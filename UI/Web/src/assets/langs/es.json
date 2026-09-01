@@ -3,7 +3,6 @@
         "title": "Iniciar sesión con tu cuenta",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "¿Ha olvidado la contraseña?",
         "submit": "Acceder",
         "oidc": "OpenID Connect"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Guardando …",
@@ -101,7 +99,7 @@
         "save": "{{common.save}}",
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "Scrobbling de AniList",
-        "anilist-scrobbling-tooltip": "Permite a Kavita scrobblear (sincronizar unilateralmente) tu progreso y tus evaluaciones a AniList",
+        "anilist-scrobbling-tooltip": "Permite a Kavita scrobblear (sincronizar unilateralmente) tu progreso y tus calificaciones de lectura a AniList",
         "font-tab": "Fuente",
         "social-settings-title": "Configuración Social",
         "opds-settings-title": "Configuración OPDS",
@@ -203,9 +201,7 @@
         "device-platform-label": "{{manage-devices.platform-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "cancel": "{{common.cancel}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -214,7 +210,6 @@
         "confirm-password-label": "Confirmar contraseña",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "Las contraseñas deben coincidir",
         "permission-error": "No tiene permiso para cambiar la contraseña. Contacte con el personal administrativo del servidor."
     },
@@ -230,8 +225,6 @@
         "invite-url-label": "Enlace de invitación",
         "invite-url-tooltip": "Copia y pégalo en una nueva ventana",
         "has-invalid-email": "Parece que no tiene una dirección de correo electrónico válida. Cambiar el correo electrónico requerirá que el administrador le envíe un enlace para completar esta acción.",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -445,8 +438,6 @@
         "title": "Resetear contraseña",
         "description": "Ingresa el correo electrónico de tu cuenta. Kavita te enviará un correo electrónico si hay uno válido registrado. De lo contrario, solicita al administrador que restablezca tu contraseña.",
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
@@ -480,7 +471,6 @@
         "close": "{{common.close}}",
         "description": "Invita a un usuario a tu servidor introduciendo su correo electrónico. Recibirán un correo electrónico para crear una cuenta. Para que esto funcione, debes tener los campos de configuración Nombre de host y Correo electrónico configurados en la pestaña <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\">Correo electrónico</a>; de lo contrario, se te presentará un enlace para que realices la configuración en nombre del usuario.<br/><br/>No es necesario que el correo electrónico sea válido.",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "setup-user-title": "Usuario invitado",
         "setup-user-description": "Puede usar el siguiente enlace para configurar la cuenta de su usuario o utilizar el botón Copiar. Es posible que deba cerrar sesión antes de utilizar el enlace para registrar un usuario nuevo.",
         "setup-user-account": "Configurar cuenta de usuario",
@@ -504,7 +494,6 @@
         "copy": "Copiar",
         "bookmark": "Marcapagina",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "bookmark-label": "Nombre marcapagina",
         "save": "{{common.save}}",
         "annotate": "Anotar"
@@ -541,8 +530,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Registrar",
         "error-label": "Error:"
@@ -557,7 +544,6 @@
         "title": "Resetear contraseña",
         "description": "Introduce nueva contraseña",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -568,8 +554,6 @@
         "email-label": "{{common.email}}",
         "email-tooltip": "No es necesario que el correo electrónico sea una dirección real, pero proporciona acceso a la contraseña olvidada. No se envía fuera del servidor a menos que Kavita le envíe un correo electrónico.",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Registrar"
     },
@@ -712,7 +696,6 @@
         "cancel": "{{common.cancel}}",
         "next": "Siguiente",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "file-type-group-label": "Tipos de archivos",
         "file-type-group-tooltip": "Qué tipos de archivos debería escanear Kavita. Por ejemplo, Archivo incluirá todos los archivos cb*, zip, rar, etc.",
         "exclude-patterns-label": "Excluir los patrones",
@@ -1192,7 +1175,6 @@
     },
     "edit-collection-tags": {
         "title": "Editar colección {{collectionName}}",
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1429,7 +1411,6 @@
         "year-validation": "Debe ser mayor que 1000, 0 o blanco",
         "month-validation": "Debe estar entre 1 y 12 o en blanco",
         "name-unique-validation": "El nombre debe ser único",
-        "required-field": "{{validation.required-field}}",
         "summary-label": "Resumen",
         "year-label": "Año",
         "month-label": "Mes",
@@ -1673,7 +1654,6 @@
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "publication-status-label": "Estado de publicación",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "name-label": "Nombre",
         "sort-name-label": "Ordenar Nombre",
@@ -1973,7 +1953,6 @@
         "edit-smart-filter": "Editar {{name}}",
         "name-label": "Nombre",
         "entity-type-label": "Tipo de entidad",
-        "required-field": "Los filtros inteligentes necesitan un nombre",
         "filter-name-unique": "Los nombres de los filtros inteligentes deben ser únicos",
         "no-content": "El filtro inteligente no devuelve resultados en el panel"
     },
@@ -1988,7 +1967,6 @@
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
         "pattern": "El host debe ser una URL http(s):// válida",
-        "required": "{{validation.required-field}}",
         "api-key-tooltip": "No requerido para iniciar sesión automáticamente cuando el host usa OIDC"
     },
     "stream-pipe": {
@@ -2473,7 +2451,6 @@
         "title": "Detalles de {{personName}}",
         "close": "{{common.close}}",
         "name-label": "{{edit-series-modal.name-label}}",
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "También puedes descargar una portada de CoversDB si está disponible.",
@@ -2486,7 +2463,6 @@
         "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
         "aliases-tooltip": "Cuando una serie es etiquetada con el alias de una persona, la persona es asignada en lugar de crear una nueva persona. Cuando se borra un alias, tendrás que volver a escanear la serie para que cambio sea detectado.",
         "alias-overlap": "Este alias ya apunta a otra persona o es el nombre de esta persona, considera combinarlas.",
-        "invalid-amazon-code": "ASIN debería comenzar con B0 o BT",
         "aliases-label": "Editar alias"
     },
     "email-history": {
@@ -2722,7 +2698,6 @@
         "provider-tooltip": "Estas configuraciones requieren que manualmente presiones \"Guardar\". Kavita debe ser configurado como un cliente confidencial y necesita una URL de redireccionamiento. Para más información, puede consultar la <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>.",
         "behavior-title": "Comportamiento",
         "other-field-required": "{{validation.other-field-required}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "manual-save-label": "Los cambios en las configuraciones de proveedor requieren un guardado manual",
         "require-verified-email-label": "Requerir correos electrónicos verificados",
         "require-verified-email-tooltip": "Requiere verificación por correo electrónico al crear una nueva cuenta o al identificarse con una existente. Si una cuenta recién creada tiene un correo electrónico verificado, estará automáticamente verificado para Kavita.",
@@ -2783,8 +2758,7 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
-        "min-length": "La reseña debe tener al menos {{count}} carácteres",
-        "required": "{{validation.required-field}}"
+        "min-length": "La reseña debe tener al menos {{count}} carácteres"
     },
     "manage-reading-profiles": {
         "font-size-book-label": "Tamaño de la fuente",
@@ -2923,7 +2897,6 @@
         "name-label": "Nombre",
         "key-length-label": "Longitud de la Clave",
         "expiration-label": "Expiración",
-        "required-field": "{{validation.required-field}}",
         "total-key-length": "Longitud Total de la Clave: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -3156,9 +3129,9 @@
         "fields-to-import-tooltip": "Desactiva para omitir por completo una configuración",
         "whitelist-label": "Lista blanca de etiquetas",
         "blacklist-label": "Lista negra de etiquetas",
-        "age-ratings-label": "Asignaciones de clasificación de edad",
+        "age-ratings-label": "Asignaciones de clasificación por edad",
         "field-mappings-label": "Asignación de campos",
-        "age-ratings-conflicts-tooltip": "Decide qué clasificación de edad usar",
+        "age-ratings-conflicts-tooltip": "Decide qué clasificación por edad usar",
         "field-mappings-conflicts-tooltip": "Decide qué resultado de destino usar",
         "import-mode-label": "Importar modo",
         "import-mode-tooltip": "Reemplazar ignora tu configuración actual, Combinar intentará y resolverá conflictos según lo que hayas configurado",
@@ -3346,8 +3319,7 @@
         "username-label": "{{common.username}}",
         "new-username-label": "Nuevo nombre de usuario",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "cbl-match-tier-pipe": {
         "external-id": "ID externo",
@@ -3363,7 +3335,6 @@
     "edit-license-key": {
         "activate-email-label": "{{common.email}}",
         "help-label": "{{common.help}}",
-        "required-field-validation": "{{validation.required-field}}",
         "activate-license-label": "Clave de licencia",
         "activate-discordId-label": "ID de usuario de Discord",
         "activate-discordId-tooltip": "Vincula tu cuenta de Discord con Kavita+. Esto te garantiza acceso a canales ocultos para contribuir a dar forma a Kavita.",
@@ -3699,13 +3670,13 @@
         "expires": "Expira {{time}}",
         "last-synced": "Última vez sincronizado {{time}}",
         "not-setup": "Proveedor no configurado, conecta para comenzar",
-        "rating-sync-label": "Sincronizar clasificaciones",
-        "rating-sync-tooltip": "Kavita scrobblea las clasificaciones para las series y capítulos coincidentes",
+        "rating-sync-label": "Sincronizar calificaciones",
+        "rating-sync-tooltip": "Kavita scrobblea las calificaciones para las series y capítulos coincidentes",
         "want-to-read-sync-label": "Sincronizar lista de lecturas deseadas",
         "want-to-read-sync-tooltip": "Mantén sincronizada tu lista de lecuras deseadas. No cambia los estados de lectura",
         "reviews-target-tooltip": "Quién consigue ver las reseñas sincronizadas, depende del soporte del proveedor",
         "filter-rules": "Filtros",
-        "highest-age-rating-label": "Clasificaciones de edad más altas",
+        "highest-age-rating-label": "Clasificaciones por edad más altas",
         "highest-age-rating-tooltip": "Clasificación de edad más alta (inclusiva) a la que una serie puede ser scrobbleada",
         "automations": "Automatizaciones",
         "inactive-series-rule-label": "Regla de serie inactiva",

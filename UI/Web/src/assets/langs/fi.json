@@ -42,7 +42,6 @@
         "title": "Kirjaudu sisään tilillesi",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Unohtuiko salasana?",
         "submit": "Kirjaudu sisään"
     },
@@ -58,7 +57,6 @@
     "edit-user": {
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "saving": "Tallennetaan…",
         "update": "Päivitä",

@@ -1,7 +1,6 @@
 {
     "change-email": {
         "save": "{{common.save}}",
-        "valid-email": "{{சரிபார்ப்பு. வாலிட்-எமெயில்}}",
         "reset": "{{common.reset}}}",
         "email-title": "மின்னஞ்சல்",
         "email-label": "புதிய மின்னஞ்சல்",
@@ -13,8 +12,7 @@
         "setup-user-account": "பயனரின் கணக்கை அமைக்கவும்",
         "invite-url-label": "முகவரி ஐ அழைக்கவும்",
         "invite-url-tooltip": "இதை நகலெடுத்து புதிய தாவலில் ஒட்டவும்",
-        "has-invalid-email": "உங்களிடம் சரியான மின்னஞ்சல் தொகுப்பு இல்லை என்று தெரிகிறது. இந்த செயலை முடிக்க நிர்வாகி உங்களுக்கு ஒரு இணைப்பை அனுப்ப நிர்வாகம் தேவைப்படும்.",
-        "required-field": "{{validation.required-field}}"
+        "has-invalid-email": "உங்களிடம் சரியான மின்னஞ்சல் தொகுப்பு இல்லை என்று தெரிகிறது. இந்த செயலை முடிக்க நிர்வாகி உங்களுக்கு ஒரு இணைப்பை அனுப்ப நிர்வாகம் தேவைப்படும்."
     },
     "change-age-restriction": {
         "age-restriction-label": "அகவை கட்டுப்பாடு",
@@ -31,7 +29,6 @@
         "forgot-password": "கடவுச்சொல்லை மறந்துவிட்டீர்களா?",
         "submit": "விடுபதிகை",
         "password": "{{common.password}}}",
-        "password-validation": "{{சரிபார்ப்பு.போச்வேர்ட்-சரிபார்ப்பு}}",
         "oidc": "OpenID இணைப்பு"
     },
     "scrobble-event-type-pipe": {
@@ -138,8 +135,6 @@
         "title": "கடவுச்சொல் மீட்டமைப்பு",
         "description": "உங்கள் கணக்கின் மின்னஞ்சலை உள்ளிடவும். செல்லுபடியாகும் கோப்பில் இருந்தால் கவிதா உங்களுக்கு ஒரு மின்னஞ்சல் அனுப்புவார், இல்லையெனில் உங்கள் கடவுச்சொல்லை மீட்டமைக்க நிர்வாகியிடம் கேளுங்கள்.",
         "email-label": "{{common.email}}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{சரிபார்ப்பு. வாலிட்-எமெயில்}}",
         "submit": "{{common.submit}}}"
     },
     "series-detail": {
@@ -369,7 +364,6 @@
         "language-label": "{{metadata-fields.language-title}}}",
         "age-rating-label": "{{metadata-fields.age- மதிப்பீட்டு-தலைப்பு}}",
         "publication-status-label": "வெளியீட்டு நிலை",
-        "required-field": "{{சரிபார்ப்பு.",
         "close": "{{common.close}}",
         "name-label": "பெயர்",
         "sort-name-label": "பெயரை வரிசைப்படுத்துங்கள்",
@@ -458,7 +452,6 @@
     },
     "edit-collection-tags": {
         "title": "திருத்து {{collectionName}} சேகரிப்பு",
-        "required-field": "{{சரிபார்ப்பு.",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -669,7 +662,6 @@
         "year-validation": "1000, 0 அல்லது காலியாக இருக்க வேண்டும்",
         "month-validation": "1 முதல் 12 அல்லது காலியாக இருக்க வேண்டும்",
         "name-unique-validation": "பெயர் தனித்துவமாக இருக்க வேண்டும்",
-        "required-field": "{{சரிபார்ப்பு.",
         "summary-label": "சுருக்கம்",
         "year-label": "ஆண்டு",
         "month-label": "மாதம்",
@@ -1532,7 +1524,6 @@
         "edit": "{{common.edit}}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}}",
         "cancel": "{{common.cancel}}",
         "saving": "சேமிப்பு…",
@@ -1602,9 +1593,7 @@
         "device-platform-label": "{{manage-devices.platform-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{சரிபார்ப்பு. வாலிட்-எமெயில்}}"
+        "cancel": "{{common.cancel}}"
     },
     "change-password": {
         "password-label": "{{common.password}}}",
@@ -1613,7 +1602,6 @@
         "confirm-password-label": "கடவுச்சொல்லை உறுதிப்படுத்தவும்",
         "reset": "{{common.reset}}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "கடவுச்சொற்கள் பொருந்த வேண்டும்",
         "permission-error": "உங்கள் கடவுச்சொல்லை மாற்ற உங்களுக்கு இசைவு இல்லை. சேவையகத்தின் நிர்வாகியை அணுகவும்."
     },
@@ -1751,7 +1739,6 @@
         "close": "{{common.close}}",
         "description": "ஒரு பயனரின் மின்னஞ்சலை உள்ளிட்டு உங்கள் சேவையகத்திற்கு அழைக்கவும். கணக்கை உருவாக்க அவர்கள் ஒரு மின்னஞ்சலைப் பெறுவார்கள். இது வேலை செய்ய உங்களுக்குப் புரவலன் பெயர் மற்றும் மின்னஞ்சல் அமைக்கும் புலங்கள் <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\"> மின்னஞ்சல் </a> தாவலில் அமைக்கப்பட்டிருக்க வேண்டும், இல்லையெனில் ஒரு இணைப்பு பயனரின் சார்பாக அமைக்க உங்களுக்கு வழங்கப்படும். <br/> <br/> மின்னஞ்சல் செல்லுபடியாகாது.",
         "email": "{{common.email}}}",
-        "required-field": "{{common.required-field}}",
         "setup-user-title": "பயனர் அழைக்கப்பட்டார்",
         "setup-user-description": "உங்கள் பயனருக்கான கணக்கை அமைக்க அல்லது நகல் பொத்தானைப் பயன்படுத்த கீழே பின்வரும் இணைப்பைப் பயன்படுத்தலாம். புதிய பயனரை பதிவு செய்ய இணைப்பைப் பயன்படுத்துவதற்கு முன்பு நீங்கள் வெளியேற வேண்டியிருக்கலாம்.",
         "setup-user-account": "பயனரின் கணக்கை அமைக்கவும்",
@@ -1775,7 +1762,6 @@
         "copy": "நகலெடு",
         "bookmark": "புத்தககுறி",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "bookmark-label": "புக்மார்க்கு பெயர்",
         "save": "{{common.save}}",
         "annotate": "சிறுகுறிப்பு"
@@ -1794,8 +1780,6 @@
         "username-label": "{{common.username}}}",
         "password-label": "{{common.password}}}",
         "email-label": "{{common.email}}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{சரிபார்ப்பு.போச்வேர்ட்-சரிபார்ப்பு}}",
         "register": "பதிவு செய்யுங்கள்",
         "error-label": "பிழை:"
@@ -1810,7 +1794,6 @@
         "title": "கடவுச்சொல் மீட்டமைப்பு",
         "description": "புதிய கடவுச்சொல்லை உள்ளிடவும்",
         "password-label": "{{common.password}}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}}",
         "password-validation": "{{சரிபார்ப்பு.போச்வேர்ட்-சரிபார்ப்பு}}"
     },
@@ -1821,8 +1804,6 @@
         "email-label": "{{common.email}}}",
         "email-tooltip": "மின்னஞ்சல் உண்மையான முகவரியாக இருக்க தேவையில்லை, ஆனால் கடவுச்சொல்லை மறந்துவிட்டதற்கான அணுகலை வழங்குகிறது. கவிதா உங்களுக்கு மின்னஞ்சல் அனுப்பாவிட்டால் அது சேவையகத்திற்கு வெளியே அனுப்பப்படாது.",
         "password-label": "{{common.password}}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{சரிபார்ப்பு. வாலிட்-எமெயில்}}",
         "password-validation": "{{சரிபார்ப்பு.போச்வேர்ட்-சரிபார்ப்பு}}",
         "register": "பதிவு செய்யுங்கள்"
     },
@@ -1896,7 +1877,6 @@
         "cancel": "{{common.cancel}}",
         "next": "அடுத்தது",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "file-type-group-label": "கோப்பு வகைகள்",
         "file-type-group-tooltip": "கவிதா ச்கேன் எந்த வகையான கோப்புகளை ச்கேன் செய்ய வேண்டும். எடுத்துக்காட்டாக, காப்பகத்தில் அனைத்து சிபி*, சிப், ரார் போன்ற கோப்புகள் இருக்கும்.",
         "exclude-patterns-label": "வடிவங்களை விலக்கு",
@@ -2169,14 +2149,12 @@
         "asin-label": "அசின்",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
         "description-label": "விவரம்",
-        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "மாற்றாக நீங்கள் கிடைத்தால் கவர்ச்டிபியிலிருந்து ஒரு அட்டையை பதிவிறக்கம் செய்யலாம்.",
         "save": "{{common.save}}",
         "download-coversdb": "CoverSDB இலிருந்து பதிவிறக்கவும்",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
         "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
-        "invalid-amazon-code": "ASIN B0 அல்லது BT உடன் தொடங்க வேண்டும்",
         "aliases-label": "மாற்றுப்பெயர்களைத் திருத்து",
         "alias-overlap": "இந்த மாற்றுப்பெயர் ஏற்கனவே மற்றொரு நபரை சுட்டிக்காட்டுகிறது அல்லது இந்த நபரின் பெயர், அவர்களை ஒன்றிணைப்பதைக் கவனியுங்கள்.",
         "aliases-tooltip": "ஒரு நபரின் மாற்றுப்பெயருடன் ஒரு தொடர் குறியிடப்பட்டால், புதிய நபரை உருவாக்குவதற்குப் பதிலாக அந்த நபர் நியமிக்கப்படுவார். மாற்றுப்பெயரை நீக்கும் போது, மாற்றத்தை எடுக்க தொடரை மீண்டும் வருடு செய்ய வேண்டும்."
@@ -2316,7 +2294,6 @@
         "save": "{{common.save}}",
         "edit-smart-filter": "திருத்து {{name}}",
         "name-label": "பெயர்",
-        "required-field": "அறிவுள்ள வடிப்பான்களுக்கு ஒரு பெயர் தேவை",
         "filter-name-unique": "அறிவுள்ள ஃபில்டர் பெயர்கள் தனிப்பட்டதாக இருக்க வேண்டும்",
         "no-content": "இந்த அறிவுள்ள ஃபில்டருக்கு டாச்போர்டில் முடிவுகள் இல்லை"
     },
@@ -2330,8 +2307,7 @@
         "edit": "{{common.edit}}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "pattern": "புரவலன் செல்லுபடியாகும் HTTP (கள்): // முகவரி ஆக இருக்க வேண்டும்",
-        "required": "{{சரிபார்ப்பு."
+        "pattern": "புரவலன் செல்லுபடியாகும் HTTP (கள்): // முகவரி ஆக இருக்க வேண்டும்"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 மணி நேரம்",
@@ -2394,7 +2370,6 @@
         "behavior-title": "நடத்தை",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "tls-required": "OIDC வழங்குநர் tls (https) பயன்படுத்த வேண்டும்",
         "manual-save-label": "வழங்குநரின் அமைப்புகளை மாற்ற, கைமுறையாகச் சேமிக்க வேண்டும்",
         "authority-label": "அதிகாரம்",
@@ -2457,7 +2432,6 @@
         "name-label": "பெயர்",
         "key-length-label": "முக்கிய நீளம்",
         "expiration-label": "காலாவதியாகும்",
-        "required-field": "{{validations.required-field}}",
         "total-key-length": "மொத்த விசை நீளம்: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -2478,8 +2452,7 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
-        "min-length": "மதிப்பாய்வில் குறைந்தது {{count}} எழுத்துகள் இருக்க வேண்டும்",
-        "required": "{{validation.required-field}}"
+        "min-length": "மதிப்பாய்வில் குறைந்தது {{count}} எழுத்துகள் இருக்க வேண்டும்"
     },
     "review-list-item": {
         "by-label": "மூலம்",

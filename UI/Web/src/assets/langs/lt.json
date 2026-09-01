@@ -3,7 +3,6 @@
         "title": "Prisijungti prie paskyros",
         "username": "Vartotojo vardas",
         "password": "Slaptažodis",
-        "password-validation": "Slaptažodžio validacija",
         "forgot-password": "Pamiršote slaptažodį?",
         "submit": "Prisijungimas",
         "oidc": "„OpenID Connect“"

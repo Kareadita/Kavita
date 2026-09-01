@@ -3,7 +3,6 @@
         "title": "Connectez-vous à votre compte",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Mot de passe oublié ?",
         "submit": "Se connecter",
         "oidc": "OpenID Connect"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Sauvegarde en cours…",
@@ -203,9 +201,7 @@
         "device-platform-label": "{{manage-devices.platform-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "cancel": "{{common.cancel}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -214,7 +210,6 @@
         "confirm-password-label": "Confirmez le mot de passe",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "Les mots de passe doivent être identique",
         "permission-error": "Vous n'avez pas la permission de changer votre mot de passe. Contactez l'administrateur du serveur."
     },
@@ -230,8 +225,6 @@
         "invite-url-label": "Url d'invitation",
         "invite-url-tooltip": "Copier ceci et coller dans un nouvel onglet",
         "has-invalid-email": "Il semble que vous n'ayez pas défini d'adresse électronique valide. Pour modifier l'adresse électronique, l'administrateur devra vous envoyer un lien de confirmation.",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -445,8 +438,6 @@
         "title": "Réinitialisation de mot de passe",
         "description": "Saisissez l'adresse email de votre compte. Kavita vous enverra un email si celui-ci est valide, sinon demandez à l'administrateur de réinitialiser votre mot de passe.",
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
@@ -480,7 +471,6 @@
         "close": "{{common.close}}",
         "description": "Invitez un utilisateur sur votre serveur en saisissant son adresse e-mail. Il recevra un e-mail pour créer un compte. Pour que cela fonctionne, vous devez avoir renseigné les champs \"Nom d'hôte\" et \"E-mail\" dans l'onglet <a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">E-mail</a>, sinon, un lien vous sera proposé pour effectuer la configuration à la place de l'utilisateur.<br/><br/>Il n'est pas nécessaire que l'adresse électronique soit valide.",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "setup-user-title": "Utilisateurs invités",
         "setup-user-description": "Vous pouvez utiliser le lien suivant ci-dessous pour configurer le compte de votre utilisateur ou utiliser le bouton Copier. Vous devrez peut-être vous déconnecter avant d'utiliser le lien pour enregistrer un nouvel utilisateur.",
         "setup-user-account": "Configuration du compte utilisateur",
@@ -504,7 +494,6 @@
         "copy": "Copier",
         "bookmark": "Marque-page",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "bookmark-label": "Nom du marque-page",
         "save": "{{common.save}}",
         "annotate": "Annoter"
@@ -541,8 +530,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "S'enregistrer",
         "error-label": "Erreur :"
@@ -557,7 +544,6 @@
         "title": "Réinitialiser le mot de passe",
         "description": "Saisir un nouveau mot de passe",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -568,8 +554,6 @@
         "email-label": "{{common.email}}",
         "email-tooltip": "Le courriel n’a pas besoin d’être une adresse réelle pour accéder au serveur, mais est utilisé en cas de mot de passe oublié. Il n’est pas envoyé à l’extérieur du serveur, sauf si Kavita vous envoie un courriel.",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "S'enregistrer"
     },
@@ -712,7 +696,6 @@
         "cancel": "{{common.cancel}}",
         "next": "Suivant",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "file-type-group-label": "Types de fichier",
         "file-type-group-tooltip": "Quels types de fichiers Kavita devrait-il analyser ? Par exemple, Archive inclura les fichiers cb*, zip, rar, etc.",
         "exclude-patterns-label": "Exclure les modèles",
@@ -1192,7 +1175,6 @@
     },
     "edit-collection-tags": {
         "title": "Modifier la collection {{collectionName}}",
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1429,7 +1411,6 @@
         "year-validation": "Doit être supérieur à 1000, 0 ou vide",
         "month-validation": "Doit être compris entre 1 et 12 ou vide",
         "name-unique-validation": "Le nom doit être unique",
-        "required-field": "{{validation.required-field}}",
         "summary-label": "Résumé",
         "year-label": "Année",
         "month-label": "Mois",
@@ -1673,7 +1654,6 @@
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "publication-status-label": "État de la publication",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "name-label": "Nom",
         "sort-name-label": "Nom trié",
@@ -1971,7 +1951,6 @@
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
         "edit": "{{common.edit}}",
-        "required-field": "Les filtres intelligents ont besoin d'un nom",
         "filter-name-unique": "Les noms des filtres intelligents doivent être uniques",
         "name-label": "Nom",
         "entity-type-label": "Type d'entité",
@@ -1988,7 +1967,6 @@
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
         "pattern": "L'hôte doit être une url http(s) :// valide",
-        "required": "{{validation.required-field}}",
         "api-key-tooltip": "La connexion automatique n'est pas requise lorsque l'hôte utilise l'OIDC"
     },
     "stream-pipe": {
@@ -2478,7 +2456,6 @@
         "asin-label": "ASIN",
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "description-label": "Description",
-        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "Vous pouvez également télécharger une couverture à partir de CoversDB, si elle est disponible.",
         "download-coversdb": "Télécharger à partir de CoversDB",
@@ -2486,8 +2463,7 @@
         "alias-overlap": "Cet alias pointe déjà vers une autre personne ou est le nom de cette personne, envisagez de les fusionner.",
         "aliases-tooltip": "Lorsqu'une série est taguée avec l'alias d'une personne, cette personne est attribuée plutôt que d'en créer une nouvelle. Lorsque vous supprimez un alias, vous devez rescanner la série pour que la modification soit prise en compte.",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
-        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
-        "invalid-amazon-code": "ASIN devrait commencer par B0 ou BT"
+        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/"
     },
     "changelog-update-item": {
         "added": "Ajouté",
@@ -2734,7 +2710,6 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}",
         "review-label": "Avis",
         "title": "Editer Avis",
         "min-length": "L'avis doit faire au moins {{count}} caractères"
@@ -2936,7 +2911,6 @@
         "secret-tooltip": "Le secret tel qu'il est généré par votre fournisseur OIDC, ne sera pas affiché après configuration",
         "provision-accounts-tooltip": "Création automatique d'un nouveau compte lors de la connexion via l'OIDC s'il n'est pas possible de le faire correspondre à un compte existant",
         "other-field-required": "{{validation.other-field-required}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "provision-accounts-label": "Comptes de provision",
         "require-verified-email-label": "Exiger des adresses mails valides",
         "require-verified-email-tooltip": "La vérification de l'adresse email est requise lors de la création d'un nouveau compte ou de l'association avec un compte existant. Si un compte nouvellement créé possède un email vérifié, il sera automatiquement vérifié du côté de Kavita.",
@@ -3148,7 +3122,6 @@
         "name-label": "Nom",
         "key-length-label": "Longueur de la clef",
         "expiration-label": "Expiration",
-        "required-field": "{{validations.required-field}}",
         "total-key-length": "Longueur totale de la clef : {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -3571,8 +3544,7 @@
         "username-label": "{{common.username}}",
         "new-username-label": "Nouveau nom d'utilisateur",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "cbl-match-tier-pipe": {
         "remap-rule": "Règle d'association",
@@ -3857,7 +3829,6 @@
         "email-help": "C'est l'adresse e-mail enregistrée auprès de Stripe",
         "license-help": "Pour votre sécurité, la clé stockée est chiffrée sur le disque ; veuillez la saisir à nouveau pour la mettre à jour.",
         "help-label": "{{common.help}}",
-        "required-field-validation": "{{validation.required-field}}",
         "license-length-validation": "La clé de licence doit comporter 19 caractères",
         "license-format-validation": "La licence doit être au format : XXXX-XXXX-XXXX-XXXX",
         "discord-format-validation": "L'identifiant Discord doit être un identifiant utilisateur composé de 19 chiffres",

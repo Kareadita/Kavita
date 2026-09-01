@@ -3,7 +3,6 @@
         "title": "Войти в свой аккаунт",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Забыли пароль?",
         "submit": "Войти",
         "oidc": "Подключение OpenID"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Сохранение…",
@@ -198,8 +196,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "title": "Изменить Email устройство",
         "email-tooltip": "Этот e-mail будет использоваться для получения файлов через функцию 'Отправить в'",
         "device-platform-label": "{{manage-devices.platform-label}}"
@@ -211,7 +207,6 @@
         "confirm-password-label": "Подтвердите пароль",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "Пароли должны совпадать",
         "permission-error": "У вас нет прав на изменение своего пароля. Обратитесь к администратору сервера."
     },
@@ -226,8 +221,6 @@
         "setup-user-account": "Настройка учетной записи пользователя",
         "invite-url-label": "URL приглашения",
         "invite-url-tooltip": "Скопируйте это и вставьте в новую вкладку",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "has-invalid-email": "Похоже, вы не указали действующий адрес электронной почты. Попросите администратора направить Вам ссылку для его изменения."
@@ -354,8 +347,6 @@
     },
     "reset-password": {
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}",
         "title": "Сбросить пароль",
         "description": "Введите адрес электронной почты вашей учётной записи. Kavita вышлет вам электронное письмо, если в файле есть действительный адрес, в противном случае попросите администратора сбросить ваш пароль."
@@ -379,7 +370,6 @@
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
         "notice": "{{manage-settings.notice}}",
@@ -403,7 +393,6 @@
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "save": "{{common.save}}",
         "copy": "Копировать",
         "bookmark": "Закладка",
@@ -431,8 +420,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "title": "Зарегистрироваться",
         "description": "Заполните форму для завершения регистрации",
@@ -441,7 +428,6 @@
     },
     "confirm-reset-password": {
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}",
         "title": "Сбросить пароль",
@@ -451,8 +437,6 @@
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "title": "Зарегистрироваться",
         "description": "Заполните форму для регистрации учётной записи администратора",
@@ -552,7 +536,6 @@
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "help": "{{common.help}}",
         "files-at-root-warning": "Один или несколько каталогов содержат файлы в своём корневом уровне. Kavita не поддерживает такую структуру.",
         "edit-title": "Редактировать {{name}}",
@@ -972,7 +955,6 @@
         "identity-provider-native-tooltip": "Нативно"
     },
     "edit-collection-tags": {
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1175,7 +1157,6 @@
     "edit-reading-list-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "title": "Редактировать Список чтения: {{name}}",
         "year-validation": "Должно быть больше 1000, 0 или пустым",
         "month-validation": "Должно быть между 1 и 12 или пустым",
@@ -1315,7 +1296,6 @@
         "location-label": "{{metadata-fields.locations-title}}",
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "release-year-label": "{{sort-field-pipe.release-year}}",
         "web-link-label": "{{tabs.weblink-tab}}",
@@ -1530,7 +1510,6 @@
         "save": "{{common.save}}",
         "edit-smart-filter": "Изменить {{name}}",
         "name-label": "Имя",
-        "required-field": "Умные фильтры должны иметь имена",
         "filter-name-unique": "Имена умных фильтров должны быть уникальными"
     },
     "edit-external-source-item": {
@@ -1538,7 +1517,6 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}",
         "not-unique": "Внешний источник с таким хостом уже существует. Убедитесь в отсутствии у вас дубликатов",
         "title": "Новый внешний источник",
         "host-label": "Хост",
@@ -1795,7 +1773,6 @@
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
         "min-length": "Отзыв должен содержать минимум {{count}} символов",
-        "required": "{{validation.required-field}}",
         "close": "{{common.close}}"
     },
     "device-platform-pipe": {
@@ -1957,7 +1934,6 @@
         "provider-tooltip": "В настройках поставщика необходимо вручную нажать кнопку Сохранить. Kavita должна быть настроена как конфиденциальный клиент, и для нее необходим URL-адрес для перенаправления. За подробностями смотрите <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>вики</a>.",
         "behavior-title": "Поведение",
         "other-field-required": "{{validation.other-field-required}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "manual-save-label": "Изменение настроек поставщика требует сохранения вручную",
         "authority-label": "Полномочия",
         "authority-tooltip": "URL-адрес вашего поставщика OIDC не должен включать путь .well-known/openid-configuration",
@@ -2458,7 +2434,6 @@
         "name-label": "Имя",
         "key-length-label": "Длина ключа",
         "expiration-label": "Срок действия",
-        "required-field": "{{validations.required-field}}",
         "total-key-length": "Общая длина ключа: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -2684,9 +2659,7 @@
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "asin-label": "ASIN",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
-        "invalid-amazon-code": "ASIN должен начинаться с B0 или BT",
         "description-label": "Описание",
-        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "Альтернативно, вы можете скачать обложку с CoversDB.",
         "save": "{{common.save}}",

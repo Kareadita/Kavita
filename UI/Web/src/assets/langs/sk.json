@@ -3,7 +3,6 @@
         "title": "Prihlásenie do vášho konta",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Zabudli ste heslo?",
         "submit": "Prihlásiť sa",
         "oidc": "OpenID Connect"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Ukladanie…",
@@ -198,8 +196,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "title": "Upraviť e-mailové zariadenie",
         "email-tooltip": "Tento e-mail sa použije na prijatie súboru prostredníctvom možnosti Poslať do",
         "device-platform-label": "{{manage-devices.platform-label}}"
@@ -211,7 +207,6 @@
         "confirm-password-label": "Potvrdiť Heslo",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "Heslá sa musia zhodovať",
         "permission-error": "Nemáte povolenie na zmenu hesla. Obráťte sa na správcu servera."
     },
@@ -225,8 +220,6 @@
         "invite-url-label": "Adresa URL pozvánky",
         "invite-url-tooltip": "Skopírovať a vložiť na novú kartu",
         "has-invalid-email": "Zdá sa, že nemáte nastavený platný e-mail. Zmena e-mailu bude vyžadovať, aby vám správca poslal odkaz na dokončenie tejto akcie.",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "email-label": "Nový E-Mail",
@@ -441,8 +434,6 @@
         "title": "Obnovenie hesla",
         "description": "Zadajte e-mail svojho konta. Kavita vám pošle e-mail, ak je platný, v opačnom prípade požiadajte správcu o obnovenie hesla.",
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
@@ -476,7 +467,6 @@
         "close": "{{common.close}}",
         "description": "Pozvite používateľa na svoj server zadaním jeho e-mailu. Dostanú e-mail na vytvorenie účtu. Aby to fungovalo, musíte mať nastavené polia Host Name a Email na karte <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a>, inak sa vám zobrazí odkaz na nastavenie v mene používateľa.<br/><br/>E-mail nemusí byť platný.",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "setup-user-title": "Používateľ bol pozvaný",
         "setup-user-description": "Na nastavenie účtu pre svojho používateľa môžete použiť nasledujúci odkaz nižšie alebo použiť tlačidlo kopírovania. Pred použitím odkazu na registráciu nového používateľa sa možno budete musieť odhlásiť.",
         "setup-user-account": "Nastavte používateľský účet",
@@ -500,7 +490,6 @@
         "copy": "Kopírovať",
         "bookmark": "Záložka",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "bookmark-label": "Meno Záložky",
         "save": "{{common.save}}",
         "annotate": "Komentovať"
@@ -537,8 +526,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Registrovať",
         "error-label": "Chyba:"
@@ -553,7 +540,6 @@
         "title": "Obnovenie Hesla",
         "description": "Zadajte nové heslo",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -564,8 +550,6 @@
         "email-label": "{{common.email}}",
         "email-tooltip": "E-mail nemusí byť skutočná adresa, ale poskytuje prístup k zabudnutému heslu. Neposiela sa mimo server, pokiaľ vám Kavita nepošle e-mail.",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Registrovať"
     },
@@ -701,7 +685,6 @@
         "cancel": "{{common.cancel}}",
         "next": "Ďalej",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "file-type-group-label": "Typy súborov",
         "file-type-group-tooltip": "Aké typy súborov má Kavita vyhľadávať. Napríklad archív bude obsahovať všetky súbory cb*, zip, rar atď.",
         "exclude-patterns-label": "Vylúčiť vzory",
@@ -1123,7 +1106,6 @@
     },
     "edit-collection-tags": {
         "title": "Upraviť zbierku {{collectionName}}",
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1331,7 +1313,6 @@
         "year-validation": "Musí byť väčšie ako 1 000, 0 alebo prázdne",
         "month-validation": "Musí byť medzi 1 a 12 alebo prázdne",
         "name-unique-validation": "Meno musí byť jedinečné",
-        "required-field": "{{validation.required-field}}",
         "summary-label": "Zhrnutie",
         "year-label": "Rok",
         "month-label": "Mesiac",
@@ -1503,7 +1484,6 @@
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "publication-status-label": "Stav publikácie",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "name-label": "Meno",
         "sort-name-label": "Triediť podľa názvu",
@@ -1771,7 +1751,6 @@
         "save": "{{common.save}}",
         "edit-smart-filter": "Upraviť {{name}}",
         "name-label": "Meno",
-        "required-field": "Inteligentné filtre potrebujú názov",
         "close": "{{common.close}}",
         "filter-name-unique": "Názvy inteligentných filtrov musia byť jedinečné",
         "edit": "{{common.edit}}",
@@ -1787,8 +1766,7 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "pattern": "Host musí mať platnú adresu URL http(s)://",
-        "required": "{{validation.required-field}}"
+        "pattern": "Host musí mať platnú adresu URL http(s)://"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -2236,7 +2214,6 @@
         "asin-label": "ASIN",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/auto/{ASIN}",
         "description-label": "Popis",
-        "required-field": "{{validation.required-field}}",
         "cover-image-description-extra": "Alternatívne si môžete stiahnuť obal z CoversDB, ak je k dispozícii.",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "save": "{{common.save}}",
@@ -2523,8 +2500,7 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
-        "min-length": "Recenzia musí mať aspoň {{count}} znakov",
-        "required": "{{validation.required-field}}"
+        "min-length": "Recenzia musí mať aspoň {{count}} znakov"
     },
     "browse-people": {
         "title": "Prehľadávať ľudí",
@@ -2608,7 +2584,6 @@
         "provider-tooltip": "Nastavenia poskytovateľa vyžadujú manuálne kliknutie na tlačidlo Uložiť. Kavita musí byť nakonfigurovaná ako dôverný klient a potrebuje URL adresu presmerovania. Viac informácií nájdete na <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>.",
         "behavior-title": "Správanie",
         "other-field-required": "{{validation.other-field-required}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "manual-save-label": "Zmena nastavení poskytovateľa vyžaduje manuálne uloženie",
         "authority-label": "Autorita",
         "authority-tooltip": "URL adresa vášho poskytovateľa OIDC, nezahŕňa cestu .well-known/openid-configuration",
@@ -2800,7 +2775,6 @@
         "name-label": "Názov",
         "key-length-label": "Dĺžka kľúča",
         "expiration-label": "Vypršanie platnosti",
-        "required-field": "{{validations.required-field}}",
         "total-key-length": "Celková dĺžka kľúča: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -2891,8 +2865,7 @@
         "username-label": "{{common.username}}",
         "new-username-label": "Nové používateľské meno",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "most-active-users": {
         "title": "Najaktívnejší čitatelia",

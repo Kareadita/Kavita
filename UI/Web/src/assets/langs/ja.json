@@ -3,7 +3,6 @@
         "title": "アカウントにログインしてください",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "パスワードをお忘れですか?",
         "submit": "ログイン",
         "oidc": "OpenID Connect"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "保存中…",
@@ -203,9 +201,7 @@
         "device-platform-label": "{{manage-devices.platform-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "cancel": "{{common.cancel}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -214,7 +210,6 @@
         "confirm-password-label": "新しいパスワード（確認）",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "パスワードは一致している必要があります",
         "permission-error": "パスワードを変更する権限がありません。サーバーの管理者にお問い合わせください。"
     },
@@ -230,8 +225,6 @@
         "invite-url-label": "招待 URL",
         "invite-url-tooltip": "新しいタブにコピーして貼り付ける",
         "has-invalid-email": "有効なメールアドレスが設定されていないようです。メールアドレスを変更するには、管理者からリンクを送信してもらい、操作を完了する必要があります。",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -445,8 +438,6 @@
         "title": "パスワードリセット",
         "description": "アカウントのメールアドレスを入力してください。有効なメールアドレスが登録されている場合は、Kavita からメールが送信されます。登録されていない場合は、管理者にパスワードのリセットを依頼してください。",
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
@@ -480,7 +471,6 @@
         "close": "{{common.close}}",
         "description": "ユーザーのメールアドレスを入力して、サーバーに招待してください。招待されたユーザーには、アカウント作成用のメールが届きます。この操作を行うには、<a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> タブでホスト名とメールアドレスの設定欄が設定されている必要があります。設定されていない場合は、ユーザーに代わって設定するためのリンクが表示されます。<br/><br/>メールアドレスは有効である必要はありません。",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "setup-user-title": "ユーザーを招待",
         "setup-user-description": "以下のリンクを使用して、ユーザーのアカウントをセットアップしたり、コピーボタンを使うことができます。 リンクを使用する前にログアウトして新規ユーザーを登録する必要があります.",
         "setup-user-account": "ユーザーアカウントを設定",
@@ -504,7 +494,6 @@
         "copy": "コピー",
         "bookmark": "ブックマーク",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "bookmark-label": "ブックマーク名",
         "save": "{{common.save}}",
         "annotate": "注釈"
@@ -541,8 +530,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "登録",
         "error-label": "エラー:"
@@ -557,7 +544,6 @@
         "title": "パスワードリセット",
         "description": "新しいパスワードを入力",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -568,8 +554,6 @@
         "email-label": "{{common.email}}",
         "email-tooltip": "メールアドレスは実在のアドレスである必要はありませんが、パスワードを忘れた場合にアクセスできます。Kavita からのメールが届かない限り、サーバー外には送信されません。",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "登録"
     },
@@ -708,7 +692,6 @@
         "cancel": "{{common.cancel}}",
         "next": "次へ",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "file-type-group-label": "ファイルの種類",
         "file-type-group-tooltip": "Kavita がスキャンするファイル形式を選択します。例えば、アーカイブには cb*、zip、rar などのすべてのファイルが含まれます。",
         "exclude-patterns-label": "除外パターン",
@@ -1188,7 +1171,6 @@
     },
     "edit-collection-tags": {
         "title": "{{collectionName}} のコレクションを編集",
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1421,7 +1403,6 @@
         "year-validation": "1000 より大きいか、0、または空白である必要があります",
         "month-validation": "1 から 12 までの範囲内か、または空白にする必要があります",
         "name-unique-validation": "名前は一意である必要があります",
-        "required-field": "{{validation.required-field}}",
         "summary-label": "要約",
         "year-label": "年",
         "month-label": "月",
@@ -1653,7 +1634,6 @@
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "publication-status-label": "出版状況",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "name-label": "名前",
         "sort-name-label": "ソート名",
@@ -1952,7 +1932,6 @@
         "errored": "フィルターにエンコードエラーがあります。再作成する必要があります。",
         "edit-smart-filter": "{{name}} を編集",
         "name-label": "名前",
-        "required-field": "スマートフィルターには名前が必要です",
         "filter-name-unique": "スマートフィルター名は一意である必要があります",
         "no-content": "このスマートフィルターはダッシュボードに結果を表示しません",
         "entity-type-label": "エンティティタイプ"
@@ -1968,7 +1947,6 @@
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
         "pattern": "ホストは有効な http(s):// URL である必要があります",
-        "required": "{{validation.required-field}}",
         "api-key-tooltip": "ホストが OIDC を使用している場合、自動ログインは不要です"
     },
     "stream-pipe": {
@@ -2544,13 +2522,11 @@
         "min-length": "レビューの記入は最低 {{count}} 文字以上が必要です",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}"
+        "delete": "{{common.delete}}"
     },
     "edit-person-modal": {
         "close": "{{common.close}}",
         "name-label": "{{edit-series-modal.name-label}}",
-        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "save": "{{common.save}}",
         "title": "{{personName}} の詳細",
@@ -2567,7 +2543,6 @@
         "mal-id-label": "MAL ID",
         "hardcover-id-label": "Hardcover ID",
         "asin-label": "ASIN",
-        "invalid-amazon-code": "ASIN は B0 または BT で始まる必要があります",
         "description-label": "説明",
         "alias-overlap": "このエイリアスはすでに別の人物を指しているか、この人物の名前です。統合をご検討ください。",
         "aliases-tooltip": "シリーズに人物のエイリアスがタグ付けされている場合、新しい人物を作成するのではなく、その人物が割り当てられます。エイリアスを削除する場合は、変更を反映させるためにシリーズを再スキャンする必要があります。"
@@ -2612,7 +2587,6 @@
         "custom-scopes-label": "カスタムスコープ",
         "save": "{{common.save}}",
         "other-field-required": "{{validation.other-field-required}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "default-roles-label": "{{common.roles}}",
         "default-libraries-label": "{{common.libraries}}",
         "behavior-title": "動作設定",
@@ -3081,7 +3055,6 @@
     "create-auth-key": {
         "create-title": "認証キーを作成",
         "rotate-title": "認証キーをローテーション",
-        "required-field": "{{validation.required-field}}",
         "total-key-length": "キーの合計長: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -3827,8 +3800,7 @@
         "username-label": "{{common.username}}",
         "new-username-label": "新しいユーザー名",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "manage-kavitaplus-activity": {
         "filter-all": "すべて",
@@ -3943,7 +3915,6 @@
         "email-help": "これは Stripe に登録されているメールアドレスです",
         "license-help": "セキュリティ上の理由から、保存されているキーはディスク上で暗号化されています。更新するには、キーを再入力してください。",
         "help-label": "{{common.help}}",
-        "required-field-validation": "{{validation.required-field}}",
         "license-length-validation": "ライセンスキーは 19 文字である必要があります",
         "license-format-validation": "ライセンスは、XXXX-XXXX-XXXX-XXXX の形式で提供される必要があります",
         "discord-format-validation": "Discord ID は 19 桁のユーザー ID である必要があります",

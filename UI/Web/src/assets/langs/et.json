@@ -3,7 +3,6 @@
         "title": "Meldimine",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Unustasid parooli?"
     },
     "dashboard": {
@@ -19,7 +18,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Salvestan…",
@@ -93,19 +91,14 @@
         "email-label": "{{common.email}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "cancel": "{{common.cancel}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "change-email": {
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -152,8 +145,6 @@
     },
     "reset-password": {
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
@@ -170,7 +161,6 @@
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
         "notice": "{{manage-settings.notice}}"
@@ -181,20 +171,16 @@
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "save": "{{common.save}}"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}"
     },
     "confirm-reset-password": {
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -202,8 +188,6 @@
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}"
     },
     "series-detail": {
@@ -242,7 +226,6 @@
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "help": "{{common.help}}"
     },
     "reader-settings": {
@@ -349,7 +332,6 @@
         "save": "{{common.save}}"
     },
     "edit-collection-tags": {
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -412,8 +394,7 @@
     },
     "edit-reading-list-modal": {
         "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
@@ -464,7 +445,6 @@
         "location-label": "{{metadata-fields.locations-title}}",
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "release-year-label": "{{sort-field-pipe.release-year}}",
         "web-link-label": "{{tabs.weblink-tab}}",
@@ -565,8 +545,7 @@
         "save": "{{common.save}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}"
+        "delete": "{{common.delete}}"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
