@@ -2,7 +2,6 @@
     "login": {
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "title": "Logga in på ditt konto",
         "forgot-password": "Glömt lösenord?",
         "submit": "Logga in",
@@ -12,7 +11,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "account-detail-title": "Kontodetaljer",
@@ -166,8 +164,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "title": "Ändra Epostenhet",
         "email-tooltip": "Denna e-postadress kommer att användas för att ta emot filen via \"Skicka till\"",
         "device-platform-label": "{{manage-devices.platform-label}}"
@@ -176,7 +172,6 @@
         "password-label": "{{common.password}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "permission-error": "Du har inte behörighet att ändra ditt lösenord. Kontakta serveradministratören.",
         "current-password-label": "Nuvarande lösenord",
         "new-password-label": "Nytt lösenord",
@@ -184,8 +179,6 @@
         "confirm-password-label": "Bekräfta lösenord"
     },
     "change-email": {
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "has-invalid-email": "Det verkar som att du inte har en giltig e-postadress angiven. För att ändra e-post krävs det att administratören skickar en länk till dig för att slutföra denna åtgärd.",
@@ -290,8 +283,6 @@
     },
     "reset-password": {
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}",
         "description": "Ange e-postadressen för ditt konto. Kavita kommer att skicka ett e-postmeddelande om en giltig adress finns registrerad, annars be administratören att återställa ditt lösenord.",
         "title": "Lösenordsåterställning"
@@ -315,7 +306,6 @@
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
         "notice": "{{manage-settings.notice}}",
@@ -339,7 +329,6 @@
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "save": "{{common.save}}",
         "bookmark-label": "Bokmärkesnamn",
         "copy": "Kopiera",
@@ -367,8 +356,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "description": "Fyll i formuläret för att slutföra din registrering",
         "error-label": "Error:",
@@ -377,7 +364,6 @@
     },
     "confirm-reset-password": {
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}",
         "title": "Lösenordsåterställning",
@@ -387,8 +373,6 @@
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "description": "Fyll i formuläret för att registrera ett administratörskonto",
         "register": "Registrera",
@@ -488,7 +472,6 @@
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "help": "{{common.help}}",
         "edit-title": "Ändra {{name}}",
         "name-label": "Namn",
@@ -908,7 +891,6 @@
         "profile-link-alt": "Profil"
     },
     "edit-collection-tags": {
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1111,7 +1093,6 @@
     "edit-reading-list-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "summary-label": "Handling",
         "promote-label": "Tipsa",
         "promote-tooltip": "Tipsa betyder att samlingen kan ses över hela servern, inte bara av dig. Alla serier inom denna samling kommer fortfarande att ha användarbegränsningar som gäller för dem.",
@@ -1256,7 +1237,6 @@
         "location-label": "{{metadata-fields.locations-title}}",
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "release-year-label": "{{sort-field-pipe.release-year}}",
         "web-link-label": "{{tabs.weblink-tab}}",
@@ -1466,7 +1446,6 @@
         "edit-smart-filter": "Ändra {{name}}",
         "edit": "{{common.edit}}",
         "no-data": "Inga Smarta Filter skapat",
-        "required-field": "Smarta Filter behöver ett namn",
         "errored": "Det finns ett kodningsfel i filtret. Du måste återskapa det.",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -1479,7 +1458,6 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}",
         "host-label": "Värd",
         "name-label": "Namn",
         "api-key-label": "API-Nyckel",
@@ -2300,7 +2278,6 @@
         "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
         "description-label": "Beskrivning",
-        "required-field": "{{validation.required-field}}",
         "download-coversdb": "Ladda ner från CoversDB",
         "mal-id-label": "MAL Id",
         "anilist-id-label": "AniList Id",
@@ -2314,7 +2291,6 @@
         "title": "{{personName}} Detaljer",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
         "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
-        "invalid-amazon-code": "ASIN måste börja med B0 eller BT",
         "aliases-label": "Ändra alias",
         "alias-overlap": "Aliaset pekar redan på en annan person eller är personens namn. Överväg att slå ihop dem.",
         "aliases-tooltip": "När en serie taggas med ett alias för en person kopplas serien till den personen i stället för att en ny person skapas. Om du tar bort ett alias måste du skanna om serien för att ändringen ska upptäckas."
@@ -2484,7 +2460,6 @@
         "behavior-title": "Beteende",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "tls-required": "OIDC-leverantören måste använda tls (https)",
         "manual-save-label": "Ändring av leverantörsinställningar kräver manuell sparning",
         "authority-label": "Befogenhet",
@@ -2547,7 +2522,6 @@
         "name-label": "Namn",
         "key-length-label": "Nyckellängd",
         "expiration-label": "Upphör att gälla",
-        "required-field": "{{validations.required-field}}",
         "total-key-length": "Total nyckellängd: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -2568,8 +2542,7 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
-        "min-length": "En recension måste innehålla minst {{count}} tecken",
-        "required": "{{validation.required-field}}"
+        "min-length": "En recension måste innehålla minst {{count}} tecken"
     },
     "review-list-item": {
         "by-label": "Av",

@@ -3,7 +3,6 @@
         "title": "귀하의 계정에 로그인하세요",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "비밀번호를 잊으셨나요?",
         "submit": "로그인",
         "oidc": "OpenID 연결"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "저장중…",
@@ -203,9 +201,7 @@
         "device-platform-label": "{{manage-devices.platform-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "cancel": "{{common.cancel}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -214,7 +210,6 @@
         "confirm-password-label": "비밀번호 확인",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "비밀번호가 일치해야합니다",
         "permission-error": "비밀번호를 변경할 수 있는 권한이 없습니다. 서버 관리자에게 문의하십시오."
     },
@@ -230,8 +225,6 @@
         "invite-url-label": "초대 URL",
         "invite-url-tooltip": "복사하여 새 탭에 붙여넣기",
         "has-invalid-email": "유효한 이메일이 설정되어 있지 않은 것 같습니다. 이메일 변경은 관리자가 해당 작업을 완료할 수 있도록 링크를 보내야 합니다.",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -445,8 +438,6 @@
         "title": "비밀번호 초기화",
         "description": "계정의 이메일을 입력하세요. 유효한 이메일이 파일에 있으면 Kavita에서 이메일을 보내드립니다. 그렇지 않으면 관리자에게 비밀번호를 재설정하도록 요청하세요.",
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
@@ -480,7 +471,6 @@
         "close": "{{common.close}}",
         "description": "이메일을 입력하여 사용자를 서버에 초대하세요. 계정을 만들 수 있는 이메일을 받게 됩니다. 이 기능이 작동하려면 <a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">이메일</a> 탭에 호스트 이름 및 이메일 설정 필드가 설정되어 있어야 합니다. 그렇지 않으면 링크가 사용자를 대신하여 설정할 수 있도록 제공됩니다.<br/><br/>이메일이 유효할 필요는 없습니다.",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "setup-user-title": "사용자 초대됨",
         "setup-user-description": "아래의 다음 링크를 사용하여 사용자 계정을 설정하거나 복사 버튼을 사용할 수 있습니다. 새로운 사용자를 등록하기 위해 링크를 사용하기 전에 로그아웃해야 할 수도 있습니다.",
         "setup-user-account": "사용자 계정 설정",
@@ -504,7 +494,6 @@
         "copy": "복사",
         "bookmark": "북마크",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "bookmark-label": "북마크 이름",
         "save": "{{common.save}}",
         "annotate": "주석 달기"
@@ -541,8 +530,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "등록",
         "error-label": "에러:"
@@ -557,7 +544,6 @@
         "title": "비밀번호 초기화",
         "description": "새 비밀번호를 입력하세요",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -568,8 +554,6 @@
         "email-label": "{{common.email}}",
         "email-tooltip": "이메일 주소는 실제 주소일 필요는 없지만 암호를 잊어버렸을 때 액세스를 제공합니다. Kavita가 이메일을 보내지 않는 한, 서버 외부로 전송되지 않습니다.",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "등록"
     },
@@ -712,7 +696,6 @@
         "cancel": "{{common.cancel}}",
         "next": "다음",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "file-type-group-label": "파일 유형",
         "file-type-group-tooltip": "Kavita가 스캔할 파일 형식을 설정합니다. 예를 들어 아카이브를 선택하면 cb*, zip, rar 등의 압축 파일이 검색 대상에 포함됩니다.",
         "exclude-patterns-label": "패턴 제외",
@@ -1192,7 +1175,6 @@
     },
     "edit-collection-tags": {
         "title": "편집 {{collectionName}} 컬렉션",
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1429,7 +1411,6 @@
         "year-validation": "1000보다 커야 합니다. 0 또는 공백",
         "month-validation": "1에서 12 사이이거나 비어 있어야 합니다",
         "name-unique-validation": "이름은 고유해야 합니다",
-        "required-field": "{{validation.required-field}}",
         "summary-label": "요약",
         "year-label": "년",
         "month-label": "월",
@@ -1673,7 +1654,6 @@
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "publication-status-label": "출판현황",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "name-label": "이름",
         "sort-name-label": "정렬 이름",
@@ -1971,7 +1951,6 @@
         "save": "{{common.save}}",
         "edit-smart-filter": "편집 {{name}}",
         "name-label": "이름",
-        "required-field": "스마트 필터에 이름 필요",
         "filter-name-unique": "스마트 필터 이름은 고유해야 합니다",
         "edit": "{{common.edit}}",
         "no-content": "이 스마트 필터는 대시보드에 결과를 표시하지 않습니다",
@@ -1988,7 +1967,6 @@
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
         "pattern": "호스트는 유효한 http(s):// URL이어야 합니다",
-        "required": "{{validation.required-field}}",
         "api-key-tooltip": "호스트가 OIDC를 사용할 때 자동 로그인이 필요하지 않습니다"
     },
     "stream-pipe": {
@@ -2467,7 +2445,6 @@
     "edit-person-modal": {
         "asin-label": "ASIN",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
-        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "대안으로 가능한 경우 CoversDB에서 표지를 다운로드할 수 있습니다.",
         "download-coversdb": "CoversDB에서 다운로드",
@@ -2486,8 +2463,7 @@
         "alias-overlap": "이 별명은 이미 다른 인물과 연결되어 있거나, 현재 인물의 이름과 같습니다. 두 인물을 병합하는 것을 고려해 보세요.",
         "aliases-tooltip": "시리즈에 인물의 별칭이 작성되어 있으면, 새로운 인물이 입력될때 이름이 동일하다면 추가로 생성하지 않고 해당 인물에 자동으로 연결됩니다. 별칭을 삭제한 경우, 변경 사항이 반영되도록 시리즈를 다시 스캔해야 합니다.",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
-        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
-        "invalid-amazon-code": "ASIN은 B0 또는 BT로 시작해야 합니다"
+        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/"
     },
     "changelog-update-item": {
         "known-issues": "알려진 문제",
@@ -2736,8 +2712,7 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
-        "min-length": "리뷰는 최소 {{count}}자 이상이어야 합니다",
-        "required": "{{validation.required-field}}"
+        "min-length": "리뷰는 최소 {{count}}자 이상이어야 합니다"
     },
     "browse-people": {
         "author-count": "인물 {{num}} 명",
@@ -2960,7 +2935,6 @@
         "provider-tooltip": "프로바이더(인증 제공자) 설정을 변경한 후에는 직접 [저장] 버튼을 눌러야 합니다. Kavita는 비공개 클라이언트(confidential client) 로 설정되어야 하며, 리디렉션 URL 이 필요합니다. 자세한 내용은 <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>위키</a>문서를 참조하십시오.",
         "behavior-title": "동작 설정 (Behavior)",
         "other-field-required": "{{validation.other-field-required}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "manual-save-label": "프로바이더(인증 제공자) 설정을 변경하려면 수동으로 저장해야 합니다",
         "authority-label": "권한",
         "authority-tooltip": "OIDC 인증 제공자의 기본 URL을 입력합니다 .well-known/openid-configuration 경로는 포함하지 마세요",
@@ -3203,7 +3177,6 @@
         "name-label": "이름",
         "key-length-label": "키 길이",
         "expiration-label": "만료일",
-        "required-field": "{{validation.required-field}}",
         "total-key-length": "인증 키 길이: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -3792,8 +3765,7 @@
         "username-label": "{{common.username}}",
         "new-username-label": "새 사용자 이름",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "filter-entity-type-pipe": {
         "series": "{{tabs.series-tab}}",
@@ -3810,7 +3782,6 @@
         "email-help": "Stripe에 등록된 이메일",
         "license-help": "보안을 위해, 저장된 키는 디스크에 암호화되어 있습니다. 다시 입력하여 업데이트하십시오.",
         "help-label": "{{common.help}}",
-        "required-field-validation": "{{validation.required-field}}",
         "license-length-validation": "라이선스 키는 19글자 길이입니다",
         "license-format-validation": "라이선스는 다음 형식으로 이루어져 있습니다: XXXX-XXXX-XXXX-XXXX",
         "discord-format-validation": "Discord ID는 19자리 숫자로 된 사용자 ID입니다",

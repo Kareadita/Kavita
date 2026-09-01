@@ -2,7 +2,6 @@
     "login": {
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Quên mật khẩu?",
         "title": "Đăng nhập vào tài khoản của bạn",
         "submit": "Đăng nhập",
@@ -12,7 +11,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "update": "Cập nhật",
@@ -166,8 +164,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "title": "chỉnh sửa Thiết Bị email",
         "email-tooltip": "Email này sẽ được sử dụng để chấp nhận tệp được Gửi đến",
         "device-platform-label": "{{manage-devices.platform-label}}"
@@ -176,7 +172,6 @@
         "password-label": "{{common.password}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "current-password-label": "Mật Khẩu Hiện Tại",
         "new-password-label": "Mật Khẩu Mới",
         "confirm-password-label": "Nhập Lại Mật Khẩu",
@@ -184,8 +179,6 @@
         "permission-error": "Bạn không có quyền thay đổi mật khẩu. Hãy liên hệ với quản trị viên của máy chủ."
     },
     "change-email": {
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "email-label": "Email mới",
@@ -284,8 +277,6 @@
     },
     "reset-password": {
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}",
         "description": "Nhập email của tài khoản của bạn. Kavita sẽ gửi cho bạn một email nếu có email hợp lệ trong hồ sơ, nếu không, hãy yêu cầu quản trị viên đặt lại mật khẩu của bạn.",
         "title": "Đặt Lại Mật Khẩu"
@@ -309,7 +300,6 @@
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
         "notice": "{{manage-settings.notice}}",
@@ -331,7 +321,6 @@
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "save": "{{common.save}}",
         "copy": "Sao Chép",
         "bookmark-label": "Tên Dấu Trang",
@@ -353,8 +342,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Đăng Ký",
         "title": "Đăng Ký",
@@ -363,7 +350,6 @@
     },
     "confirm-reset-password": {
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}",
         "title": "Đặt Lại Mật Khẩu",
@@ -373,8 +359,6 @@
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "title": "Đăng Ký",
         "description": "Điền biểu mẫu để đăng ký tài khoản quản trị",
@@ -466,7 +450,6 @@
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "help": "{{common.help}}",
         "help-us-part-2": "hướng dẫn của chúng tôi",
         "manage-collection-label": "Quản lý Bộ sưu tập",
@@ -857,7 +840,6 @@
         "change-password-alt": "Đổi Mật Khẩu Của {{user}}"
     },
     "edit-collection-tags": {
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1026,7 +1008,6 @@
     "edit-reading-list-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "title": "Sửa Danh Sách Đọc: {{name}}",
         "year-label": "Năm",
         "month-label": "Tháng",
@@ -1160,7 +1141,6 @@
         "location-label": "{{metadata-fields.locations-title}}",
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "release-year-label": "{{sort-field-pipe.release-year}}",
         "web-link-label": "{{tabs.weblink-tab}}",
@@ -1363,7 +1343,6 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}",
         "pattern": "Máy chủ phải là một đường dẫn http(s):// hợp lệ",
         "host-label": "Máy Chủ",
         "not-unique": "Nguồn bên ngoài đã tồn tại với máy chủ này. Đảm bảo bạn không thêm trùng lặp",
@@ -1745,7 +1724,6 @@
         "hardcover-id-label": "Hardcover ID",
         "asin-label": "ASIN",
         "description-label": "Mô Tả",
-        "required-field": "{{validations.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "save": "{{common.save}}",
         "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
@@ -2140,7 +2118,6 @@
         "behavior-title": "Hành vi",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "tls-required": "Nhà cung cấp OIDC phải sử dụng tls (https)",
         "checking-authority": "Đang kiểm tra tính hợp lệ của authority, hãy kiên nhẫn...",
         "manual-save-label": "Thay đổi cài đặt nhà cung cấp cần phải được lưu thủ công",
@@ -2207,7 +2184,6 @@
         "name-label": "Tên",
         "key-length-label": "Độ dài khoá",
         "expiration-label": "thời gian hết hạn",
-        "required-field": "{{validation.required-field}}",
         "total-key-length": "Tổng độ dài: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -2228,8 +2204,7 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
-        "min-length": "Đánh giá phải chứa ít nhất {{count}} ký tự",
-        "required": "{{validation.required-field}}"
+        "min-length": "Đánh giá phải chứa ít nhất {{count}} ký tự"
     },
     "review-list-item": {
         "by-label": "Bởi",

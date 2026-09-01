@@ -2,7 +2,6 @@
     "login": {
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "title": "Log ind på din konto",
         "forgot-password": "Glemt adgangskode?",
         "submit": "Log ind",
@@ -12,7 +11,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "invalid-email-warning": "En ugyldig e-mailadresse vil blokere nogle af Kavitas funktioner",
@@ -166,8 +164,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "title": "Rediger e-mail-enhed",
         "device-platform-label": "{{manage-devices.platform-label}}",
         "email-tooltip": "Denne e-mail vil blive brugt til at acceptere filen via Send til"
@@ -176,7 +172,6 @@
         "password-label": "{{common.password}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "current-password-label": "Nuværende adgangskode",
         "new-password-label": "Nyt kodeord",
         "confirm-password-label": "Bekræft adgangskode",
@@ -184,8 +179,6 @@
         "permission-error": "Du har ikke tilladelse til at ændre din adgangskode. Kontakt serveradministratoren."
     },
     "change-email": {
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "email-title": "E-mail",
@@ -290,8 +283,6 @@
     },
     "reset-password": {
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}",
         "title": "Nulstilling af adgangskode",
         "description": "Indtast e-mailadressen til din konto. Kavita sender dig en e-mail, hvis der er registreret en gyldig e-mailadresse. Ellers skal du bede administratoren om at nulstille din adgangskode."
@@ -315,7 +306,6 @@
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
         "notice": "{{manage-settings.notice}}"
@@ -326,20 +316,16 @@
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "save": "{{common.save}}"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}"
     },
     "confirm-reset-password": {
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -347,8 +333,6 @@
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}"
     },
     "series-detail": {
@@ -387,7 +371,6 @@
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "help": "{{common.help}}"
     },
     "reader-settings": {
@@ -494,7 +477,6 @@
         "save": "{{common.save}}"
     },
     "edit-collection-tags": {
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -557,8 +539,7 @@
     },
     "edit-reading-list-modal": {
         "close": "{{common.close}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
@@ -609,7 +590,6 @@
         "location-label": "{{metadata-fields.locations-title}}",
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "release-year-label": "{{sort-field-pipe.release-year}}",
         "web-link-label": "{{tabs.weblink-tab}}",
@@ -710,8 +690,7 @@
         "save": "{{common.save}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}"
+        "delete": "{{common.delete}}"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -757,7 +736,6 @@
         "behavior-title": "Adfærd",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "tls-required": "OIDC-udbyderen skal bruge tls (https)",
         "manual-save-label": "Ændring af udbyderindstillinger kræver manuel gemning",
         "authority-label": "Myndighed",
@@ -820,7 +798,6 @@
         "name-label": "Navn",
         "key-length-label": "Nøglelængde",
         "expiration-label": "Udløb",
-        "required-field": "{{validations.required-field}}",
         "total-key-length": "Samlet nøglelængde: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -860,8 +837,7 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
-        "min-length": "Anmeldelsen skal være på mindst {{count}} tegn",
-        "required": "{{validation.required-field}}"
+        "min-length": "Anmeldelsen skal være på mindst {{count}} tegn"
     },
     "review-card": {
         "your-review": "Dette er din anmeldelse",

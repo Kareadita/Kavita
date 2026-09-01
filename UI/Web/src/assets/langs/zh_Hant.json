@@ -3,7 +3,6 @@
         "title": "登入您的帳戶",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "忘記密碼?",
         "submit": "登入",
         "oidc": "OpenID Connect"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "儲存…",
@@ -42,7 +40,8 @@
         "score-updated": "更新評分",
         "want-to-read-add": "添加想讀",
         "want-to-read-remove": "移除想讀",
-        "review": "查看更新"
+        "review": "查看更新",
+        "read-status-update": "更新閱讀狀態"
     },
     "spoiler": {
         "click-to-show": "點擊查看據透"
@@ -137,7 +136,8 @@
         "no-data": "{{typeahead.no-data}}",
         "series-name-header": "{{manage-matched-metadata.series-name-header}}",
         "delete-label": "{{common.remove}}",
-        "created-header": "{{manage-media-issues.created-header}}"
+        "created-header": "{{manage-media-issues.created-header}}",
+        "no-data-description": "您目前沒有預定任何系列。您預定的系列將顯示在此。"
     },
     "theme-manager": {
         "description": "Kavita 提供多種色彩選擇，找到一個符合您需求的配色方案，或者自己創建一個並分享。主題可以應用於您的帳戶，或應用於所有帳戶中。",
@@ -198,8 +198,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "email-tooltip": "此電子郵件將用於“發送至”，可透過此功能接收文件",
         "device-platform-label": "{{manage-devices.platform-label}}",
         "title": "編輯郵件接收裝置"
@@ -211,7 +209,6 @@
         "confirm-password-label": "確認密碼",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "密碼必須一致",
         "permission-error": "您無權更改您的密碼。聯繫服務器管理員。"
     },
@@ -227,8 +224,6 @@
         "invite-url-label": "邀請連結",
         "invite-url-tooltip": "複製此內容並貼到新分頁中",
         "has-invalid-email": "看起來您沒有設置有效的電子郵件。更改電子郵件將需要管理員向您發送一個連結，以完成此操作。",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -442,8 +437,6 @@
         "title": "重置密碼",
         "description": "輸入您帳戶的電子郵件。如果資料有效，Kavita會向您發送一封電子郵件，否則請聯繫管理員重設您的密碼。",
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
@@ -465,7 +458,6 @@
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
         "notice": "{{manage-settings.notice}}",
@@ -490,7 +482,6 @@
     "book-line-overlay": {
         "copy": "複製",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "save": "{{common.save}}",
         "bookmark": "書籤",
         "bookmark-label": "書籤名稱",
@@ -517,8 +508,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "註冊",
         "title": "註冊",
@@ -527,7 +516,6 @@
     },
     "confirm-reset-password": {
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}",
         "title": "重置密碼",
@@ -537,8 +525,6 @@
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "description": "填寫表格以註冊管理員帳戶",
         "register": "註冊",
@@ -647,7 +633,6 @@
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "help": "{{common.help}}",
         "browse": "瀏覽媒體資料夾",
         "type-label": "類型",
@@ -1061,7 +1046,6 @@
         "identity-provider-oidc-tooltip": "OIDC"
     },
     "edit-collection-tags": {
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1264,7 +1248,6 @@
     "edit-reading-list-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "promote-tooltip": "推廣意味著該收藏可以在伺服器範圍內被看到，而不僅限於您個人。此收藏中的所有系列仍將受到使用者訪問限制。",
         "name-unique-validation": "名稱必須唯一",
         "summary-label": "摘要",
@@ -1409,7 +1392,6 @@
         "location-label": "{{metadata-fields.locations-title}}",
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "release-year-label": "{{sort-field-pipe.release-year}}",
         "web-link-label": "{{tabs.weblink-tab}}",
@@ -1686,15 +1668,13 @@
         "name-label": "名稱",
         "cancel": "{{common.cancel}}",
         "filter-name-unique": "智慧篩選器名稱必須唯一",
-        "close": "{{common.close}}",
-        "required-field": "智慧篩選器需要一個名稱"
+        "close": "{{common.close}}"
     },
     "edit-external-source-item": {
         "save": "{{common.save}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}",
         "not-unique": "已經存在相同主機的外部來源，請確保您沒有重複添加",
         "host-label": "主機",
         "pattern": "主機必須填寫有效的 http(s):// 網址",
@@ -2040,7 +2020,8 @@
         "activity-tab": "活動紀錄",
         "annotations-tab": "註解",
         "overview-tab": "概述",
-        "management-tab": "管理"
+        "management-tab": "管理",
+        "chapters-tab": "章"
     },
     "personal-table-of-contents": {
         "no-data": "尚未有任何書籤",
@@ -2284,7 +2265,6 @@
         "name-label": "{{edit-series-modal.name-label}}",
         "hardcover-id-label": "Hardcover Id",
         "mal-id-label": "MAL Id",
-        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "anilist-id-label": "AniList Id",
         "asin-label": "ASIN",
@@ -2299,8 +2279,7 @@
         "aliases-tooltip": "當一個系列被標記為某個人的別名時，系統會將該系列歸屬於現有的人物，而不是建立一個新人物。刪除別名後，您需要重新掃描該系列，變更才會生效。",
         "aliases-label": "編輯別名",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
-        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
-        "invalid-amazon-code": "ASIN 應以 B0 或 BT 為開頭"
+        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/"
     },
     "reviews": {
         "user-reviews-local": "本地評論",
@@ -2312,8 +2291,7 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
-        "min-length": "評論至少需要 {{count}} 個字元",
-        "required": "{{validation.required-field}}"
+        "min-length": "評論至少需要 {{count}} 個字元"
     },
     "manage-reading-profiles": {
         "wiki-title": "wiki",
@@ -2656,7 +2634,7 @@
         "save-success": "已成功更新您的 OIDC 設定",
         "notice": "注意",
         "restart-required": "更改提供者或進階設定後，必須手動重新啟動 Kavita 才能生效。",
-        "auto-save-required": "您已變更關鍵設定，系統已自動儲存以確保變更生效",
+        "auto-save-required": "您已變更關鍵設定，請手動儲存以確保變更生效",
         "provider-title": "提供者",
         "provider-tooltip": "提供者設定需要您手動點擊「儲存」。Kavita 必須設定為機密客戶端，並需要設定重導向 URL。更多詳情請參考 <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>。",
         "tls-required": "OIDC 提供者必須使用 TLS (HTTPS)",
@@ -2671,7 +2649,6 @@
         "behavior-title": "行為",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "no-restriction": "{{restriction-selector.no-restriction}}",
         "default-roles-label": "{{common.roles}}",
         "default-libraries-label": "{{common.libraries}}",
@@ -2694,7 +2671,8 @@
         "roles-prefix-tooltip": "Kavita 將僅採計以此前綴開頭的角色。",
         "roles-claim-label": "角色聲明",
         "roles-claim-tooltip": "Kavita 將用於提取角色的聲明 (Claim)。留空將使用預設值。",
-        "custom-scopes-label": "自定義範圍"
+        "custom-scopes-label": "自定義範圍",
+        "checking-authority": "正在檢查授權，請耐心等待…"
     },
     "most-active-users": {
         "title": "最活躍讀者",
@@ -2802,10 +2780,12 @@
         "opds": "OPDS",
         "image-only": "圖片",
         "add-auth-key": "新增",
-        "description": "授權金鑰（Auth Key）的作用等同於密碼。輪換金鑰將使所有現有的用戶端失效。"
+        "description": "授權金鑰（Auth Key）的作用等同於密碼。輪換金鑰將使所有現有的用戶端失效。",
+        "clients-opds-error": "無法載入Key對應的 OPDS URL：{{key}}",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "您目前還沒有授權Key。"
     },
     "create-auth-key": {
-        "required-field": "{{validations.required-field}}",
         "total-key-length": "總金鑰長度：{{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -2836,12 +2816,19 @@
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "delete": "{{common.delete}}",
-        "description": "Kavita 的 EPUB 閱讀器內建了數種字型，您也可以在此新增自訂字型。請上傳檔案或使用 Google Fonts 網址。如需詳細資訊，請參閱 <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>。",
+        "description": "Kavita 的 EPUB 閱讀器內建了數種字型，您也可以在此新增自訂字型。請上傳檔案或使用 Google Fonts 網址。如需詳細資訊，請參閱 <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>。 ",
         "upload-continued": "字型檔",
-        "preview-default": "透過檔案或 Google Fonts 網址上傳您的自訂字型",
+        "preview-default": "選擇一個字型系列進行預覽，透過檔案或 Google Fonts 網址新增您自己的字型",
         "filter-system-fonts-label": "篩選系統字型",
         "no-preview": "無法預覽此字型，將採用書籍的預設字型樣式。",
-        "brown-fox": "天地玄黃，宇宙洪荒。The quick brown fox jumps over the lazy dog"
+        "brown-fox": "天地玄黃，宇宙洪荒。The quick brown fox jumps over the lazy dog",
+        "wiki": "維基",
+        "google-fonts": "Google字型",
+        "add-font": "新增字型",
+        "families": "家庭",
+        "file": "檔案",
+        "files": "檔案",
+        "styles-summary": "· {{styles}}"
     },
     "server-devices": {
         "client-devices-header": "{{manage-devices.client-devices-header}}",
@@ -3228,9 +3215,32 @@
         "reading-list": "書單",
         "home": "首頁",
         "bookmarks": "書籤",
-        "collections": "收藏"
+        "collections": "收藏",
+        "browse-genres": "瀏覽類型",
+        "browse-tags": "瀏覽標籤",
+        "want-to-read": "想閱讀",
+        "reading-lists": "閱讀清單",
+        "settings": "設定",
+        "all-series": "所有系列",
+        "profile": "{{username}} 的個人資料"
     },
     "audit-subject-title-pipe": {
         "collection": "收藏"
+    },
+    "authority-validation-result-pipe": {
+        "success": "權限有效",
+        "invalid-authority": "Kavita 可以載入 OIDC 設定，但頒發者不符",
+        "failure": "Kavita 無法載入 OIDC 設定",
+        "not-applicable": "Kavita 無法驗證權限，因為它尚未設定",
+        "missing-https": "{{manage-oidc-connect.tls-required}}"
+    },
+    "file-drag-and-drop-upload": {
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "enter-an-url-pre-title": "輸入 {{url}}",
+        "url": "連結",
+        "url-label": "連結",
+        "back": "返回",
+        "load": "載入"
     }
 }

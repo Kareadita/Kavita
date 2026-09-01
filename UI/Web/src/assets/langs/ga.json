@@ -3,7 +3,6 @@
         "title": "Sínigh isteach i do chuntas",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Pasfhocal dearmadta?",
         "submit": "Sínigh isteach",
         "oidc": "OpenID Connect"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Ag sábháil…",
@@ -203,9 +201,7 @@
         "device-platform-label": "{{manage-devices.platform-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "cancel": "{{common.cancel}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -214,7 +210,6 @@
         "confirm-password-label": "Deimhnigh Pasfhocal",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "Ní mór pasfhocail a mheaitseáil",
         "permission-error": "Níl cead agat do phasfhocal a athrú. Téigh i dteagmháil le riarachán an fhreastalaí."
     },
@@ -230,8 +225,6 @@
         "invite-url-label": "Tabhair cuireadh do Url",
         "invite-url-tooltip": "Cóipeáil é seo agus greamaigh i gcluaisín nua",
         "has-invalid-email": "Tá an chuma air nach bhfuil tacar ríomhphoist bailí agat. Beidh athrú r-phost a cheangal ar an admin a sheoladh chugat nasc a chur i gcrích an gníomh seo.",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -445,8 +438,6 @@
         "title": "Athshocraigh Pasfhocal",
         "description": "Cuir isteach ríomhphost do chuntais. Seolfaidh Kavita ríomhphost chugat má tá ceann bailí i gcomhad, nó iarr ar an riarthóir do phasfhocal a athshocrú.",
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
@@ -480,7 +471,6 @@
         "close": "{{common.close}}",
         "description": "Tabhair cuireadh d'úsáideoir chuig do fhreastalaí trína ríomhphost a iontráil. Gheobhaidh siad ríomhphost chun cuntas a chruthú. Chun go n-oibreoidh sé seo, ní mór duit na réimsí socraithe Ainm Óstach agus Ríomhphost a bheith socraithe sa chluaisín <a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">Ríomhphost</a>, nó cuirfear nasc i láthair duit le socrú thar ceann an úsáideora.<br/><br/>Ní gá go mbeadh an ríomhphost bailí.",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "setup-user-title": "Cuireadh tugtha don úsáideoir",
         "setup-user-description": "Is féidir leat an nasc seo a leanas a úsáid chun cuntas a shocrú do d’úsáideoir nó an cnaipe cóipe a úsáid. Seans go mbeidh ort logáil amach roimh an nasc a úsáid chun úsáideoir nua a chlárú.",
         "setup-user-account": "Socraigh cuntas an úsáideora",
@@ -504,7 +494,6 @@
         "copy": "Cóipeáil",
         "bookmark": "Leabharmharc",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "bookmark-label": "Ainm Leabharmharcanna",
         "save": "{{common.save}}",
         "annotate": "Anótáil"
@@ -541,8 +530,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Cláraigh",
         "error-label": "Earráid:"
@@ -557,7 +544,6 @@
         "title": "Athshocraigh Pasfhocal",
         "description": "Iontráil an focal faire nua",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -568,8 +554,6 @@
         "email-label": "{{common.email}}",
         "email-tooltip": "Ní gá gur seoladh fíor é ríomhphost, ach soláthraíonn sé rochtain ar phasfhocal dearmadta. Ní sheoltar lasmuigh den fhreastalaí é mura gcuireann Kavita ríomhphost chugat.",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Cláraigh"
     },
@@ -712,7 +696,6 @@
         "cancel": "{{common.cancel}}",
         "next": "Ar Aghaidh",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "file-type-group-label": "Cineálacha Comhaid",
         "file-type-group-tooltip": "Cad iad na cineálacha comhaid ba chóir Kavita scanadh le haghaidh. Mar shampla, beidh gach comhad cb *, zip, rar, srl san áireamh sa Chartlann.",
         "exclude-patterns-label": "Patrúin a Eisiamh",
@@ -1192,7 +1175,6 @@
     },
     "edit-collection-tags": {
         "title": "Cuir {{collectionName}} Collection in eagar",
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1429,7 +1411,6 @@
         "year-validation": "Ní mór a bheith níos mó ná 1000, 0 nó bán",
         "month-validation": "Ní mór a bheith idir 1 agus 12 nó bán",
         "name-unique-validation": "Caithfidh an t-ainm a bheith uathúil",
-        "required-field": "{{validation.required-field}}",
         "summary-label": "Achoimre",
         "year-label": "Bliain",
         "month-label": "Mí",
@@ -1673,7 +1654,6 @@
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "publication-status-label": "Stádas Foilseacháin",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "name-label": "Ainm",
         "sort-name-label": "Ainm Sórtála",
@@ -1969,7 +1949,6 @@
         "edit": "{{common.edit}}",
         "save": "{{common.save}}",
         "name-label": "Ainm",
-        "required-field": "Teastaíonn ainm ó Scagairí Cliste",
         "filter-name-unique": "Caithfidh ainmneacha Scagaire Cliste a bheith uathúil",
         "cancel": "{{common.cancel}}",
         "edit-smart-filter": "Cuir {{name}} in eagar",
@@ -1988,7 +1967,6 @@
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
         "pattern": "Ní mór don Óstríomhaire a bheith ina http(s):// url bailí",
-        "required": "{{validation.required-field}}",
         "api-key-tooltip": "Ní gá logáil isteach go huathoibríoch nuair a úsáideann an t-óstach OIDC"
     },
     "stream-pipe": {
@@ -2467,7 +2445,6 @@
     "edit-person-modal": {
         "title": "Sonraí {{personName}}",
         "name-label": "{{edit-series-modal.name-label}}",
-        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "close": "{{common.close}}",
         "mal-id-label": "MAL Id",
@@ -2486,8 +2463,7 @@
         "aliases-tooltip": "Nuair a chuirtear leasainm duine ar shraith, sanntar an duine sin seachas duine nua a chruthú. Agus leasainm á scriosadh, beidh ort an tsraith a athscanadh le go dtabharfar faoi deara an t-athrú.",
         "alias-overlap": "Tá an leasainm seo ag tagairt do dhuine eile cheana féin nó is é ainm an duine seo é, smaoinigh ar iad a chumasc.",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
-        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
-        "invalid-amazon-code": "Ba chóir go dtosódh ASIN le B0 nó BT"
+        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/"
     },
     "changelog-update-item": {
         "download": "Íosluchtaigh",
@@ -2727,7 +2703,6 @@
         "debug": "Dífhabhtaithe"
     },
     "review-modal": {
-        "required": "{{validation.required-field}}",
         "title": "Cuir Athbhreithniú in Eagar",
         "save": "{{common.save}}",
         "min-length": "Ní mór don léirmheas a bheith {{count}} carachtar ar a laghad",
@@ -2928,7 +2903,6 @@
         "provider-tooltip": "Éilíonn socruithe an tsoláthraí ort cliceáil ar Sábháil de láimh. Ní mór Kavita a chumrú mar chliant rúnda agus teastaíonn URL atreoraithe uaidh. Féach ar an <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>vicí</a> le haghaidh tuilleadh sonraí.",
         "behavior-title": "Iompar",
         "other-field-required": "{{validation.other-field-required}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "manual-save-label": "Éilíonn athrú socruithe soláthraí sábháil de láimh",
         "authority-label": "Údarás",
         "authority-tooltip": "An URL chuig do sholáthraí OIDC, ná cuir an cosán .well-known/openid-configuration san áireamh",
@@ -3203,7 +3177,6 @@
         "name-label": "Ainm",
         "key-length-label": "Fad Eochrach",
         "expiration-label": "Dáta éaga",
-        "required-field": "{{validation.required-field}}",
         "total-key-length": "Fad Iomlán na hEochrach: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -3792,8 +3765,7 @@
         "username-label": "{{common.username}}",
         "new-username-label": "Ainm úsáideora nua",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "filter-entity-type-pipe": {
         "series": "{{tabs.series-tab}}",
@@ -3992,7 +3964,6 @@
         "email-help": "Seo é an ríomhphost atá cláraithe le Stripe",
         "license-help": "Ar mhaithe le do shlándáil, tá an eochair stóráilte criptithe ar dhiosca, cuir isteach arís í le nuashonrú.",
         "help-label": "{{common.help}}",
-        "required-field-validation": "{{validation.required-field}}",
         "license-length-validation": "Táthar ag súil go mbeidh 19 carachtar san eochair cheadúnais",
         "license-format-validation": "Táthar ag súil go mbeidh an ceadúnas formáidithe mar seo a leanas: XXXX-XXXX-XXXX-XXXX",
         "discord-format-validation": "Meastar go mbeidh aitheantas úsáideora 19 uimhir in aitheantóir Discord",

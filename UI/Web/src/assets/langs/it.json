@@ -3,7 +3,6 @@
         "title": "Accedi al tuo account",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Password dimenticata?",
         "submit": "Accedi",
         "oidc": "OpenID Connect"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Salvataggio…",
@@ -159,8 +157,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "title": "Modifica dispositivo",
         "email-tooltip": "Questa email verrà utilizzata per accettare il file tramite Invia a",
         "device-platform-label": "Piattaforma Dispositivo"
@@ -172,7 +168,6 @@
         "confirm-password-label": "Conferma Password",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "Le password devono essere identiche",
         "permission-error": "Non sei autorizzato a modificare la tua password. Contatta l'amministratore del server."
     },
@@ -188,8 +183,6 @@
         "invite-url-label": "URL di invito",
         "invite-url-tooltip": "Copia questo e incollalo in una nuova scheda",
         "has-invalid-email": "Sembra che tu abbia configurato una email non valida. Cambiare l'email richiede che l'amministratore ti invii un collegamento per completare questa operazione.",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -402,8 +395,6 @@
         "title": "Resetta la password",
         "description": "Inserisci l'email del tuo account. Kavita ti invierà un'email se ne è presente una valida in archivio, altrimenti chiedi all'amministratore di reimpostare la tua password.",
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
@@ -436,7 +427,6 @@
         "close": "{{common.close}}",
         "description": "Invita un utente sul tuo server. Inserisci la loro email e invieremo loro un'email per creare un account. Affinchè questo funzioni devi riempire i campi Nome Host e Impostazioni Email nella scheda <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a>er noreferrer\" target=\"_blank\">, altrimenti verrà proposto un collegamento dove potrai creare l'utenza al posto suo.<br/><br/>Non è necessario che l'e-mail sia valida.",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "setup-user-title": "Utente Invitato",
         "setup-user-description": "Puoi utilizzare il collegamento seguente per configurare il tuo account utente o utilizzare il pulsante Copia. Potrebbe essere necessario disconnettersi prima di utilizzare il collegamento per registrare un nuovo utente.",
         "setup-user-account": "Configura l'account dell'utente",
@@ -458,7 +448,6 @@
         "copy": "Copia",
         "bookmark": "Segnalibro",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "bookmark-label": "Nome Segnalibro",
         "save": "{{common.save}}"
     },
@@ -484,8 +473,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Registrati",
         "error-label": "Errore:"
@@ -500,7 +487,6 @@
         "title": "Reimposta password",
         "description": "Inserisci nuova password",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -511,8 +497,6 @@
         "email-label": "{{common.email}}",
         "email-tooltip": "Non è necessario che l'e-mail sia un indirizzo reale, ma fornisce l'accesso alla password dimenticata. Non viene inviato all'esterno del server a meno che Kavita non ti invii una e-mail.",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Registra"
     },
@@ -642,7 +626,6 @@
         "cancel": "{{common.cancel}}",
         "next": "Prossimo",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "file-type-group-label": "Tipi di file",
         "file-type-group-tooltip": "Quali tipi di file dovrebbe scansionare Kavita. Ad esempio, Archivio includerà tutti i file cb*, zip, rar, ecc.",
         "exclude-patterns-label": "Escludi modelli",
@@ -1049,7 +1032,6 @@
     },
     "edit-collection-tags": {
         "title": "Modifica {{collectionName}} Collezione",
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1241,7 +1223,6 @@
         "year-validation": "Deve essere maggiore di 1000, 0 o vuoto",
         "month-validation": "Deve essere compreso tra 1 e 12 o vuoto",
         "name-unique-validation": "Il nome deve essere univoco",
-        "required-field": "{{validation.required-field}}",
         "summary-label": "Sommario",
         "year-label": "Anno",
         "month-label": "Mese",
@@ -1415,7 +1396,6 @@
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "publication-status-label": "Stato della pubblicazione",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "name-label": "Nome",
         "sort-name-label": "Ordinamento per Nome",
@@ -1673,8 +1653,7 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "pattern": "L'host deve essere un valido url http(s)://",
-        "required": "{{validation.required-field}}"
+        "pattern": "L'host deve essere un valido url http(s)://"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -2124,7 +2103,6 @@
         "close": "{{common.close}}",
         "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
         "anilist-id-label": "AniList Id",
-        "required-field": "{{validations.required-field}}",
         "save": "{{common.save}}",
         "hardcover-id-label": "Id Copertina Rigida",
         "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
@@ -2202,7 +2180,6 @@
         "behavior-title": "Comportamento",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "tls-required": "Il provider OIDC richiede tls (https)",
         "manual-save-label": "Modifiche al provider richiedono un salvataggio manuale",
         "authority-tooltip": "L'URL del provider OIDC, non include il percorso .well-known/openid-configuration",

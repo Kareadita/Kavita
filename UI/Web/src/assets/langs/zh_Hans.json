@@ -3,7 +3,6 @@
         "title": "登录你的账户",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "忘记密码？",
         "submit": "登入",
         "oidc": "OpenID 连接"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "正在保存…",
@@ -201,9 +199,7 @@
         "device-platform-label": "{{manage-devices.platform-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "cancel": "{{common.cancel}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -212,7 +208,6 @@
         "confirm-password-label": "确认密码",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "密码必须一致",
         "permission-error": "您无权更改密码，请联系管理员。"
     },
@@ -228,8 +223,6 @@
         "invite-url-label": "邀请链接",
         "invite-url-tooltip": "将其复制并粘贴到一个新的标签页中",
         "has-invalid-email": "您似乎没有设置有效的电子邮件。更改电子邮件将要求管理员向您发送链接以完成此操作。",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -443,8 +436,6 @@
         "title": "重置密码",
         "description": "输入您帐户的电子邮箱。如果档案中有有效的电子邮箱，Kavita 将向您发送一封电子邮件，否则请管理员重置您的密码。",
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
@@ -478,7 +469,6 @@
         "close": "{{common.close}}",
         "description": "通过输入电子邮件邀请用户加入您的服务器。他们将收到一封电子邮件以创建帐户。要实现此功能，您必须在<a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">电子邮件</a>选项卡中设置主机名和电子邮件设置字段，否则系统会向您显示一个链接，让您代表用户进行设置。<br/><br/>电子邮件不需要有效。",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "setup-user-title": "用户已邀请",
         "setup-user-description": "您可以使用以下链接为您的用户设置帐户或使用复制按钮。您可能需要先注销，然后才能使用该链接注册新用户。",
         "setup-user-account": "设置用户账户",
@@ -502,7 +492,6 @@
         "copy": "复制",
         "bookmark": "书签",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "bookmark-label": "书签名称",
         "save": "{{common.save}}",
         "annotate": "注释"
@@ -539,8 +528,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "注册",
         "error-label": "错误："
@@ -555,7 +542,6 @@
         "title": "密码重置",
         "description": "输入新密码",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -566,8 +552,6 @@
         "email-label": "{{common.email}}",
         "email-tooltip": "电子邮件不需要是真实地址，但可以提供忘记密码的访问权限。除非 Kavita 给您发送电子邮件，否则它不会发送到服务器外部。",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "注册"
     },
@@ -709,7 +693,6 @@
         "cancel": "{{common.cancel}}",
         "next": "下一步",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "file-type-group-label": "文件类型",
         "file-type-group-tooltip": "Kavita 应该扫描哪些类型的文件。例如，档案将包含所有 cb*、zip、rar 等文件。",
         "exclude-patterns-label": "排除模式",
@@ -1178,7 +1161,6 @@
     },
     "edit-collection-tags": {
         "title": "编辑 {{collectionName}} 收藏",
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1400,7 +1382,6 @@
         "year-validation": "必须大于 1000、0 或空白",
         "month-validation": "必须介于 1 和 12 之间或为空",
         "name-unique-validation": "名称必须唯一",
-        "required-field": "{{validation.required-field}}",
         "summary-label": "内容简介",
         "year-label": "年",
         "month-label": "月",
@@ -1632,7 +1613,6 @@
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "publication-status-label": "出版状态",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "name-label": "名称",
         "sort-name-label": "排序名称",
@@ -1924,7 +1904,6 @@
         "name-label": "名称",
         "filter-name-unique": "智能筛选器名称必须是唯一的",
         "save": "{{common.save}}",
-        "required-field": "智能筛选器需要一个名称",
         "no-content": "此智能筛选器在仪表板上没有结果"
     },
     "edit-external-source-item": {
@@ -1937,8 +1916,7 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "pattern": "主机必须是一个有效的http(s)://地址",
-        "required": "{{validation.required-field}}"
+        "pattern": "主机必须是一个有效的http(s)://地址"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -2372,7 +2350,6 @@
         "mal-id-label": "MAL Id",
         "anilist-id-label": "AniList Id",
         "description-label": "描述",
-        "required-field": "{{validation.required-field}}",
         "title": "{{personName}} 详细信息",
         "name-label": "{{edit-series-modal.name-label}}",
         "hardcover-id-label": "Hardcover Id",
@@ -2390,8 +2367,7 @@
         "aliases-label": "编辑别名",
         "alias-overlap": "此别名已经指向另一个人或为该人的名字，请考虑合并它们。",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
-        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
-        "invalid-amazon-code": "ASIN 应以 B0 或 BT 开头"
+        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/"
     },
     "person-detail": {
         "all-roles": "{{common.roles}}",
@@ -2576,7 +2552,6 @@
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
         "min-length": "评论必须至少包含 {{count}} 个字符",
-        "required": "{{validation.required-field}}",
         "title": "编辑评论",
         "close": "{{common.close}}"
     },
@@ -2790,7 +2765,6 @@
         "provider-tooltip": "提供商设置需要您手动点击“保存”。Kavita 必须配置为机密客户端，并且需要重定向网址。更多详情，请参阅<a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>获取更多信息。",
         "behavior-title": "行为",
         "other-field-required": "{{validation.other-field-required}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "manual-save-label": "更改提供商设置需要手动保存",
         "authority-label": "授权",
         "authority-tooltip": "您的 OIDC 提供商的 URL 不包括 .well-known/openid-configuration 路径",
@@ -3029,7 +3003,6 @@
         "name-label": "名称",
         "key-length-label": "密钥长度",
         "expiration-label": "到期",
-        "required-field": "{{validation.required-field}}",
         "total-key-length": "总密钥长度：{{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -3456,8 +3429,7 @@
         "username-label": "{{common.username}}",
         "new-username-label": "新用户名",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "cbl-import-reason-pipe": {
         "chapter-missing": "章节缺失",
@@ -3587,7 +3559,6 @@
         "email-help": "这是在Stripe注册时所用的电子邮件",
         "license-help": "为了您的安全，存储的密钥已在磁盘上加密，请重新输入以进行更新。",
         "help-label": "{{common.help}}",
-        "required-field-validation": "{{validation.required-field}}",
         "license-length-validation": "许可证密钥的长度应为19个字符",
         "license-format-validation": "许可证的格式应为：XXXX-XXXX-XXXX-XXXX",
         "discord-format-validation": "Discord ID 应为 19 位数字",

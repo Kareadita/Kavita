@@ -3,7 +3,6 @@
         "title": "Jelentkezz be a fiókodba",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Elfelejtett jelszó?",
         "submit": "{{common.submit}}Bejelentkezés",
         "oidc": "OpenID Connect"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Mentés…",
@@ -192,8 +190,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "title": "E-mail eszköz szerkesztése",
         "email-tooltip": "Ezt az e-mail címet fogjuk használni a fájl Küldés funkcióval történő fogadásához",
         "device-platform-label": "{{manage-devices.platform-label}}"
@@ -202,7 +198,6 @@
         "password-label": "{{common.password}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "new-password-label": "Új jelszó",
         "current-password-label": "Jelenlegi jelszó",
         "confirm-password-label": "Jelszó megerősítése",
@@ -210,8 +205,6 @@
         "permission-error": "Nincs jogosultsága a jelszó megváltoztatására. Forduljon a szerver adminisztrátorához."
     },
     "change-email": {
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "current-password-label": "Jelenlegi jelszó",
@@ -311,8 +304,6 @@
     },
     "reset-password": {
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}",
         "description": "Add meg a fiókodhoz tartozó e-mail címet. Kavita küld neked egy e-mailt, ha van érvényes címed a listán, ellenkező esetben kérd meg az adminisztrátort, hogy állítsa vissza a jelszavadat.",
         "title": "Jelszó visszaállítása"
@@ -336,7 +327,6 @@
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
         "notice": "{{manage-settings.notice}}",
@@ -360,7 +350,6 @@
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "save": "{{common.save}}",
         "copy": "Másolat",
         "bookmark": "Könyvjelző",
@@ -371,15 +360,12 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "title": "Nyilvántartás",
         "description": "Töltsd ki az űrlapot a regisztráció befejezéséhez"
     },
     "confirm-reset-password": {
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -387,8 +373,6 @@
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}"
     },
     "series-detail": {
@@ -475,7 +459,6 @@
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "help": "{{common.help}}",
         "edit-title": "Szerkeszd a {{név}}-t",
         "add-title": "Könyvtár hozzáadása",
@@ -744,7 +727,6 @@
         "pending-tooltip": "Ez a felhasználó nem erősítette meg az e-mail címét"
     },
     "edit-collection-tags": {
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -860,7 +842,6 @@
     "edit-reading-list-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "title": "Olvasási lista szerkesztése: {{name}}",
         "year-validation": "1000-nél nagyobbnak, 0-nak vagy üresnek kell lennie",
         "month-validation": "1 és 12 közötti számnak vagy üresnek kell lennie",
@@ -991,7 +972,6 @@
         "location-label": "{{metadata-fields.locations-title}}",
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "release-year-label": "{{sort-field-pipe.release-year}}",
         "web-link-label": "{{tabs.weblink-tab}}",
@@ -1114,8 +1094,7 @@
         "save": "{{common.save}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}"
+        "delete": "{{common.delete}}"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -1150,8 +1129,7 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "min-length": "A kritika minimum {{count}} karakter hosszúságú kell legyen",
-        "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}"
+        "delete": "{{common.delete}}"
     },
     "theme": {
         "theme-dark": "Sötét",
@@ -1193,7 +1171,6 @@
         "save": "{{common.save}}",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "disable-password-authentication-label": "Jelszóhitelesítés letiltása",
         "provider-name-label": "Szolgáltató neve",
         "provider-name-tooltip": "A bejelentkezési képernyőn megjelenő név",
@@ -1246,7 +1223,6 @@
         "name-label": "Név",
         "key-length-label": "Kulcshossz",
         "expiration-label": "Lejárat",
-        "required-field": "{{validations.required-field}}",
         "total-key-length": "Teljes kulcshossz: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",

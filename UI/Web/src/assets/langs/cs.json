@@ -3,7 +3,6 @@
         "title": "Přihlaste se ke svému účtu",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Zapomenuté heslo?",
         "submit": "Přihlásit se",
         "oidc": "OpenID Connect"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Ukládání…",
@@ -201,8 +199,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "title": "Upravit e-mailové zařízení",
         "email-tooltip": "Tento e-mail bude použit pro přijetí souboru prostřednictvím Odeslat do",
         "device-platform-label": "{{manage-devices.platform-label}}"
@@ -214,7 +210,6 @@
         "confirm-password-label": "Potvrďte heslo",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "Heslo se musí shodovat",
         "permission-error": "Nemáte oprávnění ke změně hesla. Obraťte se na správce serveru."
     },
@@ -230,8 +225,6 @@
         "invite-url-label": "Adresa URL pozvánky",
         "invite-url-tooltip": "Zkopírujte toto a vložte na novou kartu",
         "has-invalid-email": "Zdá se, že nemáte nastavenou platnou e-mailovou adresu. Změna e-mailu se bude vyžadovat, aby vám administrátor poslal odkaz k dokončení této akce.",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -445,8 +438,6 @@
         "title": "Resetovat heslo",
         "description": "Zadejte e-mail svého účtu. Kavita vám pošle e-mail, pokud je v souboru platný, v opačném případě požádejte správce o obnovení hesla.",
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
@@ -480,7 +471,6 @@
         "close": "{{common.close}}",
         "description": "Pozvěte uživatele na svůj server zadáním jeho e-mailové adresy. Obdrží e-mail s pokyny k vytvoření účtu. Aby to fungovalo, musíte mít vyplněná pole pro název hostitele a e-mail v záložce <a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">E-mail</a>, jinak se vám zobrazí odkaz, který budete muset nastavit jménem uživatele.<br/><br/>E-mail nemusí být platný.",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "setup-user-title": "Uživatel byl pozván",
         "setup-user-description": "Účet pro svého uživatele můžete nastavit pomocí následujícího odkazu nebo pomocí tlačítka Kopírovat. Před použitím odkazu pro registraci nového uživatele se možná budete muset odhlásit.",
         "setup-user-account": "Nastavení uživatelského účtu",
@@ -504,7 +494,6 @@
         "copy": "Kopírujte",
         "bookmark": "Záložka",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "bookmark-label": "Název záložky",
         "save": "{{common.save}}",
         "annotate": "Anotovat"
@@ -541,8 +530,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Registrace",
         "error-label": "Chyba:"
@@ -557,7 +544,6 @@
         "title": "Obnovení hesla",
         "description": "Zadejte nové heslo",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -568,8 +554,6 @@
         "email-label": "{{common.email}}",
         "email-tooltip": "E-mail nemusí být skutečná adresa, ale umožňuje přístup k zapomenutému heslu. Není odesílán mimo server, pokud vám Kavita neodešle e-mail.",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Registrace"
     },
@@ -674,7 +658,6 @@
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "help": "{{common.help}}",
         "file-type-group-label": "Typy souborů",
         "allow-scrobbling-label": "Povolit scrobbling",
@@ -1137,7 +1120,6 @@
         "no-data-description": "Žádní další uživatelé nejsou."
     },
     "edit-collection-tags": {
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1193,7 +1175,7 @@
         "theme": "Motiv",
         "info-section-title": "Informace",
         "admin-email-history": "Historie e-mailů",
-        "admin-matched-metadata": "Sladěná série",
+        "admin-matched-metadata": "Přiřazené série",
         "admin-manage-tokens": "Uživatelské tokeny",
         "scrobble-holds": "Podržení Scrobble",
         "account": "Účet",
@@ -1357,7 +1339,6 @@
     "edit-reading-list-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "year-label": "Rok",
         "summary-label": "Shrnutí",
         "year-validation": "Musí být větší než 1000, 0 nebo prázdné",
@@ -1548,7 +1529,6 @@
         "location-label": "{{metadata-fields.locations-title}}",
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "release-year-label": "{{sort-field-pipe.release-year}}",
         "web-link-label": "{{tabs.weblink-tab}}",
@@ -1770,7 +1750,6 @@
         "save": "{{common.save}}",
         "edit-smart-filter": "Upravit {{name}}",
         "name-label": "Název",
-        "required-field": "Chytré filtry potřebují název",
         "filter-name-unique": "Názvy chytrých filtrů musí být jedinečné",
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
@@ -1783,7 +1762,6 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}",
         "title": "Nový externí zdroj",
         "not-unique": "U tohoto hostitele existuje externí zdroj. Ujistěte se, že nemáte duplikáty",
         "host-label": "Hostitel",
@@ -2117,7 +2095,6 @@
         "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
         "description-label": "Popis",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
-        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "save": "{{common.save}}",
         "cover-image-description-extra": "Případně si můžete stáhnout obálku z CoversDB, pokud je k dispozici.",
@@ -2129,8 +2106,7 @@
         "alias-overlap": "Tento alias již odkazuje na jinou osobu nebo je jménem této osoby, zvažte jejich sloučení.",
         "aliases-tooltip": "Pokud je série označena aliasem osoby, je tato osoba přiřazena, místo aby byla vytvořena nová osoba. Při odstranění aliasu je nutné sérii znovu prohledat, aby se změna zachytila.",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
-        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
-        "invalid-amazon-code": "ASIN by mělo začínat písmeny B0 nebo BT"
+        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/"
     },
     "errors": {
         "delete-theme-in-use": "Motiv je aktuálně používán alespoň jedním uživatelem, nelze odstranit",
@@ -2729,7 +2705,6 @@
     "review-modal": {
         "title": "Upravit recenzi",
         "min-length": "Recenze musí mít alespoň {{count}} znaků",
-        "required": "{{validation.required-field}}",
         "delete": "{{common.delete}}",
         "save": "{{common.save}}",
         "review-label": "Recenze",
@@ -2928,7 +2903,6 @@
         "provider-tooltip": "Nastavení poskytovatele vyžaduje ruční kliknutí na tlačítko Uložit. Kavita musí být nakonfigurována jako důvěrný klient a vyžaduje přesměrovací URL. Další podrobnosti najdete na <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>.",
         "behavior-title": "Chování",
         "other-field-required": "{{validation.other-field-required}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "manual-save-label": "Změna nastavení poskytovatele vyžaduje ruční uložení",
         "authority-label": "Autorita",
         "authority-tooltip": "URL adresa vašeho poskytovatele OIDC, nezahrnujte cestu .well-known/openid-configuration",
@@ -3203,7 +3177,6 @@
         "name-label": "Název",
         "key-length-label": "Délka klíče",
         "expiration-label": "Vypršení platnosti",
-        "required-field": "{{validation.required-field}}",
         "total-key-length": "Celková délka klíče: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -3792,8 +3765,7 @@
         "username-label": "{{common.username}}",
         "new-username-label": "Nové uživatelské jméno",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "filter-entity-type-pipe": {
         "series": "{{tabs.series-tab}}",
@@ -4023,7 +3995,6 @@
         "email-help": "Toto je e-mailová adresa zaregistrovaná u služby Stripe",
         "license-help": "Z bezpečnostních důvodů je uložený klíč na disku zašifrován. Pro aktualizaci jej zadejte znovu.",
         "help-label": "{{common.help}}",
-        "required-field-validation": "{{validation.required-field}}",
         "license-length-validation": "Licenční klíč by měl mít 19 znaků",
         "license-format-validation": "Licence by měla mít následující formát: XXXX-XXXX-XXXX-XXXX",
         "discord-format-validation": "Očekává se, že ID na Discordu bude 19místné uživatelské ID",

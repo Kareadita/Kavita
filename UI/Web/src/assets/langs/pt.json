@@ -3,7 +3,6 @@
         "title": "Faça login na sua conta",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Esqueceu a senha?",
         "submit": "Fazer login",
         "oidc": "OpenID Connect"
@@ -21,7 +20,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}",
         "saving": "A Guardar…",
@@ -203,9 +201,7 @@
         "device-platform-label": "{{manage-devices.platform-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "cancel": "{{common.cancel}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -214,7 +210,6 @@
         "confirm-password-label": "Confirmar Palavra Passe",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "As palavras passe têm de ser iguais",
         "permission-error": "Não tem permissões para alterar a sua palavra passe. Contacte o administrador do servidor."
     },
@@ -230,8 +225,6 @@
         "invite-url-label": "Url de Convite",
         "invite-url-tooltip": "Copie e cole o url numa nova aba",
         "has-invalid-email": "Parece que não tem um email válido definido. A alteração de email requere que o administrador lhe envie um link para completar esta acção.",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -445,8 +438,6 @@
         "title": "Repor Palavra Passe",
         "description": "Introduza o endereço de email da sua conta. O Kavita irá enviar um email se encontrar um endereço válido em ficheiro, caso contrário peça ao administrador para reiniciar a sua palavra-chave.",
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
@@ -480,7 +471,6 @@
         "close": "{{common.close}}",
         "description": "Convide um utilizador para o seu servidor a inserir o e-mail dele. Ele receberá um e-mail para criar uma conta. Para que isto funcione, é necessário que os campos Nome do Host e E-mail estejam configurados na guia <a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">E-mail</a>; caso contrário, uma ligação será apresentada para que o configure no nome do utilizador.<br/><br/>Não é obrigatório que o e-mail seja válido.",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "setup-user-title": "Utilizador convidado",
         "setup-user-description": "Pode usar o link que está em baixo, ou usar o botão copiar, para configurar a conta de utilizador. Poderá ser necessário terminar a sessão antes de o usar o link para registar o novo utilizador.",
         "setup-user-account": "Configurar conta de utilizador",
@@ -504,7 +494,6 @@
         "copy": "Copiar",
         "bookmark": "Marcador",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "bookmark-label": "Nome do Marcador",
         "save": "{{common.save}}",
         "annotate": "Anotar"
@@ -541,8 +530,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Registar",
         "error-label": "Erro:"
@@ -557,7 +544,6 @@
         "title": "Repor Palavra Passe",
         "description": "Introduza a nova palavra passe",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -568,8 +554,6 @@
         "email-label": "{{common.email}}",
         "email-tooltip": "O e-mail não precisa ser um endereço real, mas fornece acesso à palavra-passe esquecida. Ele não é enviado para fora do servidor, a menos que Kavita lhe envie um e-mail.",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Registar"
     },
@@ -712,7 +696,6 @@
         "cancel": "{{common.cancel}}",
         "next": "Seguinte",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "file-type-group-label": "Tipos de Ficheiros",
         "file-type-group-tooltip": "Os tipos de ficheiros que o Kavita pode procurar. Por exemplo, Arquivo irá incluir todos os ficheiros cb*, zip, rar, etc.",
         "exclude-patterns-label": "Padrões de Exclusão",
@@ -1192,7 +1175,6 @@
     },
     "edit-collection-tags": {
         "title": "Editar Coleção {{collectionName}}",
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1429,7 +1411,6 @@
         "year-validation": "Tem de ser maior que 1000, 0 ou em branco",
         "month-validation": "Tem de estar entre 1 e 12 ou em branco",
         "name-unique-validation": "O nome tem de ser único",
-        "required-field": "{{validation.required-field}}",
         "summary-label": "Sumário",
         "year-label": "Ano",
         "month-label": "Mês",
@@ -1673,7 +1654,6 @@
         "language-label": "{{metadata-fields.language-title}}",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "publication-status-label": "Estado de Publicação",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "name-label": "Nome",
         "sort-name-label": "Nome para Ordenação",
@@ -1972,7 +1952,6 @@
         "save": "{{common.save}}",
         "edit-smart-filter": "Editar {{name}}",
         "name-label": "Nome",
-        "required-field": "Os Filtros Inteligentes requerem um nome",
         "filter-name-unique": "Os nomes dos Filtros Inteligentes têm de ser únicos",
         "entity-type-label": "Tipo de Entidade",
         "no-content": "Este filtro inteligente não tem resultados no painel"
@@ -1988,7 +1967,6 @@
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
         "pattern": "O Host tem de ter um url http(s):// válido",
-        "required": "{{validation.required-field}}",
         "api-key-tooltip": "Não é obrigatório fazer login automático quando o host usa OIDC"
     },
     "stream-pipe": {
@@ -2469,7 +2447,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "description-label": "Descrição",
-        "required-field": "{{validation.required-field}}",
         "mal-id-label": "Id MAL",
         "name-label": "{{edit-series-modal.name-label}}",
         "anilist-id-label": "Id AniList",
@@ -2486,8 +2463,7 @@
         "alias-overlap": "Este pseudónimo refere-se a outra pessoa ou é o nome desta pessoa, considere juntar as duas pessoas.",
         "aliases-tooltip": "Quando uma série é etiquetada com o pseudónimo de uma pessoa, essa pessoa é associada à serie em vez de ser criada uma pessoa nova. Quando um pseudónimo for apagado, será necessário voltar a analisar a série para que essa alteração tenha efeito.",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
-        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
-        "invalid-amazon-code": "O ASIN deve começar com B0 ou BT"
+        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/"
     },
     "changelog-update-item": {
         "fixed": "Corrigido",
@@ -2810,8 +2786,7 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
-        "min-length": "A crítica tem de ter no mínimo {{count}} caracteres",
-        "required": "{{validation.required-field}}"
+        "min-length": "A crítica tem de ter no mínimo {{count}} caracteres"
     },
     "browse-people": {
         "title": "Explorar Pessoas",
@@ -2926,7 +2901,6 @@
         "provider-tooltip": "As configurações do provedor exigem que clique manualmente em Gravar. O Kavita deve ser configurado como um cliente confidencial e precisa de uma URL de redirecionamento. Veja o <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> para mais pormenores.",
         "behavior-title": "Comportamento",
         "other-field-required": "{{validation.other-field-required}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "manual-save-label": "Alterar as configurações do provedor requer gravar manualmente",
         "authority-label": "Autoridade",
         "authority-tooltip": "A URL para o provedor OIDC não inclui o caminho .well-known/openid-configuration",
@@ -3146,7 +3120,6 @@
         "name-label": "Nome",
         "key-length-label": "Comprimento da Chave",
         "expiration-label": "Validade",
-        "required-field": "{{validation.required-field}}",
         "total-key-length": "Comprimento Total da Chave: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -3569,8 +3542,7 @@
         "username-label": "{{common.username}}",
         "new-username-label": "Novo Nome de Utilizador",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "cbl-match-tier-pipe": {
         "remap-rule": "Regra de Remapeamento",
@@ -4019,7 +3991,6 @@
         "email-help": "Este é o e-mail cadastrado no Stripe",
         "license-help": "Para a sua segurança, a chave armazenada é criptografada no disco, digite-a novamente para atualizar.",
         "help-label": "{{common.help}}",
-        "required-field-validation": "{{validation.required-field}}",
         "license-length-validation": "A chave de licença deve ter 19 caracteres",
         "license-format-validation": "Espera-se que a licença seja formatada como: XXXX-XXXX-XXXX-XXXX",
         "discord-format-validation": "Espera-se que o Discord ID seja um ID de utilizador de 19 números",
