@@ -76,7 +76,7 @@ jobs:
 
           cd UI/Web || exit
           echo 'Installing web dependencies'
-          npm ci
+          npm ci --legacy-peer-deps
 
           echo 'Building UI'
           npm run prod
