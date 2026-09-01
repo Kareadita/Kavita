@@ -4,12 +4,12 @@
       <div class="fixed-top overlay">
         @for(img of cachedImages; track img.src) {
           @if (this.readerService.imageUrlToPageNum(img.src); as imageNum) {
-            <span class="me-1" [ngClass]="{'current': imageNum === this.pageNum, 'loaded': img.complete}">{{this.readerService.imageUrlToPageNum(img.src)}}</span>
+            <span class="me-1" [ngClass]="{'current': imageNum === this.pageNum(), 'loaded': img.complete}">{{imageNum}}</span>
           }
         }
       </div>
     }
-    @if (menuOpen) {
+    @if (menuOpen()) {
       <div class="fixed-top overlay" animate.enter="slide-in-top" animate.leave="slide-out-top">
         <div style="display: flex; margin-top: 0.3125rem;">
           <button class="btn btn-icon" style="height: 100%" [title]="t('back')" (click)="closeReader()">
@@ -26,7 +26,7 @@
             <div class="subtitle">
               {{chapterTitleLabel()}}
               @if (totalSeriesPages > 0) {
-                <span class="ms-2">{{t('series-progress', {percentage: (Math.min(1, ((totalSeriesPagesRead + pageNum) / totalSeriesPages)) | percent)}) }}</span>
+                <span class="ms-2">{{t('series-progress', {percentage: (Math.min(1, ((totalSeriesPagesRead + pageNum()) / totalSeriesPages)) | percent)}) }}</span>
               }
             </div>
           </div>
@@ -49,11 +49,11 @@
     }
 
 
-    <app-loading [loading]="isLoading() || (!(currentImage$ | async)?.complete && this.readerMode !== ReaderMode.Webtoon)" [absolute]="true" />
+    <app-loading [loading]="isLoading() || (!(currentImage$ | async)?.complete && readerMode() !== ReaderMode.Webtoon)" [absolute]="true" />
     <div class="reading-area"
          ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
-         [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : '100dvh'}" #readingArea>
-      @if (readerMode !== ReaderMode.Webtoon) {
+         [ngStyle]="{'background-color': backgroundColor, 'height': isReaderModeWebtoon() ? 'inherit' : '100dvh'}" #readingArea>
+      @if (readerMode() !== ReaderMode.Webtoon) {
         <div appDblClick (dblclick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
           <app-canvas-renderer [readerSettings$]="readerSettings$"
             [image$]="currentImage$"
@@ -62,24 +62,25 @@
         </div>
 
         <!-- Pagination controls and screen hints-->
+
         <div class="pagination-area">
-          <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, KeyDirection.Left)"
-               [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'), 'max-height': MaxHeight}">
-            @if (showClickOverlay) {
+          <div class="{{isReaderLeftRight() ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, KeyDirection.Left)"
+               [ngStyle]="{'height': (isReaderLeftRight() ? '100dvh' : '25%'), 'max-height': '100dvh'}">
+            @if (showClickOverlay()) {
               <div>
-                <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
+                <i class="fa fa-angle-{{readingDirection() === ReadingDirection.RightToLeft ? 'double-' : ''}}{{isReaderLeftRight() ? 'left' : 'up'}}"
                    [title]="t('prev-page-tooltip')" aria-hidden="true"></i>
               </div>
             }
           </div>
-          <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, KeyDirection.Right)"
-               [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'),
+          <div class="{{isReaderLeftRight() ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, KeyDirection.Right)"
+               [ngStyle]="{'height': (isReaderLeftRight() ? '100dvh' : '25%'),
                                 'left': 'inherit',
                                 'right': RightPaginationOffset + 'px',
-                                'max-height': MaxHeight}">
-            @if (showClickOverlay) {
+                                'max-height': '100dvh'}">
+            @if (showClickOverlay()) {
               <div>
-                <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
+                <i class="fa fa-angle-{{isReadingDirectionLeftToRight() ? 'double-' : ''}}{{isReaderLeftRight() ? 'right' : 'down'}}"
                    [title]="t('next-page-tooltip')" aria-hidden="true"></i>
               </div>
             }
@@ -116,13 +117,13 @@
                                         [getPage]="getPageFn" />
         </div>
       } @else {
-        @if (!isLoading() && !inSetup) {
+        @if (!isLoading() && !inSetup()) {
           <div class="webtoon-images" appDblClick (doubleClick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
-            <app-infinite-scroller [pageNum]="pageNum"
+            <app-infinite-scroller [pageNum]="pageNum()"
                                    [bufferPages]="5"
                                    [goToPage]="goToPageEvent"
                                    (pageNumberChange)="handleWebtoonPageChange($event)"
-                                   [totalPages]="maxPages"
+                                   [totalPages]="maxPages()"
                                    [urlProvider]="getPageUrl"
                                    (loadNextChapter)="loadNextChapter(true)"
                                    (loadPrevChapter)="loadPrevChapter()"
@@ -136,38 +137,39 @@
       }
     </div>
 
-    @if (menuOpen) {
+    @if (menuOpen()) {
       <div class="fixed-bottom overlay"  animate.enter="slide-in-bottom" animate.leave="slide-out-bottom">
-        @if (pageOptions !== undefined && pageOptions.ceil !== undefined) {
+        @let sliderOptions = pageOptions();
+        @if (sliderOptions && sliderOptions.ceil !== undefined) {
           <div class="mb-3">
             <span class="visually-hidden" id="slider-info"></span>
             <div class="row g-0">
               <button class="btn btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" [title]="t('prev-chapter-tooltip')"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
-              <button class="btn btn-icon col-2" [disabled]="prevPageDisabled || pageNum === 0" (click)="goToPage(0);resetMenuCloseTimer();" [title]="t('first-page-tooltip')"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
-              @if (pageOptions.ceil > 0) {
+              <button class="btn btn-icon col-2" [disabled]="prevPageDisabled || pageNum() === 0" (click)="goToPage(0);resetMenuCloseTimer();" [title]="t('first-page-tooltip')"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
+              @if (sliderOptions.ceil > 0) {
                 <div class="col custom-slider">
-                  <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" [manualRefresh]="refreshSlider" (userChangeEnd)="sliderPageUpdate($event);startMenuCloseTimer()" (userChange)="sliderDragUpdate($event)" (userChangeStart)="cancelMenuCloseTimer();" />
+                  <ngx-slider [options]="sliderOptions" [value]="pageNum()" aria-describedby="slider-info" [manualRefresh]="refreshSlider" (userChangeEnd)="sliderPageUpdate($event);startMenuCloseTimer()" (userChange)="sliderDragUpdate($event)" (userChangeStart)="cancelMenuCloseTimer();" />
                 </div>
               } @else {
                 <div class="col custom-slider">
-                  <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" (userChangeEnd)="startMenuCloseTimer()" (userChangeStart)="cancelMenuCloseTimer();" />
+                  <ngx-slider [options]="sliderOptions" [value]="pageNum()" aria-describedby="slider-info" (userChangeEnd)="startMenuCloseTimer()" (userChangeStart)="cancelMenuCloseTimer();" />
                 </div>
               }
-              <button class="btn btn-icon col-2" [disabled]="nextPageDisabled || pageNum >= maxPages - 1" (click)="goToPage(this.maxPages);resetMenuCloseTimer();" [title]="t('last-page-tooltip')"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
+              <button class="btn btn-icon col-2" [disabled]="nextPageDisabled || pageNum() >= maxPages() - 1" (click)="goToPage(this.maxPages());resetMenuCloseTimer();" [title]="t('last-page-tooltip')"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
               <button class="btn btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter();resetMenuCloseTimer();" [title]="t('next-chapter-tooltip')"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
             </div>
           </div>
         }
         <div class="row pt-4 ms-2 me-2 mb-2">
           <div class="col d-flex justify-content-center">
-            <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === ReaderMode.Webtoon || readerMode === ReaderMode.UpDown" aria-describedby="reading-direction" [title]="t('reading-direction-tooltip') + (readingDirection === ReadingDirection.LeftToRight ? t('left-to-right-alt') : t('right-to-left-alt'))">
-              <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
-              <span id="reading-direction" class="visually-hidden">{{readingDirection === ReadingDirection.LeftToRight ? t('left-to-right-alt') : t('right-to-left-alt')}}</span>
+            <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="isReaderModeWebtoon() || isReaderUpDown()" aria-describedby="reading-direction" [title]="t('reading-direction-tooltip') + (isReadingDirectionLeftToRight() ? t('left-to-right-alt') : t('right-to-left-alt'))">
+              <i class="fa fa-angle-double-{{isReadingDirectionLeftToRight() ? 'right' : 'left'}}" aria-hidden="true"></i>
+              <span id="reading-direction" class="visually-hidden">{{isReadingDirectionLeftToRight() ? t('left-to-right-alt') : t('right-to-left-alt')}}</span>
             </button>
           </div>
           <div class="col d-flex justify-content-center">
             <button class="btn btn-icon" [title]="t('reading-mode-tooltip')" (click)="toggleReaderMode();resetMenuCloseTimer();">
-              <i class="fa {{readerMode | readerModeIcon}}" aria-hidden="true"></i>
+              <i class="fa {{readerMode() | readerModeIcon}}" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('reading-mode-tooltip')}}</span>
             </button>
           </div>
@@ -191,7 +193,7 @@
                 <div class="col-md-6 col-sm-12">
                   <label for="page-splitting" class="form-label">{{t('image-splitting-label')}}</label>&nbsp;
                   <div class="split fa fa-image">
-                    <div class="{{SplitIconClass}}"></div>
+                    <div class="{{splitIconClass()}}"></div>
                   </div>
                   <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
                     @for (opt of pageSplitOptionsTranslated; track opt.value) {
