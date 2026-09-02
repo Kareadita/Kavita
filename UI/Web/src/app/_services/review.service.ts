@@ -1,8 +1,9 @@
-import {inject, Injectable, Signal} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {UserReview, UserReviewExtended} from "../_models/user-review";
 import {environment} from "../../environments/environment";
 import {HttpClient, HttpParams, httpResource} from "@angular/common/http";
 import {Rating} from "../_models/rating";
+import {UserRatingAndReview} from "../_models/user-rating-and-review";
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +13,10 @@ export class ReviewService {
 
 
   private baseUrl = environment.apiUrl;
+
+  getMyRatingAndReview(seriesId: number) {
+    return this.httpClient.get<UserRatingAndReview>(this.baseUrl + `review/my-series?seriesId=${seriesId}`);
+  }
 
   deleteReview(seriesId: number, chapterId?: number) {
     if (chapterId) {

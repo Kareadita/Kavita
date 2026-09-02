@@ -44,7 +44,7 @@ export class ValidationErrorsComponent {
 
   protected readonly validationId = computed(() => {
     return `${this.inputId()}${idPostfix}`
-  })
+  });
 
   private events = toSignal(
     toObservable(this.control).pipe(

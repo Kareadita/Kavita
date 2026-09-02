@@ -153,4 +153,11 @@ public class ReviewController(
     {
         return Ok(await unitOfWork.UserRepository.GetAllReviewsForUser(userId, UserId, filterQuery, rating));
     }
+
+    [HttpGet("my-series")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult<UserRatingAndReviewDto>> GetMySeriesRatingAndReview(int seriesId)
+    {
+        return Ok(await unitOfWork.UserRepository.GetMyRatingAndReviewForSeries(UserId, seriesId, HttpContext.RequestAborted));
+    }
 }

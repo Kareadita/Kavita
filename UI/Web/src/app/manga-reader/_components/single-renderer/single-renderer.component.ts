@@ -69,9 +69,6 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
   readerSettings!: Signal<ReaderSetting>;
   widthOverride!: Signal<string>;
 
-  get ReaderMode() {return ReaderMode;}
-  get LayoutMode() {return LayoutMode;}
-
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
       map(values => values.readerMode),

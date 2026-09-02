@@ -82,6 +82,11 @@ import {LibraryType} from "../../../_models/library/library";
 import {MangaFormat} from "../../../_models/manga-format";
 import {Stack} from "../../../shared/data-structures/stack";
 import {SwipeEvent} from "../../../ng-swipe/ag-swipe.core";
+import {ModalService} from "../../../_services/modal.service";
+import {
+  RateAndReviewSeriesModalComponent
+} from "../rate-and-review-series-modal/rate-and-review-series-modal.component";
+import {mediumModal} from "../../../_models/modal/modal-options";
 
 
 const PREFETCH_PAGES = 10;
@@ -172,6 +177,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly mangaReaderService = inject(MangaReaderService);
   private readonly keyBindService = inject(KeyBindService);
   private readonly entityTitleService = inject(EntityTitleService);
+  private readonly modalService = inject(ModalService);
 
 
   libraryId!: number;
@@ -1508,10 +1514,28 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadNextChapter(saveMaxProgress: boolean = false) {
     if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode()) {
 
-      // TODO: Open a Modal to ask for a review then close out the reader
-
-      this.toastr.info(translate('manga-reader.no-next-chapter'));
       this.isLoading.set(false);
+
+      // Open a Modal to ask for a review then close out the reader when they haven't rated it
+      if (this.bookmarkMode()) {
+        this.router.navigate(['library', this.libraryId, 'series', this.seriesId], {fragment: 'review-tab'});
+        return;
+      } else {
+
+        // I might want to skip if hasRated() here
+        const ref = this.modalService.open(RateAndReviewSeriesModalComponent, mediumModal());
+        ref.setInput('seriesId', this.seriesId);
+        ref.setInput('libraryId', this.libraryId);
+        ref.setInput('chapterInfo', this.chapterInfo()!);
+
+        ref.dismissed.subscribe(res => {
+          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+        });
+        ref.closed.subscribe(res => {
+          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+        });
+      }
+
       return;
      }
 

@@ -75,6 +75,7 @@ public interface IUserRepository
     Task<AppUser> GetDefaultAdminUser(AppUserIncludes includes = AppUserIncludes.None, CancellationToken ct = default);
     Task<AppUser?> GetUserByDeviceEmail(string deviceEmail, CancellationToken ct = default);
     Task<AppUser?> GetByOidcId(string? oidcId, AppUserIncludes includes = AppUserIncludes.None, CancellationToken ct = default);
+    Task<UserRatingAndReviewDto> GetMyRatingAndReviewForSeries(int userId, int seriesId, CancellationToken ct = default);
     #endregion
 
     #region Ratings & Reviews
