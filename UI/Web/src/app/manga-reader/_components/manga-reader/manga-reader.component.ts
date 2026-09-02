@@ -137,7 +137,6 @@ const KEYBIND_TARGETS = [
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
-
   readonly reader = viewChild.required<ElementRef>('reader');
   readonly readingArea = viewChild.required<ElementRef>('readingArea');
   readonly canvas = viewChild<ElementRef>('content');
