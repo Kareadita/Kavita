@@ -2320,7 +2320,13 @@
         "year-validation": "1000자보다 크고 4자 길이의 유효한 연도여야 합니다",
         "other-field-required": "{{other}}이(가) 설정된 경우 {{name}} 이(가) 필요합니다",
         "invalid-uri": "입력된 URL이 유효하지 않습니다",
-        "other-field-invalid": "유효성 확인 불가. {{other}} 값이 올바르지 않습니다"
+        "other-field-invalid": "유효성 확인 불가. {{other}} 값이 올바르지 않습니다",
+        "email-invalid": "유효한 이메일이어야 합니다",
+        "min-length": "최소 {{requiredLength}}자 이상이어야 합니다",
+        "min": "{{min}}보다 큰 값이어야 합니다",
+        "max": "{{max}}보다 작은 값이어야 합니다",
+        "invalid-amazon-code": "ASIN 코드는 B0 또는 BT로 시작해야 합니다",
+        "invalid-asin": "유효한 ASIN이 아닙니다"
     },
     "entity-type": {
         "volume": "권",

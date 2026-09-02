@@ -2320,7 +2320,13 @@
         "year-validation": "Dies muss eine gültige Jahreszahl sein, die größer als 1000 und 4 Zeichen lang ist",
         "other-field-required": "{{name}} ist erforderlich, wenn {{other}} festgelegt ist",
         "invalid-uri": "Die angegebene URI ist ungültig",
-        "other-field-invalid": "Gültigkeit kann nicht überprüft werden, {{other}} ist ungültig"
+        "other-field-invalid": "Gültigkeit kann nicht überprüft werden, {{other}} ist ungültig",
+        "email-invalid": "Das muss eine gültige E-Mail-Adresse sein",
+        "min-length": "Die Eingabe muss mindestens {{requiredLength}} Zeichen lang sein",
+        "min": "Der Wert muss größer als {{min}} sein",
+        "max": "Der Wert muss kleiner als {{max}} sein",
+        "invalid-amazon-code": "Die ASIN sollte mit „B0“ oder „BT“ beginnen",
+        "invalid-asin": "Dies ist keine gültige ASIN"
     },
     "entity-type": {
         "volume": "Band",
