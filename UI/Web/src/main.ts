@@ -2,7 +2,9 @@ import {
   ApplicationConfig,
   importProvidersFrom,
   inject,
+  isDevMode,
   provideAppInitializer,
+  provideCheckNoChangesConfig,
   provideZoneChangeDetection,
 } from '@angular/core';
 import {routes} from './app/app-routing.module';
@@ -209,7 +211,8 @@ bootstrapApplication(AppComponent, {
             max: 5,
             resettable: true,
           } satisfies Partial<NgbRatingConfig>)
-        }
+        },
+      ...(isDevMode() ? [provideCheckNoChangesConfig({exhaustive: true, interval: 3000})] : [])
     ]
 } as ApplicationConfig)
 .catch(err => console.error(err));
