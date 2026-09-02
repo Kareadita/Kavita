@@ -7,6 +7,8 @@ import {ReviewService} from "../../../_services/review.service";
 import {form, FormField, minLength} from "@angular/forms/signals";
 import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 interface RateAndReviewForm {
   rating: number;
@@ -20,7 +22,9 @@ interface RateAndReviewForm {
     FormsModule,
     ReactiveFormsModule,
     FormField,
-    NgxStarsModule
+    NgxStarsModule,
+    FormFieldDirective,
+    ValidationErrorsComponent
   ],
   selector: 'app-rate-and-review-series-modal',
   styleUrl: './rate-and-review-series-modal.component.scss',
@@ -28,6 +32,7 @@ interface RateAndReviewForm {
 })
 export class RateAndReviewSeriesModalComponent {
 
+  // I should likely just pss the rating and review in directly + series title
   seriesId = input.required<number>();
   libraryId = input.required<number>();
   chapterInfo = input.required<ChapterInfo>();

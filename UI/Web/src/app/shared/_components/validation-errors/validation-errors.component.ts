@@ -1,8 +1,6 @@
 import {Component, computed, DestroyRef, inject, input} from '@angular/core';
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
-import {AbstractControl} from "@angular/forms";
-import {takeUntilDestroyed, toObservable, toSignal} from "@angular/core/rxjs-interop";
-import {startWith, switchMap} from "rxjs";
+import {AnyField, toFieldView} from "../../_models/field-view";
 
 
 const DEFAULT_MESSAGES: Record<string, string> = {
@@ -37,41 +35,34 @@ export class ValidationErrorsComponent {
   private readonly translocoService = inject(TranslocoService);
 
 
-  control = input.required<AbstractControl>();
+  control = input.required<AnyField>();
   inputId = input.required<string>();
   /** Overrides for validation error messaging. Map validation -> value. This assumes the value is already localized. */
   messages = input<Record<string, string>>({});
+
+  private readonly view = toFieldView(this.control, this.destroyRef);
 
   protected readonly validationId = computed(() => {
     return `${this.inputId()}${idPostfix}`
   });
 
-  private events = toSignal(
-    toObservable(this.control).pipe(
-      switchMap(c => c.events.pipe(startWith(null))),
-      takeUntilDestroyed(this.destroyRef)
-    )
-  );
-
-
   visibleErrors = computed(() => {
-    this.events();
-    const control = this.control();
+
     const overrides = this.messages();
-    if (!control.errors || !(control.dirty || control.touched)) return []; // Required and touched should show a message
+    if (!(this.view.dirty() || this.view.touched())) return []; // Required and touched should show a message
 
-    return Object.keys(control.errors).map(key => {
-      const value = control.errors![key];
-      let title = key;
 
-      if (overrides.hasOwnProperty(key)) {
-        title = overrides[key];
-      } else if (DEFAULT_MESSAGES.hasOwnProperty(key)) {
-        title = this.translocoService.translate(`validation.${DEFAULT_MESSAGES[key]}`, typeof value === 'object' ? value : {});
+    return this.view.errors().map(e => {
+      let title = e.kind;
+
+      if (overrides.hasOwnProperty(e.kind)) {
+        title = overrides[e.kind];
+      } else if (DEFAULT_MESSAGES.hasOwnProperty(e.kind)) {
+        title = this.translocoService.translate(`validation.${DEFAULT_MESSAGES[e.kind]}`, e.params);
       }
 
       return {
-        key,
+        kind: e.kind,
         title
       }
     });

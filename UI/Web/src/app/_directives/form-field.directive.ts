@@ -1,7 +1,5 @@
 import {computed, DestroyRef, Directive, effect, ElementRef, inject, input, Renderer2} from '@angular/core';
-import {AbstractControl} from "@angular/forms";
-import {takeUntilDestroyed, toObservable, toSignal} from "@angular/core/rxjs-interop";
-import {startWith, switchMap} from "rxjs";
+import {AnyField, toFieldView} from "../shared/_models/field-view";
 
 const validTags = ['input', 'select', 'textarea'];
 
@@ -16,18 +14,12 @@ export class FormFieldDirective {
   private readonly renderer = inject(Renderer2);
   private readonly destroyRef = inject(DestroyRef);
 
-  control = input.required<AbstractControl>({alias: 'appFormField'});
+  control = input.required<AnyField>({alias: 'appFormField'});
 
-  private events = toSignal(
-    toObservable(this.control).pipe(
-      switchMap(c => c.events.pipe(startWith(null))),
-      takeUntilDestroyed(this.destroyRef)
-    )
-  );
+  private readonly view = toFieldView(this.control, this.destroyRef);
+
   isInvalid = computed(() => {
-    this.events();
-    const control = this.control();
-    return control.invalid && control.touched;
+    return this.view.invalid() && this.view.touched();
   });
 
   constructor() {
