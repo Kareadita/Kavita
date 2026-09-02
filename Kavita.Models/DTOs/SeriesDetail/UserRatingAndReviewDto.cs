@@ -7,5 +7,5 @@ public sealed record UserRatingAndReviewDto
 {
     public float Rating { get; set; }
     public string Review { get; set; } = string.Empty;
-    public bool HasRated { get; set; }
+    public bool HasBeenRated { get; set; }
 }

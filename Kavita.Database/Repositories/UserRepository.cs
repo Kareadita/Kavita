@@ -547,7 +547,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .ProjectTo<UserRatingAndReviewDto>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken: ct);
 
-        return ret ?? new UserRatingAndReviewDto() { Rating = 0, Review = string.Empty, HasRated = false };
+        return ret ?? new UserRatingAndReviewDto() { Rating = 0, Review = string.Empty, HasBeenRated = false };
     }
 
     public async Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId, CancellationToken ct = default)

@@ -1,5 +1,4 @@
 import {Component, inject, input, signal} from '@angular/core';
-import {ChapterInfo} from "../../_models/chapter-info";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
@@ -9,6 +8,7 @@ import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {UserRatingAndReview} from "../../../_models/user-rating-and-review";
 
 interface RateAndReviewForm {
   rating: number;
@@ -32,10 +32,9 @@ interface RateAndReviewForm {
 })
 export class RateAndReviewSeriesModalComponent {
 
-  // I should likely just pss the rating and review in directly + series title
   seriesId = input.required<number>();
-  libraryId = input.required<number>();
-  chapterInfo = input.required<ChapterInfo>();
+  ratingReview = input.required<UserRatingAndReview>();
+  seriesName = input.required<string>();
 
   protected readonly modal = inject(NgbActiveModal);
   private readonly reviewService = inject(ReviewService);
@@ -49,14 +48,10 @@ export class RateAndReviewSeriesModalComponent {
     minLength(schemaPath.review, 5)
   });
   starColor = this.themeService.getCssVariable('--rating-star-color');
-  hasRated = false;
 
   ngOnInit() {
-    this.reviewService.getMyRatingAndReview(this.seriesId()).subscribe(res => {
-      this.reviewForm.rating().value.set(res.rating);
-      this.reviewForm.review().value.set(res.review ?? '');
-      this.hasRated = res.hasRated;
-    });
+    this.reviewForm.rating().value.set(this.ratingReview().rating);
+    this.reviewForm.review().value.set(this.ratingReview().review ?? '');
   }
 
   updateRating(rating: number) {

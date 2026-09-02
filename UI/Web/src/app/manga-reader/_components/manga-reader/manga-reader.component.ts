@@ -86,7 +86,8 @@ import {ModalService} from "../../../_services/modal.service";
 import {
   RateAndReviewSeriesModalComponent
 } from "../rate-and-review-series-modal/rate-and-review-series-modal.component";
-import {mediumModal} from "../../../_models/modal/modal-options";
+import {editModal} from "../../../_models/modal/modal-options";
+import {ReviewService} from "../../../_services/review.service";
 
 
 const PREFETCH_PAGES = 10;
@@ -178,6 +179,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly keyBindService = inject(KeyBindService);
   private readonly entityTitleService = inject(EntityTitleService);
   private readonly modalService = inject(ModalService);
+  private readonly reviewService = inject(ReviewService);
 
 
   libraryId!: number;
@@ -1520,13 +1522,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.bookmarkMode()) {
         this.router.navigate(['library', this.libraryId, 'series', this.seriesId], {fragment: 'review-tab'});
         return;
-      } else {
+      }
 
-        // I might want to skip if hasRated() here
-        const ref = this.modalService.open(RateAndReviewSeriesModalComponent, mediumModal());
+      this.reviewService.getMyRatingAndReview(this.seriesId).subscribe((res) => {
+        if (res.hasBeenRated) {
+          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+          return;
+        }
+        const ref = this.modalService.open(RateAndReviewSeriesModalComponent, editModal());
         ref.setInput('seriesId', this.seriesId);
-        ref.setInput('libraryId', this.libraryId);
-        ref.setInput('chapterInfo', this.chapterInfo()!);
+        ref.setInput('ratingReview', res);
+        ref.setInput('seriesName', this.chapterInfo()!.seriesName);
 
         ref.dismissed.subscribe(res => {
           this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
@@ -1534,7 +1540,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         ref.closed.subscribe(res => {
           this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
         });
-      }
+      })
 
       return;
      }
