@@ -2555,7 +2555,13 @@
         "password-validation": "Heslo musí mít délku 6 až 256 znaků",
         "other-field-required": "{{name}} je vyžadováno, pokud je nastaveno {{other}}",
         "invalid-uri": "Zadaná adresa URI je neplatná",
-        "other-field-invalid": "Nelze ověřit platnost, {{other}} je neplatné"
+        "other-field-invalid": "Nelze ověřit platnost, {{other}} je neplatné",
+        "email-invalid": "Musí se jednat o platnou e-mailovou adresu",
+        "min-length": "Musí mít alespoň {{requiredLength}} znaků",
+        "min": "Hodnota musí být větší než {{min}}",
+        "max": "Hodnota musí být menší než {{max}}",
+        "invalid-amazon-code": "ASIN by měl začínat na B0 nebo BT",
+        "invalid-asin": "Toto není platné ASIN"
     },
     "confirm": {
         "alert": "Upozornění",

@@ -2320,7 +2320,13 @@
         "year-validation": "Caithfidh sé seo a bheith ina bliain bhailí níos mó ná 1000 agus 4 charachtar ar fad",
         "other-field-required": "Tá {{name}} ag teastáil nuair a bhíonn {{other}} socraithe",
         "invalid-uri": "Tá an URI a cuireadh ar fáil neamhbhailí",
-        "other-field-invalid": "Ní féidir bailíocht a sheiceáil, tá {{other}} neamhbhailí"
+        "other-field-invalid": "Ní féidir bailíocht a sheiceáil, tá {{other}} neamhbhailí",
+        "email-invalid": "Ní mór gur ríomhphost bailí é seo",
+        "min-length": "Ní mór {{requiredLength}} carachtar ar a laghad a bheith ann",
+        "min": "Ní mór don luach a bheith níos mó ná {{min}}",
+        "max": "Ní mór an luach a bheith níos lú ná {{max}}",
+        "invalid-amazon-code": "Ba chóir go dtosódh ASIN le B0 nó BT",
+        "invalid-asin": "Ní ASIN bailí é seo"
     },
     "entity-type": {
         "volume": "Imleabhar",
