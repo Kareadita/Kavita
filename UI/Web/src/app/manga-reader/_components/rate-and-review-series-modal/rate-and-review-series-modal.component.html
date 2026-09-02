@@ -1,8 +1,10 @@
 <ng-container *transloco="let t; prefix: 'rate-and-review-series-modal'">
   <div>
     <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title">{{t('title', {seriesName: seriesName()})}}</h4>
-      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+      <h4 class="modal-title" id="modal-basic-title">
+        {{t('title', {seriesName: seriesName()})}}
+      </h4>
+      <button type="button" class="btn-close" aria-labelledby="modal-basic-title" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
     <div class="modal-body">
       <p>{{t('description')}}</p>

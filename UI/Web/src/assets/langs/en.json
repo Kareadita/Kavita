@@ -4582,7 +4582,7 @@
     },
 
     "rate-and-review-series-modal": {
-        "title:": "Rate & Review: {{seriesName}}",
+        "title": "Rate & Review: {{seriesName}}",
         "description": "Leave a rating and review about the series.",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
