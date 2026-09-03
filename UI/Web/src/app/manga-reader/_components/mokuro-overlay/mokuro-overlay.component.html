@@ -1,6 +1,6 @@
 @for (layout of layouts; track layout) {
   <div class="mokuro-text-box"
-       [style]="layout.style"
+       [ngStyle]="layout.style"
        tabindex="0"
        role="group"
        [attr.aria-label]="layout.ariaLabel"
@@ -10,7 +10,7 @@
       @for (line of layout.lines; track line) {
         <span class="mokuro-line"
               [class.vertical]="layout.vertical"
-              [style]="line.style"
+              [ngStyle]="line.style"
               aria-hidden="true">{{line.text}}</span>
       }
     </div>

@@ -8,6 +8,7 @@ import {
   OnChanges,
   OnDestroy,
 } from '@angular/core';
+import {NgStyle} from '@angular/common';
 import {MokuroBlock, MokuroPage} from '../../_models/mokuro';
 
 interface MokuroLineLayout {
@@ -27,6 +28,7 @@ interface MokuroBlockLayout {
   templateUrl: './mokuro-overlay.component.html',
   styleUrls: ['./mokuro-overlay.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgStyle],
 })
 export class MokuroOverlayComponent implements AfterViewInit, OnChanges, OnDestroy {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
