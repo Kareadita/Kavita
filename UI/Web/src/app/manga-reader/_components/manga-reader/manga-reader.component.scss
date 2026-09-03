@@ -265,4 +265,16 @@ $pointer-offset: 0.3125rem;
         background: $pagination-bg;
         z-index: 100;
     }
+
+    &.mokuro-active {
+      @media (pointer: coarse) {
+        .left, .right {
+          width: min(12vw, 4rem);
+        }
+
+        .top, .bottom {
+          height: min(12vh, 4rem) !important;
+        }
+      }
+    }
   }

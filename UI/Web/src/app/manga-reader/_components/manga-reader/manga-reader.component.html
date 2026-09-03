@@ -62,7 +62,7 @@
         </div>
 
         <!-- Pagination controls and screen hints-->
-        <div class="pagination-area">
+        <div class="pagination-area" [class.mokuro-active]="(mokuroVolume()?.pages.length ?? 0) > 0">
           <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, KeyDirection.Left)"
                [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? MaxHeight: '25%'), 'max-height': MaxHeight}">
             @if (showClickOverlay) {
