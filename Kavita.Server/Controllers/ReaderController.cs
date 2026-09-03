@@ -109,7 +109,7 @@ public class ReaderController(ICacheService cacheService,
     }
 
     /// <summary>
-    /// Returns the Mokuro OCR sidecar embedded in a chapter archive, when present.
+    /// Returns the Mokuro OCR file embedded in a chapter archive, when present.
     /// </summary>
     /// <param name="chapterId">Chapter Id</param>
     /// <returns>The original Mokuro JSON document.</returns>

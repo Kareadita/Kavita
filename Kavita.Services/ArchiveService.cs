@@ -92,7 +92,7 @@ public class ArchiveService(
 
         if (matchingEntries.Count == 1) return matchingEntries[0];
 
-        logger.LogWarning("Archive {ArchivePath} contains multiple ambiguous Mokuro sidecars", archivePath);
+        logger.LogWarning("Archive {ArchivePath} contains multiple ambiguous embedded Mokuro files", archivePath);
         return null;
     }
 

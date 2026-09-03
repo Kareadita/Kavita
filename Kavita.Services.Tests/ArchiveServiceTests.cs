@@ -78,7 +78,7 @@ public class ArchiveServiceTests
     }
 
     [Fact]
-    public void GetMokuroFileReturnsEmbeddedSidecar()
+    public void GetMokuroFileReturnsEmbeddedFile()
     {
         const string expected = "{\"version\":\"0.2.0\",\"pages\":[]}";
         var archivePath = CreateArchive(("pages/001.jpg", "image"), ("book.mokuro", expected));
@@ -97,7 +97,7 @@ public class ArchiveServiceTests
     }
 
     [Fact]
-    public void GetMokuroFilePrefersSidecarMatchingArchiveName()
+    public void GetMokuroFilePrefersEmbeddedFileMatchingArchiveName()
     {
         const string expected = "{\"pages\":[{\"img_path\":\"001.jpg\"}]}";
         var archivePath = CreateArchive([("other.mokuro", "{}"), ("book.mokuro", expected)], "book.cbz");
@@ -116,7 +116,7 @@ public class ArchiveServiceTests
     }
 
     [Fact]
-    public void GetMokuroFileRejectsAmbiguousSidecars()
+    public void GetMokuroFileRejectsAmbiguousEmbeddedFiles()
     {
         var archivePath = CreateArchive(("one.mokuro", "{}"), ("two.mokuro", "{}"));
 
@@ -131,7 +131,7 @@ public class ArchiveServiceTests
     }
 
     [Fact]
-    public void GetMokuroFileReturnsNullWhenSidecarIsMissing()
+    public void GetMokuroFileReturnsNullWhenEmbeddedFileIsMissing()
     {
         var archivePath = CreateArchive(("001.jpg", "image"));
 
@@ -167,9 +167,9 @@ public class ArchiveServiceTests
     [Theory]
     [InlineData("__MACOSX/book.mokuro")]
     [InlineData(@"__MACOSX\book.mokuro")]
-    public void GetMokuroFileIgnoresBlacklistedFolders(string sidecarPath)
+    public void GetMokuroFileIgnoresBlacklistedFolders(string embeddedFilePath)
     {
-        var archivePath = CreateArchive((sidecarPath, "{}"));
+        var archivePath = CreateArchive((embeddedFilePath, "{}"));
 
         try
         {
@@ -182,7 +182,7 @@ public class ArchiveServiceTests
     }
 
     [Fact]
-    public void GetMokuroFileReturnsSoleNestedSidecar()
+    public void GetMokuroFileReturnsSoleNestedFile()
     {
         const string expected = "{\"pages\":[]}";
         var archivePath = CreateArchive(("metadata/book.mokuro", expected));
@@ -201,7 +201,7 @@ public class ArchiveServiceTests
     }
 
     [Fact]
-    public void GetMokuroFileRejectsMultipleMatchingSidecars()
+    public void GetMokuroFileRejectsMultipleMatchingEmbeddedFiles()
     {
         var archivePath = CreateArchive([("book.mokuro", "{}"), ("metadata/book.mokuro", "{}")], "book.cbz");
 
