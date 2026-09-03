@@ -2,6 +2,7 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
+using System.Text.Json;
 using Kavita.API.Services;
 using Kavita.Models.DTOs.Archive;
 using Kavita.Models.Entities.Enums;
@@ -78,22 +79,27 @@ public class ArchiveServiceTests
     }
 
     [Fact]
-    public void GetMokuroFileReturnsEmbeddedFile()
+    public void MokuroFixtureIsValidForAutomatedAndManualTesting()
     {
-        const string expected = "{\"version\":\"0.2.0\",\"pages\":[]}";
-        var archivePath = CreateArchive(("pages/001.jpg", "image"), ("book.mokuro", expected));
+        var archivePath = MokuroFixturePath("MokuroTest.cbz");
+        var expected = File.ReadAllBytes(MokuroFixturePath("MokuroTest.mokuro"));
 
-        try
-        {
-            var result = _archiveService.GetMokuroFile(archivePath);
+        Assert.True(_archiveService.IsValidArchive(archivePath));
+        Assert.Equal(2, _archiveService.GetNumberOfPagesFromArchive(archivePath));
 
-            Assert.NotNull(result);
-            Assert.Equal(expected, System.Text.Encoding.UTF8.GetString(result));
-        }
-        finally
-        {
-            DeleteArchive(archivePath);
-        }
+        var result = _archiveService.GetMokuroFile(archivePath);
+
+        Assert.NotNull(result);
+        Assert.Equal(expected, result);
+
+        using var document = JsonDocument.Parse(result);
+        Assert.Equal("0.2.0", document.RootElement.GetProperty("version").GetString());
+        var pages = document.RootElement.GetProperty("pages");
+        Assert.Equal(2, pages.GetArrayLength());
+        Assert.Equal("pages/002.png", pages[0].GetProperty("img_path").GetString());
+        Assert.Equal("pages/001.png", pages[1].GetProperty("img_path").GetString());
+        Assert.Equal(1, pages[0].GetProperty("blocks").GetArrayLength());
+        Assert.Equal(2, pages[1].GetProperty("blocks").GetArrayLength());
     }
 
     [Fact]
@@ -241,6 +247,11 @@ public class ArchiveServiceTests
     {
         var directory = Path.GetDirectoryName(archivePath);
         if (directory != null) Directory.Delete(directory, true);
+    }
+
+    private static string MokuroFixturePath(string fileName)
+    {
+        return Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ArchiveService/Mokuro", fileName);
     }
 
 

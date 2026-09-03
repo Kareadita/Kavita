@@ -1,0 +1,52 @@
+{
+  "version": "0.2.0",
+  "title": "Kavita Mokuro Test",
+  "volume": "1",
+  "pages": [
+    {
+      "version": "0.2.0",
+      "img_width": 600,
+      "img_height": 800,
+      "img_path": "pages/002.png",
+      "blocks": [
+        {
+          "box": [100, 220, 500, 380],
+          "vertical": false,
+          "font_size": 42,
+          "lines": ["SECOND PAGE", "SELECT THIS TEXT"],
+          "lines_coords": [
+            [[100, 220], [500, 220], [500, 295], [100, 295]],
+            [[100, 305], [500, 305], [500, 380], [100, 380]]
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.2.0",
+      "img_width": 600,
+      "img_height": 800,
+      "img_path": "pages/001.png",
+      "blocks": [
+        {
+          "box": [80, 100, 280, 190],
+          "vertical": false,
+          "font_size": 40,
+          "lines": ["HOVER ME"],
+          "lines_coords": [
+            [[80, 100], [280, 100], [280, 190], [80, 190]]
+          ]
+        },
+        {
+          "box": [360, 260, 480, 560],
+          "vertical": true,
+          "font_size": 34,
+          "lines": ["VERTICAL", "TEXT"],
+          "lines_coords": [
+            [[420, 270], [470, 270], [470, 550], [420, 550]],
+            [[365, 270], [415, 270], [415, 550], [365, 550]]
+          ]
+        }
+      ]
+    }
+  ]
+}
