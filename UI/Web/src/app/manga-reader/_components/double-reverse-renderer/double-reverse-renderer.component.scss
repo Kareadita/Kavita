@@ -2,13 +2,18 @@
 
 // Overrides for reverse
 .image-container {
-    height: calc(100dvh); // override as on single, we -34px for the potential scrollbar
+    min-height: calc(100dvh); // override as on single, we -34px for the potential scrollbar
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
     
     &.reverse {
         overflow: unset;
         display: flex;
         align-content: center;
         justify-content: center;
+        align-items: center;
         flex-direction: row-reverse;
 
         img {
@@ -30,11 +35,6 @@
 }
 
 .image-container {
-    display: flex;
-    align-content: center;
-    justify-content: center;
-
-
     .full-height {
         margin: unset;
         object-fit: contain;
@@ -45,13 +45,14 @@
     width: 100%;
     margin: 0 auto;
     vertical-align: top;
-    max-width: fit-content;
+    max-width: 50%;
 
     &.double {
         width: 50%;
 
         &.cover {
             width: 100%;
+            max-width: 100%;
         }
     }
 }

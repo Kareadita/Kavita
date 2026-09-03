@@ -1,6 +1,12 @@
 @use '../../../../manga-reader-common';
 
 .image-container {
+    min-height: calc(100dvh);
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    
     #image-1 {
         &.double {
         }
@@ -23,19 +29,22 @@
 .full-width {
     width: 100%;
     vertical-align: top;
-    max-width: fit-content;
+    max-width: 50%;
 
     &.double {
         width: 50%;
 
         &.cover {
             width: 100%;
+            max-width: 100%;
         }
     }
 }
 
 .center-double {
     display: flex;
+    justify-content: center;
+    align-items: center;
     overflow: unset;
 }
 
@@ -54,4 +63,3 @@
     left: 50%;
     max-width: 100%;
 }
-
