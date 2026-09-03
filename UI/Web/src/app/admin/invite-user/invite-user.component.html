@@ -10,16 +10,14 @@
       }
 
       @if (emailLink() === '') {
-        <form [formGroup]="inviteForm">
+        <form>
           <div class="row g-0">
             <div class="mb-3" style="width:100%">
-              @if (inviteForm.get('email'); as formControl) {
-                <label for="email" class="form-label">{{t('email')}}</label>
-                <input class="form-control" type="email" inputmode="email" id="email" formControlName="email"
-                       [appFormField]="formControl" aria-describedby="email-validations">
+              <label for="email" class="form-label">{{t('email')}}</label>
+              <input class="form-control" type="email" inputmode="email" id="email" [formField]="inviteForm.email"
+                     [appFormField]="inviteForm.email" aria-describedby="email-validations">
 
-                <app-validation-errors inputId="email" [control]="formControl" />
-              }
+              <app-validation-errors inputId="email" [control]="inviteForm.email" />
             </div>
           </div>
 
@@ -29,7 +27,7 @@
                 id="libraries"
                 [title]="t('libraries-label')"
                 [options]="libraryOptions()"
-                formControlName="libraries"
+                [formField]="inviteForm.libraries"
               />
             </div>
 
@@ -37,16 +35,16 @@
               <app-setting-multi-check-box
                 id="roles"
                 [title]="t('roles-label')"
-                [warning]="(readOnlyWarning$ | async) ?? undefined"
+                [warning]="readOnlyWarning()"
                 [options]="roleOptions"
-                formControlName="roles"
+                [formField]="inviteForm.roles"
               />
             </div>
           </div>
 
           <div class="row g-0">
             <div class="col-md-12">
-              <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" />
+              <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected()" />
             </div>
           </div>
         </form>
@@ -71,7 +69,7 @@
       </button>
 
       @if (!invited()) {
-        <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending() || !inviteForm.valid  || emailLink() !== ''">
+        <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="canSave()">
           @if (isSending()) {
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           }

@@ -62,7 +62,7 @@ export class ConfirmService {
       }
 
       const modalRef = this.modalService.open(ConfirmDialogComponent, confirmModal());
-      modalRef.componentInstance.config = config;
+      modalRef.setInput('config', config ?? new ConfirmConfig());
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
       });
@@ -90,7 +90,7 @@ export class ConfirmService {
       }
 
       const modalRef = this.modalService.open(ConfirmDialogComponent, confirmModal());
-      modalRef.componentInstance.config = config;
+      modalRef.setInput('config', config ?? new ConfirmConfig());
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
       });
@@ -114,7 +114,7 @@ export class ConfirmService {
       }
 
       const modalRef = this.modalService.open(ConfirmDialogComponent, confirmModal());
-      modalRef.componentInstance.config = config;
+      modalRef.setInput('config', config ?? new ConfirmConfig());
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
       });
@@ -140,8 +140,8 @@ export class ConfirmService {
         config!.header = title;
       }
 
-      const modalRef = this.modalService.open(ConfirmDialogComponent);
-      modalRef.componentInstance.config = config;
+      const modalRef = this.modalService.open(ConfirmDialogComponent, confirmModal());
+      modalRef.setInput('config', config ?? new ConfirmConfig());
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
       });

@@ -6,9 +6,9 @@
   </div>
   <div class="modal-body">
     <p>{{t('description')}}</p>
-    <form [formGroup]="libForm">
-      <select class="form-select" formControlName="library">
-        <option [value]="null">{{t('select-option')}}</option>
+    <form>
+      <select class="form-select" [formField]="libraryForm.library">
+        <option [value]="''">{{t('select-option')}}</option>
         @for (lib of libraries(); track lib.id) {
           <option [value]="lib.id">{{lib.name}}</option>
         }

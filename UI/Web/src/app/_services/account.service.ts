@@ -18,6 +18,7 @@ import {LocalizationService} from "./localization.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AuthKey, ImageOnlyName, OpdsName} from "../_models/user/auth-key";
 import {Action} from "../_models/actionables/action";
+import {UpdateUserRequest} from "../_models/user/update-user-request";
 
 export enum Role {
   Admin = 'Admin',
@@ -377,7 +378,7 @@ export class AccountService {
     return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password, oldPassword}, TextResonse);
   }
 
-  update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number, ageRestriction: AgeRestriction}) {
+  update(model: UpdateUserRequest) {
     return this.httpClient.post(this.baseUrl + 'account/update', model);
   }
 

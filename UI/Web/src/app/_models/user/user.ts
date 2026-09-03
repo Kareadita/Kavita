@@ -29,4 +29,4 @@ export enum IdentityProvider {
   OpenIdConnect = 1,
 }
 
-export const IdentityProviders: IdentityProvider[] = [IdentityProvider.Kavita, IdentityProvider.OpenIdConnect];
+export const allIdentityProviders: IdentityProvider[] = [IdentityProvider.Kavita, IdentityProvider.OpenIdConnect];

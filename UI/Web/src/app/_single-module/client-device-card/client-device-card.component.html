@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix: 'client-device-card'">
-  <form [formGroup]="deviceForm">
+  <form>
     <div class="card client-device-card">
       <div class="card-body">
         <!-- Header Section -->
@@ -7,9 +7,8 @@
           <div class="flex-grow-1">
             <h5 class="card-title d-flex align-items-center mb-1">
               <i [class]="deviceIcon()"></i>
-              @if (isEditMode() && deviceForm.get('name'); as formControl) {
-                <input [id]="'client-device-' + clientDevice().id" class="form-control flex-grow-1 ms-2" style="width: 80%" type="text" formControlName="name"
-                       [appFormField]="formControl" />
+              @if (isEditMode()) {
+                <input [id]="'client-device-' + clientDevice().id" class="form-control flex-grow-1 ms-2" style="width: 80%" type="text" [formField]="deviceForm.name"/>
                 <button class="btn btn-sm btn-primary ms-1" (click)="saveName()">{{t('save')}}</button>
               } @else {
                 <span class="ms-2">

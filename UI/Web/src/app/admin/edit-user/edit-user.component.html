@@ -21,47 +21,41 @@
         </div>
       }
 
-      <form [formGroup]="userForm">
+      <form>
         <h4>{{t('account-detail-title')}}</h4>
         <div class="row g-0 mb-2">
           <div class="col-md-4 col-sm-12 pe-4">
-            @if (userForm.get('identityProvider'); as formControl) {
-              <label for="identityProvider" class="form-label">{{t('identity-provider')}}</label>
-              <select class="form-select" id="identityProvider" formControlName="identityProvider">
-                @for (idp of IdentityProviders; track idp) {
-                  <option [value]="idp">{{idp | identityProviderPipe}}</option>
-                }
-              </select>
-              <span class="text-muted">{{t('identity-provider-tooltip')}}</span>
-            }
+            <label for="identityProvider" class="form-label">{{t('identity-provider')}}</label>
+            <select class="form-select" id="identityProvider" [formField]="userForm.identityProvider">
+              @for (idp of IdentityProviders; track idp) {
+                <option [value]="idp">{{idp | identityProviderPipe}}</option>
+              }
+            </select>
+            <span class="text-muted">{{t('identity-provider-tooltip')}}</span>
           </div>
           <div class="col-md-4 col-sm-12 pe-4">
-              @if(userForm.get('username'); as formControl) {
-                <div class="mb-3">
-                  <label for="username" class="form-label">{{t('username')}}</label>
-                  <input id="username" class="form-control" formControlName="username" type="text"
-                      [appFormField]="formControl" aria-describedby="username-validations">
+            <div class="mb-3">
+              <label for="username" class="form-label">{{t('username')}}</label>
+              <input id="username" class="form-control" [formField]="userForm.username" type="text"
+                     [appFormField]="userForm.username" aria-describedby="username-validations">
 
-                  <app-validation-errors [control]="formControl" inputId="username" [messages]="{'pattern': t('username-pattern', {characters: allowedCharacters})}" />
-                </div>
-              }
+              <app-validation-errors [control]="userForm.username" inputId="username" [messages]="{'pattern': t('username-pattern', {characters: allowedCharacters})}" />
+            </div>
             </div>
           <div class="col-md-4 col-sm-12">
-              @if(userForm.get('email'); as formControl) {
-                <div class="mb-3" style="width:100%">
-                  <label for="email" class="form-label">{{t('email')}}</label>
-                  <input id="email" class="form-control" formControlName="email" type="text"
-                         [appFormField]="formControl" aria-describedby="email-validations">
+            <div class="mb-3" style="width:100%">
+              <label for="email" class="form-label">{{t('email')}}</label>
+              <input id="email" class="form-control" [formField]="userForm.email" type="text"
+                     [appFormField]="userForm.email" aria-describedby="email-validations">
 
-                  <app-validation-errors [control]="formControl" inputId="email" [messages]="{pattern: t('invalid-email-warning')}" />
-                </div>
-              }
+              <app-validation-errors [control]="userForm.email" inputId="email" [messages]="{pattern: t('invalid-email-warning')}" />
+            </div>
             </div>
         </div>
 
         <div class="row g-0 mb-3">
           <div class="col-md-12">
-            <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" [member]="member()" />
+            <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected()" [member]="member()" />
           </div>
         </div>
 
@@ -71,7 +65,7 @@
                 id="libraries"
                 [title]="t('libraries-label')"
                 [options]="libraryOptions()"
-                formControlName="libraries"
+                [formField]="userForm.libraries"
               />
             </div>
 
@@ -79,9 +73,9 @@
               <app-setting-multi-check-box
                 id="roles"
                 [title]="t('roles-label')"
-                [warning]="(readOnlyWarning$ | async) ?? undefined"
+                [warning]="readOnlyWarning()"
                 [options]="roleOptions"
-                formControlName="roles"
+                [formField]="userForm.roles"
               />
             </div>
           </div>
@@ -92,11 +86,11 @@
       <button type="button" class="btn btn-secondary" (click)="close()">
         {{t('cancel')}}
       </button>
-      <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isLocked() || isSaving || !userForm.valid">
-        @if (isSaving) {
+      <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isLocked() || isSaving || !userForm().valid()">
+        @if (isSaving()) {
           <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         }
-        <span>{{isSaving ? t('saving') : t('update')}}</span>
+        <span>{{isSaving() ? t('saving') : t('update')}}</span>
       </button>
     </div>
   </div>

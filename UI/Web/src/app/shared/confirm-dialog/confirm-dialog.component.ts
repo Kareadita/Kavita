@@ -1,50 +1,54 @@
-import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, inject, input, signal} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {ConfirmButton} from './_models/confirm-button';
 import {ConfirmConfig} from './_models/confirm-config';
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmTranslatePipe} from "../../_pipes/confirm-translate.pipe";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {form, FormField} from "@angular/forms/signals";
+
+interface ConfirmFormModel {
+  prompt: string;
+}
 
 @Component({
-    selector: 'app-confirm-dialog',
-  imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe, ReactiveFormsModule, FormFieldDirective],
-    templateUrl: './confirm-dialog.component.html',
-    styleUrls: ['./confirm-dialog.component.scss'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    host: {
-      '[class]': 'hostClass',
-    }
+  selector: 'app-confirm-dialog',
+  imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe, FormFieldDirective, FormField],
+  templateUrl: './confirm-dialog.component.html',
+  styleUrls: ['./confirm-dialog.component.scss'],
+  host: {
+    '[class]': 'hostClass()',
+  }
 })
-export class ConfirmDialogComponent implements OnInit {
+export class ConfirmDialogComponent {
 
   protected readonly modal = inject(NgbActiveModal);
 
-  config!: ConfirmConfig;
-  formGroup = new FormGroup({
-    'prompt': new FormControl('', []),
-  })
+  config = input.required<ConfirmConfig>();
+  formModel = signal<ConfirmFormModel>({prompt: ''});
+  formGroup = form(this.formModel);
 
-  get hostClass(): string {
-    return this.config ? `confirm-${this.config._type}` : '';
-  }
 
-  get typeIcon(): string {
-    switch (this.config?._type) {
+  hostClass = computed(() => {
+    const config = this.config();
+    return config ? `confirm-${config._type}` : '';
+  });
+
+  typeIcon = computed(() => {
+    switch (this.config()?._type) {
       case 'alert': return 'fa-triangle-exclamation';
       case 'info': return 'fa-circle-info';
       case 'prompt': return 'fa-pen-to-square';
       default: return 'fa-circle-question';
     }
-  }
+  });
 
-  ngOnInit(): void {
-    if (this.config) {
-      this.config.buttons.sort(this._button_sort);
-    }
-  }
+  sortedButtons = computed(() => {
+    const config =this.config();
+    return [...(config.buttons ?? [])].sort(this._button_sort);
+  });
+
 
   private _button_sort(x: ConfirmButton, y: ConfirmButton) {
     const xIsSecondary = x.type === 'secondary';
@@ -59,8 +63,8 @@ export class ConfirmDialogComponent implements OnInit {
 
   clickButton(button: ConfirmButton) {
     const isConfirming = button.type !== 'secondary';
-    if (this.config._type === 'prompt') {
-      this.modal.close(isConfirming ? this.formGroup.get('prompt')?.value : '');
+    if (this.config()._type === 'prompt') {
+      this.modal.close(isConfirming ? this.formModel().prompt : '');
       return;
     }
     this.modal.close(isConfirming);
@@ -69,5 +73,4 @@ export class ConfirmDialogComponent implements OnInit {
   close() {
     this.modal.close(false);
   }
-
 }

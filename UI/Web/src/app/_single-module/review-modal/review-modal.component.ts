@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnInit} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ChangeDetectionStrategy, Component, inject, input, OnInit, signal} from '@angular/core';
+import {ReactiveFormsModule} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {UserReview} from "../../_models/user-review";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -8,7 +8,7 @@ import {ToastrService} from '@openng/ngx-toastr';
 import {NgxStarsModule} from "ngx-stars";
 import {ReviewService} from "../../_services/review.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
-import {form} from "@angular/forms/signals";
+import {form, FormField, minLength, required} from "@angular/forms/signals";
 import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 
 export enum ReviewModalCloseAction {
@@ -22,9 +22,13 @@ export interface ReviewModalCloseEvent {
   action: ReviewModalCloseAction
 }
 
+interface ReviewFormModel {
+  reviewBody: string;
+}
+
 @Component({
   selector: 'app-review-series-modal',
-  imports: [ReactiveFormsModule, TranslocoDirective, NgxStarsModule, FormFieldDirective, ValidationErrorsComponent],
+  imports: [ReactiveFormsModule, TranslocoDirective, NgxStarsModule, FormFieldDirective, ValidationErrorsComponent, FormField],
   templateUrl: './review-modal.component.html',
   styleUrls: ['./review-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,19 +37,21 @@ export class ReviewModalComponent implements OnInit {
 
   protected readonly modal = inject(NgbActiveModal);
   private readonly reviewService = inject(ReviewService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
   protected readonly minLength = 5;
 
   review = input.required<UserReview>();
-  reviewGroup!: FormGroup;
+  private readonly reviewFormModel = signal<ReviewFormModel>({
+    reviewBody: ''
+  });
+  reviewForm = form(this.reviewFormModel, (schemaPath) => {
+    required(schemaPath.reviewBody);
+    minLength(schemaPath.reviewBody, this.minLength);
+  });
 
   ngOnInit(): void {
-    this.reviewGroup = new FormGroup({
-      reviewBody: new FormControl(this.review().body, [Validators.required, Validators.minLength(this.minLength)]),
-    });
-    this.cdRef.markForCheck();
+    this.reviewForm.reviewBody().value.set(this.review().body);
   }
 
   close() {
@@ -62,7 +68,7 @@ export class ReviewModalComponent implements OnInit {
 
   }
   save() {
-    const model = this.reviewGroup.getRawValue();
+    const model = this.reviewFormModel();
     if (model.reviewBody.length < this.minLength) {
       return;
     }
@@ -72,6 +78,4 @@ export class ReviewModalComponent implements OnInit {
     });
 
   }
-
-  protected readonly form = form;
 }

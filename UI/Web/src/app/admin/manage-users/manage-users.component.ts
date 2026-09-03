@@ -170,7 +170,7 @@ export class ManageUsersComponent implements OnInit {
   }
 
   getRoles(member: Member) {
-    return member.roles.filter(item => item != 'Pleb');
+    return member.roles.filter(item => String(item) != 'Pleb');
   }
 
   protected readonly IdentityProvider = IdentityProvider;
