@@ -1,0 +1,3 @@
+To the extent possible under law, the creators of this synthetic test fixture have waived all copyright and related or neighboring rights to it under CC0 1.0 Universal.
+
+https://creativecommons.org/publicdomain/zero/1.0/

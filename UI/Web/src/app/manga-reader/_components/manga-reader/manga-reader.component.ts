@@ -81,6 +81,7 @@ import {LibraryType} from "../../../_models/library/library";
 import {MangaFormat} from "../../../_models/manga-format";
 import {Stack} from "../../../shared/data-structures/stack";
 import {SwipeEvent} from "../../../ng-swipe/ag-swipe.core";
+import {alignMokuroPages, MokuroVolume} from '../../_models/mokuro';
 
 
 const PREFETCH_PAGES = 10;
@@ -182,6 +183,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   volumeId!: number;
   chapterId!: number;
   chapterInfo = signal<ChapterInfo | null>(null);
+  mokuroVolume = signal<MokuroVolume | null>(null);
   /**
    * Reading List id. Defaults to -1.
    */
@@ -1056,6 +1058,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.nextChapterPrefetched = false;
     this.isReRead = false;
     this.pageNum = 0;
+    this.mokuroVolume.set(null);
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
     this.inSetup = true;
     this.canvasImage.src = '';
@@ -1102,6 +1105,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       progress: this.readerService.getProgress(this.chapterId),
       chapterInfo: this.readerService.getChapterInfo(this.chapterId, true),
       bookmarks: this.readerService.getBookmarks(this.chapterId),
+      mokuro: this.readerService.getMokuro(this.chapterId),
     }).subscribe(results => {
       if (this.readingListMode && (results.chapterInfo.seriesFormat === MangaFormat.EPUB || results.chapterInfo.seriesFormat === MangaFormat.PDF)) {
         // Redirect to the book reader.
@@ -1111,6 +1115,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       this.chapterInfo.set(results.chapterInfo);
+      this.mokuroVolume.set(results.mokuro === null ? null : {
+        ...results.mokuro,
+        pages: alignMokuroPages(results.mokuro.pages, results.chapterInfo.pageDimensions ?? []),
+      });
 
       this.mangaReaderService.load(results.chapterInfo);
 

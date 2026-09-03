@@ -2,6 +2,7 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
+using System.Text.Json;
 using Kavita.API.Services;
 using Kavita.Models.DTOs.Archive;
 using Kavita.Models.Entities.Enums;
@@ -75,6 +76,182 @@ public class ArchiveServiceTests
         var sw = Stopwatch.StartNew();
         Assert.Equal(expected, _archiveService.GetNumberOfPagesFromArchive(Path.Join(testDirectory, archivePath)));
         _testOutputHelper.WriteLine($"Processed Original in {sw.ElapsedMilliseconds} ms");
+    }
+
+    [Fact]
+    public void MokuroFixtureIsValidForAutomatedAndManualTesting()
+    {
+        var archivePath = MokuroFixturePath("MokuroTest.cbz");
+        var expected = File.ReadAllBytes(MokuroFixturePath("MokuroTest.mokuro"));
+
+        Assert.True(_archiveService.IsValidArchive(archivePath));
+        Assert.Equal(2, _archiveService.GetNumberOfPagesFromArchive(archivePath));
+
+        var result = _archiveService.GetMokuroFile(archivePath);
+
+        Assert.NotNull(result);
+        Assert.Equal(expected, result);
+
+        using var document = JsonDocument.Parse(result);
+        Assert.Equal("0.2.0", document.RootElement.GetProperty("version").GetString());
+        var pages = document.RootElement.GetProperty("pages");
+        Assert.Equal(2, pages.GetArrayLength());
+        Assert.Equal("pages/002.png", pages[0].GetProperty("img_path").GetString());
+        Assert.Equal("pages/001.png", pages[1].GetProperty("img_path").GetString());
+        Assert.Equal(1, pages[0].GetProperty("blocks").GetArrayLength());
+        Assert.Equal(2, pages[1].GetProperty("blocks").GetArrayLength());
+    }
+
+    [Fact]
+    public void GetMokuroFilePrefersEmbeddedFileMatchingArchiveName()
+    {
+        const string expected = "{\"pages\":[{\"img_path\":\"001.jpg\"}]}";
+        var archivePath = CreateArchive([("other.mokuro", "{}"), ("book.mokuro", expected)], "book.cbz");
+
+        try
+        {
+            var result = _archiveService.GetMokuroFile(archivePath);
+
+            Assert.NotNull(result);
+            Assert.Equal(expected, System.Text.Encoding.UTF8.GetString(result));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Fact]
+    public void GetMokuroFileRejectsAmbiguousEmbeddedFiles()
+    {
+        var archivePath = CreateArchive(("one.mokuro", "{}"), ("two.mokuro", "{}"));
+
+        try
+        {
+            Assert.Null(_archiveService.GetMokuroFile(archivePath));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Fact]
+    public void GetMokuroFileReturnsNullWhenEmbeddedFileIsMissing()
+    {
+        var archivePath = CreateArchive(("001.jpg", "image"));
+
+        try
+        {
+            Assert.Null(_archiveService.GetMokuroFile(archivePath));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Fact]
+    public void GetMokuroFileMatchesCaseInsensitively()
+    {
+        const string expected = "{\"pages\":[]}";
+        var archivePath = CreateArchive([("other.mokuro", "{}"), ("book.MOKURO", expected)], "Book.cbz");
+
+        try
+        {
+            var result = _archiveService.GetMokuroFile(archivePath);
+
+            Assert.NotNull(result);
+            Assert.Equal(expected, System.Text.Encoding.UTF8.GetString(result));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Theory]
+    [InlineData("__MACOSX/book.mokuro")]
+    [InlineData(@"__MACOSX\book.mokuro")]
+    public void GetMokuroFileIgnoresBlacklistedFolders(string embeddedFilePath)
+    {
+        var archivePath = CreateArchive((embeddedFilePath, "{}"));
+
+        try
+        {
+            Assert.Null(_archiveService.GetMokuroFile(archivePath));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Fact]
+    public void GetMokuroFileReturnsSoleNestedFile()
+    {
+        const string expected = "{\"pages\":[]}";
+        var archivePath = CreateArchive(("metadata/book.mokuro", expected));
+
+        try
+        {
+            var result = _archiveService.GetMokuroFile(archivePath);
+
+            Assert.NotNull(result);
+            Assert.Equal(expected, System.Text.Encoding.UTF8.GetString(result));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Fact]
+    public void GetMokuroFileRejectsMultipleMatchingEmbeddedFiles()
+    {
+        var archivePath = CreateArchive([("book.mokuro", "{}"), ("metadata/book.mokuro", "{}")], "book.cbz");
+
+        try
+        {
+            Assert.Null(_archiveService.GetMokuroFile(archivePath));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    private static string CreateArchive(params (string Path, string Content)[] entries)
+    {
+        return CreateArchive(entries, $"{Guid.NewGuid():N}.cbz");
+    }
+
+    private static string CreateArchive((string Path, string Content)[] entries, string fileName)
+    {
+        var directory = Path.Join(Path.GetTempPath(), $"kavita-mokuro-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        var archivePath = Path.Join(directory, fileName);
+
+        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Create);
+        foreach (var (path, content) in entries)
+        {
+            var entry = archive.CreateEntry(path);
+            using var writer = new StreamWriter(entry.Open());
+            writer.Write(content);
+        }
+
+        return archivePath;
+    }
+
+    private static void DeleteArchive(string archivePath)
+    {
+        var directory = Path.GetDirectoryName(archivePath);
+        if (directory != null) Directory.Delete(directory, true);
+    }
+
+    private static string MokuroFixturePath(string fileName)
+    {
+        return Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ArchiveService/Mokuro", fileName);
     }
 
 

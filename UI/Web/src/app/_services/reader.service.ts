@@ -33,6 +33,7 @@ import {
   KeyboardShortcut,
   ShortcutsModalComponent
 } from "../reader-shared/_modals/shortcuts-modal/shortcuts-modal.component";
+import {MokuroVolume} from '../manga-reader/_models/mokuro';
 
 enum RereadPromptResult {
   Cancel = 0,
@@ -199,6 +200,10 @@ export class ReaderService {
 
   getChapterInfo(chapterId: number, includeDimensions = false) {
     return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId + '&includeDimensions=' + includeDimensions);
+  }
+
+  getMokuro(chapterId: number): Observable<MokuroVolume | null> {
+    return this.httpClient.get<MokuroVolume | null>(this.baseUrl + 'reader/mokuro?chapterId=' + chapterId);
   }
 
   getFileDimensions(chapterId: number) {

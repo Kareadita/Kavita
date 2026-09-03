@@ -1,0 +1,18 @@
+@for (layout of layouts; track layout) {
+  <div class="mokuro-text-box"
+       [ngStyle]="layout.style"
+       tabindex="0"
+       role="group"
+       [attr.aria-label]="layout.ariaLabel"
+       (click)="$event.stopPropagation()"
+       (dblclick)="$event.stopPropagation()">
+    <div class="mokuro-text-content" [class.vertical]="layout.vertical">
+      @for (line of layout.lines; track line) {
+        <span class="mokuro-line"
+              [class.vertical]="layout.vertical"
+              [ngStyle]="line.style"
+              aria-hidden="true">{{line.text}}</span>
+      }
+    </div>
+  </div>
+}
