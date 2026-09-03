@@ -8,24 +8,33 @@ on:
 jobs:
   debug:
     runs-on: ubuntu-24.04
+    # No API access needed, the job only echoes context values.
+    permissions: {}
     steps:
       - name: Debug Info
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          GIT_REF: ${{ github.ref }}
+          NOT_CONTAINS_RELEASE: ${{ !contains(github.head_ref, 'release') }}
+          MATCHES_DEVELOP: ${{ github.ref == 'refs/heads/develop' }}
         run: |
-          echo "Event Name: ${{ github.event_name }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Not Contains Release: ${{ !contains(github.head_ref, 'release') }}"
-          echo "Matches Develop: ${{ github.ref == 'refs/heads/develop' }}"
+          echo "Event Name: $EVENT_NAME"
+          echo "Ref: $GIT_REF"
+          echo "Not Contains Release: $NOT_CONTAINS_RELEASE"
+          echo "Matches Develop: $MATCHES_DEVELOP"
   build:
     name: Upload Kavita.Common for Version Bump
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     if: github.ref == 'refs/heads/develop'
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: csproj
           path: Kavita.Common/Kavita.Common.csproj
@@ -34,19 +43,22 @@ jobs:
     name: Bump version
     needs: [ build ]
     runs-on: ubuntu-24.04
+    # The bump commit is pushed with the repository PAT, not this token.
+    permissions:
+      contents: read
     if: github.ref == 'refs/heads/develop'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
             dotnet-version: 10.0.x
 
       - name: Bump versions
-        uses: majora2007/dotnet-bump-version@v0.0.10
+        uses: majora2007/dotnet-bump-version@a01d35d737a36f2732f750ecaa6b35bc628da4da # v0.0.10
         with:
           version_files: Kavita.Common/Kavita.Common.csproj
           github_token: ${{ secrets.REPO_GHA_PAT }}
@@ -62,7 +74,7 @@ jobs:
       contents: read
     steps:
       - name: Find Current Pull Request
-        uses: jwalton/gh-find-current-pr@v1
+        uses: jwalton/gh-find-current-pr@f3d61b485d2801773f7a07b2aaa3306bd8f8e653 # v1.3.5
         id: findPr
         with:
           state: all
@@ -89,12 +101,12 @@ jobs:
           echo "BODY=$body" >> "$GITHUB_OUTPUT"
 
       - name: Check Out Repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           ref: develop
 
       - name: NodeJS to Compile WebUI
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 24
       - run: |
@@ -111,7 +123,7 @@ jobs:
           cd ../ || exit
 
       - name: Get csproj Version
-        uses: kzrnm/get-net-sdk-project-versions-action@v2
+        uses: kzrnm/get-net-sdk-project-versions-action@c33b25a7eeaf70f65fc346fac2306d7d2ada2d66 # v2.0.0
         id: get-version
         with:
           proj-path: Kavita.Common/Kavita.Common.csproj
@@ -126,7 +138,7 @@ jobs:
         run: echo "${{steps.get-version.outputs.assembly-version}}"
 
       - name: Compile dotnet app
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           dotnet-version: 10.0.x
 
@@ -136,29 +148,29 @@ jobs:
       - run: ./monorepo-build.sh
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         if: ${{ github.repository_owner == 'Kareadita' }}
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Extract metadata (tags, labels) for Docker
         id: docker_meta_nightly
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
           tags: |
             type=raw,value=nightly
@@ -169,7 +181,7 @@ jobs:
 
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
@@ -181,7 +193,7 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
 
       - name: Notify Discord
-        uses: rjstone/discord-webhook-notify@v2
+        uses: rjstone/discord-webhook-notify@13eb215cbf853107dd9386c4a2f4035b7988cfc2 # v2.3.0
         if: ${{ github.repository_owner == 'Kareadita' }}
         with:
             severity: info
