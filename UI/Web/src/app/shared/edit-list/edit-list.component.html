@@ -5,17 +5,17 @@
       <div class="row g-0 mb-3">
         <div class="col-lg-10 col-md-12 pe-2">
           <div class="mb-3">
-            <label for="item--{{i}}" class="visually-hidden">{{label}}</label>
+            <label for="item--{{i}}" class="visually-hidden">{{label()}}</label>
             <input
               type="text"
               class="form-control"
               [formControlName]="i"
               id="item--{{i}}"
             >
-            @if (item.dirty && item.touched && errorMessage) {
-              @if (item.status === "INVALID") {
+            @if (item.dirty && item.touched && errorMessage()) {
+              @if (item.status === 'INVALID') {
                 <div id="item--{{i}}-error" class="invalid-feedback" style="display: inline-block">
-                  {{errorMessage}}
+                  {{errorMessage()}}
                 </div>
               }
             }
@@ -31,7 +31,7 @@
             <span class="visually-hidden">{{t('common.remove')}}</span>
           </button>
           @if (last){
-            <button class="btn btn-secondary " (click)="add()">
+            <button class="btn btn-secondary" (click)="add()">
               <i class="fa-solid fa-plus" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('common.add')}}</span>
             </button>

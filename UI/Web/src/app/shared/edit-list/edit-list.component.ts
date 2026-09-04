@@ -4,14 +4,21 @@ import {
   Component,
   DestroyRef,
   inject,
+  input,
   Input,
   OnInit,
-  output
+  output,
+  signal
 } from '@angular/core';
 import {AsyncValidatorFn, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn} from "@angular/forms";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, tap} from "rxjs/operators";
+import {form} from "@angular/forms/signals";
+
+interface EditListFormModel {
+  items: string[];
+}
 
 @Component({
     selector: 'app-edit-list',
@@ -25,16 +32,21 @@ export class EditListComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
 
-  @Input({required: true}) items: Array<string> = [];
-  @Input({required: true}) label = '';
+  items = input.required<string[]>();
+  label = input<string>('');
+
   @Input() validators: ValidatorFn[] = []
   @Input() asyncValidators: AsyncValidatorFn[] = [];
 
   // TODO: Make this more dynamic based on which validator failed
-  @Input() errorMessage: string | null = null;
+  errorMessage = input<string | null>(null);
   readonly updateItems = output<Array<string>>();
 
   form: FormGroup = new FormGroup({items: new FormArray([])});
+  private readonly formModel = signal<EditListFormModel>({
+    items: [],
+  });
+  formGroup = form(this.formModel);
 
   get ItemsArray(): FormArray {
     return this.form.get('items') as FormArray;
@@ -42,9 +54,9 @@ export class EditListComponent implements OnInit {
 
 
   ngOnInit() {
-    this.items.forEach(item => this.addItem(item));
-    if (this.items.length === 0) {
-      this.addItem("");
+    this.items().forEach(item => this.addItem(item));
+    if (this.items().length === 0) {
+      this.addItem('');
     }
 
 

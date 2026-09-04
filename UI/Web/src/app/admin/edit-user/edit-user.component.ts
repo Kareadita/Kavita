@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component, computed, effect, inject, model, OnInit, signal} from '@angular/core';
-import {ReactiveFormsModule} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
 import {RestrictionSelectorComponent} from '../../user-settings/restriction-selector/restriction-selector.component';
@@ -36,7 +35,7 @@ interface EditUserForm {
   selector: 'app-edit-user',
   templateUrl: './edit-user.component.html',
   styleUrls: ['./edit-user.component.scss'],
-  imports: [ReactiveFormsModule, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective,
+  imports: [RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective,
     IdentityProviderPipePipe, SettingMultiCheckBox, ValidationErrorsComponent, FormFieldDirective, FormField],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -71,7 +70,7 @@ export class EditUserComponent implements OnInit {
 
   readonly allowedCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/';
 
-  userFormModel = signal<EditUserForm>({
+  private readonly userFormModel = signal<EditUserForm>({
     email: '',
     username: '',
     roles: [],
@@ -108,7 +107,6 @@ export class EditUserComponent implements OnInit {
         identityProvider: newIdentityProvider,
       }));
     });
-
 
   }
 
