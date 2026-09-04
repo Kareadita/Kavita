@@ -1,8 +1,8 @@
 @if(isValid() && !mangaReaderService.shouldSplit(currentImage, pageSplit)) {
-  <div class="image-container {{imageFitClass$ | async}} {{emulateBookClass$ | async}}"
+  <div class="image-container {{imageFitClass$ | async}} {{emulateBookClass()}}"
        [style.filter]="(darkness$ | async)  ?? '' | safeStyle" [style.height]="(imageContainerHeight$ | async)  ?? '' | safeStyle">
     @if(currentImage) {
-      <img alt=" "
+      <img [attr.alt]="'Page ' + pageNum"
            tabindex="0" [style.outline]="'none'"
            [style.width]="widthOverride()"
            #image

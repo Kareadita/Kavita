@@ -1,108 +1,95 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  input,
-  Input,
-  OnInit,
-  output,
-  signal
-} from '@angular/core';
-import {AsyncValidatorFn, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn} from "@angular/forms";
+import {ChangeDetectionStrategy, Component, computed, input, OnInit, output, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, distinctUntilChanged, tap} from "rxjs/operators";
-import {form} from "@angular/forms/signals";
+import {applyEach, form, FormField, validate, validateAsync, ValidationResult} from "@angular/forms/signals";
+import {ValidationErrorsComponent} from "../_components/validation-errors/validation-errors.component";
+import {Observable, of} from "rxjs";
+import {rxResource} from "@angular/core/rxjs-interop";
 
 interface EditListFormModel {
   items: string[];
 }
 
 @Component({
-    selector: 'app-edit-list',
-    imports: [ReactiveFormsModule, TranslocoDirective],
-    templateUrl: './edit-list.component.html',
-    styleUrl: './edit-list.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-edit-list',
+  imports: [TranslocoDirective, FormField, ValidationErrorsComponent],
+  templateUrl: './edit-list.component.html',
+  styleUrl: './edit-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditListComponent implements OnInit {
 
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly destroyRef = inject(DestroyRef);
-
   items = input.required<string[]>();
   label = input<string>('');
-
-  @Input() validators: ValidatorFn[] = []
-  @Input() asyncValidators: AsyncValidatorFn[] = [];
-
-  // TODO: Make this more dynamic based on which validator failed
-  errorMessage = input<string | null>(null);
+  itemValidator = input<((value: string) => ValidationResult | null) | null>(null);
+  asyncItemValidator = input<((value: string) => Observable<ValidationResult> | null) | null>(null);
+  messages = input<Record<string, string>>({});
+  /** Only emits non-empty items */
   readonly updateItems = output<Array<string>>();
 
-  form: FormGroup = new FormGroup({items: new FormArray([])});
   private readonly formModel = signal<EditListFormModel>({
     items: [],
   });
-  formGroup = form(this.formModel);
+  formGroup = form(this.formModel, (path) => {
+    applyEach(path.items, (item) => {
+      validate(item, (ctx) => this.itemValidator()?.(ctx.value()) ?? []);
 
-  get ItemsArray(): FormArray {
-    return this.form.get('items') as FormArray;
-  }
+      validateAsync(item, {
+        params: (ctx) => {
+          const value = ctx.value();
+          if (!this.asyncItemValidator() || value.trim().length === 0) { return undefined; }
+          return value;
+        },
+        debounce: 300,
+        factory: (params) => rxResource({
+          params,
+          stream: ({params: value}) =>  this.asyncItemValidator()?.(value) ?? of(null)
+        }),
+        onSuccess: (result) => result,
+        onError: () => []
+      });
+    });
+  });
+
+  hasOneItem = computed(() => {
+    return this.formGroup.items().value().length === 1;
+  });
+
+  disableRemove = computed(() => {
+    const items = this.formGroup.items().value();
+    return (items.length === 1 && items[0] === '');
+  });
 
 
   ngOnInit() {
-    this.items().forEach(item => this.addItem(item));
-    if (this.items().length === 0) {
-      this.addItem('');
+    const items = this.items();
+    if (items.length === 0) {
+      items.push('');
     }
-
-
-    this.form.valueChanges.pipe(
-      debounceTime(100),
-      distinctUntilChanged(),
-      tap(data => this.emit()),
-      takeUntilDestroyed(this.destroyRef))
-    .subscribe();
-    this.cdRef.markForCheck();
+    this.formGroup.items().value.set(items);
   }
 
-  createItemControl(value: string = ''): FormControl {
-    return new FormControl(value, this.validators, this.asyncValidators);
-  }
 
   add() {
-    this.ItemsArray.push(this.createItemControl());
+    this.formGroup.items().value.update(x => [...x, '']);
     this.emit();
-    this.cdRef.markForCheck();
-  }
-
-  addItem(value: string) {
-    this.ItemsArray.push(this.createItemControl(value));
   }
 
   remove(index: number) {
     // If it's the last item, just clear its value
-    if (this.ItemsArray.length === 1) {
-      this.ItemsArray.at(0).setValue('');
+    if (this.hasOneItem()) {
+      this.formGroup.items().value.set(['']);
       this.emit();
-      this.cdRef.markForCheck();
       return;
     }
 
-    this.ItemsArray.removeAt(index);
+    this.formGroup.items().value.update(x => {
+      x.splice(index, 1);
+      return [...x];
+    });
     this.emit();
-    this.cdRef.markForCheck();
   }
 
-  // Emit non-empty item values
   emit() {
-    const nonEmptyItems = this.ItemsArray.controls
-      .map(control => control.value)
-      .filter(value => value !== null && value.trim() !== '');
-
-    this.updateItems.emit(nonEmptyItems);
+    this.updateItems.emit(this.formModel().items.filter(value => value !== null && value.trim() !== ''));
   }
 }

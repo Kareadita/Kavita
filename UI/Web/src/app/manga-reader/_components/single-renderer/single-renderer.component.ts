@@ -68,6 +68,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
 
   readerSettings!: Signal<ReaderSetting>;
   widthOverride!: Signal<string>;
+  emulateBookClass!: Signal<string>;
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
@@ -87,6 +88,14 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
       }
       return (parseInt(value) <= 0) ? '' : value + '%';
     });
+
+    this.emulateBookClass = computed(() => {
+      const emulateBook = this.readerSettings().emulateBook;
+      if (!emulateBook || !this.isValid()) return '';
+
+      return 'book-shadow';
+    });
+
 
     this.emulateBookClass$ = this.readerSettings$.pipe(
       map(data => data.emulateBook),

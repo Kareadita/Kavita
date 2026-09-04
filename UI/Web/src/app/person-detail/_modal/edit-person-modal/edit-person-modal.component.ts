@@ -35,7 +35,7 @@ import {
   CoverChooserConfigFactoryService,
   CoverImageChooserConfig
 } from "../../../_services/cover-chooser-config-factory.service";
-import {concat, map, of} from "rxjs";
+import {concat, map, Observable, of} from "rxjs";
 import {UploadService} from "../../../_services/upload.service";
 import {ImageService} from "../../../_services/image.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
@@ -47,6 +47,7 @@ import {modalSaved} from "../../../_models/modal/modal-result";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationResult} from "@angular/forms/signals";
 
 @Component({
   selector: 'app-edit-person-modal',
@@ -192,22 +193,15 @@ export class EditPersonModalComponent implements OnInit {
     });
   }
 
-  aliasValidator(): AsyncValidatorFn {
-    return (control: AbstractControl) => {
-      const alias = control.value;
-      if (!alias || alias.trim().length === 0) {
-        return of(null);
-      }
-
-      const name = this.editForm.get('name')!.value;
-      return this.personService.isValidAlias(this.person.id, alias, name).pipe(map(valid => {
-        if (valid) {
-          return null;
-        }
-
-        return { 'invalidAlias': {'alias': alias} } as ValidationErrors;
-      }));
+  aliasValidator = (alias: string): Observable<ValidationResult> => {
+    if (!alias || alias.trim().length === 0) {
+      return of(null);
     }
+
+    const name = this.editForm.get('name')!.value;
+    return this.personService.isValidAlias(this.person.id, alias, name).pipe(
+      map(valid => valid ? null : [{kind: 'invalidAlias'}])
+    );
   }
 
   /**
