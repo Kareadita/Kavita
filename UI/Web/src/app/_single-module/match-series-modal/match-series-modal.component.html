@@ -76,7 +76,7 @@
           <i class="fas fa-database" aria-hidden="true"></i>
         </div>
 
-        <div class="flex-grow-1 min-w-0" [formGroup]="formGroup">
+        <div class="flex-grow-1 min-w-0">
           <div class="d-flex align-items-center gap-2 flex-wrap">
             <span class="fw-semibold small text-truncate">
               {{t('searching-against', {provider: activeProvider()! | metadataProviderTitle })}}
@@ -91,18 +91,18 @@
             }
           </div>
 
-          <select class="form-select form-select-sm w-auto" formControlName="provider"
+          <select class="form-select form-select-sm w-auto" [formField]="formGroup.provider"
                   [attr.aria-label]="t('change-provider-help')">
             @for (provider of allMetadataProviders; track provider) {
-              <option [ngValue]="provider">{{ provider | metadataProviderTitle }}</option>
+              <option [value]="provider">{{ provider | metadataProviderTitle }}</option>
             }
           </select>
         </div>
 
         @if (activeProvider() === MetadataProvider.Hardcover) {
-          <form [formGroup]="formGroup">
+          <form>
             <div class="form-check form-switch mb-0">
-              <input type="checkbox" class="form-check-input" formControlName="isStandAlone"
+              <input type="checkbox" class="form-check-input" [formField]="formGroup.isStandAlone"
                      id="is-standalone" role="switch" />
               <label class="form-check-label" for="is-standalone">
                 {{ t('is-standalone-label') }}
@@ -116,16 +116,16 @@
     }
 
     <!-- Query bar -->
-    <div class="py-3" [formGroup]="formGroup">
+    <div class="py-3">
       <div class="d-flex align-items-stretch gap-2">
         <div class="d-flex align-items-center position-relative flex-fill">
           <i class="fa-solid fa-magnifying-glass query-icon" aria-hidden="true"></i>
           <label for="search-query" class="visually-hidden">{{t('search')}}</label>
           <input class="form-control query-input"
                  id="search-query"
-                 formControlName="query"
+                 [formField]="formGroup.query"
                  (keydown.enter)="search()" />
-          @if (formGroup.get('query')?.value) {
+          @if (queryString()) {
             <button type="button" class="query-clear btn-close btn-close-white btn-sm"
                     [attr.aria-label]="t('clear')"
                     (click)="clearQuery()"></button>
@@ -133,7 +133,7 @@
         </div>
         <button type="button" class="btn btn-primary"
                 (click)="search()"
-                [disabled]="isLoading() || formGroup.get('dontMatch')?.value">
+                [disabled]="isLoading() || isDontMatch()">
           @if (isLoading()) {
             <span class="spinner-border spinner-border-sm" role="status">
               <span class="visually-hidden">{{ t('searching-alt') }}</span>
@@ -154,7 +154,7 @@
           <code class="provider-hint">hardcover:flatland</code>
         </div>
         <div class="form-check form-switch mb-0">
-          <input type="checkbox" class="form-check-input" formControlName="dontMatch"
+          <input type="checkbox" class="form-check-input" [formField]="formGroup.dontMatch"
                  id="dont-match" role="switch" />
           <label class="form-check-label" for="dont-match"
                  [ngbTooltip]="t('dont-match-tooltip')">

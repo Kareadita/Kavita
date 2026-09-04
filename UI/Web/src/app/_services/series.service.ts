@@ -23,6 +23,7 @@ import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {MatchSeriesInfo} from "../_models/kavitaplus/match-series-info";
 import {MetadataProvider} from "../_models/kavitaplus/metadata-provider.enum";
 import {environment} from "../../environments/environment";
+import {MatchSeriesRequest} from "../_models/kavitaplus/match-series-request";
 
 @Injectable({
   providedIn: 'root'
@@ -248,7 +249,7 @@ export class SeriesService {
     return this.httpClient.get<NextExpectedChapter>(this.baseUrl + 'series/next-expected?seriesId=' + seriesId);
   }
 
-  matchSeries(model: any) {
+  matchSeries(model: MatchSeriesRequest) {
     return this.httpClient.post<MatchSeriesResult>(this.baseUrl + 'series/match', model);
   }
 

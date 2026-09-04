@@ -8,17 +8,16 @@ import {
   linkedSignal,
   OnInit,
   signal,
-  Signal
+  Signal,
+  untracked
 } from '@angular/core';
 import {Series} from "../../_models/series";
 import {SeriesService} from "../../_services/series.service";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
-import {ToastrService} from '@openng/ngx-toastr';
-import {catchError, filter, of, pairwise, skip, startWith, tap} from "rxjs";
-import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {catchError, filter, of, skip, tap} from "rxjs";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
 import {
   MatchSeriesResultItemComponent
@@ -37,11 +36,19 @@ import {ExternalEditionDto} from "../../_models/series-detail/external-series-de
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
 import {SeriesMetadata} from "../../_models/metadata/series-metadata";
+import {disabled, form, FormField} from "@angular/forms/signals";
+import {MatchSeriesRequest} from "../../_models/kavitaplus/match-series-request";
+
+interface MatchSeriesFormModel {
+  query: string;
+  isStandAlone: boolean;
+  dontMatch: boolean;
+  provider: string;
+}
 
 @Component({
   selector: 'app-match-series-modal',
   imports: [
-    ReactiveFormsModule,
     TranslocoDirective,
     NgbTooltip,
     EmptyStateComponent,
@@ -51,7 +58,7 @@ import {SeriesMetadata} from "../../_models/metadata/series-metadata";
     MetadataProviderTitlePipe,
     SeriesFormatComponent,
     LibraryTypePipe,
-
+    FormField,
   ],
   templateUrl: './match-series-modal.component.html',
   styleUrl: './match-series-modal.component.scss',
@@ -65,19 +72,22 @@ export class MatchSeriesModalComponent implements OnInit {
 
   series = input.required<Series>();
 
-  formGroup = new FormGroup({
-    query: new FormControl('', []),
-    isStandAlone: new FormControl(false),
-    dontMatch: new FormControl(false, []),
-    provider: new FormControl<MetadataProvider | null>(null),
+  formModel = signal<MatchSeriesFormModel>({
+    query: '',
+    isStandAlone: false,
+    dontMatch: false,
+    provider: ''
+  });
+  formGroup = form(this.formModel, (path) => {
+    disabled(path.query, {when: ({valueOf}) => valueOf(path.dontMatch)});
   });
 
-  protected readonly isDontMatch = toSignal(
-    this.formGroup.controls.dontMatch.valueChanges.pipe(
-      startWith(this.formGroup.controls.dontMatch.value)
-    ),
-    { initialValue: false }
-  );
+  protected readonly isDontMatch = computed(() => {
+    return this.formGroup.dontMatch().value();
+  });
+  protected readonly queryString = computed(() => {
+    return this.formGroup.query().value() ?? '';
+  });
 
   canSaveDontMatch!: Signal<boolean>;
   matches = signal<ExternalSeriesMatch[]>([]);
@@ -139,36 +149,33 @@ export class MatchSeriesModalComponent implements OnInit {
     return provider !== null && provider !== this.matchInfo()?.metadataProvider;
   });
 
+  private lastProvider: string = '';
+
 
   constructor() {
-    this.canSaveDontMatch = computed(() => this.isDontMatch() === true && !this.series().dontMatch);
+    this.canSaveDontMatch = computed(() => this.isDontMatch() && !this.series().dontMatch);
     this.coverImageUrl = computed(() => this.imageService.getSeriesCoverImage(this.series().id));
     this.kavitaVolumeCount = computed(() => (this.seriesDetail()?.volumes ?? []).length);
     this.kavitaChapterCount = computed(() => (this.seriesDetail()?.chapters ?? []).length);
     this.kavitaSpecialCount = computed(() => (this.seriesDetail()?.specials ?? []).length);
 
-    effect(() => {
-      if (this.isDontMatch()) {
-        this.formGroup.controls.query.disable({ emitEvent: false });
-      } else {
-        this.formGroup.controls.query.enable({ emitEvent: false });
-      }
-    });
 
-    this.formGroup.controls.dontMatch.valueChanges.pipe(
+    toObservable(this.isDontMatch).pipe(
       skip(1),
-      filter(v => v === false),
+      filter(v => !v),
       takeUntilDestroyed()
     ).subscribe(() => this.search());
 
-    this.formGroup.valueChanges.pipe(
-      takeUntilDestroyed(),
-      pairwise(),
-      filter(([prev, curr]) => prev.provider !== curr.provider),
-    ).subscribe(() => {
-      this.selectedItem.set(null);
-      this.selectedEdition.set(null);
-      this.search();
+    effect(() => {
+      const provider = this.formGroup.provider().value();
+      if (provider === this.lastProvider) return;
+      this.lastProvider = provider;
+
+      untracked(() => {
+        this.selectedItem.set(null);
+        this.selectedEdition.set(null);
+        this.search();
+      });
     });
   }
 
@@ -179,17 +186,18 @@ export class MatchSeriesModalComponent implements OnInit {
 
     this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
       this.matchInfo.set(res);
-      this.formGroup.controls.provider.setValue(res.metadataProvider, { emitEvent: false });
+      this.formGroup.provider().value.set(res.metadataProvider.toString());
       this.autoSelectExistingMatch(this.matches());
     });
 
-    this.formGroup.patchValue({ dontMatch: this.series().dontMatch || false });
+    this.formGroup.dontMatch().value.set(this.series().dontMatch || false);
+
     this.seriesService.getSeriesDetail(this.series().id).pipe(
       tap(detail => {
         this.seriesDetail.set(detail)
 
         const isStandAlone = detail.chapters.length + detail.specials.length == 1;
-        this.formGroup.get('isStandAlone')?.setValue(isStandAlone); // This will trigger the initial search
+        this.formGroup.isStandAlone().value.set(isStandAlone);// This will trigger the initial search
       }),
     ).subscribe();
 
@@ -201,12 +209,18 @@ export class MatchSeriesModalComponent implements OnInit {
   search() {
     if (this.isDontMatch()) return;
 
-    const query = this.formGroup.value.query ?? '';
+    const query = this.queryString();
 
     this.isLoading.set(true);
     this.lastQuery.set(query);
 
-    const model: any = { ...this.formGroup.value, seriesId: this.series().id };
+
+    const model = {
+      ...this.formModel(),
+      provider: parseInt(this.formModel().provider, 10) as MetadataProvider,
+      seriesId: this.series().id
+    } as MatchSeriesRequest;
+
 
     this.seriesService.matchSeries(model).pipe(
       tap(res => {
@@ -217,7 +231,7 @@ export class MatchSeriesModalComponent implements OnInit {
         // The backend can search against another provider than the one asked for, when the query is a
         // provider specific url/header. Show what the results actually came from
         this.resultProvider.set(res.provider);
-        this.formGroup.controls.provider.setValue(res.provider, { emitEvent: false });
+        this.formGroup.provider().value.set(res.provider.toString());
 
         this.autoSelectExistingMatch(res.matches);
       }),
@@ -267,7 +281,7 @@ export class MatchSeriesModalComponent implements OnInit {
   }
 
   clearQuery() {
-    this.formGroup.get('query')?.setValue('');
+    this.formGroup.query().value.set('');
   }
 
   matchKey(item: ExternalSeriesMatch) {
@@ -324,8 +338,6 @@ export class MatchSeriesModalComponent implements OnInit {
       this.modalService.close(true);
     });
   }
-
-
 
   protected readonly MetadataProvider = MetadataProvider;
   protected readonly ScrobbleProvider = ScrobbleProvider;
