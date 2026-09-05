@@ -1,23 +1,19 @@
 <ng-container *transloco="let t; prefix:'copy-settings-from-library-modal'">
-
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="modal.dismiss()"></button>
   </div>
   <div class="modal-body">
     <p>{{t('description')}}</p>
-    <form>
-      <select class="form-select" [formField]="libraryForm.library">
-        <option [value]="''">{{t('select-option')}}</option>
-        @for (lib of libraries(); track lib.id) {
-          <option [value]="lib.id">{{lib.name}}</option>
-        }
-      </select>
-    </form>
+    <select class="form-select" [formField]="libraryForm.library">
+      <option [value]="''">{{t('select-option')}}</option>
+      @for (lib of libraries(); track lib.id) {
+        <option [value]="lib.id">{{lib.name}}</option>
+      }
+    </select>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">{{t('close')}}</button>
     <button type="button" class="btn btn-primary" (click)="save()">{{t('select')}}</button>
   </div>
-
 </ng-container>

@@ -1,86 +1,77 @@
 <ng-container *transloco="let t; prefix: 'manage-media-settings'">
-    <form [formGroup]="settingsForm">
-      <div class="mb-4">
-        <p>
-          {{t('encode-as-description-part-1')}} <a href="https://caniuse.com/?search=webp" target="_blank" rel="noopener noreferrer">{{t('encode-as-description-part-2')}}</a>/<a href="https://caniuse.com/?search=avif" target="_blank" rel="noopener noreferrer">{{t('encode-as-description-part-3')}}</a>
-        </p>
-        <div class="alert alert-warning">
-          {{t('encode-as-warning')}}
-        </div>
-      </div>
+  <div class="mb-4">
+    <p>
+      {{t('encode-as-description-part-1')}} <a href="https://caniuse.com/?search=webp" target="_blank" rel="noopener noreferrer">{{t('encode-as-description-part-2')}}</a>/<a href="https://caniuse.com/?search=avif" target="_blank" rel="noopener noreferrer">{{t('encode-as-description-part-3')}}</a>
+    </p>
+    <div class="alert alert-warning">
+      {{t('encode-as-warning')}}
+    </div>
+  </div>
 
-      <ng-container>
-        <div class="row g-0 mt-2">
-          @if(settingsForm.get('encodeMediaAs'); as formControl) {
-            <app-setting-item [title]="t('encode-as-label')" [subtitle]="t('encode-as-tooltip')">
-              <ng-template #view>
-                {{formControl.value | encodeFormat}}
-              </ng-template>
-              <ng-template #edit>
-                <select class="form-select" formControlName="encodeMediaAs">
-                  @for (opt of allEncodeFormats; track opt) {
-                    <option [value]="opt">{{opt | encodeFormat}}</option>
-                  }
-                </select>
-              </ng-template>
-            </app-setting-item>
-          }
-        </div>
+  @if (isLoaded()) {
+    <div class="row g-0 mt-2">
+      <app-setting-item [title]="t('encode-as-label')" [subtitle]="t('encode-as-tooltip')"
+                        [control]="settingsForm.encodeMediaAs">
+        <ng-template #view>
+          {{encodeMediaAs() | encodeFormat}}
+        </ng-template>
+        <ng-template #edit>
+          <select class="form-select" [formField]="settingsForm.encodeMediaAs">
+            @for (opt of allEncodeFormats; track opt) {
+              <option [value]="opt">{{opt | encodeFormat}}</option>
+            }
+          </select>
+        </ng-template>
+      </app-setting-item>
+    </div>
 
-        <div class="row g-0 mt-2">
-          @if(settingsForm.get('pdfRenderResolution'); as formControl) {
-            <app-setting-item [title]="t('pdf-render-resolution-label')" [subtitle]="t('pdf-render-resolution-tooltip')">
-              <ng-template #view>
-                {{formControl!.value | pdfRenderResolution}}
-              </ng-template>
-              <ng-template #edit>
-                <select class="form-select" formControlName="pdfRenderResolution">
-                  @for (opt of allPdfRenderResolutions; track opt) {
-                    <option [ngValue]="opt">{{opt | pdfRenderResolution}}</option>
-                  }
-                </select>
-              </ng-template>
-            </app-setting-item>
-          }
-        </div>
+    <div class="row g-0 mt-2">
+      <app-setting-item [title]="t('pdf-render-resolution-label')" [subtitle]="t('pdf-render-resolution-tooltip')"
+                        [control]="settingsForm.pdfRenderResolution">
+        <ng-template #view>
+          {{pdfRenderResolution() | pdfRenderResolution}}
+        </ng-template>
+        <ng-template #edit>
+          <select class="form-select" [formField]="settingsForm.pdfRenderResolution">
+            @for (opt of allPdfRenderResolutions; track opt) {
+              <option [value]="opt">{{opt | pdfRenderResolution}}</option>
+            }
+          </select>
+        </ng-template>
+      </app-setting-item>
+    </div>
 
-        <div class="row g-0 mt-2">
-          @if(settingsForm.get('coverImageSize'); as formControl) {
-            <app-setting-item [title]="t('cover-image-size-label')" [subtitle]="t('cover-image-size-tooltip')">
-              <ng-template #view>
-                {{formControl!.value | coverImageSize}}
-              </ng-template>
-              <ng-template #edit>
-                <select class="form-select" formControlName="coverImageSize">
-                  @for (opt of allCoverImageSizes; track opt) {
-                    <option [value]="opt">{{opt | coverImageSize}}</option>
-                  }
-                </select>
-              </ng-template>
-            </app-setting-item>
-          }
-        </div>
+    <div class="row g-0 mt-2">
+      <app-setting-item [title]="t('cover-image-size-label')" [subtitle]="t('cover-image-size-tooltip')">
+        <ng-template #view>
+          {{coverImageSize() | coverImageSize}}
+        </ng-template>
+        <ng-template #edit>
+          <select class="form-select" [formField]="settingsForm.coverImageSize">
+            @for (opt of allCoverImageSizes; track opt) {
+              <option [value]="opt">{{opt | coverImageSize}}</option>
+            }
+          </select>
+        </ng-template>
+      </app-setting-item>
+    </div>
 
-        <div class="row g-0 mt-2">
-          @if(settingsForm.get('bookmarksDirectory'); as formControl) {
-            <app-setting-item [title]="t('bookmark-dir-label')" [subtitle]="t('bookmark-dir-tooltip')" [control]="formControl" labelId="settings-bookmarksdir">
-              <ng-template #view>
-                {{formControl!.value}}
-              </ng-template>
-              <ng-template #edit>
-                <div class="input-group">
-                  <input readonly id="settings-bookmarksdir" class="form-control" formControlName="bookmarksDirectory" type="text" aria-describedby="change-bookmarks-dir" [appFormField]="formControl">
-                  <button id="change-bookmarks-dir" class="btn btn-primary" (click)="openDirectoryChooser(formControl.value, 'bookmarksDirectory')">
-                    {{t('change')}}
-                  </button>
-                </div>
-              </ng-template>
-            </app-setting-item>
-          }
-        </div>
-
-      </ng-container>
-
-    </form>
-
+    @let bookmarksDirectory = settingsForm.bookmarksDirectory;
+    <div class="row g-0 mt-2">
+      <app-setting-item [title]="t('bookmark-dir-label')" [subtitle]="t('bookmark-dir-tooltip')"
+                        [control]="bookmarksDirectory" labelId="settings-bookmarksdir">
+        <ng-template #view>
+          {{bookmarksDirectory().value()}}
+        </ng-template>
+        <ng-template #edit>
+          <div class="input-group">
+            <input id="settings-bookmarksdir" class="form-control" [formField]="bookmarksDirectory" type="text" aria-describedby="change-bookmarks-dir" [appFormField]="bookmarksDirectory">
+            <button type="button" id="change-bookmarks-dir" class="btn btn-primary" (click)="openDirectoryChooser(bookmarksDirectory().value())">
+              {{t('change')}}
+            </button>
+          </div>
+        </ng-template>
+      </app-setting-item>
+    </div>
+  }
 </ng-container>

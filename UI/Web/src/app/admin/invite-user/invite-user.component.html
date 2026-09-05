@@ -10,44 +10,42 @@
       }
 
       @if (emailLink() === '') {
-        <form>
-          <div class="row g-0">
-            <div class="mb-3" style="width:100%">
-              <label for="email" class="form-label">{{t('email')}}</label>
-              <input class="form-control" type="email" inputmode="email" id="email" [formField]="inviteForm.email"
-                     [appFormField]="inviteForm.email" aria-describedby="email-validations">
+        <div class="row g-0">
+          <div class="mb-3" style="width:100%">
+            <label for="email" class="form-label">{{t('email')}}</label>
+            <input class="form-control" type="email" inputmode="email" id="email" [formField]="inviteForm.email"
+                   [appFormField]="inviteForm.email" aria-describedby="email-validations">
 
-              <app-validation-errors inputId="email" [control]="inviteForm.email" />
-            </div>
+            <app-validation-errors inputId="email" [control]="inviteForm.email" />
+          </div>
+        </div>
+
+        <div class="row g-0">
+          <div class="col-md-6 pe-4">
+            <app-setting-multi-check-box
+              id="libraries"
+              [title]="t('libraries-label')"
+              [options]="libraryOptions()"
+              [formField]="inviteForm.libraries"
+            />
           </div>
 
-          <div class="row g-0">
-            <div class="col-md-6 pe-4">
-              <app-setting-multi-check-box
-                id="libraries"
-                [title]="t('libraries-label')"
-                [options]="libraryOptions()"
-                [formField]="inviteForm.libraries"
-              />
-            </div>
-
-            <div class="col-md-6">
-              <app-setting-multi-check-box
-                id="roles"
-                [title]="t('roles-label')"
-                [warning]="readOnlyWarning()"
-                [options]="roleOptions"
-                [formField]="inviteForm.roles"
-              />
-            </div>
+          <div class="col-md-6">
+            <app-setting-multi-check-box
+              id="roles"
+              [title]="t('roles-label')"
+              [warning]="readOnlyWarning()"
+              [options]="roleOptions"
+              [formField]="inviteForm.roles"
+            />
           </div>
+        </div>
 
-          <div class="row g-0">
-            <div class="col-md-12">
-              <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected()" />
-            </div>
+        <div class="row g-0">
+          <div class="col-md-12">
+            <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected()" />
           </div>
-        </form>
+        </div>
       }
 
       @if (emailLink() !== '') {

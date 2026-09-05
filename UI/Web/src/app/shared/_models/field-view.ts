@@ -41,17 +41,17 @@ function signalParams(e: any): Record<string, unknown> {
 }
 
 
-export function toFieldView(source: Signal<AnyField>, destroyRef: DestroyRef): FieldView {
+export function toFieldView(source: Signal<AnyField | null>, destroyRef: DestroyRef): FieldView {
   const tree = computed(() => {
     const s = source();
-    return isFieldTree(s) ? s : null;
+    return s !== null && isFieldTree(s) ? s : null;
   });
   const state = () => tree()!();
 
   // reactive path only, empty for signal fields
   const events = toSignal(
     toObservable(source).pipe(
-      switchMap(s => isFieldTree(s) ? [] : (s as AbstractControl).events.pipe(startWith(null))),
+      switchMap(s => s === null || isFieldTree(s) ? [] : (s as AbstractControl).events.pipe(startWith(null))),
       takeUntilDestroyed(destroyRef)
     )
   );
@@ -76,6 +76,7 @@ export function toFieldView(source: Signal<AnyField>, destroyRef: DestroyRef): F
         });
       }
       events();
+      if (source() === null) return [];
 
       const errs = (source() as AbstractControl).errors;
       if (!errs) return [];
@@ -86,12 +87,15 @@ export function toFieldView(source: Signal<AnyField>, destroyRef: DestroyRef): F
       }));
     }),
     touched: computed(() => {
+      if (source() === null) return false;
       return tree() ? state().touched() : fromControl(c => c.touched)();
     }),
     dirty: computed(() => {
+      if (source() === null) return false;
       return tree() ? state().dirty() : fromControl(c => c.dirty)();
     }),
     invalid: computed(() => {
+      if (source() === null) return false;
       return tree() ? state().invalid() : fromControl(c => c.invalid)();
     }),
   }

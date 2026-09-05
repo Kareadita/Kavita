@@ -40,9 +40,11 @@ export class RegisterLicenseKeyComponent {
 
   save() {
     if (!this.formData) return;
+
     this.isLoading.set(true);
     this.errorCode.set(null);
-    this.licenseService.registerLicense(this.formData.licenseKey, this.formData.email, this.formData.discordId ?? undefined).subscribe(async result => {
+    
+    this.licenseService.registerLicense(this.formData.licenseKey, this.formData.email, undefined).subscribe(async result => {
       this.isLoading.set(false);
       if (!result.success) {
         if (result.errorCode === KavitaPlusRegistrationErrorCode.AlreadyRegistered) {
@@ -73,6 +75,6 @@ export class RegisterLicenseKeyComponent {
 
   forceSave() {
     this.licenseService.resetLicense(this.formData!.licenseKey, this.formData!.email)
-      .subscribe(_ => this.save());
+      .subscribe(() => this.save());
   }
 }

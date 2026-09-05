@@ -100,16 +100,14 @@
         </div>
 
         @if (activeProvider() === MetadataProvider.Hardcover) {
-          <form>
-            <div class="form-check form-switch mb-0">
-              <input type="checkbox" class="form-check-input" [formField]="formGroup.isStandAlone"
-                     id="is-standalone" role="switch" />
-              <label class="form-check-label" for="is-standalone">
-                {{ t('is-standalone-label') }}
-                <i class="fa fa-info-circle" [ngbTooltip]="t('is-standalone-tooltip')"></i>
-              </label>
-            </div>
-          </form>
+          <div class="form-check form-switch mb-0">
+            <input type="checkbox" class="form-check-input" [formField]="formGroup.isStandAlone"
+                   id="is-standalone" role="switch" />
+            <label class="form-check-label" for="is-standalone">
+              {{ t('is-standalone-label') }}
+              <i class="fa fa-info-circle" [ngbTooltip]="t('is-standalone-tooltip')"></i>
+            </label>
+          </div>
         }
 
       </div>

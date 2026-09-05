@@ -35,9 +35,9 @@ export class VersionUpdateModalComponent {
     return this.isDocker() ? WikiLink.UpdateDocker : WikiLink.UpdateNative;
   });
   private readonly localePrefix: Record<string, string> = {
-    'refresh': 'new-version',
-    'update-available': 'update-notification',
-    'out-of-date': 'out-of-date',
+    'refresh': 'version-update-modal.new-version',
+    'update-available': 'version-update-modal.update-notification',
+    'out-of-date': 'version-update-modal.out-of-date',
   };
   title = computed(() => {
     const update = this.update();

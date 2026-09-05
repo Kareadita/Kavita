@@ -21,65 +21,63 @@
         </div>
       }
 
-      <form>
-        <h4>{{t('account-detail-title')}}</h4>
-        <div class="row g-0 mb-2">
-          <div class="col-md-4 col-sm-12 pe-4">
-            <label for="identityProvider" class="form-label">{{t('identity-provider')}}</label>
-            <select class="form-select" id="identityProvider" [formField]="userForm.identityProvider">
-              @for (idp of IdentityProviders; track idp) {
-                <option [value]="idp">{{idp | identityProviderPipe}}</option>
-              }
-            </select>
-            <span class="text-muted">{{t('identity-provider-tooltip')}}</span>
-          </div>
-          <div class="col-md-4 col-sm-12 pe-4">
-            <div class="mb-3">
-              <label for="username" class="form-label">{{t('username')}}</label>
-              <input id="username" class="form-control" [formField]="userForm.username" type="text"
-                     [appFormField]="userForm.username" aria-describedby="username-validations">
-
-              <app-validation-errors [control]="userForm.username" inputId="username" [messages]="{'pattern': t('username-pattern', {characters: allowedCharacters})}" />
-            </div>
-            </div>
-          <div class="col-md-4 col-sm-12">
-            <div class="mb-3" style="width:100%">
-              <label for="email" class="form-label">{{t('email')}}</label>
-              <input id="email" class="form-control" [formField]="userForm.email" type="text"
-                     [appFormField]="userForm.email" aria-describedby="email-validations">
-
-              <app-validation-errors [control]="userForm.email" inputId="email" [messages]="{pattern: t('invalid-email-warning')}" />
-            </div>
-            </div>
+      <h4>{{t('account-detail-title')}}</h4>
+      <div class="row g-0 mb-2">
+        <div class="col-md-4 col-sm-12 pe-4">
+          <label for="identityProvider" class="form-label">{{t('identity-provider')}}</label>
+          <select class="form-select" id="identityProvider" [formField]="userForm.identityProvider">
+            @for (idp of IdentityProviders; track idp) {
+              <option [value]="idp">{{idp | identityProviderPipe}}</option>
+            }
+          </select>
+          <span class="text-muted">{{t('identity-provider-tooltip')}}</span>
         </div>
+        <div class="col-md-4 col-sm-12 pe-4">
+          <div class="mb-3">
+            <label for="username" class="form-label">{{t('username')}}</label>
+            <input id="username" class="form-control" [formField]="userForm.username" type="text"
+                   [appFormField]="userForm.username" aria-describedby="username-validations">
 
-        <div class="row g-0 mb-3">
-          <div class="col-md-12">
-            <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected()" [member]="member()" />
+            <app-validation-errors [control]="userForm.username" inputId="username" [messages]="{'pattern': t('username-pattern', {characters: allowedCharacters})}" />
           </div>
         </div>
+        <div class="col-md-4 col-sm-12">
+          <div class="mb-3" style="width:100%">
+            <label for="email" class="form-label">{{t('email')}}</label>
+            <input id="email" class="form-control" [formField]="userForm.email" type="text"
+                   [appFormField]="userForm.email" aria-describedby="email-validations">
 
-          <div class="row g-0 mb-3">
-            <div class="col-md-6 pe-4">
-              <app-setting-multi-check-box
-                id="libraries"
-                [title]="t('libraries-label')"
-                [options]="libraryOptions()"
-                [formField]="userForm.libraries"
-              />
-            </div>
-
-            <div class="col-md-6">
-              <app-setting-multi-check-box
-                id="roles"
-                [title]="t('roles-label')"
-                [warning]="readOnlyWarning()"
-                [options]="roleOptions"
-                [formField]="userForm.roles"
-              />
-            </div>
+            <app-validation-errors [control]="userForm.email" inputId="email" [messages]="{pattern: t('invalid-email-warning')}" />
           </div>
-      </form>
+        </div>
+      </div>
+
+      <div class="row g-0 mb-3">
+        <div class="col-md-12">
+          <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected()" [member]="member()" />
+        </div>
+      </div>
+
+      <div class="row g-0 mb-3">
+        <div class="col-md-6 pe-4">
+          <app-setting-multi-check-box
+            id="libraries"
+            [title]="t('libraries-label')"
+            [options]="libraryOptions()"
+            [formField]="userForm.libraries"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <app-setting-multi-check-box
+            id="roles"
+            [title]="t('roles-label')"
+            [warning]="readOnlyWarning()"
+            [options]="roleOptions"
+            [formField]="userForm.roles"
+          />
+        </div>
+      </div>
     </div>
 
     <div class="modal-footer">

@@ -1,19 +1,23 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, output, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {ReactiveFormsModule} from "@angular/forms";
 import {WikiLink} from "../../../_models/wiki";
 import {AccountService} from "../../../_services/account.service";
 import {LicenseService} from "../../../_services/license.service";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {email, form, FormField, maxLength, minLength, pattern, required} from "@angular/forms/signals";
 
 
 export interface LicenseFormEvent {
   licenseKey: string,
   email: string,
-  discordId: string | null,
   isValid: boolean
+}
+
+interface EdiLicenseFormModel {
+  licenseKey: string;
+  email: string;
 }
 
 /**
@@ -23,10 +27,10 @@ export interface LicenseFormEvent {
   selector: 'app-edit-license-key',
   imports: [
     TranslocoDirective,
-    FormsModule,
     ReactiveFormsModule,
     ValidationErrorsComponent,
-    FormFieldDirective
+    FormFieldDirective,
+    FormField
   ],
   templateUrl: './edit-license-key.component.html',
   styleUrl: './edit-license-key.component.scss',
@@ -45,23 +49,36 @@ export class EditLicenseKeyComponent {
   /** This will trigger showing an additional helper to explain why the key is needed again */
   hasLicense = computed(() => this.licenseService.hasActiveLicense());
 
-  formGroup: FormGroup = new FormGroup({
-    'licenseKey': new FormControl('', [Validators.required, Validators.maxLength(19),
-      Validators.minLength(19), Validators.pattern(/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/)]),
-    'email': new FormControl('', [Validators.required, Validators.email]),
+  private readonly formModel = signal<EdiLicenseFormModel>({
+    licenseKey: '',
+    email: '',
   });
+  formGroup = form(this.formModel, p => {
+    required(p.licenseKey);
+    maxLength(p.licenseKey, 19);
+    minLength(p.licenseKey, 19);
+    pattern(p.licenseKey, /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/);
+
+    required(p.email);
+    email(p.email);
+  })
+
 
   constructor() {
 
     const licenseInfo = this.licenseService.licenseInfo();
     if (licenseInfo) {
-      this.formGroup.get('email')?.setValue(licenseInfo.registeredEmail);
+      this.formGroup.email().value.set(licenseInfo.registeredEmail);
     }
 
-    this.formGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(change => {
-      this.updated.emit({...this.formGroup.value, isValid: this.formGroup.valid});
+    effect(() => {
+      const valid = this.formGroup().valid();
+      const model = this.formModel();
+
+      this.updated.emit({...model, isValid: valid});
     });
   }
 
   protected readonly WikiLink = WikiLink;
+  protected readonly form = form;
 }

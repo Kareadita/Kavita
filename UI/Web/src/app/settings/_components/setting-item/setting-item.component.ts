@@ -10,7 +10,6 @@ import {
   inject,
   input,
   model,
-  OnInit,
   Renderer2,
   signal,
   TemplateRef,
@@ -21,8 +20,8 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {NgTemplateOutlet} from "@angular/common";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {filter, fromEvent, tap} from "rxjs";
-import {AbstractControl} from "@angular/forms";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {AnyField, toFieldView} from "../../../shared/_models/field-view";
 import {generateUniqueId} from "../../../_helpers/random";
 import {wireSettingControl} from "../../../_helpers/setting-item";
 
@@ -39,7 +38,7 @@ import {wireSettingControl} from "../../../_helpers/setting-item";
   styleUrl: './setting-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SettingItemComponent implements OnInit {
+export class SettingItemComponent {
 
   private readonly elementRef = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
@@ -58,7 +57,7 @@ export class SettingItemComponent implements OnInit {
    * When true, the hover animation will not be present and the titleExtras will be always visible
    */
   fixedExtras = input(false);
-  control = input<AbstractControl | null>(null);
+  control = input<AnyField | null>(null);
   /** Custom validation messages */
   validations = input<Record<string, string>>({});
 
@@ -97,6 +96,8 @@ export class SettingItemComponent implements OnInit {
     return this.labelId() || this.generatedId();
   });
 
+  private readonly controlView = toFieldView(this.control, this.destroyRef);
+
   protected readonly hasControl = wireSettingControl({
     scope: this.wrapperScope,
     elementId: this.elementId,
@@ -123,7 +124,7 @@ export class SettingItemComponent implements OnInit {
           takeUntilDestroyed(this.destroyRef),
           filter((event: Event) => {
             if (!this.toggleOnViewClick()) return false;
-            if (this.control() != null && this.control()!.invalid) return false;
+            if (this.controlView.invalid()) return false;
 
             const mouseEvent = event as MouseEvent;
             const selection = window.getSelection();
@@ -142,32 +143,26 @@ export class SettingItemComponent implements OnInit {
     effect(() => {
       const editMode = this.isEditMode();
       if (!initialized) { initialized = true; return; }
+      if (!editMode) return;
       if (!this.toggleOnViewClick()) return;
       if (!this.canEdit()) return;
-      if (this.control() != null && this.control()!.invalid) return;
-      if (editMode) this.focusInput();
+      if (this.controlView.invalid()) return;
+
+      this.focusInput();
     });
-  }
 
-  ngOnInit() {
-    const control = this.control();
-    if (!control) return;
+    effect(() => {
+      if (!this.controlView.invalid()) return;
+      if (!this.showEdit() || this.valueEditRef() == null) return;
 
-    if (control.invalid && this.showEdit() && this.valueEditRef() != null) {
       this.isEditMode.set(true);
-    }
-
-    control.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      filter(() => control.invalid && this.showEdit() && this.valueEditRef() != null),
-      tap(() => this.isEditMode.set(true)),
-    ).subscribe();
+    });
   }
 
   toggleEditMode() {
     if (!this.toggleOnViewClick()) return;
     if (!this.canEdit()) return;
-    if (this.control() != null && this.control()!.invalid) return;
+    if (this.controlView.invalid()) return;
 
     this.isEditMode.set(!this.isEditMode());
     this.focusInput();
