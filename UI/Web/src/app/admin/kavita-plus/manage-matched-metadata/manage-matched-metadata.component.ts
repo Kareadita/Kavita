@@ -1,10 +1,9 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {MatchStateOptionPipe} from "../../../_pipes/match-state.pipe";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
@@ -29,6 +28,13 @@ import {ScanSeriesEvent} from "../../../_models/events/scan-series-event";
 import {allMatchStates, MatchStateOption} from "../../../_models/kavitaplus/match-state-option";
 import {LibraryService} from "../../../_services/library.service";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
+import {form, FormField} from "@angular/forms/signals";
+
+
+interface FormModel {
+  matchState: string;
+  libraryType: number;
+}
 
 @Component({
   selector: 'app-manage-matched-metadata',
@@ -36,7 +42,6 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
     TranslocoDirective,
     ImageComponent,
     VirtualScrollerModule,
-    ReactiveFormsModule,
     MatchStateOptionPipe,
     UtcToLocalTimePipe,
     DefaultValuePipe,
@@ -48,7 +53,7 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
     LoadingComponent,
     PercentPipe,
     DecimalPipe,
-
+    FormField,
   ],
   templateUrl: './manage-matched-metadata.component.html',
   styleUrl: './manage-matched-metadata.component.scss',
@@ -77,10 +82,11 @@ export class ManageMatchedMetadataComponent implements OnInit {
     itemsPerPage: 15,
   });
 
-  filterGroup = new FormGroup({
-    'matchState': new FormControl(MatchStateOption.Error, []),
-    'libraryType': new FormControl(-1, []), // Denotes all
+  private readonly formModel = signal<FormModel>({
+    matchState: MatchStateOption.Error.toString(),
+    libraryType: -1 // Denotes all
   });
+  formGroup = form(this.formModel);
   trackBy = (idx: number, item: ManageMatchSeries) => `${item.isMatched}_${item.series.name}_${idx}`;
 
   matchedCounts = signal<MatchedExternalSeriesCount | null>(null);
@@ -95,12 +101,9 @@ export class ManageMatchedMetadataComponent implements OnInit {
 
     return  (totalItems - (matchedCount.dontMatchCount + matchedCount.erroredCount)) / totalItems;
   });
-
-  private readonly baseFilter: ManageMatchFilter = {
-    matchStateOption: MatchStateOption.NotMatched,
-    libraryType: -1,
-    searchTerm: ''
-  };
+  isMatchedState = computed(() => {
+    return this.formGroup.matchState().value() === MatchStateOption.Matched.toString();
+  });
 
   ngOnInit() {
 
@@ -123,10 +126,11 @@ export class ManageMatchedMetadataComponent implements OnInit {
       }
     });
 
-    this.filterGroup.valueChanges.pipe(
+
+    toObservable(this.formModel).pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      switchMap(_ => this.loadData()),
+      switchMap(() => this.loadData()),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
 
@@ -143,8 +147,8 @@ export class ManageMatchedMetadataComponent implements OnInit {
 
   loadData(pageNumber: number = 1) {
     const filter: ManageMatchFilter = {
-      matchStateOption: parseInt(this.filterGroup.get('matchState')!.value + '', 10),
-      libraryType: parseInt(this.filterGroup.get('libraryType')!.value + '', 10),
+      matchStateOption: parseInt(this.formGroup.matchState().value() + '', 10),
+      libraryType: parseInt(this.formGroup.libraryType().value() + '', 10),
       searchTerm: ''
     };
 

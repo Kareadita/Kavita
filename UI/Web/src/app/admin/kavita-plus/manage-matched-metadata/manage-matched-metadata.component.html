@@ -40,27 +40,25 @@
 
 
 
-  <form [formGroup]="filterGroup">
-    <div class="row g-2">
-      <div class="col-12 col-md-auto ms-md-auto">
-        <label for="libtype-filter">{{t('library-type')}}</label>
-        <select class="form-select" formControlName="libraryType" id="libtype-filter">
-          <option [value]="-1">{{t('all-status-label')}}</option>
-          @for(libType of metadataEnabledLibraryTypes(); track libType) {
-            <option [value]="libType">{{libType | libraryType}}</option>
-          }
-        </select>
-      </div>
-      <div class="col-12 col-md-auto">
-        <label for="match-filter">{{t('matched-state-label')}}</label>
-        <select class="form-select" formControlName="matchState" id="match-filter">
-          @for(state of allMatchStates; track state) {
-            <option [value]="state">{{state | matchStateOption}}</option>
-          }
-        </select>
-      </div>
+  <div class="row g-2">
+    <div class="col-12 col-md-auto ms-md-auto">
+      <label for="libtype-filter">{{t('library-type')}}</label>
+      <select class="form-select" [formField]="formGroup.libraryType" id="libtype-filter">
+        <option [value]="-1">{{t('all-status-label')}}</option>
+        @for(libType of metadataEnabledLibraryTypes(); track libType) {
+          <option [value]="libType">{{libType | libraryType}}</option>
+        }
+      </select>
     </div>
-  </form>
+    <div class="col-12 col-md-auto">
+      <label for="match-filter">{{t('matched-state-label')}}</label>
+      <select class="form-select" [formField]="formGroup.matchState" id="match-filter">
+        @for(state of allMatchStates; track state) {
+          <option [value]="state">{{state | matchStateOption}}</option>
+        }
+      </select>
+    </div>
+  </div>
 
   <app-responsive-table [rows]="data()"
                         [trackByFn]="trackBy"
@@ -123,7 +121,7 @@
           </ng-template>
         </ngx-datatable-column>
 
-        @if (filterGroup.get('matchState')?.value === MatchStateOption.Matched) {
+        @if (isMatchedState()) {
           <ngx-datatable-column prop="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
             <ng-template let-column="column" ngx-datatable-header-template>
               {{t('valid-until-header')}}
@@ -200,7 +198,7 @@
               </div>
             </div>
 
-            @if (filterGroup.get('matchState')?.value === MatchStateOption.Matched) {
+            @if (isMatchedState()) {
               <div class="col-6">
                 <div class="text-muted small">{{t('valid-until-header')}}</div>
                 <div>
