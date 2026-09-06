@@ -1,26 +1,34 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {AccountService} from "../../../_services/account.service";
 import {AuthKey} from "../../../_models/user/auth-key";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {disabled, form, FormField, max, min, required, submit} from "@angular/forms/signals";
+import {firstValueFrom} from "rxjs";
+
+interface FormModel {
+  name: string;
+  keyLength: number;
+  expiresUtc: string;
+}
 
 @Component({
   selector: 'app-create-auth-key',
   imports: [
     TranslocoDirective,
-    ReactiveFormsModule,
     SettingItemComponent,
     UtcToLocalTimePipe,
-    FormFieldDirective],
+    FormFieldDirective,
+    FormField
+  ],
   templateUrl: './create-auth-key.component.html',
   styleUrl: './create-auth-key.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateAuthKeyComponent implements OnInit {
+export class CreateAuthKeyComponent {
 
   private readonly modalRef = inject(NgbActiveModal);
   private readonly accountService = inject(AccountService);
@@ -28,22 +36,39 @@ export class CreateAuthKeyComponent implements OnInit {
   authKey = input<AuthKey | null>(null);
   isRotateFlow = computed(() => this.authKey() != null);
 
-  settingsForm: FormGroup = new FormGroup({
-    name: new FormControl('', [Validators.required]),
-    keyLength: new FormControl(8, [Validators.required, Validators.min(8), Validators.max(32)]),
-    expiresUtc: new FormControl('', []),
+  private readonly formModel = signal<FormModel>({
+    name: '', keyLength: 8, expiresUtc: ''
+  });
+  formGroup = form(this.formModel, p => {
+    required(p.name);
+    required(p.keyLength);
+    min(p.keyLength, 8);
+    max(p.keyLength, 32);
+
+    disabled(p.name, {
+      when: () => this.isRotateFlow()
+    });
+    disabled(p.keyLength, {
+      when: () => this.isRotateFlow()
+    });
+    disabled(p.expiresUtc, {
+      when: () => this.isRotateFlow()
+    });
   });
 
-  ngOnInit() {
-    const authKey = this.authKey();
 
-    if (this.isRotateFlow() && authKey) {
-      this.settingsForm.get('name')?.disable();
-      this.settingsForm.get('name')?.setValue(authKey.name);
-      this.settingsForm.get('keyLength')?.setValue(authKey.key.length);
-      this.settingsForm.get('expiresUtc')?.disable();
-      this.settingsForm.get('expiresUtc')?.setValue(authKey.expiresAtUtc);
-    }
+  constructor() {
+    effect(() => {
+      const isRotateFlow = this.isRotateFlow();
+      const authKey = this.authKey();
+      if (!isRotateFlow || !authKey) return;
+
+      untracked(() => {
+        this.formGroup.name().value.set(authKey.name);
+        this.formGroup.keyLength().value.set(authKey.key.length);
+        this.formGroup.expiresUtc().value.set(authKey.expiresAtUtc);
+      });
+    });
   }
 
 
@@ -51,19 +76,25 @@ export class CreateAuthKeyComponent implements OnInit {
     this.modalRef.dismiss();
   }
 
-  save() {
-    const data = this.settingsForm.value;
+  async save() {
+    const data = {...this.formModel()} as any;
     if (data.expiresUtc === '') {
       data.expiresUtc = null;
     }
 
     if (this.isRotateFlow()) {
-      this.accountService.rotateAuthKey(this.authKey()!.id, {...data, name: this.authKey()!.name}).subscribe(res => {
+      this.accountService.rotateAuthKey(this.authKey()!.id, data).subscribe(res => {
         this.modalRef.close(res);
       });
     } else {
-      this.accountService.createAuthKey(data).subscribe(res => {
-        this.modalRef.close(res);
+      await submit(this.formGroup, async () => {
+        try {
+          const result = await firstValueFrom(this.accountService.createAuthKey(data));
+          this.modalRef.close(result);
+          return undefined;
+        } catch {
+          return [{fieldTree: this.formGroup.name, kind: 'duplicateName'}];
+        }
       });
     }
   }

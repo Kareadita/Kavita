@@ -127,7 +127,8 @@
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "never": "Never"
+        "never": "Never",
+        "duplicate-name-validation": "Auth Key Name must be unique"
     },
 
     "identity-provider-pipe": {
