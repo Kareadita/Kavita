@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal, viewChild, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal, viewChild} from '@angular/core';
 import {translate, TranslocoDirective, TranslocoPipe} from "@jsverse/transloco";
 import {StepTrackerComponent, TimelineStep} from "../../reading-list/_components/step-tracker/step-tracker.component";
 import {WikiLink} from "../../_models/wiki";
@@ -68,8 +68,8 @@ enum Step {
     ManageMetadataMappingsComponent,
   ],
   templateUrl: './import-mappings.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './import-mappings.component.scss'
+  styleUrl: './import-mappings.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImportMappingsComponent implements OnInit {
 
