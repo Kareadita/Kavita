@@ -5,51 +5,43 @@
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
   <div class="modal-body scrollable-modal">
-    <form [formGroup]="settingsForm">
-      <div class="row g-0 mb-2">
-        @if(settingsForm.get('name'); as formControl) {
-          <label for="settings-name" class="form-label">{{t('device-name-label')}}</label>
-          <input id="settings-name" class="form-control" formControlName="name" type="text" [appFormField]="formControl">
-          <app-validation-errors inputId="settings-name" [control]="formControl"/>
+    <div class="row g-0 mb-2">
+      <label for="settings-name" class="form-label">{{t('device-name-label')}}</label>
+      <input id="settings-name" class="form-control" [formField]="formGroup.name" type="text" [appFormField]="formGroup.name">
+      <app-validation-errors inputId="settings-name" [control]="formGroup.name"/>
+    </div>
+
+    <div class="row g-0 mb-2">
+        <label for="email" class="form-label">{{t('email-label')}}
+          <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="emailTooltip" role="button" tabindex="0"></i>
+          <ng-template #emailTooltip>{{t('email-tooltip')}}</ng-template>
+            <span class="visually-hidden" id="email-help">
+          <ng-container />
+        </span>
+        </label>
+
+      <input id="email" aria-describedby="email-help"
+             class="form-control" [formField]="formGroup.emailAddress" type="email" inputmode="email"
+             placeholder="id@kindle.com" [appFormField]="formGroup.emailAddress">
+
+      <app-validation-errors inputId="email" [control]="formGroup.emailAddress" />
+    </div>
+
+    <div class="row g-0 mb-2">
+      <label for="device-platform" class="form-label">{{t('device-platform-label')}}</label>
+      <select id="device-platform" aria-describedby="device-platform-help" class="form-select" [formField]="formGroup.platform"
+              [appFormField]="formGroup.platform">
+        @for(platform of devicePlatforms; track platform) {
+          <option [value]="platform">{{platform | devicePlatform}}</option>
         }
-      </div>
+      </select>
+      <app-validation-errors inputId="device-platform" [control]="formGroup.platform" />
 
-      <div class="row g-0 mb-2">
-          <label for="email" class="form-label">{{t('email-label')}}
-            <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="emailTooltip" role="button" tabindex="0"></i>
-            <ng-template #emailTooltip>{{t('email-tooltip')}}</ng-template>
-              <span class="visually-hidden" id="email-help">
-            <ng-container />
-          </span>
-          </label>
-
-          @if (settingsForm.get('email'); as formControl) {
-            <input id="email" aria-describedby="email-help"
-                   class="form-control" formControlName="email" type="email" inputmode="email"
-                   placeholder="id@kindle.com" [appFormField]="formControl">
-
-            <app-validation-errors inputId="email" [control]="formControl" />
-          }
-      </div>
-
-      <div class="row g-0 mb-2">
-        <label for="device-platform" class="form-label">{{t('device-platform-label')}}</label>
-        @if(settingsForm.get('platform'); as formControl) {
-          <select id="device-platform" aria-describedby="device-platform-help" class="form-select" formControlName="platform"
-                  [appFormField]="formControl">
-            @for(platform of devicePlatforms; track platform) {
-              <option [value]="platform">{{platform | devicePlatform}}</option>
-            }
-          </select>
-          <app-validation-errors inputId="device-platform" [control]="formControl" />
-        }
-
-      </div>
-    </form>
+    </div>
 
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
-    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!formGroup().dirty()">{{t('save')}}</button>
   </div>
 </ng-container>

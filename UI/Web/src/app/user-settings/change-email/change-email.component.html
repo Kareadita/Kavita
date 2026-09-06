@@ -1,8 +1,8 @@
 <ng-container *transloco="let t; prefix:'change-email'">
-  <app-setting-item [title]="t('email-title')" [canEdit]="canEdit()" [isEditMode]="isEditMode" (isEditModeChange)="updateEditMode($event)">
+  <app-setting-item [title]="t('email-title')" [canEdit]="canEdit()" [isEditMode]="isEditMode()" (isEditModeChange)="updateEditMode($event)">
     <ng-template #view>
       <span>{{censoredEmail() | defaultValue}}</span>
-      @if(emailConfirmed) {
+      @if(emailConfirmed()) {
         <i class="fa-solid fa-circle-check ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('email-confirmed')"></i>
         <span class="visually-hidden">{{t('email-confirmed')}}</span>
       } @else {
@@ -12,48 +12,44 @@
     </ng-template>
 
     <ng-template #edit>
-      @if (errors.length > 0) {
+      @if (errors().length > 0) {
         <div class="alert alert-danger" role="alert">
-          @for(error of errors; track error) {
+          @for(error of errors(); track error) {
             <div>{{error}}</div>
           })
         </div>
       }
-      <form [formGroup]="form">
-        @if(!hasValidEmail) {
+      <form [formRoot]="formGroup">
+        @if(!hasValidEmail()) {
           <div class="alert alert-warning" role="alert">
             {{t('has-invalid-email')}}
           </div>
         }
         <div class="mb-3">
           <label for="email" class="form-label">{{t('email-label')}}</label>
-          @if(form.get('email'); as formControl) {
-            <input class="form-control custom-input" type="email" id="email" formControlName="email"
-                   [appFormField]="formControl">
-            <app-validation-errors inputId="email" [control]="formControl" />
-
-          }
+          <input class="form-control custom-input" type="email" id="email" [formField]="formGroup.email"
+                 [appFormField]="formGroup.email">
+          <app-validation-errors inputId="email" [control]="formGroup.email" />
         </div>
 
         <div class="mb-3">
           <label for="password" class="form-label">{{t('current-password-label')}}</label>
-          @if (form.get('password'); as formControl) {
-            <input class="form-control custom-input" type="password" id="password" formControlName="password"
-                   [appFormField]="formControl">
-            <app-validation-errors inputId="password" [control]="formControl" />
-          }
+          <input class="form-control custom-input" type="password" id="password" [formField]="formGroup.password"
+                 [appFormField]="formGroup.password">
+          <app-validation-errors inputId="password" [control]="formGroup.password" />
         </div>
 
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
           <button type="button" class="flex-fill btn btn-secondary me-2" aria-describedby="email-card" (click)="resetForm()">{{t('reset')}}</button>
-          <button type="submit" class="flex-fill btn btn-primary" aria-describedby="email-card" (click)="saveForm()" [disabled]="!form.valid || !(form.dirty || form.touched)">{{t('save')}}</button>
+          <button type="submit" class="flex-fill btn btn-primary" aria-describedby="email-card" (click)="saveForm()" [disabled]="!formGroup().valid() || !(formGroup().dirty() || formGroup().touched())">{{t('save')}}</button>
         </div>
       </form>
-      @if (emailLink !== '') {
+
+      @if (emailLink() !== '') {
         <h4>{{t('email-updated-title')}}</h4>
         <p>{{t('email-updated-description')}}</p>
-        <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
-        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('invite-url-tooltip')" [hideData]="false" [key]="emailLink" />
+        <a class="email-link" href="{{emailLink()}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
+        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('invite-url-tooltip')" [hideData]="false" [key]="emailLink()" />
       }
     </ng-template>
   </app-setting-item>

@@ -5,4 +5,4 @@ export enum DevicePlatform {
     Kobo = 3
 }
 
-export const devicePlatforms = [DevicePlatform.Custom, DevicePlatform.Kindle, DevicePlatform.Kobo, DevicePlatform.PocketBook];
+export const allDevicePlatforms = [DevicePlatform.Custom, DevicePlatform.Kindle, DevicePlatform.Kobo, DevicePlatform.PocketBook];

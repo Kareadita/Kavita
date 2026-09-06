@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component, effect, inject, input, output, signal} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {TranslocoModule} from "@jsverse/transloco";
@@ -10,13 +9,19 @@ import {AgeRestriction} from "../../_models/metadata/age-restriction";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {User} from "../../_models/user/user";
+import {disabled, form, FormField} from "@angular/forms/signals";
+
+interface FormModel {
+  ageRating: string;
+  ageRestrictionIncludeUnknowns: boolean;
+}
 
 @Component({
-    selector: 'app-restriction-selector',
-    templateUrl: './restriction-selector.component.html',
-    styleUrls: ['./restriction-selector.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, NgbTooltip, TitleCasePipe, TranslocoModule, NgTemplateOutlet]
+  selector: 'app-restriction-selector',
+  templateUrl: './restriction-selector.component.html',
+  styleUrls: ['./restriction-selector.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgbTooltip, TitleCasePipe, TranslocoModule, NgTemplateOutlet, FormField]
 })
 export class RestrictionSelectorComponent {
   private readonly metadataService = inject(MetadataService);
@@ -30,71 +35,54 @@ export class RestrictionSelectorComponent {
 
   // State
   ageRatings = signal<AgeRatingDto[]>([]);
-  restrictionForm: FormGroup;
+  private readonly formModel = signal<FormModel>({
+    ageRating: AgeRating.NotApplicable.toString(),
+    ageRestrictionIncludeUnknowns: true
+  });
+  restrictionForm = form(this.formModel, p => {
+    disabled(p.ageRating, {
+      when: () => this.isAdmin(),
+    });
+    disabled(p.ageRestrictionIncludeUnknowns, {
+      when: () => this.isAdmin()
+    });
+
+    disabled(p.ageRestrictionIncludeUnknowns, {
+      when: ({valueOf}) => parseInt(valueOf(p.ageRating), 10) as AgeRating === AgeRating.NotApplicable
+    });
+  });
 
   constructor() {
-    this.restrictionForm = new FormGroup({
-      'ageRating': new FormControl(AgeRating.NotApplicable, []),
-      'ageRestrictionIncludeUnknowns': new FormControl(false, []),
-    });
 
     effect(() => {
       const m = this.member();
       if (!m) return;
-      this.restrictionForm.get('ageRating')!.setValue(m.ageRestriction.ageRating || AgeRating.NotApplicable);
-      this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.setValue(m.ageRestriction.includeUnknowns);
+
+      this.restrictionForm.ageRating().value.set((m.ageRestriction.ageRating || AgeRating.NotApplicable).toString());
+      this.restrictionForm.ageRestrictionIncludeUnknowns().value.set(m.ageRestriction.includeUnknowns);
     });
 
     effect(() => {
       const r = this.resetValue();
       if (r == null) return;
-      this.restrictionForm.get('ageRating')!.setValue(r.ageRating);
-      this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.setValue(r.includeUnknowns);
+
+      this.restrictionForm.ageRating().value.set(r.ageRating.toString());
+      this.restrictionForm.ageRestrictionIncludeUnknowns().value.set(r.includeUnknowns);
     });
 
-    effect(() => {
-      if (this.isAdmin()) {
-        this.restrictionForm.get('ageRating')!.disable();
-        this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.disable();
-      } else {
-        this.restrictionForm.get('ageRating')!.enable();
-
-        const currentRating = parseInt(this.restrictionForm.get('ageRating')!.value, 10);
-        if (currentRating === AgeRating.NotApplicable) {
-          this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.disable();
-        } else {
-          this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.enable();
-        }
-      }
-    });
 
     // Load age ratings
     this.metadataService.getAllAgeRatings()
       .pipe(takeUntilDestroyed())
       .subscribe(ratings => this.ageRatings.set(ratings));
 
-    // Wire up valueChanges → output
-    this.restrictionForm.get('ageRating')!.valueChanges
-      .pipe(takeUntilDestroyed())
-      .subscribe(e => {
-        this.selected.emit({
-          ageRating: parseInt(e, 10),
-          includeUnknowns: this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.value
-        });
-        if (parseInt(e, 10) === AgeRating.NotApplicable) {
-          this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.disable();
-        } else {
-          this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.enable();
-        }
-      });
+    effect(() => {
+      const formModel = this.formModel();
 
-    this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.valueChanges
-      .pipe(takeUntilDestroyed())
-      .subscribe(e => {
-        this.selected.emit({
-          ageRating: parseInt(this.restrictionForm.get('ageRating')!.value, 10),
-          includeUnknowns: e
-        });
+      this.selected.emit({
+        ageRating: parseInt(formModel.ageRating, 10) as AgeRating,
+        includeUnknowns: formModel.ageRestrictionIncludeUnknowns
       });
+    });
   }
 }

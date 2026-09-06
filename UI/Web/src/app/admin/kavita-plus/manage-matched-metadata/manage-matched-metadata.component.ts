@@ -33,7 +33,7 @@ import {form, FormField} from "@angular/forms/signals";
 
 interface FormModel {
   matchState: string;
-  libraryType: number;
+  libraryType: string;
 }
 
 @Component({
@@ -84,7 +84,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
 
   private readonly formModel = signal<FormModel>({
     matchState: MatchStateOption.Error.toString(),
-    libraryType: -1 // Denotes all
+    libraryType: String(-1) // Denotes all
   });
   formGroup = form(this.formModel);
   trackBy = (idx: number, item: ManageMatchSeries) => `${item.isMatched}_${item.series.name}_${idx}`;
@@ -147,8 +147,8 @@ export class ManageMatchedMetadataComponent implements OnInit {
 
   loadData(pageNumber: number = 1) {
     const filter: ManageMatchFilter = {
-      matchStateOption: parseInt(this.formGroup.matchState().value() + '', 10),
-      libraryType: parseInt(this.formGroup.libraryType().value() + '', 10),
+      matchStateOption: parseInt(this.formGroup.matchState().value(), 10),
+      libraryType: parseInt(this.formGroup.libraryType().value(), 10),
       searchTerm: ''
     };
 
