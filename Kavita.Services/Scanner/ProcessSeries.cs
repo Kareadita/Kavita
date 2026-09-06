@@ -38,14 +38,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Scanner;
 
-internal sealed record UpdateChapterArgs
+internal sealed record ProcessParserInfosArgs
 {
     public required MetadataSettingsDto Settings { get; init; }
     public required Series Series { get; init; }
-    public required Volume Volume { get; init; }
     public required IList<ParserInfo> ParsedInfos { get; init; }
     public required Dictionary<string, Person> DatabasePeople { get; init; }
-    public bool ForceUpdate { get; init; } = false;
+    public bool ForceUpdate { get; init; }
 }
 
 internal sealed record UpdateChapterComicInfoArgs
@@ -124,7 +123,15 @@ public class ProcessSeries(
             var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
             var databasePeople = await LoadAndCreateMissingChapterPeople(series, parsedInfos);
 
-            await UpdateVolumes(databasePeople, settings, series, parsedInfos, args.ForceUpdate);
+            await ProcessParserInfos(new ProcessParserInfosArgs
+            {
+                Settings =settings,
+                Series = series,
+                ParsedInfos = parsedInfos,
+                DatabasePeople = databasePeople,
+                ForceUpdate = args.ForceUpdate,
+            });
+
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
             series.NormalizedName = series.Name.ToNormalized();
@@ -671,248 +678,191 @@ public class ProcessSeries(
         }
     }
 
-    private async Task UpdateVolumes(Dictionary<string, Person> databasePeople, MetadataSettingsDto settings, Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
+    private async Task ProcessParserInfos(ProcessParserInfosArgs args)
     {
-        // Add new volumes and update chapters per volume
-        var distinctVolumes = parsedInfos.DistinctVolumes();
-        foreach (var volumeNumber in distinctVolumes)
+        var foundVolumes = new HashSet<int>();
+        var foundChapters = new HashSet<int>();
+
+        foreach (var parsedInfo in args.ParsedInfos)
         {
-            Volume? volume;
-            try
+            var volume = FindOrCreateVolume(args, parsedInfo);
+            var chapter = FindOrCreateChapter(args, parsedInfo);
+
+            foundVolumes.Add(volume.Id);
+            foundChapters.Add(chapter.Id);
+
+            if (chapter.VolumeId == 0 || chapter.VolumeId != volume.Id)
             {
-                // With the Name change to be formatted, Name no longer working because Name returns "1" and volumeNumber is "1.0", so we use LookupName as the original
-                volume = series.Volumes.SingleOrDefault(s => s.LookupName == volumeNumber);
-            }
-            catch (Exception ex)
-            {
-                // TODO: Push this to UI in some way
-                if (!ex.Message.Equals("Sequence contains more than one matching element")) throw;
-                logger.LogCritical(ex, "[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
-                throw new KavitaException(
-                    $"Kavita found corrupted volume entries on {series.Name}. Please delete the series from Kavita via UI and rescan");
-            }
-            if (volume == null)
-            {
-                volume = new VolumeBuilder(volumeNumber)
-                    .WithSeriesId(series.Id)
-                    .Build();
-                series.Volumes.Add(volume);
+                logger.LogTrace("Chapter {ChapterId} is being assign or switching volumes. From {From} to {To}", chapter.Id, chapter.VolumeId, volume.Id);
+
+                // Remove from old chapter if exists, then add to new one
+                chapter.Volume?.Chapters.Remove(chapter);
+                volume.Chapters.Add(chapter);
+                chapter.Volume = volume;
             }
 
-            volume.LookupName = volumeNumber;
-            volume.Name = volume.GetNumberTitle();
+            await UpdateChapter(args, chapter, parsedInfo);
+        }
 
-            var minNumber = Parser.MinNumberFromRange(volumeNumber);
-            var maxNumber = Parser.MaxNumberFromRange(volumeNumber);
-            var infos = parsedInfos
-                .Where(p => Parser.MinNumberFromRange(p.Volumes).Is(minNumber)
-                            && Parser.MaxNumberFromRange(p.Volumes).Is(maxNumber))
-                .ToArray();
+        // Update page count once all pages have been processed
+        foreach (var volume in args.Series.Volumes)
+        {
+            volume.Pages = volume.Chapters.Sum(chapter => chapter.Pages);
+        }
 
-            await UpdateChapters(new UpdateChapterArgs
+        // Remove volumes and chapter that did not match any files on disk
+        unitOfWork.VolumeRepository.Remove([.. args.Series.Volumes
+            .Where(v => !foundVolumes.Contains(v.Id))]);
+        unitOfWork.ChapterRepository.Remove([.. args.Series.Volumes
+            .SelectMany(v => v.Chapters)
+            .Where(c => !foundChapters.Contains(c.Id))]);
+    }
+
+    private Volume FindOrCreateVolume(ProcessParserInfosArgs args, ParserInfo info)
+    {
+        var volumeGroup = args.ParsedInfos.Select(p => p.Volumes)
+            .GroupBy(v => (Min: Parser.MinNumberFromRange(v), Max: Parser.MaxNumberFromRange(v)))
+            .Single(g => g.Contains(info.Volumes));
+        var volumeNumber = volumeGroup.OrderBy(v => v.Length).First();
+
+        Volume? volume;
+        try
+        {
+            volume = args.Series.Volumes.SingleOrDefault(v => v.LookupName == volumeNumber);
+        }
+        catch (InvalidOperationException ex)
+        {
+            if (!ex.Message.Equals("Sequence contains more than one matching element")) throw;
+
+            logger.LogCritical(ex, "[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", args.Series.Name);
+            throw new KavitaException($"Kavita found corrupted volume entries on {args.Series.Name}. Please delete the series from Kavita via UI and rescan");
+        }
+
+        if (volume == null)
+        {
+            volume = new VolumeBuilder(volumeNumber).WithSeriesId(args.Series.Id).Build();
+            args.Series.Volumes.Add(volume);
+        }
+
+        volume.LookupName = volumeNumber;
+        volume.Name = volume.GetNumberTitle();
+
+        return volume;
+    }
+
+    private Chapter FindOrCreateChapter(ProcessParserInfosArgs args, ParserInfo info)
+    {
+        var volumeGroup = args.ParsedInfos.Select(p => p.Volumes)
+            .GroupBy(v => (Min: Parser.MinNumberFromRange(v), Max: Parser.MaxNumberFromRange(v)))
+            .Single(g => g.Contains(info.Volumes));
+        var lookupVolume = volumeGroup.OrderBy(v => v.Length).First();
+
+        var volume = args.Series.Volumes.OneOrDefault(v => v.LookupName == lookupVolume);
+        var exactChapterMatch = volume?.Chapters.GetChapterByRange(info);
+        if (exactChapterMatch != null)
+        {
+            // This is the old matching. On Volume & Chapter
+            return exactChapterMatch;
+        }
+
+        // There is one matched volume, and only one file on disk mapping to it (I.e. only chapters changed)
+        if (volume?.Chapters.Count == 1 && volumeGroup.Count() == 1)
+        {
+            return volume.Chapters[0];
+        }
+
+        var matchingChapters = args.Series.Volumes.SelectMany(v => v.Chapters).GetChaptersByRange(info).OneOrDefault();
+        var matchingOnDiskChapters = args.ParsedInfos.Select(p => p.Chapters)
+            .GroupBy(v => (Min: Parser.MinNumberFromRange(v), Max: Parser.MaxNumberFromRange(v)))
+            .Single(g => g.Contains(info.Chapters));
+
+        // There is exactly one chapter that matches the range in DB & on disk (I.e. Only volume changed)
+        if (matchingChapters != null && matchingOnDiskChapters.Count() == 1)
+        {
+            return matchingChapters;
+        }
+
+        logger.LogDebug("[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
+
+        args.Series.UpdateLastChapterAdded();
+
+        var chapter = ChapterBuilder.FromParserInfo(info).Build();
+        return chapter;
+    }
+
+    private async Task UpdateChapter(ProcessParserInfosArgs args, Chapter chapter, ParserInfo info)
+    {
+        chapter.UpdateFrom(info);
+
+        // Add files
+        AddOrUpdateFileForChapter(chapter, info, args.ForceUpdate);
+
+        chapter.Number = info.LowestChapter.ToString(CultureInfo.InvariantCulture);
+        chapter.MinNumber = info.LowestChapter;
+        chapter.MaxNumber = info.HighestChapter;
+        chapter.Range = chapter.GetNumberTitle();
+
+        if (!chapter.SortOrderLocked)
+        {
+            chapter.SortOrder = info.IssueOrder;
+        }
+
+        if (float.TryParse(chapter.Title, CultureInfo.InvariantCulture, out _))
+        {
+            // If we have float based chapters, first scan can have the chapter formatted as Chapter 0.2 - .2 as the title is wrong.
+            chapter.Title = chapter.GetNumberTitle();
+        }
+
+        // When setting TotalCount, we need to check against EndMarker and ComicInfo
+        var totalCount = ParsedCountHelper.GetTotalCount(info);
+        if (totalCount > 0)
+        {
+            chapter.TotalCount = totalCount.Value;
+        }
+
+        // This needs to check against both Number and Volume to calculate Count
+        chapter.Count = ParsedCountHelper.GetCalculatedCount(info);
+
+        try
+        {
+            await UpdateChapterFromComicInfo(new UpdateChapterComicInfoArgs
             {
-                Settings = settings,
-                Series = series,
-                Volume = volume,
-                ParsedInfos = infos,
-                DatabasePeople = databasePeople,
-                ForceUpdate = forceUpdate
+                Settings = args.Settings,
+                Chapter = chapter,
+                ComicInfo = info.ComicInfo,
+                DatabasePeople = args.DatabasePeople,
+                ForceUpdate = args.ForceUpdate,
             });
-            volume.Pages = volume.Chapters.Sum(c => c.Pages);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was some issue when updating chapter's metadata");
         }
 
-        // Remove existing volumes that aren't in parsedInfos
-        RemoveVolumes(series, parsedInfos);
-    }
-
-    private void RemoveVolumes(Series series, IList<ParserInfo> parsedInfos)
-    {
-
-        var nonDeletedVolumes = series.Volumes
-            .Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.LookupName))
-            .ToList();
-        if (series.Volumes.Count == nonDeletedVolumes.Count) return;
-
-
-        logger.LogDebug("[ScannerService] Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
-            (series.Volumes.Count - nonDeletedVolumes.Count), series.Name);
-        var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
-        foreach (var volume in deletedVolumes)
+        // Try to patch in any External Metadata Ids we've seen during parsing
+        if (info.AniListId is > 0)
         {
-            var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? string.Empty;
-            if (!string.IsNullOrEmpty(file) && directoryService.FileSystem.File.Exists(file))
-            {
-                // This can happen when file is renamed and volume is removed
-                logger.LogInformation(
-                    "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk (usually volume marker removed) File: {File}",
-                    file);
-            }
-
-            logger.LogDebug("[ScannerService] Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
+            chapter.AniListId = info.AniListId ?? 0;
         }
-
-        series.Volumes = nonDeletedVolumes;
-    }
-
-    private async Task UpdateChapters(UpdateChapterArgs args)
-    {
-        // Add new chapters
-        foreach (var info in args.ParsedInfos)
+        if (info.MalId is > 0)
         {
-            // Specials go into their own chapters with Range being their filename and IsSpecial = True. Non-Specials with Vol and Chap as 0
-            // also are treated like specials for UI grouping.
-            Chapter? chapter;
-            try
-            {
-                chapter = args.Volume.Chapters.GetChapterByRange(info);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "{FileName} mapped as '{Series} - Vol {Volume} Ch {Chapter}' is a duplicate, skipping", info.FullFilePath, info.Series, info.Volumes, info.Chapters);
-                continue;
-            }
-
-            if (chapter == null)
-            {
-                logger.LogDebug(
-                    "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
-                chapter = ChapterBuilder.FromParserInfo(info).Build();
-                args.Volume.Chapters.Add(chapter);
-                args.Series.UpdateLastChapterAdded();
-            }
-            else
-            {
-                chapter.UpdateFrom(info);
-            }
-
-
-            // Add files
-            AddOrUpdateFileForChapter(chapter, info, args.ForceUpdate);
-
-            chapter.Number = info.LowestChapter.ToString(CultureInfo.InvariantCulture);
-            chapter.MinNumber = info.LowestChapter;
-            chapter.MaxNumber = info.HighestChapter;
-            chapter.Range = chapter.GetNumberTitle();
-
-            if (!chapter.SortOrderLocked)
-            {
-                chapter.SortOrder = info.IssueOrder;
-            }
-
-            if (float.TryParse(chapter.Title, CultureInfo.InvariantCulture, out _))
-            {
-                // If we have float based chapters, first scan can have the chapter formatted as Chapter 0.2 - .2 as the title is wrong.
-                chapter.Title = chapter.GetNumberTitle();
-            }
-
-            // When setting TotalCount, we need to check against EndMarker and ComicInfo
-            var totalCount = ParsedCountHelper.GetTotalCount(info);
-            if (totalCount > 0)
-            {
-                chapter.TotalCount = totalCount.Value;
-            }
-
-            // This needs to check against both Number and Volume to calculate Count
-            chapter.Count = ParsedCountHelper.GetCalculatedCount(info);
-
-            try
-            {
-                await UpdateChapterFromComicInfo(new UpdateChapterComicInfoArgs
-                {
-                    Settings = args.Settings,
-                    Chapter = chapter,
-                    ComicInfo = info.ComicInfo,
-                    DatabasePeople = args.DatabasePeople,
-                    ForceUpdate = args.ForceUpdate,
-                });
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "There was some issue when updating chapter's metadata");
-            }
-
-            // Try to patch in any External Metadata Ids we've seen during parsing
-            if (info.AniListId is > 0)
-            {
-                chapter.AniListId = info.AniListId ?? 0;
-            }
-            if (info.MalId is > 0)
-            {
-                chapter.MalId = info.MalId ?? 0;
-            }
-            if (info.MangaBakaId is > 0)
-            {
-                chapter.MangaBakaId = info.MangaBakaId ?? 0;
-            }
-            if (info.MetronId is > 0)
-            {
-                chapter.MetronId = info.MetronId ?? 0;
-            }
-            if (!string.IsNullOrEmpty(info.ComicVineId))
-            {
-                chapter.ComicVineId = info.ComicVineId;
-            }
-            if (info.HardcoverId is > 0)
-            {
-                chapter.HardcoverId = info.HardcoverId ?? 0;
-            }
+            chapter.MalId = info.MalId ?? 0;
         }
-
-        RemoveChapters(args.Volume, args.ParsedInfos);
-    }
-
-    private void RemoveChapters(Volume volume, IList<ParserInfo> parsedInfos)
-    {
-        // Chapters to remove after enumeration
-        var chaptersToRemove = new List<Chapter>();
-
-        var existingChapters = volume.Chapters;
-
-        // Extract the directories (without filenames) from parserInfos
-        var parsedDirectories = parsedInfos
-            .Select(p => Path.GetDirectoryName(p.FullFilePath))
-            .Distinct()
-            .ToList();
-
-        foreach (var existingChapter in existingChapters)
+        if (info.MangaBakaId is > 0)
         {
-            var chapterFileDirectories = existingChapter.Files
-                .Select(f => Path.GetDirectoryName(f.FilePath))
-                .Distinct()
-                .ToList();
-
-            var hasMatchingDirectory = chapterFileDirectories.Exists(dir => parsedDirectories.Contains(dir));
-
-            if (hasMatchingDirectory)
-            {
-                existingChapter.Files = existingChapter.Files
-                    .Where(f => parsedInfos.Any(p => Parser.NormalizePath(p.FullFilePath) == Parser.NormalizePath(f.FilePath)))
-                    .OrderByNatural(f => f.FilePath)
-                    .ToList();
-
-                existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
-
-                if (existingChapter.Files.Count != 0) continue;
-
-                logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}",
-                    existingChapter.Range, volume.Name, parsedInfos[0].Series);
-                chaptersToRemove.Add(existingChapter); // Mark chapter for removal
-            }
-            else
-            {
-                var filesExist = existingChapter.Files.Any(f => File.Exists(f.FilePath));
-                if (filesExist) continue;
-
-                logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName} as no files exist",
-                    existingChapter.Range, volume.Name, parsedInfos[0].Series);
-                chaptersToRemove.Add(existingChapter); // Mark chapter for removal
-            }
+            chapter.MangaBakaId = info.MangaBakaId ?? 0;
         }
-
-        // Remove chapters after the loop to avoid modifying the collection during enumeration
-        foreach (var chapter in chaptersToRemove)
+        if (info.MetronId is > 0)
         {
-            volume.Chapters.Remove(chapter);
+            chapter.MetronId = info.MetronId ?? 0;
+        }
+        if (!string.IsNullOrEmpty(info.ComicVineId))
+        {
+            chapter.ComicVineId = info.ComicVineId;
+        }
+        if (info.HardcoverId is > 0)
+        {
+            chapter.HardcoverId = info.HardcoverId ?? 0;
         }
     }
 
@@ -1057,8 +1007,6 @@ public class ProcessSeries(
 
         logger.LogTrace("[TIME] Kavita took {Time} ms to create/update Chapter: {File}", sw.ElapsedMilliseconds, chapter.Files.First().FileName);
     }
-
-
 
     private async Task UpdateChapterGenres(Chapter chapter, IEnumerable<string> genreNames)
     {
