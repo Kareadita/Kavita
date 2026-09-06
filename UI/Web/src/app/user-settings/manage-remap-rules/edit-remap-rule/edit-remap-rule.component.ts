@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal} from '@angular/core';
 import {NonNullableFormBuilder, ReactiveFormsModule} from '@angular/forms';
-import {ReplaySubject} from 'rxjs';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {CblService} from '../../../_services/cbl.service';
 import {SearchService} from '../../../_services/search.service';
@@ -8,10 +7,10 @@ import {ImageService} from '../../../_services/image.service';
 import {RemapRule} from '../../../_models/reading-list/cbl/remap-rule';
 import {SearchResult} from '../../../_models/search/search-result';
 import {Chapter} from '../../../_models/chapter';
-import {TypeaheadSettings} from '../../../typeahead/_models/typeahead-settings';
+import {TypeaheadConfig} from '../../../typeahead/_models/typeahead-config';
 import {TypeaheadComponent} from '../../../typeahead/_components/typeahead.component';
 import {ImageComponent} from '../../../shared/image/image.component';
-import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
+import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
@@ -26,7 +25,7 @@ export class EditRemapRuleComponent implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly cblService = inject(CblService);
   private readonly searchService = inject(SearchService);
-  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadConfigFactoryService);
   protected readonly imageService = inject(ImageService);
 
   rule = input<RemapRule | null>(null);
@@ -41,11 +40,9 @@ export class EditRemapRuleComponent implements OnInit {
 
   selectedSeries = signal<SearchResult | null>(null);
   selectedChapter = signal<Chapter | null>(null);
-  chapterSettings = signal<TypeaheadSettings<Chapter> | null>(null);
+  chapterSettings = signal<TypeaheadConfig<Chapter> | null>(null);
 
-  seriesSettings = signal<TypeaheadSettings<SearchResult> | null>(null);
-  seriesReset = new ReplaySubject<boolean>(1);
-  chapterReset = new ReplaySubject<boolean>(1);
+  seriesSettings = signal<TypeaheadConfig<SearchResult> | null>(null);
 
   ngOnInit() {
     const editRule = this.rule();
@@ -68,7 +65,7 @@ export class EditRemapRuleComponent implements OnInit {
         chapterStub.id = editRule.chapterId;
         chapterStub.volumeId = editRule.volumeId ?? 0;
         chapterStub.title = editRule.chapterRange;
-        chapterTypeahead.savedData = chapterStub;
+        chapterTypeahead.savedData = [chapterStub];
         this.selectedChapter.set(chapterStub);
       }
 
@@ -129,12 +126,12 @@ export class EditRemapRuleComponent implements OnInit {
     });
   }
 
-  private createSeriesTypeahead(editRule: RemapRule | null): TypeaheadSettings<SearchResult> {
-    const savedData = editRule ? {seriesId: editRule.seriesId, name: editRule.seriesNameAtMapping} as SearchResult : undefined;
+  private createSeriesTypeahead(editRule: RemapRule | null): TypeaheadConfig<SearchResult> {
+    const savedData = editRule ? [{seriesId: editRule.seriesId, name: editRule.seriesNameAtMapping} as SearchResult] : [];
     return this.typeaheadSettingsFactory.forSearchResult({id: 'remap-series', savedData});
   }
 
-  private createChapterTypeahead(seriesId: number): TypeaheadSettings<Chapter> {
+  private createChapterTypeahead(seriesId: number): TypeaheadConfig<Chapter> {
     return this.typeaheadSettingsFactory.forChapter({id: `remap-chapter-${seriesId}`, seriesId});
   }
 }

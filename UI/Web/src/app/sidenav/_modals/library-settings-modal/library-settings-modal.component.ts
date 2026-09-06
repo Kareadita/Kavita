@@ -43,7 +43,7 @@ import {SettingButtonComponent} from "../../../settings/_components/setting-butt
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 import {LibraryTypeSubtitlePipe} from "../../../_pipes/library-type-subtitle.pipe";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
-import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {TypeaheadConfig} from "../../../typeahead/_models/typeahead-config";
 import {Language} from "../../../_models/metadata/language";
 import {MetadataService} from "../../../_services/metadata.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
@@ -67,7 +67,7 @@ import {
   DirectoryPickerModalComponent,
   DirectoryPickerResult
 } from "../../../admin/_modals/directory-picker/directory-picker-modal.component";
-import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
+import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
@@ -102,7 +102,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   private readonly metadataService = inject(MetadataService);
   protected readonly breakpointService = inject(BreakpointService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
-  private readonly typeaheadSettingFactoryService = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingFactoryService = inject(TypeaheadConfigFactoryService);
 
   protected readonly LibraryType = LibraryType;
   protected readonly Tabs = Tabs;
@@ -159,7 +159,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     return {title: this.libraryTypePipe.transform(f), value: f};
   }).sort((a, b) => a.title.localeCompare(b.title));
 
-  languageSettings = signal<TypeaheadSettings<Language> | null>(null);
+  languageSettings = signal<TypeaheadConfig<Language> | null>(null);
 
   isAddLibrary= signal<boolean>(false);
   setupStep = StepID.General;

@@ -195,7 +195,7 @@
                   </div>
                   <div>
                     <app-typeahead
-                      [settings]="libraryTypeaheadSettings(provider)"
+                      [config]="libraryTypeaheadSettings(provider)"
                       (selectedData)="updateLibrarySelection(provider, $event!)"
                       [disabled]="formGroup.get('allLibraries')?.value ?? false"
 

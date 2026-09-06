@@ -58,7 +58,7 @@ import {LibraryService} from "../../../_services/library.service";
 import {UploadService} from "../../../_services/upload.service";
 import {MetadataService} from "../../../_services/metadata.service";
 import {Person, PersonRole} from "../../../_models/metadata/person";
-import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {TypeaheadConfig} from "../../../typeahead/_models/typeahead-config";
 import {Genre} from "../../../_models/metadata/genre";
 import {AgeRatingDto} from "../../../_models/metadata/age-rating-dto";
 import {PublicationStatusDto} from "../../../_models/metadata/publication-status-dto";
@@ -69,7 +69,7 @@ import {Series} from "../../../_models/series";
 import {Tag} from "../../../_models/tag";
 import {AllMetadataProviders, MetadataProvider} from "../../../_models/kavitaplus/metadata-provider.enum";
 import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
-import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
+import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 
@@ -124,7 +124,7 @@ export class EditSeriesModalComponent implements OnInit {
   protected readonly breakpointService = inject(BreakpointService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
   private readonly confirmService = inject(ConfirmService);
-  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadConfigFactoryService);
 
   protected readonly Tabs = Tabs;
   protected readonly PersonRole = PersonRole;
@@ -151,10 +151,10 @@ export class EditSeriesModalComponent implements OnInit {
 
 
   // Typeaheads
-  tagsSettings = signal<TypeaheadSettings<Tag> | null>(null);
-  languageSettings = signal<TypeaheadSettings<Language> | null>(null);
-  peopleSettings = signal<Partial<Record<PersonRole, TypeaheadSettings<Person>>>>({});
-  genreSettings = signal<TypeaheadSettings<Genre> | null>(null);
+  tagsSettings = signal<TypeaheadConfig<Tag> | null>(null);
+  languageSettings = signal<TypeaheadConfig<Language> | null>(null);
+  peopleSettings = signal<Partial<Record<PersonRole, TypeaheadConfig<Person>>>>({});
+  genreSettings = signal<TypeaheadConfig<Genre> | null>(null);
 
   tags: Tag[] = [];
   genres: Genre[] = [];
@@ -346,7 +346,7 @@ export class EditSeriesModalComponent implements OnInit {
     ];
 
     this.metadataService.getAllPeople().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(people => {
-      const settings: Partial<Record<PersonRole, TypeaheadSettings<Person>>> = {};
+      const settings: Partial<Record<PersonRole, TypeaheadConfig<Person>>> = {};
 
       for (const [id, role, preset] of roles) {
         const personSettings = this.typeaheadSettingsFactory.forPerson({id, role});

@@ -1,9 +1,8 @@
 import {Observable} from 'rxjs';
-import {FormControl} from '@angular/forms';
 
 export type SelectionCompareFn<T> = (a: T, b: T) => boolean;
 
-export class TypeaheadSettings<T> {
+export class TypeaheadConfig<T> {
     /**
      * How many ms between typing actions before pipeline to load data is triggered
      */
@@ -26,7 +25,7 @@ export class TypeaheadSettings<T> {
     /**
      * Data to preload the typeahead with on first load
      */
-    savedData!: T[] | T;
+    savedData: T[] = [];
     /**
      * Function to compare the elements. Should return all elements that fit the matching criteria.
      * This is only used with non-Observable based fetchFn, but must be defined for all uses of typeahead.
@@ -50,10 +49,6 @@ export class TypeaheadSettings<T> {
      */
     minCharacters: number = 1;
     /**
-     * Optional form Control to tie model to.
-     */
-    formControl?: FormControl;
-    /**
      * If true, typeahead will remove already selected items from fetchFn results. Only appies when multiple=true
      */
     unique: boolean = true;
@@ -69,6 +64,10 @@ export class TypeaheadSettings<T> {
      * An optional, but recommended trackby identity function to help Angular render the list better
      */
     trackByIdentityFn!: (index: number, value: T) => string;
+    /**
+     * Renders an item as plain text. Used for screen-reader labels, where the badge template cannot be read.
+     */
+    titleFn?: (value: T) => string;
     /**
      * Where to render the dropdown. 'relative' uses position: absolute within the form.
      * 'body' (default) renders via CDK overlay attached to the document body, avoiding overflow: hidden clipping.

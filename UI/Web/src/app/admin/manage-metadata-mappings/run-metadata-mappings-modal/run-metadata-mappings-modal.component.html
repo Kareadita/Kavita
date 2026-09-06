@@ -40,7 +40,7 @@
           @if (includedLibrariesTypeaheadSettings(); as settings) {
             <app-setting-item [title]="t('included-libraries-title')" [subtitle]="t('included-libraries-tooltip')" [canEdit]="false" [showEdit]="false">
               <ng-template #view>
-                <app-typeahead [settings]="settings"
+                <app-typeahead [config]="settings"
                   (selectedData)="updateLibrarySelection('includedLibraries', $event)">
                   <ng-template #badgeItem let-item>
                     {{ item.name }}
@@ -56,7 +56,7 @@
           @if (excludedLibrariesTypeaheadSettings(); as settings) {
             <app-setting-item [title]="t('excluded-libraries-title')" [subtitle]="t('excluded-libraries-tooltip')" [canEdit]="false" [showEdit]="false">
               <ng-template #view>
-                <app-typeahead [settings]="settings"
+                <app-typeahead [config]="settings"
                   (selectedData)="updateLibrarySelection('excludedLibraries', $event)">
                   <ng-template #badgeItem let-item>
                     {{ item.name }}

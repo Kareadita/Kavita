@@ -17,7 +17,23 @@ input {
     > .input-group-text {
         background-color: var(--primary-color);
         color: white;
+
+      i {
+        color: white;
+      }
     }
+}
+
+.input-group-text > i {
+  color: var(--bs-body-bg);
+}
+
+.input-group-text:focus-visible {
+  box-shadow: 0 0 0 var(--btn-focus-ring-width) var(--btn-focus-boxshadow-color);
+  outline: none;
+  // .typeahead-input sits at z-index 1 and would paint over the ring on the shared edge
+  position: relative;
+  z-index: 2;
 }
 
 .close-offset {
@@ -165,4 +181,8 @@ input {
     opacity: 0;
     overflow: hidden;
   }
+}
+
+.remove-badge {
+    color: inherit;
 }

@@ -544,7 +544,14 @@
         "loading": "{{common.loading}}",
         "add-item": "Add {{item}}…",
         "no-data": "{{common.no-data}}",
-        "add-custom-item": ", type to add a custom item"
+        "add-custom-item": ", type to add a custom item",
+        "toggle-lock-alt": "Lock field",
+        "remove-alt": "Remove {{title}}",
+        "remove-item-alt": "Remove item",
+        "clear-selections-alt": "Clear all selections",
+        "selected-items-alt": "Selected items",
+        "results-available-alt": "{{count}} results available",
+        "no-results-alt": "No results available"
     },
 
     "generic-list-modal": {

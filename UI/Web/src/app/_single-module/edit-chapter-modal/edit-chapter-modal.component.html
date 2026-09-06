@@ -93,7 +93,7 @@
               @if (langConfig) {
                 <app-setting-item [title]="t('language-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateLanguage($event)" [settings]="langConfig"
+                    <app-typeahead (selectedData)="updateLanguage($event)" [config]="langConfig"
                                    [(locked)]="chapter.languageLocked" (onUnlock)="chapter.languageLocked = false"
                                    (newItemAdded)="chapter.languageLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -158,7 +158,7 @@
               @if (genreConf) {
                 <app-setting-item [title]="t('genres-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateGenres($event);chapter.genresLocked = true" [settings]="genreConf"
+                    <app-typeahead (selectedData)="updateGenres($event);chapter.genresLocked = true" [config]="genreConf"
                                    [(locked)]="chapter.genresLocked" (onUnlock)="chapter.genresLocked = false"
                                    (newItemAdded)="chapter.genresLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -180,7 +180,7 @@
               @if (tagsConf) {
                 <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateTags($event);chapter.tagsLocked = true" [settings]="tagsConf"
+                    <app-typeahead (selectedData)="updateTags($event);chapter.tagsLocked = true" [config]="tagsConf"
                                    [(locked)]="chapter.tagsLocked" (onUnlock)="chapter.tagsLocked = false"
                                    (newItemAdded)="chapter.tagsLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -205,7 +205,7 @@
                 <app-setting-item [title]="t('imprint-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
                     <app-typeahead (selectedData)="updatePerson($event, PersonRole.Imprint);chapter.imprintLocked = true"
-                                   [settings]="settings"
+                                   [config]="settings"
                                    [(locked)]="chapter.imprintLocked" (onUnlock)="chapter.imprintLocked = false"
                                    (newItemAdded)="chapter.imprintLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -226,7 +226,7 @@
               @if (getPersonsSettings(PersonRole.Publisher); as settings) {
                 <app-setting-item [title]="t('publisher-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher);chapter.publisherLocked = true" [settings]="settings"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher);chapter.publisherLocked = true" [config]="settings"
                                    [(locked)]="chapter.publisherLocked" (onUnlock)="chapter.publisherLocked = false"
                                    (newItemAdded)="chapter.publisherLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -250,7 +250,7 @@
               @if (getPersonsSettings(PersonRole.Team); as settings) {
                 <app-setting-item [title]="t('team-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Team);chapter.teamLocked = true" [settings]="settings"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Team);chapter.teamLocked = true" [config]="settings"
                                    [(locked)]="chapter.teamLocked" (onUnlock)="chapter.teamLocked = false"
                                    (newItemAdded)="chapter.teamLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -271,7 +271,7 @@
               @if (getPersonsSettings(PersonRole.Location); as settings) {
                 <app-setting-item [title]="t('location-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location);chapter.locationLocked = true" [settings]="settings"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location);chapter.locationLocked = true" [config]="settings"
                                    [(locked)]="chapter.locationLocked" (onUnlock)="chapter.locationLocked = false"
                                    (newItemAdded)="chapter.locationLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -295,7 +295,7 @@
               @if (getPersonsSettings(PersonRole.Character); as settings) {
                 <app-setting-item [title]="t('character-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);chapter.characterLocked = true" [settings]="settings"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);chapter.characterLocked = true" [config]="settings"
                                    [(locked)]="chapter.characterLocked" (onUnlock)="chapter.characterLocked = false"
                                    (newItemAdded)="chapter.characterLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -324,7 +324,7 @@
               @if (getPersonsSettings(PersonRole.Writer); as settings) {
                 <app-setting-item [title]="t('writer-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer);chapter.writerLocked = true" [settings]="settings"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer);chapter.writerLocked = true" [config]="settings"
                                    [(locked)]="chapter.writerLocked" (onUnlock)="chapter.writerLocked = false"
                                    (newItemAdded)="chapter.writerLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -345,7 +345,7 @@
               @if (getPersonsSettings(PersonRole.CoverArtist); as settings) {
                 <app-setting-item [title]="t('cover-artist-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist);chapter.coverArtistLocked = true" [settings]="settings"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist);chapter.coverArtistLocked = true" [config]="settings"
                                    [(locked)]="chapter.coverArtistLocked" (onUnlock)="chapter.coverArtistLocked = false"
                                    (newItemAdded)="chapter.coverArtistLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -369,7 +369,7 @@
               @if(getPersonsSettings(PersonRole.Penciller); as settings) {
                 <app-setting-item [title]="t('penciller-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller);chapter.pencillerLocked = true" [settings]="settings"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller);chapter.pencillerLocked = true" [config]="settings"
                                    [(locked)]="chapter.pencillerLocked" (onUnlock)="chapter.pencillerLocked = false"
                                    (newItemAdded)="chapter.pencillerLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -390,7 +390,7 @@
               @if(getPersonsSettings(PersonRole.Colorist); as settings) {
                 <app-setting-item [title]="t('colorist-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist);chapter.coloristLocked = true" [settings]="settings"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist);chapter.coloristLocked = true" [config]="settings"
                                    [(locked)]="chapter.coloristLocked" (onUnlock)="chapter.coloristLocked = false"
                                    (newItemAdded)="chapter.coloristLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -414,7 +414,7 @@
               @if(getPersonsSettings(PersonRole.Inker); as settings) {
                 <app-setting-item [title]="t('inker-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker);chapter.inkerLocked = true" [settings]="settings"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker);chapter.inkerLocked = true" [config]="settings"
                                    [(locked)]="chapter.inkerLocked" (onUnlock)="chapter.inkerLocked = false"
                                    (newItemAdded)="chapter.inkerLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -435,7 +435,7 @@
               @if(getPersonsSettings(PersonRole.Letterer); as settings) {
                 <app-setting-item [title]="t('letterer-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer);chapter.lettererLocked = true" [settings]="settings"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer);chapter.lettererLocked = true" [config]="settings"
                                    [(locked)]="chapter.lettererLocked" (onUnlock)="chapter.lettererLocked = false"
                                    (newItemAdded)="chapter.lettererLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -459,7 +459,7 @@
               @if(getPersonsSettings(PersonRole.Editor); as settings) {
                 <app-setting-item [title]="t('editor-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor);chapter.editorLocked = true" [settings]="settings"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor);chapter.editorLocked = true" [config]="settings"
                                    [(locked)]="chapter.editorLocked" (onUnlock)="chapter.editorLocked = false"
                                    (newItemAdded)="chapter.editorLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -480,7 +480,7 @@
               @if(getPersonsSettings(PersonRole.Translator); as settings) {
                 <app-setting-item [title]="t('translator-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);chapter.translatorLocked = true" [settings]="settings"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);chapter.translatorLocked = true" [config]="settings"
                                    [(locked)]="chapter.translatorLocked" (onUnlock)="chapter.translatorLocked = false"
                                    (newItemAdded)="chapter.translatorLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">

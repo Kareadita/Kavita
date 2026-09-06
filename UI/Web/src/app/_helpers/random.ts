@@ -4,6 +4,7 @@ export function generateUniqueId(): string {
     if (crypto && crypto.randomUUID) {
       return 'id-' + crypto.randomUUID();
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch(ex) { /* Swallow */ }
 
   // Fallback for browsers without crypto.randomUUID (which has happened multiple times in my user base)

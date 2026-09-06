@@ -3,18 +3,18 @@ import {
   Component,
   computed,
   DestroyRef,
-  EventEmitter,
   inject,
   input,
   OnInit,
-  signal
+  signal,
+  viewChild,
 } from '@angular/core';
 import {Person} from "../../../_models/metadata/person";
 import {PersonService} from "../../../_services/person.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
-import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {TypeaheadConfig} from "../../../typeahead/_models/typeahead-config";
 import {map} from "rxjs/operators";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
@@ -25,7 +25,7 @@ import {Series} from "../../../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe} from "@angular/common";
 import {modalSaved} from "../../../_models/modal/modal-result";
-import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
+import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 
 @Component({
   selector: 'app-merge-person-modal',
@@ -46,10 +46,10 @@ export class MergePersonModalComponent implements OnInit {
   private readonly utilityService = inject(UtilityService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly modal = inject(NgbActiveModal);
-  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadConfigFactoryService);
 
-  typeAheadSettings = signal<TypeaheadSettings<Person> | null>(null);
-  typeAheadUnfocus = new EventEmitter<string>();
+  typeAheadSettings = signal<TypeaheadConfig<Person> | null>(null);
+  private readonly typeahead = viewChild(TypeaheadComponent);
 
   person = input.required<Person>();
 
@@ -98,7 +98,7 @@ export class MergePersonModalComponent implements OnInit {
   updatePerson(people: Person[]) {
     if (people.length == 0) return;
 
-    this.typeAheadUnfocus.emit(this.typeAheadSettings()!.id);
+    this.typeahead()?.blurInput();
     this.mergee.set(people[0]);
 
     this.knownFor$ = this.personService.getSeriesMostKnownFor(this.mergee()!.id)

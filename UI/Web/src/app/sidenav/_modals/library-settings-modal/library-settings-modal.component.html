@@ -257,7 +257,7 @@
                 <ng-template #view>
                   @let langConfig = languageSettings();
                   @if (langConfig) {
-                    <app-typeahead (selectedData)="updateLanguage($event)" [settings]="langConfig" [locked]="false">
+                    <app-typeahead (selectedData)="updateLanguage($event)" [config]="langConfig" [locked]="false">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.title}}
                       </ng-template>

@@ -88,7 +88,7 @@
               @if (langConf) {
                 <app-setting-item [title]="t('language-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateLanguage($event);metadata.languageLocked = true;" [settings]="langConf"
+                    <app-typeahead (selectedData)="updateLanguage($event);metadata.languageLocked = true;" [config]="langConf"
                                    [(locked)]="metadata.languageLocked" (onUnlock)="metadata.languageLocked = false"
                                    (newItemAdded)="metadata.languageLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -132,7 +132,7 @@
               @if (genreConf) {
                 <app-setting-item [title]="t('genres-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateGenres($event);metadata.genresLocked = true" [settings]="genreConf"
+                    <app-typeahead (selectedData)="updateGenres($event);metadata.genresLocked = true" [config]="genreConf"
                                    [(locked)]="metadata.genresLocked" (onUnlock)="metadata.genresLocked = false"
                                    (newItemAdded)="metadata.genresLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -156,7 +156,7 @@
               @if (tagsConf) {
                 <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateTags($event);metadata.tagsLocked = true" [settings]="tagsConf"
+                    <app-typeahead (selectedData)="updateTags($event);metadata.tagsLocked = true" [config]="tagsConf"
                                    [(locked)]="metadata.tagsLocked" (onUnlock)="metadata.tagsLocked = false"
                                    (newItemAdded)="metadata.tagsLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -238,7 +238,7 @@
             @if (getPersonsSettings(PersonRole.Writer); as settings) {
               <app-setting-item [title]="t('writer-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer);metadata.writerLocked = true" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer);metadata.writerLocked = true" [config]="settings"
                                  [(locked)]="metadata.writerLocked" (onUnlock)="metadata.writerLocked = false"
                                  (newItemAdded)="metadata.writerLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
@@ -258,7 +258,7 @@
             @if (getPersonsSettings(PersonRole.CoverArtist); as settings) {
               <app-setting-item [title]="t('cover-artist-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist);metadata.coverArtistLocked = true" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist);metadata.coverArtistLocked = true" [config]="settings"
                                  [(locked)]="metadata.coverArtistLocked" (onUnlock)="metadata.coverArtistLocked = false"
                                  (newItemAdded)="metadata.coverArtistLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
@@ -280,7 +280,7 @@
             @if (getPersonsSettings(PersonRole.Publisher); as settings) {
               <app-setting-item [title]="t('publisher-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher);metadata.publisherLocked = true" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher);metadata.publisherLocked = true" [config]="settings"
                                  [(locked)]="metadata.publisherLocked" (onUnlock)="metadata.publisherLocked = false"
                                  (newItemAdded)="metadata.publisherLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
@@ -301,7 +301,7 @@
             @if (getPersonsSettings(PersonRole.Imprint); as settings) {
               <app-setting-item [title]="t('imprint-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Imprint);metadata.publisherLocked = true" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Imprint);metadata.publisherLocked = true" [config]="settings"
                                  [(locked)]="metadata.imprintLocked" (onUnlock)="metadata.imprintLocked = false"
                                  (newItemAdded)="metadata.imprintLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
@@ -322,7 +322,7 @@
             @if (getPersonsSettings(PersonRole.Penciller); as settings) {
               <app-setting-item [title]="t('penciller-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller);metadata.pencillerLocked = true" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller);metadata.pencillerLocked = true" [config]="settings"
                                  [(locked)]="metadata.pencillerLocked" (onUnlock)="metadata.pencillerLocked = false"
                                  (newItemAdded)="metadata.pencillerLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
@@ -344,7 +344,7 @@
             @if (getPersonsSettings(PersonRole.Letterer); as settings) {
               <app-setting-item [title]="t('letterer-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer);metadata.lettererLocked = true" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer);metadata.lettererLocked = true" [config]="settings"
                                  [(locked)]="metadata.lettererLocked" (onUnlock)="metadata.lettererLocked = false"
                                  (newItemAdded)="metadata.lettererLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
@@ -364,7 +364,7 @@
             @if (getPersonsSettings(PersonRole.Inker); as settings) {
               <app-setting-item [title]="t('inker-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker);metadata.inkerLocked = true" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker);metadata.inkerLocked = true" [config]="settings"
                                  [(locked)]="metadata.inkerLocked" (onUnlock)="metadata.inkerLocked = false"
                                  (newItemAdded)="metadata.inkerLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
@@ -387,7 +387,7 @@
             @if (getPersonsSettings(PersonRole.Editor); as settings) {
               <app-setting-item [title]="t('editor-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor);metadata.editorLocked = true" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor);metadata.editorLocked = true" [config]="settings"
                                  [(locked)]="metadata.editorLocked" (onUnlock)="metadata.editorLocked = false"
                                  (newItemAdded)="metadata.editorLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
@@ -407,7 +407,7 @@
             @if (getPersonsSettings(PersonRole.Colorist); as settings) {
               <app-setting-item [title]="t('colorist-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist);metadata.coloristLocked = true" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist);metadata.coloristLocked = true" [config]="settings"
                                  [(locked)]="metadata.coloristLocked" (onUnlock)="metadata.coloristLocked = false"
                                  (newItemAdded)="metadata.coloristLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
@@ -428,7 +428,7 @@
             @if (getPersonsSettings(PersonRole.Translator); as settings) {
               <app-setting-item [title]="t('translator-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);metadata.translatorLocked = true;" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);metadata.translatorLocked = true;" [config]="settings"
                                  [(locked)]="metadata.translatorLocked" (onUnlock)="metadata.translatorLocked = false"
                                  (newItemAdded)="metadata.translatorLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
@@ -449,7 +449,7 @@
             @if (getPersonsSettings(PersonRole.Character); as settings) {
               <app-setting-item [title]="t('character-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);metadata.characterLocked = true" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);metadata.characterLocked = true" [config]="settings"
                                  [(locked)]="metadata.characterLocked" (onUnlock)="metadata.characterLocked = false"
                                  (newItemAdded)="metadata.characterLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
@@ -470,7 +470,7 @@
             @if (getPersonsSettings(PersonRole.Team); as settings) {
               <app-setting-item [title]="t('team-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Team);metadata.teamLocked = true" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Team);metadata.teamLocked = true" [config]="settings"
                                  [(locked)]="metadata.teamLocked" (onUnlock)="metadata.teamLocked = false"
                                  (newItemAdded)="metadata.teamLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">
@@ -491,7 +491,7 @@
             @if (getPersonsSettings(PersonRole.Location); as settings) {
               <app-setting-item [title]="t('location-label')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location)" [settings]="settings"
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location)" [config]="settings"
                                  [(locked)]="metadata.locationLocked" (onUnlock)="metadata.locationLocked = false"
                                  (newItemAdded)="metadata.locationLocked = true">
                     <ng-template #badgeItem let-item let-position="idx">

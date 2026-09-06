@@ -17,14 +17,14 @@ import {
 } from "../../../shared/smart-time-range-picker/smart-time-range-picker.component";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {Library} from "../../../_models/library/library";
-import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {TypeaheadConfig} from "../../../typeahead/_models/typeahead-config";
 import {StatsFilter} from "../../_models/stats-filter";
 import {tap} from "rxjs";
 import {LibraryService} from "../../../_services/library.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ReaderService} from "../../../_services/reader.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
+import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 
 export interface LibraryAndTimeFilterGroup {
   timeFilter: FormGroup<{
@@ -51,7 +51,7 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly readerService = inject(ReaderService);
   private readonly elementRef = inject(ElementRef);
-  private readonly typeaheadSettingFactoryService = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingFactoryService = inject(TypeaheadConfigFactoryService);
 
   label = input.required<string>();
   userId = input.required<number>();
@@ -63,7 +63,7 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
   startYear = signal(new Date().getFullYear())
   allLibraries = signal<Library[]>([]);
   showLibraryTypeahead = signal(false);
-  libraryTypeaheadSettings?: TypeaheadSettings<Library>;
+  libraryTypeaheadSettings?: TypeaheadConfig<Library>;
   protected filterForm = new FormGroup<LibraryAndTimeFilterGroup>({
     timeFilter: new FormGroup({
       startDate: new FormControl<Date | null>(null),
@@ -146,7 +146,7 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
   setupLibrarySettings(
     allLibraries: Array<Library>,
     currentSelectedLibraries: Array<Library> | undefined,
-  ): TypeaheadSettings<Library> {
+  ): TypeaheadConfig<Library> {
     return this.typeaheadSettingFactoryService.forLibraries({id: 'libraries', libraries: allLibraries,
       overrides: {
       showLocked: false,

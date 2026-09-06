@@ -13,7 +13,7 @@ import {OidcPublicConfig} from "../../admin/_models/oidc-config";
 import {SettingsService} from "../../admin/settings.service";
 import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
-import {form, FormField, maxLength, minLength, pattern, required} from "@angular/forms/signals";
+import {form, FormField, required} from "@angular/forms/signals";
 
 interface LoginFormModel {
   username: string;
@@ -47,9 +47,9 @@ export class UserLoginComponent implements OnInit {
   loginForm = form(this.loginFormModel, (path) => {
     required(path.username);
     required(path.password);
-    maxLength(path.password, 256);
-    minLength(path.password, 6);
-    pattern(path.password, /^.{6,256}$/);
+    // For login screen, we hide validation
+    // maxLength(path.password, 256);
+    // minLength(path.password, 6);
   });
 
 

@@ -16,7 +16,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {Chapter} from "../../_models/chapter";
 import {LibraryType} from "../../_models/library/library";
-import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
+import {TypeaheadConfig} from "../../typeahead/_models/typeahead-config";
 import {Tag} from "../../_models/tag";
 import {Language} from "../../_models/metadata/language";
 import {Person, PersonRole} from "../../_models/metadata/person";
@@ -62,7 +62,7 @@ import {NULL_DATE} from "../../_pipes/date-year-range.pipe";
 import {DownloadEntityType} from "../../shared/_models/download-queue-item";
 import {EditModalShellComponent} from "../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../shared/_directive/edit-tab.directive";
-import {TypeaheadSettingsFactoryService} from "../../typeahead-settings-factory.service";
+import {TypeaheadConfigFactoryService} from "../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 
@@ -114,7 +114,7 @@ export class EditChapterModalComponent implements OnInit {
   private readonly chapterService = inject(ChapterService);
   protected readonly breakpointService = inject(BreakpointService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
-  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadConfigFactoryService);
 
   @Input({required: true}) chapter!: Chapter;
   @Input({required: true}) libraryType!: LibraryType;
@@ -129,10 +129,10 @@ export class EditChapterModalComponent implements OnInit {
   chooserConfig = signal<CoverImageChooserConfig>({});
 
 
-  tagsSettings = signal<TypeaheadSettings<Tag> | null>(null);
-  languageSettings = signal<TypeaheadSettings<Language> | null>(null);
-  peopleSettings = signal<Partial<Record<PersonRole, TypeaheadSettings<Person>>>>({});
-  genreSettings = signal<TypeaheadSettings<Genre> | null>(null);
+  tagsSettings = signal<TypeaheadConfig<Tag> | null>(null);
+  languageSettings = signal<TypeaheadConfig<Language> | null>(null);
+  peopleSettings = signal<Partial<Record<PersonRole, TypeaheadConfig<Person>>>>({});
+  genreSettings = signal<TypeaheadConfig<Genre> | null>(null);
 
   tags: Tag[] = [];
   genres: Genre[] = [];
@@ -340,7 +340,7 @@ export class EditChapterModalComponent implements OnInit {
     ];
 
     this.metadataService.getAllPeople().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(people => {
-      const settings: Partial<Record<PersonRole, TypeaheadSettings<Person>>> = {};
+      const settings: Partial<Record<PersonRole, TypeaheadConfig<Person>>> = {};
 
       for (const [id, role, preset] of roles) {
         const personSettings = this.typeaheadSettingsFactory.forPerson({id, role});

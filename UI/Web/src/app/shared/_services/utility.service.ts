@@ -10,6 +10,7 @@ export enum KEY_CODES {
   DOWN_ARROW = 'ArrowDown',
   UP_ARROW = 'ArrowUp',
   ESC_KEY = 'Escape',
+  TAB = 'Tab',
   SPACE = ' ',
   ENTER = 'Enter',
   G = 'g',

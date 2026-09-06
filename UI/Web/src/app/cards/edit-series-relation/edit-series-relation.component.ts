@@ -7,7 +7,8 @@ import {
   input,
   OnInit,
   output,
-  signal
+  signal,
+  viewChildren,
 } from '@angular/core';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -15,18 +16,18 @@ import {TypeaheadComponent} from "../../typeahead/_components/typeahead.componen
 import {TranslocoModule} from "@jsverse/transloco";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 import {WikiLink} from "../../_models/wiki";
-import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
+import {TypeaheadConfig} from "../../typeahead/_models/typeahead-config";
 import {SeriesService} from "../../_services/series.service";
 import {LibraryService} from "../../_services/library.service";
 import {ImageService} from "../../_services/image.service";
 import {RelationKind, RelationKinds} from "../../_models/series-detail/relation-kind";
 import {SearchResult} from "../../_models/search/search-result";
 import {Series} from "../../_models/series";
-import {TypeaheadSettingsFactoryService} from "../../typeahead-settings-factory.service";
+import {TypeaheadConfigFactoryService} from "../../typeahead-config-factory.service";
 
 interface RelationControl {
   series: {id: number, name: string} | undefined; // Will add type as well
-  typeaheadSettings: TypeaheadSettings<SearchResult>;
+  typeaheadSettings: TypeaheadConfig<SearchResult>;
   formControl: FormControl;
   id: number; // Random id used track by
 }
@@ -48,7 +49,7 @@ export class EditSeriesRelationComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly seriesService = inject(SeriesService);
   private readonly libraryService = inject(LibraryService);
-  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadConfigFactoryService);
   public readonly imageService = inject(ImageService);
 
   readonly series = input.required<Series>();
@@ -59,7 +60,7 @@ export class EditSeriesRelationComponent implements OnInit {
   relations = signal<RelationControl[]>([]);
   libraryNames = signal<Record<number, string>>({});
 
-  focusTypeahead = new EventEmitter();
+  private readonly typeaheads = viewChildren(TypeaheadComponent);
 
   idCount = 0;
 
@@ -114,7 +115,7 @@ export class EditSeriesRelationComponent implements OnInit {
 
     // Focus on the new typeahead
     setTimeout(() => {
-      this.focusTypeahead.emit(`relation--${this.relations().length - 1}`);
+      this.typeaheads().at(-1)?.focusInput();
     }, 10);
   }
 
@@ -133,9 +134,9 @@ export class EditSeriesRelationComponent implements OnInit {
     relation.series = {id: event[0].seriesId, name: event[0].name};
   }
 
-  createSeriesTypeahead(series: Series | undefined, index: number): TypeaheadSettings<SearchResult> {
+  createSeriesTypeahead(series: Series | undefined, index: number): TypeaheadConfig<SearchResult> {
 
-    const savedData = series ? {
+    const savedData = series ? [{
       name: series.name,
       libraryId: series.libraryId,
       libraryName: series.localizedName,
@@ -144,7 +145,7 @@ export class EditSeriesRelationComponent implements OnInit {
       localizedName: series.localizedName,
       originalName: series.originalName,
       sortName: series.sortName,
-    } : undefined;
+    }] : [];
 
     return this.typeaheadSettingsFactory.forSearchResult({id: `relation--${index}`,
       excludeSeriesId: this.series().id,

@@ -34,9 +34,8 @@ import {modalSaved} from "../../../_models/modal/modal-result";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {ReadingListTag} from "../../../_models/reading-list/reading-list-tag";
-import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
-import {Tag} from "../../../_models/tag";
-import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
+import {TypeaheadConfig} from "../../../typeahead/_models/typeahead-config";
+import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {ReadingListService} from "../../../_services/reading-list.service";
@@ -64,7 +63,7 @@ export class EditReadingListModalComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadConfigFactoryService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   @Input({required: true}) readingList!: ReadingList;
@@ -77,7 +76,7 @@ export class EditReadingListModalComponent implements OnInit {
   chooserConfig = signal<CoverImageChooserConfig>({});
   active = Tabs.General;
   tags: ReadingListTag[] = [];
-  tagsSettings = signal<TypeaheadSettings<Tag> | null>(null);
+  tagsSettings = signal<TypeaheadConfig<ReadingListTag> | null>(null);
 
   protected readonly Tabs = Tabs;
 
@@ -113,8 +112,7 @@ export class EditReadingListModalComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
       ).subscribe();
 
-    this.tagsSettings.set(this.typeaheadSettingsFactory.forTag({id: 'tags', source: 'readingList',
-      savedData: this.readingList.tags ?? []}));
+    this.tagsSettings.set(this.typeaheadSettingsFactory.forReadingListTag({id: 'tags', savedData: this.readingList.tags ?? []}));
   }
 
   close() {

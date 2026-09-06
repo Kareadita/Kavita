@@ -26,7 +26,7 @@ import {LibraryService} from "../../_services/library.service";
 import {PublicationStatusPipe} from "../../_pipes/publication-status.pipe";
 import {ScrobbleReadStatusPipe} from "../../_pipes/scrobble-read-status.pipe";
 import {Select2, Select2Data} from "ng-select2-component";
-import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
+import {TypeaheadConfig} from "../../typeahead/_models/typeahead-config";
 import {ModalService} from "../../_services/modal.service";
 import {
   ManageUserScrobbleProviderModalComponent
@@ -50,7 +50,7 @@ import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {ActivatedRoute} from "@angular/router";
-import {TypeaheadSettingsFactoryService} from "../../typeahead-settings-factory.service";
+import {TypeaheadConfigFactoryService} from "../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
@@ -129,7 +129,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly toastr = inject(ToastrService);
   private readonly route = inject(ActivatedRoute);
-  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadConfigFactoryService);
 
   formGroups = signal<Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup>>(new Map());
   userScrobbleProviders = signal<Map<ScrobbleProvider, UserScrobbleProvider>>(new Map());
@@ -250,7 +250,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
     return formGroup.get('droppedSeriesRule') as ReadStatusTransitionRuleFromGroup;
   }
 
-  protected libraryTypeaheadSettings(provider: ScrobbleProvider): TypeaheadSettings<Library> {
+  protected libraryTypeaheadSettings(provider: ScrobbleProvider): TypeaheadConfig<Library> {
     const libraries = this.libraries()
       .filter(l => ProvidersSupportLibraryTypes[provider].includes(l.type));
 

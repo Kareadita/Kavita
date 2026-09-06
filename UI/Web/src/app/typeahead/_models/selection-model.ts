@@ -1,4 +1,4 @@
-import {SelectionCompareFn} from "./typeahead-settings";
+import {SelectionCompareFn} from "./typeahead-config";
 
 /**
  * SelectionModel<T> is used for keeping track of multiple selections. Simple interface with ability to toggle.

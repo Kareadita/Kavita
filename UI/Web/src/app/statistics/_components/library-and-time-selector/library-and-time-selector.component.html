@@ -17,7 +17,7 @@
           </h4>
         } @else if (libraryTypeaheadSettings) {
           <app-typeahead
-            [settings]="libraryTypeaheadSettings"
+            [config]="libraryTypeaheadSettings"
             (selectedData)="updateSelectedLibraries($event)"
             id="library-typeahead">
             <ng-template #optionItem let-lib>

@@ -29,7 +29,7 @@
             <label class="form-label">{{t('kavita-series-label')}}</label>
             @let seriesConfig = seriesSettings();
             @if (seriesConfig) {
-              <app-typeahead [settings]="seriesConfig" [reset]="seriesReset" (selectedData)="onSeriesSelected($event)" id="remap-series">
+              <app-typeahead [config]="seriesConfig" (selectedData)="onSeriesSelected($event)" id="remap-series">
                 <ng-template #optionItem let-item let-position="idx" let-value="value">
                   {{item.name}}
                 </ng-template>
@@ -45,7 +45,7 @@
           <div class="row g-3 align-items-end mt-1">
             <div class="col-md-4">
               <label class="form-label">{{t('kavita-chapter-label')}}</label>
-              <app-typeahead [settings]="chapterSettings()!" [reset]="chapterReset" (selectedData)="onChapterSelected($event)">
+              <app-typeahead [config]="chapterSettings()!" (selectedData)="onChapterSelected($event)">
                 <ng-template #badgeItem let-item let-position="idx">
                   {{item.title}}
                 </ng-template>

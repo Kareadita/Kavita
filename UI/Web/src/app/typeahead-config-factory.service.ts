@@ -1,5 +1,5 @@
 import {DestroyRef, inject, Injectable} from '@angular/core';
-import {TypeaheadSettings} from "./typeahead/_models/typeahead-settings";
+import {TypeaheadConfig} from "./typeahead/_models/typeahead-config";
 import {Person, PersonRole} from "./_models/metadata/person";
 import {map, shareReplay} from "rxjs/operators";
 import {UtilityService} from "./shared/_services/utility.service";
@@ -14,6 +14,7 @@ import {SearchResult} from "./_models/search/search-result";
 import {SearchService} from "./_services/search.service";
 import {Tag} from "./_models/tag";
 import {Genre} from "./_models/metadata/genre";
+import {ReadingListTag} from "./_models/reading-list/reading-list-tag";
 
 /**
  * Partial configuration for overrides. All properties optional.
@@ -22,7 +23,7 @@ import {Genre} from "./_models/metadata/genre";
  * called also supplies compareFnForAdd and addTransformFn — the typeahead asserts
  * both non-null at runtime. Prefer the addIfNonExisting param where one exists.
  */
-export type TypeaheadConfigurationOverrides<T> = Partial<TypeaheadSettings<T>>;
+export type TypeaheadConfigurationOverrides<T> = Partial<TypeaheadConfig<T>>;
 
 export interface TypeaheadFactoryParameters<T> {
   /**
@@ -33,7 +34,7 @@ export interface TypeaheadFactoryParameters<T> {
    * Data to preload the typeahead with. Also settable via overrides.savedData (overrides win)
    * or by assigning to the returned instance once an async fetch resolves.
    */
-  savedData?: T[] | T;
+  savedData?: T[];
   overrides?: TypeaheadConfigurationOverrides<T>;
 }
 
@@ -62,11 +63,12 @@ export interface TypeaheadFactoryTagParameters extends TypeaheadFactoryParameter
   source?: 'metadata' | 'readingList';
 }
 
-export interface TypeaheadFactoryGenreParameters extends TypeaheadFactoryParameters<Genre> {
-}
+export type TypeaheadFactoryReadingListTagParameters = TypeaheadFactoryParameters<ReadingListTag>
+
+export type TypeaheadFactoryGenreParameters = TypeaheadFactoryParameters<Genre>
 
 @Injectable({providedIn: 'root'})
-export class TypeaheadSettingsFactoryService {
+export class TypeaheadConfigFactoryService {
 
   private readonly utilityService = inject(UtilityService);
   private readonly metadataService = inject(MetadataService);
@@ -87,7 +89,7 @@ export class TypeaheadSettingsFactoryService {
 
     const selectedLibs = this.accountService.userPreferences()!.socialPreferences.socialLibraries;
 
-    const settings = new TypeaheadSettings<Library>();
+    const settings = new TypeaheadConfig<Library>();
     settings.multiple = true;
     settings.unique = true;
     settings.minCharacters = 0;
@@ -98,6 +100,7 @@ export class TypeaheadSettingsFactoryService {
       return options.filter(l => this.utilityService.filterMatches(l.name, filter));
     }
     settings.trackByIdentityFn = (idx, l) => `${l.id}`;
+    settings.titleFn = (l) => l.name;
     settings.fetchFn = (filter) => of(settings.compareFn(libraries, filter));
     settings.selectionCompareFn = (a: Library, b: Library) => {
       return a.id === b.id;
@@ -111,7 +114,7 @@ export class TypeaheadSettingsFactoryService {
   forPerson(params: TypeaheadFactoryPersonParameters) {
     const {id, role, addIfNonExisting = true, savedData, overrides} = params;
 
-    const settings = new TypeaheadSettings<Person>();
+    const settings = new TypeaheadConfig<Person>();
     settings.id = id;
     settings.minCharacters = 0;
     settings.multiple = true;
@@ -134,6 +137,7 @@ export class TypeaheadSettingsFactoryService {
     };
 
     settings.trackByIdentityFn = (_, value) => value.name + value.id;
+    settings.titleFn = (value) => value.name;
 
     if (savedData !== undefined) settings.savedData = savedData;
 
@@ -144,7 +148,7 @@ export class TypeaheadSettingsFactoryService {
 
   forLanguage(params: TypeaheadFactoryLanguageParameters) {
     const {id, currentSelectedLanguage, savedData, overrides} = params;
-    const settings = new TypeaheadSettings<Language>();
+    const settings = new TypeaheadConfig<Language>();
 
 
     settings.minCharacters = 0;
@@ -167,12 +171,13 @@ export class TypeaheadSettingsFactoryService {
     }
 
     settings.trackByIdentityFn = (_, value) => value.isoCode;
+    settings.titleFn = (value) => value.title;
 
     // Language works differently, savedData isn't passed but currentSelectedLanguage is
     if (currentSelectedLanguage) {
       // We pre-call this so it's already cached in memory
       this.allLanguages$.subscribe(languages => {
-        settings.savedData = languages.find(l => l.isoCode === currentSelectedLanguage) ?? [];
+        settings.savedData = languages.filter(l => l.isoCode === currentSelectedLanguage);
       });
     } else if (savedData) {
       settings.savedData = savedData;
@@ -184,7 +189,7 @@ export class TypeaheadSettingsFactoryService {
   forSearchResult(params: TypeaheadFactorySearchResultParameters) {
     const {id, savedData, excludeSeriesId, overrides} = params;
 
-    const settings = new TypeaheadSettings<SearchResult>();
+    const settings = new TypeaheadConfig<SearchResult>();
     settings.minCharacters = 2;
     settings.multiple = false;
     settings.id = id;
@@ -196,6 +201,7 @@ export class TypeaheadSettingsFactoryService {
       map(series => series.filter(s => !excludeSeriesId || s.seriesId !== excludeSeriesId)),
     );
     settings.trackByIdentityFn = (idx, item) => item.seriesId + '';
+    settings.titleFn = (item) => item.name;
     settings.compareFn = (options: SearchResult[], filter: string) => {
       return options.filter(m => {
         return this.utilityService.filter(m.name, filter) || this.utilityService.filter(m.localizedName, filter);
@@ -215,7 +221,7 @@ export class TypeaheadSettingsFactoryService {
   forTag(params: TypeaheadFactoryTagParameters) {
     const {id, source = 'metadata', savedData, overrides} = params;
 
-    const settings = new TypeaheadSettings<Tag>();
+    const settings = new TypeaheadConfig<Tag>();
     settings.minCharacters = 0;
     settings.multiple = true;
     settings.id = id;
@@ -224,6 +230,7 @@ export class TypeaheadSettingsFactoryService {
     settings.addIfNonExisting = true;
 
     settings.trackByIdentityFn = (_idx, item) => item.title + item.id;
+    settings.titleFn = (item) => item.title;
     settings.selectionCompareFn = (a: Tag, b: Tag) => {
       return a.title.toLowerCase() == b.title.toLowerCase();
     };
@@ -248,10 +255,11 @@ export class TypeaheadSettingsFactoryService {
     return this.applyOverrides(settings, overrides);
   }
 
-  forGenre(params: TypeaheadFactoryGenreParameters) {
+
+  forReadingListTag(params: TypeaheadFactoryReadingListTagParameters) {
     const {id, savedData, overrides} = params;
 
-    const settings = new TypeaheadSettings<Genre>();
+    const settings = new TypeaheadConfig<ReadingListTag>();
     settings.minCharacters = 0;
     settings.multiple = true;
     settings.id = id;
@@ -260,6 +268,42 @@ export class TypeaheadSettingsFactoryService {
     settings.addIfNonExisting = true;
 
     settings.trackByIdentityFn = (_idx, item) => item.title + item.id;
+    settings.titleFn = (item) => item.title;
+    settings.selectionCompareFn = (a: Tag, b: Tag) => {
+      return a.title.toLowerCase() == b.title.toLowerCase();
+    };
+    settings.compareFn = (options: ReadingListTag[], filter: string) => {
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    };
+    settings.compareFnForAdd = (options: ReadingListTag[], filter: string) => {
+      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
+    };
+    settings.fetchFn = (filter: string) => {
+      const tags$ = this.metadataService.getAllReadingListTags();
+      return tags$.pipe(map(items => settings.compareFn(items, filter)));
+    };
+    settings.addTransformFn = ((title: string) => {
+      return {id: 0, title: title, normalizedTitle: title.toLowerCase() };
+    });
+
+    if (savedData !== undefined) settings.savedData = savedData;
+
+    return this.applyOverrides(settings, overrides);
+  }
+
+  forGenre(params: TypeaheadFactoryGenreParameters) {
+    const {id, savedData, overrides} = params;
+
+    const settings = new TypeaheadConfig<Genre>();
+    settings.minCharacters = 0;
+    settings.multiple = true;
+    settings.id = id;
+    settings.unique = true;
+    settings.showLocked = true;
+    settings.addIfNonExisting = true;
+
+    settings.trackByIdentityFn = (_idx, item) => item.title + item.id;
+    settings.titleFn = (item) => item.title;
     settings.selectionCompareFn = (a: Genre, b: Genre) => {
       return a.title.toLowerCase() == b.title.toLowerCase();
     };
@@ -283,7 +327,7 @@ export class TypeaheadSettingsFactoryService {
   forChapter(params: TypeaheadFactoryChapterParameters) {
     const {id, savedData, seriesId, overrides} = params;
 
-    const settings = new TypeaheadSettings<Chapter>();
+    const settings = new TypeaheadConfig<Chapter>();
     settings.minCharacters = 0;
     settings.multiple = false;
     settings.id = id;
@@ -301,6 +345,7 @@ export class TypeaheadSettingsFactoryService {
       })
     );
     settings.trackByIdentityFn = (_idx, item) => item.id + '';
+    settings.titleFn = (item) => item.title;
     settings.compareFn = (options: Chapter[], filter: string) => {
       if (!filter) return options;
       const lower = filter.toLowerCase().trim();
@@ -325,9 +370,9 @@ export class TypeaheadSettingsFactoryService {
    * overridden values. Undefined values are skipped so they can't clobber class defaults.
    */
   private applyOverrides<T>(
-    settings: TypeaheadSettings<T>,
+    settings: TypeaheadConfig<T>,
     overrides?: TypeaheadConfigurationOverrides<T>
-  ): TypeaheadSettings<T> {
+  ): TypeaheadConfig<T> {
     if (!overrides) return settings;
 
     const defined = Object.fromEntries(

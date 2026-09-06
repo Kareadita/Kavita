@@ -29,8 +29,8 @@ import {MetadataService} from "../../_services/metadata.service";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
-import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
-import {TypeaheadSettingsFactoryService} from "../../typeahead-settings-factory.service";
+import {TypeaheadConfig} from "../../typeahead/_models/typeahead-config";
+import {TypeaheadConfigFactoryService} from "../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 type UserPreferencesForm = FormGroup<{
@@ -76,7 +76,8 @@ type UserPreferencesForm = FormGroup<{
     DecimalPipe,
     HighlightBarComponent,
     AgeRatingPipe,
-    TypeaheadComponent, FormFieldDirective],
+    TypeaheadComponent,
+    FormFieldDirective],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -90,13 +91,13 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly metadataService = inject(MetadataService);
-  private readonly typeaheadSettingFactory = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingFactory = inject(TypeaheadConfigFactoryService);
 
   protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
   loading = signal(true);
   ageRatings = signal<AgeRatingDto[]>([]);
   locales = signal<KavitaLocale[]>([]);
-  socialLibrariesTypeaheadSettings = signal<TypeaheadSettings<Library> | null>(null);
+  socialLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
 
   settingsForm!: UserPreferencesForm;
 

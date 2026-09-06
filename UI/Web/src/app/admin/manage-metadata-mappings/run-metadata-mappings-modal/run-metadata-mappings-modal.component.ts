@@ -14,13 +14,13 @@ import {
 } from "@angular/forms";
 import {Library} from "../../../_models/library/library";
 import {finalize, tap} from "rxjs/operators";
-import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {TypeaheadConfig} from "../../../typeahead/_models/typeahead-config";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {of} from "rxjs";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {ToastrService} from '@openng/ngx-toastr';
-import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
+import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 
 type RunMetadataMappingsRequestFormGroup = FormGroup<{
   allLibraries: FormControl<boolean>,
@@ -48,14 +48,14 @@ export class RunMetadataMappingsModalComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly toastR = inject(ToastrService);
-  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadConfigFactoryService);
 
   libraries = signal<Library[]>([]);
   requestForm!: RunMetadataMappingsRequestFormGroup;
   isSaving = signal(false);
 
-  includedLibrariesTypeaheadSettings = signal<TypeaheadSettings<Library> | null>(null);
-  excludedLibrariesTypeaheadSettings = signal<TypeaheadSettings<Library> | null>(null);
+  includedLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
+  excludedLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
 
   ngOnInit() {
     this.requestForm = this.fb.group({
