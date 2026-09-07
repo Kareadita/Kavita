@@ -306,7 +306,13 @@ public class LicenseService(
             var response = await kavitaPlusApiService.GetLicenseInfo(ct);
 
             // This indicates a mismatch on installId or no active subscription
-            if (response == null) return null;
+            if (response == null)
+            {
+                logger.LogWarning(
+                    "Kavita+ did not return any license info for the saved license (installId mismatch or no active subscription) - Support Token: {SupportToken}",
+                    HashUtil.ServerToken());
+                return null;
+            }
 
             await EnrichLicenseInfo(response, hasLicense, ct);
 
