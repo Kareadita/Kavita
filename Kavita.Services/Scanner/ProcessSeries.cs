@@ -767,6 +767,7 @@ public class ProcessSeries(
         {
             volume = new VolumeBuilder(volumeNumber).WithSeriesId(args.Series.Id).Build();
             args.Series.Volumes.Add(volume);
+            unitOfWork.VolumeRepository.Add(volume);
         }
 
         volume.LookupName = volumeNumber;
