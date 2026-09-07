@@ -549,10 +549,10 @@ export class ActionService {
 
       case Action.Edit:
         const ref = this.modalService.open(EditChapterModalComponent, editModal());
-        ref.componentInstance.chapter = chapter;
-        ref.componentInstance.libraryType = libraryType;
-        ref.componentInstance.seriesId = seriesId;
-        ref.componentInstance.libraryId = libraryId;
+        ref.setInput('chapter', chapter);
+        ref.setInput('libraryType', libraryType);
+        ref.setInput('seriesId', seriesId);
+        ref.setInput('libraryId', libraryId);
 
         return this.handleEditModal(ref, action, chapter);
 

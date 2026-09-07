@@ -59,13 +59,11 @@ export interface TypeaheadFactorySearchResultParameters extends TypeaheadFactory
   excludeSeriesId?: number;
 }
 
-export interface TypeaheadFactoryTagParameters extends TypeaheadFactoryParameters<Tag> {
-  source?: 'metadata' | 'readingList';
-}
+export type TypeaheadFactoryTagParameters = TypeaheadFactoryParameters<Tag>;
 
-export type TypeaheadFactoryReadingListTagParameters = TypeaheadFactoryParameters<ReadingListTag>
+export type TypeaheadFactoryReadingListTagParameters = TypeaheadFactoryParameters<ReadingListTag>;
 
-export type TypeaheadFactoryGenreParameters = TypeaheadFactoryParameters<Genre>
+export type TypeaheadFactoryGenreParameters = TypeaheadFactoryParameters<Genre>;
 
 @Injectable({providedIn: 'root'})
 export class TypeaheadConfigFactoryService {
@@ -219,7 +217,7 @@ export class TypeaheadConfigFactoryService {
   }
 
   forTag(params: TypeaheadFactoryTagParameters) {
-    const {id, source = 'metadata', savedData, overrides} = params;
+    const {id, savedData, overrides} = params;
 
     const settings = new TypeaheadConfig<Tag>();
     settings.minCharacters = 0;
@@ -241,10 +239,7 @@ export class TypeaheadConfigFactoryService {
       return options.filter(m => this.utilityService.filterMatches(m.title, filter));
     };
     settings.fetchFn = (filter: string) => {
-      const tags$ = source === 'readingList'
-        ? this.metadataService.getAllReadingListTags()
-        : this.metadataService.getAllTags();
-      return tags$.pipe(map(items => settings.compareFn(items, filter)));
+      return this.metadataService.getAllTags().pipe(map(items => settings.compareFn(items, filter)));
     };
     settings.addTransformFn = ((title: string) => {
       return {id: 0, title: title };

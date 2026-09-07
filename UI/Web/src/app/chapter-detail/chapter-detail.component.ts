@@ -309,12 +309,12 @@ export class ChapterDetailComponent implements OnInit {
 
   openEditModal() {
     const ref = this.modalService.open(EditChapterModalComponent);
-    ref.componentInstance.chapter = this.chapter();
-    ref.componentInstance.libraryType = this.libraryType();
-    ref.componentInstance.libraryId = this.libraryId();
-    ref.componentInstance.seriesId = this.seriesId();
+    ref.setInput('chapter', this.chapter());
+    ref.setInput('libraryType', this.libraryType());
+    ref.setInput('seriesId', this.seriesId());
+    ref.setInput('libraryId', this.libraryId());
 
-    ref.closed.subscribe(res => {
+    ref.closed.subscribe(() => {
       this.loadData();
     });
   }
