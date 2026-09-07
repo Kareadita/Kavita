@@ -63,6 +63,11 @@ public class ScannerHelper
         return library;
     }
 
+    public Task UpdateTestData(string testcase, Dictionary<string, ComicInfo>? comicInfos = null)
+    {
+        return GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase), comicInfos);
+    }
+
     public ScannerService CreateServices(DirectoryService? ds = null, IFileSystem? fs = null)
     {
         fs ??= new FileSystem();
