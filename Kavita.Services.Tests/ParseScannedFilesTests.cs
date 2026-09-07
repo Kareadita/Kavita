@@ -56,33 +56,33 @@ public class MockReadingItemService : IReadingItemService
         throw new NotImplementedException();
     }
 
-    public ParserInfo Parse(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+    public ParserInfo? Parse(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
     {
         if (_comicVineParser.IsApplicable(path, type))
         {
-            return _comicVineParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path));
+            return _comicVineParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path)).Info;
         }
         if (_imageParser.IsApplicable(path, type))
         {
-            return _imageParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path));
+            return _imageParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path)).Info;
         }
         if (_bookParser.IsApplicable(path, type))
         {
-            return _bookParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path));
+            return _bookParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path)).Info;
         }
         if (_pdfParser.IsApplicable(path, type))
         {
-            return _pdfParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path));
+            return _pdfParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path)).Info;
         }
         if (_basicParser.IsApplicable(path, type))
         {
-            return _basicParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path));
+            return _basicParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path)).Info;
         }
 
         return null;
     }
 
-    public ParserInfo ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+    public ParserInfo? ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
     {
         return Parse(path, rootPath, libraryRoot, type, enableMetadata);
     }
@@ -691,7 +691,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             _inner = new MockReadingItemService(directoryService, bookService);
         }
 
-        public ParserInfo ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+        public ParserInfo? ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
         {
             Interlocked.Increment(ref _totalCalls);
             var running = Interlocked.Increment(ref _current);
@@ -713,11 +713,6 @@ public class ParseScannedFilesTests: AbstractDbTest
                 Interlocked.Decrement(ref _current);
             }
         }
-
-        public ParserInfo Parse(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
-            => _inner.Parse(path, rootPath, libraryRoot, type, enableMetadata);
-
-        public ComicInfo GetComicInfo(string filePath) => _inner.GetComicInfo(filePath);
 
         public int GetNumberOfPages(string filePath, MangaFormat format) => _inner.GetNumberOfPages(filePath, format);
 

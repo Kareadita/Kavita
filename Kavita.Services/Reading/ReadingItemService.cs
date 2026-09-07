@@ -76,8 +76,8 @@ public class ReadingItemService : IReadingItemService
     {
         try
         {
-            var info = Parse(path, rootPath, libraryRoot, type, enableMetadata);
-            if (info == null)
+            var parseResult = Parse(path, rootPath, libraryRoot, type, enableMetadata);
+            if (!parseResult.Success)
             {
                 _logger.LogError("Unable to parse any meaningful information out of file {FilePath}", path);
                 _mediaErrorService.ReportMediaIssue(Path.GetFileName(path), MediaErrorProducer.Scanner,
@@ -86,7 +86,7 @@ public class ReadingItemService : IReadingItemService
                 return null;
             }
 
-            return info;
+            return parseResult.Info;
         }
         catch (Exception ex)
         {
@@ -180,10 +180,11 @@ public class ReadingItemService : IReadingItemService
     /// </summary>
     /// <param name="path"></param>
     /// <param name="rootPath"></param>
+    /// <param name="libraryRoot"></param>
     /// <param name="type"></param>
     /// <param name="enableMetadata"></param>
     /// <returns></returns>
-    private ParserInfo? Parse(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+    private ParseInfoResult Parse(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
     {
         if (_comicVineParser.IsApplicable(path, type))
         {
