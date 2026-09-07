@@ -450,10 +450,10 @@ export class VolumeDetailComponent implements OnInit {
 
   openEditModal() {
     const ref = this.modalService.open(EditVolumeModalComponent);
-    ref.componentInstance.volume = this.volume();
-    ref.componentInstance.libraryType = this.libraryType();
-    ref.componentInstance.libraryId = this.libraryId();
-    ref.componentInstance.seriesId = this.seriesId();
+    ref.setInput('volume', this.volume());
+    ref.setInput('libraryType', this.libraryType());
+    ref.setInput('libraryId', this.libraryId());
+    ref.setInput('seriesId', this.seriesId());
 
     ref.closed.pipe(
       filter((res: ModalResult<Volume>) => res.success),

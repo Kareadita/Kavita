@@ -187,14 +187,15 @@ public class ChapterController(
     /// <returns></returns>
     [HttpPost("update")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult> UpdateChapterMetadata(UpdateChapterDto dto)
+    public async Task<ActionResult<ChapterDto>> UpdateChapterMetadata(UpdateChapterDto dto)
     {
+        var ct = HttpContext.RequestAborted;
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.Id,
-            ChapterIncludes.People | ChapterIncludes.Genres | ChapterIncludes.Tags, HttpContext.RequestAborted);
+            ChapterIncludes.People | ChapterIncludes.Genres | ChapterIncludes.Tags, ct);
         if (chapter == null)
             return BadRequest(await localizationService.TranslateAsync(UserId, "chapter-doesnt-exist"));
 
-        var seriesId = await unitOfWork.ChapterRepository.GetSeriesIdForChapter(chapter.Id, HttpContext.RequestAborted);
+        var seriesId = await unitOfWork.ChapterRepository.GetSeriesIdForChapter(chapter.Id, ct);
 
         if (chapter.AgeRating != dto.AgeRating)
         {
@@ -412,9 +413,9 @@ public class ChapterController(
                 false, HttpContext.RequestAborted);
         }
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
-        return Ok();
+        return Ok(await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapter.Id, UserId, ct));
     }
 
 

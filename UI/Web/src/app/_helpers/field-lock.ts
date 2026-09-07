@@ -6,7 +6,7 @@ export type LockGroup<K extends string> = Readonly<Record<K, FieldLock>>;
 
 /** Model keys whose entity counterpart `${K}Locked` actually exists */
 type LockableKeys<TModel, TEntity> = Extract<keyof TModel, string> &
-  {[P in keyof TEntity]: P extends `${infer Base}Locked` ? Base : never}[keyof TEntity];
+  {[P in keyof TEntity]: P extends `${infer Base}Locked` ? Base : any}[keyof TEntity];
 
 /**
  * A lock that turns itself on the first time the user edits the bound field and can also be set by hand (eg lock button or typeahead's [(locked)] binding)

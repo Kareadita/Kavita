@@ -29,7 +29,7 @@ import {ActionService} from "../../_services/action.service";
 import {DownloadService} from '../../shared/_services/download.service';
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
-import {concat} from "rxjs";
+import {map, of, switchMap} from "rxjs";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
@@ -284,17 +284,14 @@ export class EditChapterModalComponent implements OnInit {
     writeFieldLocks(payload, this.locks);
     writeNamedLocks(payload, this.personLocks);
 
-    const apis = [
-      this.chapterService.updateChapter(payload)
-    ];
-
-    const needsCoverUpdate = this.coverImageDirty || this.coverImageReset;
-    if (this.coverImageDirty) {
-      apis.push(this.uploadService.updateChapterCoverImage(this.chapter().id, this.selectedCover, true));
-    }
-
-    concat(...apis).subscribe(() => {
-      this.modal.close(modalSaved(payload, needsCoverUpdate));
+    this.chapterService.updateChapter(payload).pipe(
+      switchMap(vol => this.coverImageDirty
+        ? this.uploadService.updateChapterCoverImage(this.chapter().id, this.selectedCover, true).pipe(map(() => vol))
+        : of(vol))
+    ).subscribe((c) => {
+      this.chapter.set(c);
+      const needsCoverUpdate = this.coverImageDirty || this.coverImageReset;
+      this.modal.close(modalSaved(this.chapter(), needsCoverUpdate));
     });
   }
 

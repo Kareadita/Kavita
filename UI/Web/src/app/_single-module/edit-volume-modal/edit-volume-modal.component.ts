@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  model,
+  signal,
+  untracked
+} from '@angular/core';
 import {form} from "@angular/forms/signals";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -25,15 +35,14 @@ import {DownloadService} from '../../shared/_services/download.service';
 import {DownloadEntityType} from '../../shared/_models/download-queue-item';
 import {LibraryType} from "../../_models/library/library";
 import {PersonRole} from "../../_models/metadata/person";
-import {concat} from "rxjs";
-import {MangaFile} from "../../_models/manga-file";
+import {map, of, switchMap} from "rxjs";
 import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../_services/action-factory.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
 import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
 import {VolumeService} from "../../_services/volume.service";
-import {UpdateVolume} from "../../_models/update-volume";
+import {UpdateVolumeRequest} from "../../_models/update-volume-request";
 import {Tabs} from "../../_models/tabs";
 import {
   applyExternalMetadataIdRules,
@@ -42,6 +51,7 @@ import {
 import {EditModalShellComponent} from "../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../shared/_directive/edit-tab.directive";
 import {MangaFormat} from "../../_models/manga-format";
+import {lockGroup, writeFieldLocks} from "../../_helpers/field-lock";
 
 interface FormModel {
   coverImageLocked: boolean;
@@ -54,6 +64,8 @@ interface FormModel {
   mangaBakaId: number;
   cbrId: number;
 }
+
+const blacklist = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 
 
 @Component({
@@ -77,12 +89,11 @@ interface FormModel {
   styleUrl: './edit-volume-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditVolumeModalComponent implements OnInit {
+export class EditVolumeModalComponent {
   public readonly modal = inject(NgbActiveModal);
   public readonly utilityService = inject(UtilityService);
   public readonly imageService = inject(ImageService);
   private readonly uploadService = inject(UploadService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   public readonly accountService = inject(AccountService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
@@ -91,16 +102,16 @@ export class EditVolumeModalComponent implements OnInit {
   protected readonly breakpointService = inject(BreakpointService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
-  @Input({required: true}) volume!: Volume;
-  @Input({required: true}) libraryType!: LibraryType;
-  @Input({required: true}) libraryId!: number;
-  @Input({required: true}) seriesId!: number;
+  volume = model.required<Volume>();
+  libraryType = input.required<LibraryType>();
+  libraryId = input.required<number>();
+  seriesId = input.required<number>();
 
-  activeId = Tabs.Info;
-  selectedCover: string = '';
-  coverImageReset = false;
-  coverImageDirty = false;
-  chooserConfig = signal<CoverImageChooserConfig>({});
+  activeId = signal<Tabs>(Tabs.Info);
+
+  private selectedCover: string = '';
+  private coverImageReset = false;
+  private coverImageDirty = false;
 
   private readonly formModel = signal<FormModel>({
     coverImageLocked: false,
@@ -115,50 +126,54 @@ export class EditVolumeModalComponent implements OnInit {
   formGroup = form(this.formModel, p => {
     applyExternalMetadataIdRules(p);
   });
+  protected readonly locks = lockGroup(this.formGroup, () => this.volume(), [
+    'coverImage',
+  ]);
+  protected readonly chooserConfig = computed<CoverImageChooserConfig>(() => ({
+    ...this.coverChooserConfigFactory.forVolume(this.volume(), this.libraryType()),
+    isLocked: this.locks.coverImage()
+  }));
 
-  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType), this.blacklist);
-  /**
-   * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
-   */
-  initVolume!: Volume;
-  size: number = 0;
-  files: Array<MangaFile> = [];
+  tasks = computed(() => {
+    return this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.seriesId(), this.libraryId(), this.libraryType()), blacklist);
+  });
+
+  files = computed(() => {
+    const vol = this.volume();
+    if (!vol) return [];
+
+    return vol.chapters.flatMap(c => c.files);
+  });
+  size = computed(() => {
+    return this.files().reduce((sum, v) => sum + v.bytes, 0);
+  });
 
   constructor() {
     if (!this.accountService.hasAdminRole()) {
-      this.activeId = Tabs.Info;
-      this.cdRef.markForCheck();
+      this.activeId.set(Tabs.Info);
     }
-  }
 
-  get blacklist() {
-    return [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
-  }
-
-
-  ngOnInit() {
-    this.initVolume = Object.assign({}, this.volume);
-
-    this.files = this.volume.chapters.flatMap(c => c.files);
-    this.size = this.files.reduce((sum, v) => sum + v.bytes, 0);
-
-    this.formModel.set({
-      coverImageLocked: this.volume.coverImageLocked,
-      aniListId: this.volume.aniListId,
-      malId: this.volume.malId,
-      hardcoverId: this.volume.hardcoverId,
-      metronId: this.volume.metronId,
-      comicVineId: this.volume.comicVineId,
-      mangaBakaId: this.volume.mangaBakaId,
-      cbrId: this.volume.cbrId,
+    effect(() => {
+      untracked(() => {
+        this.formModel.set({
+          coverImageLocked: this.volume().coverImageLocked,
+          aniListId: this.volume().aniListId,
+          malId: this.volume().malId,
+          hardcoverId: this.volume().hardcoverId,
+          metronId: this.volume().metronId,
+          comicVineId: this.volume().comicVineId,
+          mangaBakaId: this.volume().mangaBakaId,
+          cbrId: this.volume().cbrId,
+        });
+      });
+      this.locks.coverImage.set(this.volume().coverImageLocked);
     });
-
-    this.chooserConfig.set(this.coverChooserConfigFactory.forVolume(this.volume, this.libraryType));
   }
+
 
   close() {
     if (this.coverImageReset) {
-      this.modal.close(modalSaved(this.volume, true));
+      this.modal.close(modalSaved(this.volume(), true));
     } else {
       this.modal.dismiss();
     }
@@ -167,19 +182,17 @@ export class EditVolumeModalComponent implements OnInit {
   save() {
     const model = this.formModel();
 
-    const updateData = {id: this.volume.id, ...model} as UpdateVolume;
+    const updateData = {id: this.volume().id, ...model} as UpdateVolumeRequest;
+    writeFieldLocks(updateData, this.locks);
 
-    const apis = [
-      this.volumeService.updateVolume(updateData)
-    ];
-
-    if (this.coverImageDirty) {
-      apis.push(this.uploadService.updateVolumeCoverImage(this.volume.id, this.selectedCover, true));
-    }
-
-    concat(...apis).subscribe(() => {
+    this.volumeService.updateVolume(updateData).pipe(
+      switchMap(vol => this.coverImageDirty
+        ? this.uploadService.updateVolumeCoverImage(this.volume().id, this.selectedCover, true).pipe(map(() => vol))
+        : of(vol))
+    ).subscribe((v) => {
+      this.volume.set(v);
       const needsCoverUpdate = this.coverImageDirty || this.coverImageReset;
-      this.modal.close(modalSaved(this.volume, needsCoverUpdate));
+      this.modal.close(modalSaved(this.volume(), needsCoverUpdate));
     });
   }
 
@@ -187,25 +200,23 @@ export class EditVolumeModalComponent implements OnInit {
   async runTask(action: ActionItem<Volume>) {
     switch (action.action) {
       case Action.MarkAsRead:
-        this.actionService.markVolumeAsRead(this.seriesId, this.volume, (p) => {
-          this.volume.pagesRead = p.pagesRead;
-          this.cdRef.markForCheck();
+        this.actionService.markVolumeAsRead(this.seriesId(), this.volume(), (p) => {
+          this.volume.update(c => ({...c, pagesRead: p.pagesRead}));
         });
         break;
       case Action.MarkAsUnread:
-        this.actionService.markVolumeAsUnread(this.seriesId, this.volume, (p) => {
-          this.volume.pagesRead = 0;
-          this.cdRef.markForCheck();
+        this.actionService.markVolumeAsUnread(this.seriesId(), this.volume(), (p) => {
+          this.volume.update(c => ({...c, pagesRead: 0}));
         });
         break;
       case Action.Delete:
-        await this.actionService.deleteVolume(this.volume.id, (b) => {
+        await this.actionService.deleteVolume(this.volume().id, (b) => {
           if (!b) return;
-          this.modal.close(modalDeleted(this.volume));
+          this.modal.close(modalDeleted(this.volume()));
         });
         break;
       case Action.Download:
-        this.downloadService.download(DownloadEntityType.Volume, this.volume, this.libraryId, this.seriesId);
+        this.downloadService.download(DownloadEntityType.Volume, this.volume(), this.libraryId(), this.seriesId());
         break;
     }
   }
@@ -213,19 +224,17 @@ export class EditVolumeModalComponent implements OnInit {
   handleCoverChanged(event: { isDirty: boolean; fileName: string }) {
     this.coverImageDirty = event.isDirty;
     this.selectedCover = event.fileName;
-    this.cdRef.markForCheck();
   }
 
   handleReset() {
     this.coverImageReset = true;
     this.formModel.update(m => ({...m, coverImageLocked: false}));
-    this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
+    this.locks.coverImage.set(false);
   }
 
   changeTab(tab?: Tabs) {
     if (!tab) return;
-    this.activeId = tab;
-    this.cdRef.markForCheck();
+    this.activeId.set(tab);
   }
 
   protected readonly Tabs = Tabs;

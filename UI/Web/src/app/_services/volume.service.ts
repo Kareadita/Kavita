@@ -2,8 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
 import {Volume} from "../_models/volume";
-import {TextResonse} from "../_types/text-response";
-import {UpdateVolume} from "../_models/update-volume";
+import {UpdateVolumeRequest} from "../_models/update-volume-request";
 
 @Injectable({
   providedIn: 'root'
@@ -26,8 +25,8 @@ export class VolumeService {
     return this.httpClient.post<boolean>(this.baseUrl + "volume/multiple", volumeIds)
   }
 
-  updateVolume(volume: UpdateVolume) {
-    return this.httpClient.post(this.baseUrl + 'volume/update', volume, TextResonse);
+  updateVolume(volume: UpdateVolumeRequest) {
+    return this.httpClient.post<Volume>(this.baseUrl + 'volume/update', volume);
   }
 
 }
