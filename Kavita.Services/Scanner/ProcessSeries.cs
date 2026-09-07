@@ -19,6 +19,7 @@ using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
+using Kavita.Database.Extensions;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.SignalR;
@@ -190,9 +191,10 @@ public class ProcessSeries(
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    logger.LogCritical(ex,
-                        "[ScannerService] There was an issue writing to the database for series {SeriesName}",
-                        series.Name);
+                    #pragma warning disable S6667
+                    logger.LogCritical("[ScannerService] There was an issue writing to the database for series {SeriesName}", series.Name);
+                    #pragma warning restore S6667
+                    logger.LogDbUpdateConcurrencyException(ex);
                     await eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series.OriginalName}",
                             ex.Message));
