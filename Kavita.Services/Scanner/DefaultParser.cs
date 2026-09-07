@@ -9,11 +9,11 @@ namespace Kavita.Services.Scanner;
 
 public sealed record ParseInfoResult
 {
-    public ParserInfo? Info { get; init; }
+    public ParserInfo? Info { get; }
     /// <summary>
     /// False only if the parse failed; Skipped parses are success with a null <see cref="Info"/>
     /// </summary>
-    public bool Success { get; init; }
+    public bool Success { get; }
 
     private ParseInfoResult(ParserInfo? info, bool success)
     {
@@ -23,16 +23,14 @@ public sealed record ParseInfoResult
 
     private static ParseInfoResult SuccessFullParse(ParserInfo? info) => new(info, true);
     public static ParseInfoResult SkippedParse() => new(null, true);
-    public static ParseInfoResult FailedParse() => new(null, false);
-    public static ParseInfoResult FromParserInfo(ParserInfo? info) => string.IsNullOrEmpty(info?.Series) ? FailedParse() : SuccessFullParse(info);
+    public static ParseInfoResult FailedParse(ParserInfo? info = null) => new(info, false);
+    public static ParseInfoResult FromParserInfo(ParserInfo? info) => string.IsNullOrEmpty(info?.Series) ? FailedParse(info) : SuccessFullParse(info);
 
 }
 
 public interface IDefaultParser
 {
     ParseInfoResult Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null);
-    void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, ref ParserInfo ret);
-    bool IsApplicable(string filePath, LibraryType type);
 }
 
 /// <summary>

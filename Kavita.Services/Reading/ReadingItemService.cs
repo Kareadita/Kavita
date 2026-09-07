@@ -79,7 +79,9 @@ public class ReadingItemService : IReadingItemService
             var parseResult = Parse(path, rootPath, libraryRoot, type, enableMetadata);
             if (!parseResult.Success)
             {
-                _logger.LogError("Unable to parse any meaningful information out of file {FilePath}", path);
+                _logger.LogError("Unable to parse any meaningful information out of file {FilePath}. Found {@ParserInfo}",
+                    path, parseResult.Info);
+
                 _mediaErrorService.ReportMediaIssue(Path.GetFileName(path), MediaErrorProducer.Scanner,
                     "Unable to parse any meaningful information out of file", string.Empty);
 
