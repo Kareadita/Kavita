@@ -19,7 +19,7 @@ import {LibraryType} from "../../_models/library/library";
 import {TypeaheadConfig} from "../../typeahead/_models/typeahead-config";
 import {Tag} from "../../_models/tag";
 import {Language} from "../../_models/metadata/language";
-import {Person, PersonRole} from "../../_models/metadata/person";
+import {allPeopleRoles, Person, PersonRole} from "../../_models/metadata/person";
 import {Genre} from "../../_models/metadata/genre";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {ImageService} from "../../_services/image.service";
@@ -64,13 +64,14 @@ import {TypeaheadConfigFactoryService} from "../../typeahead-config-factory.serv
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 import {form, FormField, min, required} from "@angular/forms/signals";
 import {IHasMetadataIds} from "../../_models/common/i-has-metadata-ids";
+import {IHasCast} from "../../_models/common/i-has-cast";
 import {lockGroup, standaloneLocks, writeFieldLocks, writeNamedLocks} from "../../_helpers/field-lock";
 
-type PersonLockKey = 'writerLocked' | 'characterLocked' | 'publisherLocked' | 'coverArtistLocked'
-  | 'pencillerLocked' | 'inkerLocked' | 'imprintLocked' | 'coloristLocked' | 'lettererLocked'
-  | 'editorLocked' | 'translatorLocked' | 'teamLocked' | 'locationLocked';
+type PersonLockKey = Exclude<Extract<keyof IHasCast, `${string}Locked`>, 'languageLocked'>;
+type PersonModelKey = Exclude<keyof IHasCast, `${string}Locked`>;
+type PersonFields = Record<PersonModelKey, Array<Person>>;
 
-interface FormModel extends IHasMetadataIds {
+interface FormModel extends IHasMetadataIds, PersonFields {
   titleName: string;
   sortOrder: number;
   summary: string;
@@ -93,21 +94,29 @@ interface FormModel extends IHasMetadataIds {
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 
-const personLockByRole: Record<PersonRole, PersonLockKey> = {
-  [PersonRole.Writer]: 'writerLocked',
-  [PersonRole.Penciller]: 'pencillerLocked',
-  [PersonRole.Inker]: 'inkerLocked',
-  [PersonRole.Colorist]: 'coloristLocked',
-  [PersonRole.Letterer]: 'lettererLocked',
-  [PersonRole.CoverArtist]: 'coverArtistLocked',
-  [PersonRole.Editor]: 'editorLocked',
-  [PersonRole.Publisher]: 'publisherLocked',
-  [PersonRole.Character]: 'characterLocked',
-  [PersonRole.Translator]: 'translatorLocked',
-  [PersonRole.Imprint]: 'imprintLocked',
-  [PersonRole.Team]: 'teamLocked',
-  [PersonRole.Location]: 'locationLocked',
+/** id is the typeahead's DOM id, referenced by its label, so it must stay as-is */
+const personFields: Record<PersonRole, {id: string; model: PersonModelKey; lock: PersonLockKey}> = {
+  [PersonRole.Writer]: {id: 'writer', model: 'writers', lock: 'writerLocked'},
+  [PersonRole.Penciller]: {id: 'penciller', model: 'pencillers', lock: 'pencillerLocked'},
+  [PersonRole.Inker]: {id: 'inker', model: 'inkers', lock: 'inkerLocked'},
+  [PersonRole.Colorist]: {id: 'colorist', model: 'colorists', lock: 'coloristLocked'},
+  [PersonRole.Letterer]: {id: 'letterer', model: 'letterers', lock: 'lettererLocked'},
+  [PersonRole.CoverArtist]: {id: 'cover-artist', model: 'coverArtists', lock: 'coverArtistLocked'},
+  [PersonRole.Editor]: {id: 'editor', model: 'editors', lock: 'editorLocked'},
+  [PersonRole.Publisher]: {id: 'publisher', model: 'publishers', lock: 'publisherLocked'},
+  [PersonRole.Character]: {id: 'character', model: 'characters', lock: 'characterLocked'},
+  [PersonRole.Translator]: {id: 'translator', model: 'translators', lock: 'translatorLocked'},
+  [PersonRole.Imprint]: {id: 'imprint', model: 'imprints', lock: 'imprintLocked'},
+  [PersonRole.Team]: {id: 'teams', model: 'teams', lock: 'teamLocked'},
+  [PersonRole.Location]: {id: 'locations', model: 'locations', lock: 'locationLocked'},
 };
+
+function personFieldsFrom(entity: Partial<IHasCast>): PersonFields {
+  return Object.values(personFields).reduce((acc, field) => {
+    acc[field.model] = entity[field.model] ?? [];
+    return acc;
+  }, {} as PersonFields);
+}
 
 @Component({
   selector: 'app-edit-chapter-modal',
@@ -181,7 +190,8 @@ export class EditChapterModalComponent implements OnInit {
     sortOrder: 0,
     summary: '',
     tags: [],
-    titleName: ''
+    titleName: '',
+    ...personFieldsFrom({})
   });
   protected readonly formGroup = form(this.formModel, p => {
     required(p.sortOrder);
@@ -196,11 +206,8 @@ export class EditChapterModalComponent implements OnInit {
     'titleName', 'sortOrder', 'isbn', 'ageRating', 'summary',
     'releaseDate', 'genres', 'tags', 'language', 'coverImage',
   ]);
-  protected readonly personLocks = standaloneLocks(() => this.chapter(), [
-    'writerLocked', 'characterLocked', 'publisherLocked', 'coverArtistLocked',
-    'pencillerLocked', 'inkerLocked', 'imprintLocked', 'coloristLocked',
-    'lettererLocked', 'editorLocked', 'translatorLocked', 'teamLocked', 'locationLocked',
-  ]);
+  protected readonly personLocks = standaloneLocks(() => this.chapter(),
+    Object.values(personFields).map(f => f.lock));
 
   protected readonly tagsSettings = computed(() =>
     this.typeaheadSettingsFactory.forTag({id: 'tags', savedData: this.chapter().tags ?? []}));
@@ -250,6 +257,7 @@ export class EditChapterModalComponent implements OnInit {
       mangaBakaId: this.chapter().mangaBakaId,
       cbrId: this.chapter().cbrId,
       coverImage: this.chapter().coverImage,
+      ...personFieldsFrom(this.chapter()),
     });
 
     this.setupPersonTypeahead();
@@ -317,32 +325,18 @@ export class EditChapterModalComponent implements OnInit {
   }
 
   setupPersonTypeahead() {
-    const roles: ReadonlyArray<[string, PersonRole, Array<Person> | undefined]> = [
-      ['writer', PersonRole.Writer, this.chapter().writers],
-      ['character', PersonRole.Character, this.chapter().characters],
-      ['colorist', PersonRole.Colorist, this.chapter().colorists],
-      ['cover-artist', PersonRole.CoverArtist, this.chapter().coverArtists],
-      ['editor', PersonRole.Editor, this.chapter().editors],
-      ['inker', PersonRole.Inker, this.chapter().inkers],
-      ['letterer', PersonRole.Letterer, this.chapter().letterers],
-      ['penciller', PersonRole.Penciller, this.chapter().pencillers],
-      ['publisher', PersonRole.Publisher, this.chapter().publishers],
-      ['imprint', PersonRole.Imprint, this.chapter().imprints],
-      ['translator', PersonRole.Translator, this.chapter().translators],
-      ['teams', PersonRole.Team, this.chapter().teams],
-      ['locations', PersonRole.Location, this.chapter().locations],
-    ];
-
     this.metadataService.getAllPeople().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(people => {
       const settings: Partial<Record<PersonRole, TypeaheadConfig<Person>>> = {};
 
-      for (const [id, role, preset] of roles) {
-        const personSettings = this.typeaheadSettingsFactory.forPerson({id, role});
+      for (const role of allPeopleRoles) {
+        const field = personFields[role];
+        const personSettings = this.typeaheadSettingsFactory.forPerson({id: field.id, role});
+        const preset = this.formGroup[field.model]().value();
 
-        if (preset && preset.length > 0) {
+        if (preset.length > 0) {
           const presetIds = preset.map(p => p.id);
           personSettings.savedData = people.filter(person => presetIds.includes(person.id));
-          this.metadataService.updatePerson(this.chapter(), personSettings.savedData, role);
+          this.formGroup[field.model]().value.set(personSettings.savedData);
         }
 
         settings[role] = personSettings;
@@ -363,8 +357,9 @@ export class EditChapterModalComponent implements OnInit {
   }
 
   updatePerson(persons: Person[], role: PersonRole) {
-    this.metadataService.updatePerson(this.chapter(), persons, role);
-    this.personLocks[personLockByRole[role]].set(true);
+    const field = personFields[role];
+    this.formGroup[field.model]().value.set(persons);
+    this.personLocks[field.lock].set(true);
   }
 
   updateLanguage(language: Array<Language>) {
