@@ -2158,6 +2158,45 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         Assert.Equal(expectedStatus, postSeries.Metadata.PublicationStatus);
     }
 
+    [Fact]
+    public async Task DeterminePublicationStatus_CorrectCount_OneBookEpubPdfSeries()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("The Tunnel to Summer, the Exit of Goodbyes")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder(Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(Parser.LooseLeafVolume)
+                    .WithTitle("The Tunnel to Summer, the Exit of Goodbyes")
+                    .Build())
+                .Build())
+            .Build();
+
+        context.Series.Attach(series);
+        await unitOfWork.CommitAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePublicationStatus = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto
+        {
+            Name = series.Name,
+            Volumes = 1,
+            Chapters = 6
+        }, series.Id);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(1, postSeries.Metadata.TotalCount);
+        Assert.Equal(1, postSeries.Metadata.MaxCount);
+        Assert.Equal(PublicationStatus.Completed, postSeries.Metadata.PublicationStatus);
+    }
+
     #endregion
 
     #region Age Rating
