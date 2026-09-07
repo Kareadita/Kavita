@@ -38,9 +38,10 @@ import {Action} from "../../../_models/actionables/action";
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {Tabs} from "../../../_models/tabs";
 import {
-  addMetadataIdControls,
+  applyExternalMetadataIdRules,
   EditExternalMetadataFormComponent
 } from "../../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
+import {form, maxLength, minLength, pattern, required} from "@angular/forms/signals";
 import {MangaFormat} from "../../../_models/manga-format";
 import {LibraryType} from "../../../_models/library/library";
 import {
@@ -72,6 +73,29 @@ import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
+
+interface FormModel {
+  id: number;
+  summary: string;
+  name: string;
+  localizedName: string;
+  sortName: string;
+  rating: number;
+  coverImageLocked: boolean;
+  ageRating: string;
+  publicationStatus: string;
+  language: string;
+  releaseYear: string;
+  metadataProviderOverride: MetadataProvider | null;
+
+  aniListId: number;
+  malId: number;
+  hardcoverId: number;
+  metronId: number;
+  comicVineId: string | null;
+  mangaBakaId: number;
+  cbrId: number;
+}
 
 @Component({
   selector: 'app-edit-series-modal',
@@ -169,6 +193,36 @@ export class EditSeriesModalComponent implements OnInit {
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
 
+  private readonly formModel = signal<FormModel>({
+    id: 0,
+    summary: '',
+    name: '',
+    localizedName: '',
+    sortName: '',
+    rating: 0,
+    coverImageLocked: false,
+    ageRating: '',
+    publicationStatus: '',
+    language: '',
+    releaseYear: '',
+    metadataProviderOverride: null,
+    aniListId: 0,
+    malId: 0,
+    hardcoverId: 0,
+    metronId: 0,
+    comicVineId: null,
+    mangaBakaId: 0,
+    cbrId: 0
+  });
+  formGroup = form(this.formModel, p => {
+    required(p.name);
+    required(p.sortName);
+    minLength(p.releaseYear, 4);
+    maxLength(p.releaseYear, 4);
+    pattern(p.releaseYear, /([1-9]\d{3})|[0]{1}/);
+    applyExternalMetadataIdRules(p);
+  });
+
   get blacklist() {
     return [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, Action.SendTo,
       Action.AddToWantToReadList, Action.AddToCollection, Action.AddToReadingList, Action.RemoveFromWantToReadList,
@@ -207,7 +261,23 @@ export class EditSeriesModalComponent implements OnInit {
       metadataProviderOverride: new FormControl<MetadataProvider | null>(this.series.metadataProviderOverride ?? null, []),
     });
 
-    addMetadataIdControls(this.editSeriesForm, this.series);
+    this.formModel.set({
+      ...this.formModel(),
+      id: this.series.id,
+      name: this.series.name,
+      localizedName: this.series.localizedName,
+      sortName: this.series.sortName,
+      rating: this.series.userRating,
+      coverImageLocked: this.series.coverImageLocked,
+      metadataProviderOverride: this.series.metadataProviderOverride ?? null,
+      aniListId: this.series.aniListId,
+      malId: this.series.malId,
+      hardcoverId: this.series.hardcoverId,
+      metronId: this.series.metronId,
+      comicVineId: this.series.comicVineId,
+      mangaBakaId: this.series.mangaBakaId,
+      cbrId: this.series.cbrId,
+    });
 
     this.cdRef.markForCheck();
 
@@ -234,6 +304,15 @@ export class EditSeriesModalComponent implements OnInit {
         this.editSeriesForm.get('publicationStatus')?.patchValue(this.metadata.publicationStatus);
         this.editSeriesForm.get('language')?.patchValue(this.metadata.language);
         this.editSeriesForm.get('releaseYear')?.patchValue(this.metadata.releaseYear);
+
+        this.formModel.update(m => ({
+          ...m,
+          summary: this.metadata.summary,
+          ageRating: this.metadata.ageRating.toString(),
+          publicationStatus: this.metadata.publicationStatus.toString(),
+          language: this.metadata.language,
+          releaseYear: this.metadata.releaseYear.toString(),
+        }));
 
         this.cdRef.markForCheck();
 
@@ -378,7 +457,8 @@ export class EditSeriesModalComponent implements OnInit {
 
 
   async save() {
-    const model = this.editSeriesForm.getRawValue();
+    // Ids live on the signal form, everything else is still on editSeriesForm
+    const model = {...this.formModel(), ...this.editSeriesForm.getRawValue()};
 
     const nameChanged = this.editSeriesForm.get('name')?.dirty ?? false;
 

@@ -3,6 +3,7 @@ import {
   Component,
   contentChild,
   contentChildren,
+  DestroyRef,
   inject,
   input,
   model,
@@ -17,6 +18,7 @@ import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-b
 import {NgTemplateOutlet} from "@angular/common";
 import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {AnyField, toFieldView} from "../_models/field-view";
 
 @Component({
   selector: 'app-edit-modal-shell',
@@ -37,11 +39,18 @@ import {TranslocoDirective} from "@jsverse/transloco";
 })
 export class EditModalShellComponent {
   private readonly breakpointService = inject(BreakpointService);
+  private readonly destroyRef = inject(DestroyRef);
 
   translocoPrefix = input.required<string>();
   // eslint-disable-next-line @angular-eslint/no-input-rename
   modalTitle = input.required<string>({ alias: 'title' });
-  formGroup = input.required<FormGroup>();
+
+  /** @deprecated Use field instead */
+  formGroup = input<FormGroup>();
+  field = input.required<AnyField>();
+
+  private readonly fieldView = toFieldView(this.field, this.destroyRef);
+  protected readonly canSave = this.fieldView.valid;
 
   activeTabId = model<Tabs>();
 

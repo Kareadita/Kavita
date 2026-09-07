@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit, signal} from '@angular/core';
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {form} from "@angular/forms/signals";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -36,20 +36,30 @@ import {VolumeService} from "../../_services/volume.service";
 import {UpdateVolume} from "../../_models/update-volume";
 import {Tabs} from "../../_models/tabs";
 import {
-  addMetadataIdControls,
+  applyExternalMetadataIdRules,
   EditExternalMetadataFormComponent
 } from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {EditModalShellComponent} from "../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../shared/_directive/edit-tab.directive";
 import {MangaFormat} from "../../_models/manga-format";
 
+interface FormModel {
+  coverImageLocked: boolean;
+
+  aniListId: number;
+  malId: number;
+  hardcoverId: number;
+  metronId: number;
+  comicVineId: string | null;
+  mangaBakaId: number;
+  cbrId: number;
+}
+
 
 @Component({
   selector: 'app-edit-volume-modal',
   imports: [
-    FormsModule,
     TranslocoDirective,
-    ReactiveFormsModule,
     SettingItemComponent,
     EntityTitleComponent,
     SettingButtonComponent,
@@ -87,11 +97,24 @@ export class EditVolumeModalComponent implements OnInit {
   @Input({required: true}) seriesId!: number;
 
   activeId = Tabs.Info;
-  editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
   coverImageDirty = false;
   chooserConfig = signal<CoverImageChooserConfig>({});
+
+  private readonly formModel = signal<FormModel>({
+    coverImageLocked: false,
+    aniListId: 0,
+    malId: 0,
+    hardcoverId: 0,
+    metronId: 0,
+    comicVineId: null,
+    mangaBakaId: 0,
+    cbrId: 0
+  });
+  formGroup = form(this.formModel, p => {
+    applyExternalMetadataIdRules(p);
+  });
 
   tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType), this.blacklist);
   /**
@@ -119,8 +142,16 @@ export class EditVolumeModalComponent implements OnInit {
     this.files = this.volume.chapters.flatMap(c => c.files);
     this.size = this.files.reduce((sum, v) => sum + v.bytes, 0);
 
-    this.editForm.addControl('coverImageLocked', new FormControl(this.volume.coverImageLocked, []));
-    addMetadataIdControls(this.editForm, this.volume);
+    this.formModel.set({
+      coverImageLocked: this.volume.coverImageLocked,
+      aniListId: this.volume.aniListId,
+      malId: this.volume.malId,
+      hardcoverId: this.volume.hardcoverId,
+      metronId: this.volume.metronId,
+      comicVineId: this.volume.comicVineId,
+      mangaBakaId: this.volume.mangaBakaId,
+      cbrId: this.volume.cbrId,
+    });
 
     this.chooserConfig.set(this.coverChooserConfigFactory.forVolume(this.volume, this.libraryType));
   }
@@ -134,7 +165,7 @@ export class EditVolumeModalComponent implements OnInit {
   }
 
   save() {
-    const model = this.editForm.getRawValue();
+    const model = this.formModel();
 
     const updateData = {id: this.volume.id, ...model} as UpdateVolume;
 
@@ -187,7 +218,7 @@ export class EditVolumeModalComponent implements OnInit {
 
   handleReset() {
     this.coverImageReset = true;
-    this.editForm.patchValue({ coverImageLocked: false });
+    this.formModel.update(m => ({...m, coverImageLocked: false}));
     this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
   }
 

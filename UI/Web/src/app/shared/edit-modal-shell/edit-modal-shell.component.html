@@ -14,7 +14,7 @@
 
     <div class="modal-body scrollable-modal" [class.d-flex]="!isMobile()">
 
-      <form [formGroup]="formGroup()" class="w-100 d-flex" [class.flex-column]="isMobile()">
+      <form novalidate class="w-100 d-flex" [class.flex-column]="isMobile()">
 
         <ul ngbNav #nav="ngbNav" [activeId]="activeTabId()" class="nav-pills"
             [orientation]="isMobile() ? 'horizontal' : 'vertical'" style="min-width: 8.4375rem;">
@@ -38,7 +38,7 @@
 
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" (click)="close.emit()">{{ t('close') }}</button>
-      <button type="submit" class="btn btn-primary" [disabled]="!formGroup().valid" (click)="save.emit()">{{ t('save') }}</button>
+      <button type="submit" class="btn btn-primary" [disabled]="!canSave()" (click)="save.emit()">{{ t('save') }}</button>
     </div>
 
   </div>

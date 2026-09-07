@@ -20,6 +20,7 @@ export interface FieldView {
   touched: Signal<boolean>;
   dirty: Signal<boolean>;
   invalid: Signal<boolean>;
+  valid: Signal<boolean>;
 }
 
 /** signal forms use camelCase and localization doesn't, so we provide a mapping */
@@ -97,6 +98,10 @@ export function toFieldView(source: Signal<AnyField | null>, destroyRef: Destroy
     invalid: computed(() => {
       if (source() === null) return false;
       return tree() ? state().invalid() : fromControl(c => c.invalid)();
+    }),
+    valid: computed(() => {
+      if (source() === null) return true;
+      return tree() ? state().valid() : fromControl(c => c.valid)();
     }),
   }
 

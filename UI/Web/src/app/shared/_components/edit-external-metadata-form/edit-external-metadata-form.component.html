@@ -1,26 +1,20 @@
 <ng-container *transloco="let t; prefix: 'edit-external-metadata-form'">
-  @let formGroup = form();
-  <form [formGroup]="formGroup">
-    <div class="row">
-      @for(key of metadataIds; track key) {
-        @if (formGroup.get(key); as formControl) {
-          <div class="col-md-6 col-sm-12 mb-3">
-
-            <app-setting-item [title]="t(key + '-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formControl">
-              <ng-template #view>
-                <!--Dynamic type will not properly translate the numeric input from a string -->
-                <div class="input-group">
-                  @if(getKeyInputType(key) === 'number') {
-                    <input class="form-control" type="number" [formControlName]="key" inputmode="numeric" [appFormField]="formControl" />
-                  } @else {
-                    <input class="form-control" type="text" [formControlName]="key" [appFormField]="formControl" />
-                  }
-                </div>
-              </ng-template>
-            </app-setting-item>
-          </div>
-        }
-      }
-    </div>
-  </form>
+  <div class="row">
+    @for(item of subFields(); track item.key) {
+      <div class="col-md-6 col-sm-12 mb-3">
+        <app-setting-item [title]="t(item.key + '-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="item.field">
+          <ng-template #view>
+            <!--Dynamic type will not properly translate the numeric input from a string -->
+            <div class="input-group">
+              @if(getKeyInputType(item.key) === 'number') {
+                <input class="form-control" type="number" [formField]="item.numberField" inputmode="numeric" [appFormField]="item.field" />
+              } @else {
+                <input class="form-control" type="text" [formField]="item.textField" [appFormField]="item.field" />
+              }
+            </div>
+          </ng-template>
+        </app-setting-item>
+      </div>
+    }
+  </div>
 </ng-container>

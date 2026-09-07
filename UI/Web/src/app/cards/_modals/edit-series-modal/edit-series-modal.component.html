@@ -8,6 +8,7 @@
     [activeTabId]="active"
     (activeTabIdChange)="changeTab($event)"
     [formGroup]="editSeriesForm"
+    [field]="editSeriesForm"
   >
 
     @if (series) {
@@ -227,7 +228,7 @@
             </app-setting-item>
           </div>
         }
-        <app-edit-external-metadata-form [form]="editSeriesForm" [entity]="series"/>
+        <app-edit-external-metadata-form [field]="formGroup"/>
       </ng-template>
     }
 

@@ -9,7 +9,7 @@ import {
   OnInit,
   signal
 } from '@angular/core';
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgClass, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -55,7 +55,7 @@ import {ActionFactoryService} from "../../_services/action-factory.service";
 import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
 import {Tabs} from "../../_models/tabs";
 import {
-  addMetadataIdControls,
+  applyExternalMetadataIdRules,
   EditExternalMetadataFormComponent
 } from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {NULL_DATE} from "../../_pipes/date-year-range.pipe";
@@ -64,9 +64,52 @@ import {EditModalShellComponent} from "../../shared/edit-modal-shell/edit-modal-
 import {EditTabDirective} from "../../shared/_directive/edit-tab.directive";
 import {TypeaheadConfigFactoryService} from "../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {form, FormField, min, required} from "@angular/forms/signals";
+import {IHasMetadataIds} from "../../_models/common/i-has-metadata-ids";
+import {lockGroup, standaloneLocks, writeFieldLocks, writeNamedLocks} from "../../_helpers/field-lock";
 
+type PersonLockKey = 'writerLocked' | 'characterLocked' | 'publisherLocked' | 'coverArtistLocked'
+  | 'pencillerLocked' | 'inkerLocked' | 'imprintLocked' | 'coloristLocked' | 'lettererLocked'
+  | 'editorLocked' | 'translatorLocked' | 'teamLocked' | 'locationLocked';
+
+interface FormModel extends IHasMetadataIds {
+  titleName: string;
+  sortOrder: number;
+  summary: string;
+  language: string;
+  isbn: string;
+  ageRating: string;
+  releaseDate: string;
+  genres: Genre[];
+  tags: Tag[];
+  coverImage: string;
+
+  aniListId: number;
+  malId: number;
+  hardcoverId: number;
+  metronId: number;
+  comicVineId: string | null;
+  mangaBakaId: number;
+  cbrId: number;
+}
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
+
+const personLockByRole: Record<PersonRole, PersonLockKey> = {
+  [PersonRole.Writer]: 'writerLocked',
+  [PersonRole.Penciller]: 'pencillerLocked',
+  [PersonRole.Inker]: 'inkerLocked',
+  [PersonRole.Colorist]: 'coloristLocked',
+  [PersonRole.Letterer]: 'lettererLocked',
+  [PersonRole.CoverArtist]: 'coverArtistLocked',
+  [PersonRole.Editor]: 'editorLocked',
+  [PersonRole.Publisher]: 'publisherLocked',
+  [PersonRole.Character]: 'characterLocked',
+  [PersonRole.Translator]: 'translatorLocked',
+  [PersonRole.Imprint]: 'imprintLocked',
+  [PersonRole.Team]: 'teamLocked',
+  [PersonRole.Location]: 'locationLocked',
+};
 
 @Component({
   selector: 'app-edit-chapter-modal',
@@ -93,6 +136,7 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     EditModalShellComponent,
     EditTabDirective,
     FormFieldDirective,
+    FormField,
 
   ],
   templateUrl: './edit-chapter-modal.component.html',
@@ -122,12 +166,35 @@ export class EditChapterModalComponent implements OnInit {
   @Input({required: true}) seriesId!: number;
 
   activeId = Tabs.General;
-  editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
   coverImageDirty = false;
   chooserConfig = signal<CoverImageChooserConfig>({});
 
+  private readonly formModel = signal<FormModel>({
+    ageRating: AgeRating.Unknown.toString(),
+    aniListId: 0,
+    cbrId: 0,
+    comicVineId: null,
+    coverImage: '',
+    genres: [],
+    hardcoverId: 0,
+    isbn: '',
+    language: '',
+    malId: 0,
+    mangaBakaId: 0,
+    metronId: 0,
+    releaseDate: '',
+    sortOrder: 0,
+    summary: '',
+    tags: [],
+    titleName: ''
+  });
+  formGroup = form(this.formModel, p => {
+    required(p.sortOrder);
+    min(p.sortOrder, 0);
+    applyExternalMetadataIdRules(p);
+  });
 
   tagsSettings = signal<TypeaheadConfig<Tag> | null>(null);
   languageSettings = signal<TypeaheadConfig<Language> | null>(null);
@@ -138,13 +205,18 @@ export class EditChapterModalComponent implements OnInit {
   genres: Genre[] = [];
   ageRatings: Array<AgeRatingDto> = [];
 
-  tasks = this.actionFactoryService.getActionablesForSettingsPage(
-    this.actionFactoryService.getChapterActions(this.seriesId, this.libraryId, this.libraryType), blackList);
-  /**
-   * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
-   */
-  initChapter!: Chapter;
+  tasks: Array<ActionItem<Chapter>> = [];
   size: number = 0;
+
+  protected readonly locks = lockGroup(this.formGroup, () => this.chapter, [
+    'titleName', 'sortOrder', 'isbn', 'ageRating', 'summary',
+    'releaseDate', 'genres', 'tags', 'language', 'coverImage',
+  ]);
+  protected readonly personLocks = standaloneLocks(() => this.chapter, [
+    'writerLocked', 'characterLocked', 'publisherLocked', 'coverArtistLocked',
+    'pencillerLocked', 'inkerLocked', 'imprintLocked', 'coloristLocked',
+    'lettererLocked', 'editorLocked', 'translatorLocked', 'teamLocked', 'locationLocked',
+  ]);
 
   get WebLinks() {
     if (this.chapter.webLinks === '') return [];
@@ -158,39 +230,16 @@ export class EditChapterModalComponent implements OnInit {
         this.cdRef.markForCheck();
       }
     });
+
   }
 
-
   ngOnInit() {
-    this.initChapter = Object.assign({}, this.chapter);
+    this.tasks = this.actionFactoryService.getActionablesForSettingsPage(
+      this.actionFactoryService.getChapterActions(this.seriesId, this.libraryId, this.libraryType), blackList);
 
     this.size = (<Chapter>this.chapter).files.reduce((sum, v) => sum + v.bytes, 0);
 
     this.chooserConfig.set(this.coverChooserConfigFactory.forChapter(this.chapter, this.libraryType, this.seriesId));
-
-    this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
-    this.editForm.addControl('sortOrder', new FormControl(Math.max(0, this.chapter.sortOrder), {
-      nonNullable: true,
-      validators: [Validators.required, Validators.min(0)],
-    }));
-    this.editForm.addControl('summary', new FormControl(this.chapter.summary || '', []));
-    this.editForm.addControl('language', new FormControl(this.chapter.language, []));
-    this.editForm.addControl('isbn', new FormControl(this.chapter.isbn, []));
-    this.editForm.addControl('ageRating', new FormControl(this.chapter.ageRating, []));
-    addMetadataIdControls(this.editForm, this.chapter);
-
-    if (this.chapter.releaseDate !== NULL_DATE) {
-      this.editForm.addControl('releaseDate', new FormControl(this.chapter.releaseDate.substring(0, 10), []));
-    } else {
-      this.editForm.addControl('releaseDate', new FormControl('', []));
-    }
-
-
-    this.editForm.addControl('genres', new FormControl(this.chapter.genres, []));
-    this.editForm.addControl('tags', new FormControl(this.chapter.tags, []));
-
-
-    this.editForm.addControl('coverImageLocked', new FormControl(this.chapter.coverImageLocked, []));
 
     this.languageSettings.set(this.typeaheadSettingsFactory.forLanguage({id: 'language', currentSelectedLanguage: this.chapter.language}));
 
@@ -199,40 +248,29 @@ export class EditChapterModalComponent implements OnInit {
       this.cdRef.markForCheck();
     });
 
-    this.editForm.get('titleName')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-      this.chapter.titleNameLocked = true;
-      this.cdRef.markForCheck();
-    });
-
-    this.editForm.get('sortOrder')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-      this.chapter.sortOrderLocked = true;
-      this.cdRef.markForCheck();
-    });
-
-    this.editForm.get('isbn')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-      this.chapter.isbnLocked = true;
-      this.cdRef.markForCheck();
-    });
-
-    this.editForm.get('ageRating')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-      this.chapter.ageRatingLocked = true;
-      this.cdRef.markForCheck();
-    });
-
-    this.editForm.get('summary')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-      this.chapter.summaryLocked = true;
-      this.cdRef.markForCheck();
-    });
-
-    this.editForm.get('releaseDate')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-      this.chapter.releaseDateLocked = true;
-      this.cdRef.markForCheck();
+    this.formModel.set({
+      titleName: this.chapter.titleName,
+      sortOrder: Math.max(0, this.chapter.sortOrder),
+      summary: this.chapter.summary || '',
+      language: this.chapter.language,
+      isbn: this.chapter.isbn,
+      ageRating: this.chapter.ageRating.toString(),
+      releaseDate: this.chapter.releaseDate !== NULL_DATE ? this.chapter.releaseDate.substring(0, 10) : '',
+      genres: this.chapter.genres ?? [],
+      tags: this.chapter.tags ?? [],
+      aniListId: this.chapter.aniListId,
+      malId: this.chapter.malId,
+      hardcoverId: this.chapter.hardcoverId,
+      metronId: this.chapter.metronId,
+      comicVineId: this.chapter.comicVineId,
+      mangaBakaId: this.chapter.mangaBakaId,
+      cbrId: this.chapter.cbrId,
+      coverImage: this.chapter.coverImage, // TODO: Validate this
     });
 
     this.setupTypeaheads();
 
   }
-
 
   close() {
     if (this.coverImageReset) {
@@ -243,30 +281,20 @@ export class EditChapterModalComponent implements OnInit {
   }
 
   save() {
-    const model = this.editForm.getRawValue();
+    const model = this.formModel();
 
-    // Patch in data from the model that is not typeahead (as those are updated during setting)
-    if (model.releaseDate === '') {
-      this.chapter.releaseDate = NULL_DATE;
-    } else {
-      this.chapter.releaseDate = model.releaseDate + 'T00:00:00';
-    }
+    const payload: Chapter = {
+      ...this.chapter,
+      ...model,
+      ageRating: parseInt(model.ageRating + '', 10) as AgeRating,
+      releaseDate: model.releaseDate === '' ? NULL_DATE : model.releaseDate + 'T00:00:00',
+    };
 
-    this.chapter.ageRating = parseInt(model.ageRating + '', 10) as AgeRating;
-    this.chapter.sortOrder = model.sortOrder;
-    this.chapter.titleName = model.titleName;
-    this.chapter.summary = model.summary;
-    this.chapter.isbn = model.isbn;
-    this.chapter.aniListId = model.aniListId;
-    this.chapter.comicVineId = model.comicVineId;
-    this.chapter.malId = model.malId;
-    this.chapter.hardcoverId = model.hardcoverId;
-    this.chapter.metronId = model.metronId;
-    this.chapter.language = model.language;
-
+    writeFieldLocks(payload, this.locks);
+    writeNamedLocks(payload, this.personLocks);
 
     const apis = [
-      this.chapterService.updateChapter(this.chapter)
+      this.chapterService.updateChapter(payload)
     ];
 
     const needsCoverUpdate = this.coverImageDirty || this.coverImageReset;
@@ -274,16 +302,9 @@ export class EditChapterModalComponent implements OnInit {
       apis.push(this.uploadService.updateChapterCoverImage(this.chapter.id, this.selectedCover, true));
     }
 
-    concat(...apis).subscribe(results => {
-      this.modal.close(modalSaved(model, needsCoverUpdate));
+    concat(...apis).subscribe(() => {
+      this.modal.close(modalSaved(payload, needsCoverUpdate));
     });
-  }
-
-  unlock(b: any, field: string) {
-    if (b) {
-      b[field] = !b[field];
-    }
-    this.cdRef.markForCheck();
   }
 
   async runTask(action: ActionItem<Chapter>) {
@@ -297,7 +318,7 @@ export class EditChapterModalComponent implements OnInit {
         });
         break;
       case Action.MarkAsUnread:
-        this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, this.chapter, (p) => {
+        this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, this.chapter, () => {
           this.chapter.pagesRead = 0;
           this.cdRef.markForCheck();
         });
@@ -320,7 +341,6 @@ export class EditChapterModalComponent implements OnInit {
 
     this.setupPersonTypeahead();
   }
-
 
   setupPersonTypeahead() {
     const roles: ReadonlyArray<[string, PersonRole, Array<Person> | undefined]> = [
@@ -361,18 +381,20 @@ export class EditChapterModalComponent implements OnInit {
   updateTags(tags: Tag[]) {
     this.tags = tags;
     this.chapter.tags = tags;
+    this.locks.tags.set(true);
     this.cdRef.markForCheck();
   }
 
   updateGenres(genres: Genre[]) {
     this.genres = genres;
     this.chapter.genres = genres;
+    this.locks.genres.set(true);
     this.cdRef.markForCheck();
   }
 
   updatePerson(persons: Person[], role: PersonRole) {
     this.metadataService.updatePerson(this.chapter, persons, role);
-    this.chapter.locationLocked = true;
+    this.personLocks[personLockByRole[role]].set(true);
     this.cdRef.markForCheck();
   }
 
@@ -382,7 +404,7 @@ export class EditChapterModalComponent implements OnInit {
       return;
     }
     this.chapter.language = language[0].isoCode;
-    this.chapter.languageLocked = true;
+    this.locks.language.set(true);
     this.cdRef.markForCheck();
   }
 
@@ -394,7 +416,7 @@ export class EditChapterModalComponent implements OnInit {
 
   handleReset() {
     this.coverImageReset = true;
-    this.editForm.patchValue({ coverImageLocked: false });
+    this.locks.coverImage.set(false);
     this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
   }
 
@@ -413,4 +435,5 @@ export class EditChapterModalComponent implements OnInit {
   protected readonly Action = Action;
   protected readonly PersonRole = PersonRole;
   protected readonly MangaFormat = MangaFormat;
+  protected readonly form = form;
 }

@@ -3,7 +3,7 @@
   <app-edit-modal-shell
     [activeTabId]="activeId"
     (activeTabIdChange)="changeTab($event)"
-    [formGroup]="editForm"
+    [field]="formGroup"
     [translocoPrefix]="'edit-chapter-modal'"
     [title]="t('title')"
     (close)="close()"
@@ -18,69 +18,55 @@
       @if (accountService.hasAdminRole()) {
         <div class="row">
           <div class="col-md-9 col-sm-12 mb-3">
-            @if (editForm.get('titleName'); as formControl) {
-              <app-setting-item [title]="t('title-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formControl">
-                <ng-template #view>
-                  @if (editForm.get('titleName'); as formControl) {
-                    <div class="input-group" [ngClass]="{'lock-active': chapter.titleNameLocked}">
-                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'titleNameLocked' }" />
-                      <input class="form-control" formControlName="titleName" type="text"
-                             [appFormField]="formControl">
-
-                    </div>
-                  }
-                </ng-template>
-              </app-setting-item>
-            }
+            <app-setting-item [title]="t('title-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formGroup.titleName">
+              <ng-template #view>
+                <div class="input-group" [ngClass]="{'lock-active': locks.titleName()}">
+                  <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ lock: locks.titleName }" />
+                  <input class="form-control" [formField]="formGroup.titleName" type="text"
+                         [appFormField]="formGroup.titleName">
+                </div>
+              </ng-template>
+            </app-setting-item>
 
           </div>
 
           <div class="col-md-3 col-sm-12 mb-3">
-            @if (editForm.get('sortOrder'); as formControl) {
-              <app-setting-item [title]="t('sort-order-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formControl" labelId="sort-order">
-                <ng-template #view>
-
-                    <div class="input-group" [ngClass]="{'lock-active': chapter.sortOrderLocked}">
-                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'sortOrderLocked' }" />
-                      <input class="form-control" formControlName="sortOrder"  type="number" min="0" step="0.1" inputmode="numeric"
-                             id="sort-order" aria-describedby="sort-order-validations"
-                             [appFormField]="formControl">
-
-                    </div>
-                </ng-template>
-              </app-setting-item>
-            }
+            <app-setting-item [title]="t('sort-order-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formGroup.sortOrder">
+              <ng-template #view>
+                <div class="input-group" [ngClass]="{'lock-active': locks.sortOrder()}">
+                  <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ lock: locks.sortOrder }" />
+                  <input class="form-control" [formField]="formGroup.sortOrder" type="number" step="0.1" inputmode="numeric"
+                         [appFormField]="formGroup.sortOrder">
+                </div>
+              </ng-template>
+            </app-setting-item>
           </div>
         </div>
 
         <div class="row">
           <div class="col-md-9 col-sm-12 mb-3">
-            @if (editForm.get('isbn'); as formControl) {
-              <app-setting-item [title]="t('isbn-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formControl" labelId="isbn">
-                <ng-template #view>
-                    <div class="input-group"  [ngClass]="{'lock-active': chapter.isbnLocked}">
-                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'isbnLocked' }" />
-                      <input class="form-control" formControlName="isbn" type="text" id="isbn" aria-describedby="isbn-validations"
-                             [appFormField]="formControl">
-                    </div>
-                </ng-template>
-              </app-setting-item>
-            }
+            <app-setting-item [title]="t('isbn-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formGroup.isbn">
+              <ng-template #view>
+                <div class="input-group"  [ngClass]="{'lock-active': locks.isbn()}">
+                  <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ lock: locks.isbn }" />
+                  <input class="form-control" [formField]="formGroup.isbn" type="text"
+                         [appFormField]="formGroup.isbn">
+                </div>
+              </ng-template>
+            </app-setting-item>
           </div>
 
           <div class="col-md-3 col-sm-12 mb-3">
-            <app-setting-item [title]="t('age-rating-label')" [showEdit]="false" [toggleOnViewClick]="false">
+            <app-setting-item [title]="t('age-rating-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formGroup.ageRating">
               <ng-template #view>
-                @if (editForm.get('ageRating'); as formControl) {
-                  <div class="input-group" [ngClass]="{'lock-active': chapter.ageRatingLocked}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'ageRatingLocked' }" />
-                    <select class="form-select" id="age-rating" formControlName="ageRating">
-                      @for(opt of ageRatings; track opt.value) {
-                        <option [value]="opt.value">{{opt.title | titlecase}}</option>
-                      }
-                    </select>
-                  </div>
-                }
+                <div class="input-group" [ngClass]="{'lock-active': locks.ageRating()}">
+                  <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ lock: locks.ageRating }" />
+                  <select class="form-select" id="age-rating" [formField]="formGroup.ageRating">
+                    @for(opt of ageRatings; track opt.value) {
+                      <option [value]="opt.value">{{opt.title | titlecase}}</option>
+                    }
+                  </select>
+                </div>
               </ng-template>
             </app-setting-item>
           </div>
@@ -91,15 +77,14 @@
             <div class="mb-3">
               @let langConfig = languageSettings();
               @if (langConfig) {
-                <app-setting-item [title]="t('language-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <app-setting-item [title]="t('language-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formGroup.language">
                   <ng-template #view>
                     <app-typeahead (selectedData)="updateLanguage($event)" [config]="langConfig"
-                                   [(locked)]="chapter.languageLocked" (onUnlock)="chapter.languageLocked = false"
-                                   (newItemAdded)="chapter.languageLocked = true">
-                      <ng-template #badgeItem let-item let-position="idx">
+                                   [(locked)]="locks.language">
+                      <ng-template #badgeItem let-item>
                         {{item.title}}
                       </ng-template>
-                      <ng-template #optionItem let-item let-position="idx">
+                      <ng-template #optionItem let-item>
                         {{item.title}} ({{item.isoCode}})
                       </ng-template>
                     </app-typeahead>
@@ -111,35 +96,31 @@
 
           <div class="col-lg-3 col-md-12">
             <div class="mb-3">
-              @if (editForm.get('releaseDate'); as formControl) {
-                <app-setting-item [title]="t('release-date-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formControl">
-                  <ng-template #view>
-                    <div class="input-group" [ngClass]="{'lock-active': chapter.releaseDateLocked}">
-                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'releaseDateLocked' }" />
-                      <input
-                        class="form-control"
-                        formControlName="releaseDate"
-                        type="date"
-                        [appFormField]="formControl"
-                      />
-                    </div>
-                  </ng-template>
-                </app-setting-item>
-              }
+              <app-setting-item [title]="t('release-date-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formGroup.releaseDate">
+                <ng-template #view>
+                  <div class="input-group" [ngClass]="{'lock-active': locks.releaseDate()}">
+                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ lock: locks.releaseDate }" />
+                    <input
+                      class="form-control"
+                      [formField]="formGroup.releaseDate"
+                      type="date"
+                      [appFormField]="formGroup.releaseDate"
+                    />
+                  </div>
+                </ng-template>
+              </app-setting-item>
             </div>
           </div>
         </div>
 
         <div class="row">
           <div class="mb-3" style="width: 100%">
-            <app-setting-item [title]="t('summary-label')" [showEdit]="false" [toggleOnViewClick]="false">
+            <app-setting-item [title]="t('summary-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formGroup.summary">
               <ng-template #view>
-                @if (editForm.get('summary'); as formControl) {
-                  <div class="input-group" [ngClass]="{'lock-active': chapter.summaryLocked}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'summaryLocked' }" />
-                    <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
-                  </div>
-                }
+                <div class="input-group" [ngClass]="{'lock-active': locks.summary()}">
+                  <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ lock: locks.summary }" />
+                  <textarea id="summary" class="form-control" [formField]="formGroup.summary" [appFormField]="formGroup.summary" rows="4"></textarea>
+                </div>
               </ng-template>
             </app-setting-item>
           </div>
@@ -156,15 +137,14 @@
             <div class="mb-3">
               @let genreConf = genreSettings();
               @if (genreConf) {
-                <app-setting-item [title]="t('genres-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <app-setting-item [title]="t('genres-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formGroup.genres">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateGenres($event);chapter.genresLocked = true" [config]="genreConf"
-                                   [(locked)]="chapter.genresLocked" (onUnlock)="chapter.genresLocked = false"
-                                   (newItemAdded)="chapter.genresLocked = true">
-                      <ng-template #badgeItem let-item let-position="idx">
+                    <app-typeahead (selectedData)="updateGenres($event)" [config]="genreConf"
+                                   [(locked)]="locks.genres">
+                      <ng-template #badgeItem let-item>
                         {{item.title}}
                       </ng-template>
-                      <ng-template #optionItem let-item let-position="idx">
+                      <ng-template #optionItem let-item>
                         {{item.title}}
                       </ng-template>
                     </app-typeahead>
@@ -178,15 +158,14 @@
             <div class="mb-3">
               @let tagsConf = tagsSettings();
               @if (tagsConf) {
-                <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formGroup.tags">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateTags($event);chapter.tagsLocked = true" [config]="tagsConf"
-                                   [(locked)]="chapter.tagsLocked" (onUnlock)="chapter.tagsLocked = false"
-                                   (newItemAdded)="chapter.tagsLocked = true">
-                      <ng-template #badgeItem let-item let-position="idx">
+                    <app-typeahead (selectedData)="updateTags($event)" [config]="tagsConf"
+                                   [(locked)]="locks.tags">
+                      <ng-template #badgeItem let-item>
                         {{item.title}}
                       </ng-template>
-                      <ng-template #optionItem let-item let-position="idx">
+                      <ng-template #optionItem let-item>
                         {{item.title}}
                       </ng-template>
                     </app-typeahead>
@@ -204,14 +183,13 @@
               @if (getPersonsSettings(PersonRole.Imprint); as settings) {
                 <app-setting-item [title]="t('imprint-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Imprint);chapter.imprintLocked = true"
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Imprint)"
                                    [config]="settings"
-                                   [(locked)]="chapter.imprintLocked" (onUnlock)="chapter.imprintLocked = false"
-                                   (newItemAdded)="chapter.imprintLocked = true">
-                      <ng-template #badgeItem let-item let-position="idx">
+                                   [(locked)]="personLocks.imprintLocked">
+                      <ng-template #badgeItem let-item>
                         {{item.name}}
                       </ng-template>
-                      <ng-template #optionItem let-item let-position="idx">
+                      <ng-template #optionItem let-item>
                         {{item.name}}
                       </ng-template>
                     </app-typeahead>
@@ -226,9 +204,8 @@
               @if (getPersonsSettings(PersonRole.Publisher); as settings) {
                 <app-setting-item [title]="t('publisher-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher);chapter.publisherLocked = true" [config]="settings"
-                                   [(locked)]="chapter.publisherLocked" (onUnlock)="chapter.publisherLocked = false"
-                                   (newItemAdded)="chapter.publisherLocked = true">
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher)" [config]="settings"
+                                   [(locked)]="personLocks.publisherLocked">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.name}}
                       </ng-template>
@@ -250,13 +227,12 @@
               @if (getPersonsSettings(PersonRole.Team); as settings) {
                 <app-setting-item [title]="t('team-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Team);chapter.teamLocked = true" [config]="settings"
-                                   [(locked)]="chapter.teamLocked" (onUnlock)="chapter.teamLocked = false"
-                                   (newItemAdded)="chapter.teamLocked = true">
-                      <ng-template #badgeItem let-item let-position="idx">
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Team)" [config]="settings"
+                                   [(locked)]="personLocks.teamLocked">
+                      <ng-template #badgeItem let-item>
                         {{item.name}}
                       </ng-template>
-                      <ng-template #optionItem let-item let-position="idx">
+                      <ng-template #optionItem let-item>
                         {{item.name}}
                       </ng-template>
                     </app-typeahead>
@@ -271,13 +247,12 @@
               @if (getPersonsSettings(PersonRole.Location); as settings) {
                 <app-setting-item [title]="t('location-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location);chapter.locationLocked = true" [config]="settings"
-                                   [(locked)]="chapter.locationLocked" (onUnlock)="chapter.locationLocked = false"
-                                   (newItemAdded)="chapter.locationLocked = true">
-                      <ng-template #badgeItem let-item let-position="idx">
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location)" [config]="settings"
+                                   [(locked)]="personLocks.locationLocked">
+                      <ng-template #badgeItem let-item>
                         {{item.name}}
                       </ng-template>
-                      <ng-template #optionItem let-item let-position="idx">
+                      <ng-template #optionItem let-item>
                         {{item.name}}
                       </ng-template>
                     </app-typeahead>
@@ -295,13 +270,12 @@
               @if (getPersonsSettings(PersonRole.Character); as settings) {
                 <app-setting-item [title]="t('character-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);chapter.characterLocked = true" [config]="settings"
-                                   [(locked)]="chapter.characterLocked" (onUnlock)="chapter.characterLocked = false"
-                                   (newItemAdded)="chapter.characterLocked = true">
-                      <ng-template #badgeItem let-item let-position="idx">
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character)" [config]="settings"
+                                   [(locked)]="personLocks.characterLocked">
+                      <ng-template #badgeItem let-item>
                         {{item.name}}
                       </ng-template>
-                      <ng-template #optionItem let-item let-position="idx">
+                      <ng-template #optionItem let-item>
                         {{item.name}}
                       </ng-template>
                     </app-typeahead>
@@ -324,13 +298,12 @@
               @if (getPersonsSettings(PersonRole.Writer); as settings) {
                 <app-setting-item [title]="t('writer-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer);chapter.writerLocked = true" [config]="settings"
-                                   [(locked)]="chapter.writerLocked" (onUnlock)="chapter.writerLocked = false"
-                                   (newItemAdded)="chapter.writerLocked = true">
-                      <ng-template #badgeItem let-item let-position="idx">
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer)" [config]="settings"
+                                   [(locked)]="personLocks.writerLocked">
+                      <ng-template #badgeItem let-item>
                         {{item.name}}
                       </ng-template>
-                      <ng-template #optionItem let-item let-position="idx">
+                      <ng-template #optionItem let-item>
                         {{item.name}}
                       </ng-template>
                     </app-typeahead>
@@ -345,13 +318,12 @@
               @if (getPersonsSettings(PersonRole.CoverArtist); as settings) {
                 <app-setting-item [title]="t('cover-artist-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist);chapter.coverArtistLocked = true" [config]="settings"
-                                   [(locked)]="chapter.coverArtistLocked" (onUnlock)="chapter.coverArtistLocked = false"
-                                   (newItemAdded)="chapter.coverArtistLocked = true">
-                      <ng-template #badgeItem let-item let-position="idx">
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist)" [config]="settings"
+                                   [(locked)]="personLocks.coverArtistLocked">
+                      <ng-template #badgeItem let-item>
                         {{item.name}}
                       </ng-template>
-                      <ng-template #optionItem let-item let-position="idx">
+                      <ng-template #optionItem let-item>
                         {{item.name}}
                       </ng-template>
                     </app-typeahead>
@@ -369,9 +341,8 @@
               @if(getPersonsSettings(PersonRole.Penciller); as settings) {
                 <app-setting-item [title]="t('penciller-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller);chapter.pencillerLocked = true" [config]="settings"
-                                   [(locked)]="chapter.pencillerLocked" (onUnlock)="chapter.pencillerLocked = false"
-                                   (newItemAdded)="chapter.pencillerLocked = true">
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller)" [config]="settings"
+                                   [(locked)]="personLocks.pencillerLocked">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.name}}
                       </ng-template>
@@ -390,9 +361,8 @@
               @if(getPersonsSettings(PersonRole.Colorist); as settings) {
                 <app-setting-item [title]="t('colorist-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist);chapter.coloristLocked = true" [config]="settings"
-                                   [(locked)]="chapter.coloristLocked" (onUnlock)="chapter.coloristLocked = false"
-                                   (newItemAdded)="chapter.coloristLocked = true">
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist)" [config]="settings"
+                                   [(locked)]="personLocks.coloristLocked">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.name}}
                       </ng-template>
@@ -414,9 +384,8 @@
               @if(getPersonsSettings(PersonRole.Inker); as settings) {
                 <app-setting-item [title]="t('inker-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker);chapter.inkerLocked = true" [config]="settings"
-                                   [(locked)]="chapter.inkerLocked" (onUnlock)="chapter.inkerLocked = false"
-                                   (newItemAdded)="chapter.inkerLocked = true">
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker)" [config]="settings"
+                                   [(locked)]="personLocks.inkerLocked">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.name}}
                       </ng-template>
@@ -435,9 +404,8 @@
               @if(getPersonsSettings(PersonRole.Letterer); as settings) {
                 <app-setting-item [title]="t('letterer-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer);chapter.lettererLocked = true" [config]="settings"
-                                   [(locked)]="chapter.lettererLocked" (onUnlock)="chapter.lettererLocked = false"
-                                   (newItemAdded)="chapter.lettererLocked = true">
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer)" [config]="settings"
+                                   [(locked)]="personLocks.lettererLocked">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.name}}
                       </ng-template>
@@ -459,9 +427,8 @@
               @if(getPersonsSettings(PersonRole.Editor); as settings) {
                 <app-setting-item [title]="t('editor-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor);chapter.editorLocked = true" [config]="settings"
-                                   [(locked)]="chapter.editorLocked" (onUnlock)="chapter.editorLocked = false"
-                                   (newItemAdded)="chapter.editorLocked = true">
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor)" [config]="settings"
+                                   [(locked)]="personLocks.editorLocked">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.name}}
                       </ng-template>
@@ -480,9 +447,8 @@
               @if(getPersonsSettings(PersonRole.Translator); as settings) {
                 <app-setting-item [title]="t('translator-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);chapter.translatorLocked = true" [config]="settings"
-                                   [(locked)]="chapter.translatorLocked" (onUnlock)="chapter.translatorLocked = false"
-                                   (newItemAdded)="chapter.translatorLocked = true">
+                    <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator)" [config]="settings"
+                                   [(locked)]="personLocks.translatorLocked">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.name}}
                       </ng-template>
@@ -502,7 +468,7 @@
     <!--External Metadata Ids-->
     @if (accountService.hasAdminRole()) {
       <ng-template [appEditTab]="Tabs.ExternalMetadataIds">
-        <app-edit-external-metadata-form [form]="editForm" [entity]="chapter"/>
+        <app-edit-external-metadata-form [field]="formGroup"/>
       </ng-template>
     }
 
@@ -635,8 +601,8 @@
 
 
 
-  <ng-template #lock let-item="item" let-field="field">
-    <span class="input-group-text clickable" (click)="unlock(item, field)">
+  <ng-template #lock let-lock="lock">
+    <span class="input-group-text clickable" (click)="lock.set(!lock())">
         <i class="fa fa-lock" aria-hidden="true"></i>
         <span class="visually-hidden">{{t('field-locked-alt')}}</span>
     </span>

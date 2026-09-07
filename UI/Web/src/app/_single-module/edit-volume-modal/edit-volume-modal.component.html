@@ -4,7 +4,7 @@
   <app-edit-modal-shell
     [title]="t('title')"
     [translocoPrefix]="'edit-volume-modal'"
-    [formGroup]="editForm"
+    [field]="formGroup"
     (activeTabIdChange)="changeTab($event)"
     [activeTabId]="activeId"
     (close)="close()"
@@ -98,7 +98,7 @@
     <!--External Metadata Ids-->
     @if (accountService.hasAdminRole()) {
       <ng-template [appEditTab]="Tabs.ExternalMetadataIds">
-        <app-edit-external-metadata-form [form]="editForm" [entity]="volume"/>
+        <app-edit-external-metadata-form [field]="formGroup"/>
       </ng-template>
     }
 
