@@ -125,7 +125,7 @@ public class ProcessSeries(
 
             await ProcessParserInfos(new ProcessParserInfosArgs
             {
-                Settings =settings,
+                Settings = settings,
                 Series = series,
                 ParsedInfos = parsedInfos,
                 DatabasePeople = databasePeople,
@@ -711,11 +711,36 @@ public class ProcessSeries(
         }
 
         // Remove volumes and chapter that did not match any files on disk
-        unitOfWork.VolumeRepository.Remove([.. args.Series.Volumes
-            .Where(v => !foundVolumes.Contains(v.Id))]);
-        unitOfWork.ChapterRepository.Remove([.. args.Series.Volumes
+        RemoveUnmappedEntities(args.Series, foundVolumes, foundChapters);
+    }
+
+    private void RemoveUnmappedEntities(Series series, HashSet<int> foundVolumes, HashSet<int> foundChapters)
+    {
+        var unmappedVolumes = series.Volumes.Where(v => !foundVolumes.Contains(v.Id)).ToList();
+        var unmappedChapters = series.Volumes
             .SelectMany(v => v.Chapters)
-            .Where(c => !foundChapters.Contains(c.Id))]);
+            .Where(c => !foundChapters.Contains(c.Id))
+            .ToList();
+
+        if (unmappedVolumes.Count == 0 && unmappedChapters.Count == 0)
+        {
+            logger.LogTrace("No volumes or chapters to delete for {SeriesId}", series.Id);
+            return;
+        }
+
+        if (unmappedVolumes.Count > 0)
+        {
+            logger.LogTrace("Deleting {Count} volumes for {SeriesId}. IDS: {VolumeIds}",
+                unmappedVolumes.Count, series.Id, string.Join(", ", unmappedVolumes.Select(v => v.Id)));
+            unitOfWork.VolumeRepository.Remove(unmappedVolumes);
+        }
+
+        if (unmappedChapters.Count > 0)
+        {
+            logger.LogTrace("Deleting {Count} chapters for {SeriesId}. IDS: {ChapterIds}",
+                unmappedChapters.Count, series.Id, string.Join(", ", unmappedChapters.Select(c => c.Id)));
+            unitOfWork.ChapterRepository.Remove(unmappedChapters);
+        }
     }
 
     private Volume FindOrCreateVolume(ProcessParserInfosArgs args, ParserInfo info)
