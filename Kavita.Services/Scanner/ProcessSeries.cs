@@ -682,6 +682,7 @@ public class ProcessSeries(
     {
         var foundVolumes = new HashSet<int>();
         var foundChapters = new HashSet<int>();
+        var foundMangaFiles = new HashSet<int>();
 
         foreach (var parsedInfo in args.ParsedInfos)
         {
@@ -701,6 +702,9 @@ public class ProcessSeries(
                 chapter.Volume = volume;
             }
 
+            var mangaFileId = AddOrUpdateFileForChapter(chapter, parsedInfo, args.ForceUpdate);
+            foundMangaFiles.Add(mangaFileId);
+
             await UpdateChapter(args, chapter, parsedInfo);
         }
 
@@ -708,6 +712,11 @@ public class ProcessSeries(
         foreach (var volume in args.Series.Volumes)
         {
             volume.Pages = volume.Chapters.Sum(chapter => chapter.Pages);
+
+            foreach (var chapter in volume.Chapters)
+            {
+                chapter.Files = [.. chapter.Files.Where(f => foundMangaFiles.Contains(f.Id))];
+            }
         }
 
         // Remove volumes and chapter that did not match any files on disk
@@ -724,7 +733,7 @@ public class ProcessSeries(
 
         if (unmappedVolumes.Count == 0 && unmappedChapters.Count == 0)
         {
-            logger.LogTrace("No volumes or chapters to delete for {SeriesId}", series.Id);
+            logger.LogTrace("No volumes, chapters, or files to delete for {SeriesId}", series.Id);
             return;
         }
 
@@ -820,9 +829,6 @@ public class ProcessSeries(
     {
         chapter.UpdateFrom(info);
 
-        // Add files
-        AddOrUpdateFileForChapter(chapter, info, args.ForceUpdate);
-
         chapter.Number = info.LowestChapter.ToString(CultureInfo.InvariantCulture);
         chapter.MinNumber = info.LowestChapter;
         chapter.MaxNumber = info.HighestChapter;
@@ -892,7 +898,7 @@ public class ProcessSeries(
         }
     }
 
-    private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
+    private int AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
     {
         chapter.Files ??= [];
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
@@ -902,7 +908,12 @@ public class ProcessSeries(
             // TODO: I wonder if we can simplify this force check.
             existingFile.Format = info.Format;
 
-            if (!forceUpdate && !fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
+            if (!forceUpdate &&
+                !fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) &&
+                existingFile.Pages != 0)
+            {
+                return existingFile.Id;
+            }
 
             existingFile.Pages = readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
             existingFile.Extension = fileInfo.Extension.ToLowerInvariant();
@@ -912,17 +923,17 @@ public class ProcessSeries(
             existingFile.KoreaderHash = KoreaderHelper.HashContents(existingFile.FilePath);
 
             // We skip updating DB here with last modified time so that metadata refresh can do it
+            return existingFile.Id;
         }
-        else
-        {
 
-            var file = new MangaFileBuilder(info.FullFilePath, info.Format, readingItemService.GetNumberOfPages(info.FullFilePath, info.Format))
-                .WithExtension(fileInfo.Extension)
-                .WithBytes(fileInfo.Length)
-                .WithHash()
-                .Build();
-            chapter.Files.Add(file);
-        }
+        var file = new MangaFileBuilder(info.FullFilePath, info.Format, readingItemService.GetNumberOfPages(info.FullFilePath, info.Format))
+            .WithExtension(fileInfo.Extension)
+            .WithBytes(fileInfo.Length)
+            .WithHash()
+            .Build();
+        chapter.Files.Add(file);
+
+        return file.Id;
     }
 
     private async Task UpdateChapterFromComicInfo(UpdateChapterComicInfoArgs args)
