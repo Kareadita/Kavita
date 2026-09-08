@@ -45,11 +45,21 @@ public class ScannerHelper
     public async Task<Library> GenerateScannerData(string testcase, Dictionary<string, ComicInfo>? comicInfos = null)
     {
         var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase), comicInfos);
+        return await GenerateScannerData(Path.GetFileNameWithoutExtension(testcase), testDirectoryPath);
+    }
 
-        var (publisher, type) = SplitPublisherAndLibraryType(Path.GetFileNameWithoutExtension(testcase));
+    public async Task<Library> GenerateScannerData(string testcase, List<string> filePaths, Dictionary<string, ComicInfo>? comicInfos = null)
+    {
+        var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase), filePaths, comicInfos);
+        return await GenerateScannerData(testcase, testDirectoryPath);
+    }
+
+    private async Task<Library> GenerateScannerData(string testCase, string testPath)
+    {
+        var (publisher, type) = SplitPublisherAndLibraryType(testCase);
 
         var library = new LibraryBuilder(publisher, type)
-            .WithFolders([new FolderPath() {Path = testDirectoryPath}])
+            .WithFolders([new FolderPath() {Path = testPath}])
             .Build();
 
         var admin = new AppUserBuilder("admin", "admin@kavita.com", Defaults.DefaultThemes[0])
@@ -66,6 +76,11 @@ public class ScannerHelper
     public Task UpdateTestData(string testcase, Dictionary<string, ComicInfo>? comicInfos = null)
     {
         return GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase), comicInfos);
+    }
+
+    public Task UpdateTestData(string testcase, List<string> filePaths, Dictionary<string, ComicInfo>? comicInfos = null)
+    {
+        return GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase), filePaths, comicInfos);
     }
 
     public ScannerService CreateServices(DirectoryService? ds = null, IFileSystem? fs = null)
@@ -130,18 +145,22 @@ public class ScannerHelper
         return (publisher, libraryType);
     }
 
-
-
     private async Task<string> GenerateTestDirectory(string mapPath, Dictionary<string, ComicInfo>? comicInfos = null)
     {
         // Read the map file
         var mapContent = await File.ReadAllTextAsync(mapPath);
 
         // Deserialize the JSON content into a list of strings using System.Text.Json
-        var filePaths = JsonSerializer.Deserialize<List<string>>(mapContent);
+        var filePaths = JsonSerializer.Deserialize<List<string>>(mapContent) ?? [];
+        var testCase = Path.GetFileNameWithoutExtension(mapPath);
 
+        return await GenerateTestDirectory(testCase, filePaths, comicInfos);
+    }
+
+    private async Task<string> GenerateTestDirectory(string testCase, List<string> filePaths, Dictionary<string, ComicInfo>? comicInfos = null)
+    {
         // Create a test directory
-        var testDirectory = Path.Combine(_testDirectory, Path.GetFileNameWithoutExtension(mapPath));
+        var testDirectory = Path.Combine(_testDirectory, Path.GetFileNameWithoutExtension(testCase));
         if (Directory.Exists(testDirectory))
         {
             Directory.Delete(testDirectory, true);

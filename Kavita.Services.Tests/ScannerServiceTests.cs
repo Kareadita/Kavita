@@ -1451,4 +1451,101 @@ public class ScannerServiceTests: AbstractDbTest
         // All chapters are re-used. Chapter number did not change!
         Assert.Equal(secondRunChapterIds, thirdRunChapterIds);
     }
+
+    [Fact]
+    public async Task ScanLibrary_SplittingVolumeRecreatesEntities()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Splitting Volume Recreates Entities - Manga";
+        var library = await scannerHelper.GenerateScannerData(testcase, [
+            "I Want to Love You Till Your Dying Day/I Want to Love You Till Your Dying Day Vol. 1.cbz"
+        ], null);
+
+        var scanner = scannerHelper.CreateServices();
+
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Single(postLib.Series.First().Volumes);
+        Assert.Single(postLib.Series.First().Volumes[0].Chapters);
+
+        var volumeId = postLib.Series.First().Volumes[0].Id;
+        var chapterId = postLib.Series.First().Volumes[0].Chapters[0].Id;
+
+        await scannerHelper.UpdateTestData(testcase, [
+            "I Want to Love You Till Your Dying Day/I Want to Love You Till Your Dying Day Vol. 1 Ch. 1-3.cbz",
+            "I Want to Love You Till Your Dying Day/I Want to Love You Till Your Dying Day Vol. 1 Ch. 4-6.cbz"
+        ], null);
+
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Single(postLib.Series.First().Volumes);
+        Assert.Equal(2, postLib.Series.First().Volumes[0].Chapters.Count);
+
+        Assert.Equal(volumeId, postLib.Series.First().Volumes[0].Id);
+
+        var newChapterIds = postLib.Series.First().Volumes[0].Chapters.Select(c => c.Id).ToHashSet();
+        Assert.DoesNotContain(chapterId, newChapterIds);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_UpdateVolumeRecreatesEntityIfChaptersRepeat()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Updated Volume Recreates Entities repeated chapters - Manga";
+        var library = await scannerHelper.GenerateScannerData(testcase, [
+            // This series doesn't actually do this. It does happen in Anthology sometimes
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 1 Ch. 1.cbz",
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 2 Ch. 1.cbz"
+        ], null);
+
+        var scanner = scannerHelper.CreateServices();
+
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(2, postLib.Series.First().Volumes.Count);
+
+        var volume1Id = postLib.Series.First().Volumes.Single(v => v.LookupName == "1").Id;
+        var volume1Chapter1Id =  postLib.Series.First().Volumes.Single(v => v.LookupName == "1").Chapters[0].Id;
+        var volume2Id = postLib.Series.First().Volumes.Single(v => v.LookupName == "2").Id;
+        var volume2Chapter1Id = postLib.Series.First().Volumes.Single(v => v.LookupName == "2").Chapters[0].Id;
+
+
+        await scannerHelper.UpdateTestData(testcase, [
+            // This series doesn't actually do this. It does happen in Anthology sometimes
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 1 Ch. 1.cbz",
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 3 Ch. 1.cbz"
+        ], null);
+
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(2, postLib.Series.First().Volumes.Count);
+
+        Assert.Equal(volume1Id, postLib.Series.First().Volumes.Single(v => v.LookupName == "1").Id);
+        Assert.Equal(volume1Chapter1Id, postLib.Series.First().Volumes.Single(v => v.LookupName == "1").Chapters[0].Id);
+        // Volume 2 is deleted, and volume 3 got created
+        Assert.NotEqual(volume2Id, postLib.Series.First().Volumes.Single(v => v.LookupName == "3").Id);
+        // Since there are two chapter 1's, we cannot re-use the chapter, and it got recreated
+        Assert.NotEqual(volume2Chapter1Id, postLib.Series.First().Volumes.Single(v => v.LookupName == "3").Chapters[0].Id);
+
+    }
 }
