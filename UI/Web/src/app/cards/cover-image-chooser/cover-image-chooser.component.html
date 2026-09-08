@@ -16,7 +16,7 @@
       <div class="d-flex align-items-center gap-2 mt-2 mb-1">
         @if (config().isLocked) {
           <span class="text-warning"><i class="fa fa-lock" aria-hidden="true"></i> {{ t('cover-locked') }}</span>
-            <button class="btn btn-sm btn-outline-warning" (click)="reset()">{{ t('reset') }}</button>
+            <button type="button" class="btn btn-sm btn-outline-warning" (click)="reset()">{{ t('reset') }}</button>
         } @else {
           <span class="text-muted small"><i class="fa fa-lock-open" aria-hidden="true"></i> {{ t('cover-not-locked') }}</span>
         }

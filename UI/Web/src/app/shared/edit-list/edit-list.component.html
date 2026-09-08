@@ -14,7 +14,7 @@
         </div>
       </div>
       <div class="col-lg-2">
-        <button
+        <button type="button"
           class="btn btn-danger me-2"
           (click)="remove(i)"
           [disabled]="disableRemove()">
@@ -22,7 +22,7 @@
           <span class="visually-hidden">{{t('common.remove')}}</span>
         </button>
         @if (last){
-          <button class="btn btn-secondary" (click)="add()">
+          <button type="button" class="btn btn-secondary" (click)="add()">
             <i class="fa-solid fa-plus" aria-hidden="true"></i>
             <span class="visually-hidden">{{t('common.add')}}</span>
           </button>
