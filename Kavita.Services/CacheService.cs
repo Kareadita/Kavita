@@ -290,7 +290,7 @@ public class CacheService(
         {
             if (keepPaths.Contains(NormalizeDirPath(dir)))
             {
-                logger.LogDebug("Skipping cache cleanup for {Directory} with an active reading session", dir);
+                logger.LogTrace("Skipping cache cleanup for {Directory} with an active reading session", dir);
                 continue;
             }
             directoryService.ClearAndDeleteDirectory(dir);
@@ -298,7 +298,8 @@ public class CacheService(
 
         static string NormalizeDirPath(string path)
         {
-            return Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            return Parser.NormalizePath(Path.GetFullPath(path)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
         }
     }
 
