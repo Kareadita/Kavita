@@ -776,6 +776,7 @@ public class ProcessSeries(
 
         if (volume == null)
         {
+            logger.LogDebug("Creating new volume {VolumeNumber} for series {SeriesId}", volume,  args.Series.Name);
             volume = new VolumeBuilder(volumeNumber).WithSeriesId(args.Series.Id).Build();
             args.Series.Volumes.Add(volume);
             unitOfWork.VolumeRepository.Add(volume);
@@ -799,24 +800,34 @@ public class ProcessSeries(
         if (exactChapterMatch != null)
         {
             // This is the old matching. On Volume & Chapter
+            logger.LogTrace("Matched on disk file {DebugInfo} to Volume {Volume} Chapter {Chapter} for series {SeriesId}",
+                info.DebugString, exactChapterMatch.Volume.Name, exactChapterMatch.Range, args.Series.Id);
             return exactChapterMatch;
         }
 
         // There is one matched volume, and only one file on disk mapping to it (I.e. only chapters changed)
         if (volume?.Chapters.Count == 1 && volumeGroup.Count() == 1)
         {
-            return volume.Chapters[0];
+            var match = volume.Chapters[0];
+
+            logger.LogTrace("Matched on disk file {DebugInfo} to Volume {Volume} Chapter {Chapter} for series {SeriesId}. Only one matching volume was found, will be updating chapter range",
+                info.DebugString, match.Volume.Name, match.Range, args.Series.Id);
+            return match;
         }
 
-        var matchingChapters = args.Series.Volumes.SelectMany(v => v.Chapters).GetChaptersByRange(info).OneOrDefault();
+        var minRange = Parser.MinNumberFromRange(info.Chapters);
+        var maxRange = Parser.MaxNumberFromRange(info.Chapters);
+
+        var matchingChapter = args.Series.Volumes.SelectMany(v => v.Chapters).GetChaptersByRange(info).OneOrDefault();
         var matchingOnDiskChapters = args.ParsedInfos.Select(p => p.Chapters)
-            .GroupBy(v => (Min: Parser.MinNumberFromRange(v), Max: Parser.MaxNumberFromRange(v)))
-            .Single(g => g.Contains(info.Chapters));
+            .Count(c => Parser.MinNumberFromRange(c).Is(minRange) &&  Parser.MaxNumberFromRange(c).Is(maxRange));
 
         // There is exactly one chapter that matches the range in DB & on disk (I.e. Only volume changed)
-        if (matchingChapters != null && matchingOnDiskChapters.Count() == 1)
+        if (matchingChapter != null && matchingOnDiskChapters == 1)
         {
-            return matchingChapters;
+            logger.LogTrace("Matched on disk file {DebugInfo} to Volume {Volume} Chapter {Chapter} for series {SeriesId}. Only one matching chapter range was found, will be updating volume",
+                info.DebugString, matchingChapter.Volume.Name, matchingChapter.Range, args.Series.Id);
+            return matchingChapter;
         }
 
         logger.LogDebug("[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);

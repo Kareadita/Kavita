@@ -135,4 +135,6 @@ public class ParserInfo
     /// Lowest Chapter from ComicInfo then Parsed
     /// </summary>
     public float LowestChapter { get; set; }
+
+    public string DebugString => $"ParserInfo{{Volume={Volumes},Chapter={Chapters},Path={FullFilePath}}}";
 }
