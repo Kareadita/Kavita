@@ -805,11 +805,17 @@ public class ProcessSeries(
             return exactChapterMatch;
         }
 
-        // There is one matched volume, and only one file on disk mapping to it (I.e. only chapters changed)
-        if (volume?.Chapters.Count == 1 && volumeGroup.Count() == 1)
+        var minVolumeRange = Parser.MinNumberFromRange(info.Volumes);
+        var maxVolumeRange = Parser.MaxNumberFromRange(info.Volumes);
+
+        var filesMatchingOnVolume = args.ParsedInfos.Select(p => p.Volumes)
+            .Count(v => Parser.MinNumberFromRange(v).Is(minVolumeRange) && Parser.MaxNumberFromRange(v).Is(maxVolumeRange));
+
+        if (volume?.Chapters.Count == 1 && filesMatchingOnVolume == 1)
         {
             var match = volume.Chapters[0];
 
+            // There is one matched volume, and only one file on disk mapping to it (I.e. only chapters changed)
             logger.LogTrace("Matched on disk file {DebugInfo} to Volume {Volume} Chapter {Chapter} for series {SeriesId}. Only one matching volume was found, will be updating chapter range",
                 info.DebugString, match.Volume.Name, match.Range, args.Series.Id);
             return match;
@@ -819,12 +825,12 @@ public class ProcessSeries(
         var maxRange = Parser.MaxNumberFromRange(info.Chapters);
 
         var matchingChapter = args.Series.Volumes.SelectMany(v => v.Chapters).GetChaptersByRange(info).OneOrDefault();
-        var matchingOnDiskChapters = args.ParsedInfos.Select(p => p.Chapters)
+        var filesMatchingOnChapter = args.ParsedInfos.Select(p => p.Chapters)
             .Count(c => Parser.MinNumberFromRange(c).Is(minRange) &&  Parser.MaxNumberFromRange(c).Is(maxRange));
 
-        // There is exactly one chapter that matches the range in DB & on disk (I.e. Only volume changed)
-        if (matchingChapter != null && matchingOnDiskChapters == 1)
+        if (matchingChapter != null && filesMatchingOnChapter == 1)
         {
+            // There is exactly one chapter that matches the range in DB & on disk (I.e. Only volume changed)
             logger.LogTrace("Matched on disk file {DebugInfo} to Volume {Volume} Chapter {Chapter} for series {SeriesId}. Only one matching chapter range was found, will be updating volume",
                 info.DebugString, matchingChapter.Volume.Name, matchingChapter.Range, args.Series.Id);
             return matchingChapter;
