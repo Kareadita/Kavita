@@ -377,7 +377,16 @@ public class DirectoryService : IDirectoryService
             foreach (var dir in di.EnumerateDirectories())
             {
                 if (!dir.Exists) continue;
-                dir.Delete(true);
+                try
+                {
+                    dir.Delete(true);
+                }
+                catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is DirectoryNotFoundException)
+                {
+                    // A chapter cache can be re-created (or partially removed) by a live reader
+                    // between enumeration and delete; skip it and let the next cleanup take it.
+                    _logger.LogWarning(ex, "[ClearDirectory] Could not delete {DirectoryPath}, skipping", dir.FullName);
+                }
             }
         }
         catch (UnauthorizedAccessException ex)
