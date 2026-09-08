@@ -899,7 +899,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
   openEditSeriesModal() {
     const modalRef = this.modalService.open(EditSeriesModalComponent);
-    modalRef.componentInstance.series = this.series();
+    modalRef.setInput('series', this.series());
     modalRef.closed.subscribe((closeResult: ModalResult<Series>) => {
       if (closeResult.success) {
         window.scrollTo(0, 0);

@@ -3515,7 +3515,6 @@
         "web-link-label": "{{tabs.weblink-tab}}",
         "cover-image-description": "Upload and choose a new cover image. Press Save to upload and override the cover.",
         "save": "{{common.save}}",
-        "field-locked-alt": "Field is locked",
         "info-title": "Information",
         "library-title": "Library",
         "format-title": "Format",
@@ -3581,7 +3580,6 @@
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
         "external-ids-tab": "{{tabs.external-ids-tab}}",
-        "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
 
         "pages-label": "Pages",
@@ -3654,6 +3652,11 @@
         "alias-title": "New aliases",
         "known-for-title": "Known for"
     },
+
+    "locked-field": {
+        "field-locked-alt": "Field is locked"
+    },
+
 
     "day-breakdown": {
         "title": "Reading by Day",

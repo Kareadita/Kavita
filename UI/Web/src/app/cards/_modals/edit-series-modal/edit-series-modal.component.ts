@@ -1,17 +1,16 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   EventEmitter,
   inject,
-  Input,
+  model,
   OnInit,
   signal
 } from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal, NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
-import {concat, delay, forkJoin, last, tap} from 'rxjs';
+import {forkJoin, map, of, switchMap} from 'rxjs';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
@@ -29,9 +28,7 @@ import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
-import {LicenseService} from "../../../_services/license.service";
-import {DecimalPipe, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
-import {BreakpointService} from "../../../_services/breakpoint.service";
+import {DecimalPipe, TitleCasePipe} from "@angular/common";
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
@@ -41,7 +38,7 @@ import {
   applyExternalMetadataIdRules,
   EditExternalMetadataFormComponent
 } from "../../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
-import {form, maxLength, minLength, pattern, required} from "@angular/forms/signals";
+import {form, FormField, pattern, required} from "@angular/forms/signals";
 import {MangaFormat} from "../../../_models/manga-format";
 import {LibraryType} from "../../../_models/library/library";
 import {
@@ -58,13 +55,13 @@ import {ImageService} from "../../../_services/image.service";
 import {LibraryService} from "../../../_services/library.service";
 import {UploadService} from "../../../_services/upload.service";
 import {MetadataService} from "../../../_services/metadata.service";
-import {Person, PersonRole} from "../../../_models/metadata/person";
+import {allPeopleRoles, Person, PersonRole} from "../../../_models/metadata/person";
 import {TypeaheadConfig} from "../../../typeahead/_models/typeahead-config";
 import {Genre} from "../../../_models/metadata/genre";
 import {AgeRatingDto} from "../../../_models/metadata/age-rating-dto";
 import {PublicationStatusDto} from "../../../_models/metadata/publication-status-dto";
 import {SeriesMetadata} from "../../../_models/metadata/series-metadata";
-import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../../_models/chapter";
+import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../../_models/chapter";
 import {Language} from "../../../_models/metadata/language";
 import {Series} from "../../../_models/series";
 import {Tag} from "../../../_models/tag";
@@ -72,35 +69,42 @@ import {AllMetadataProviders, MetadataProvider} from "../../../_models/kavitaplu
 import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {lockGroup, standaloneLocks, writeFieldLocks, writeNamedLocks} from "../../../_helpers/field-lock";
+import {LockableFieldComponent} from "../../../shared/_components/lockable-field/lockable-field.component";
+import {personFields, PersonFields, personFieldsFrom} from "../../../_helpers/person-fields";
+import {IHasMetadataIds} from "../../../_models/common/i-has-metadata-ids";
+import {AgeRating} from "../../../_models/metadata/age-rating";
+import {PublicationStatus} from "../../../_models/metadata/publication-status";
 
-
-interface FormModel {
-  id: number;
+interface MetadataFormModel extends PersonFields {
   summary: string;
-  name: string;
-  localizedName: string;
-  sortName: string;
-  rating: number;
-  coverImageLocked: boolean;
   ageRating: string;
   publicationStatus: string;
   language: string;
   releaseYear: string;
-  metadataProviderOverride: MetadataProvider | null;
-
-  aniListId: number;
-  malId: number;
-  hardcoverId: number;
-  metronId: number;
-  comicVineId: string | null;
-  mangaBakaId: number;
-  cbrId: number;
+  genres: Genre[];
+  tags: Tag[];
+  webLinks: string;
 }
+
+interface FormModel extends IHasMetadataIds {
+  id: number;
+  name: string;
+  localizedName: string;
+  sortName: string;
+  rating: number;
+  coverImage: string;
+  metadataProviderOverride: string;
+  metadata: MetadataFormModel;
+}
+
+const blacklist = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, Action.SendTo,
+  Action.AddToWantToReadList, Action.AddToCollection, Action.AddToReadingList, Action.RemoveFromWantToReadList,
+  Action.RemoveFromWantToReadList];
 
 @Component({
   selector: 'app-edit-series-modal',
   imports: [
-    ReactiveFormsModule,
     TypeaheadComponent,
     CoverImageChooserComponent,
     EditSeriesRelationComponent,
@@ -117,7 +121,6 @@ interface FormModel {
     EditListComponent,
     SettingButtonComponent,
     SettingItemComponent,
-    NgTemplateOutlet,
     DecimalPipe,
     EditExternalMetadataFormComponent,
     EditModalShellComponent,
@@ -125,7 +128,9 @@ interface FormModel {
     MetadataProviderTitlePipe,
     TitleCasePipe,
     TimeDifferencePipe,
-    FormFieldDirective
+    FormFieldDirective,
+    FormField,
+    LockableFieldComponent
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -133,264 +138,191 @@ interface FormModel {
 })
 export class EditSeriesModalComponent implements OnInit {
 
-  protected readonly modal = inject(NgbActiveModal);
+  private readonly modal = inject(NgbActiveModal);
   private readonly seriesService = inject(SeriesService);
-  private readonly fb = inject(FormBuilder);
   protected readonly imageService = inject(ImageService);
   private readonly libraryService = inject(LibraryService);
   private readonly uploadService = inject(UploadService);
   private readonly metadataService = inject(MetadataService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly accountService = inject(AccountService);
-  protected readonly licenseService = inject(LicenseService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  protected readonly breakpointService = inject(BreakpointService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
   private readonly confirmService = inject(ConfirmService);
   private readonly typeaheadSettingsFactory = inject(TypeaheadConfigFactoryService);
 
-  protected readonly Tabs = Tabs;
-  protected readonly PersonRole = PersonRole;
-  protected readonly Action = Action;
-
-  @Input({required: true}) series!: Series;
-
-
-  seriesVolumes: any[] = [];
-  isLoadingVolumes = signal<boolean>(false);
-  /**
-   * A copy of the series from init. This is used to compare values for name fields to see if lock was modified
-   */
-  initSeries!: Series;
-  tasks = this.actionFactoryService.getActionablesForSettingsPage(
-    this.actionFactoryService.getSeriesActions(), this.blacklist);
-  volumeCollapsed: any = {};
-  active = Tabs.General;
-  editSeriesForm!: FormGroup;
-  libraryName: string | undefined = undefined;
-  size: number = 0;
-  libraryType = signal<LibraryType>(LibraryType.Manga);
-  protected readonly allMetadataProviders = AllMetadataProviders;
-
-
-  // Typeaheads
-  tagsSettings = signal<TypeaheadConfig<Tag> | null>(null);
-  languageSettings = signal<TypeaheadConfig<Language> | null>(null);
-  peopleSettings = signal<Partial<Record<PersonRole, TypeaheadConfig<Person>>>>({});
-  genreSettings = signal<TypeaheadConfig<Genre> | null>(null);
-
-  tags: Tag[] = [];
-  genres: Genre[] = [];
-  ageRatings: Array<AgeRatingDto> = [];
-  publicationStatuses: Array<PublicationStatusDto> = [];
-
-  metadata!: SeriesMetadata;
-  selectedCover: string = '';
-  coverImageReset = false;
-  coverImageDirty = false;
-  chooserConfig = signal<CoverImageChooserConfig>({});
-
-  saveNestedComponents: EventEmitter<void> = new EventEmitter();
+  series = model.required<Series>();
 
   private readonly formModel = signal<FormModel>({
+    coverImage: '',
     id: 0,
-    summary: '',
     name: '',
     localizedName: '',
     sortName: '',
     rating: 0,
-    coverImageLocked: false,
-    ageRating: '',
-    publicationStatus: '',
-    language: '',
-    releaseYear: '',
-    metadataProviderOverride: null,
+    metadataProviderOverride: '',
     aniListId: 0,
     malId: 0,
     hardcoverId: 0,
     metronId: 0,
     comicVineId: null,
     mangaBakaId: 0,
-    cbrId: 0
+    cbrId: 0,
+    metadata: {
+      summary: '',
+      ageRating: AgeRating.Unknown.toString(),
+      publicationStatus: PublicationStatus.OnGoing.toString(),
+      language: '',
+      releaseYear: '',
+      genres: [],
+      tags: [],
+      webLinks: '',
+      ...personFieldsFrom({}),
+    }
   });
-  formGroup = form(this.formModel, p => {
+  protected readonly formGroup = form(this.formModel, p => {
     required(p.name);
     required(p.sortName);
-    minLength(p.releaseYear, 4);
-    maxLength(p.releaseYear, 4);
-    pattern(p.releaseYear, /([1-9]\d{3})|[0]{1}/);
+    pattern(p.metadata.releaseYear, /^[1-9]\d{3}$/);
     applyExternalMetadataIdRules(p);
   });
 
-  get blacklist() {
-    return [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, Action.SendTo,
-      Action.AddToWantToReadList, Action.AddToCollection, Action.AddToReadingList, Action.RemoveFromWantToReadList,
-      Action.RemoveFromWantToReadList];
-  }
+  protected readonly locks = lockGroup(this.formGroup, () => this.series(), [
+    'name', 'sortName', 'localizedName', 'coverImage',
+  ]);
+  protected readonly metadataLocks = lockGroup(this.formGroup.metadata, () => this.metadata()!, [
+    'summary', 'ageRating', 'publicationStatus', 'language', 'releaseYear', 'genres', 'tags',
+  ]);
+  protected readonly personLocks = standaloneLocks(() => this.metadata()!,
+    Object.values(personFields).map(f => f.lock));
 
-  get WebLinks() {
-    return this.metadata?.webLinks.split(',') || [''];
-  }
+
+  protected readonly isLoadingVolumes = signal<boolean>(false);
+  protected readonly tasks = computed(() => this.actionFactoryService.getActionablesForSettingsPage(
+    this.actionFactoryService.getSeriesActions(), blacklist));
+  protected readonly activeTabId = signal<Tabs>(Tabs.General);
+  protected readonly libraryName = signal<string>('');
+  protected readonly libraryType = signal<LibraryType>(LibraryType.Manga);
+
+  protected readonly expandedVolumes = signal<ReadonlySet<number>>(new Set());
+  protected readonly seriesVolumes = signal<Volume[]>([]);
+  protected readonly size = computed(() => {
+    return this.seriesVolumes().reduce((sum1, volume) => {
+      return sum1 + volume.chapters.reduce((sum2, chapter) => {
+        return sum2 + chapter.files.reduce((sum3, file) => {
+          return sum3 + file.bytes;
+        }, 0);
+      }, 0);
+    }, 0);
+  });
+  protected readonly volumeRows = computed(() => this.seriesVolumes().map(v => ({
+    volume: v,
+    files: v.chapters.flatMap(c => c.files.map(f => ({...f, chapter: c.range}))),
+  })));
+
+
+
+  // Typeaheads
+  protected readonly tagsTypeaheadSettings = computed(() => {
+    return this.typeaheadSettingsFactory.forTag({id: 'tags', savedData: this.formModel().metadata.tags ?? []});
+  });
+  protected readonly languageTypeaheadSettings = computed(() => {
+    return this.typeaheadSettingsFactory.forLanguage({id: 'language', currentSelectedLanguage: this.formModel().metadata.language})
+  });
+  protected readonly genreTypeaheadSettings = computed(() => {
+    return this.typeaheadSettingsFactory.forGenre({id: 'genres', savedData: this.formModel().metadata.genres ?? []});
+  });
+  private readonly peopleSettings = signal<Partial<Record<PersonRole, TypeaheadConfig<Person>>>>({});
+
+  protected readonly ageRatings = signal<AgeRatingDto[]>([]);
+  protected readonly publicationStatuses = signal<PublicationStatusDto[]>([]);
+  protected readonly metadata = signal<SeriesMetadata | null>(null);
+  private selectedCover = '';
+  private coverImageReset = false;
+  private coverImageDirty = false;
+
+  protected readonly saveNestedComponents = new EventEmitter<void>();
+
+  protected readonly chooserConfig = computed<CoverImageChooserConfig>(() => ({
+    ...this.coverChooserConfigFactory.forSeries(this.series(), this.seriesVolumes(), this.libraryType()),
+    isLocked: this.locks.coverImage()
+  }));
+
+  protected readonly weblinks = computed(() => {
+    const webLinks = this.formGroup.metadata.webLinks().value();
+    if (!webLinks || webLinks.length === 0) return [];
+    return webLinks.split(',');
+  });
 
   getPersonsSettings(role: PersonRole) {
     return this.peopleSettings()[role];
   }
 
   ngOnInit(): void {
+    const series = this.series();
+
+    this.formModel.update(m => ({
+      ...m,
+      id: series.id,
+      name: series.name,
+      localizedName: series.localizedName,
+      sortName: series.sortName,
+      rating: series.userRating,
+      metadataProviderOverride: series.metadataProviderOverride?.toString() ?? '',
+      aniListId: series.aniListId,
+      malId: series.malId,
+      hardcoverId: series.hardcoverId,
+      metronId: series.metronId,
+      comicVineId: series.comicVineId,
+      mangaBakaId: series.mangaBakaId,
+      cbrId: series.cbrId,
+    }));
+
     this.libraryService.getLibraryNames().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(names => {
-      this.libraryName = names[this.series.libraryId];
+      this.libraryName.set(names[this.series().libraryId]);
     });
-
-    this.initSeries = Object.assign({}, this.series);
-
-    this.editSeriesForm = this.fb.group({
-      id: new FormControl(this.series.id, []),
-      summary: new FormControl('', []),
-      name: new FormControl(this.series.name, [Validators.required]),
-      localizedName: new FormControl(this.series.localizedName, []),
-      sortName: new FormControl(this.series.sortName, [Validators.required]),
-      rating: new FormControl(this.series.userRating, []),
-
-      coverImageLocked: new FormControl(this.series.coverImageLocked, []),
-
-      ageRating: new FormControl('', []),
-      publicationStatus: new FormControl('', []),
-      language: new FormControl('', []),
-      releaseYear: new FormControl('', [Validators.minLength(4), Validators.maxLength(4), Validators.pattern(/([1-9]\d{3})|[0]{1}/)]),
-      metadataProviderOverride: new FormControl<MetadataProvider | null>(this.series.metadataProviderOverride ?? null, []),
-    });
-
-    this.formModel.set({
-      ...this.formModel(),
-      id: this.series.id,
-      name: this.series.name,
-      localizedName: this.series.localizedName,
-      sortName: this.series.sortName,
-      rating: this.series.userRating,
-      coverImageLocked: this.series.coverImageLocked,
-      metadataProviderOverride: this.series.metadataProviderOverride ?? null,
-      aniListId: this.series.aniListId,
-      malId: this.series.malId,
-      hardcoverId: this.series.hardcoverId,
-      metronId: this.series.metronId,
-      comicVineId: this.series.comicVineId,
-      mangaBakaId: this.series.mangaBakaId,
-      cbrId: this.series.cbrId,
-    });
-
-    this.cdRef.markForCheck();
-
 
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
-      this.ageRatings = ratings;
-      this.cdRef.markForCheck();
+      this.ageRatings.set(ratings);
     });
 
     this.metadataService.getAllPublicationStatus().subscribe(statuses => {
-      this.publicationStatuses = statuses;
-      this.cdRef.markForCheck();
+      this.publicationStatuses.set(statuses);
     });
 
-
-
-    this.seriesService.getMetadata(this.series.id).subscribe(metadata => {
+    this.seriesService.getMetadata(this.series().id).subscribe(metadata => {
       if (metadata) {
-        this.metadata = metadata;
+        this.metadata.set(metadata);
 
-        this.setupTypeaheads();
-        this.editSeriesForm.get('summary')?.patchValue(this.metadata.summary);
-        this.editSeriesForm.get('ageRating')?.patchValue(this.metadata.ageRating);
-        this.editSeriesForm.get('publicationStatus')?.patchValue(this.metadata.publicationStatus);
-        this.editSeriesForm.get('language')?.patchValue(this.metadata.language);
-        this.editSeriesForm.get('releaseYear')?.patchValue(this.metadata.releaseYear);
+        this.setupPersonTypeahead();
 
         this.formModel.update(m => ({
           ...m,
-          summary: this.metadata.summary,
-          ageRating: this.metadata.ageRating.toString(),
-          publicationStatus: this.metadata.publicationStatus.toString(),
-          language: this.metadata.language,
-          releaseYear: this.metadata.releaseYear.toString(),
+          metadata: {
+            ...m.metadata,
+            summary: metadata.summary || '',
+            ageRating: metadata.ageRating.toString(),
+            publicationStatus: metadata.publicationStatus.toString(),
+            language: metadata.language,
+            releaseYear: metadata.releaseYear > 0 ? metadata.releaseYear.toString() : '',
+            genres: metadata.genres ?? [],
+            tags: metadata.tags ?? [],
+            webLinks: metadata.webLinks,
+            ...personFieldsFrom(metadata),
+          },
         }));
-
-        this.cdRef.markForCheck();
-
-        this.editSeriesForm.get('name')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-          this.series.nameLocked = true;
-          this.cdRef.markForCheck();
-        });
-
-        this.editSeriesForm.get('sortName')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-          this.series.sortNameLocked = true;
-          this.cdRef.markForCheck();
-        });
-
-        this.editSeriesForm.get('localizedName')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-          this.series.localizedNameLocked = true;
-          this.cdRef.markForCheck();
-        });
-
-        this.editSeriesForm.get('summary')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-          this.metadata.summaryLocked = true;
-          this.metadata.summary = val;
-          this.cdRef.markForCheck();
-        });
-
-
-        this.editSeriesForm.get('ageRating')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-          this.metadata.ageRating = parseInt(val + '', 10);
-          this.metadata.ageRatingLocked = true;
-          this.cdRef.markForCheck();
-        });
-
-        this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-          this.metadata.publicationStatus = parseInt(val + '', 10);
-          this.metadata.publicationStatusLocked = true;
-          this.cdRef.markForCheck();
-        });
-
-        this.editSeriesForm.get('releaseYear')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-          this.metadata.releaseYear = parseInt(val + '', 10);
-          this.metadata.releaseYearLocked = true;
-          this.cdRef.markForCheck();
-        });
       }
     });
 
     this.isLoadingVolumes.set(true);
 
-    forkJoin({volumes: this.seriesService.getVolumes(this.series.id), libraryType: this.libraryService.getLibraryType(this.series.libraryId)}).subscribe(res => {
+    forkJoin({volumes: this.seriesService.getVolumes(this.series().id), libraryType: this.libraryService.getLibraryType(this.series().libraryId)}).subscribe(res => {
       const volumes = res.volumes;
       const libraryType = res.libraryType;
 
-      this.seriesVolumes = volumes;
       this.libraryType.set(libraryType);
       this.isLoadingVolumes.set(false);
-      this.chooserConfig.set(this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType()));
-
-      volumes.forEach(v => {
-        this.volumeCollapsed[v.name] = true;
-      });
-
-      this.seriesVolumes.forEach(vol => {
-        vol.volumeFiles = vol.chapters?.map((c: Chapter) => c.files.map((f: any) => {
-          // TODO: Identify how to fix this hack
-          f.chapter = c.range;
-          return f;
-        })).flat();
-      });
-
-      if (volumes.length > 0) {
-        this.size = volumes.reduce((sum1, volume) => {
-          return sum1 + volume.chapters.reduce((sum2, chapter) => {
-            return sum2 + chapter.files.reduce((sum3, file) => {
-              return sum3 + file.bytes;
-            }, 0);
-          }, 0);
-        }, 0);
-      }
-      this.cdRef.markForCheck();
+      this.seriesVolumes.set(volumes);
     });
 
   }
@@ -398,42 +330,18 @@ export class EditSeriesModalComponent implements OnInit {
 
 
 
-  setupTypeaheads() {
-
-    this.languageSettings.set(this.typeaheadSettingsFactory.forLanguage({id: 'language', currentSelectedLanguage: this.metadata.language}));
-    this.tagsSettings.set(this.typeaheadSettingsFactory.forTag({id: 'tags', savedData: this.metadata.tags ?? []}));
-    this.genreSettings.set(this.typeaheadSettingsFactory.forGenre({id: 'genres', savedData: this.metadata.genres ?? []}));
-
-    this.setupPersonTypeahead();
-  }
-
   setupPersonTypeahead() {
-    const roles: ReadonlyArray<[string, PersonRole, Array<Person> | undefined]> = [
-      ['writer', PersonRole.Writer, this.metadata.writers],
-      ['character', PersonRole.Character, this.metadata.characters],
-      ['colorist', PersonRole.Colorist, this.metadata.colorists],
-      ['cover-artist', PersonRole.CoverArtist, this.metadata.coverArtists],
-      ['editor', PersonRole.Editor, this.metadata.editors],
-      ['inker', PersonRole.Inker, this.metadata.inkers],
-      ['letterer', PersonRole.Letterer, this.metadata.letterers],
-      ['penciller', PersonRole.Penciller, this.metadata.pencillers],
-      ['publisher', PersonRole.Publisher, this.metadata.publishers],
-      ['imprint', PersonRole.Imprint, this.metadata.imprints],
-      ['translator', PersonRole.Translator, this.metadata.translators],
-      ['teams', PersonRole.Team, this.metadata.teams],
-      ['locations', PersonRole.Location, this.metadata.locations],
-    ];
-
     this.metadataService.getAllPeople().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(people => {
       const settings: Partial<Record<PersonRole, TypeaheadConfig<Person>>> = {};
 
-      for (const [id, role, preset] of roles) {
-        const personSettings = this.typeaheadSettingsFactory.forPerson({id, role});
+      for (const role of allPeopleRoles) {
+        const field = personFields[role];
+        const personSettings = this.typeaheadSettingsFactory.forPerson({id: field.id, role});
+        const preset = this.formGroup.metadata[field.model]().value();
 
-        if (preset && preset.length > 0) {
-          const presetIds = preset.map(p => p.id);
-          personSettings.savedData = people.filter(person => presetIds.includes(person.id));
-          this.metadataService.updatePerson(this.metadata, personSettings.savedData, role);
+        if (preset.length > 0) {
+          personSettings.savedData = people.filter(p => preset.some(x => x.id === p.id));
+          this.formGroup.metadata[field.model]().value.set(personSettings.savedData);
         }
 
         settings[role] = personSettings;
@@ -445,91 +353,96 @@ export class EditSeriesModalComponent implements OnInit {
 
   close() {
     if (this.coverImageReset) {
-      this.modal.close(modalSaved(this.series, true));
+      this.modal.close(modalSaved(this.series(), true));
     } else {
       this.modal.dismiss();
     }
   }
 
+  toggleVolume(id: number) {
+    this.expandedVolumes.update(s => {
+      const next = new Set(s);
+      if (!next.delete(id)) {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
   updateWeblinks(items: Array<string>) {
-    this.metadata.webLinks = items.map(s => s.replaceAll(',', '%2C')).join(',');
+    this.formGroup.metadata.webLinks().value.set(items.map(s => s.replaceAll(',', '%2C')).join(','));
   }
 
 
   async save() {
-    // Ids live on the signal form, everything else is still on editSeriesForm
-    const model = {...this.formModel(), ...this.editSeriesForm.getRawValue()};
+    const metadata = this.metadata();
+    if (metadata === null) return;
 
-    const nameChanged = this.editSeriesForm.get('name')?.dirty ?? false;
+    const model = this.formModel();
 
     // If the user renamed the series but has a locked (custom) sort name, offer to align it.
     // When the sort name is unlocked the backend reseeds it from the new name automatically.
-    if (nameChanged && this.series.sortNameLocked && model.sortName !== model.name) {
+    const nameChanged = this.formGroup.name().dirty() ?? false;
+    if (nameChanged && this.series().sortNameLocked && model.sortName !== model.name) {
       if (await this.confirmService.confirm(translate('edit-series-modal.align-sort-name'))) {
         model.sortName = model.name;
-        this.editSeriesForm.get('sortName')?.patchValue(model.name);
+        this.formGroup.sortName().value.set(model.name);
       }
     }
 
-    let updatedSeries: Series | null = null;
+    const seriesPayload = {
+      ...this.series(),
+      ...model,
+      metadataProviderOverride: model.metadataProviderOverride === '' ? null : parseInt(model.metadataProviderOverride, 10) as MetadataProvider
+    };
+    writeFieldLocks(seriesPayload, this.locks);
 
-    model.nameLocked = this.series.nameLocked;
-    model.sortNameLocked = this.series.sortNameLocked;
-    model.localizedNameLocked = this.series.localizedNameLocked;
-    model.language = this.metadata.language;
-
-    // updateSeries runs first so a name collision (400) short-circuits the chain before metadata is written
-    const apis = [
-      this.seriesService.updateSeries(model).pipe(tap(result => updatedSeries = result)),
-      this.seriesService.updateMetadata(this.metadata)
-    ];
-
-    if (this.coverImageDirty) {
-      apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, true));
-    }
+    const metadataPayload: SeriesMetadata = {
+      ...metadata,
+      ...model.metadata,
+      ageRating: parseInt(model.metadata.ageRating, 10) as AgeRating,
+      publicationStatus: parseInt(model.metadata.publicationStatus, 10) as PublicationStatus,
+      releaseYear: parseInt(model.metadata.releaseYear, 10) || 0,
+    };
+    writeFieldLocks(metadataPayload, this.metadataLocks);
+    writeNamedLocks(metadataPayload, this.personLocks);
 
     this.saveNestedComponents.emit();
 
-    // Run api calls sequentially to prevent them from overwriting each other in a race condition
-    concat(...apis).pipe(
-      delay(10),
-      last()
-    ).subscribe({
-      next: () => {
-        this.modal.close(modalSaved(updatedSeries ?? model, this.coverImageDirty || this.coverImageReset));
-      },
-      error: () => {
-        // A duplicate name (400) is surfaced by the global error interceptor; keep the modal open
-        this.cdRef.markForCheck();
-      }
+    // updateSeries runs first so a name collision (400) short-circuits the chain before metadata is written
+    this.seriesService.updateSeries(seriesPayload).pipe(
+      switchMap(series => this.seriesService.updateMetadata(metadataPayload).pipe(map(() => series))),
+      switchMap(series => this.coverImageDirty
+        ? this.uploadService.updateSeriesCoverImage(this.series().id, this.selectedCover, true).pipe(map(() => series))
+        : of(series))
+    ).subscribe((c) => {
+      this.series.set(c);
+      const needsCoverUpdate = this.coverImageDirty || this.coverImageReset;
+      this.modal.close(modalSaved(this.series(), needsCoverUpdate));
     });
   }
 
 
   updateTags(tags: Tag[]) {
-    this.tags = tags;
-    this.metadata.tags = tags;
-    this.cdRef.markForCheck();
+    this.formGroup.metadata.tags().value.set(tags);
   }
 
   updateGenres(genres: Genre[]) {
-    this.genres = genres;
-    this.metadata.genres = genres;
-    this.cdRef.markForCheck();
+    this.formGroup.metadata.genres().value.set(genres);
   }
 
   updatePerson(persons: Person[], role: PersonRole) {
-    this.metadataService.updatePerson(this.metadata, persons, role);
-    this.cdRef.markForCheck();
+    const field = personFields[role];
+    this.formGroup.metadata[field.model]().value.set(persons);
+    this.personLocks[field.lock].set(true);
   }
 
   updateLanguage(language: Array<Language>) {
     if (language.length === 0) {
-      this.metadata.language = '';
+      this.formGroup.metadata.language().value.set('');
       return;
     }
-    this.metadata.language = language[0].isoCode;
-    this.cdRef.markForCheck();
+    this.formGroup.metadata.language().value.set(language[0].isoCode);
   }
 
   handleCoverChanged(event: { isDirty: boolean; fileName: string }) {
@@ -539,19 +452,11 @@ export class EditSeriesModalComponent implements OnInit {
 
   handleReset() {
     this.coverImageReset = true;
-    this.editSeriesForm.patchValue({ coverImageLocked: false });
-    this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
-  }
-
-  unlock(b: any, field: string) {
-    if (b) {
-      b[field] = !b[field];
-    }
-    this.cdRef.markForCheck();
+    this.locks.coverImage.set(false);
   }
 
   async runTask(action: ActionItem<Series>) {
-    action.callback(action,  this.series);
+    action.callback(action,  this.series());
   }
 
   formatVolumeName(volume: Volume) {
@@ -565,10 +470,14 @@ export class EditSeriesModalComponent implements OnInit {
 
   changeTab(tab?: Tabs) {
     if (!tab) return;
-    this.active = tab;
-    this.cdRef.markForCheck();
+    this.activeTabId.set(tab);
   }
 
   protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
   protected readonly MangaFormat = MangaFormat;
+  protected readonly allMetadataProviders = AllMetadataProviders;
+  protected readonly Tabs = Tabs;
+  protected readonly PersonRole = PersonRole;
+  protected readonly Action = Action;
+  protected readonly parseInt = parseInt;
 }

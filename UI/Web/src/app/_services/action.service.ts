@@ -224,7 +224,7 @@ export class ActionService {
 
       case Action.Edit: {
         const modalRef = this.modalService.open(EditSeriesModalComponent, editModal());
-        modalRef.componentInstance.series = series;
+        modalRef.setInput('series', series);
         return this.handleEditModal(modalRef, action, series);
       }
 

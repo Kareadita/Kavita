@@ -20,11 +20,10 @@
           <div class="col-md-9 col-sm-12 mb-3">
             <app-setting-item [title]="t('title-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formGroup.titleName">
               <ng-template #view>
-                <div class="input-group" [ngClass]="{'lock-active': locks.titleName()}">
-                  <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ lock: locks.titleName }" />
+                <app-lockable-field [(locked)]="locks.titleName">
                   <input class="form-control" [formField]="formGroup.titleName" type="text"
                          [appFormField]="formGroup.titleName">
-                </div>
+                </app-lockable-field>
               </ng-template>
             </app-setting-item>
 
@@ -33,11 +32,10 @@
           <div class="col-md-3 col-sm-12 mb-3">
             <app-setting-item [title]="t('sort-order-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formGroup.sortOrder">
               <ng-template #view>
-                <div class="input-group" [ngClass]="{'lock-active': locks.sortOrder()}">
-                  <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ lock: locks.sortOrder }" />
+                <app-lockable-field [(locked)]="locks.sortOrder">
                   <input class="form-control" [formField]="formGroup.sortOrder" type="number" step="0.1" inputmode="numeric"
                          [appFormField]="formGroup.sortOrder">
-                </div>
+                </app-lockable-field>
               </ng-template>
             </app-setting-item>
           </div>
@@ -47,11 +45,10 @@
           <div class="col-md-9 col-sm-12 mb-3">
             <app-setting-item [title]="t('isbn-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formGroup.isbn">
               <ng-template #view>
-                <div class="input-group"  [ngClass]="{'lock-active': locks.isbn()}">
-                  <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ lock: locks.isbn }" />
+                <app-lockable-field [(locked)]="locks.isbn">
                   <input class="form-control" [formField]="formGroup.isbn" type="text"
                          [appFormField]="formGroup.isbn">
-                </div>
+                </app-lockable-field>
               </ng-template>
             </app-setting-item>
           </div>
@@ -59,14 +56,13 @@
           <div class="col-md-3 col-sm-12 mb-3">
             <app-setting-item [title]="t('age-rating-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formGroup.ageRating">
               <ng-template #view>
-                <div class="input-group" [ngClass]="{'lock-active': locks.ageRating()}">
-                  <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ lock: locks.ageRating }" />
+                <app-lockable-field [(locked)]="locks.ageRating">
                   <select class="form-select" id="age-rating" [formField]="formGroup.ageRating">
                     @for(opt of ageRatings(); track opt.value) {
                       <option [value]="opt.value">{{opt.title | titlecase}}</option>
                     }
                   </select>
-                </div>
+                </app-lockable-field>
               </ng-template>
             </app-setting-item>
           </div>
@@ -96,15 +92,11 @@
             <div class="mb-3">
               <app-setting-item [title]="t('release-date-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formGroup.releaseDate">
                 <ng-template #view>
-                  <div class="input-group" [ngClass]="{'lock-active': locks.releaseDate()}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ lock: locks.releaseDate }" />
-                    <input
-                      class="form-control"
-                      [formField]="formGroup.releaseDate"
-                      type="date"
-                      [appFormField]="formGroup.releaseDate"
+                  <app-lockable-field [(locked)]="locks.releaseDate">
+                    <input class="form-control" [formField]="formGroup.releaseDate"
+                      type="date" [appFormField]="formGroup.releaseDate"
                     />
-                  </div>
+                  </app-lockable-field>
                 </ng-template>
               </app-setting-item>
             </div>
@@ -115,10 +107,9 @@
           <div class="mb-3" style="width: 100%">
             <app-setting-item [title]="t('summary-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formGroup.summary">
               <ng-template #view>
-                <div class="input-group" [ngClass]="{'lock-active': locks.summary()}">
-                  <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ lock: locks.summary }" />
+                <app-lockable-field [(locked)]="locks.summary">
                   <textarea id="summary" class="form-control" [formField]="formGroup.summary" [appFormField]="formGroup.summary" rows="4"></textarea>
-                </div>
+                </app-lockable-field>
               </ng-template>
             </app-setting-item>
           </div>
@@ -590,17 +581,6 @@
       }
     </ng-template>
 
-
   </app-edit-modal-shell>
-
-
-
-  <ng-template #lock let-lock="lock">
-    <span class="input-group-text clickable" (click)="lock.set(!lock())">
-        <i class="fa fa-lock" aria-hidden="true"></i>
-        <span class="visually-hidden">{{t('field-locked-alt')}}</span>
-    </span>
-  </ng-template>
-
 
 </ng-container>

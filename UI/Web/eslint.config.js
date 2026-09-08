@@ -31,6 +31,7 @@ module.exports = tseslint.config(
         'error',
         {prefix: 'app', style: 'camelCase', type: 'attribute'},
       ],
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
   {
