@@ -59,6 +59,8 @@ export class ValidationErrorsComponent {
         title = overrides[e.kind];
       } else if (DEFAULT_MESSAGES.hasOwnProperty(e.kind)) {
         title = this.translocoService.translate(`validation.${DEFAULT_MESSAGES[e.kind]}`, e.params);
+      } else if (e.message) {
+        title = e.message;
       }
 
       return {
