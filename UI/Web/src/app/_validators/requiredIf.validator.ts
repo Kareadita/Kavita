@@ -1,7 +1,6 @@
 import {createMetadataKey, PathKind, SchemaPath, SchemaPathRules, validate, validateTree} from "@angular/forms/signals";
-import {environment} from "../../../environments/environment";
+import {environment} from "../../environments/environment";
 import {translate} from "@jsverse/transloco";
-
 
 export const REQUIRED_IF_NAME = createMetadataKey<string>();
 
@@ -44,41 +43,4 @@ export function requiredIf<TValue, TValueOther, TPathKind extends PathKind = Pat
       fieldTree: ctx.fieldTree
     }
   })
-}
-
-const defaultUrlOptions = {
-  requireTls: true,
-}
-
-export function url<TPathKind extends PathKind = PathKind.Root>(
-  path: SchemaPath<string, SchemaPathRules.Supported, TPathKind>,
-  options?: { requireTls: boolean },
-) {
-  const finalOptions = {
-    ...defaultUrlOptions,
-    ...options
-  };
-
-  validate(path, (value) => {
-    const uri = value.value();
-    if (!uri || uri.trim().length === 0) {
-      return null;
-    }
-
-    if (environment.production && finalOptions.requireTls && !uri.startsWith('https')) {
-      return {
-        kind: 'requireTls',
-      }
-    }
-
-    try {
-      new URL(uri);
-    } catch {
-      return {
-        kind: 'invalidUri'
-      };
-    }
-
-    return null;
-  });
 }

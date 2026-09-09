@@ -48,11 +48,11 @@ import {SlicePipe} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ConfirmService} from "../../shared/confirm.service";
 import {AuthorityValidationResultPipe} from "../../_pipes/authority-validation-result.pipe";
-import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
-import {debounce, disabled, form, FormField, metadata, validateAsync, validateHttp} from "@angular/forms/signals";
-import {REQUIRED_IF_NAME, requiredIf, url} from "../../shared/utils/validators.util";
+import {disabled, form, FormField, metadata, validateAsync} from "@angular/forms/signals";
 import {SettingEnumSelectComponent} from "../../settings/_components/setting-enum-select/setting-enum-select.component";
+import {REQUIRED_IF_NAME, requiredIf} from "../../_validators/requiredIf.validator";
+import {url} from "../../_validators/url.validator";
 
 @Component({
   selector: 'app-manage-open-idconnect',
