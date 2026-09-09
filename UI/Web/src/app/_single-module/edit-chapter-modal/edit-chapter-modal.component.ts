@@ -103,7 +103,6 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     SettingItemComponent,
     TypeaheadComponent,
     EntityTitleComponent,
-    TitleCasePipe,
     SettingButtonComponent,
     CoverImageChooserComponent,
     CompactNumberPipe,
