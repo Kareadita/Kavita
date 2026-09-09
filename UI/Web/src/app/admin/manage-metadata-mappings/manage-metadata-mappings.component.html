@@ -39,6 +39,7 @@
               </div>
             }
 
+            <!--
             <div class="row g-0 align-items-start mb-4">
               <div class="col">
                 <app-setting-multi-text-field
@@ -58,12 +59,13 @@
                 formControlName="whitelist"
               />
             </div>
+            -->
 
             @if (licenseService.hasActiveLicense()) {
               <div class="row g-0 mt-4 mb-4">
                 <app-setting-item [title]="t('tag-weight-label')" [subtitle]="t('tag-weight-tooltip')" [labelId]="'filter-above-weight'">
                   <ng-template #view>
-                    @if (settingsForm().get('filterAboveWeight')?.value == null) {
+                    @if (settingsForm().get('filterAboveWeight')?.value === null) {
                       {{t('tag-weight-disabled')}}
                     } @else {
                       {{settingsForm().get('filterAboveWeight')?.value | tagWeightTitle}}
