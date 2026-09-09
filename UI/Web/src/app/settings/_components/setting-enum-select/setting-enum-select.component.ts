@@ -1,7 +1,18 @@
-import {Component, contentChild, input, model, Pipe, PipeTransform, TemplateRef, viewChild} from '@angular/core';
-import {FormValueControl} from "@angular/forms/signals";
+import {
+  Component,
+  computed,
+  contentChild, inject,
+  input,
+  model,
+  Pipe,
+  PipeTransform,
+  TemplateRef,
+  viewChild
+} from '@angular/core';
+import {FormField, FormValueControl} from "@angular/forms/signals";
 import {ReactiveFormsModule} from "@angular/forms";
-import {NgTemplateOutlet} from "@angular/common";
+import {NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 export interface EnumOption<T> {
   value: T;
@@ -12,7 +23,9 @@ export interface EnumOption<T> {
 @Component({
   imports: [
     ReactiveFormsModule,
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    TitleCasePipe,
+    FormFieldDirective
   ],
   selector: 'app-setting-enum-select',
   styleUrl: './setting-enum-select.component.scss',
@@ -20,11 +33,28 @@ export interface EnumOption<T> {
 })
 export class SettingEnumSelectComponent<T extends number = number> implements FormValueControl<T> {
 
+  protected formField = inject(FormField);
+
+  id = input.required<string>();
+
   value = model<T>(0 as T);
   disabled = input<boolean>(false);
+  extraClasses = input<string>('');
 
-  options = input.required<EnumOption<T>[]>();
+  options = input.required<(EnumOption<T> | T)[]>();
   template = contentChild<TemplateRef<never>>('template');
+
+  getEnumValue(opt: T | EnumOption<T>): T {
+    return typeof opt === 'number' ? opt : opt.value;
+  }
+
+  getEnumLabel(opt: T | EnumOption<T>): string {
+    if (typeof opt === 'number') {
+      return opt + '';
+    }
+
+    return opt.title ?? opt.label ?? (opt.value + '');
+  }
 
   onSelectionChange(event: Event) {
     const select = event.target as HTMLSelectElement;
