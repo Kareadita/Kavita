@@ -4,17 +4,17 @@
   </p>
 
   @if (!loading()) {
-    <form [formGroup]="settingsForm" class="mb-4">
+    <form class="mb-4">
       <h4>{{t('global-settings-title')}}</h4>
       <ng-container>
 
         <div class="row g-0 mt-4 mb-4">
           <app-setting-item [title]="t('locale-label')" [subtitle]="t('locale-tooltip')" labelId="locale" [canEdit]="!isReadOnly()">
             <ng-template #view>
-              {{Locale | titlecase}}
+              {{selectedLocale() | titlecase}}
             </ng-template>
             <ng-template #edit>
-              <select class="form-select" aria-describedby="global-header" formControlName="locale" id="locale">
+              <select class="form-select" aria-describedby="global-header" [formField]="userPreferencesForm.locale" id="locale">
                 @for(opt of locales(); track opt.renderName) {
                   <option [value]="opt.fileName">{{opt.renderName | titlecase}} ({{opt.translationCompletion | number:'1.0-1'}}%)</option>
                 }
@@ -28,7 +28,7 @@
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="blurUnreadSummaries" class="form-check-input"
+                       [formField]="userPreferencesForm.blurUnreadSummaries" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
             </ng-template>
@@ -41,7 +41,7 @@
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="promptForDownloadSize" class="form-check-input"
+                       [formField]="userPreferencesForm.promptForDownloadSize" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
             </ng-template>
@@ -53,7 +53,7 @@
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="noTransitions" class="form-check-input"
+                       [formField]="userPreferencesForm.noTransitions" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
             </ng-template>
@@ -65,7 +65,7 @@
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="collapseSeriesRelationships" class="form-check-input"
+                       [formField]="userPreferencesForm.collapseSeriesRelationships" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
             </ng-template>
@@ -77,7 +77,7 @@
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="colorScapeEnabled" class="form-check-input"
+                       [formField]="userPreferencesForm.colorScapeEnabled" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
             </ng-template>
@@ -89,7 +89,7 @@
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="dataSaver" class="form-check-input"
+                       [formField]="userPreferencesForm.dataSaver" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
             </ng-template>
@@ -97,18 +97,16 @@
         </div>
 
         <div class="row g-0 mt-4 mb-4">
-          @if (settingsForm.get('promptForRereadsAfter'); as formControl) {
-            <app-setting-item [title]="t('prompt-for-rereads-after-label')" [subtitle]="t('prompt-for-rereads-after-tooltip')" [canEdit]="!isReadOnly()" [control]="formControl" labelId="prompt-for-rereads-after">
-              <ng-template #view>
-                <span> {{formControl.value}} </span>
-              </ng-template>
-              <ng-template #edit>
-                <input type="number" min="0" id="prompt-for-rereads-after"
-                       formControlName="promptForRereadsAfter" class="form-control"
-                       aria-labelledby="auto-close-label" [appFormField]="formControl">
-              </ng-template>
-            </app-setting-item>
-          }
+          <app-setting-item [title]="t('prompt-for-rereads-after-label')" [subtitle]="t('prompt-for-rereads-after-tooltip')" [canEdit]="!isReadOnly()" [control]="userPreferencesForm.promptForRereadsAfter" labelId="prompt-for-rereads-after">
+            <ng-template #view>
+              <span> {{userPreferencesForm.promptForRereadsAfter().value()}} </span>
+            </ng-template>
+            <ng-template #edit>
+              <input type="number" id="prompt-for-rereads-after"
+                     [formField]="userPreferencesForm.promptForRereadsAfter" class="form-control"
+                     aria-labelledby="auto-close-label" [appFormField]="userPreferencesForm.promptForRereadsAfter">
+            </ng-template>
+          </app-setting-item>
         </div>
 
         <div class="row g-0 mt-4 mb-4">
@@ -131,14 +129,14 @@
       <div class="setting-section-break"></div>
 
       <h4>{{t('social-settings-title')}}</h4>
-      <ng-container formGroupName="socialPreferences">
+      <ng-container>
 
         <div class="row g-0 mt-4">
           <app-setting-switch [title]="t('social-share-profile-label')" [subtitle]="t('social-share-profile-tooltip')">
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="shareProfile" class="form-check-input">
+                       [formField]="userPreferencesForm.socialPreferences.shareProfile" class="form-check-input">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -149,7 +147,7 @@
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="shareReviews" class="form-check-input"
+                       [formField]="userPreferencesForm.socialPreferences.shareReviews" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
             </ng-template>
@@ -161,7 +159,7 @@
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="shareAnnotations" class="form-check-input">
+                       [formField]="userPreferencesForm.socialPreferences.shareAnnotations" class="form-check-input">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -172,51 +170,47 @@
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="viewOtherAnnotations" class="form-check-input">
+                       [formField]="userPreferencesForm.socialPreferences.viewOtherAnnotations" class="form-check-input">
               </div>
             </ng-template>
           </app-setting-switch>
         </div>
 
         <div class="row g-0 mt-4">
-          @if (settingsForm.get('socialPreferences')!.get('socialLibraries'); as control) {
-            <app-setting-item
-              [title]="t('social-libraries-label')"
-              [subtitle]="t('social-libraries-tooltip')"
-              [showEdit]="false" [canEdit]="false" [control]="control"
-            >
-              <ng-template #view>
-                @let socialLibConfig = socialLibrariesTypeaheadSettings();
-                @if (socialLibConfig) {
-                  <app-typeahead [config]="socialLibConfig" (selectedData)="syncFormWithTypeahead($event)" [disabled]="isReadOnly()">
-                    <ng-template #optionItem let-lib>
-                      {{lib.name}}
-                    </ng-template>
-                    <ng-template #badgeItem let-lib>
-                      {{lib.name}}
-                    </ng-template>
-                  </app-typeahead>
-                }
-              </ng-template>
-            </app-setting-item>
-          }
+          <app-setting-item
+            [title]="t('social-libraries-label')"
+            [subtitle]="t('social-libraries-tooltip')"
+            [showEdit]="false" [canEdit]="false" [control]="userPreferencesForm.socialPreferences.socialLibraries"
+          >
+            <ng-template #view>
+              @let socialLibConfig = socialLibrariesTypeaheadSettings();
+              @if (socialLibConfig) {
+                <app-typeahead [config]="socialLibConfig" (selectedData)="syncFormWithTypeahead($event)" [disabled]="isReadOnly()">
+                  <ng-template #optionItem let-lib>
+                    {{lib.name}}
+                  </ng-template>
+                  <ng-template #badgeItem let-lib>
+                    {{lib.name}}
+                  </ng-template>
+                </app-typeahead>
+              }
+            </ng-template>
+          </app-setting-item>
         </div>
 
         <div class="row g-0 mt-4">
-          @if (settingsForm.get('socialPreferences')!.get('socialMaxAgeRating'); as control) {
-            <app-setting-item [control]="control" [title]="t('social-max-age-rating-label')" [subtitle]="t('social-max-age-rating-tooltip')" [canEdit]="!isReadOnly()">
-              <ng-template #view>
-                {{control.value | ageRating}}
-              </ng-template>
-              <ng-template #edit>
-                <select class="form-select" formControlName="socialMaxAgeRating">
-                  @for (ar of ageRatings(); track ar.value) {
-                    <option [ngValue]="ar.value">{{ar.value | ageRating}}</option>
-                  }
-                </select>
-              </ng-template>
-            </app-setting-item>
-          }
+          <app-setting-item [control]="userPreferencesForm.socialPreferences.socialMaxAgeRating" [title]="t('social-max-age-rating-label')" [subtitle]="t('social-max-age-rating-tooltip')" [canEdit]="!isReadOnly()">
+            <ng-template #view>
+              {{userPreferencesForm.socialPreferences.socialMaxAgeRating().value() | ageRating}}
+            </ng-template>
+            <ng-template #edit>
+              <app-setting-enum-select [formField]="userPreferencesForm.socialPreferences.socialMaxAgeRating" [options]="ageRatings()">
+                <ng-template #template let-ar>
+                  {{ar | ageRating}}
+                </ng-template>
+              </app-setting-enum-select>
+            </ng-template>
+          </app-setting-item>
         </div>
 
         <div class="row g-0 mt-4">
@@ -224,7 +218,7 @@
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="socialIncludeUnknowns" class="form-check-input">
+                       [formField]="userPreferencesForm.socialPreferences.socialIncludeUnknowns" class="form-check-input">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -234,13 +228,13 @@
       <div class="setting-section-break"></div>
 
       <h4>{{t('opds-settings-title')}}</h4>
-      <ng-container formGroupName="opdsPreferences">
+      <ng-container>
         <div class="row g-0 mt-4">
           <app-setting-switch [title]="t('embed-progress-indicator-label')" [subtitle]="t('embed-progress-indicator-tooltip')">
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="embedProgressIndicator" class="form-check-input"
+                       [formField]="userPreferencesForm.opdsPreferences.embedProgressIndicator" class="form-check-input"
                        aria-labelledby="auto-close-label">
               </div>
             </ng-template>
@@ -252,7 +246,7 @@
             <ng-template>
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch"
-                       formControlName="includeContinueFrom" class="form-check-input">
+                       [formField]="userPreferencesForm.opdsPreferences.includeContinueFrom" class="form-check-input">
               </div>
             </ng-template>
           </app-setting-switch>

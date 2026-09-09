@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed, debounced,
+  DestroyRef,
+  effect,
+  inject,
+  OnInit,
+  Signal,
+  signal
+} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Preferences} from "../../_models/preferences/preferences";
 import {AccountService} from "../../_services/account.service";
@@ -19,7 +29,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {LicenseService} from "../../_services/license.service";
 import {HighlightBarComponent} from "../../book-reader/_components/_annotations/highlight-bar/highlight-bar.component";
-import {SiteTheme} from "../../_models/preferences/site-theme";
+import {SiteTheme, ThemeProvider} from "../../_models/preferences/site-theme";
 import {PageLayoutMode} from "../../_models/page-layout-mode";
 import {HighlightSlot} from "../../book-reader/_models/annotations/highlight-slot";
 import {AgeRating} from "../../_models/metadata/age-rating";
@@ -32,38 +42,8 @@ import {TypeaheadComponent} from "../../typeahead/_components/typeahead.componen
 import {TypeaheadConfig} from "../../typeahead/_models/typeahead-config";
 import {TypeaheadConfigFactoryService} from "../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
-
-type UserPreferencesForm = FormGroup<{
-  theme: FormControl<SiteTheme>,
-  globalPageLayoutMode: FormControl<PageLayoutMode>,
-  blurUnreadSummaries: FormControl<boolean>,
-  promptForDownloadSize: FormControl<boolean>,
-  noTransitions: FormControl<boolean>,
-  collapseSeriesRelationships: FormControl<boolean>,
-  locale: FormControl<string>,
-  bookReaderHighlightSlots: FormArray<FormControl<HighlightSlot>>,
-  colorScapeEnabled: FormControl<boolean>,
-  dataSaver: FormControl<boolean>,
-  promptForRereadsAfter: FormControl<number>,
-
-  aniListScrobblingEnabled: FormControl<boolean>,
-  wantToReadSync: FormControl<boolean>,
-
-  socialPreferences: FormGroup<{
-    shareReviews: FormControl<boolean>,
-    shareAnnotations: FormControl<boolean>,
-    viewOtherAnnotations: FormControl<boolean>,
-    socialLibraries: FormControl<number[]>,
-    socialMaxAgeRating: FormControl<AgeRating>,
-    socialIncludeUnknowns: FormControl<boolean>,
-    shareProfile: FormControl<boolean>,
-  }>,
-
-  opdsPreferences: FormGroup<{
-    embedProgressIndicator: FormControl<boolean>,
-    includeContinueFrom: FormControl<boolean>,
-  }>
-}>
+import {debounce, disabled, form, FormField, min, required} from "@angular/forms/signals";
+import {SettingEnumSelectComponent} from "../../settings/_components/setting-enum-select/setting-enum-select.component";
 
 @Component({
   selector: 'app-manga-user-preferences',
@@ -77,7 +57,10 @@ type UserPreferencesForm = FormGroup<{
     HighlightBarComponent,
     AgeRatingPipe,
     TypeaheadComponent,
-    FormFieldDirective],
+    FormFieldDirective,
+    FormField,
+    SettingEnumSelectComponent
+  ],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -99,24 +82,76 @@ export class ManageUserPreferencesComponent implements OnInit {
   locales = signal<KavitaLocale[]>([]);
   socialLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
 
-  settingsForm!: UserPreferencesForm;
+  userPreferencesModel = signal<Preferences>({
+    aniListScrobblingEnabled: false,
+    blurUnreadSummaries: false,
+    bookReaderHighlightSlots: [],
+    collapseSeriesRelationships: false,
+    colorScapeEnabled: false,
+    customKeyBinds: {},
+    dataSaver: false,
+    globalPageLayoutMode: PageLayoutMode.Cards,
+    locale: "",
+    noTransitions: false,
+    opdsPreferences: {
+      embedProgressIndicator: false,
+      includeContinueFrom: false
+    },
+    promptForDownloadSize: false,
+    promptForRereadsAfter: 0,
+    socialPreferences: {
+      shareReviews: false,
+      shareAnnotations: false,
+      viewOtherAnnotations: false,
+      socialLibraries: [],
+      socialMaxAgeRating: AgeRating.NotApplicable,
+      socialIncludeUnknowns: false,
+      shareProfile: false
+    },
+    theme: {
+      id: 0,
+      name: "",
+      normalizedName: "",
+      filePath: "",
+      isDefault: false,
+      provider: ThemeProvider.System,
+      selector: "",
+      description: "",
+      previewUrls: [],
+      author: ""
+    },
+    wantToReadSync: false
+  });
+  userPreferencesForm = form(this.userPreferencesModel, (path) => {
+    disabled(path, {when: () => this.accountService.hasReadOnlyRole()});
+    debounce(path, 100);
 
+    min(path.promptForRereadsAfter, 0);
+    required(path.promptForRereadsAfter);
+  });
 
-  get Locale() {
-    if (!this.settingsForm.get('locale')) return 'English';
-
-    const locale = (this.locales() || []).find(l => l.fileName === this.settingsForm.get('locale')!.value);
+  selectedLocale = computed(() => {
+    const locale = (this.locales() || []).find(l => l.fileName === this.userPreferencesForm.locale().value());
     if (!locale) {
       return 'English';
     }
 
     return locale.renderName;
-  }
+  });
 
 
   constructor() {
     this.localizationService.getLocales().subscribe(res => {
       this.locales.set(res.sort((l1, l2) => l1.renderName.localeCompare(l2.renderName)));
+    });
+
+    effect(() => {
+      if (!this.userPreferencesForm().valid() || !this.userPreferencesForm().dirty || this.loading()) {
+        return;
+      }
+      const preferences = this.userPreferencesModel();
+
+      this.accountService.updatePreferences(preferences).subscribe();
     });
   }
 
@@ -126,78 +161,15 @@ export class ManageUserPreferencesComponent implements OnInit {
       libraries: this.libraryService.getLibraries(),
       ageRatings: this.metadataService.getAllAgeRatings(),
     }).subscribe(({pref, libraries, ageRatings}) => {
-      this.loading.set(false);
-      this.ageRatings.set([{
-        value: AgeRating.NotApplicable,
-        title: '',
-      }, ...ageRatings]);
-
+      this.ageRatings.set([{value: AgeRating.NotApplicable, title: '',}, ...ageRatings]);
       this.socialLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({id: 'social-libraries', libraries}));
+      this.userPreferencesModel.set(pref);
 
-      this.settingsForm = this.fb.group({
-        theme: this.fb.control<SiteTheme>(pref.theme),
-        globalPageLayoutMode: this.fb.control<PageLayoutMode>(pref.globalPageLayoutMode),
-        blurUnreadSummaries: this.fb.control<boolean>(pref.blurUnreadSummaries),
-        promptForDownloadSize: this.fb.control<boolean>(pref.promptForDownloadSize),
-        noTransitions: this.fb.control<boolean>(pref.noTransitions),
-        collapseSeriesRelationships: this.fb.control<boolean>(pref.collapseSeriesRelationships),
-        locale: this.fb.control<string>(pref.locale || 'en'),
-        bookReaderHighlightSlots: this.fb.array(pref.bookReaderHighlightSlots.map(s => this.fb.control(s))),
-        colorScapeEnabled: this.fb.control<boolean>(pref.colorScapeEnabled),
-        dataSaver: this.fb.control<boolean>(pref.dataSaver),
-        promptForRereadsAfter: this.fb.control<number>(pref.promptForRereadsAfter, [Validators.required]), // Required allows 0, but not null
-
-        aniListScrobblingEnabled: this.fb.control<boolean>(pref.aniListScrobblingEnabled),
-        wantToReadSync: this.fb.control<boolean>(pref.wantToReadSync),
-
-        socialPreferences: this.fb.group({
-          shareReviews: this.fb.control<boolean>(pref.socialPreferences.shareReviews),
-          shareAnnotations: this.fb.control<boolean>(pref.socialPreferences.shareAnnotations),
-          viewOtherAnnotations: this.fb.control<boolean>(pref.socialPreferences.viewOtherAnnotations),
-          socialLibraries: this.fb.control<number[]>(pref.socialPreferences.socialLibraries),
-          socialMaxAgeRating: this.fb.control<AgeRating>(pref.socialPreferences.socialMaxAgeRating),
-          socialIncludeUnknowns: this.fb.control<boolean>(pref.socialPreferences.socialIncludeUnknowns),
-          shareProfile: this.fb.control<boolean>(pref.socialPreferences.shareProfile),
-        }),
-
-        opdsPreferences: this.fb.group({
-          embedProgressIndicator: this.fb.control<boolean>(pref.opdsPreferences.embedProgressIndicator),
-          includeContinueFrom: this.fb.control<boolean>(pref.opdsPreferences.includeContinueFrom),
-        })
-      });
-
-      if (this.isReadOnly()) {
-        this.settingsForm.disable({ emitEvent: false });
-      }
-
-      this.settingsForm.markAsPristine();
-
-      // Automatically save settings as we edit them
-      this.settingsForm.valueChanges.pipe(
-        distinctUntilChanged(),
-        debounceTime(100),
-        filter(_ => this.settingsForm.valid && this.settingsForm.dirty),
-        takeUntilDestroyed(this.destroyRef),
-        switchMap(_ => {
-          const data = this.packSettings();
-          return this.accountService.updatePreferences(data);
-        }),
-      ).subscribe();
+      this.loading.set(false);
     });
   }
 
   syncFormWithTypeahead(libs: Library[] | Library) {
-    this.settingsForm
-      .get('socialPreferences')!
-      .get('socialLibraries')!
-      .setValue((libs as Library[]).map(l => l.id));
-  }
-
-  packSettings(): Preferences {
-    const customKeyBinds = this.accountService.userPreferences()!.customKeyBinds;
-    return {
-      customKeyBinds,
-      ...this.settingsForm.getRawValue(),
-    };
+    this.userPreferencesForm.socialPreferences.socialLibraries().value.set((libs as Library[]).map(l => l.id));
   }
 }
