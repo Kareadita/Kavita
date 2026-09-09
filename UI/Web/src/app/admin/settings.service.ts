@@ -1,5 +1,5 @@
 import {HttpClient, httpResource} from '@angular/common/http';
-import {inject, Injectable} from '@angular/core';
+import {inject, Injectable, Signal} from '@angular/core';
 import {map, of} from 'rxjs';
 import {environment} from '../../environments/environment';
 import {TextResonse} from '../_types/text-response';
@@ -104,9 +104,16 @@ export class SettingsService {
     return this.http.get<string>(this.baseUrl + 'settings/is-valid-cron?cronExpression=' + val, TextResonse).pipe(map(d => d === 'true'));
   }
 
-  ifValidAuthority(authority: string) {
-    if (authority === '' || authority === undefined || authority === null) return of(AuthorityValidationResult.NotApplicable);
-
-    return this.http.post<string>(this.baseUrl + 'settings/is-valid-authority', {authority}, TextResonse).pipe(map(r => parseInt(r) as AuthorityValidationResult));
+  validAuthorityRsc(authority: Signal<string | null | undefined>) {
+    return httpResource.text(() => ({
+      url: this.baseUrl + 'settings/is-valid-authority',
+      method: 'POST',
+      body: {
+        authority: authority()
+      },
+    }), {
+      parse: (value) => parseInt(value) as AuthorityValidationResult,
+    }).asReadonly();
   }
+
 }
