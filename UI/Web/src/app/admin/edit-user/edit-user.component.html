@@ -25,11 +25,11 @@
       <div class="row g-0 mb-2">
         <div class="col-md-4 col-sm-12 pe-4">
           <label for="identityProvider" class="form-label">{{t('identity-provider')}}</label>
-          <app-setting-enum-select id="identity-provider" [options]="IdentityProviders" [formField]="userForm.identityProvider">
+          <app-setting-select inputId="identity-provider" [options]="IdentityProviders" [formField]="userForm.identityProvider">
             <ng-template #template let-ip>
               {{ ip | identityProviderPipe }}
             </ng-template>
-          </app-setting-enum-select>
+          </app-setting-select>
           <span class="text-muted">{{t('identity-provider-tooltip')}}</span>
         </div>
         <div class="col-md-4 col-sm-12 pe-4">

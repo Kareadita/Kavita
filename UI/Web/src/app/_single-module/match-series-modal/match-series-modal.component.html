@@ -91,11 +91,11 @@
             }
           </div>
 
-          <app-setting-enum-select id="metadata-provider" [formField]="formGroup.provider" [options]="allMetadataProviders" extraClasses="form-select-sm w-auto">
+          <app-setting-select inputId="metadata-provider" [formField]="formGroup.provider" [options]="allMetadataProviders" extraClasses="form-select-sm w-auto">
             <ng-template #template let-p>
               {{ p | metadataProviderTitle }}
             </ng-template>
-          </app-setting-enum-select>
+          </app-setting-select>
         </div>
 
         @if (activeProvider() === MetadataProvider.Hardcover) {

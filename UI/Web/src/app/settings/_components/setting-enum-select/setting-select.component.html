@@ -1,4 +1,4 @@
-<select [id]="id()" class="form-select {{extraClasses()}}" (change)="onSelectionChange($event)" [disabled]="disabled()" [appFormField]="formField.field()">
+<select [id]="inputId()" class="form-select {{extraClasses()}}" (change)="onSelectionChange($event)" [disabled]="formField.state().disabled()" [appFormField]="formField.field()">
   @for (opt of options(); track getEnumValue(opt)) {
     @let value = getEnumValue(opt);
 

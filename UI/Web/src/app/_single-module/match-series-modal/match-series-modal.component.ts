@@ -38,7 +38,7 @@ import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
 import {SeriesMetadata} from "../../_models/metadata/series-metadata";
 import {disabled, form, FormField} from "@angular/forms/signals";
 import {MatchSeriesRequest} from "../../_models/kavitaplus/match-series-request";
-import {SettingEnumSelectComponent} from "../../settings/_components/setting-enum-select/setting-enum-select.component";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 
 interface MatchSeriesFormModel {
   query: string;
@@ -60,7 +60,7 @@ interface MatchSeriesFormModel {
     SeriesFormatComponent,
     LibraryTypePipe,
     FormField,
-    SettingEnumSelectComponent,
+    SettingSelectComponent,
   ],
   templateUrl: './match-series-modal.component.html',
   styleUrl: './match-series-modal.component.scss',

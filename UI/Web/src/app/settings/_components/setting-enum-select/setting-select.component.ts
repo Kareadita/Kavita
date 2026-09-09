@@ -1,16 +1,5 @@
-import {
-  Component,
-  computed,
-  contentChild, inject,
-  input,
-  model,
-  Pipe,
-  PipeTransform,
-  TemplateRef,
-  viewChild
-} from '@angular/core';
+import {Component, contentChild, inject, input, model, TemplateRef} from '@angular/core';
 import {FormField, FormValueControl} from "@angular/forms/signals";
-import {ReactiveFormsModule} from "@angular/forms";
 import {NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
@@ -20,25 +9,26 @@ export interface EnumOption<T> {
   title?: string;
 }
 
+/**
+ * A wrapper around a native select element that supports emitting non-string (enum) values.
+ */
 @Component({
   imports: [
-    ReactiveFormsModule,
     NgTemplateOutlet,
     TitleCasePipe,
     FormFieldDirective
   ],
-  selector: 'app-setting-enum-select',
-  styleUrl: './setting-enum-select.component.scss',
-  templateUrl: './setting-enum-select.component.html',
+  selector: 'app-setting-select',
+  styleUrl: './setting-select.component.scss',
+  templateUrl: './setting-select.component.html',
 })
-export class SettingEnumSelectComponent<T extends number = number> implements FormValueControl<T> {
+export class SettingSelectComponent<T extends number = number> implements FormValueControl<T> {
 
-  protected formField = inject(FormField);
+  protected readonly formField = inject(FormField);
 
-  id = input.required<string>();
-
+  /** This should only be passed when used outside an <app-setting-item> */
+  inputId = input<string | undefined>(undefined);
   value = model<T>(0 as T);
-  disabled = input<boolean>(false);
   extraClasses = input<string>('');
 
   options = input.required<(EnumOption<T> | T)[]>();
@@ -61,5 +51,4 @@ export class SettingEnumSelectComponent<T extends number = number> implements Fo
     const numericValue = select.value === '' ? null : Number(select.value);
     this.value.set(numericValue as T);
   }
-
 }

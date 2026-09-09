@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ToastrService} from '@openng/ngx-toastr';
 import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
@@ -19,7 +19,7 @@ import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {ModalService} from "../../_services/modal.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 import {form, FormField, readonly, required} from "@angular/forms/signals";
-import {SettingEnumSelectComponent} from "../../settings/_components/setting-enum-select/setting-enum-select.component";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 
 interface FormModel {
   encodeMediaAs: EncodeFormat;
@@ -34,7 +34,7 @@ interface FormModel {
   templateUrl: './manage-media-settings.component.html',
   styleUrls: ['./manage-media-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe, FormFieldDirective, FormField, SettingEnumSelectComponent]
+  imports: [TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe, FormFieldDirective, FormField, SettingSelectComponent]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 

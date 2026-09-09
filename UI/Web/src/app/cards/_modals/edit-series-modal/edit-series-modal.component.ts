@@ -28,7 +28,7 @@ import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
-import {DecimalPipe, TitleCasePipe} from "@angular/common";
+import {DecimalPipe} from "@angular/common";
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
@@ -77,8 +77,8 @@ import {AgeRating} from "../../../_models/metadata/age-rating";
 import {PublicationStatus} from "../../../_models/metadata/publication-status";
 import {
   EnumOption,
-  SettingEnumSelectComponent
-} from "../../../settings/_components/setting-enum-select/setting-enum-select.component";
+  SettingSelectComponent
+} from "../../../settings/_components/setting-enum-select/setting-select.component";
 
 interface MetadataFormModel extends PersonFields {
   summary: string;
@@ -134,7 +134,7 @@ const blacklist = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, 
     FormFieldDirective,
     FormField,
     LockableFieldComponent,
-    SettingEnumSelectComponent
+    SettingSelectComponent
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],

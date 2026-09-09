@@ -10,7 +10,6 @@ import {
   inject,
   input,
   model,
-  Renderer2,
   signal,
   TemplateRef,
   viewChild
@@ -42,7 +41,6 @@ export class SettingItemComponent {
 
   private readonly elementRef = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly renderer = inject(Renderer2);
 
   title = input.required<string>();
   editLabel = input<string | undefined>();

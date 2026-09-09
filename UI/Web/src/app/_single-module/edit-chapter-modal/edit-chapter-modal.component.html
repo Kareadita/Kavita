@@ -57,11 +57,11 @@
             <app-setting-item [title]="t('age-rating-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formGroup.ageRating">
               <ng-template #view>
                 <app-lockable-field [(locked)]="locks.ageRating">
-                  <app-setting-enum-select id="age-rating" [options]="ageRatings()" [formField]="formGroup.ageRating">
+                  <app-setting-select [options]="ageRatings()" [formField]="formGroup.ageRating">
                     <ng-template #template let-ar>
                       {{ar | ageRating}}
                     </ng-template>
-                  </app-setting-enum-select>
+                  </app-setting-select>
                 </app-lockable-field>
               </ng-template>
             </app-setting-item>

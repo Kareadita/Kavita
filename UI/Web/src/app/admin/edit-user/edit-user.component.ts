@@ -19,7 +19,7 @@ import {ValidationErrorsComponent} from "../../shared/_components/validation-err
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 import {form, FormField, pattern, required} from "@angular/forms/signals";
 import {UpdateUserRequest} from "../../_models/user/update-user-request";
-import {SettingEnumSelectComponent} from "../../settings/_components/setting-enum-select/setting-enum-select.component";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 
 const AllowedUsernameCharacters = /^[a-zA-Z0-9\-._@+/]*$/;
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -37,7 +37,7 @@ interface EditUserForm {
   templateUrl: './edit-user.component.html',
   styleUrls: ['./edit-user.component.scss'],
   imports: [RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective,
-    IdentityProviderPipePipe, SettingMultiCheckBox, ValidationErrorsComponent, FormFieldDirective, FormField, SettingEnumSelectComponent],
+    IdentityProviderPipePipe, SettingMultiCheckBox, ValidationErrorsComponent, FormFieldDirective, FormField, SettingSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditUserComponent implements OnInit {

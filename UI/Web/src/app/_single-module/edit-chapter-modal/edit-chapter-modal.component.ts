@@ -10,7 +10,6 @@ import {
   OnInit,
   signal
 } from '@angular/core';
-import {TitleCasePipe} from "@angular/common";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
@@ -67,7 +66,7 @@ import {IHasMetadataIds} from "../../_models/common/i-has-metadata-ids";
 import {lockGroup, standaloneLocks, writeFieldLocks, writeNamedLocks} from "../../_helpers/field-lock";
 import {personFields, PersonFields, personFieldsFrom} from "../../_helpers/person-fields";
 import {LockableFieldComponent} from "../../shared/_components/lockable-field/lockable-field.component";
-import {SettingEnumSelectComponent} from "../../settings/_components/setting-enum-select/setting-enum-select.component";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 
 
@@ -118,7 +117,7 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     FormFieldDirective,
     FormField,
     LockableFieldComponent,
-    SettingEnumSelectComponent,
+    SettingSelectComponent,
     AgeRatingPipe,
   ],
   templateUrl: './edit-chapter-modal.component.html',

@@ -1,10 +1,22 @@
-import {computed, DestroyRef, Directive, effect, ElementRef, inject, input, Renderer2} from '@angular/core';
+import {
+  computed,
+  DestroyRef,
+  Directive,
+  effect,
+  ElementRef,
+  HostListener,
+  inject,
+  input,
+  Renderer2
+} from '@angular/core';
 import {AnyField, toFieldView} from "../shared/_models/field-view";
+import {isFieldTree} from "@angular/forms/signals";
+import {AbstractControl} from "@angular/forms";
 
 const validTags = ['input', 'select', 'textarea'];
 
 /**
- * Sets .is-invalid + aria-invalid based on the control's state
+ * Wires a native form element to a field: reflects invalid state, and reports blur as touched (selects need for validation outline)
  */
 @Directive({
   selector: '[appFormField]',
@@ -21,6 +33,19 @@ export class FormFieldDirective {
   isInvalid = computed(() => {
     return this.view.invalid() && this.view.touched();
   });
+
+  @HostListener('blur')
+  onBlur() {
+    if (this.view.touched()) return;
+
+    const c = this.control();
+    if (isFieldTree(c)) {
+      c().markAsTouched();
+    } else {
+      (c as AbstractControl).markAsTouched();
+    }
+  }
+
 
   constructor() {
     const nativeElem = this.el.nativeElement as HTMLElement;

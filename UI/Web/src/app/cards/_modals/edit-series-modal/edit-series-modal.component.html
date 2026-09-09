@@ -151,7 +151,7 @@
               <app-setting-item [title]="t('age-rating-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formGroup.metadata.ageRating">
                 <ng-template #view>
                   <app-lockable-field [(locked)]="metadataLocks.ageRating">
-                    <app-setting-enum-select id="age-rating" [options]="ageRatings()" [formField]="formGroup.metadata.ageRating" />
+                    <app-setting-select [options]="ageRatings()" [formField]="formGroup.metadata.ageRating" />
                   </app-lockable-field>
                 </ng-template>
               </app-setting-item>
@@ -162,11 +162,11 @@
               <app-setting-item [title]="t('publication-status-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formGroup.metadata.publicationStatus">
                 <ng-template #view>
                   <app-lockable-field [(locked)]="metadataLocks.publicationStatus">
-                    <app-setting-enum-select id="publication-status" [options]="publicationStatuses()" [formField]="formGroup.metadata.publicationStatus">
+                    <app-setting-select [options]="publicationStatuses()" [formField]="formGroup.metadata.publicationStatus">
                       <ng-template #template let-ps>
                         {{ ps | publicationStatus }}
                       </ng-template>
-                    </app-setting-enum-select>
+                    </app-setting-select>
                   </app-lockable-field>
                 </ng-template>
               </app-setting-item>

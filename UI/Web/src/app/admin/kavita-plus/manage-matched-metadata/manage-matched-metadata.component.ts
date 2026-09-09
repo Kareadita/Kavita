@@ -31,8 +31,8 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {form, FormField} from "@angular/forms/signals";
 import {
   EnumOption,
-  SettingEnumSelectComponent
-} from "../../../settings/_components/setting-enum-select/setting-enum-select.component";
+  SettingSelectComponent
+} from "../../../settings/_components/setting-enum-select/setting-select.component";
 
 
 interface FormModel {
@@ -58,7 +58,7 @@ interface FormModel {
     PercentPipe,
     DecimalPipe,
     FormField,
-    SettingEnumSelectComponent,
+    SettingSelectComponent,
   ],
   templateUrl: './manage-matched-metadata.component.html',
   styleUrl: './manage-matched-metadata.component.scss',

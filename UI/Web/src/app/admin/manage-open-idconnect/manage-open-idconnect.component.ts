@@ -1,17 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  inject,
-  OnInit,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ServerSettings} from "../_models/server-settings";
-import {
-  ReactiveFormsModule
-} from "@angular/forms";
+import {ReactiveFormsModule} from "@angular/forms";
 import {SettingsService} from "../settings.service";
 import {AuthorityValidationResult, OidcConfig} from "../_models/oidc-config";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -41,7 +31,7 @@ import {ConfirmService} from "../../shared/confirm.service";
 import {AuthorityValidationResultPipe} from "../../_pipes/authority-validation-result.pipe";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 import {disabled, form, FormField, metadata, validateAsync} from "@angular/forms/signals";
-import {SettingEnumSelectComponent} from "../../settings/_components/setting-enum-select/setting-enum-select.component";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 import {REQUIRED_IF_NAME, requiredIf} from "../../_validators/requiredIf.validator";
 import {url} from "../../_validators/url.validator";
 
@@ -61,7 +51,7 @@ import {url} from "../../_validators/url.validator";
     NgbTooltip,
     FormFieldDirective,
     FormField,
-    SettingEnumSelectComponent
+    SettingSelectComponent
   ],
   templateUrl: './manage-open-idconnect.component.html',
   styleUrl: './manage-open-idconnect.component.scss',

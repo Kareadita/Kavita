@@ -43,7 +43,7 @@
   <div class="row g-2">
     <div class="col-12 col-md-auto ms-md-auto">
       <label for="libtype-filter">{{t('library-type')}}</label>
-      <app-setting-enum-select [formField]="formGroup.libraryType" id="libtype-filter" [options]="metadataEnabledLibraryTypes()">
+      <app-setting-select [formField]="formGroup.libraryType" inputId="libtype-filter" [options]="metadataEnabledLibraryTypes()">
         <ng-template #template let-libType>
           @if (libType === -1) {
             {{t('all-status-label')}}
@@ -51,15 +51,15 @@
             {{libType | libraryType}}
           }
         </ng-template>
-      </app-setting-enum-select>
+      </app-setting-select>
     </div>
     <div class="col-12 col-md-auto">
       <label for="match-filter">{{t('matched-state-label')}}</label>
-      <app-setting-enum-select [formField]="formGroup.matchState" id="match-filter" [options]="allMatchStates">
+      <app-setting-select [formField]="formGroup.matchState" inputId="match-filter" [options]="allMatchStates">
         <ng-template #template let-state>
           {{state | matchStateOption}}
         </ng-template>
-      </app-setting-enum-select>
+      </app-setting-select>
     </div>
   </div>
 

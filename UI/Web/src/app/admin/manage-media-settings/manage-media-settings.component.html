@@ -16,11 +16,11 @@
           {{settingsForm.encodeMediaAs().value() | encodeFormat}}
         </ng-template>
         <ng-template #edit>
-          <app-setting-enum-select [formField]="settingsForm.encodeMediaAs" id="encode-media-as" [options]="allEncodeFormats">
+          <app-setting-select [formField]="settingsForm.encodeMediaAs" [options]="allEncodeFormats">
             <ng-template #template let-ef>
               {{ ef | encodeFormat }}
             </ng-template>
-          </app-setting-enum-select>
+          </app-setting-select>
         </ng-template>
       </app-setting-item>
     </div>
@@ -32,11 +32,11 @@
           {{settingsForm.pdfRenderResolution().value() | pdfRenderResolution}}
         </ng-template>
         <ng-template #edit>
-          <app-setting-enum-select id="pdf-render-resolution" [formField]="settingsForm.pdfRenderResolution" [options]="allPdfRenderResolutions">
+          <app-setting-select [formField]="settingsForm.pdfRenderResolution" [options]="allPdfRenderResolutions">
             <ng-template #template let-prs>
               {{ prs | pdfRenderResolution }}
             </ng-template>
-          </app-setting-enum-select>
+          </app-setting-select>
         </ng-template>
       </app-setting-item>
     </div>
@@ -47,11 +47,11 @@
           {{settingsForm.coverImageSize().value() | coverImageSize}}
         </ng-template>
         <ng-template #edit>
-          <app-setting-enum-select id="cover-image-size" [formField]="settingsForm.coverImageSize" [options]="allCoverImageSizes">
+          <app-setting-select [formField]="settingsForm.coverImageSize" [options]="allCoverImageSizes">
             <ng-template #template let-cis>
               {{ cis | coverImageSize }}
             </ng-template>
-          </app-setting-enum-select>
+          </app-setting-select>
         </ng-template>
       </app-setting-item>
     </div>

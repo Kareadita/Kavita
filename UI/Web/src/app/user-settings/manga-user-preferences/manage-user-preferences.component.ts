@@ -1,37 +1,19 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed, debounced,
-  DestroyRef,
-  effect,
-  inject,
-  OnInit,
-  Signal,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Preferences} from "../../_models/preferences/preferences";
 import {AccountService} from "../../_services/account.service";
 import {LocalizationService} from "../../_services/localization.service";
-import {
-  FormArray,
-  FormControl,
-  FormGroup,
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators
-} from "@angular/forms";
+import {NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {KavitaLocale} from "../../_models/metadata/language";
-import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
+import {toObservable} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, filter, forkJoin, switchMap} from "rxjs";
 import {DecimalPipe, TitleCasePipe} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {LicenseService} from "../../_services/license.service";
 import {HighlightBarComponent} from "../../book-reader/_components/_annotations/highlight-bar/highlight-bar.component";
-import {SiteTheme, ThemeProvider} from "../../_models/preferences/site-theme";
+import {ThemeProvider} from "../../_models/preferences/site-theme";
 import {PageLayoutMode} from "../../_models/page-layout-mode";
-import {HighlightSlot} from "../../book-reader/_models/annotations/highlight-slot";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {LibraryService} from "../../_services/library.service";
 import {Library} from "../../_models/library/library";
@@ -43,7 +25,7 @@ import {TypeaheadConfig} from "../../typeahead/_models/typeahead-config";
 import {TypeaheadConfigFactoryService} from "../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 import {debounce, disabled, form, FormField, min, required} from "@angular/forms/signals";
-import {SettingEnumSelectComponent} from "../../settings/_components/setting-enum-select/setting-enum-select.component";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 
 @Component({
   selector: 'app-manga-user-preferences',
@@ -59,7 +41,7 @@ import {SettingEnumSelectComponent} from "../../settings/_components/setting-enu
     TypeaheadComponent,
     FormFieldDirective,
     FormField,
-    SettingEnumSelectComponent
+    SettingSelectComponent
   ],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',
