@@ -691,8 +691,7 @@ public class ProcessSeries(
             var volume = FindOrCreateVolume(args, parsedInfo);
             var chapter = FindOrCreateChapter(args, parsedInfo);
 
-            foundVolumes.Add(volume.Id);
-            foundChapters.Add(chapter.Id);
+
 
             if (chapter.VolumeId == 0 || chapter.VolumeId != volume.Id)
             {
@@ -704,10 +703,14 @@ public class ProcessSeries(
                 chapter.Volume = volume;
             }
 
-            var mangaFileId = AddOrUpdateFileForChapter(chapter, parsedInfo, args.ForceUpdate);
-            foundMangaFiles.Add(mangaFileId);
+            var mangaFile = AddOrUpdateFileForChapter(chapter, parsedInfo, args.ForceUpdate);
 
             await UpdateChapter(args, chapter, parsedInfo);
+
+            // UpdateChapters may commit, ensure we add the loaded ids if newly created
+            foundVolumes.Add(volume.Id);
+            foundChapters.Add(chapter.Id);
+            foundMangaFiles.Add(mangaFile.Id);
         }
 
         // Update page count once all pages have been processed
@@ -917,7 +920,7 @@ public class ProcessSeries(
         }
     }
 
-    private int AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
+    private MangaFile AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
     {
         chapter.Files ??= [];
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
@@ -931,7 +934,7 @@ public class ProcessSeries(
                 !fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) &&
                 existingFile.Pages != 0)
             {
-                return existingFile.Id;
+                return existingFile;
             }
 
             existingFile.Pages = readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
@@ -942,7 +945,7 @@ public class ProcessSeries(
             existingFile.KoreaderHash = KoreaderHelper.HashContents(existingFile.FilePath);
 
             // We skip updating DB here with last modified time so that metadata refresh can do it
-            return existingFile.Id;
+            return existingFile;
         }
 
         var file = new MangaFileBuilder(info.FullFilePath, info.Format, readingItemService.GetNumberOfPages(info.FullFilePath, info.Format))
@@ -952,7 +955,7 @@ public class ProcessSeries(
             .Build();
         chapter.Files.Add(file);
 
-        return file.Id;
+        return file;
     }
 
     private async Task UpdateChapterFromComicInfo(UpdateChapterComicInfoArgs args)
