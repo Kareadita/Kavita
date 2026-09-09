@@ -22,7 +22,7 @@ import {
   Validators
 } from "@angular/forms";
 import {KavitaLocale} from "../../_models/metadata/language";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, filter, forkJoin, switchMap} from "rxjs";
 import {DecimalPipe, TitleCasePipe} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -82,7 +82,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   locales = signal<KavitaLocale[]>([]);
   socialLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
 
-  userPreferencesModel = signal<Preferences>({
+  userPreferencesFormModel = signal<Preferences>({
     aniListScrobblingEnabled: false,
     blurUnreadSummaries: false,
     bookReaderHighlightSlots: [],
@@ -122,7 +122,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     },
     wantToReadSync: false
   });
-  userPreferencesForm = form(this.userPreferencesModel, (path) => {
+  userPreferencesFormGroup = form(this.userPreferencesFormModel, (path) => {
     disabled(path, {when: () => this.accountService.hasReadOnlyRole()});
     debounce(path, 100);
 
@@ -131,7 +131,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   });
 
   selectedLocale = computed(() => {
-    const locale = (this.locales() || []).find(l => l.fileName === this.userPreferencesForm.locale().value());
+    const locale = (this.locales() || []).find(l => l.fileName === this.userPreferencesFormGroup.locale().value());
     if (!locale) {
       return 'English';
     }
@@ -145,14 +145,12 @@ export class ManageUserPreferencesComponent implements OnInit {
       this.locales.set(res.sort((l1, l2) => l1.renderName.localeCompare(l2.renderName)));
     });
 
-    effect(() => {
-      if (!this.userPreferencesForm().valid() || !this.userPreferencesForm().dirty || this.loading()) {
-        return;
-      }
-      const preferences = this.userPreferencesModel();
-
-      this.accountService.updatePreferences(preferences).subscribe();
-    });
+    toObservable(this.userPreferencesFormModel).pipe(
+      debounceTime(100),
+      distinctUntilChanged(),
+      filter(() => this.userPreferencesFormGroup().valid() && this.userPreferencesFormGroup().dirty() && !this.loading()),
+      switchMap(() => this.accountService.updatePreferences(this.userPreferencesFormModel()))
+    ).subscribe();
   }
 
   ngOnInit(): void {
@@ -163,13 +161,13 @@ export class ManageUserPreferencesComponent implements OnInit {
     }).subscribe(({pref, libraries, ageRatings}) => {
       this.ageRatings.set([{value: AgeRating.NotApplicable, title: '',}, ...ageRatings]);
       this.socialLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({id: 'social-libraries', libraries}));
-      this.userPreferencesModel.set(pref);
+      this.userPreferencesFormModel.set(pref);
 
       this.loading.set(false);
     });
   }
 
   syncFormWithTypeahead(libs: Library[] | Library) {
-    this.userPreferencesForm.socialPreferences.socialLibraries().value.set((libs as Library[]).map(l => l.id));
+    this.userPreferencesFormGroup.socialPreferences.socialLibraries().value.set((libs as Library[]).map(l => l.id));
   }
 }
