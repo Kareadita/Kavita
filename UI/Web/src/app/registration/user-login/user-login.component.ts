@@ -13,7 +13,7 @@ import {OidcPublicConfig} from "../../admin/_models/oidc-config";
 import {SettingsService} from "../../admin/settings.service";
 import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
-import {form, FormField, required} from "@angular/forms/signals";
+import {form, FormField, FormRoot, required} from "@angular/forms/signals";
 
 interface LoginFormModel {
   username: string;
@@ -26,7 +26,7 @@ interface LoginFormModel {
   styleUrls: ['./user-login.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SplashContainerComponent, ReactiveFormsModule, RouterLink, TranslocoDirective, ImageComponent,
-    ValidationErrorsComponent, FormFieldDirective, FormField]
+    ValidationErrorsComponent, FormFieldDirective, FormField, FormRoot]
 })
 export class UserLoginComponent implements OnInit {
 
@@ -40,11 +40,11 @@ export class UserLoginComponent implements OnInit {
 
   baseUrl = environment.apiUrl.substring(0, environment.apiUrl.indexOf('api'));
 
-  loginFormModel = signal<LoginFormModel>({
+  formModel = signal<LoginFormModel>({
     username: '',
     password: '',
   });
-  loginForm = form(this.loginFormModel, (path) => {
+  formGroup = form(this.formModel, (path) => {
     required(path.username);
     required(path.password);
     // For login screen, we hide validation
@@ -134,14 +134,14 @@ export class UserLoginComponent implements OnInit {
 
   login(apiKey: string = '') {
     const model = {
-      ...this.loginFormModel(),
+      ...this.formModel(),
       apiKey
     };
 
     this.isSubmitting.set(true);
     this.accountService.login(model).subscribe({
       next: () => {
-          this.loginForm().reset();
+          this.formGroup().reset();
           this.navService.handleLogin()
 
           this.isSubmitting.set(false);
