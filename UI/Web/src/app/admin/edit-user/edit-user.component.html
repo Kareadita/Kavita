@@ -25,11 +25,11 @@
       <div class="row g-0 mb-2">
         <div class="col-md-4 col-sm-12 pe-4">
           <label for="identityProvider" class="form-label">{{t('identity-provider')}}</label>
-          <select class="form-select" id="identityProvider" [formField]="userForm.identityProvider">
-            @for (idp of IdentityProviders; track idp) {
-              <option [value]="idp">{{idp | identityProviderPipe}}</option>
-            }
-          </select>
+          <app-setting-enum-select id="identity-provider" [options]="IdentityProviders" [formField]="userForm.identityProvider">
+            <ng-template #template let-ip>
+              {{ ip | identityProviderPipe }}
+            </ng-template>
+          </app-setting-enum-select>
           <span class="text-muted">{{t('identity-provider-tooltip')}}</span>
         </div>
         <div class="col-md-4 col-sm-12 pe-4">

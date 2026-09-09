@@ -29,11 +29,15 @@ import {allMatchStates, MatchStateOption} from "../../../_models/kavitaplus/matc
 import {LibraryService} from "../../../_services/library.service";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {form, FormField} from "@angular/forms/signals";
+import {
+  EnumOption,
+  SettingEnumSelectComponent
+} from "../../../settings/_components/setting-enum-select/setting-enum-select.component";
 
 
 interface FormModel {
-  matchState: string;
-  libraryType: string;
+  matchState: MatchStateOption;
+  libraryType: LibraryType;
 }
 
 @Component({
@@ -54,6 +58,7 @@ interface FormModel {
     PercentPipe,
     DecimalPipe,
     FormField,
+    SettingEnumSelectComponent,
   ],
   templateUrl: './manage-matched-metadata.component.html',
   styleUrl: './manage-matched-metadata.component.scss',
@@ -72,7 +77,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
   protected readonly destroyRef = inject(DestroyRef);
   private readonly libraryService = inject(LibraryService);
 
-  metadataEnabledLibraryTypes = signal<LibraryType[]>([]);
+  metadataEnabledLibraryTypes = signal<EnumOption<LibraryType>[]>([]);
   isLoading = signal(true);
   data = signal<ManageMatchSeries[]>([]);
   pagination = signal<Pagination>({
@@ -83,8 +88,8 @@ export class ManageMatchedMetadataComponent implements OnInit {
   });
 
   private readonly formModel = signal<FormModel>({
-    matchState: MatchStateOption.Error.toString(),
-    libraryType: String(-1) // Denotes all
+    matchState: MatchStateOption.Error,
+    libraryType: -1 as LibraryType // Denotes all
   });
   formGroup = form(this.formModel);
   trackBy = (idx: number, item: ManageMatchSeries) => `${item.isMatched}_${item.series.name}_${idx}`;
@@ -102,14 +107,17 @@ export class ManageMatchedMetadataComponent implements OnInit {
     return  (totalItems - (matchedCount.dontMatchCount + matchedCount.erroredCount)) / totalItems;
   });
   isMatchedState = computed(() => {
-    return this.formGroup.matchState().value() === MatchStateOption.Matched.toString();
+    return this.formGroup.matchState().value() === MatchStateOption.Matched;
   });
 
   ngOnInit() {
 
     this.libraryService.getLibraryTypesWithMetadataSupport().pipe(
       takeUntilDestroyed(this.destroyRef),
-      tap(types => this.metadataEnabledLibraryTypes.set(types))
+      tap(types => this.metadataEnabledLibraryTypes.set([
+        ...types.map(l => ({value: l})),
+        {value: -1 as LibraryType}
+      ]))
     ).subscribe();
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
@@ -147,8 +155,8 @@ export class ManageMatchedMetadataComponent implements OnInit {
 
   loadData(pageNumber: number = 1) {
     const filter: ManageMatchFilter = {
-      matchStateOption: parseInt(this.formGroup.matchState().value(), 10),
-      libraryType: parseInt(this.formGroup.libraryType().value(), 10),
+      matchStateOption: this.formGroup.matchState().value(),
+      libraryType: this.formGroup.libraryType().value(),
       searchTerm: ''
     };
 

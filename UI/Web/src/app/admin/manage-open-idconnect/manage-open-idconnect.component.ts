@@ -3,7 +3,6 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
-  DestroyRef, effect,
   inject,
   OnInit,
   signal
@@ -11,21 +10,14 @@ import {
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ServerSettings} from "../_models/server-settings";
 import {
-  AbstractControl,
-  AsyncValidatorFn,
-  FormControl,
-  FormGroup,
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn
+  ReactiveFormsModule
 } from "@angular/forms";
 import {SettingsService} from "../settings.service";
 import {AuthorityValidationResult, OidcConfig} from "../_models/oidc-config";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
-import {debounceTime, distinctUntilChanged, filter, forkJoin, map, of, skip, tap} from "rxjs";
-import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
+import {debounceTime, distinctUntilChanged, filter, forkJoin, skip, tap} from "rxjs";
+import {toObservable} from "@angular/core/rxjs-interop";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {MetadataService} from "../../_services/metadata.service";
 import {AgeRating} from "../../_models/metadata/age-rating";
@@ -43,7 +35,6 @@ import {
 import {
   SettingMultiTextFieldComponent
 } from "../../settings/_components/setting-multi-text-field/setting-multi-text-field.component";
-import {environment} from "../../../environments/environment";
 import {SlicePipe} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ConfirmService} from "../../shared/confirm.service";

@@ -153,7 +153,7 @@
               <div>{{oidcSettingsFormGroup.defaultAgeRestriction().value() | ageRating}}</div>
             </ng-template>
             <ng-template #edit>
-              <app-setting-enum-select [formField]="oidcSettingsFormGroup.defaultAgeRestriction" [options]="ageRatings()">
+              <app-setting-enum-select id="default-age-restriction" [formField]="oidcSettingsFormGroup.defaultAgeRestriction" [options]="ageRatings()">
                 <ng-template #template let-ar>
                   {{ar | ageRating}}
                 </ng-template>

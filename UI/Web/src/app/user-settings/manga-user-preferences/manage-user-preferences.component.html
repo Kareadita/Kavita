@@ -204,7 +204,7 @@
               {{userPreferencesFormGroup.socialPreferences.socialMaxAgeRating().value() | ageRating}}
             </ng-template>
             <ng-template #edit>
-              <app-setting-enum-select [formField]="userPreferencesFormGroup.socialPreferences.socialMaxAgeRating" [options]="ageRatings()">
+              <app-setting-enum-select id="social-max-age-rating" [formField]="userPreferencesFormGroup.socialPreferences.socialMaxAgeRating" [options]="ageRatings()">
                 <ng-template #template let-ar>
                   {{ar | ageRating}}
                 </ng-template>

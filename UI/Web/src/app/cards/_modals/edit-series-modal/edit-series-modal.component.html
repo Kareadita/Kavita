@@ -151,11 +151,7 @@
               <app-setting-item [title]="t('age-rating-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formGroup.metadata.ageRating">
                 <ng-template #view>
                   <app-lockable-field [(locked)]="metadataLocks.ageRating">
-                    <select class="form-select" [formField]="formGroup.metadata.ageRating" [appFormField]="formGroup.metadata.ageRating">
-                      @for (opt of ageRatings(); track opt.title) {
-                        <option [value]="opt.value">{{opt.title | titlecase}}</option>
-                      }
-                    </select>
+                    <app-setting-enum-select id="age-rating" [options]="ageRatings()" [formField]="formGroup.metadata.ageRating" />
                   </app-lockable-field>
                 </ng-template>
               </app-setting-item>
@@ -166,11 +162,11 @@
               <app-setting-item [title]="t('publication-status-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formGroup.metadata.publicationStatus">
                 <ng-template #view>
                   <app-lockable-field [(locked)]="metadataLocks.publicationStatus">
-                    <select class="form-select" [formField]="formGroup.metadata.publicationStatus" [appFormField]="formGroup.metadata.publicationStatus">
-                      @for (opt of publicationStatuses(); track opt.value) {
-                        <option [value]="opt.value">{{opt.value | publicationStatus}}</option>
-                      }
-                    </select>
+                    <app-setting-enum-select id="publication-status" [options]="publicationStatuses()" [formField]="formGroup.metadata.publicationStatus">
+                      <ng-template #template let-ps>
+                        {{ ps | publicationStatus }}
+                      </ng-template>
+                    </app-setting-enum-select>
                   </app-lockable-field>
                 </ng-template>
               </app-setting-item>
@@ -181,29 +177,27 @@
 
       <ng-template [appEditTab]="Tabs.ExternalMetadataIds">
         @let providerOverride = formGroup.metadataProviderOverride().value();
-        @if (providerOverride) {
-          <div class="row g-0 mb-4">
-            <app-setting-item [title]="t('metadata-provider-override-label')" [subtitle]="t('metadata-provider-override-tooltip')"
-                              [canEdit]="true" [control]="formGroup.metadataProviderOverride">
-              <ng-template #view>
-                @if (providerOverride === '') {
-                  {{t('metadata-provider-override-default')}}
-                } @else {
-                  {{parseInt(providerOverride, 10) | metadataProviderTitle}}
+        <div class="row g-0 mb-4">
+          <app-setting-item [title]="t('metadata-provider-override-label')" [subtitle]="t('metadata-provider-override-tooltip')"
+                            [canEdit]="true" [control]="formGroup.metadataProviderOverride">
+            <ng-template #view>
+              @if (providerOverride === '') {
+                {{t('metadata-provider-override-default')}}
+              } @else {
+                {{parseInt(providerOverride, 10) | metadataProviderTitle}}
+              }
+            </ng-template>
+            <ng-template #edit>
+              <select class="form-select" [formField]="formGroup.metadataProviderOverride"
+                      [appFormField]="formGroup.metadataProviderOverride">
+                <option [value]="''">{{ t('metadata-provider-override-default') }}</option>
+                @for (metadataProvider of AllMetadataProviders; track metadataProvider) {
+                  <option [value]="metadataProvider">{{ metadataProvider | metadataProviderTitle }}</option>
                 }
-              </ng-template>
-              <ng-template #edit>
-                <select class="form-select" [formField]="formGroup.metadataProviderOverride"
-                        [appFormField]="formGroup.metadataProviderOverride">
-                  <option [value]="''">{{ t('metadata-provider-override-default') }}</option>
-                  @for (metadataProvider of allMetadataProviders; track metadataProvider) {
-                    <option [value]="metadataProvider">{{ metadataProvider | metadataProviderTitle }}</option>
-                  }
-                </select>
-              </ng-template>
-            </app-setting-item>
-          </div>
-        }
+              </select>
+            </ng-template>
+          </app-setting-item>
+        </div>
         <app-edit-external-metadata-form [field]="formGroup"/>
       </ng-template>
     }
