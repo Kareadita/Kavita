@@ -3,8 +3,8 @@
     @let value = getEnumValue(opt);
 
     <option [value]="value" [selected]="value === formField.state().value()">
-      @if (template(); as templ) {
-        <ng-container [ngTemplateOutlet]="templ" [ngTemplateOutletContext]="{ $implicit: value }"></ng-container>
+      @if (template(); as tmpl) {
+        <ng-container [ngTemplateOutlet]="tmpl" [ngTemplateOutletContext]="{ $implicit: value }"></ng-container>
       } @else {
         {{ getEnumLabel(opt) | titlecase }}
       }

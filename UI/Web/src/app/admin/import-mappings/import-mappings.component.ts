@@ -9,10 +9,9 @@ import {
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
-  ValidatorFn,
-  Validators
+  ValidatorFn
 } from "@angular/forms";
-import {FileUploadComponent, FileUploadValidators} from "@iplab/ngx-file-upload";
+import {FileUploadComponent} from "@iplab/ngx-file-upload";
 import {MetadataSettings} from "../_models/metadata-settings";
 import {SettingsService} from "../settings.service";
 import {
@@ -34,13 +33,15 @@ import {
   ImportSettings
 } from "../../_models/import-field-mappings";
 import {catchError, firstValueFrom, of, switchMap} from "rxjs";
-import {map, tap} from "rxjs/operators";
+import {tap} from "rxjs/operators";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {NgTemplateOutlet} from "@angular/common";
 import {Router} from "@angular/router";
 import {LicenseService} from "../../_services/license.service";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
-import {toSignal} from "@angular/core/rxjs-interop";
+import {form, FormField, FormRoot, required, validate} from "@angular/forms/signals";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
+import {mode} from "d3";
 
 enum Step {
   Import = 0,
@@ -48,6 +49,21 @@ enum Step {
   Conflicts = 2,
   Finalize = 3,
 }
+
+interface FormModel {
+  importMode: ImportMode;
+  resolution: ConflictResolution;
+  whitelist: boolean;
+  blacklist: boolean;
+  ageRatings: boolean;
+  fieldMappings: boolean;
+  ageRatingConflictResolution: Record<string, ConflictResolution>;
+}
+
+interface FileFormModel {
+  files: File[];
+}
+
 
 @Component({
   selector: 'app-import-mappings',
@@ -66,6 +82,10 @@ enum Step {
     NgTemplateOutlet,
     TranslocoPipe,
     ManageMetadataMappingsComponent,
+    FormField,
+    FormRoot,
+    SettingSelectComponent,
+
   ],
   templateUrl: './import-mappings.component.html',
   styleUrl: './import-mappings.component.scss',
@@ -88,22 +108,63 @@ export class ImportMappingsComponent implements OnInit {
   ];
   currentStepIndex = signal(this.steps[0].index);
 
-  fileUploadControl = new FormControl<undefined | Array<File>>(undefined, [
-    FileUploadValidators.accept(['.json']), FileUploadValidators.filesLimit(1)
-  ]);
+  private readonly fileFormModel = signal<FileFormModel>({
+    files: []
+  });
 
-  uploadForm = new FormGroup({
-    files: this.fileUploadControl,
+  private readonly formModel = signal<FormModel>({
+    importMode: ImportMode.Merge,
+    resolution: ConflictResolution.Manual,
+    ageRatingConflictResolution: {},
+    ageRatings: true,
+    blacklist:true,
+    fieldMappings: true,
+    whitelist: true
   });
-  importSettingsForm = new FormGroup({
-    importMode: new FormControl(ImportMode.Merge, [Validators.required]),
-    resolution: new FormControl(ConflictResolution.Manual),
-    whitelist: new FormControl(true),
-    blacklist: new FormControl(true),
-    ageRatings: new FormControl(true),
-    fieldMappings: new FormControl(true),
-    ageRatingConflictResolutions: new FormGroup({}),
+  fileFormGroup = form(this.fileFormModel, p => {
+
+    // Only json files may be uploaded
+    validate(p.files, ({value}) => {
+      const files = value();
+      if (!files || files.length === 0) return null;
+
+      if (files.every(f => f.name.toLowerCase().endsWith('.json'))) {
+        return null;
+      }
+
+      return { kind: 'fileType', message: translate('import-mappings.select-files-warning') };
+    });
+
+    // Only a single file may be uploaded
+    validate(p.files, ({value}) => {
+      const files = value();
+      if (!files || files.length <= 1) return null;
+
+      return { kind: 'fileLimit', message: translate('import-mappings.select-files-warning') };
+    });
   });
+  formGroup = form(this.formModel, p => {
+
+    required(p.importMode);
+
+
+  })
+  // fileUploadControl = new FormControl<undefined | Array<File>>(undefined, [
+  //   FileUploadValidators.accept(['.json']), FileUploadValidators.filesLimit(1)
+  // ]);
+  //
+  // uploadForm = new FormGroup({
+  //   files: this.fileUploadControl,
+  // });
+  // importSettingsForm = new FormGroup({
+  //   importMode: new FormControl(ImportMode.Merge, [Validators.required]),
+  //   resolution: new FormControl(ConflictResolution.Manual),
+  //   whitelist: new FormControl(true),
+  //   blacklist: new FormControl(true),
+  //   ageRatings: new FormControl(true),
+  //   fieldMappings: new FormControl(true),
+  //   ageRatingConflictResolutions: new FormGroup({}),
+  // });
   /**
    * This is that contains the data in the finalize step
    */
@@ -114,12 +175,10 @@ export class ImportMappingsComponent implements OnInit {
   importedMappings = signal<MetadataMappingsExport | undefined>(undefined);
   importResult = signal<FieldMappingsImportResult | undefined>(undefined);
 
-  isFileSelected = toSignal(this.uploadForm.get('files')!.valueChanges
-    .pipe(map((files) => !!files && files.length == 1)), {initialValue: false});
-
-  isImportSettingsFormValid = toSignal(this.importSettingsForm.valueChanges.pipe(
-    map(() => this.importSettingsForm.valid),
-  ), { initialValue: false });
+  isFileSelected = computed(() => {
+    const files = this.fileFormGroup.files().value();
+    return !!files && files.length == 1;
+  });
 
   nextButtonLabel = computed(() => {
     switch(this.currentStepIndex()) {
@@ -141,7 +200,7 @@ export class ImportMappingsComponent implements OnInit {
       case Step.Configure:
         return true;
       case Step.Conflicts:
-        return this.isImportSettingsFormValid();
+        return this.formGroup().valid();
       default:
         return false;
     }
@@ -215,7 +274,7 @@ export class ImportMappingsComponent implements OnInit {
       return Promise.resolve();
     }
 
-    const settings = this.importSettingsForm.value as ImportSettings;
+    const settings = this.formModel() as ImportSettings; // TODO: How to remove the files part
 
     return firstValueFrom(this.settingsService.importFieldMappings(data, settings).pipe(
       catchError(err => {
@@ -244,7 +303,7 @@ export class ImportMappingsComponent implements OnInit {
   }
 
   async validateImport() {
-    const files = this.fileUploadControl.value;
+    const files = this.formModel().files;
     if (!files || files.length === 0) {
       this.toastr.error(translate('import-mappings.select-files-warning'));
       return;
@@ -305,7 +364,7 @@ export class ImportMappingsComponent implements OnInit {
 
     // Reset when returning to the first step
     if (this.currentStepIndex() === Step.Import) {
-      this.fileUploadControl.reset();
+      this.formGroup().reset();
       (this.importSettingsForm.get('ageRatingConflictResolutions') as FormArray).clear();
     }
 
@@ -316,4 +375,5 @@ export class ImportMappingsComponent implements OnInit {
   protected readonly ImportModes = ImportModes;
   protected readonly ConflictResolutions = ConflictResolutions;
   protected readonly ConflictResolution = ConflictResolution;
+  protected readonly mode = mode;
 }
