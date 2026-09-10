@@ -1,9 +1,12 @@
 
 
-<app-tag-badge *transloco="let t; prefix: 'manage-custom-key-binds'" [selectionMode]="tagBadgeCursor()" [ngbTooltip]="t('key-bind-tooltip')" [placement]="tooltipPlacement()">
+<app-tag-badge *transloco="let t; prefix: 'manage-custom-key-binds'"
+               [selectionMode]="tagBadgeCursor()"
+               [ngbTooltip]="showToolTip() ?  t('key-bind-tooltip') : null"
+               [placement]="tooltipPlacement()">
   <div id="key-bind-{{target()}}-{{index()}}" tabindex="-1" (click)="startListening()" (focus)="startListening()" class="d-flex align-items-center">
 
-    @let keybind = selectedKeyBind() | keyBind;
+    @let keybind = value() | keyBind;
     @if (!this.isListening()) {
       {{keybind | defaultValue}}
     } @else {
@@ -19,7 +22,7 @@
          [attr.aria-label]="t('warning-duplicated-control', {target: target(), index: index() + 1})"></i>
     }
 
-    @if (!control().valid && !control().disabled) {
+    @if (invalid() && !disabled()) {
       <i class="fa fa-warning text-danger ms-2"
          [attr.aria-label]="t('errors-control', {target: target(), index: index() + 1})"></i>
     }

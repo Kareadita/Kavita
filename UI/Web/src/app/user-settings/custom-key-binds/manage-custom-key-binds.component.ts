@@ -1,21 +1,20 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
-import {DefaultKeyBinds, KeyBindGroups, KeyBindService, KeyCode,} from "../../_services/key-bind.service";
 import {
-  FormArray,
-  FormControl,
-  FormGroup,
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn
-} from "@angular/forms";
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef, effect,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
+import {DefaultKeyBinds, KeyBindGroups, KeyBindService, KeyCode,} from "../../_services/key-bind.service";
 import {KeyBind, KeyBindTarget, Preferences} from "../../_models/preferences/preferences";
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {
   SettingKeyBindPickerComponent
 } from "../../settings/_components/setting-key-bind-picker/setting-key-bind-picker.component";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from "rxjs";
 import {map} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
@@ -27,17 +26,24 @@ import {LicenseService} from "../../_services/license.service";
 import {KeybindSettingDescriptionPipe} from "../../_pipes/keybind-setting-description.pipe";
 import {DOCUMENT} from "@angular/common";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
-
-type KeyBindFormGroup = FormGroup<{
-  [K in KeyBindTarget]: FormArray<FormControl<KeyBind>>
-}>;
-
+import {
+  applyEach,
+  debounce, disabled,
+  form, FormField,
+  PathKind,
+  SchemaPath,
+  SchemaPathTree,
+  validate, ValidationError
+} from "@angular/forms/signals";
 const MAX_KEYBINDS_PER_TARGET = 5;
+
+type FormModel = {
+  [K in KeyBindTarget]: KeyBind[];
+};
 
 @Component({
   selector: 'app-manage-custom-key-binds',
   imports: [
-    ReactiveFormsModule,
     SettingItemComponent,
     SettingKeyBindPickerComponent,
     DefaultValuePipe,
@@ -45,7 +51,8 @@ const MAX_KEYBINDS_PER_TARGET = 5;
     KeybindSettingDescriptionPipe,
     TranslocoDirective,
     LongClickDirective,
-    SafeHtmlPipe
+    SafeHtmlPipe,
+    FormField
   ],
   templateUrl: './manage-custom-key-binds.component.html',
   styleUrl: './manage-custom-key-binds.component.scss',
@@ -56,14 +63,45 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   protected readonly keyBindService = inject(KeyBindService);
   private readonly transLoco = inject(TranslocoService);
-  private readonly fb = inject(NonNullableFormBuilder);
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly licenseService = inject(LicenseService);
   private readonly document = inject(DOCUMENT);
   protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
 
-  protected keyBindForm!: KeyBindFormGroup;
+  protected formModel = signal<FormModel>({
+    [KeyBindTarget.NavigateToSettings]: [],
+    [KeyBindTarget.OpenSearch]: [],
+    [KeyBindTarget.NavigateToScrobbling]: [],
+    [KeyBindTarget.ToggleFullScreen]: [],
+    [KeyBindTarget.BookmarkPage]: [],
+    [KeyBindTarget.OpenHelp]: [],
+    [KeyBindTarget.GoTo]: [],
+    [KeyBindTarget.ToggleMenu]: [],
+    [KeyBindTarget.PageLeft]: [],
+    [KeyBindTarget.PageRight]: [],
+    [KeyBindTarget.Escape]: [],
+    [KeyBindTarget.PageUp]: [],
+    [KeyBindTarget.PageDown]: [],
+    [KeyBindTarget.OffsetDoublePage]: [],
+    [KeyBindTarget.NextChapter]: [],
+    [KeyBindTarget.PreviousChapter]: [],
+    [KeyBindTarget.FirstPage]: [],
+    [KeyBindTarget.LastPage]: [],
+    [KeyBindTarget.NavigateHome]: [],
+  });
+
+  protected formGroup = form(this.formModel, path => {
+    debounce(path, 250);
+    disabled(path, { when: () => this.accountService.hasReadOnlyRole()});
+
+    for (const target of Object.values(KeyBindTarget)) {
+      this.validateKeybinds(path[target]);
+      applyEach(path[target], item => {
+        this.validateKeybind(item);
+      });
+    }
+  });
 
   protected duplicatedKeyBinds = signal<Partial<Record<KeyBindTarget, number[]>>>({});
   protected filteredKeyBindGroups = computed(() => {
@@ -81,33 +119,19 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     }).filter(g => g.elements.length > 0);
   });
 
-  ngOnInit() {
-    const keyBinds = this.keyBindService.allKeyBinds();
-    const groupConfig = Object.entries(keyBinds).reduce((acc, [key, value]) => {
-      acc[key as KeyBindTarget] = this.fb.array(this.toFormControls(value), this.keyBindArrayValidator());
-      return acc;
-    }, {} as Record<KeyBindTarget, FormArray<FormControl<KeyBind>>>);
+  constructor() {
+    effect(() => {
+      const keyBinds = this.formModel();
+      const duplicateKeys = this.extractDuplicated(keyBinds);
 
-    this.keyBindForm = this.fb.group(groupConfig);
-    this.duplicatedKeyBinds.set(this.extractDuplicated(keyBinds)); // Set initial
+      this.duplicatedKeyBinds.set(duplicateKeys);
+    });
 
-    if (this.isReadOnly()) {
-      this.keyBindForm.disable({ emitEvent: false });
-    }
-
-    this.keyBindForm.valueChanges.pipe(
+    toObservable(this.formModel).pipe(
       takeUntilDestroyed(this.destroyRef),
       debounceTime(250),
       distinctUntilChanged(),
-      map(formValue => this.extractDuplicated(formValue)),
-      tap(d => this.duplicatedKeyBinds.set(d)),
-    ).subscribe();
-
-    this.keyBindForm.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      debounceTime(500),
-      distinctUntilChanged(),
-      filter(() => this.keyBindForm.valid),
+      filter(() => this.formGroup().valid()),
       map(formValue => this.extractCustomKeyBinds(formValue)),
       map(customKeyBinds => this.combinePreferences(customKeyBinds)),
       switchMap(p => this.accountService.updatePreferences(p)),
@@ -118,6 +142,13 @@ export class ManageCustomKeyBindsComponent implements OnInit {
         return of(null);
       }),
     ).subscribe();
+  }
+
+  ngOnInit() {
+    const keyBinds = this.keyBindService.allKeyBinds();
+    this.formModel.set(keyBinds);
+
+    this.duplicatedKeyBinds.set(this.extractDuplicated(keyBinds)); // Set initial
   }
 
   private extractDuplicated(formValue: Partial<Record<KeyBindTarget, KeyBind[]>>): Partial<Record<KeyBindTarget, number[]>> {
@@ -157,26 +188,6 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     };
   }
 
-  private toFormControls(keybinds: KeyBind[]): FormControl<KeyBind>[] {
-    return keybinds.map(keyBind => this.fb.control(keyBind, this.keyBindValidator()));
-  }
-
-  trackByKeyBind(index: number, keyBind: KeyBind) {
-    let key = `${index}_${keyBind.key}_ctrl_${keyBind.control}_meta_${keyBind.meta}_alt_${keyBind.alt}_shift_${keyBind.shift}`;
-    if (keyBind.controllerSequence) {
-      key += `controller_${keyBind.controllerSequence.join('_')}`;
-    }
-    return key;
-  }
-
-  /**
-   * Typed getter for the FormArray of a given target
-   * @param key
-   */
-  getFormArray(key: KeyBindTarget): FormArray<FormControl<KeyBind>> | null {
-    return this.keyBindForm.get(key) as FormArray<FormControl<KeyBind>> | null;
-  }
-
   /**
    * Reset keybinds to default configured values
    * @param key
@@ -184,7 +195,10 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   resetKeybindsToDefaults(key: KeyBindTarget) {
     if (this.accountService.hasReadOnlyRole()) return;
 
-    this.keyBindForm.setControl(key, this.fb.array(this.toFormControls(DefaultKeyBinds[key]), this.keyBindArrayValidator()));
+    this.formModel.update(model => ({
+      ...model,
+      [key]: DefaultKeyBinds[key],
+    }));
   }
 
   /**
@@ -194,15 +208,18 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   addKeyBind(key: KeyBindTarget) {
     if (this.accountService.hasReadOnlyRole()) return;
 
-    const array = this.getFormArray(key);
-    if (!array) return;
-
-    if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
-      array.push(this.fb.control({key: KeyCode.Empty}, this.keyBindValidator()));
+    const keyBinds = this.formModel()[key];
+    if (keyBinds.length >= MAX_KEYBINDS_PER_TARGET) {
+      return;
     }
 
+    this.formModel.update(model => ({
+      ...model,
+      [key]: [...keyBinds, {key: KeyCode.Empty}]
+    }));
+
     setTimeout(() => {
-      const id = `key-bind-${key}-${array.length-1}`;
+      const id = `key-bind-${key}-${keyBinds.length}`;
       const newElement = this.document.getElementById(id);
       if (newElement) {
         newElement.focus();
@@ -219,48 +236,53 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   removeKeyBind(key: KeyBindTarget, index: number) {
     if (this.accountService.hasReadOnlyRole()) return;
 
-    const array = this.getFormArray(key);
-    if (!array) return;
-
-    if (array.controls.length === 1) {
+    const keyBinds = this.formModel()[key];
+    if (keyBinds.length === 1) {
       this.resetKeybindsToDefaults(key);
-    } else {
-      array.removeAt(index)
+      return;
     }
+
+    this.formModel.update(model => ({
+      ...model,
+      [key]: model[key].filter((_, i) => i !== index),
+    }));
   }
 
-  /**
-   * Custom validator for FormControl<KeyBind>
-   * @private
-   */
-  private keyBindValidator(): ValidatorFn {
-    return (control) => {
-      const keyBind = (control as FormControl<KeyBind>).value;
-      if (keyBind.key.length === 0 && !keyBind.controllerSequence) return { 'need-at-least-one-key': {'length': 0} } as ValidationErrors;
+  private validateKeybind(path: SchemaPathTree<KeyBind, PathKind.Item>) {
+    validate(path, ctx => {
+      const keybind = ctx.value();
+      if (keybind.key.length === 0 && !keybind.controllerSequence) {
+        return {
+          kind: 'need-at-least-one-key',
+        }
+      }
 
-      if (this.keyBindService.isReservedKeyBind(keyBind)) {
-        return { 'reserved-key-bind': { 'keyBind': keyBind }} as ValidationErrors
+      if (this.keyBindService.isReservedKeyBind(keybind)) {
+        return {
+          kind: 'reserved-key-bind'
+        }
       }
 
       return null;
-    }
+    });
   }
 
-  private keyBindArrayValidator(): ValidatorFn {
-    return (control) => {
-      const controls = (control as FormArray<FormControl<KeyBind>>).controls;
+  private validateKeybinds(path: SchemaPath<KeyBind[]>) {
+    validate(path, ctx => {
+      const keybinds = ctx.value();
 
-      const anyOverlap = controls.some((c, i) => controls.some((c2, i2)=> {
-        return i !== i2 && this.keyBindService.areKeyBindsEqual(c.value, c2.value);
-      }))
+      const anyOverlap = keybinds.some((c, i) => keybinds.some((c2, i2) => {
+        return i !== i2 && this.keyBindService.areKeyBindsEqual(c, c2);
+      }));
 
       if (anyOverlap) {
-        return { 'overlap-in-target': { '': '' } }
+        return {
+          kind: 'overlap-in-target'
+        }
       }
 
       return null;
-
-    }
+    });
   }
 
   /**
@@ -270,10 +292,10 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    * @param errors
    * @protected
    */
-  protected errorToolTip(target: KeyBindTarget, index: number, errors: ValidationErrors | null): string | null {
-    if (errors) {
-      return Object.keys(errors)
-        .map(key => this.transLoco.translate(`manage-custom-key-binds.key-bind-error-${key}`))
+  protected errorToolTip(target: KeyBindTarget, index: number, errors: ValidationError[]): string | null {
+    if (errors.length > 0) {
+      return errors
+        .map(error => this.transLoco.translate(`manage-custom-key-binds.key-bind-error-${error.kind}`))
         .join(' ')
         .trim() || null;
     }

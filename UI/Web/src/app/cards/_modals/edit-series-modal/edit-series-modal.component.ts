@@ -28,7 +28,7 @@ import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
-import {DecimalPipe, TitleCasePipe} from "@angular/common";
+import {DecimalPipe} from "@angular/common";
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
@@ -75,11 +75,15 @@ import {personFields, PersonFields, personFieldsFrom} from "../../../_helpers/pe
 import {IHasMetadataIds} from "../../../_models/common/i-has-metadata-ids";
 import {AgeRating} from "../../../_models/metadata/age-rating";
 import {PublicationStatus} from "../../../_models/metadata/publication-status";
+import {
+  EnumOption,
+  SettingSelectComponent
+} from "../../../settings/_components/setting-enum-select/setting-select.component";
 
 interface MetadataFormModel extends PersonFields {
   summary: string;
-  ageRating: string;
-  publicationStatus: string;
+  ageRating: AgeRating;
+  publicationStatus: PublicationStatus;
   language: string;
   releaseYear: string;
   genres: Genre[];
@@ -126,11 +130,11 @@ const blacklist = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, 
     EditModalShellComponent,
     EditTabDirective,
     MetadataProviderTitlePipe,
-    TitleCasePipe,
     TimeDifferencePipe,
     FormFieldDirective,
     FormField,
-    LockableFieldComponent
+    LockableFieldComponent,
+    SettingSelectComponent
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -170,8 +174,8 @@ export class EditSeriesModalComponent implements OnInit {
     cbrId: 0,
     metadata: {
       summary: '',
-      ageRating: AgeRating.Unknown.toString(),
-      publicationStatus: PublicationStatus.OnGoing.toString(),
+      ageRating: AgeRating.Unknown,
+      publicationStatus: PublicationStatus.OnGoing,
       language: '',
       releaseYear: '',
       genres: [],
@@ -301,8 +305,8 @@ export class EditSeriesModalComponent implements OnInit {
           metadata: {
             ...m.metadata,
             summary: metadata.summary || '',
-            ageRating: metadata.ageRating.toString(),
-            publicationStatus: metadata.publicationStatus.toString(),
+            ageRating: metadata.ageRating,
+            publicationStatus: metadata.publicationStatus,
             language: metadata.language,
             releaseYear: metadata.releaseYear > 0 ? metadata.releaseYear.toString() : '',
             genres: metadata.genres ?? [],
@@ -400,8 +404,6 @@ export class EditSeriesModalComponent implements OnInit {
     const metadataPayload: SeriesMetadata = {
       ...metadata,
       ...model.metadata,
-      ageRating: parseInt(model.metadata.ageRating, 10) as AgeRating,
-      publicationStatus: parseInt(model.metadata.publicationStatus, 10) as PublicationStatus,
       releaseYear: parseInt(model.metadata.releaseYear, 10) || 0,
     };
     writeFieldLocks(metadataPayload, this.metadataLocks);
@@ -473,11 +475,18 @@ export class EditSeriesModalComponent implements OnInit {
     this.activeTabId.set(tab);
   }
 
+  get MetadataProvidersEnumOptions(): EnumOption<MetadataProvider | null>[] {
+    const options: EnumOption<MetadataProvider | null>[] = AllMetadataProviders.map(p => ({value: p}));
+    options.push({value: null});
+
+    return options;
+  }
+
   protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
   protected readonly MangaFormat = MangaFormat;
-  protected readonly allMetadataProviders = AllMetadataProviders;
   protected readonly Tabs = Tabs;
   protected readonly PersonRole = PersonRole;
   protected readonly Action = Action;
   protected readonly parseInt = parseInt;
+  protected readonly AllMetadataProviders = AllMetadataProviders;
 }

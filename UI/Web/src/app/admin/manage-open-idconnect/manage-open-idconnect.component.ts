@@ -1,31 +1,13 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  DestroyRef, effect,
-  inject,
-  OnInit,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ServerSettings} from "../_models/server-settings";
-import {
-  AbstractControl,
-  AsyncValidatorFn,
-  FormControl,
-  FormGroup,
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn
-} from "@angular/forms";
+import {ReactiveFormsModule} from "@angular/forms";
 import {SettingsService} from "../settings.service";
 import {AuthorityValidationResult, OidcConfig} from "../_models/oidc-config";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
-import {debounceTime, distinctUntilChanged, filter, forkJoin, map, of, tap} from "rxjs";
-import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
+import {debounceTime, distinctUntilChanged, filter, forkJoin, skip, tap} from "rxjs";
+import {toObservable} from "@angular/core/rxjs-interop";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {MetadataService} from "../../_services/metadata.service";
 import {AgeRating} from "../../_models/metadata/age-rating";
@@ -43,16 +25,15 @@ import {
 import {
   SettingMultiTextFieldComponent
 } from "../../settings/_components/setting-multi-text-field/setting-multi-text-field.component";
-import {environment} from "../../../environments/environment";
 import {SlicePipe} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ConfirmService} from "../../shared/confirm.service";
 import {AuthorityValidationResultPipe} from "../../_pipes/authority-validation-result.pipe";
-import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
-import {debounce, disabled, form, FormField, metadata, validateAsync, validateHttp} from "@angular/forms/signals";
-import {REQUIRED_IF_NAME, requiredIf, url} from "../../shared/utils/validators.util";
-import {SettingEnumSelectComponent} from "../../settings/_components/setting-enum-select/setting-enum-select.component";
+import {disabled, form, FormField, metadata, validateAsync} from "@angular/forms/signals";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
+import {REQUIRED_IF_NAME, requiredIf} from "../../_validators/requiredIf.validator";
+import {url} from "../../_validators/url.validator";
 
 @Component({
   selector: 'app-manage-open-idconnect',
@@ -70,7 +51,7 @@ import {SettingEnumSelectComponent} from "../../settings/_components/setting-enu
     NgbTooltip,
     FormFieldDirective,
     FormField,
-    SettingEnumSelectComponent
+    SettingSelectComponent
   ],
   templateUrl: './manage-open-idconnect.component.html',
   styleUrl: './manage-open-idconnect.component.scss',
@@ -90,7 +71,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
 
   serverSettings!: ServerSettings;
 
-  oidcSettingsModel = signal<OidcConfig>({
+  formModel = signal<OidcConfig>({
     authority: "",
     autoLogin: false,
     clientId: "",
@@ -110,7 +91,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
     syncUserSettings: false
 
   });
-  oidcSettingsForm = form(this.oidcSettingsModel, (path) => {
+  formGroup = form(this.formModel, (path) => {
     disabled(path, {when: () => !this.accountService.hasAdminRole()});
 
     url(path.authority, { requireTls: true });
@@ -159,10 +140,11 @@ export class ManageOpenIDConnectComponent implements OnInit {
   autoSavingBlocked = signal(false);
 
   constructor() {
-    toObservable(this.oidcSettingsModel).pipe(
+    toObservable(this.formModel).pipe(
+      skip(2),
       debounceTime(300),
       distinctUntilChanged(),
-      filter(() => this.oidcSettingsForm().valid()),
+      filter(() => this.formGroup().valid()),
       filter(() => {
         const settings: OidcConfig = this.packData().oidcConfig;
         const autoSave = settings.authority == this.oidcSettings()?.authority && settings.clientId == this.oidcSettings()?.clientId;
@@ -184,7 +166,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
       this.libraries.set(libraries);
 
       this.serverSettings = settings;
-      this.oidcSettingsModel.set(this.serverSettings.oidcConfig);
+      this.formModel.set(this.serverSettings.oidcConfig);
       this.oidcSettings.set(this.serverSettings.oidcConfig);
 
       this.loading.set(false);
@@ -194,7 +176,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
   private packData(): ServerSettings {
     const newSettings = Object.assign({}, this.serverSettings);
     newSettings.oidcConfig = {
-      ...this.oidcSettingsModel(),
+      ...this.formModel(),
       enabled: false,
     };
     return newSettings;
@@ -211,7 +193,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
   }
 
   save(showToasts: boolean = false) {
-    if (!this.oidcSettingsForm().valid()) {
+    if (!this.formGroup().valid()) {
       if (showToasts) {
         this.toastr.error(translate('errors.invalid-form'));
       }

@@ -19,6 +19,7 @@ import {ValidationErrorsComponent} from "../../shared/_components/validation-err
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 import {form, FormField, pattern, required} from "@angular/forms/signals";
 import {UpdateUserRequest} from "../../_models/user/update-user-request";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 
 const AllowedUsernameCharacters = /^[a-zA-Z0-9\-._@+/]*$/;
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,7 +27,7 @@ const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 interface EditUserForm {
   email: string;
   username: string;
-  identityProvider: string;
+  identityProvider: IdentityProvider;
   roles: Role[];
   libraries: number[];
 }
@@ -36,7 +37,7 @@ interface EditUserForm {
   templateUrl: './edit-user.component.html',
   styleUrls: ['./edit-user.component.scss'],
   imports: [RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective,
-    IdentityProviderPipePipe, SettingMultiCheckBox, ValidationErrorsComponent, FormFieldDirective, FormField],
+    IdentityProviderPipePipe, SettingMultiCheckBox, ValidationErrorsComponent, FormFieldDirective, FormField, SettingSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditUserComponent implements OnInit {
@@ -74,7 +75,7 @@ export class EditUserComponent implements OnInit {
     email: '',
     username: '',
     roles: [],
-    identityProvider: IdentityProvider.Kavita.toString(),
+    identityProvider: IdentityProvider.Kavita,
     libraries: []
   });
   userForm = form(this.userFormModel, (schemaPath) => {
@@ -100,7 +101,7 @@ export class EditUserComponent implements OnInit {
 
   constructor() {
     effect(() => {
-      const newIdentityProvider = parseInt(this.userForm.identityProvider().value(), 10) as IdentityProvider;
+      const newIdentityProvider = this.userForm.identityProvider().value();
       if (newIdentityProvider === IdentityProvider.OpenIdConnect) return;
       this.member.update(m => ({
         ...m,
@@ -116,7 +117,7 @@ export class EditUserComponent implements OnInit {
 
     this.userForm.email().value.set(this.member().email);
     this.userForm.username().value.set(this.member().username);
-    this.userForm.identityProvider().value.set(this.member().identityProvider.toString());
+    this.userForm.identityProvider().value.set(this.member().identityProvider);
     this.userForm.roles().value.set(this.member().roles);
     this.userForm.libraries().value.set(this.member().libraries.map(l => l.id));
 

@@ -5,22 +5,22 @@
 
       @if (isLoaded()) {
         @if (showPasswordLogin()) {
-          <form (submit)="login()" novalidate class="needs-validation">
+          <form [formRoot]="formGroup" (submit)="login()" novalidate class="needs-validation">
             <div class="card-text">
               <div class="mb-3">
                 <label for="username" class="form-label visually-hidden">{{t('username')}}</label>
-                <input class="form-control custom-input" [formField]="loginForm.username" id="username" autocomplete="username"
+                <input class="form-control custom-input" [formField]="formGroup.username" id="username" autocomplete="username"
                        type="text" autofocus [placeholder]="t('username')"
-                       [appFormField]="loginForm.username" aria-describedby="username-validations">
-                <app-validation-errors inputId="username" [control]="loginForm.username" />
+                       [appFormField]="formGroup.username" aria-describedby="username-validations">
+                <app-validation-errors inputId="username" [control]="formGroup.username" />
               </div>
 
               <div class="mb-2">
                 <label for="password" class="form-label visually-hidden">{{t('password')}}</label>
-                <input class="form-control custom-input" [formField]="loginForm.password" autocomplete="current-password"
+                <input class="form-control custom-input" [formField]="formGroup.password" autocomplete="current-password"
                        id="password" type="password" [placeholder]="t('password')"
-                       [appFormField]="loginForm.password" aria-describedby="password-validations">
-                <app-validation-errors inputId="password" [control]="loginForm.password" />
+                       [appFormField]="formGroup.password" aria-describedby="password-validations">
+                <app-validation-errors inputId="password" [control]="formGroup.password" />
               </div>
 
               <div class="mb-3 forgot-password">
@@ -38,8 +38,8 @@
           <a
             class="btn btn-outline-primary mt-2 d-flex justify-content-center align-items-center gap-2"
             [href]="baseUrl + 'oidc/login'">
-            <app-image height="36px" width="36px" [imageUrl]="'assets/icons/open-id-connect-logo.svg'" [styles]="{'object-fit': 'contains'}" />
-            {{oidcConfig()?.providerName || t('oidc')}}
+              <app-image height="36px" width="36px" [imageUrl]="'assets/icons/open-id-connect-logo.svg'" [styles]="{'object-fit': 'contains'}" />
+              {{oidcConfig()?.providerName || t('oidc')}}
           </a>
         }
       }

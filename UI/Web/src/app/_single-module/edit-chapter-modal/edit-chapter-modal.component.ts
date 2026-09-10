@@ -10,7 +10,6 @@ import {
   OnInit,
   signal
 } from '@angular/core';
-import {TitleCasePipe} from "@angular/common";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
@@ -67,6 +66,8 @@ import {IHasMetadataIds} from "../../_models/common/i-has-metadata-ids";
 import {lockGroup, standaloneLocks, writeFieldLocks, writeNamedLocks} from "../../_helpers/field-lock";
 import {personFields, PersonFields, personFieldsFrom} from "../../_helpers/person-fields";
 import {LockableFieldComponent} from "../../shared/_components/lockable-field/lockable-field.component";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
+import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 
 
 interface FormModel extends IHasMetadataIds, PersonFields {
@@ -75,7 +76,7 @@ interface FormModel extends IHasMetadataIds, PersonFields {
   summary: string;
   language: string;
   isbn: string;
-  ageRating: string;
+  ageRating: AgeRating;
   releaseDate: string;
   genres: Genre[];
   tags: Tag[];
@@ -101,7 +102,6 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     SettingItemComponent,
     TypeaheadComponent,
     EntityTitleComponent,
-    TitleCasePipe,
     SettingButtonComponent,
     CoverImageChooserComponent,
     CompactNumberPipe,
@@ -117,6 +117,8 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     FormFieldDirective,
     FormField,
     LockableFieldComponent,
+    SettingSelectComponent,
+    AgeRatingPipe,
   ],
   templateUrl: './edit-chapter-modal.component.html',
   styleUrl: './edit-chapter-modal.component.scss',
@@ -148,7 +150,7 @@ export class EditChapterModalComponent implements OnInit {
   private coverImageDirty = false;
 
   private readonly formModel = signal<FormModel>({
-    ageRating: AgeRating.Unknown.toString(),
+    ageRating: AgeRating.Unknown,
     aniListId: 0,
     cbrId: 0,
     comicVineId: null,
@@ -219,7 +221,7 @@ export class EditChapterModalComponent implements OnInit {
       summary: this.chapter().summary || '',
       language: this.chapter().language,
       isbn: this.chapter().isbn,
-      ageRating: this.chapter().ageRating.toString(),
+      ageRating: this.chapter().ageRating,
       releaseDate: this.chapter().releaseDate !== NULL_DATE ? this.chapter().releaseDate.substring(0, 10) : '',
       genres: this.chapter().genres ?? [],
       tags: this.chapter().tags ?? [],
@@ -251,7 +253,6 @@ export class EditChapterModalComponent implements OnInit {
     const payload: Chapter = {
       ...this.chapter(),
       ...model,
-      ageRating: parseInt(model.ageRating + '', 10) as AgeRating,
       releaseDate: model.releaseDate === '' ? NULL_DATE : model.releaseDate + 'T00:00:00',
     };
 

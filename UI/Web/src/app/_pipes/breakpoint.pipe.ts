@@ -9,9 +9,10 @@ export class BreakpointPipe implements PipeTransform {
 
   transform(value: Breakpoint): string {
     const v = parseInt(value + '', 10) as Breakpoint;
-    if (parseInt(value + '', 10) == 0) return translate('breakpoint-pipe.never');
 
     switch (v) {
+      case Breakpoint.Never:
+        return translate('breakpoint-pipe.never');
       case Breakpoint.Mobile:
         return translate('breakpoint-pipe.mobile');
       case Breakpoint.Tablet:

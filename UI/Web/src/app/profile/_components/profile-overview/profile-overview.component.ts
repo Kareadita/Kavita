@@ -24,7 +24,7 @@ import {Series} from "../../../_models/series";
 type OverviewStream = {
   title: string;
   api: Observable<SeriesCardEntity[]>;
-  nextPageLoader: NextPageLoader;
+  nextPageLoader: NextPageLoader<SeriesCardEntity>;
 }
 
 const JustFinishedReadingFilter = {

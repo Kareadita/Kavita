@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {Select2, Select2Data} from "ng-select2-component";
 import {AccordionComponent} from "../../shared/accordion/accordion.component";
 import {TagBadgeComponent, TagBadgeCursor} from "../../shared/tag-badge/tag-badge.component";
@@ -21,6 +21,7 @@ import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {ConfirmService} from "../../shared/confirm.service";
 import {ConfirmConfig} from "../../shared/confirm-dialog/_models/confirm-config";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {form, FormField, required} from "@angular/forms/signals";
 
 /**
  * Developer-only, unlocalized style guide. Renders the app's common UI primitives and raw theme
@@ -41,6 +42,7 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/
     SettingMultiTextFieldComponent,
     SettingMultiCheckBox,
     ReactiveFormsModule,
+    FormField,
   ],
   templateUrl: './theme.component.html',
   styleUrl: './theme.component.scss',
@@ -54,9 +56,14 @@ export class ThemeComponent {
   protected readonly PlusMediaFormat = PlusMediaFormat;
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
-  form = new FormGroup({
-    textArea: new FormControl('', [Validators.required]),
-  })
+  formModel = signal<{
+    textArea: string[]
+  }>({
+    textArea: []
+  });
+  formGroup = form(this.formModel, path => {
+    required(path.textArea);
+  });
 
   protected readonly select2Demo: Select2Data = [
     {value: 1, label: 'Option A'},

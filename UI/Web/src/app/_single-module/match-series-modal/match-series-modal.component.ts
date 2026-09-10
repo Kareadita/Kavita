@@ -38,12 +38,13 @@ import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
 import {SeriesMetadata} from "../../_models/metadata/series-metadata";
 import {disabled, form, FormField} from "@angular/forms/signals";
 import {MatchSeriesRequest} from "../../_models/kavitaplus/match-series-request";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 
 interface MatchSeriesFormModel {
   query: string;
   isStandAlone: boolean;
   dontMatch: boolean;
-  provider: string;
+  provider: MetadataProvider;
 }
 
 @Component({
@@ -59,6 +60,7 @@ interface MatchSeriesFormModel {
     SeriesFormatComponent,
     LibraryTypePipe,
     FormField,
+    SettingSelectComponent,
   ],
   templateUrl: './match-series-modal.component.html',
   styleUrl: './match-series-modal.component.scss',
@@ -76,7 +78,7 @@ export class MatchSeriesModalComponent implements OnInit {
     query: '',
     isStandAlone: false,
     dontMatch: false,
-    provider: ''
+    provider: MetadataProvider.Mangabaka
   });
   formGroup = form(this.formModel, (path) => {
     disabled(path.query, {when: ({valueOf}) => valueOf(path.dontMatch)});
@@ -149,7 +151,7 @@ export class MatchSeriesModalComponent implements OnInit {
     return provider !== null && provider !== this.matchInfo()?.metadataProvider;
   });
 
-  private lastProvider: string = '';
+  private lastProvider: MetadataProvider | null = null;
 
 
   constructor() {
@@ -186,7 +188,7 @@ export class MatchSeriesModalComponent implements OnInit {
 
     this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
       this.matchInfo.set(res);
-      this.formGroup.provider().value.set(res.metadataProvider.toString());
+      this.formGroup.provider().value.set(res.metadataProvider);
       this.autoSelectExistingMatch(this.matches());
     });
 
@@ -217,7 +219,6 @@ export class MatchSeriesModalComponent implements OnInit {
 
     const model = {
       ...this.formModel(),
-      provider: parseInt(this.formModel().provider, 10) as MetadataProvider,
       seriesId: this.series().id
     } as MatchSeriesRequest;
 
@@ -231,7 +232,7 @@ export class MatchSeriesModalComponent implements OnInit {
         // The backend can search against another provider than the one asked for, when the query is a
         // provider specific url/header. Show what the results actually came from
         this.resultProvider.set(res.provider);
-        this.formGroup.provider().value.set(res.provider.toString());
+        this.formGroup.provider().value.set(res.provider);
 
         this.autoSelectExistingMatch(res.matches);
       }),

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ToastrService} from '@openng/ngx-toastr';
 import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
@@ -19,12 +19,13 @@ import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {ModalService} from "../../_services/modal.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 import {form, FormField, readonly, required} from "@angular/forms/signals";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 
 interface FormModel {
-  encodeMediaAs: string;
+  encodeMediaAs: EncodeFormat;
   bookmarksDirectory: string;
-  coverImageSize: string;
-  pdfRenderResolution: string;
+  coverImageSize: CoverImageSize;
+  pdfRenderResolution: PdfRenderResolution;
 }
 
 
@@ -33,7 +34,7 @@ interface FormModel {
   templateUrl: './manage-media-settings.component.html',
   styleUrls: ['./manage-media-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe, FormFieldDirective, FormField]
+  imports: [TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe, FormFieldDirective, FormField, SettingSelectComponent]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 
@@ -50,10 +51,10 @@ export class ManageMediaSettingsComponent implements OnInit {
   protected readonly isLoaded = signal(false);
 
   private readonly formModel = signal<FormModel>({
-    encodeMediaAs: '',
+    encodeMediaAs: EncodeFormat.PNG,
     bookmarksDirectory: '',
-    coverImageSize: '',
-    pdfRenderResolution: ''
+    coverImageSize: CoverImageSize.Default,
+    pdfRenderResolution: PdfRenderResolution.Default
   });
   protected readonly settingsForm = form(this.formModel, p => {
     required(p.encodeMediaAs);
@@ -61,10 +62,6 @@ export class ManageMediaSettingsComponent implements OnInit {
     required(p.coverImageSize);
     required(p.pdfRenderResolution);
   });
-
-  protected readonly encodeMediaAs = computed(() => parseInt(this.formModel().encodeMediaAs, 10) as EncodeFormat);
-  protected readonly coverImageSize = computed(() => parseInt(this.formModel().coverImageSize, 10) as CoverImageSize);
-  protected readonly pdfRenderResolution = computed(() => parseInt(this.formModel().pdfRenderResolution, 10) as PdfRenderResolution);
 
   constructor() {
     // Automatically save settings as we edit them
@@ -112,10 +109,10 @@ export class ManageMediaSettingsComponent implements OnInit {
   resetForm() {
     const settings = this.serverSettings;
     this.formModel.set({
-      encodeMediaAs: settings.encodeMediaAs.toString(),
+      encodeMediaAs: settings.encodeMediaAs,
       bookmarksDirectory: settings.bookmarksDirectory,
-      coverImageSize: (settings.coverImageSize || CoverImageSize.Default).toString(),
-      pdfRenderResolution: (settings.pdfRenderResolution || PdfRenderResolution.Default).toString(),
+      coverImageSize: (settings.coverImageSize || CoverImageSize.Default),
+      pdfRenderResolution: (settings.pdfRenderResolution || PdfRenderResolution.Default),
     });
     this.settingsForm().reset();
   }
@@ -123,10 +120,10 @@ export class ManageMediaSettingsComponent implements OnInit {
   packData() {
     const model = this.formModel();
     const modelSettings = Object.assign({}, this.serverSettings);
-    modelSettings.encodeMediaAs = parseInt(model.encodeMediaAs, 10);
+    modelSettings.encodeMediaAs = model.encodeMediaAs;
     modelSettings.bookmarksDirectory = model.bookmarksDirectory;
-    modelSettings.coverImageSize = parseInt(model.coverImageSize, 10);
-    modelSettings.pdfRenderResolution = parseInt(model.pdfRenderResolution, 10);
+    modelSettings.coverImageSize = model.coverImageSize;
+    modelSettings.pdfRenderResolution = model.pdfRenderResolution;
 
     return modelSettings;
   }

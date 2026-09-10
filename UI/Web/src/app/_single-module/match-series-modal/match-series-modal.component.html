@@ -91,12 +91,11 @@
             }
           </div>
 
-          <select class="form-select form-select-sm w-auto" [formField]="formGroup.provider"
-                  [attr.aria-label]="t('change-provider-help')">
-            @for (provider of allMetadataProviders; track provider) {
-              <option [value]="provider">{{ provider | metadataProviderTitle }}</option>
-            }
-          </select>
+          <app-setting-select inputId="metadata-provider" [formField]="formGroup.provider" [options]="allMetadataProviders" extraClasses="form-select-sm w-auto">
+            <ng-template #template let-p>
+              {{ p | metadataProviderTitle }}
+            </ng-template>
+          </app-setting-select>
         </div>
 
         @if (activeProvider() === MetadataProvider.Hardcover) {

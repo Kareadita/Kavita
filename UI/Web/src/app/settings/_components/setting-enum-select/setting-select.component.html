@@ -1,0 +1,13 @@
+<select [id]="inputId()" class="form-select {{extraClasses()}}" (change)="onSelectionChange($event)" [disabled]="formField.state().disabled()" [appFormField]="formField.field()">
+  @for (opt of options(); track getEnumValue(opt)) {
+    @let value = getEnumValue(opt);
+
+    <option [value]="value" [selected]="value === formField.state().value()">
+      @if (template(); as templ) {
+        <ng-container [ngTemplateOutlet]="templ" [ngTemplateOutletContext]="{ $implicit: value }"></ng-container>
+      } @else {
+        {{ getEnumLabel(opt) | titlecase }}
+      }
+    </option>
+  }
+</select>

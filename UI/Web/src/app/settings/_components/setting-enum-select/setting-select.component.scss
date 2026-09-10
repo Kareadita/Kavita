@@ -1,0 +1,15 @@
+:host {
+  display: contents;
+}
+
+:host-context(.input-group) select {
+  flex: 1 1 auto;
+  width: 1%;
+  min-width: 0;
+}
+
+:host(:not(:first-child)) select {
+  margin-left: calc(var(--bs-border-width) * -1);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}

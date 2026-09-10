@@ -193,6 +193,9 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
             .ToList();
         if (selectedProfiles.Count != profileIds.Count) throw new KavitaException("profile-doesnt-exist");
 
+        if (selectedProfiles.Any(p => p.Kind == ReadingProfileKind.Default))
+            throw new KavitaException("cannot-bind-default-profile");
+
         DeviceOverlapGuard(selectedProfiles);
 
         var allDeviceIds = selectedProfiles.SelectMany(p => p.DeviceIds).Distinct().ToList();
@@ -216,6 +219,9 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
             .Where(rp => profileIds.Contains(rp.Id))
             .ToList();
         if (selectedProfiles.Count != profileIds.Count) throw new KavitaException("profile-doesnt-exist");
+
+        if (selectedProfiles.Any(p => p.Kind == ReadingProfileKind.Default))
+            throw new KavitaException("cannot-bind-default-profile");
 
         DeviceOverlapGuard(selectedProfiles);
 
@@ -248,6 +254,9 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
             .Where(rp => profileIds.Contains(rp.Id))
             .ToList();
         if (selectedProfiles.Count != profileIds.Count) throw new KavitaException("profile-doesnt-exist");
+
+        if (selectedProfiles.Any(p => p.Kind == ReadingProfileKind.Default))
+            throw new KavitaException("cannot-bind-default-profile");
 
         DeviceOverlapGuard(selectedProfiles);
 

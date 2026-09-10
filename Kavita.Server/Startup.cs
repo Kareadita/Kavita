@@ -38,6 +38,7 @@ using Kavita.Server.ManualMigrations.v0._8._9;
 using Kavita.Server.ManualMigrations.v0._9._0;
 using Kavita.Server.ManualMigrations.v0._9._1;
 using Kavita.Server.ManualMigrations.v0._9._1.x;
+using Kavita.Server.ManualMigrations.v0._9._2;
 using Kavita.Server.Middleware;
 using Kavita.Server.Swagger;
 using Kavita.Services.SignalR;
@@ -544,6 +545,12 @@ public class Startup
                     await new ManualMigrateCoverImageSettings().RunAsync(dataContext, logger);
 
                     await new ManualMigrateBreakpointMapping().RunAsync(dataContext, logger);
+
+                    #endregion
+
+                    #region v0.9.2
+
+                    await new ManualMigrationUnassignDefaultReadingProfile().RunAsync(dataContext, logger);
 
                     #endregion
 

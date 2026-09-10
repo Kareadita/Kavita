@@ -3,7 +3,7 @@
 
   </p>
 
-  <form [formGroup]="keyBindForm" class="row mb-4">
+  <form class="row mb-4">
 
     @for (keyBindGroup of filteredKeyBindGroups(); track keyBindGroup.title) {
       @if (!$first) {
@@ -13,61 +13,64 @@
       <h4>{{t(keyBindGroup.title)}}</h4>
 
       @for (element of keyBindGroup.elements; track element.target) {
-        @if (getFormArray(element.target); as array) {
-          <div class="col-12 mt-4" [formArrayName]="element.target">
-            @let settingDesc = element.target | keybindSettingDescription;
-            <app-setting-item
-              [title]="settingDesc.title"
-              [subtitle]="settingDesc.tooltip"
-              [labelId]="element.target + ''"
-              [showEdit]="false"
-              [canEdit]="false"
-              [allowClickEvents]="true"
-            >
-              <ng-template #view>
-                <div class="d-flex flex-row justify-content-between">
-                  <div>
-                    @for (keyBindControl of array.controls; track trackByKeyBind($index, keyBindControl.value)) {
-                      <app-setting-key-bind-picker
-                        appLongClick
-                        [control]="keyBindControl"
-                        [formControlName]="$index + ''"
-                        [target]="element.target"
-                        [index]="$index"
-                        [duplicated]="duplicatedKeyBinds()[element.target]?.includes($index) ?? false"
-                        [ngbTooltip]="errorToolTip(element.target, $index, keyBindControl.errors)"
-                        [tooltipPlacement]="'right'"
-                        (longClick)="removeKeyBind(element.target, $index)"
-                      />
-                    } @empty {
-                      {{null | defaultValue}}
-                    }
-                  </div>
+        <div class="col-12 mt-4">
+          @let settingDesc = element.target | keybindSettingDescription;
+          @let elementState = formGroup[element.target]();
 
-                  <div class="float-end">
-                    @if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
-                      <button class="btn btn-sm" (click)="addKeyBind(element.target)" [disabled]="isReadOnly()" [ngbTooltip]="t('add', {target: settingDesc.title})">
-                        <i class="fa fa-add" [attr.aria-label]="t('add', {target: element.target})"></i>
-                      </button>
-                    }
-
-                    <button class="btn btn-sm" (click)="resetKeybindsToDefaults(element.target)" [disabled]="isReadOnly()" [ngbTooltip]="t('reset', {target: settingDesc.title})">
-                      <i class="fa fa-recycle" [attr.aria-label]="t('reset', {target: element.target})"></i>
-                    </button>
-
-                    @if (!array.valid && !array.disabled) {
-                      <i class="fa fa-warning text-danger"
-                         [attr.aria-label]="t('errors-array', {target: element.target})"
-                         [ngbTooltip]="errorToolTip(element.target, -1, array.errors)">
-
-                      </i>
-                    }
-                  </div>
+          <app-setting-item
+            [title]="settingDesc.title"
+            [subtitle]="settingDesc.tooltip"
+            [labelId]="element.target + ''"
+            [showEdit]="false"
+            [canEdit]="false"
+            [allowClickEvents]="true"
+          >
+            <ng-template #view>
+              <div class="d-flex flex-row justify-content-between">
+                <div>
+                  <!--
+                  Must track itself https://github.com/angular/angular/issues/66711 Note that this does cause warnings for expensive operations.
+                  It also makes the experience horrible because app-setting-key-bind-picker gets re-created...
+                  -->
+                  @for (keyBindControl of formGroup[element.target]; track keyBindControl) {
+                    <app-setting-key-bind-picker
+                      appLongClick
+                      [formField]="keyBindControl"
+                      [target]="element.target"
+                      [index]="$index"
+                      [duplicated]="duplicatedKeyBinds()[element.target]?.includes($index) ?? false"
+                      [ngbTooltip]="errorToolTip(element.target, $index, keyBindControl().errors())"
+                      [tooltipPlacement]="'right'"
+                      (longClick)="removeKeyBind(element.target, $index)"
+                    />
+                  } @empty {
+                    {{null | defaultValue}}
+                  }
                 </div>
-              </ng-template>
-            </app-setting-item>
-          </div>
-        }
+
+                <div class="float-end">
+                  @if (elementState.value().length < MAX_KEYBINDS_PER_TARGET) {
+                    <button class="btn btn-sm" (click)="$event.preventDefault(); addKeyBind(element.target)" [disabled]="isReadOnly()" [ngbTooltip]="t('add', {target: settingDesc.title})">
+                      <i class="fa fa-add" [attr.aria-label]="t('add', {target: element.target})"></i>
+                    </button>
+                  }
+
+                  <button class="btn btn-sm" (click)="$event.preventDefault(); resetKeybindsToDefaults(element.target)" [disabled]="isReadOnly()" [ngbTooltip]="t('reset', {target: settingDesc.title})">
+                    <i class="fa fa-recycle" [attr.aria-label]="t('reset', {target: element.target})"></i>
+                  </button>
+
+                  @if (elementState.invalid() && !elementState.disabled()) {
+                    <i class="fa fa-warning text-danger"
+                       [attr.aria-label]="t('errors-array', {target: element.target})"
+                       [ngbTooltip]="errorToolTip(element.target, -1, elementState.errors())">
+
+                    </i>
+                  }
+                </div>
+              </div>
+            </ng-template>
+          </app-setting-item>
+        </div>
       }
     }
   </form>

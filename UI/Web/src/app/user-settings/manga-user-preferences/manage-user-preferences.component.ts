@@ -1,37 +1,19 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed, debounced,
-  DestroyRef,
-  effect,
-  inject,
-  OnInit,
-  Signal,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Preferences} from "../../_models/preferences/preferences";
 import {AccountService} from "../../_services/account.service";
 import {LocalizationService} from "../../_services/localization.service";
-import {
-  FormArray,
-  FormControl,
-  FormGroup,
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators
-} from "@angular/forms";
+import {NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {KavitaLocale} from "../../_models/metadata/language";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {toObservable} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, filter, forkJoin, switchMap} from "rxjs";
 import {DecimalPipe, TitleCasePipe} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {LicenseService} from "../../_services/license.service";
 import {HighlightBarComponent} from "../../book-reader/_components/_annotations/highlight-bar/highlight-bar.component";
-import {SiteTheme, ThemeProvider} from "../../_models/preferences/site-theme";
+import {ThemeProvider} from "../../_models/preferences/site-theme";
 import {PageLayoutMode} from "../../_models/page-layout-mode";
-import {HighlightSlot} from "../../book-reader/_models/annotations/highlight-slot";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {LibraryService} from "../../_services/library.service";
 import {Library} from "../../_models/library/library";
@@ -43,7 +25,7 @@ import {TypeaheadConfig} from "../../typeahead/_models/typeahead-config";
 import {TypeaheadConfigFactoryService} from "../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 import {debounce, disabled, form, FormField, min, required} from "@angular/forms/signals";
-import {SettingEnumSelectComponent} from "../../settings/_components/setting-enum-select/setting-enum-select.component";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 
 @Component({
   selector: 'app-manga-user-preferences',
@@ -59,7 +41,7 @@ import {SettingEnumSelectComponent} from "../../settings/_components/setting-enu
     TypeaheadComponent,
     FormFieldDirective,
     FormField,
-    SettingEnumSelectComponent
+    SettingSelectComponent
   ],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',
@@ -82,7 +64,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   locales = signal<KavitaLocale[]>([]);
   socialLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
 
-  userPreferencesModel = signal<Preferences>({
+  formModel = signal<Preferences>({
     aniListScrobblingEnabled: false,
     blurUnreadSummaries: false,
     bookReaderHighlightSlots: [],
@@ -122,7 +104,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     },
     wantToReadSync: false
   });
-  userPreferencesForm = form(this.userPreferencesModel, (path) => {
+  formGroup = form(this.formModel, (path) => {
     disabled(path, {when: () => this.accountService.hasReadOnlyRole()});
     debounce(path, 100);
 
@@ -131,7 +113,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   });
 
   selectedLocale = computed(() => {
-    const locale = (this.locales() || []).find(l => l.fileName === this.userPreferencesForm.locale().value());
+    const locale = (this.locales() || []).find(l => l.fileName === this.formGroup.locale().value());
     if (!locale) {
       return 'English';
     }
@@ -145,14 +127,12 @@ export class ManageUserPreferencesComponent implements OnInit {
       this.locales.set(res.sort((l1, l2) => l1.renderName.localeCompare(l2.renderName)));
     });
 
-    effect(() => {
-      if (!this.userPreferencesForm().valid() || !this.userPreferencesForm().dirty || this.loading()) {
-        return;
-      }
-      const preferences = this.userPreferencesModel();
-
-      this.accountService.updatePreferences(preferences).subscribe();
-    });
+    toObservable(this.formModel).pipe(
+      debounceTime(100),
+      distinctUntilChanged(),
+      filter(() => this.formGroup().valid() && !this.loading()),
+      switchMap(() => this.accountService.updatePreferences(this.formModel()))
+    ).subscribe();
   }
 
   ngOnInit(): void {
@@ -163,13 +143,13 @@ export class ManageUserPreferencesComponent implements OnInit {
     }).subscribe(({pref, libraries, ageRatings}) => {
       this.ageRatings.set([{value: AgeRating.NotApplicable, title: '',}, ...ageRatings]);
       this.socialLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({id: 'social-libraries', libraries}));
-      this.userPreferencesModel.set(pref);
+      this.formModel.set(pref);
 
       this.loading.set(false);
     });
   }
 
   syncFormWithTypeahead(libs: Library[] | Library) {
-    this.userPreferencesForm.socialPreferences.socialLibraries().value.set((libs as Library[]).map(l => l.id));
+    this.formGroup.socialPreferences.socialLibraries().value.set((libs as Library[]).map(l => l.id));
   }
 }

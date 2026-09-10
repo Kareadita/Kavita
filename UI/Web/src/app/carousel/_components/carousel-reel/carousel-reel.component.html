@@ -1,45 +1,45 @@
 <ng-container *transloco="let t; prefix: 'carousel-reel'">
 
-  @if (alwaysShow || items && items.length > 0) {
+  @if (alwaysShow() || items() && items().length > 0) {
     <div class="carousel-container mb-3">
       <div>
         @if (actionables.length > 0) {
-          <app-card-actionables [entity]="actionableEntity" [actions]="actionables" (actionHandler)="performAction($event)" />
+          <app-card-actionables [entity]="actionableEntity()" [actions]="actionables()" (actionHandler)="performAction($event)" />
         }
-        <h4 class="header" (click)="sectionClicked($event)" [ngClass]="{'non-selectable': !clickableTitle}">
-          @if (titleLink !== '') {
-            <a [href]="titleLink | safeUrl" [class]="headerClass()">{{title}}</a>
+        <h4 class="header" (click)="sectionClicked()" [ngClass]="{'non-selectable': !clickableTitle()}">
+          @if (titleLink(); as titleLink) {
+            <a [href]="titleLink | safeUrl" [class]="headerClass()">{{title()}}</a>
           } @else {
-            <a href="javascript:void(0)" [class]="headerClass()">{{title}}</a>
+            <a href="javascript:void(0)" [class]="headerClass()">{{title()}}</a>
           }
 
-          @if (iconClasses !== '') {
+          @if (iconClasses(); as iconClasses) {
             <i class="{{iconClasses}} title-icon ms-1" aria-hidden="true"></i>
           }
         </h4>
-        @if (swiper) {
+        @if (swiper(); as swiper) {
           <div class="float-end">
             <button class="btn btn-icon carousel-btn" [disabled]="swiper.isBeginning" (click)="prevPage()"><i class="fa fa-angle-left" aria-hidden="true"></i><span class="visually-hidden">{{t('prev-items')}}</span></button>
             <button class="btn btn-icon carousel-btn" [disabled]="swiper.isEnd
-            && (!paginationEnabled() || items.length < pageSize())
+            && (!paginationEnabled() || items().length < pageSize())
             || (currentPage() >= (totalPages()))"
                     (click)="nextPage()"><i class="fa fa-angle-right" aria-hidden="true"></i><span class="visually-hidden">{{t('next-items')}}</span></button>
           </div>
         }
 
       </div>
-      @if (items.length > 0) {
+      @if (items().length > 0) {
         <div>
           <swiper-container #swiperContainer
             slides-per-view="auto"
             free-mode="true"
             (swiperprogress)="onProgress($event)">
-            @for(item of items; track item; let i = $index;) {
+            @for(item of items(); track trackByIdentity()($index, item); let i = $index;) {
               <swiper-slide>
                 <ng-container [ngTemplateOutlet]="carouselItemTemplate()" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
               </swiper-slide>
             } @empty {
-              @if (alwaysShow) {
+              @if (alwaysShow()) {
                 <swiper-slide>
                   <ng-container [ngTemplateOutlet]="carouselItemTemplate()" />
                 </swiper-slide>

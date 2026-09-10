@@ -57,11 +57,11 @@
             <app-setting-item [title]="t('age-rating-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formGroup.ageRating">
               <ng-template #view>
                 <app-lockable-field [(locked)]="locks.ageRating">
-                  <select class="form-select" id="age-rating" [formField]="formGroup.ageRating">
-                    @for(opt of ageRatings(); track opt.value) {
-                      <option [value]="opt.value">{{opt.title | titlecase}}</option>
-                    }
-                  </select>
+                  <app-setting-select [options]="ageRatings()" [formField]="formGroup.ageRating">
+                    <ng-template #template let-ar>
+                      {{ar | ageRating}}
+                    </ng-template>
+                  </app-setting-select>
                 </app-lockable-field>
               </ng-template>
             </app-setting-item>
