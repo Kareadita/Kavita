@@ -179,6 +179,7 @@ export class ImageZoomDirective {
    * @param event The touch event
    */
   onTouchStart(event: TouchEvent): void {
+    this.suppressNextClick = false;
     this.stopMomentum();
 
     // Zoom
@@ -257,6 +258,7 @@ export class ImageZoomDirective {
    * @param event The mouse event
    */
   onMouseDown(event: MouseEvent): void {
+    this.suppressNextClick = false;
     if (!this.canStartPan(event.button, event.clientX, event.clientY)) {
       return;
     }
@@ -271,6 +273,7 @@ export class ImageZoomDirective {
    * @param event The mouse event
    */
   onWindowMouseDown(event: MouseEvent): void {
+    this.suppressNextClick = false;
     if (!this.isPaginationEvent(event) || !this.canStartPan(event.button, event.clientX, event.clientY)) {
       return;
     }
@@ -298,6 +301,7 @@ export class ImageZoomDirective {
    * @param event The touch event
    */
   onWindowTouchStart(event: TouchEvent): void {
+    this.suppressNextClick = false;
     if (event.touches.length !== 1 || !this.isPaginationEvent(event)) {
       return;
     }
