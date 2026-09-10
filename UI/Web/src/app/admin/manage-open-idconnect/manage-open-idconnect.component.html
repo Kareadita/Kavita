@@ -15,21 +15,21 @@
       <div class="text-muted" [innerHtml]="t('provider-tooltip') | safeHtml"></div>
       <ng-container>
         <div class="row g-0 mt-4 mb-4">
-          <app-setting-item [title]="t('authority-label')" [subtitle]="t('authority-tooltip')" [control]="oidcSettingsFormGroup.authority" [validations]="{
+          <app-setting-item [title]="t('authority-label')" [subtitle]="t('authority-tooltip')" [control]="formGroup.authority" [validations]="{
                   requireTls: t('tls-required')
                 }">
             <ng-template #view>
-              {{oidcSettingsFormGroup.authority().value() | defaultValue}}
+              {{formGroup.authority().value() | defaultValue}}
             </ng-template>
             <ng-template #edit>
               <input id="oid-authority" class="form-control"
-                     [formField]="oidcSettingsFormGroup.authority" type="text"
+                     [formField]="formGroup.authority" type="text"
                      aria-describedby="oid-authority-validations"
-                     [appFormField]="oidcSettingsFormGroup.authority">
+                     [appFormField]="formGroup.authority">
 
-              @if (oidcSettingsFormGroup().dirty() || oidcSettingsFormGroup().touched()) {
+              @if (formGroup().dirty() || formGroup().touched()) {
                 <div id="invalid-uri-validation" class="invalid-feedback">
-                  @if (oidcSettingsFormGroup.authority().pending()) {
+                  @if (formGroup.authority().pending()) {
                     <div>{{t('checking-authority')}}</div>
                   }
                 </div>
@@ -39,28 +39,28 @@
         </div>
 
         <div class="row g-0 mt-4 mb-4">
-          <app-setting-item [title]="t('client-id-label')" [subtitle]="t('client-id-tooltip')" [control]="oidcSettingsFormGroup.clientId">
+          <app-setting-item [title]="t('client-id-label')" [subtitle]="t('client-id-tooltip')" [control]="formGroup.clientId">
             <ng-template #view>
-              {{oidcSettingsFormGroup.clientId().value()}}
+              {{formGroup.clientId().value()}}
             </ng-template>
             <ng-template #edit>
               <input id="oid-client-id" aria-describedby="oidc-client-id-validations" class="form-control"
-                     [formField]="oidcSettingsFormGroup.clientId" type="text"
-                     [appFormField]="oidcSettingsFormGroup.clientId">
+                     [formField]="formGroup.clientId" type="text"
+                     [appFormField]="formGroup.clientId">
 
             </ng-template>
           </app-setting-item>
         </div>
 
         <div class="row g-0 mt-4 mb-4">
-          <app-setting-item [title]="t('secret-label')" [subtitle]="t('secret-tooltip')" [control]="oidcSettingsFormGroup.secret">
+          <app-setting-item [title]="t('secret-label')" [subtitle]="t('secret-tooltip')" [control]="formGroup.secret">
             <ng-template #view>
-              {{oidcSettingsFormGroup.secret().value() | slice:0:40 | defaultValue}}
+              {{formGroup.secret().value() | slice:0:40 | defaultValue}}
             </ng-template>
             <ng-template #edit>
               <input id="oid-secret" aria-describedby="oidc-secret-validations" class="form-control"
-                     [formField]="oidcSettingsFormGroup.secret" type="text"
-                     [appFormField]="oidcSettingsFormGroup.secret">
+                     [formField]="formGroup.secret" type="text"
+                     [appFormField]="formGroup.secret">
             </ng-template>
           </app-setting-item>
         </div>
@@ -78,14 +78,14 @@
       <h4>{{t('behavior-title')}}</h4>
       <ng-container>
         <div class="row g-0 mt-4 mb-4">
-          <app-setting-item [title]="t('provider-name-label')" [subtitle]="t('provider-name-tooltip')" [control]="oidcSettingsFormGroup.providerName">
+          <app-setting-item [title]="t('provider-name-label')" [subtitle]="t('provider-name-tooltip')" [control]="formGroup.providerName">
             <ng-template #view>
-              {{oidcSettingsFormGroup.providerName().value() | defaultValue}}
+              {{formGroup.providerName().value() | defaultValue}}
             </ng-template>
             <ng-template #edit>
               <input id="oid-provider-name" aria-describedby="oidc-provider-name-validations" class="form-control"
-                     [formField]="oidcSettingsFormGroup.providerName" type="text"
-                     [appFormField]="oidcSettingsFormGroup.providerName">
+                     [formField]="formGroup.providerName" type="text"
+                     [appFormField]="formGroup.providerName">
             </ng-template>
           </app-setting-item>
         </div>
@@ -94,7 +94,7 @@
           <app-setting-switch [title]="t('provision-accounts-label')" [subtitle]="t('provision-accounts-tooltip')">
             <ng-template>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" class="form-check-input" [formField]="oidcSettingsFormGroup.provisionAccounts">
+                <input type="checkbox" class="form-check-input" [formField]="formGroup.provisionAccounts">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -104,7 +104,7 @@
           <app-setting-switch [title]="t('require-verified-email-label')" [subtitle]="t('require-verified-email-tooltip')">
             <ng-template>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" class="form-check-input" [formField]="oidcSettingsFormGroup.requireVerifiedEmail">
+                <input type="checkbox" class="form-check-input" [formField]="formGroup.requireVerifiedEmail">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -114,7 +114,7 @@
           <app-setting-switch [title]="t('sync-user-settings-label')" [subtitle]="t('sync-user-settings-tooltip')">
             <ng-template>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" class="form-check-input" [formField]="oidcSettingsFormGroup.syncUserSettings">
+                <input type="checkbox" class="form-check-input" [formField]="formGroup.syncUserSettings">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -124,7 +124,7 @@
           <app-setting-switch [title]="t('auto-login-label')" [subtitle]="t('auto-login-tooltip')">
             <ng-template>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" class="form-check-input" [formField]="oidcSettingsFormGroup.autoLogin">
+                <input type="checkbox" class="form-check-input" [formField]="formGroup.autoLogin">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -134,7 +134,7 @@
           <app-setting-switch [title]="t('disable-password-authentication-label')">
             <ng-template>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" class="form-check-input" [formField]="oidcSettingsFormGroup.disablePasswordAuthentication">
+                <input type="checkbox" class="form-check-input" [formField]="formGroup.disablePasswordAuthentication">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -148,12 +148,12 @@
       <ng-container>
 
         <div class="row g-0 mt-4 mb-4">
-          <app-setting-item [title]="t('default-age-restriction-label')" [subtitle]="t('default-age-restriction-tooltip')" [control]="oidcSettingsFormGroup.defaultAgeRestriction">
+          <app-setting-item [title]="t('default-age-restriction-label')" [subtitle]="t('default-age-restriction-tooltip')" [control]="formGroup.defaultAgeRestriction">
             <ng-template #view>
-              <div>{{oidcSettingsFormGroup.defaultAgeRestriction().value() | ageRating}}</div>
+              <div>{{formGroup.defaultAgeRestriction().value() | ageRating}}</div>
             </ng-template>
             <ng-template #edit>
-              <app-setting-select [formField]="oidcSettingsFormGroup.defaultAgeRestriction" [options]="ageRatings()">
+              <app-setting-select [formField]="formGroup.defaultAgeRestriction" [options]="ageRatings()">
                 <ng-template #template let-ar>
                   {{ar | ageRating}}
                 </ng-template>
@@ -166,7 +166,7 @@
           <app-setting-switch [title]="t('default-include-unknowns-label')" [subtitle]="t('default-include-unknowns-tooltip')">
             <ng-template>
               <div class="form-check form-switch float-end">
-                <input type="checkbox" class="form-check-input" [formField]="oidcSettingsFormGroup.defaultIncludeUnknowns">
+                <input type="checkbox" class="form-check-input" [formField]="formGroup.defaultIncludeUnknowns">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -180,7 +180,7 @@
                 [title]="t('default-libraries-label')"
                 [options]="libraryOptions()"
                 [loading]="loading()"
-                [formField]="oidcSettingsFormGroup.defaultLibraries"
+                [formField]="formGroup.defaultLibraries"
               />
             </div>
 
@@ -190,7 +190,7 @@
                 [title]="t('default-roles-label')"
                 [options]="roleOptions"
                 [loading]="loading()"
-                [formField]="oidcSettingsFormGroup.defaultRoles"
+                [formField]="formGroup.defaultRoles"
               />
             </div>
           </div>
@@ -204,27 +204,27 @@
 
       <ng-container>
         <div class="row g-0 mt-4 mb-4">
-          <app-setting-item [title]="t('roles-prefix-label')" [subtitle]="t('roles-prefix-tooltip')" [control]="oidcSettingsFormGroup.rolesPrefix">
+          <app-setting-item [title]="t('roles-prefix-label')" [subtitle]="t('roles-prefix-tooltip')" [control]="formGroup.rolesPrefix">
             <ng-template #view>
-              {{oidcSettingsFormGroup.rolesPrefix().value() | defaultValue}}
+              {{formGroup.rolesPrefix().value() | defaultValue}}
             </ng-template>
             <ng-template #edit>
               <input id="oidc-roles-prefix" class="form-control"
-                     [formField]="oidcSettingsFormGroup.rolesPrefix" type="text"
-                     [appFormField]="oidcSettingsFormGroup.rolesPrefix">
+                     [formField]="formGroup.rolesPrefix" type="text"
+                     [appFormField]="formGroup.rolesPrefix">
             </ng-template>
           </app-setting-item>
         </div>
 
         <div class="row g-0 mt-4 mb-4">
-          <app-setting-item [title]="t('roles-claim-label')" [subtitle]="t('roles-claim-tooltip')" [control]="oidcSettingsFormGroup.rolesClaim">
+          <app-setting-item [title]="t('roles-claim-label')" [subtitle]="t('roles-claim-tooltip')" [control]="formGroup.rolesClaim">
             <ng-template #view>
-              {{oidcSettingsFormGroup.rolesClaim().value()}}
+              {{formGroup.rolesClaim().value()}}
             </ng-template>
             <ng-template #edit>
               <input id="oidc-roles-claim" class="form-control"
-                     [formField]="oidcSettingsFormGroup.rolesClaim" type="text"
-                     [appFormField]="oidcSettingsFormGroup.rolesClaim">
+                     [formField]="formGroup.rolesClaim" type="text"
+                     [appFormField]="formGroup.rolesClaim">
             </ng-template>
           </app-setting-item>
         </div>
@@ -234,7 +234,7 @@
             [title]="t('custom-scopes-label')"
             [tooltip]="t('custom-scopes-tooltip')"
             [loading]="loading()"
-            [formField]="oidcSettingsFormGroup.customScopes"
+            [formField]="formGroup.customScopes"
           />
         </div>
 
