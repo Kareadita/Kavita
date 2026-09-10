@@ -108,11 +108,41 @@ export class ImageZoomDirective {
   private isPanning = false;
   /** Whether to suppress the next click after a pan */
   private suppressNextClick = false;
+  /** The current pan velocity in pixels per millisecond */
+  private panVelocityX = 0;
+  private panVelocityY = 0;
+  /** The net distance traveled during the current pan, in pixels */
+  private panDistance = 0;
+  /** The last pointer position used to calculate pan velocity */
+  private lastPanX = 0;
+  private lastPanY = 0;
+  /** The timestamp used to calculate pan velocity */
+  private lastPanTime = 0;
+  /** The active inertial pan animation frame */
+  private momentumFrame?: number;
 
   /** The scalar for zooming with the mouse wheel */
   private readonly zoomScalar = 0.0015;
   /** The maximum zoom level */
   private readonly maxZoomLevel = 8;
+  /** The minimum velocity needed to start inertial panning */
+  private readonly momentumThreshold = 0.04;
+  /** The slowest and fastest momentum decay rates */
+  private readonly momentumDecayRange: [number, number] = [0.80, 0.95];
+  /** The release speed at which maximum flick momentum is applied */
+  private readonly fastFlickSpeed = 0.2;
+  /** The pan distance at which a fast release counts as a full flick */
+  private readonly fullFlickDistance = 100;
+  /** The minimum velocity retained by a momentum release */
+  private readonly minimumMomentumVelocityMultiplier = 0.25;
+  /** The baseline velocity multiplier applied to every momentum release */
+  private readonly momentumBaseSpeedMultiplier = 1;
+  /** The additional velocity multiplier applied at fast-flick speed */
+  private readonly momentumMaxSpeedBoost = 0.15;
+  /** The maximum elapsed time used for a single momentum frame */
+  private readonly momentumMaxFrameTime = 32;
+  /** The reference frame duration used by the decay rate */
+  private readonly momentumReferenceFrameTime = 16;
 
   transform = 'translate3d(0, 0, 0) scale(1)';
   cursor = 'default';
@@ -154,6 +184,8 @@ export class ImageZoomDirective {
    * @param event The touch event
    */
   onTouchStart(event: TouchEvent): void {
+    this.stopMomentum();
+
     // Zoom
     if (event.touches.length === 2) {
       event.preventDefault();
@@ -208,6 +240,8 @@ export class ImageZoomDirective {
    * @param event The touch event
    */
   onTouchEnd(event: TouchEvent): void {
+    const wasPanning = this.isPanning;
+
     // One touch was released, but another may still be active
     // Upon moving, the remaining touch will turn into a pan
     if (event.touches.length < 2) {
@@ -216,6 +250,9 @@ export class ImageZoomDirective {
     // The last touch was released, so panning has stopped
     if (event.touches.length === 0) {
       this.isPanning = false;
+      if (wasPanning) {
+        this.startMomentum();
+      }
     }
   }
 
@@ -230,6 +267,7 @@ export class ImageZoomDirective {
     }
 
     event.preventDefault();
+    this.stopMomentum();
     this.startPan(event.clientX, event.clientY);
   }
 
@@ -243,6 +281,7 @@ export class ImageZoomDirective {
     }
 
     event.preventDefault();
+    this.stopMomentum();
     this.startPan(event.clientX, event.clientY);
   }
   
@@ -272,6 +311,7 @@ export class ImageZoomDirective {
       return;
     }
 
+    this.stopMomentum();
     this.startPan(event.touches[0].clientX, event.touches[0].clientY);
   }
 
@@ -293,14 +333,20 @@ export class ImageZoomDirective {
    * Handles mouse up events.
    */
   onMouseUp(): void {
+    if (!this.isPanning) {
+      return;
+    }
+
     this.isPanning = false;
     this.cursor = this.isZoomedIn() ? 'grab' : 'default';
+    this.startMomentum();
   }
 
   /**
    * Resets the zoom & pan state.
    */
   private reset(): void {
+    this.stopMomentum();
     this.scale = 1;
     this.translateX = 0;
     this.translateY = 0;
@@ -399,6 +445,8 @@ export class ImageZoomDirective {
    * @param clientY The y-coordinate of the mouse/touch event
    */
   private startPan(clientX: number, clientY: number): void {
+    this.stopMomentum();
+
     // Save off where the pan started from
     this.panStartX = clientX;
     this.panStartY = clientY;
@@ -406,6 +454,12 @@ export class ImageZoomDirective {
     // Save off where the image was translated at the start of the pan
     this.panStartTranslateX = this.translateX;
     this.panStartTranslateY = this.translateY;
+    this.lastPanX = clientX;
+    this.lastPanY = clientY;
+    this.lastPanTime = performance.now();
+    this.panVelocityX = 0;
+    this.panVelocityY = 0;
+    this.panDistance = 0;
 
     this.isPanning = true;
     this.cursor = 'grabbing';
@@ -422,7 +476,95 @@ export class ImageZoomDirective {
       this.suppressNextClick = true;
     }
 
+    const now = performance.now();
+    const elapsed = now - this.lastPanTime;
+    if (elapsed > 0) {
+      const velocityX = (clientX - this.lastPanX) / elapsed;
+      const velocityY = (clientY - this.lastPanY) / elapsed;
+      this.panVelocityX = (this.panVelocityX + velocityX) * 0.5;
+      this.panVelocityY = (this.panVelocityY + velocityY) * 0.5;
+    }
+    this.lastPanX = clientX;
+    this.lastPanY = clientY;
+    this.lastPanTime = now;
+    this.panDistance = Math.hypot(clientX - this.panStartX, clientY - this.panStartY);
+
     this.setPanByDelta(clientX - this.panStartX, clientY - this.panStartY, this.panStartTranslateX, this.panStartTranslateY);
+  }
+
+  /** Continues a pan briefly after the pointer is released. */
+  private startMomentum(): void {
+    const releaseSpeed = Math.hypot(this.panVelocityX, this.panVelocityY);
+    if (releaseSpeed < this.momentumThreshold) {
+      return;
+    }
+
+    const flickFactor = this.getFlickFactor(releaseSpeed, this.panDistance);
+    const momentumSpeedBoost = this.getMomentumSpeedMultiplier(flickFactor);
+    const momentumDecay = this.getMomentumDecay(flickFactor);
+    const velocityMultiplier = this.minimumMomentumVelocityMultiplier +
+      (1 - this.minimumMomentumVelocityMultiplier) * flickFactor;
+    this.panVelocityX *= velocityMultiplier * momentumSpeedBoost;
+    this.panVelocityY *= velocityMultiplier * momentumSpeedBoost;
+    let previousTime = performance.now();
+    const animate = (time: number) => {
+      const elapsed = Math.min(time - previousTime, this.momentumMaxFrameTime);
+      previousTime = time;
+      const nextTranslateX = this.translateX + this.panVelocityX * elapsed;
+      const nextTranslateY = this.translateY + this.panVelocityY * elapsed;
+      const [clampedX, clampedY] = this.clampTranslation(nextTranslateX, nextTranslateY);
+      const hitHorizontalLimit = clampedX !== nextTranslateX;
+      const hitVerticalLimit = clampedY !== nextTranslateY;
+
+      this.translateX = clampedX;
+      this.translateY = clampedY;
+      this.updateTransform();
+
+      if (hitHorizontalLimit) this.panVelocityX = 0;
+      if (hitVerticalLimit) this.panVelocityY = 0;
+      this.panVelocityX *= Math.pow(momentumDecay, elapsed / this.momentumReferenceFrameTime);
+      this.panVelocityY *= Math.pow(momentumDecay, elapsed / this.momentumReferenceFrameTime);
+
+      if (Math.hypot(this.panVelocityX, this.panVelocityY) < this.momentumThreshold) {
+        this.momentumFrame = undefined;
+        return;
+      }
+
+      this.momentumFrame = requestAnimationFrame(animate);
+    };
+
+    this.momentumFrame = requestAnimationFrame(animate);
+  }
+
+  /**
+   * Combines release speed and pan distance into a flick factor between zero
+   * and one. A full flick must be both fast enough and long enough.
+   */
+  private getFlickFactor(releaseSpeed: number, panDistance: number): number {
+    const speedFactor = Math.min(1, releaseSpeed / this.fastFlickSpeed);
+    const distanceFactor = Math.min(1, panDistance / this.fullFlickDistance);
+    return speedFactor * distanceFactor;
+  }
+
+  /** Gets the velocity multiplier for a normalized flick speed. */
+  private getMomentumSpeedMultiplier(flickFactor: number): number {
+    return this.momentumBaseSpeedMultiplier + this.momentumMaxSpeedBoost * flickFactor;
+  }
+
+  /** Gets the decay rate for a normalized flick speed. */
+  private getMomentumDecay(flickFactor: number): number {
+    const [minimumDecay, maximumDecay] = this.momentumDecayRange;
+    return minimumDecay + (maximumDecay - minimumDecay) * flickFactor;
+  }
+
+  /** Stops any in-progress inertial pan animation. */
+  private stopMomentum(): void {
+    if (this.momentumFrame !== undefined) {
+      cancelAnimationFrame(this.momentumFrame);
+      this.momentumFrame = undefined;
+    }
+    this.panVelocityX = 0;
+    this.panVelocityY = 0;
   }
 
   /**
@@ -576,6 +718,7 @@ export class ImageZoomDirective {
     document.addEventListener('click', suppressClick, {capture: true});
 
     inject(DestroyRef).onDestroy(() => {
+      this.stopMomentum();
       // Remove this instance from the set of active image zoom instances
       ImageZoomDirective.instances.delete(this);
       if (ImageZoomDirective.activeInstance === this) {
