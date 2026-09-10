@@ -14,7 +14,7 @@ import {ToastrService} from '@openng/ngx-toastr';
 import {ReactiveFormsModule} from "@angular/forms";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
-import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
+import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {ListSelectModalComponent} from "../../../shared/_components/list-select-modal/list-select-modal.component";
 import {ClientDevice} from "../../../_models/client-device";
@@ -79,7 +79,8 @@ export class BulkSetReadingProfileModalComponent implements OnInit {
       this.deviceService.getMyClientDevices(),
     ]).subscribe(([profiles, devices]) => {
       this.loading.set(false);
-      this.profiles.set(profiles);
+      // Do not allow default to be assigned
+      this.profiles.set(profiles.filter(p => p.kind !== ReadingProfileKind.Default));
       this.devices.set(devices);
     });
   }
