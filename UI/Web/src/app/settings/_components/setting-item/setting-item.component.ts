@@ -130,7 +130,6 @@ export class SettingItemComponent {
             return !this.elementRef.nativeElement.contains(mouseEvent.target) && hasSelection;
           }),
           tap(() => {
-            if (!this.showEdit()) return;
             this.isEditMode.set(false);
           })
         )
