@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, computed,
   DestroyRef,
   effect,
   inject,
@@ -51,7 +51,7 @@ import {SettingSwitchComponent} from "../../settings/_components/setting-switch/
 import {WritingStylePipe} from "../../_pipes/writing-style.pipe";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkBase, NgbNavOutlet, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {catchError, filter, forkJoin, of, switchMap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ToastrService} from '@openng/ngx-toastr';
 import {ConfirmService} from "../../shared/confirm.service";
@@ -72,6 +72,18 @@ import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {Tabs} from "../../_models/tabs";
 import {EpubFontTitlePipe} from "../../_pipes/epub-font-title.pipe";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {ReadingDirection} from "../../_models/preferences/reading-direction";
+import {WritingStyle} from "../../_models/preferences/writing-style";
+import {Breakpoint} from "../../_services/breakpoint.service";
+import {LayoutMode} from "../../manga-reader/_models/layout-mode";
+import {PageSplitOption} from "../../_models/preferences/page-split-option";
+import {ReaderMode} from "../../_models/preferences/reader-mode";
+import {ScalingOption} from "../../_models/preferences/scaling-option";
+import {form, FormField, max, min} from "@angular/forms/signals";
+import {
+  EnumOption,
+  SettingSelectComponent
+} from "../../settings/_components/setting-enum-select/setting-select.component";
 
 
 @Component({
@@ -107,7 +119,7 @@ import {FormFieldDirective} from "../../_directives/form-field.directive";
     BreakpointPipe,
     SettingColorPickerComponent,
     TabTitlePipe,
-    EpubFontTitlePipe, FormFieldDirective],
+    EpubFontTitlePipe, FormFieldDirective, FormField, SettingSelectComponent],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,8 +128,6 @@ export class ManageReadingProfilesComponent implements OnInit {
 
   private readonly readingProfileService = inject(ReadingProfileService);
   protected readonly colorscapeService = inject(ColorscapeService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
@@ -128,30 +138,84 @@ export class ManageReadingProfilesComponent implements OnInit {
 
   virtualScrollerBreakPoint = 20;
 
+  loading = signal(true);
   savingProfile = signal(false);
   fonts = signal<EpubFont[]>([]);
+  devices = signal<ClientDevice[]>([]);
+  readingProfiles = signal<ReadingProfile[]>([]);
 
-  devices: ClientDevice[] = [];
-  readingProfiles: ReadingProfile[] = [];
-  user!: User;
+  fontEnumOptions = computed<EnumOption<string>[]>(() => this.fonts().map(f => ({value: f.family, label: f.name})));
+
   activeTabId = Tabs.ImageReader;
-  loading = true;
 
-  selectedProfile: ReadingProfile | null = null;
-  readingProfileForm: FormGroup | null = null;
+  profileSelected = signal(false);
+  formModel = signal<ReadingProfile>({
+    allowAutomaticWebtoonReaderDetection: false,
+    autoCloseMenu: false,
+    backgroundColor: "",
+    bookReaderDisableBookmarkIcon: false,
+    bookReaderFontFamily: "",
+    bookReaderFontSize: 0,
+    bookReaderImmersiveMode: false,
+    bookReaderLayoutMode: BookPageLayoutMode.Default,
+    bookReaderLineSpacing: 0,
+    bookReaderMargin: 0,
+    bookReaderReadingDirection: ReadingDirection.LeftToRight,
+    bookReaderTapToPaginate: false,
+    bookReaderThemeName: "",
+    bookReaderWritingStyle: WritingStyle.Horizontal,
+    deviceIds: [],
+    disableWidthOverride: Breakpoint.Mobile,
+    emulateBook: false,
+    id: 0,
+    kind: ReadingProfileKind.Default,
+    layoutMode: LayoutMode.Single,
+    libraryIds: [],
+    name: "",
+    pageSplitOption: PageSplitOption.NoSplit,
+    pdfScrollMode: PdfScrollMode.Page,
+    pdfSpreadMode: PdfSpreadMode.None,
+    pdfTheme: PdfTheme.Light,
+    readerMode: ReaderMode.LeftRight,
+    readingDirection: ReadingDirection.LeftToRight,
+    scalingOption: ScalingOption.Automatic,
+    seriesIds: [],
+    showScreenHints: false,
+    swipeToPaginate: false,
+    widthOverride: null
+  });
+  formGroup = form(this.formModel, path => {
+    // Need custom maybeMin to allow undefined
+    //min(path.widthOverride, 0);
+    //max(path.widthOverride, 100)
+
+    min(path.bookReaderFontSize, 50);
+    max(path.bookReaderFontSize, 300);
+    min(path.bookReaderLineSpacing, 100);
+    max(path.bookReaderLineSpacing, 200);
+    min(path.bookReaderMargin, 0);
+    max(path.bookReaderMargin, 30);
+  });
+
   bookColorThemesTranslated = bookColorThemes.map(o => {
-    const d = {...o};
-    d.name = translate('theme.' + d.translationKey);
-    return d;
+    return {
+      ...o,
+      value: o.name,
+      title: translate('theme.' + o.translationKey)
+    };
   });
 
   constructor() {
-    effect(() => {
-      const user = this.accountService.currentUser();
-      if (user) {
-        this.user = user;
-      }
-    });
+    toObservable(this.formModel).pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      filter(_ => !this.savingProfile()),
+      filter(_ => this.formGroup().valid()),
+      takeUntilDestroyed(this.destroyRef),
+      tap(_ => this.savingProfile.set(true)),
+      switchMap(_ => this.autoSave()),
+      tap(() => this.savingProfile.set(false))
+    ).subscribe();
   }
 
   ngOnInit(): void {
@@ -161,16 +225,13 @@ export class ManageReadingProfilesComponent implements OnInit {
       this.deviceService.getMyClientDevices(),
     ]).subscribe(([fonts, profiles, devices]) => {
       this.fonts.set([...new Map(fonts.map(font => [font.family, font])).values()]);
-      this.devices = devices;
+      this.devices.set(devices);
 
-      this.readingProfiles = profiles;
-      this.loading = false;
-      this.setupForm();
+      this.readingProfiles.set(profiles);
+      this.loading.set(false);
 
-      const defaultProfile = this.readingProfiles.find(rp => rp.kind === ReadingProfileKind.Default);
+      const defaultProfile = this.readingProfiles().find(rp => rp.kind === ReadingProfileKind.Default);
       this.selectProfile(defaultProfile);
-
-      this.cdRef.markForCheck();
     });
   }
 
@@ -179,111 +240,45 @@ export class ManageReadingProfilesComponent implements OnInit {
       return;
     }
 
-
     this.readingProfileService.delete(readingProfile.id).subscribe(() => {
       this.selectProfile(undefined);
-      this.readingProfiles = this.readingProfiles.filter(o => o.id !== readingProfile.id);
-      this.cdRef.markForCheck();
+      this.readingProfiles.update(x => [...x.filter(o => o.id !== readingProfile.id)]);
     });
   }
 
-  get widthOverrideLabel() {
-    const rawVal = this.readingProfileForm?.get('widthOverride')!.value;
-    if (!rawVal) {
+  widthOverrideLabel = computed(() => {
+    const value = this.formGroup.widthOverride().value();
+    if (value === null || value === undefined) {
       return translate('reader-settings.off');
     }
 
-    const val = parseInt(rawVal);
-    return (val <= 0) ? '' : val + '%'
-  }
-
-  setupForm() {
-    if (this.selectedProfile == null) {
-      return;
-    }
-
-
-    this.readingProfileForm = new FormGroup({})
-
-    if (this.fonts().find(font => font.family === this.selectedProfile?.bookReaderFontFamily) === undefined) {
-      this.selectedProfile.bookReaderFontFamily = FontService.DefaultEpubFont;
-    }
-
-    this.readingProfileForm.addControl('name', new FormControl(this.selectedProfile.name, Validators.required));
-
-
-    // Image reader
-    this.readingProfileForm.addControl('readingDirection', new FormControl(this.selectedProfile.readingDirection, []));
-    this.readingProfileForm.addControl('scalingOption', new FormControl(this.selectedProfile.scalingOption, []));
-    this.readingProfileForm.addControl('pageSplitOption', new FormControl(this.selectedProfile.pageSplitOption, []));
-    this.readingProfileForm.addControl('autoCloseMenu', new FormControl(this.selectedProfile.autoCloseMenu, []));
-    this.readingProfileForm.addControl('showScreenHints', new FormControl(this.selectedProfile.showScreenHints, []));
-    this.readingProfileForm.addControl('readerMode', new FormControl(this.selectedProfile.readerMode, []));
-    this.readingProfileForm.addControl('layoutMode', new FormControl(this.selectedProfile.layoutMode, []));
-    this.readingProfileForm.addControl('emulateBook', new FormControl(this.selectedProfile.emulateBook, []));
-    this.readingProfileForm.addControl('swipeToPaginate', new FormControl(this.selectedProfile.swipeToPaginate, []));
-    this.readingProfileForm.addControl('backgroundColor', new FormControl(this.selectedProfile.backgroundColor, []));
-    this.readingProfileForm.addControl('allowAutomaticWebtoonReaderDetection', new FormControl(this.selectedProfile.allowAutomaticWebtoonReaderDetection, []));
-    this.readingProfileForm.addControl('widthOverride', new FormControl(this.selectedProfile.widthOverride, [Validators.min(0), Validators.max(100)]));
-    this.readingProfileForm.addControl('disableWidthOverride', new FormControl(this.selectedProfile.disableWidthOverride, []))
-
-    // Epub reader
-    this.readingProfileForm.addControl('bookReaderFontFamily', new FormControl(this.selectedProfile.bookReaderFontFamily, []));
-    this.readingProfileForm.addControl('bookReaderFontSize', new FormControl(this.selectedProfile.bookReaderFontSize, []));
-    this.readingProfileForm.addControl('bookReaderLineSpacing', new FormControl(this.selectedProfile.bookReaderLineSpacing, []));
-    this.readingProfileForm.addControl('bookReaderMargin', new FormControl(this.selectedProfile.bookReaderMargin, []));
-    this.readingProfileForm.addControl('bookReaderReadingDirection', new FormControl(this.selectedProfile.bookReaderReadingDirection, []));
-    this.readingProfileForm.addControl('bookReaderWritingStyle', new FormControl(this.selectedProfile.bookReaderWritingStyle, []))
-    this.readingProfileForm.addControl('bookReaderTapToPaginate', new FormControl(this.selectedProfile.bookReaderTapToPaginate, []));
-    this.readingProfileForm.addControl('bookReaderLayoutMode', new FormControl(this.selectedProfile.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
-    this.readingProfileForm.addControl('bookReaderThemeName', new FormControl(this.selectedProfile.bookReaderThemeName || bookColorThemes[0].name, []));
-    this.readingProfileForm.addControl('bookReaderImmersiveMode', new FormControl(this.selectedProfile.bookReaderImmersiveMode, []));
-    this.readingProfileForm.addControl('bookReaderDisableBookmarkIcon', new FormControl(this.selectedProfile.bookReaderDisableBookmarkIcon, []));
-
-    // Pdf reader
-    this.readingProfileForm.addControl('pdfTheme', new FormControl(this.selectedProfile.pdfTheme || PdfTheme.Dark, []));
-    this.readingProfileForm.addControl('pdfScrollMode', new FormControl(this.selectedProfile.pdfScrollMode || PdfScrollMode.Vertical, []));
-    this.readingProfileForm.addControl('pdfSpreadMode', new FormControl(this.selectedProfile.pdfSpreadMode || PdfSpreadMode.None, []));
-
-    // Auto save
-    this.readingProfileForm.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      filter(_ => !this.savingProfile()),
-      filter(_ => this.readingProfileForm!.valid),
-      takeUntilDestroyed(this.destroyRef),
-      tap(_ => this.savingProfile.set(true)),
-      switchMap(_ => this.autoSave()),
-      tap(() => this.savingProfile.set(false))
-    ).subscribe();
-  }
+    return (value <= 0) ? '' : value + '%'
+  });
 
   private autoSave() {
-    if (this.selectedProfile!.id == 0) {
-      return this.readingProfileService.createProfile(this.packData()).pipe(
+    const profile = this.formModel();
+
+    if (profile.id == 0) {
+      return this.readingProfileService.createProfile(profile).pipe(
         tap(createdProfile => {
-          this.selectedProfile = createdProfile;
-          this.readingProfiles.push(createdProfile);
-          this.cdRef.markForCheck();
+           this.formModel.set(createdProfile);
+          this.readingProfiles.update(x => [...x, createdProfile]);
         }),
         catchError(err => {
           console.error(err);
           this.toastr.error(err.message);
-
           return of(null);
         })
       );
     }
 
-    const profile = this.packData();
     return this.readingProfileService.updateProfile(profile).pipe(
       tap(newProfile => {
-        this.readingProfiles = this.readingProfiles.map(p => {
+        this.readingProfiles.update(x => [...x.map(p => {
           if (p.id !== profile.id) return p;
 
           return newProfile;
-        });
-        this.cdRef.markForCheck();
+        })]);
       }),
       catchError(err => {
         console.error(err);
@@ -294,69 +289,46 @@ export class ManageReadingProfilesComponent implements OnInit {
     );
   }
 
-  private packData(): ReadingProfile {
-    const data: ReadingProfile = this.readingProfileForm!.getRawValue();
-    data.id = this.selectedProfile!.id;
-    data.readingDirection = parseInt(data.readingDirection + '');
-    data.scalingOption = parseInt(data.scalingOption + '');
-    data.pageSplitOption = parseInt(data.pageSplitOption + '');
-    data.readerMode = parseInt(data.readerMode + '');
-    data.layoutMode = parseInt(data.layoutMode + '');
-    data.disableWidthOverride = parseInt(data.disableWidthOverride + '');
-
-    data.bookReaderReadingDirection = parseInt(data.bookReaderReadingDirection + '');
-    data.bookReaderWritingStyle = parseInt(data.bookReaderWritingStyle + '');
-    data.bookReaderLayoutMode = parseInt(data.bookReaderLayoutMode + '');
-
-    data.pdfTheme = parseInt(data.pdfTheme + '');
-    data.pdfScrollMode = parseInt(data.pdfScrollMode + '');
-    data.pdfSpreadMode = parseInt(data.pdfSpreadMode + '');
-
-    return data;
-  }
-
   handleBackgroundColorChange(color: Color) {
-    if (!this.readingProfileForm || !this.selectedProfile) return;
+    if (this.formModel() == null) return;
 
-    this.readingProfileForm.markAsDirty();
-    this.readingProfileForm.markAsTouched();
-    this.selectedProfile.backgroundColor = color.toHexString();
-    this.readingProfileForm.get('backgroundColor')?.setValue(color.toHexString());
-    this.cdRef.markForCheck();
+    this.formGroup.backgroundColor().value.set(color.toHexString())
   }
 
   selectProfile(profile: ReadingProfile | undefined | null) {
-    if (profile === undefined) {
-      this.selectedProfile = null;
-      this.cdRef.markForCheck();
+    if (profile === undefined || profile === null) {
+      this.profileSelected.set(false);
       return;
     }
 
-    this.selectedProfile = profile;
-    this.setupForm();
-    this.cdRef.markForCheck();
+    this.profileSelected.set(true);
+    this.formModel.set(profile);
   }
 
   addNew() {
-    const defaultProfile = this.readingProfiles.find(f => f.kind === ReadingProfileKind.Default);
-    this.selectedProfile = {...defaultProfile!};
-    this.selectedProfile.kind = ReadingProfileKind.User;
-    this.selectedProfile.id = 0;
-    this.selectedProfile.name = "New Profile #" + (this.readingProfiles.length + 1);
-    this.setupForm();
-    this.cdRef.markForCheck();
+    const defaultProfile = this.readingProfiles().find(f => f.kind === ReadingProfileKind.Default);
+    if (defaultProfile === undefined || defaultProfile === null) {
+      throw new Error("No default profile to branch from");
+    }
+
+    const newProfile = {...defaultProfile!};
+    newProfile.kind = ReadingProfileKind.User;
+    newProfile.id = 0;
+    newProfile.name = "New Profile #" + (this.readingProfiles().length + 1);
+
+    this.selectProfile(newProfile);
   }
 
   protected setDevices() {
-    if (this.selectedProfile == null) return;
+    if (!this.profileSelected() || this.formModel().id === 0) return;
 
     const ref = this.modalService.open(ListSelectModalComponent);
-    const profileName = this.readingProfileForm?.get('name')?.value || this.selectedProfile.name;
+    const profileName = this.formModel().name;
     ref.setInput('title', translate('manage-reading-profiles.select-devices-for', {name: profileName}));
     ref.setInput('multiSelect', true);
     ref.setInput('requireConfirmation', true);
-    ref.setInput('preSelectedItems', this.selectedProfile.deviceIds ?? []);
-    ref.setInput('inputItems', this.devices.map(d => ({
+    ref.setInput('preSelectedItems', this.formModel().deviceIds ?? []);
+    ref.setInput('inputItems', this.devices().map(d => ({
       label: d.friendlyName,
       value: d.id
     })));
@@ -364,11 +336,13 @@ export class ManageReadingProfilesComponent implements OnInit {
     ref.closed.pipe(
       filter(devices => !!devices),
       switchMap((devices: number[]) => {
-        return this.readingProfileService.setDevices(this.selectedProfile!.id, devices).pipe(map(() => devices))
+        return this.readingProfileService.setDevices(this.formModel().id, devices).pipe(map(() => devices))
       }),
       tap(devices => {
-        this.selectedProfile!.deviceIds = devices;
-        this.cdRef.markForCheck();
+        this.formModel.update(x => ({
+          ...x,
+          deviceIds: devices
+        }))
       }),
     ).subscribe();
 
@@ -389,4 +363,5 @@ export class ManageReadingProfilesComponent implements OnInit {
   protected readonly WikiLink = WikiLink;
   protected readonly breakPoints = breakPoints;
   protected readonly FontProvider = FontProvider;
+  protected readonly form = form;
 }
