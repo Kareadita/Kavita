@@ -28,7 +28,10 @@
             <ng-template #view>
               <div class="d-flex flex-row justify-content-between">
                 <div>
-                  <!-- Must track itself https://github.com/angular/angular/issues/66711 Note that this does cause warnings for expensive operations -->
+                  <!--
+                  Must track itself https://github.com/angular/angular/issues/66711 Note that this does cause warnings for expensive operations.
+                  It also makes the experience horrible because app-setting-key-bind-picker gets re-created...
+                  -->
                   @for (keyBindControl of formGroup[element.target]; track keyBindControl) {
                     <app-setting-key-bind-picker
                       appLongClick
