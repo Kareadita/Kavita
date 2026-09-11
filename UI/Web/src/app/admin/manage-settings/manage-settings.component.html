@@ -223,50 +223,6 @@
     </ng-container>
 
     <div class="setting-section-break"></div>
-
-    <h4>{{t('customization-settings-title')}}</h4>
-    <ng-container>
-      <div class="row g-0 mt-4 mb-4">
-        @if (settingsForm.get('onDeckProgressDays'); as formControl) {
-          <app-setting-item [title]="t('on-deck-last-progress-label')" [subtitle]="t('on-deck-last-progress-tooltip')">
-            <ng-template #view>
-              {{formControl.value}}
-            </ng-template>
-            <ng-template #edit>
-              <input id="setting-on-deck-progress-days" aria-describedby="setting-on-deck-progress-days-validations" class="form-control" formControlName="onDeckProgressDays"
-                     type="number" inputmode="numeric" step="1" min="1"
-                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [appFormField]="formControl" appEnterBlur>
-
-              <app-validation-errors [control]="formControl" inputId="setting-on-deck-progress-days" [messages]="{
-                min: t('min-days-validation')
-              }" />
-
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-
-      <div class="row g-0 mt-4 mb-4">
-        @if (settingsForm.get('onDeckUpdateDays'); as formControl) {
-          <app-setting-item [title]="t('on-deck-last-chapter-add-label')" [subtitle]="t('on-deck-last-chapter-add-tooltip')"
-                            [control]="formControl" labelId="on-deck-last-chapter-add" [validations]="{
-                min: t('min-days-validation')
-              }">
-            <ng-template #view>
-              {{formControl.value}}
-            </ng-template>
-            <ng-template #edit>
-              <input id="on-deck-last-chapter-add" aria-describedby="on-deck-last-chapter-add-validations" class="form-control" formControlName="onDeckUpdateDays"
-                     type="number" inputmode="numeric" step="1" min="1"
-                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [appFormField]="formControl" appEnterBlur>
-
-            </ng-template>
-          </app-setting-item>
-        }
-      </div>
-    </ng-container>
   </form>
 
 </ng-container>

@@ -110,6 +110,32 @@
         </div>
 
         <div class="row g-0 mt-4 mb-4">
+          <app-setting-item [title]="t('ondeck-progress-days-label')" [subtitle]="t('ondeck-progress-days-tooltip')" [canEdit]="!isReadOnly()" [control]="formGroup.promptForRereadsAfter" labelId="prompt-for-rereads-after">
+            <ng-template #view>
+              <span> {{formGroup.onDeckProgressDays().value()}} </span>
+            </ng-template>
+            <ng-template #edit>
+              <input type="number"
+                     [formField]="formGroup.onDeckProgressDays" class="form-control"
+                     aria-labelledby="auto-close-label" [appFormField]="formGroup.onDeckProgressDays">
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+        <div class="row g-0 mt-4 mb-4">
+          <app-setting-item [title]="t('ondeck-update-days-label')" [subtitle]="t('ondeck-update-days-tooltip')" [canEdit]="!isReadOnly()" [control]="formGroup.promptForRereadsAfter" labelId="prompt-for-rereads-after">
+            <ng-template #view>
+              <span> {{formGroup.onDeckUpdateDays().value()}} </span>
+            </ng-template>
+            <ng-template #edit>
+              <input type="number"
+                     [formField]="formGroup.onDeckUpdateDays" class="form-control"
+                     aria-labelledby="auto-close-label" [appFormField]="formGroup.onDeckProgressDays">
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [canEdit]="false" [showEdit]="false" [allowClickEvents]="true"
                             [title]="t('highlight-bar-label')" [subtitle]="t('highlight-bar-tooltip')">
             <ng-template #view>

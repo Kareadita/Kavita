@@ -144,6 +144,8 @@ public class UsersController(
         existingPreferences.BookReaderHighlightSlots = preferencesDto.BookReaderHighlightSlots;
         existingPreferences.DataSaver = preferencesDto.DataSaver;
         existingPreferences.PromptForRereadsAfter = Math.Max(preferencesDto.PromptForRereadsAfter, 0);
+        existingPreferences.OnDeckProgressDays = preferencesDto.OnDeckProgressDays;
+        existingPreferences.OnDeckUpdateDays = preferencesDto.OnDeckUpdateDays;
         existingPreferences.CustomKeyBinds = preferencesDto.CustomKeyBinds;
 
         var allLibs = (await unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id))

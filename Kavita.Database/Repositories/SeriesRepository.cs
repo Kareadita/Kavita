@@ -717,14 +717,13 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// <returns></returns>
     public async Task<PagedList<SeriesDto>> GetOnDeckAsync(int userId, int libraryId, UserParams userParams, CancellationToken ct = default)
     {
-        var settings = await context.ServerSetting
-            .Select(x => x)
-            .AsNoTracking()
-            .ToListAsync(ct);
-        var serverSettings = mapper.Map<ServerSettingDto>(settings);
+        var x = await context.AppUserPreferences
+            .Where(p => p.AppUserId == userId)
+            .Select(p => new {p.OnDeckProgressDays, p.OnDeckUpdateDays})
+            .FirstAsync(ct);
 
-        var cutoffProgressPoint = DateTime.Now - TimeSpan.FromDays(serverSettings.OnDeckProgressDays);
-        var cutoffLastAddedPoint = DateTime.Now - TimeSpan.FromDays(serverSettings.OnDeckUpdateDays);
+        var cutoffProgressPoint = DateTime.Now - TimeSpan.FromDays(x.OnDeckProgressDays);
+        var cutoffLastAddedPoint = DateTime.Now - TimeSpan.FromDays(x.OnDeckUpdateDays);
 
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId, libraryId, QueryContext.Dashboard)
             .Where(id => libraryId == 0 || id == libraryId);

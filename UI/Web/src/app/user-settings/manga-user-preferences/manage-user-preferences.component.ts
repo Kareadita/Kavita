@@ -49,7 +49,6 @@ import {SettingSelectComponent} from "../../settings/_components/setting-enum-se
 })
 export class ManageUserPreferencesComponent implements OnInit {
 
-  private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
   private readonly localizationService = inject(LocalizationService);
   protected readonly licenseService = inject(LicenseService);
@@ -102,13 +101,17 @@ export class ManageUserPreferencesComponent implements OnInit {
       previewUrls: [],
       author: ""
     },
-    wantToReadSync: false
+    wantToReadSync: false,
+    onDeckProgressDays: 0,
+    onDeckUpdateDays: 0
   });
   formGroup = form(this.formModel, (path) => {
     disabled(path, {when: () => this.accountService.hasReadOnlyRole()});
     debounce(path, 100);
 
     min(path.promptForRereadsAfter, 0);
+    min(path.onDeckProgressDays, 1);
+    min(path.onDeckUpdateDays, 1);
     required(path.promptForRereadsAfter);
   });
 

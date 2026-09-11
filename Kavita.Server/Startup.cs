@@ -551,6 +551,7 @@ public class Startup
                     #region v0.9.2
 
                     await new ManualMigrationUnassignDefaultReadingProfile().RunAsync(dataContext, logger);
+                    await new ManualMigrateOnDeckSettings().RunAsync(dataContext, logger);
 
                     #endregion
 

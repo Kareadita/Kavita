@@ -18,6 +18,8 @@ export interface Preferences {
   colorScapeEnabled: boolean;
   dataSaver: boolean;
   promptForRereadsAfter: number;
+  onDeckProgressDays: number;
+  onDeckUpdateDays: number;
   customKeyBinds: Partial<Record<KeyBindTarget, KeyBind[]>>;
 
   // Kavita+
