@@ -332,6 +332,15 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .ToListAsync(ct);
     }
 
+    public async Task<IList<int>> GetActiveReadingChapterIdsAsync(CancellationToken ct = default)
+    {
+        return await context.AppUserReadingSession
+            .Where(s => s.IsActive)
+            .SelectMany(s => s.ActivityData.Select(a => a.ChapterId))
+            .Distinct()
+            .ToListAsync(ct);
+    }
+
     public async Task<ChapterDto?> GetCurrentlyReadingChapterAsync(int seriesId, int userId, CancellationToken ct = default)
     {
         var chapterWithProgress = await context.AppUserProgresses
