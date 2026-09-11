@@ -4,6 +4,7 @@ import {ConfirmDialogComponent} from './confirm-dialog/confirm-dialog.component'
 import {ConfirmConfig} from './confirm-dialog/_models/confirm-config';
 import {confirmModal} from "../_models/modal/modal-options";
 import {ModalService} from "../_services/modal.service";
+import {fromPromise} from "rxjs/internal/observable/innerFrom";
 
 
 @Injectable({
@@ -44,8 +45,11 @@ export class ConfirmService {
     this.defaultPrompt._type = 'prompt';
   }
 
-  public async confirm(content?: string, config?: ConfirmConfig): Promise<boolean> {
+  public confirm$(content?: string, config?: ConfirmConfig) {
+    return fromPromise(this.confirm(content, config));
+  }
 
+  public async confirm(content?: string, config?: ConfirmConfig): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if (content === undefined && config === undefined) {
         console.error('Confirm must have either text or a config object passed');
