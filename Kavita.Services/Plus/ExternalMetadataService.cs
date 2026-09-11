@@ -2462,7 +2462,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             if (!titlesByLanguage.TryGetValue(languageCode, out var titles)) continue;
 
-            foreach (var title in titles)
+            foreach (var title in titles.OrderByDescending(t => t.IsPrimary).ThenByDescending(t => t.IsOfficial))
             {
                 if (string.IsNullOrWhiteSpace(title.Title)) continue;
                 yield return (title.Title.Trim(), languageCode);
