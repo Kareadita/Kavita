@@ -1548,4 +1548,45 @@ public class ScannerServiceTests: AbstractDbTest
         Assert.NotEqual(volume2Chapter1Id, postLib.Series.First().Volumes.Single(v => v.LookupName == "3").Chapters[0].Id);
 
     }
+
+    [Fact]
+    public async Task ScanLibrary_CorrectTrackingWithMetadata()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Commits in UpdateChapters don't cause deletion - Manga";
+        var library = await scannerHelper.GenerateScannerData(testcase, [
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 1.cbz",
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 2.cbz"
+        ], new Dictionary<string, ComicInfo>
+        {
+            ["The Moon on a Rainy Night Vol. 2.cbz"] = new()
+            {
+                Genre = "Romance,Girls Love"
+            }
+        });
+
+        var scanner = scannerHelper.CreateServices();
+
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(2, postLib.Series.First().Volumes.Count);
+
+        await scannerHelper.UpdateTestData(testcase, [
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 1.cbz",
+        ]);
+
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Single(postLib.Series.First().Volumes);
+    }
 }
