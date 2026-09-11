@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Kavita.API.Errors;
 using Kavita.Common;
+using Kavita.Database.Extensions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Middleware;
@@ -28,6 +31,11 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
             context.Response.StatusCode = (int)HttpStatusCode.RequestTimeout;
             await context.Response.CompleteAsync();
         }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            logger.LogDbUpdateConcurrencyException(ex);
+            await WriteException(context, ex);
+        }
         catch (Exception ex) when (ex is KavitaUnauthenticatedUserException or UnauthorizedAccessException)
         {
             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
@@ -41,17 +49,21 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an exception");
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
-
-            var errorMessage = string.IsNullOrEmpty(ex.Message) ? "Internal Server Error" : ex.Message;
-
-            var response = new ApiException(context.Response.StatusCode, errorMessage, ex.StackTrace);
-
-            var json = JsonSerializer.Serialize(response, ExceptionJsonSerializeOptions);
-
-            await context.Response.WriteAsync(json);
-
+            await WriteException(context, ex);
         }
+    }
+
+    private async Task WriteException(HttpContext context, Exception ex)
+    {
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+
+        var errorMessage = string.IsNullOrEmpty(ex.Message) ? "Internal Server Error" : ex.Message;
+
+        var response = new ApiException(context.Response.StatusCode, errorMessage, ex.StackTrace);
+
+        var json = JsonSerializer.Serialize(response, ExceptionJsonSerializeOptions);
+
+        await context.Response.WriteAsync(json);
     }
 }
