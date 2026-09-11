@@ -48,7 +48,7 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
     /// <param name="type">Allows different Regex to be used for parsing.</param>
     /// <param name="enableMetadata">Allows overriding data from metadata (ComicInfo/pdf/epub)</param>
     /// <param name="comicInfo"></param>
-    /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
+    /// <returns><see cref="ParseInfoResult"/> or null if Series was empty</returns>
     public abstract ParseInfoResult Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null);
 
     /// <summary>

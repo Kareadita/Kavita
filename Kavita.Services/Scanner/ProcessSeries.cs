@@ -682,9 +682,9 @@ public class ProcessSeries(
 
     private async Task ProcessParserInfos(ProcessParserInfosArgs args)
     {
-        var foundVolumes = new HashSet<int>();
-        var foundChapters = new HashSet<int>();
-        var foundMangaFiles = new HashSet<int>();
+        var foundVolumes = new HashSet<Volume>();
+        var foundChapters = new HashSet<Chapter>();
+        var foundMangaFiles = new HashSet<MangaFile>();
 
         foreach (var parsedInfo in args.ParsedInfos)
         {
@@ -707,11 +707,15 @@ public class ProcessSeries(
 
             await UpdateChapter(args, chapter, parsedInfo);
 
-            // UpdateChapters may commit, ensure we add the loaded ids if newly created
-            foundVolumes.Add(volume.Id);
-            foundChapters.Add(chapter.Id);
-            foundMangaFiles.Add(mangaFile.Id);
+            // UpdateChapters may commit, we track the entities and collect the ids later
+            foundVolumes.Add(volume);
+            foundChapters.Add(chapter);
+            foundMangaFiles.Add(mangaFile);
         }
+
+        var mangaFileIds = foundMangaFiles.Select(m => m.Id).ToHashSet();
+        var volumeIds  = foundVolumes.Select(v => v.Id).ToHashSet();
+        var chapterIds = foundChapters.Select(c => c.Id).ToHashSet();
 
         // Update page count once all pages have been processed
         foreach (var volume in args.Series.Volumes)
@@ -720,12 +724,12 @@ public class ProcessSeries(
 
             foreach (var chapter in volume.Chapters)
             {
-                chapter.Files = [.. chapter.Files.Where(f => foundMangaFiles.Contains(f.Id))];
+                chapter.Files = [.. chapter.Files.Where(f => mangaFileIds.Contains(f.Id))];
             }
         }
 
         // Remove volumes and chapter that did not match any files on disk
-        RemoveUnmappedEntities(args.Series, foundVolumes, foundChapters);
+        RemoveUnmappedEntities(args.Series, volumeIds, chapterIds);
     }
 
     private void RemoveUnmappedEntities(Series series, HashSet<int> foundVolumes, HashSet<int> foundChapters)
@@ -779,7 +783,7 @@ public class ProcessSeries(
 
         if (volume == null)
         {
-            logger.LogDebug("Creating new volume {VolumeNumber} for series {SeriesId}", volume,  args.Series.Name);
+            logger.LogDebug("Creating new volume {VolumeNumber} for series {SeriesId}", volumeNumber,  args.Series.Name);
             volume = new VolumeBuilder(volumeNumber).WithSeriesId(args.Series.Id).Build();
             args.Series.Volumes.Add(volume);
             unitOfWork.VolumeRepository.Add(volume);
