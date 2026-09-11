@@ -4121,7 +4121,7 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "pattern": "Host must be a valid http(s):// url"
+        "confirm-delete": "Are you sure you want to delete {{name}} as external source?"
     },
 
     "stream-pipe": {

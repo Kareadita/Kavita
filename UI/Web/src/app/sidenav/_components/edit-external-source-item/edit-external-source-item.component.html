@@ -3,7 +3,7 @@
     <div class="card-body">
       <div class="card-title">
         <div class="container-fluid row mb-2">
-          <div class="col-9 col-sm-9"><h4 id="anilist-token-header">{{source().name || t('title')}}</h4></div>
+          <div class="col-9 col-sm-9"><h4>{{source().name || t('title')}}</h4></div>
           <div class="col-3 text-end">
             <button class="btn btn-primary btn-sm me-1" (click)="toggleViewMode()">
               @if (isViewMode()) {
@@ -25,42 +25,34 @@
 
 
       <div #collapse="ngbCollapse" [ngbCollapse]="isViewMode()" (ngbCollapseChange)="isViewMode.set($event)">
-        <form [formGroup]="formGroup">
+        <form>
           <div class="form-group mb-3">
             <label for="host">{{t('name-label')}}</label>
-            @if (formGroup.get('name'); as formControl) {
-              <input id="name" class="form-control" formControlName="name" type="text"
-                     [appFormField]="formControl" aria-describedby="name-validations">
+            <input id="name" class="form-control" [formField]="formGroup.name" type="text"
+                   [appFormField]="formGroup.name" aria-describedby="name-validations">
 
-              <app-validation-errors inputId="name" [control]="formControl" [messages]="{
+            <app-validation-errors inputId="name" [control]="formGroup.name" [messages]="{
                 notUnique: t('not-unique')
               }" />
-            }
-
           </div>
 
           <div class="form-group mb-3">
             <label for="host">{{t('host-label')}}</label>
-            @if(formGroup.get('host'); as formControl) {
-              <input id="host" class="form-control" formControlName="host" type="url"
-                     [appFormField]="formControl" aria-describedby="host-validations">
+            <input id="host" class="form-control" [formField]="formGroup.host" type="url"
+                   [appFormField]="formGroup.host" aria-describedby="host-validations">
 
 
-              <app-validation-errors inputId="host" [control]="formControl" [messages]="{
+            <app-validation-errors inputId="host" [control]="formGroup.host" [messages]="{
                 notUnique: t('not-unique'),
-                pattern: t('pattern')
               }" />
-            }
 
 
           </div>
           <div class="form-group mb-3">
             <label for="api-key">{{t('api-key-label')}}</label>
-            @if (formGroup.get('apiKey'); as formControl) {
-              <input id="api-key" class="form-control" formControlName="apiKey" type="text"
-                     [appFormField]="formControl" aria-describedby="api-key-validations">
-              <app-validation-errors inputId="api-key" [control]="formControl" />
-            }
+            <input id="api-key" class="form-control" [formField]="formGroup.apiKey" type="text"
+                   [appFormField]="formGroup.apiKey" aria-describedby="api-key-validations">
+            <app-validation-errors inputId="api-key" [control]="formGroup.apiKey" />
             <span class="text-muted">{{t('api-key-tooltip')}}</span>
 
           </div>
