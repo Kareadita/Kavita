@@ -6,7 +6,7 @@ import {
   DestroyRef,
   HostListener,
   inject,
-  OnInit,
+  OnInit, signal,
   TrackByFunction
 } from '@angular/core';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
@@ -27,8 +27,6 @@ import {tap} from "rxjs";
 import {
   CopySettingsFromLibraryModalComponent
 } from "../_modals/copy-settings-from-library-modal/copy-settings-from-library-modal.component";
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {SelectionModel} from "../../typeahead/_models/selection-model";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 import {
   DataTableColumnCellDirective,
@@ -53,6 +51,9 @@ import {
   LibrarySettingsModalComponent
 } from "../../sidenav/_modals/library-settings-modal/library-settings-modal.component";
 import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
+import {form, FormField} from "@angular/forms/signals";
+import {Tracker} from "../../shared/utils/Tracker";
+import {FormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-manage-library',
@@ -60,9 +61,9 @@ import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
   styleUrls: ['./manage-library.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, NgbTooltip, LibraryTypePipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe,
-    LoadingComponent, CardActionablesComponent, NgTemplateOutlet, ReactiveFormsModule, FormsModule,
+    LoadingComponent, CardActionablesComponent, NgTemplateOutlet,
     ResponsiveTableComponent, DatatableComponent, DataTableColumnHeaderDirective, DataTableColumnDirective,
-    DataTableColumnCellDirective, TimeDifferencePipe]
+    DataTableColumnCellDirective, TimeDifferencePipe, FormField, FormsModule]
 })
 export class ManageLibraryComponent implements OnInit {
 
@@ -80,39 +81,40 @@ export class ManageLibraryComponent implements OnInit {
 
   actions = this.actionFactoryService.getLibraryActions();
   bulkActions = this.actionFactoryService.getBulkLibraryActions();
-  libraries: Library[] = [];
-  loading = false;
+
+  libraries = signal<Library[]>([]);
+  loading = signal(true);
   /**
    * If a deletion is in progress for a library
    */
-  deletionInProgress: boolean = false;
+  deletionInProgress = signal(false);
+  bulkMode = signal(false);
+  bulkAction = signal<Action | null>(null);
+  sourceCopyToLibrary = signal<Library | null>(null);
+  isShiftDown = signal(false);
+  lastSelectedIndex = signal<number | null>(null);
+
+  bulkFormModel = signal({
+    includeType: false
+  });
+  bulkFormGroup = form(this.bulkFormModel);
+
   useActionables = computed(() => {
     return this.breakpointService.isTabletOrBelow();
   })
-  selections!: SelectionModel<Library>;
-  selectAll: boolean = false;
-  bulkMode = false;
-  bulkAction: Action | null = null;
-  sourceCopyToLibrary: Library | null = null;
-  bulkForm = new FormGroup({'includeType': new FormControl(false)});
-  isShiftDown: boolean = false;
-  lastSelectedIndex: number | null = null;
+  libraryTracker = Tracker.IdTracker<Library>();
 
   trackByLibrary: TrackByFunction<Library> = (_, lib) =>
     `${lib.name}_${lib.type}_${lib.folders.length}_${lib.lastScanned}`;
 
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(_: Event) {
-    this.isShiftDown = true;
+    this.isShiftDown.set(true);
   }
 
   @HostListener('document:keyup.shift', ['$event'])
   handleKeyUp(_: Event) {
-    this.isShiftDown = false;
-  }
-
-  get hasSomeSelected() {
-    return this.selections != null && this.selections.hasSomeSelected();
+    this.isShiftDown.set(false);
   }
 
   ngOnInit(): void {
@@ -135,7 +137,7 @@ export class ManageLibraryComponent implements OnInit {
 
         this.libraryService.getLibraries().subscribe(libraries => {
           const newLibrary = libraries.find(lib => lib.id === libId);
-          const existingLibrary = this.libraries.find(lib => lib.id === libId);
+          const existingLibrary = this.libraries().find(lib => lib.id === libId);
           if (existingLibrary !== undefined) {
             existingLibrary.lastScanned = newLibrary?.lastScanned || existingLibrary.lastScanned;
             this.cdRef.markForCheck();
@@ -156,20 +158,17 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   getLibraries() {
-    this.loading = true;
-    this.cdRef.markForCheck();
     this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe(libraries => {
-      this.libraries = [...libraries];
-      this.setupSelections();
+      this.libraries.set(libraries);
+      this.libraryTracker.setData(this.libraries(), false);
       this.resetBulkMode();
-      this.loading = false;
-      this.cdRef.markForCheck();
+      this.loading.set(false);
     });
   }
 
   editLibrary(library: Library) {
     const modalRef = this.modalService.open(LibrarySettingsModalComponent, editModal());
-    modalRef.componentInstance.library = library;
+    modalRef.setInput('library', library);
     modalRef.closed.subscribe((result: ModalResult<Library>) => {
       this.getLibraries();
     });
@@ -184,10 +183,9 @@ export class ManageLibraryComponent implements OnInit {
 
   async deleteLibrary(library: Library) {
     if (await this.confirmService.confirm(translate('toasts.confirm-library-delete', {name: library.name}))) {
-      this.deletionInProgress = true;
+      this.deletionInProgress.set(true);
       this.libraryService.delete(library.id).subscribe(() => {
-        this.deletionInProgress = false;
-        this.cdRef.markForCheck();
+        this.deletionInProgress.set(false);
         this.getLibraries();
         this.toastr.success(translate('toasts.library-deleted', {name: library.name}));
       });
@@ -201,11 +199,11 @@ export class ManageLibraryComponent implements OnInit {
 
   async applyBulkAction() {
     // Get Selected libraries
-    let selected = this.selections.selected();
+    let selected = this.libraryTracker.selected();
 
     // Remove the source library id from selected (if applicable)
-    if (this.bulkAction === Action.CopySettings) {
-      selected = selected.filter(l => l.id !== this.sourceCopyToLibrary!.id);
+    if (this.bulkAction() === Action.CopySettings) {
+      selected = selected.filter(l => l.id !== this.sourceCopyToLibrary()!.id);
     }
 
     if (selected.length === 0) {
@@ -213,33 +211,29 @@ export class ManageLibraryComponent implements OnInit {
       return;
     }
 
-    switch(this.bulkAction) {
+    switch(this.bulkAction()) {
       case (Action.Scan):
         await this.confirmService.alert(translate('toasts.bulk-scan'));
-        this.bulkMode = true;
-        this.cdRef.markForCheck();
+        this.bulkMode.set(true);
         this.libraryService.scanMultipleLibraries(selected.map(l => l.id)).subscribe(_ => this.resetBulkMode());
         break;
       case Action.RefreshMetadata:
         if (!await this.confirmService.confirm(translate('toasts.bulk-covers'))) return;
-        this.bulkMode = true;
-        this.cdRef.markForCheck();
+        this.bulkMode.set(true);
         this.libraryService.refreshMetadataMultipleLibraries(selected.map(l => l.id), true, false).subscribe(() => {
           this.getLibraries();
           this.resetBulkMode();
         });
         break
       case Action.GenerateColorScape:
-        this.bulkMode = true;
-        this.cdRef.markForCheck();
+        this.bulkMode.set(true);
         this.libraryService.refreshMetadataMultipleLibraries(selected.map(l => l.id), false, true).subscribe(() => {
           this.getLibraries();
           this.resetBulkMode();
         });
         break;
-      case Action.Delete:
-        this.bulkMode = true;
-        this.cdRef.markForCheck();
+      case Action.Delete: {
+        this.bulkMode.set(true);
         const libIds = selected.map(l => l.id);
         if (!await this.confirmService.confirm(translate('toasts.bulk-delete-libraries', {count: libIds.length}))) {
           this.resetBulkMode();
@@ -252,27 +246,27 @@ export class ManageLibraryComponent implements OnInit {
             finalize(() => this.resetBulkMode()),
           ).subscribe();
         break;
-      case Action.CopySettings:
+      }
+      case Action.CopySettings: {
         // Remove the source library from the list
-        if (selected.length === 1 && selected[0].id === this.sourceCopyToLibrary!.id) {
+        if (selected.length === 1 && selected[0].id === this.sourceCopyToLibrary()!.id) {
           return;
         }
 
-        this.bulkMode = true;
-        this.cdRef.markForCheck();
+        this.bulkMode.set(true);
 
-        const includeType = this.bulkForm.get('includeType')!.value + '' == 'true';
-        this.libraryService.copySettingsFromLibrary(this.sourceCopyToLibrary!.id, selected.map(l => l.id), includeType).subscribe(() => {
+        const includeType = this.bulkFormModel().includeType;
+        this.libraryService.copySettingsFromLibrary(this.sourceCopyToLibrary()!.id, selected.map(l => l.id), includeType).subscribe(() => {
           this.getLibraries();
           this.resetBulkMode();
         });
         break;
+      }
     }
   }
 
   async handleBulkAction(event: ActionResult<Library>) {
-    this.bulkAction = event.action;
-    this.cdRef.markForCheck();
+    this.bulkAction.set(event.action);
 
     switch (event.action) {
       case(Action.Scan):
@@ -281,71 +275,50 @@ export class ManageLibraryComponent implements OnInit {
       case (Action.Delete):
         await this.applyBulkAction();
         break;
-      case (Action.CopySettings):
-
+      case (Action.CopySettings): {
         // Prompt the user for the library, then wait for them to manually trigger applyBulkAction
         const ref = this.modalService.open(CopySettingsFromLibraryModalComponent, {size: 'lg', fullscreen: 'md'});
-        ref.setInput('libraries', this.libraries);
+        ref.setInput('libraries', this.libraries());
         ref.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res: number) => {
           // res will be the library the user chose
-          this.bulkMode = true;
-          this.sourceCopyToLibrary = this.libraries.filter(l => l.id === res)[0];
-          this.cdRef.markForCheck();
+          this.bulkMode.set(true);
+          this.sourceCopyToLibrary.set(this.libraries().filter(l => l.id === res)[0]);
         });
         break;
+      }
     }
-  }
-
-  setupSelections() {
-    this.selections = new SelectionModel<Library>(false, this.libraries);
-    this.cdRef.markForCheck();
   }
 
   toggleAll() {
-    this.selectAll = !this.selectAll;
-    this.libraries.forEach(s => this.selections.toggle(s, this.selectAll));
-    this.cdRef.markForCheck();
+    this.libraryTracker.setAll(!this.libraryTracker.allSelected());
   }
 
   handleSelection(item: Library, index: number) {
-    if (this.isShiftDown && this.lastSelectedIndex !== null) {
+    const lastSelectedIndex = this.lastSelectedIndex();
+
+    if (this.isShiftDown() && lastSelectedIndex !== null) {
       // Bulk select items between the last selected item and the current one
-      const start = Math.min(this.lastSelectedIndex, index);
-      const end = Math.max(this.lastSelectedIndex, index);
+      const start = Math.min(lastSelectedIndex, index);
+      const end = Math.max(lastSelectedIndex, index);
 
       for (let i = start; i <= end; i++) {
-        const library = this.libraries[i];
-        if (!this.selections.isSelected(library)) {
-          this.selections.toggle(library, true); // Select the item
-        }
+        const library = this.libraries()[i];
+        this.libraryTracker.toggle(library, true);
       }
     } else {
-      // Toggle the clicked item
-      this.selections.toggle(item);
+      this.libraryTracker.toggle(item, true);
     }
 
     // Update the last selected index
-    this.lastSelectedIndex = index;
-
-    // Manage the state of "Select All" and "Has Some Selected"
-    const numberOfSelected = this.selections.selected().length;
-    this.selectAll = numberOfSelected === this.libraries.length;
-
-    this.cdRef.markForCheck();
+    this.lastSelectedIndex.set(index);
   }
 
 
   resetBulkMode() {
-    this.bulkAction = null;
-    this.bulkMode = false;
-    this.sourceCopyToLibrary = null;
-    this.libraries.forEach(s => {
-      if (this.selections.isSelected(s)) {
-        this.selections.toggle(s, false)
-      }
-    });
-    this.selectAll = false;
-      this.cdRef.markForCheck();
+    this.bulkAction.set(null);
+    this.bulkMode.set(false);
+    this.sourceCopyToLibrary.set(null);
+    this.libraryTracker.setAll(false);
   }
 
   protected readonly Action = Action;

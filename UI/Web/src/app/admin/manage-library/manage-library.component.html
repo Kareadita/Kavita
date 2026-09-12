@@ -2,19 +2,20 @@
   <div class="position-relative mb-3">
     <div class="d-flex gap-2 position-absolute custom-position">
       <app-card-actionables [actions]="bulkActions" btnClass="btn-outline-primary" [label]="t('bulk-action-label')"
-                            [disabled]="bulkMode" (actionHandler)="handleBulkAction($event)" [hideLabelOnMobile]="true" />
+                            [disabled]="bulkMode()" (actionHandler)="handleBulkAction($event)" [hideLabelOnMobile]="true" />
       <button class="btn btn-outline-primary" (click)="addLibrary()" [title]="t('add-library')">
         <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add-library')}}</span>
       </button>
     </div>
   </div>
 
-  @if (bulkMode && bulkAction === Action.CopySettings && sourceCopyToLibrary) {
+  @let srcLibrary = sourceCopyToLibrary();
+  @if (bulkMode() && bulkAction() === Action.CopySettings && srcLibrary) {
     <div class="alert alert-warning">
-      {{t('bulk-copy-to', {libraryName: sourceCopyToLibrary.name})}}
-      <form [formGroup]="bulkForm">
+      {{t('bulk-copy-to', {libraryName: srcLibrary.name})}}
+      <form>
         <div class="form-check form-switch">
-          <input id="bulk-action-type" type="checkbox" class="form-check-input" formControlName="includeType" aria-describedby="include-type-help" switch>
+          <input id="bulk-action-type" type="checkbox" class="form-check-input" [formField]="bulkFormGroup.includeType" aria-describedby="include-type-help" switch>
           <label class="form-check-label" for="bulk-action-type">{{t('include-type-label')}}</label>
           <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="left" [ngbTooltip]="includeTypeTooltip" role="button" tabindex="0"></i>
           <ng-template #includeTypeTooltip>{{t('include-type-tooltip')}}</ng-template>
@@ -23,16 +24,16 @@
       </form>
       <div class="mt-2">
         <button class="btn btn-secondary" (click)="resetBulkMode()">{{t('cancel')}}</button>
-        <button class="btn btn-primary ms-1" (click)="applyBulkAction()" [disabled]="!hasSomeSelected">{{t('apply')}}</button>
+        <button class="btn btn-primary ms-1" (click)="applyBulkAction()" [disabled]="!libraryTracker.hasSomeSelected()">{{t('apply')}}</button>
       </div>
     </div>
   }
 
-  <app-responsive-table [rows]="libraries" [trackByFn]="trackByLibrary">
+  <app-responsive-table [rows]="libraries()" [trackByFn]="trackByLibrary">
     <ng-template #tableTemplate>
       <ngx-datatable
         class="bootstrap"
-        [rows]="libraries"
+        [rows]="libraries()"
         [columnMode]="'force'"
         rowHeight="auto"
         [footerHeight]="50"
@@ -41,14 +42,14 @@
           <ng-template ngx-datatable-header-template>
             <div class="form-check">
               <input id="select-all" type="checkbox" class="form-check-input"
-                     [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+                     [ngModel]="libraryTracker.allSelected()" (change)="toggleAll()" [indeterminate]="libraryTracker.hasSomeSelected()">
               <label for="select-all" class="form-check-label d-md-block d-none">{{t('select-all')}}</label>
             </div>
           </ng-template>
           <ng-template let-library="row" let-idx="rowIndex" ngx-datatable-cell-template>
             <div class="form-check">
               <input [id]="'select-library-' + idx" type="checkbox" class="form-check-input"
-                     [ngModel]="selections.isSelected(library)" (change)="handleSelection(library, idx)">
+                     [ngModel]="libraryTracker.isSelected(library)" (change)="handleSelection(library, idx)">
               <label [for]="'select-library-' + idx" class="form-check-label visually-hidden">{{library.name}}</label>
             </div>
           </ng-template>
@@ -95,15 +96,15 @@
       <div class="card-body py-2">
         <div class="form-check">
           <input id="select-all-cards" type="checkbox" class="form-check-input"
-                 [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+                 [ngModel]="libraryTracker.allSelected()" (change)="toggleAll()" [indeterminate]="libraryTracker.hasSomeSelected()">
           <label for="select-all-cards" class="form-check-label">{{t('select-all')}}</label>
         </div>
       </div>
     </div>
 
     <ng-template #cardEmpty>
-      @if (loading) {
-        <app-loading [loading]="loading" />
+      @if (loading()) {
+        <app-loading [loading]="loading()" />
       } @else {
         <div class="text-center text-muted py-4">{{t('no-data')}}</div>
       }
@@ -120,7 +121,7 @@
           <div class="d-flex align-items-center mb-3">
             <div class="form-check me-2">
               <input [id]="'select-library-card-' + idx" type="checkbox" class="form-check-input"
-                     [ngModel]="selections.isSelected(library)" (change)="handleSelection(library, idx)">
+                     [ngModel]="libraryTracker.isSelected(library)" (change)="handleSelection(library, idx)">
               <label [for]="'select-library-card-' + idx" class="visually-hidden">{{library.name}}</label>
             </div>
             <h5 class="card-title mb-0">
@@ -158,7 +159,7 @@
               [ngbTooltip]="t('scan-library')" [attr.aria-label]="t('scan-library')">
         <i class="fa fa-sync-alt" aria-hidden="true"></i>
       </button>
-      <button class="btn btn-danger me-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)"
+      <button class="btn btn-danger me-2 btn-sm" [disabled]="deletionInProgress()" (click)="deleteLibrary(library)"
               [ngbTooltip]="t('delete-library')" [attr.aria-label]="t('delete-library-by-name', {name: library.name | sentenceCase})">
         <i class="fa fa-trash" aria-hidden="true"></i>
       </button>
