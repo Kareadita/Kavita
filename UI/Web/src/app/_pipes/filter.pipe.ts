@@ -1,7 +1,7 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 /**
- * @deprecated Use signals instead
+ * @deprecated Use signals instead - _helpers/filtered.ts
  */
 @Pipe({
   name: 'filter',

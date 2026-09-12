@@ -129,8 +129,12 @@ export class DraggableOrderedListComponent {
   }
 
   selectItem(updatedVal: Event, index: number) {
-    const boolVal = (updatedVal.target as HTMLInputElement).value == 'true';
-    // TODO: Bug here
-    this.bulkSelectionService.handleCardSelection('sideNavStream', index, this.localItems().length, boolVal);
+    const checked = (updatedVal.target as HTMLInputElement).checked;
+    this.bulkSelectionService.handleCardSelection('sideNavStream', index, this.localItems().length, !checked);
+  }
+
+  protected isItemSelected(index: number) {
+    this.selectionSignal(); // Ensure we re-render when a deselect occurs elsewhere
+    return this.bulkSelectionService.isCardSelected('sideNavStream', index);
   }
 }

@@ -51,7 +51,6 @@ import {LibraryService} from "../../../_services/library.service";
 import {UploadService} from "../../../_services/upload.service";
 import {UserCollection} from "../../../_models/collection-tag";
 import {Pagination} from "../../../_models/pagination";
-import {ImageService} from "../../../_services/image.service";
 import {Series} from "../../../_models/series";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
@@ -76,7 +75,6 @@ export class EditCollectionTagsModalComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   private readonly libraryService = inject(LibraryService);
-  private readonly imageService = inject(ImageService);
   private readonly uploadService = inject(UploadService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);

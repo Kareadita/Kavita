@@ -75,7 +75,7 @@
           </div>
 
 
-          @if (files && files.length > 0) {
+          @if (files().length > 0) {
             <app-loading [loading]="isUploadingCbl()" />
           } @else if (!accountService.hasReadOnlyRole()) {
             <app-file-drag-and-drop-upload
