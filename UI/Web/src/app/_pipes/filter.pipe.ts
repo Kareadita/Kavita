@@ -1,5 +1,8 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 
+/**
+ * @deprecated Use signals instead
+ */
 @Pipe({
   name: 'filter',
   pure: false,

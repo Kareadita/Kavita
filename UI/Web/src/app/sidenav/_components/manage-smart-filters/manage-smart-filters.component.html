@@ -11,15 +11,9 @@
           </select>
         </div>
 
-        @if (listForm.get('filterQuery'); as formControl) {
-          <div class="col-md-9">
-            <label for="filter" class="form-label">{{t('filter')}}</label>
-            <div class="input-group">
-              <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input" [appFormField]="formControl">
-              <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
-            </div>
-          </div>
-        }
+        <div class="col-md-9">
+          <app-filter-field [(query)]="filterQuery" [showLabel]="true" clearMode="button" [label]="t('filter')" />
+        </div>
       </div>
     }
   </form>

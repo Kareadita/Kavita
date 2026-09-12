@@ -1,14 +1,14 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {ChangeDetectionStrategy, Component, computed, inject, input, signal} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {FilterPipe} from '../../../../_pipes/filter.pipe';
 import {TranslocoDirective} from "@jsverse/transloco";
+import {FilterFieldComponent} from "../../../../shared/_components/filter-field/filter-field.component";
+import {filteredBy} from "../../../../_helpers/filtered";
 
 @Component({
   selector: 'app-generic-list-modal',
   templateUrl: './generic-list-modal.component.html',
   styleUrls: ['./generic-list-modal.component.scss'],
-  imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective],
+  imports: [TranslocoDirective, FilterFieldComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GenericListModalComponent {
@@ -20,13 +20,8 @@ export class GenericListModalComponent {
 
   needsFilter = computed(() => this.items().length >= 5);
 
-  listForm: FormGroup = new FormGroup({
-    'filterQuery': new FormControl('', [])
-  });
-
-  filterList = (listItem: string) => {
-    return listItem.toLowerCase().indexOf((this.listForm.value.filterQuery || '').toLowerCase()) >= 0;
-  }
+  filterQuery = signal('');
+  protected readonly filteredItems = filteredBy(this.items, this.filterQuery);
 
   close() {
     this.modal.dismiss();

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, signal} from '@angular/core';
 import {
   DraggableOrderedListComponent,
   IndexUpdateEvent
@@ -10,15 +10,15 @@ import {DashboardService} from "../../../_services/dashboard.service";
 import {FilterService} from "../../../_services/filter.service";
 import {forkJoin} from "rxjs";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {BreakpointService} from "../../../_services/breakpoint.service";
-import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {FilterFieldComponent} from "../../../shared/_components/filter-field/filter-field.component";
+import {matchesQuery} from "../../../_helpers/filtered";
 
 @Component({
     selector: 'app-customize-dashboard-streams',
     imports: [DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective,
-      ReactiveFormsModule, FilterPipe, FormFieldDirective],
+      FilterPipe, FilterFieldComponent],
     templateUrl: './customize-dashboard-streams.component.html',
     styleUrls: ['./customize-dashboard-streams.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -34,18 +34,9 @@ export class CustomizeDashboardStreamsComponent {
   allSmartFilters: SmartFilter[] = [];
   smartFilters: SmartFilter[] = [];
   accessibilityMode: boolean = false;
-  listForm: FormGroup = new FormGroup({
-    'filterQuery': new FormControl('', [])
-  });
+  filterQuery = signal('');
 
-  filterList = (listItem: SmartFilter) => {
-    const filterVal = (this.listForm.value.filterQuery || '').toLowerCase();
-    return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
-  }
-  resetFilter() {
-    this.listForm.get('filterQuery')?.setValue('');
-    this.cdRef.markForCheck();
-  }
+  filterList = (listItem: SmartFilter) => matchesQuery(listItem, this.filterQuery(), 'name');
 
   constructor() {
     forkJoin([this.dashboardService.getDashboardStreams(false), this.filterService.getAllFilters()]).subscribe(results => {

@@ -9,6 +9,7 @@ import {ReadingListService} from '../../_services/reading-list.service';
 import {ReadingList, ReadingListProvider} from '../../_models/reading-list/reading-list';
 import {LoadingComponent} from '../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from '@jsverse/transloco';
+import {FilterFieldComponent} from "../../shared/_components/filter-field/filter-field.component";
 import {BrowseCblRepoModalComponent} from '../_modals/browse-cbl-repo-modal/browse-cbl-repo-modal.component';
 import {ImportCblModalComponent} from '../_modals/import-cbl-modal/import-cbl-modal.component';
 import {CblService} from '../../_services/cbl.service';
@@ -56,7 +57,8 @@ import {
     NgbDropdownItem,
     NgbDropdownMenu,
     NgbDropdownToggle,
-    TimeDifferencePipe
+    TimeDifferencePipe,
+    FilterFieldComponent
   ],
   templateUrl: './cbl-manager.component.html',
   styleUrl: './cbl-manager.component.scss',

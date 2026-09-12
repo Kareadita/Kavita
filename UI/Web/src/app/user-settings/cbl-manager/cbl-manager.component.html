@@ -20,8 +20,7 @@
     <div class="col-lg-5 col-md-6 col-sm-12 scroller">
       <div class="pe-2">
         <div class="mb-2">
-          <input type="text" class="form-control form-control-sm" [placeholder]="t('search-placeholder')"
-                 [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" />
+          <app-filter-field [(query)]="searchTerm" [label]="t('search-placeholder')" size="sm" />
         </div>
 
         <div class="d-flex align-items-center justify-content-between mb-2 filter-row">

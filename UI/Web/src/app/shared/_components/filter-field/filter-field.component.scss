@@ -1,0 +1,13 @@
+.entry {
+  .form-control {
+    padding-right: 2rem;
+  }
+
+  .btn-close {
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+  }
+}

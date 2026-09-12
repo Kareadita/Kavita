@@ -5,18 +5,14 @@
   </p>
 
 
-  <form class="row g-0 justify-content-between mb-3">
+  <div class="row g-0 justify-content-between align-items-end mb-3">
     <div class="col-9">
-      <label for="filter" class="form-label">{{t('filter')}}</label>
-      <div class="input-group">
-        <input id="filter" autocomplete="off" class="form-control" [formField]="formGroup.query" type="text" aria-describedby="reset-input" [appFormField]="formGroup.query">
-        <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
-      </div>
+      <app-filter-field [(query)]="filterQuery" [showLabel]="true" clearMode="button" [label]="t('filter')" />
     </div>
-    <div class="col-auto ms-2 float-end">
-      <button class="btn btn-primary" style="margin-top: 1.875rem" (click)="addNewExternalSource()">{{t('add-source')}}</button>
+    <div class="col-auto ms-2">
+      <button class="btn btn-primary" (click)="addNewExternalSource()">{{t('add-source')}}</button>
     </div>
-  </form>
+  </div>
 
   @for(externalSource of filteredExternalSources(); track externalSource; let idx = $index) {
     <app-edit-external-source-item [source]="externalSource"

@@ -1,18 +1,11 @@
 <ng-container *transloco="let t; prefix: 'personal-table-of-contents'">
   <div class="table-of-contents">
     @if(ptocBookmarks().length >= ShowFilterAfterItems) {
-      <form [formGroup]="formGroup">
-        <div class="row g-0 mb-3">
-          @if (formGroup.get('filter'); as formControl) {
-            <div class="col-md-12">
-              <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
-              <div class="input-group">
-                <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter" [appFormField]="formControl" />
-              </div>
-            </div>
-          }
+      <div class="row g-0 mb-3">
+        <div class="col-md-12">
+          <app-filter-field [(query)]="query" [label]="t('filter-label')" />
         </div>
-      </form>
+      </div>
     }
 
     @for(bookmark of visibleBookmarks(); track bookmark.id) {
@@ -23,7 +16,7 @@
       </div>
     } @empty {
       <div>
-        @if (formGroup.get('filter')?.value) {
+        @if (query()) {
           <em>{{t('no-match')}}</em>
         } @else {
           <em>{{t('no-data')}}</em>

@@ -32,6 +32,7 @@ import {
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
+import {matchesQuery} from "../../../_helpers/filtered";
 import {AccountService} from "../../../_services/account.service";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
@@ -104,10 +105,8 @@ export class EditCollectionTagsModalComponent implements OnInit {
     return this.selections != null && this.selections.hasSomeSelected();
   }
 
-  filterList = (listItem: Series) => {
-    const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
-    return listItem.name.toLowerCase().indexOf(query) >= 0 || listItem.localizedName.toLowerCase().indexOf(query) >= 0;
-  }
+  filterList = (listItem: Series) => matchesQuery(listItem, this.formGroup.get('filter')?.value || '',
+    'name', 'localizedName');
 
   constructor() {
     effect(() => {

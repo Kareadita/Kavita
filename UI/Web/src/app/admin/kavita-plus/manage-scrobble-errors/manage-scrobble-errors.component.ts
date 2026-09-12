@@ -1,19 +1,10 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  OnInit,
-  output,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, output, signal} from '@angular/core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, shareReplay} from "rxjs";
 import {TranslocoModule} from "@jsverse/transloco";
 import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
-import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ScrobblingService} from "../../../_services/scrobbling.service";
-import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {ResponsiveTableComponent} from "../../../shared/_components/responsive-table/responsive-table.component";
@@ -21,19 +12,18 @@ import {EVENTS, MessageHubService} from "../../../_services/message-hub.service"
 import {SeriesService} from "../../../_services/series.service";
 import {ActionService} from "../../../_services/action.service";
 import {ScrobbleError} from "../../../_models/scrobbling/scrobble-error";
-import {FormFieldDirective} from "../../../_directives/form-field.directive";
-import {form, FormField} from "@angular/forms/signals";
+import {FilterFieldComponent} from "../../../shared/_components/filter-field/filter-field.component";
+import {filteredBy} from "../../../_helpers/filtered";
 
 @Component({
     selector: 'app-manage-scrobble-errors',
-  imports: [FilterPipe, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgxDatatableModule, ResponsiveTableComponent, FormFieldDirective, FormField],
+  imports: [TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgxDatatableModule, ResponsiveTableComponent, FilterFieldComponent],
     templateUrl: './manage-scrobble-errors.component.html',
     styleUrls: ['./manage-scrobble-errors.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageScrobbleErrorsComponent implements OnInit {
   protected readonly filter = filter;
-  protected readonly ColumnMode = ColumnMode;
 
   private readonly scrobbleService = inject(ScrobblingService);
   private readonly messageHub = inject(MessageHubService);
@@ -48,10 +38,9 @@ export class ManageScrobbleErrorsComponent implements OnInit {
 
   isLoading = signal<boolean>(true);
   data = signal<ScrobbleError[]>([]);
-  formModel = signal({
-    filter: ''
-  });
-  formGroup = form(this.formModel);
+  filterQuery = signal('');
+
+  filteredData = filteredBy(this.data, this.filterQuery, 'comment', 'details');
 
   trackBy = (index: number, item: ScrobbleError) => `${index}_${item.seriesId}`;
 
@@ -72,11 +61,6 @@ export class ManageScrobbleErrorsComponent implements OnInit {
 
   clear() {
     this.scrobbleService.clearScrobbleErrors().subscribe(_ => this.loadData());
-  }
-
-  filterList = (listItem: ScrobbleError) => {
-    const query = this.formModel().filter;
-    return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.details.toLowerCase().indexOf(query) >= 0;
   }
 
   fixMatch(seriesId: number) {

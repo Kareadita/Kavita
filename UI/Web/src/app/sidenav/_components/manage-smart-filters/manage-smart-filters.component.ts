@@ -41,12 +41,12 @@ import {EVENTS, MessageHubService} from "../../../_services/message-hub.service"
 import {DashboardService} from "../../../_services/dashboard.service";
 import {NavService} from "../../../_services/nav.service";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
-import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {FilterFieldComponent} from "../../../shared/_components/filter-field/filter-field.component";
 
 @Component({
   selector: 'app-manage-smart-filters',
   imports: [ReactiveFormsModule, TranslocoDirective, CarouselReelComponent, SeriesCardComponent, AsyncPipe, CardActionablesComponent,
-    FilterEntityTypePipe, EntityCardComponent, PromotedIconComponent, FormFieldDirective],
+    FilterEntityTypePipe, EntityCardComponent, PromotedIconComponent, FilterFieldComponent],
   templateUrl: './manage-smart-filters.component.html',
   styleUrls: ['./manage-smart-filters.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -73,7 +73,7 @@ export class ManageSmartFiltersComponent implements OnInit {
   protected readonly hasFilterControl = computed(() => this.filters().length >= 1);
   protected readonly filteredItems = computed(() => {
     const items = this.filters();
-    const filterVal = this.filterQuery().toString().toLowerCase();
+    const filterVal = this.filterQuery().toLowerCase();
     const entityType = this.filterEntityType();
 
     if (!filterVal) {
@@ -85,12 +85,11 @@ export class ManageSmartFiltersComponent implements OnInit {
   });
 
   listForm: FormGroup = new FormGroup({
-    'filterQuery': new FormControl('', []),
     'entityType': new FormControl<FilterEntityType>(FilterEntityType.Series, []),
   });
   protected readonly filterApiMap = signal<{ [key: number]: Observable<any> }>({});
   protected readonly actions = computed(() => this.actionFactoryService.getSmartFilterActions(this.shouldRenderFunc.bind(this)));
-  protected readonly filterQuery = signal<string>('');
+  filterQuery = signal<string>('');
   protected readonly filterEntityType = signal<FilterEntityType>(FilterEntityType.Series);
   private readonly dashboardFilters = signal<Set<number>>(new Set<number>());
   private readonly sideNavFilters = signal<Set<number>>(new Set<number>());
@@ -101,10 +100,6 @@ export class ManageSmartFiltersComponent implements OnInit {
   constructor() {
     this.loadData();
 
-    this.listForm.get('filterQuery')?.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      tap(val => this.filterQuery.set(val))
-    ).subscribe();
     this.listForm.get('entityType')?.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),
       tap(val => this.filterEntityType.set(parseInt(val + '', 10)))
@@ -177,7 +172,7 @@ export class ManageSmartFiltersComponent implements OnInit {
   }
 
   resetFilter() {
-    this.listForm.get('filterQuery')?.setValue('');
+    this.filterQuery.set('');
   }
 
   isErrored(filter: SmartFilter) {

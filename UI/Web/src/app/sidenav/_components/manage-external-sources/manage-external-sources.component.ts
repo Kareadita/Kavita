@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
 import {EditExternalSourceItemComponent} from "../edit-external-source-item/edit-external-source-item.component";
@@ -6,12 +6,12 @@ import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {ExternalSourceService} from "../../../_services/external-source.service";
 import {WikiLink} from "../../../_models/wiki";
 import {EmptyStateComponent} from "../../../shared/_components/empty-state/empty-state.component";
-import {FormFieldDirective} from "../../../_directives/form-field.directive";
-import {form, FormField} from "@angular/forms/signals";
+import {FilterFieldComponent} from "../../../shared/_components/filter-field/filter-field.component";
+import {filteredBy} from "../../../_helpers/filtered";
 
 @Component({
     selector: 'app-manage-external-sources',
-  imports: [TranslocoDirective, EditExternalSourceItemComponent, EmptyStateComponent, FormFieldDirective, FormField],
+  imports: [TranslocoDirective, EditExternalSourceItemComponent, EmptyStateComponent, FilterFieldComponent],
     templateUrl: './manage-external-sources.component.html',
     styleUrls: ['./manage-external-sources.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -20,19 +20,10 @@ export class ManageExternalSourcesComponent {
   protected readonly accountService = inject(AccountService);
   private readonly externalSourceService = inject(ExternalSourceService);
 
-  formModel = signal({
-    query: ''
-  });
-  formGroup = form(this.formModel);
+  filterQuery = signal('');
   externalSources = signal<ExternalSource[]>([]);
 
-  filteredExternalSources = computed(() => {
-    const data = this.externalSources();
-    const query = (this.formModel().query || '').toLowerCase();
-    if (query === '') return data;
-
-    return data.filter(listItem => listItem.name.toLowerCase().indexOf(query) >= 0 || listItem.host.toLowerCase().indexOf(query) >= 0);
-  });
+  filteredExternalSources = filteredBy(this.externalSources, this.filterQuery, 'name', 'host');
 
   constructor() {
     this.externalSourceService.getExternalSources().subscribe(data => {
@@ -41,7 +32,7 @@ export class ManageExternalSourcesComponent {
   }
 
   resetFilter() {
-    this.formGroup.query().value.set('');
+    this.filterQuery.set('');
   }
 
   addNewExternalSource() {

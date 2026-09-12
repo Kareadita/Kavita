@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy,
-  Component, computed,
+  Component,
   DestroyRef,
   EventEmitter,
   inject,
@@ -11,12 +11,12 @@ import {
 } from '@angular/core';
 import {ReaderService} from "../../../_services/reader.service";
 import {PersonalToC} from "../../../_models/readers/personal-toc";
-import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {TextBookmarkItemComponent} from "../text-bookmark-item/text-bookmark-item.component";
 import {ConfirmService} from "../../../shared/confirm.service";
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {FilterFieldComponent} from "../../../shared/_components/filter-field/filter-field.component";
+import {filteredBy} from "../../../_helpers/filtered";
 
 export interface PersonalToCEvent {
   pageNum: number;
@@ -25,7 +25,7 @@ export interface PersonalToCEvent {
 
 @Component({
   selector: 'app-personal-table-of-contents',
-  imports: [TranslocoDirective, TextBookmarkItemComponent, FormsModule, ReactiveFormsModule, FormFieldDirective],
+  imports: [TranslocoDirective, TextBookmarkItemComponent, FilterFieldComponent],
   templateUrl: './personal-table-of-contents.component.html',
   styleUrls: ['./personal-table-of-contents.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -45,20 +45,8 @@ export class PersonalTableOfContentsComponent implements OnInit {
 
 
   ptocBookmarks = signal<PersonalToC[]>([]);
-  visibleBookmarks = computed(() => {
-    const query = this.query()?.toLowerCase() ?? '';
-
-    return this.ptocBookmarks().filter(bookMark => {
-      return bookMark.title.toLowerCase().indexOf(query) >= 0
-        || bookMark.pageNumber.toString().indexOf(query) >= 0
-        || (bookMark.chapterTitle ?? '').toLowerCase().indexOf(query) >= 0;
-    });
-  });
-
-  formGroup = new FormGroup({
-    filter: new FormControl('', [])
-  });
-  query = toSignal(this.formGroup.get('filter')!.valueChanges, {initialValue: ''});
+  query = signal('');
+  visibleBookmarks = filteredBy(this.ptocBookmarks, this.query, 'title', 'pageNumber', 'chapterTitle');
 
   ngOnInit() {
     this.tocRefresh.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {

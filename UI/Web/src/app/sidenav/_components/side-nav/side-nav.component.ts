@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, effect, inject} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, effect, inject, signal} from '@angular/core';
 import {NavigationEnd, Router} from '@angular/router';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
@@ -12,8 +12,9 @@ import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switch
 import {AsyncPipe} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
-import {FormsModule} from "@angular/forms";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {FilterFieldComponent} from "../../../shared/_components/filter-field/filter-field.component";
+import {matchesQuery} from "../../../_helpers/filtered";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
@@ -34,8 +35,8 @@ import {ImageService} from "../../../_services/image.service";
 
 @Component({
   selector: 'app-side-nav',
-  imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, NgbTooltip,
-    AsyncPipe, CdkDropList, CdkDrag],
+  imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, TranslocoDirective, NgbTooltip,
+    AsyncPipe, CdkDropList, CdkDrag, FilterFieldComponent],
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -61,10 +62,8 @@ export class SideNavComponent {
   homeActions: ActionItem<{}>[] = this.actionFactoryService.getSideNavHomeActions();
   readingListActions: ActionItem<{}>[] = this.actionFactoryService.getSideNavReadingListActions();
 
-  filterQuery: string = '';
-  filterLibrary = (stream: SideNavStream) => {
-    return stream.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
-  }
+  filterQuery = signal('');
+  filterLibrary = (stream: SideNavStream) => matchesQuery(stream, this.filterQuery(), 'name');
   showAll: boolean = false;
   editMode: boolean = false;
   totalSize = 0;
@@ -209,7 +208,7 @@ export class SideNavComponent {
   }
 
   showLess() {
-    this.filterQuery = '';
+    this.filterQuery.set('');
     this.showAllSubject.next(false);
     this.editMode = false;
     this.cdRef.markForCheck();

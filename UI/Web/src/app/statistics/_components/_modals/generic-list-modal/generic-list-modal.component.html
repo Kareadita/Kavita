@@ -4,31 +4,25 @@
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
   <div class="modal-body">
-    <form style="width: 100%" [formGroup]="listForm">
-      @if (needsFilter()) {
-        <div class="mb-3">
-          <label for="filter" class="form-label">{{t('filter')}}</label>
-          <div class="input-group">
-            <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
-            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="listForm.get('filterQuery')?.setValue('');">{{t('clear')}}</button>
-          </div>
-        </div>
-      }
+    @if (needsFilter()) {
+      <div class="mb-3">
+        <app-filter-field [(query)]="filterQuery" [showLabel]="true" clearMode="button" [label]="t('filter')" />
+      </div>
+    }
 
-      <ul class="list-group">
-        @for(item of items() | filter: filterList; track item; let i = $index) {
-          <li class="list-group-item d-flex justify-content-between align-items-center clickable">
-            {{item}}
-            @if (clicked() !== undefined) {
-              <button class="btn btn-primary" (click)="handleClick(item)">
-                <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
-                <span class="visually-hidden">{{t('open-filtered-search',{item: item})}}</span>
-              </button>
-            }
-          </li>
-        }
-      </ul>
-    </form>
+    <ul class="list-group">
+      @for(item of filteredItems(); track item; let i = $index) {
+        <li class="list-group-item d-flex justify-content-between align-items-center clickable">
+          {{item}}
+          @if (clicked() !== undefined) {
+            <button class="btn btn-primary" (click)="handleClick(item)">
+              <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('open-filtered-search',{item: item})}}</span>
+            </button>
+          }
+        </li>
+      }
+    </ul>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-primary" (click)="close()">{{t('close')}}</button>

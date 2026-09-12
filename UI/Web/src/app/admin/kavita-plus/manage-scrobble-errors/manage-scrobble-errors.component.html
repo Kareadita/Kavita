@@ -2,26 +2,21 @@
   <h4>{{t('title')}}</h4>
   <p>{{t('description')}}</p>
 
-  <form>
-    <div class="row g-0 mb-3">
-      <div class="col-md-12">
-        <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
-        <div class="input-group">
-          <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" [formField]="formGroup.filter"
-                 [appFormField]="formGroup.filter" />
-          <button class="btn btn-primary" type="button" [disabled]="data().length === 0" (click)="clear()">{{t('clear-errors')}}</button>
-        </div>
-      </div>
+  <div class="row g-0 justify-content-between align-items-end mb-3">
+    <div class="col">
+      <app-filter-field [(query)]="filterQuery" [label]="t('filter-label')" />
     </div>
-  </form>
+    <div class="col-auto ms-2">
+      <button class="btn btn-primary" type="button" [disabled]="data().length === 0" (click)="clear()">{{t('clear-errors')}}</button>
+    </div>
+  </div>
 
-  @let filteredData = data() | filter: filterList;
-  <app-responsive-table [rows]="filteredData" [trackByFn]="trackBy">
+  <app-responsive-table [rows]="filteredData()" [trackByFn]="trackBy">
     <ng-template #tableTemplate>
       <ngx-datatable
         class="bootstrap"
-        [rows]="filteredData"
-        [columnMode]="ColumnMode.flex"
+        [rows]="filteredData()"
+        [columnMode]="'flex'"
         rowHeight="auto"
         [footerHeight]="50"
         [limit]="15"

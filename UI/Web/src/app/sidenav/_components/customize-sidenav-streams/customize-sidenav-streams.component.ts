@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnDestroy} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnDestroy, signal} from '@angular/core';
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {FilterService} from "../../../_services/filter.service";
 import {forkJoin} from "rxjs";
@@ -22,12 +22,13 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {ActionResult} from "../../../_models/actionables/action-result";
-import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {FilterFieldComponent} from "../../../shared/_components/filter-field/filter-field.component";
+import {matchesQuery} from "../../../_helpers/filtered";
 
 @Component({
   selector: 'app-customize-sidenav-streams',
   imports: [DraggableOrderedListComponent, TranslocoDirective, SidenavStreamListItemComponent, ReactiveFormsModule,
-    FilterPipe, BulkOperationsComponent, FormFieldDirective],
+    FilterPipe, BulkOperationsComponent, FilterFieldComponent],
   templateUrl: './customize-sidenav-streams.component.html',
   styleUrls: ['./customize-sidenav-streams.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -49,30 +50,20 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   externalSources: ExternalSource[] = [];
   virtualizeAfter = 100;
 
-  listForm: FormGroup = new FormGroup({
-    'filterSideNavStream': new FormControl('', []),
-    'filterSmartFilter': new FormControl('', []),
-    'filterExternalSource': new FormControl('', []),
-  });
+  sideNavStreamQuery = signal('');
+  smartFilterQuery = signal('');
+  externalSourceQuery = signal('');
+
   pageOperationsForm: FormGroup = new FormGroup({
     'accessibilityMode': new FormControl(false, []),
     'bulkMode': new FormControl(false, [])
   });
 
-  filterSideNavStreams = (listItem: SideNavStream) => {
-    const filterVal = (this.listForm.value.filterSideNavStream || '').toLowerCase();
-    return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
-  }
+  filterSideNavStreams = (listItem: SideNavStream) => matchesQuery(listItem, this.sideNavStreamQuery(), 'name');
 
-  filterSmartFilters = (listItem: SmartFilter) => {
-    const filterVal = (this.listForm.value.filterSmartFilter || '').toLowerCase();
-    return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
-  }
+  filterSmartFilters = (listItem: SmartFilter) => matchesQuery(listItem, this.smartFilterQuery(), 'name');
 
-  filterExternalSources = (listItem: ExternalSource) => {
-    const filterVal = (this.listForm.value.filterExternalSource || '').toLowerCase();
-    return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
-  }
+  filterExternalSources = (listItem: ExternalSource) => matchesQuery(listItem, this.externalSourceQuery(), 'name');
 
   constructor() {
 
@@ -116,17 +107,6 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
         takeUntilDestroyed(this.destroyRef)
     ).subscribe();
 
-    this.pageOperationsForm.valueChanges.pipe(
-        tap(_ => {
-          if (this.pageOperationsForm.value.accessibilityMode || this.pageOperationsForm.value.bulkMode) {
-            this.listForm.get('filterSideNavStream')?.disable();
-            return;
-          }
-          this.listForm.get('filterSideNavStream')?.enable();
-        }),
-        takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
-
     forkJoin([this.sideNavService.getSideNavStreams(false),
         this.filterService.getAllFilters(), this.externalSourceService.getExternalSources()
     ]).subscribe(results => {
@@ -154,21 +134,6 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.bulkSelectionService.deselectAll();
-  }
-
-  resetSideNavFilter() {
-    this.listForm.get('filterSideNavStream')?.setValue('');
-    this.cdRef.markForCheck();
-  }
-
-  resetSmartFilterFilter() {
-    this.listForm.get('filterSmartFilter')?.setValue('');
-    this.cdRef.markForCheck();
-  }
-
-  resetExternalSourceFilter() {
-    this.listForm.get('filterExternalSource')?.setValue('');
-    this.cdRef.markForCheck();
   }
 
   addFilterToStream(filter: SmartFilter) {

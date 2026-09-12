@@ -1,0 +1,24 @@
+<ng-container *transloco="let t;">
+  @let labelText = label() ?? t('common.filter');
+
+  <label [for]="generatedId()" class="form-label" [class.visually-hidden]="!showLabel()">{{labelText}}</label>
+
+  @if (clearMode() === 'button') {
+    <div class="input-group">
+      <input [id]="generatedId()" type="text" autocomplete="off" class="form-control"
+             [class.form-control-sm]="size() === 'sm'" [placeholder]="labelText"
+             [attr.aria-describedby]="clearId()" [disabled]="disabled()"
+             [value]="query()" (input)="updateQuery($event)" />
+      <button class="btn btn-outline-secondary" type="button" [id]="clearId()" [disabled]="disabled()" (click)="clearField()">{{t('common.clear')}}</button>
+    </div>
+  } @else {
+    <div class="entry position-relative">
+      <input [id]="generatedId()" type="text" autocomplete="off" class="form-control"
+             [class.form-control-sm]="size() === 'sm'" [placeholder]="labelText" [disabled]="disabled()"
+             [value]="query()" (input)="updateQuery($event)" />
+      @if (query() && !disabled()) {
+        <button type="button" class="btn-close" [attr.aria-label]="t('common.clear')" (click)="clearField()"></button>
+      }
+    </div>
+  }
+</ng-container>
