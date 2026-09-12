@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   DestroyRef,
   inject,
@@ -8,7 +7,6 @@ import {
   output,
   signal
 } from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, shareReplay} from "rxjs";
 import {TranslocoModule} from "@jsverse/transloco";
@@ -24,10 +22,11 @@ import {SeriesService} from "../../../_services/series.service";
 import {ActionService} from "../../../_services/action.service";
 import {ScrobbleError} from "../../../_models/scrobbling/scrobble-error";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {form, FormField} from "@angular/forms/signals";
 
 @Component({
     selector: 'app-manage-scrobble-errors',
-  imports: [ReactiveFormsModule, FilterPipe, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgxDatatableModule, ResponsiveTableComponent, FormFieldDirective],
+  imports: [FilterPipe, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgxDatatableModule, ResponsiveTableComponent, FormFieldDirective, FormField],
     templateUrl: './manage-scrobble-errors.component.html',
     styleUrls: ['./manage-scrobble-errors.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -38,23 +37,23 @@ export class ManageScrobbleErrorsComponent implements OnInit {
 
   private readonly scrobbleService = inject(ScrobblingService);
   private readonly messageHub = inject(MessageHubService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly seriesService = inject(SeriesService);
   private readonly actionService = inject(ActionService);
 
   readonly scrobbleCount = output<number>();
 
-
   messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef),
     filter(m => m.event === EVENTS.ScanSeries), shareReplay());
 
-  data: Array<ScrobbleError> = [];
   isLoading = signal<boolean>(true);
-  formGroup = new FormGroup({
-    filter: new FormControl('', [])
+  data = signal<ScrobbleError[]>([]);
+  formModel = signal({
+    filter: ''
   });
-  trackBy = (index: number, item: ScrobbleError) => `${item.seriesId}`;
+  formGroup = form(this.formModel);
+
+  trackBy = (index: number, item: ScrobbleError) => `${index}_${item.seriesId}`;
 
 
   ngOnInit() {
@@ -64,12 +63,10 @@ export class ManageScrobbleErrorsComponent implements OnInit {
 
   loadData() {
     this.isLoading.set(true);
-    this.cdRef.markForCheck();
     this.scrobbleService.getScrobbleErrors().subscribe(d => {
-      this.data = d;
+      this.data.set(d);
       this.isLoading.set(false);
       this.scrobbleCount.emit(d.length);
-      this.cdRef.detectChanges();
     });
   }
 
@@ -78,7 +75,7 @@ export class ManageScrobbleErrorsComponent implements OnInit {
   }
 
   filterList = (listItem: ScrobbleError) => {
-    const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
+    const query = this.formModel().filter;
     return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.details.toLowerCase().indexOf(query) >= 0;
   }
 
@@ -86,8 +83,7 @@ export class ManageScrobbleErrorsComponent implements OnInit {
     this.seriesService.getSeries(seriesId).subscribe(series => {
       this.actionService.matchSeries(series, (result) => {
         if (!result) return;
-        this.data = [...this.data.filter(s => s.seriesId !== series.id)];
-        this.cdRef.markForCheck();
+        this.data.update(x => [...x.filter(s => s.seriesId !== series.id)]);
       });
     });
   }
