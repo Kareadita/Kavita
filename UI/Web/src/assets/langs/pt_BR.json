@@ -2320,7 +2320,13 @@
         "year-validation": "O ano deve ser válido, maior que 1000 e conter 4 caracteres",
         "other-field-required": "{{name}} é obrigatório quando {{other}} está definido",
         "invalid-uri": "O URI informado é inválido",
-        "other-field-invalid": "Não é possível verificar a validade; {{other}} é inválido"
+        "other-field-invalid": "Não é possível verificar a validade; {{other}} é inválido",
+        "email-invalid": "Este deve ser um e-mail válido",
+        "min-length": "Deve ter pelo menos {{requiredLength}} caracteres",
+        "min": "O valor deve ser maior que {{min}}",
+        "max": "O valor deve ser menor que {{max}}",
+        "invalid-amazon-code": "ASIN deve começar com B0 ou BT",
+        "invalid-asin": "Este não é um ASIN válido"
     },
     "entity-type": {
         "volume": "volume",
