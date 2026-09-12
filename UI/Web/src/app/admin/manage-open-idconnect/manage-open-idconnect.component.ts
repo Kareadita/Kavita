@@ -1,7 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ServerSettings} from "../_models/server-settings";
-import {ReactiveFormsModule} from "@angular/forms";
 import {SettingsService} from "../settings.service";
 import {AuthorityValidationResult, OidcConfig} from "../_models/oidc-config";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -39,7 +38,6 @@ import {url} from "../../_validators/url.validator";
   selector: 'app-manage-open-idconnect',
   imports: [
     TranslocoDirective,
-    ReactiveFormsModule,
     SettingItemComponent,
     SettingSwitchComponent,
     AgeRatingPipe,

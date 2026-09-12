@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
-import {ReactiveFormsModule} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
 import {ApiKeyComponent} from '../../user-settings/api-key/api-key.component';
@@ -32,7 +31,7 @@ interface InviteFormModel {
   templateUrl: './invite-user.component.html',
   styleUrls: ['./invite-user.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RestrictionSelectorComponent, ApiKeyComponent, TranslocoDirective, SafeHtmlPipe,
+  imports: [RestrictionSelectorComponent, ApiKeyComponent, TranslocoDirective, SafeHtmlPipe,
     SettingMultiCheckBox, FormFieldDirective, ValidationErrorsComponent, FormField]
 })
 export class InviteUserComponent implements OnInit {
