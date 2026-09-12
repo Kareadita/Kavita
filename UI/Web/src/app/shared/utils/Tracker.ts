@@ -39,7 +39,7 @@ export class Tracker<T> {
 
     this.data.update(x => [...x.map(item => {
       if (this.compareFn(item.value, data)) {
-        return {value: data, selected: (selected !== undefined ? selected : false)}
+        return {value: data, selected: (selected !== undefined ? selected : !item.selected)}
       }
 
       return item;
