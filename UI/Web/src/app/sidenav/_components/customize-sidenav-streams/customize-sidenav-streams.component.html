@@ -1,9 +1,9 @@
 <ng-container *transloco="let t; prefix: 'customize-sidenav-streams'">
   <app-bulk-operations />
 
-  @if (items().length > 3) {
+  @if (showFilter()) {
     <div class="row g-0 mb-2">
-      <app-filter-field [(query)]="sideNavStreamQuery" [showLabel]="true" clearMode="button" [label]="t('filter')"
+      <app-filter-field [(query)]="sideNavStreamQuery" [label]="t('filter')"
                         [disabled]="filterDisabled()" />
       @if (sideNavStreamQuery()) {
         <p role="alert" class="mt-2">{{t('reorder-when-filter-present')}}</p>

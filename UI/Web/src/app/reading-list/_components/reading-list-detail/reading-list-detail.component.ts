@@ -107,9 +107,7 @@ export class ReadingListDetailComponent implements OnInit {
   private readonly colorscapeService = inject(ColorscapeService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
 
-  protected readonly MangaFormat = MangaFormat;
-  protected readonly Tabs = Tabs;
-  protected readonly encodeURIComponent = encodeURIComponent;
+
   private readonly dateYearRangePipe = new DateYearRangePipe();
 
   scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
@@ -427,4 +425,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   protected readonly Breakpoint = Breakpoint;
   protected readonly ReadingListFilterField = ReadingListFilterField;
+  protected readonly MangaFormat = MangaFormat;
+  protected readonly Tabs = Tabs;
+  protected readonly encodeURIComponent = encodeURIComponent;
 }

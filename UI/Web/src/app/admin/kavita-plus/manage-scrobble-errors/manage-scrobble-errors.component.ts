@@ -16,11 +16,11 @@ import {FilterFieldComponent} from "../../../shared/_components/filter-field/fil
 import {filteredBy} from "../../../_helpers/filtered";
 
 @Component({
-    selector: 'app-manage-scrobble-errors',
+  selector: 'app-manage-scrobble-errors',
   imports: [TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgxDatatableModule, ResponsiveTableComponent, FilterFieldComponent],
-    templateUrl: './manage-scrobble-errors.component.html',
-    styleUrls: ['./manage-scrobble-errors.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: './manage-scrobble-errors.component.html',
+  styleUrls: ['./manage-scrobble-errors.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageScrobbleErrorsComponent implements OnInit {
   protected readonly filter = filter;

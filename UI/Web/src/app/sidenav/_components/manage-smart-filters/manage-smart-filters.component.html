@@ -1,22 +1,20 @@
 <ng-container *transloco="let t; prefix:'manage-smart-filters'">
-  <form [formGroup]="listForm">
-    @if (hasFilterControl()) {
-      <div class="row g-1 mb-3">
-        <div class="col-md-3">
-          <label for="entity-type" class="form-label">{{t('entity-type-label')}}</label>
-          <select class="col-auto form-select" id="entity-type" formControlName="entityType">
-            @for(entityType of allFilterEntityTypes; track entityType) {
-              <option [value]="entityType">{{entityType | filterEntityType}}</option>
-            }
-          </select>
-        </div>
-
-        <div class="col-md-9">
-          <app-filter-field [(query)]="filterQuery" [showLabel]="true" clearMode="button" [label]="t('filter')" />
-        </div>
+  @if (hasFilterControl()) {
+    <div class="row g-1 mb-3">
+      <div class="col-md-3">
+        <label for="entity-type" class="form-label">{{t('entity-type-label')}}</label>
+        <app-setting-select [formField]="formGroup.entityType" inputId="entity-type" [options]="allFilterEntityTypes">
+          <ng-template #template let-entityType>
+            {{entityType | filterEntityType}}
+          </ng-template>
+        </app-setting-select>
       </div>
-    }
-  </form>
+
+      <div class="col-md-9">
+        <app-filter-field [(query)]="filterQuery" [showLabel]="true" clearMode="button" [label]="t('filter')" />
+      </div>
+    </div>
+  }
 
   <ul>
     @for(stream of filteredItems(); track stream.id) {

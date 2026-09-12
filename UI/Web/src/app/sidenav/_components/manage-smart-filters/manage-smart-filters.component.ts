@@ -13,7 +13,6 @@ import {
 import {FilterService} from "../../../_services/filter.service";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {APP_BASE_HREF, AsyncPipe} from "@angular/common";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CarouselReelComponent} from "../../../carousel/_components/carousel-reel/carousel-reel.component";
@@ -42,11 +41,17 @@ import {DashboardService} from "../../../_services/dashboard.service";
 import {NavService} from "../../../_services/nav.service";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {FilterFieldComponent} from "../../../shared/_components/filter-field/filter-field.component";
+import {SettingSelectComponent} from "../../../settings/_components/setting-enum-select/setting-select.component";
+import {form, FormField} from "@angular/forms/signals";
+
+interface FormModel {
+  entityType: FilterEntityType;
+}
 
 @Component({
   selector: 'app-manage-smart-filters',
-  imports: [ReactiveFormsModule, TranslocoDirective, CarouselReelComponent, SeriesCardComponent, AsyncPipe, CardActionablesComponent,
-    FilterEntityTypePipe, EntityCardComponent, PromotedIconComponent, FilterFieldComponent],
+  imports: [FormField, TranslocoDirective, CarouselReelComponent, SeriesCardComponent, AsyncPipe, CardActionablesComponent,
+    FilterEntityTypePipe, EntityCardComponent, PromotedIconComponent, FilterFieldComponent, SettingSelectComponent],
   templateUrl: './manage-smart-filters.component.html',
   styleUrls: ['./manage-smart-filters.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -69,12 +74,14 @@ export class ManageSmartFiltersComponent implements OnInit {
 
   target = input<'_self' | '_blank'>('_blank');
 
+  protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
+
   protected readonly filters = signal<SmartFilter[]>([]);
   protected readonly hasFilterControl = computed(() => this.filters().length >= 1);
   protected readonly filteredItems = computed(() => {
     const items = this.filters();
     const filterVal = this.filterQuery().toLowerCase();
-    const entityType = this.filterEntityType();
+    const entityType = this.formModel().entityType;
 
     if (!filterVal) {
       return items.filter(item => item.entityType === entityType);
@@ -84,26 +91,21 @@ export class ManageSmartFiltersComponent implements OnInit {
       .filter(item => item.name.toLowerCase().includes(filterVal));
   });
 
-  listForm: FormGroup = new FormGroup({
-    'entityType': new FormControl<FilterEntityType>(FilterEntityType.Series, []),
+  private readonly formModel = signal<FormModel>({
+    entityType: FilterEntityType.Series
   });
-  protected readonly filterApiMap = signal<{ [key: number]: Observable<any> }>({});
-  protected readonly actions = computed(() => this.actionFactoryService.getSmartFilterActions(this.shouldRenderFunc.bind(this)));
+  protected readonly formGroup = form(this.formModel);
+  filterApiMap = signal<{ [key: number]: Observable<any> }>({});
+  actions = computed(() => this.actionFactoryService.getSmartFilterActions(this.shouldRenderFunc.bind(this)));
   filterQuery = signal<string>('');
-  protected readonly filterEntityType = signal<FilterEntityType>(FilterEntityType.Series);
   private readonly dashboardFilters = signal<Set<number>>(new Set<number>());
   private readonly sideNavFilters = signal<Set<number>>(new Set<number>());
 
-  protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
+
   protected readonly readingListConfig = computed(() => this.cardConfigFactory.forReadingList({titleRef: this.titleTemplateRef(), overrides: {allowSelection: false, actionableFunc: () => []}}));
 
   constructor() {
     this.loadData();
-
-    this.listForm.get('entityType')?.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      tap(val => this.filterEntityType.set(parseInt(val + '', 10)))
-    ).subscribe();
 
     this.messageHub.messages$.pipe(
       tap(msg => {

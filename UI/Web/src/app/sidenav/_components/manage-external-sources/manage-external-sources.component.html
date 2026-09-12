@@ -7,7 +7,7 @@
 
   <div class="row g-0 justify-content-between align-items-end mb-3">
     <div class="col-9">
-      <app-filter-field [(query)]="filterQuery" [showLabel]="true" clearMode="button" [label]="t('filter')" />
+      <app-filter-field [(query)]="filterQuery" [label]="t('filter')" />
     </div>
     <div class="col-auto ms-2">
       <button class="btn btn-primary" (click)="addNewExternalSource()">{{t('add-source')}}</button>

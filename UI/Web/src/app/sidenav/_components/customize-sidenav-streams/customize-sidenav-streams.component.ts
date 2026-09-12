@@ -39,18 +39,18 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   private readonly sideNavService = inject(NavService);
   private readonly filterService = inject(FilterService);
   private readonly externalSourceService = inject(ExternalSourceService);
-  public readonly bulkSelectionService = inject(BulkSelectionService);
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly breakpointService = inject(BreakpointService);
 
   protected readonly virtualizeAfter = 100;
 
-  protected readonly items = signal<SideNavStream[]>([]);
-  private readonly allSmartFilters = signal<SmartFilter[]>([]);
-  private readonly allExternalSources = signal<ExternalSource[]>([]);
+  items = signal<SideNavStream[]>([]);
+  allSmartFilters = signal<SmartFilter[]>([]);
+  allExternalSources = signal<ExternalSource[]>([]);
 
-  protected readonly sideNavStreamQuery = signal('');
-  protected readonly smartFilterQuery = signal('');
-  protected readonly externalSourceQuery = signal('');
+  sideNavStreamQuery = signal('');
+  smartFilterQuery = signal('');
+  externalSourceQuery = signal('');
 
   private readonly formModel = signal<FormModel>({
     accessibilityMode: false,
@@ -80,6 +80,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   protected readonly filteredExternalSources = filteredBy(this.externalSources, this.externalSourceQuery, 'name', 'host');
 
   protected readonly filterDisabled = computed(() => this.formModel().accessibilityMode || this.formModel().bulkMode);
+  protected readonly showFilter = computed(() => this.items().length > 3);
 
   constructor() {
 
