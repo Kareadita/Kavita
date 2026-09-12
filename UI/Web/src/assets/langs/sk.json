@@ -40,7 +40,8 @@
         "score-updated": "Aktualizácia hodnotenia",
         "want-to-read-add": "Chcem čítať: Pridať",
         "want-to-read-remove": "Chcem čítať: Odstrániť",
-        "review": "Zhodnotiť aktualizáciu"
+        "review": "Zhodnotiť aktualizáciu",
+        "read-status-update": "Prečítať aktualizáciu stavu"
     },
     "spoiler": {
         "click-to-show": "Spojler, kliknite na zobrazenie"
@@ -135,7 +136,8 @@
         "no-data": "{{typeahead.no-data}}",
         "delete-label": "{{common.remove}}",
         "series-name-header": "{{manage-matched-metadata.series-name-header}}",
-        "created-header": "{{manage-media-issues.created-header}}"
+        "created-header": "{{manage-media-issues.created-header}}",
+        "no-data-description": "Nemáte žiadne pozastavené seriály. Seriály, ktoré pozastavíte, sa zobrazia tu."
     },
     "theme-manager": {
         "set-default": "Nastaviť predvolené",
@@ -188,7 +190,8 @@
         "name-label": "Meno",
         "warning": "Pozor",
         "client-devices-header": "Klientske zariadenia",
-        "sendto-device-header": "Zariadenia založené na e-maile"
+        "sendto-device-header": "Zariadenia založené na e-maile",
+        "no-data-description": "Zatiaľ nemáte nastavené žiadne zariadenia využívajúce e-mail."
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
@@ -373,7 +376,8 @@
         "spin-off": "Spin Off",
         "prequel": "Prequel",
         "parent": "Nadradený",
-        "annual": "Ročný"
+        "annual": "Ročný",
+        "cameo": "Cameo"
     },
     "publication-status-pipe": {
         "ongoing": "Prebieha",
@@ -2647,7 +2651,33 @@
         "delete": "{{common.delete}}",
         "no-preview": "Toto písmo nie je možné zobraziť v ukážke. Predvolený štýl sa použije z knihy.",
         "brown-fox": "Rýchla hnedá líška preskakuje lenivého psa",
-        "filter-system-fonts-label": "Filtrovať systémové písma"
+        "filter-system-fonts-label": "Filtrovať systémové písma",
+        "wiki": "Wiki",
+        "google-fonts": "Fonty Google",
+        "add-font": "Pridať písmo",
+        "families": "Rodiny písiem",
+        "custom-only": "Len na zákazku",
+        "var": "VAR",
+        "variable": "Premenná",
+        "style": "štýl",
+        "styles": "štýly",
+        "file": "súbor",
+        "files": "súbory",
+        "in-this-family": "v tejto rodine písiem",
+        "styles-summary": "· {{styles}}",
+        "roman": "Rímske",
+        "italic": "Kurzíva",
+        "regular": "Regular",
+        "wght": "Sila",
+        "alphabet": "ABCDEFGHIJKLM abcdefghijklm 0123456789",
+        "weight-axis": "Hrúbka čiary",
+        "weight-axis-hint": "Potiahnutím zobrazíte ukážku celého rozsahu",
+        "weight-thin": "Tenké",
+        "weight-black": "čierna",
+        "reading-sample": "Ukážka",
+        "reading-sample-text": "Pomaly otáčala stránku, svetlo lampy zachytávalo každé písmeno. Z chrbtice sa vznášali šepkané príbehy o atramente a papieri, päť boxerských čarodejníkov rýchlo vyskočilo a noc čítala ďalej.",
+        "provider-note-system": "Zabudované, vždy k dispozícii",
+        "provider-note-custom": "Nahrané vami"
     },
     "library-type-subtitle-pipe": {
         "book": "Knižnica s univerzálnymi knihami.",
@@ -2767,7 +2797,9 @@
         "add-auth-key": "Nový",
         "description": "Autorizačný kľúč je ako heslo. Jeho zmena zneplatní všetkých existujúcich klientov.",
         "copy-key": "{{common.copy}}",
-        "clients-opds-error": "Nepodarilo sa načítať URL adresu OPDS pre kľúč: {{key}}"
+        "clients-opds-error": "Nepodarilo sa načítať URL adresu OPDS pre kľúč: {{key}}",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "Zatiaľ nemáte žiadne autorizačné kľúče."
     },
     "create-auth-key": {
         "create-title": "Vytvor autorizačný kľúč",
@@ -2929,5 +2961,83 @@
         "filter-match": "Zhoda",
         "filter-metadata": "Metadáta",
         "filter-scrobble": "Scrobblovanie"
+    },
+    "search-input": {
+        "clear": "Vymazať vyhľadávanie"
+    },
+    "time-difference-pipe": {
+        "never": "Nikdy",
+        "just-now": "práve teraz",
+        "min": {
+            "ago": "pred minútou",
+            "in": "o chvíľu"
+        },
+        "mins": {
+            "ago": "Pred {{value}} minútami",
+            "in": "o {{value}} minút"
+        },
+        "hour": {
+            "ago": "pred hodinou",
+            "in": "o hodinu"
+        },
+        "hours": {
+            "ago": "Pred {{value}} hodinami",
+            "in": "o {{value}} hodín"
+        },
+        "day": {
+            "ago": "pred jedným dňom",
+            "in": "za deň"
+        },
+        "days": {
+            "ago": "Pred {{value}} dňami",
+            "in": "o {{value}} dní"
+        },
+        "month": {
+            "ago": "pred mesiacom",
+            "in": "o mesiac"
+        },
+        "months": {
+            "ago": "Pred {{value}} mesiacmi",
+            "in": "o {{value}} mesiacov"
+        },
+        "year": {
+            "ago": "pred rokom",
+            "in": "o rok"
+        },
+        "years": {
+            "ago": "Pred {{value}} rokmi",
+            "in": "o {{value}} rokov"
+        }
+    },
+    "edit-license-key": {
+        "activate-license-label": "Licenčný kľúč",
+        "activate-email-label": "{{common.email}}",
+        "activate-discordId-label": "ID používateľa Discordu",
+        "activate-discordId-tooltip": "Prepojte svoj účet na Discorde so službou Kavita+. Získate tak prístup k skrytým kanálom, kde môžete pomôcť formovať podobu služby Kavita.",
+        "discord-validation": "Toto nie je platné ID používateľa služby Discord. Vaše ID používateľa nie je vaše používateľské meno na Discorde.",
+        "email-help": "Toto je e-mail registrovaný v službe Stripe.",
+        "license-help": "Z bezpečnostných dôvodov je uložený kľúč na disku zašifrovaný; pre jeho aktualizáciu ho zadajte znova.",
+        "help-label": "{{common.help}}",
+        "license-length-validation": "Licenčný kľúč by mal mať dĺžku 19 znakov",
+        "license-format-validation": "Očakáva sa, že licencia bude mať formát: XXXX-XXXX-XXXX-XXXX",
+        "discord-format-validation": "Očakáva sa, že Discord ID bude 19-miestne ID používateľa",
+        "email-format-validation": "Musí to byť platná e-mailová adresa"
+    },
+    "manage-license-key-modal": {
+        "title": "Licencia Kavita+",
+        "last-validated": "naposledy overené pred {{timeAgo}}",
+        "activate-license": "Aktivovať licenciu",
+        "close": "{{common.close}}",
+        "delete-license": "Odstrániť licenciu",
+        "reset-license": "Obnoviť licenciu",
+        "save": "{{common.save}}"
+    },
+    "manage-license-modal": {
+        "hub-title": "Spravovať predplatné",
+        "hub-subtitle": "Vyberte si, čo chcete urobiť s plánom Kavita+ pre tento server.",
+        "renew-title": "Obnoviť predplatné",
+        "renew-desc": "Znova aktivujte Kavita+ pre všetkých na tomto serveri.",
+        "cancel-title": "Zrušiť predplatné",
+        "cancel-desc": "Ukončite svoj plán. Služba Kavita+ zostane aktívna až do dátumu fakturácie – ďalšie poplatky vám už nebudú účtované."
     }
 }
