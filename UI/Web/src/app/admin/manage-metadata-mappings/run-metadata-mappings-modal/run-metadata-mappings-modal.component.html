@@ -11,67 +11,63 @@
     </div>
 
     <div class="modal-body scrollable-modal py-4">
-      <form>
-
-        <div class="border rounded p-3 mb-4">
-          <div class="d-flex justify-content-between align-items-start gap-3">
-            <div class="flex-grow-1">
-              <label for="all-libraries" class="form-label fw-semibold mb-1">
-                {{ t('all-libraries-label') }}
-              </label>
-              <div class="form-text mt-0">
-                {{ t('all-libraries-tooltip') }}
-              </div>
-            </div>
-
-            <div class="form-check form-switch mt-1">
-              <input
-                id="all-libraries"
-                type="checkbox"
-                class="form-check-input"
-                [formField]="formGroup.allLibraries"
-                role="switch">
+      <div class="border rounded p-3 mb-4">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div class="flex-grow-1">
+            <label for="all-libraries" class="form-label fw-semibold mb-1">
+              {{ t('all-libraries-label') }}
+            </label>
+            <div class="form-text mt-0">
+              {{ t('all-libraries-tooltip') }}
             </div>
           </div>
+
+          <div class="form-check form-switch mt-1">
+            <input
+              id="all-libraries"
+              type="checkbox"
+              class="form-check-input"
+              [formField]="formGroup.allLibraries"
+              role="switch">
+          </div>
         </div>
+      </div>
 
-        <div class="d-flex flex-column gap-4">
+      <div class="d-flex flex-column gap-4">
 
-          @if (includedLibrariesTypeaheadSettings(); as settings) {
-            <app-setting-item [title]="t('included-libraries-title')" [subtitle]="t('included-libraries-tooltip')" [canEdit]="false" [showEdit]="false">
-              <ng-template #view>
-                <app-typeahead [config]="settings"
-                  (selectedData)="updateLibrarySelection('includedLibraries', $event)">
-                  <ng-template #badgeItem let-item>
-                    {{ item.name }}
-                  </ng-template>
-                  <ng-template #optionItem let-item>
-                    {{ item.name }}
-                  </ng-template>
-                </app-typeahead>
-              </ng-template>
-            </app-setting-item>
-          }
+        @if (includedLibrariesTypeaheadSettings(); as settings) {
+          <app-setting-item [title]="t('included-libraries-title')" [subtitle]="t('included-libraries-tooltip')" [canEdit]="false" [showEdit]="false">
+            <ng-template #view>
+              <app-typeahead [config]="settings"
+                             (selectedData)="updateLibrarySelection('includedLibraries', $event)">
+                <ng-template #badgeItem let-item>
+                  {{ item.name }}
+                </ng-template>
+                <ng-template #optionItem let-item>
+                  {{ item.name }}
+                </ng-template>
+              </app-typeahead>
+            </ng-template>
+          </app-setting-item>
+        }
 
-          @if (excludedLibrariesTypeaheadSettings(); as settings) {
-            <app-setting-item [title]="t('excluded-libraries-title')" [subtitle]="t('excluded-libraries-tooltip')" [canEdit]="false" [showEdit]="false">
-              <ng-template #view>
-                <app-typeahead [config]="settings"
-                  (selectedData)="updateLibrarySelection('excludedLibraries', $event)">
-                  <ng-template #badgeItem let-item>
-                    {{ item.name }}
-                  </ng-template>
-                  <ng-template #optionItem let-item>
-                    {{ item.name }}
-                  </ng-template>
-                </app-typeahead>
-              </ng-template>
-            </app-setting-item>
-          }
+        @if (excludedLibrariesTypeaheadSettings(); as settings) {
+          <app-setting-item [title]="t('excluded-libraries-title')" [subtitle]="t('excluded-libraries-tooltip')" [canEdit]="false" [showEdit]="false">
+            <ng-template #view>
+              <app-typeahead [config]="settings"
+                             (selectedData)="updateLibrarySelection('excludedLibraries', $event)">
+                <ng-template #badgeItem let-item>
+                  {{ item.name }}
+                </ng-template>
+                <ng-template #optionItem let-item>
+                  {{ item.name }}
+                </ng-template>
+              </app-typeahead>
+            </ng-template>
+          </app-setting-item>
+        }
 
-        </div>
-
-      </form>
+      </div>
     </div>
 
     <div class="modal-footer">
