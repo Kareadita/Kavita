@@ -11,7 +11,7 @@
     </div>
 
     <div class="modal-body scrollable-modal py-4">
-      <form [formGroup]="requestForm">
+      <form>
 
         <div class="border rounded p-3 mb-4">
           <div class="d-flex justify-content-between align-items-start gap-3">
@@ -29,7 +29,7 @@
                 id="all-libraries"
                 type="checkbox"
                 class="form-check-input"
-                formControlName="allLibraries"
+                [formField]="formGroup.allLibraries"
                 role="switch">
             </div>
           </div>
@@ -86,7 +86,7 @@
         type="button"
         class="btn btn-primary"
         (click)="submit()"
-        [disabled]="isSaving() || requestForm.invalid">
+        [disabled]="isSaving() || formGroup().invalid()">
 
         @if (isSaving()) {
           <span
