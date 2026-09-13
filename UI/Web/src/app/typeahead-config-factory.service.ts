@@ -85,14 +85,11 @@ export class TypeaheadConfigFactoryService {
   forLibraries(params: TypeaheadFactoryLibraryParameters) {
     const {libraries, savedData, overrides} = params;
 
-    const selectedLibs = this.accountService.userPreferences()!.socialPreferences.socialLibraries;
-
     const settings = new TypeaheadConfig<Library>();
     settings.multiple = true;
     settings.unique = true;
     settings.minCharacters = 0;
     settings.addIfNonExisting = false;
-    settings.savedData = libraries.filter(l => selectedLibs.includes(l.id));
     settings.compareFn = (libs, filter) => libs.filter(l => l.name.toLowerCase().includes(filter.toLowerCase()));
     settings.compareFnForAdd = (options: Library[], filter: string) => {
       return options.filter(l => this.utilityService.filterMatches(l.name, filter));
@@ -104,7 +101,9 @@ export class TypeaheadConfigFactoryService {
       return a.id === b.id;
     }
 
-    if (savedData !== undefined) settings.savedData = savedData;
+    if (savedData !== undefined) {
+      settings.savedData = savedData;
+    }
 
     return this.applyOverrides(settings, overrides);
   }

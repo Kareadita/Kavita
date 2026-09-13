@@ -144,8 +144,14 @@ export class ManageUserPreferencesComponent implements OnInit {
       libraries: this.libraryService.getLibraries(),
       ageRatings: this.metadataService.getAllAgeRatings(),
     }).subscribe(({pref, libraries, ageRatings}) => {
+      const socialLibs = this.accountService.userPreferences()?.socialPreferences.socialLibraries ?? [];
+
       this.ageRatings.set([{value: AgeRating.NotApplicable, title: '',}, ...ageRatings]);
-      this.socialLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({id: 'social-libraries', libraries}));
+      this.socialLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({
+        id: 'social-libraries',
+        libraries,
+        savedData: libraries.filter(l => socialLibs.includes(l.id))
+      }));
       this.formModel.set(pref);
 
       this.loading.set(false);
