@@ -3,7 +3,7 @@
   @if (alwaysShow() || items() && items().length > 0) {
     <div class="carousel-container mb-3">
       <div>
-        @if (actionables.length > 0) {
+        @if (actionables().length > 0) {
           <app-card-actionables [entity]="actionableEntity()" [actions]="actionables()" (actionHandler)="performAction($event)" />
         }
         <h4 class="header" (click)="sectionClicked()" [ngClass]="{'non-selectable': !clickableTitle()}">
