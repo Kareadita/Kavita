@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component, inject, input, OnInit, signal} from '@angular/core';
-import {ReactiveFormsModule} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {UserReview} from "../../_models/user-review";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -28,7 +27,7 @@ interface ReviewFormModel {
 
 @Component({
   selector: 'app-review-series-modal',
-  imports: [ReactiveFormsModule, TranslocoDirective, NgxStarsModule, FormFieldDirective, ValidationErrorsComponent, FormField],
+  imports: [TranslocoDirective, NgxStarsModule, FormFieldDirective, ValidationErrorsComponent, FormField],
   templateUrl: './review-modal.component.html',
   styleUrls: ['./review-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

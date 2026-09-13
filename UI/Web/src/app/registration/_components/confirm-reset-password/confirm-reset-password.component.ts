@@ -1,5 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from '@openng/ngx-toastr';
 import {NgTemplateOutlet} from '@angular/common';
@@ -10,27 +9,35 @@ import {AccountService} from "../../../_services/account.service";
 import {NavService} from "../../../_services/nav.service";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {email, form, FormField, maxLength, minLength, required} from "@angular/forms/signals";
 
 @Component({
     selector: 'app-confirm-reset-password',
     templateUrl: './confirm-reset-password.component.html',
     styleUrls: ['./confirm-reset-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent]
+  imports: [SplashContainerComponent, NgbTooltip, NgTemplateOutlet, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent, FormField]
 })
 export class ConfirmResetPasswordComponent {
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private accountService = inject(AccountService);
   private toastr = inject(ToastrService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private navService = inject(NavService);
 
-
-  token: string = '';
-  registerForm: FormGroup = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.maxLength(256), Validators.minLength(6)]),
+  formModel = signal({
+    email: '',
+    password: '',
+    token: '',
+  });
+  formGroup = form(this.formModel, path => {
+    required(path.email);
+    email(path.email);
+    required(path.password);
+    minLength(path.password, 6);
+    maxLength(path.password, 256);
+    required(path.token);
   });
 
   constructor() {
@@ -40,7 +47,7 @@ export class ConfirmResetPasswordComponent {
 
 
     const token = this.route.snapshot.queryParamMap.get('token');
-    const email = this.route.snapshot.queryParamMap.get('email');
+    const queryEmail = this.route.snapshot.queryParamMap.get('email');
     if (token == undefined || token === '' || token === null) {
       // This is not a valid url, redirect to login
       this.toastr.error(translate('errors.invalid-password-reset-url'));
@@ -48,20 +55,18 @@ export class ConfirmResetPasswordComponent {
       return;
     }
 
-    this.token = token;
-    this.registerForm.get('email')?.setValue(email);
-    this.cdRef.markForCheck();
+    this.formModel.set({
+      token: token,
+      email: queryEmail ?? '',
+      password: ''
+    });
   }
 
 
   submit() {
-    const model = this.registerForm.getRawValue();
-    model.token = this.token;
-    this.accountService.confirmResetPasswordEmail(model).subscribe((response: string) => {
+    this.accountService.confirmResetPasswordEmail(this.formModel()).subscribe(() => {
       this.toastr.success(translate('toasts.password-reset'));
       this.router.navigateByUrl('login');
-    }, err => {
-      console.error(err, 'There was an error trying to confirm reset password');
     });
   }
 }

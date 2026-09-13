@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal} from '@angular/core';
-import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ToastrService} from '@openng/ngx-toastr';
 import {AccountService} from '../../_services/account.service';
@@ -25,7 +24,7 @@ interface LoginFormModel {
   templateUrl: './user-login.component.html',
   styleUrls: ['./user-login.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SplashContainerComponent, ReactiveFormsModule, RouterLink, TranslocoDirective, ImageComponent,
+  imports: [SplashContainerComponent, RouterLink, TranslocoDirective, ImageComponent,
     ValidationErrorsComponent, FormFieldDirective, FormField, FormRoot]
 })
 export class UserLoginComponent implements OnInit {

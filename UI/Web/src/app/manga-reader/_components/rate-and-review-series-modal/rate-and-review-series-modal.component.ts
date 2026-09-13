@@ -1,6 +1,5 @@
 import {Component, inject, input, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReviewService} from "../../../_services/review.service";
 import {form, FormField, minLength} from "@angular/forms/signals";
@@ -19,8 +18,6 @@ interface RateAndReviewForm {
 @Component({
   imports: [
     TranslocoDirective,
-    FormsModule,
-    ReactiveFormsModule,
     FormField,
     NgxStarsModule,
     FormFieldDirective,

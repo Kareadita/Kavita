@@ -324,7 +324,7 @@
                                   <select class="form-select" aria-describedby="book-reader-heading"
                                           [formField]="formGroup.bookReaderFontFamily">
                                     @for (opt of fonts(); track opt.id) {
-                                      <option [ngValue]="opt.family">
+                                      <option [value]="opt.family">
                                         {{opt | epubFontTitle}}
                                       </option>
                                     }
@@ -371,7 +371,7 @@
                                 <ng-template #edit>
                                   <select class="form-select" aria-describedby="book-reader-heading" [formField]="formGroup.bookReaderThemeName">
                                     @for (opt of bookColorThemesTranslated; track opt) {
-                                      <option [ngValue]="opt.name">{{opt.name | titlecase}}</option>
+                                      <option [value]="opt.name">{{opt.name | titlecase}}</option>
                                     }
                                   </select>
                                 </ng-template>

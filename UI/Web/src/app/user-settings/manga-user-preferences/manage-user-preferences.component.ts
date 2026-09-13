@@ -1,9 +1,8 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Preferences} from "../../_models/preferences/preferences";
 import {AccountService} from "../../_services/account.service";
 import {LocalizationService} from "../../_services/localization.service";
-import {NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {KavitaLocale} from "../../_models/metadata/language";
 import {toObservable} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, filter, forkJoin, switchMap} from "rxjs";
@@ -31,7 +30,6 @@ import {SettingSelectComponent} from "../../settings/_components/setting-enum-se
   selector: 'app-manga-user-preferences',
   imports: [
     TranslocoDirective,
-    ReactiveFormsModule,
     TitleCasePipe,
     SettingItemComponent,
     SettingSwitchComponent,
@@ -53,7 +51,6 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly localizationService = inject(LocalizationService);
   protected readonly licenseService = inject(LicenseService);
   private readonly libraryService = inject(LibraryService);
-  private readonly fb = inject(NonNullableFormBuilder);
   private readonly metadataService = inject(MetadataService);
   private readonly typeaheadSettingFactory = inject(TypeaheadConfigFactoryService);
 

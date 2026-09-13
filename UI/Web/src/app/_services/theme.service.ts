@@ -53,6 +53,7 @@ export class ThemeService {
 
   private themesSource = new ReplaySubject<SiteTheme[]>(1);
   public themes$ = this.themesSource.asObservable();
+  public themes = toSignal(this.themes$);
 
   private darkModeSource = new ReplaySubject<boolean>(1);
   public isDarkMode$ = this.darkModeSource.asObservable();
@@ -117,7 +118,13 @@ export class ThemeService {
     const formData = new FormData()
     formData.append('formFile', themeFile, fileEntry.relativePath);
 
-    return this.httpClient.post<SiteTheme>(this.baseUrl + 'theme/upload-theme', formData);
+    return this.httpClient.post<SiteTheme>(this.baseUrl + 'theme/upload-theme', formData).pipe(
+      tap(theme => {
+        const currentThemes = this.themes() ?? [];
+        const allThemes = [...currentThemes, theme];
+        this.themesSource.next(allThemes);
+      })
+    );
   }
 
   getColorScheme() {

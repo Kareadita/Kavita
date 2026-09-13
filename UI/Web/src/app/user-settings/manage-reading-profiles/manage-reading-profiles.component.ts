@@ -1,9 +1,7 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component, computed,
   DestroyRef,
-  effect,
   inject,
   OnInit,
   signal
@@ -27,11 +25,8 @@ import {
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
-import {User} from "../../_models/user/user";
-import {AccountService} from "../../_services/account.service";
 import {debounceTime, distinctUntilChanged, map, tap} from "rxjs/operators";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {BookPageLayoutMode} from "../../_models/readers/book-page-layout-mode";
 import {PdfTheme} from "../../_models/preferences/pdf-theme";
 import {PdfScrollMode} from "../../_models/preferences/pdf-scroll-mode";
@@ -94,13 +89,11 @@ import {
     VirtualScrollerModule,
     SentenceCasePipe,
     BookPageLayoutModePipe,
-    FormsModule,
     LayoutModePipe,
     PageSplitOptionPipe,
     PdfScrollModePipe,
     PdfSpreadModePipe,
     PdfThemePipe,
-    ReactiveFormsModule,
     ReaderModePipe,
     ReadingDirectionPipe,
     ScalingOptionPipe,
