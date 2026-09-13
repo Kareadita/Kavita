@@ -13,15 +13,13 @@
   @if (bulkMode() && bulkAction() === Action.CopySettings && srcLibrary) {
     <div class="alert alert-warning">
       {{t('bulk-copy-to', {libraryName: srcLibrary.name})}}
-      <form>
-        <div class="form-check form-switch">
-          <input id="bulk-action-type" type="checkbox" class="form-check-input" [formField]="bulkFormGroup.includeType" aria-describedby="include-type-help" switch>
-          <label class="form-check-label" for="bulk-action-type">{{t('include-type-label')}}</label>
-          <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="left" [ngbTooltip]="includeTypeTooltip" role="button" tabindex="0"></i>
-          <ng-template #includeTypeTooltip>{{t('include-type-tooltip')}}</ng-template>
-          <span class="visually-hidden" id="include-type-help"><ng-container [ngTemplateOutlet]="includeTypeTooltip" /></span>
-        </div>
-      </form>
+      <div class="form-check form-switch">
+        <input id="bulk-action-type" type="checkbox" class="form-check-input" [formField]="bulkFormGroup.includeType" aria-describedby="include-type-help" switch>
+        <label class="form-check-label" for="bulk-action-type">{{t('include-type-label')}}</label>
+        <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="left" [ngbTooltip]="includeTypeTooltip" role="button" tabindex="0"></i>
+        <ng-template #includeTypeTooltip>{{t('include-type-tooltip')}}</ng-template>
+        <span class="visually-hidden" id="include-type-help"><ng-container [ngTemplateOutlet]="includeTypeTooltip" /></span>
+      </div>
       <div class="mt-2">
         <button class="btn btn-secondary" (click)="resetBulkMode()">{{t('cancel')}}</button>
         <button class="btn btn-primary ms-1" (click)="applyBulkAction()" [disabled]="!libraryTracker.hasSomeSelected()">{{t('apply')}}</button>

@@ -8,18 +8,14 @@
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
 
-  <form>
-
-    <div class="m-3">
-      <label for="smart-filter-title" class="form-label">{{t('name-label')}}</label>
-      <input id="smart-filter-title" class="form-control" [formField]="formGroup.name" type="text"
-             [appFormField]="formGroup.name" aria-describedby="smart-filter-title-validations">
-      <app-validation-errors inputId="smart-filter-title" [control]="formGroup.name" [messages]="{
+  <div class="m-3 modal-body">
+    <label for="smart-filter-title" class="form-label">{{t('name-label')}}</label>
+    <input id="smart-filter-title" class="form-control" [formField]="formGroup.name" type="text"
+           [appFormField]="formGroup.name" aria-describedby="smart-filter-title-validations">
+    <app-validation-errors inputId="smart-filter-title" [control]="formGroup.name" [messages]="{
           duplicateName: t('filter-name-unique')
         }" />
-    </div>
-
-  </form>
+  </div>
 
   <div class="modal-footer">
     <button type="button" class="btn btn-light" (click)="close()">{{t('cancel')}}</button>

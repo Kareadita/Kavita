@@ -42,464 +42,462 @@
           @if (profileSelected()) {
             @let isNotDefault = formModel().kind !== ReadingProfileKind.Default;
 
-            <form>
-              <div class="mb-2 d-flex justify-content-between align-items-center">
-                <app-setting-item [title]="''" [showEdit]="false" [canEdit]="isNotDefault" [control]="formGroup.name">
-                  <ng-template #view>
+            <div class="mb-2 d-flex justify-content-between align-items-center">
+              <app-setting-item [title]="''" [showEdit]="false" [canEdit]="isNotDefault" [control]="formGroup.name">
+                <ng-template #view>
                       <span [class.clickable]="isNotDefault">
                         {{formGroup.name().value()}}
                       </span>
+                </ng-template>
+                <ng-template #edit>
+                  <input class="form-control" type="text" [formField]="formGroup.name" [appFormField]="formGroup.name">
+                </ng-template>
+              </app-setting-item>
+
+              @if (formModel().id !== 0) {
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-secondary me-2" (click)="setDevices()" [disabled]="!isNotDefault">
+                    {{t('set-devices')}}
+                  </button>
+                  <button type="button" class="btn btn-danger" (click)="delete(formModel())" [disabled]="!isNotDefault">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    <span class="visually-hidden">{{t('delete')}}</span>
+                  </button>
+                </div>
+              }
+
+            </div>
+
+            <div class="carousel-tabs-container mb-2">
+              <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs">
+
+                <li [ngbNavItem]="Tabs.ImageReader">
+                  <a ngbNavLink (click)="activeTabId = Tabs.ImageReader">{{Tabs.ImageReader | tabTitle}}</a>
+                  <ng-template ngbNavContent>
+                    @defer (when activeTabId === Tabs.ImageReader; prefetch on idle) {
+                      <div>
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('reading-direction-label')" [subtitle]="t('reading-direction-tooltip')">
+                            <ng-template #view>
+                              {{formGroup.readingDirection().value() | readingDirection}}
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-select [formField]="formGroup.readingDirection" [options]="readingDirections">
+                                <ng-template #template let-rd>
+                                  {{ rd | readingDirection }}
+                                </ng-template>
+                              </app-setting-select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('scaling-option-label')" [subtitle]="t('scaling-option-tooltip')">
+                            <ng-template #view>
+                              {{ formGroup.scalingOption().value() | scalingOption}}
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-select [formField]="formGroup.scalingOption" [options]="scalingOptions">
+                                <ng-template #template let-rd>
+                                  {{ rd | scalingOption }}
+                                </ng-template>
+                              </app-setting-select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('page-splitting-label')" [subtitle]="t('page-splitting-tooltip')">
+                            <ng-template #view>
+                              {{ formGroup.pageSplitOption().value() | pageSplitOption}}
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-select [formField]="formGroup.pageSplitOption" [options]="pageSplitOptions">
+                                <ng-template #template let-rd>
+                                  {{ rd | pageSplitOption }}
+                                </ng-template>
+                              </app-setting-select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('reading-mode-label')" [subtitle]="t('reading-mode-tooltip')">
+                            <ng-template #view>
+                              {{ formGroup.readerMode().value() | readerMode}}
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-select [formField]="formGroup.readerMode" [options]="readerModes">
+                                <ng-template #template let-rd>
+                                  {{ rd | readerMode }}
+                                </ng-template>
+                              </app-setting-select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('layout-mode-label')" [subtitle]="t('layout-mode-tooltip')">
+                            <ng-template #view>
+                              {{ formGroup.layoutMode().value() | layoutMode}}
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-select [formField]="formGroup.layoutMode" [options]="layoutModes">
+                                <ng-template #template let-rd>
+                                  {{ rd | layoutMode }}
+                                </ng-template>
+                              </app-setting-select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('background-color-label')" [subtitle]="t('background-color-tooltip')">
+                            <ng-template #view>
+                              <div class="d-flex align-items-center">
+                                <div class="color-box" [ngStyle]="{'background-color': formGroup.backgroundColor().value()}"></div>
+                                <span class="hex-code ms-2">{{ formGroup.backgroundColor().value().toUpperCase() }}</span>
+                              </div>
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-colour-picker
+                                [id]="'background-color'"
+                                [label]="t('background-color-label')"
+                                [color]="colorscapeService.hexToRGBA(formGroup.backgroundColor().value())"
+                                (rawColorChange)="handleBackgroundColorChange($event)"
+                                [selected]="false"
+                                [editMode]="true"
+                                [canChangeEditMode]="false"
+                              />
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-switch [title]="t('auto-close-menu-label')" [subtitle]="t('auto-close-menu-tooltip')">
+                            <ng-template>
+                              <div class="form-check form-switch float-end">
+                                <input type="checkbox" role="switch" class="form-check-input" aria-labelledby="auto-close-label" [formField]="formGroup.autoCloseMenu">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-switch [title]="t('show-screen-hints-label')" [subtitle]="t('show-screen-hints-tooltip')">
+                            <ng-template>
+                              <div class="form-check form-switch float-end">
+                                <input type="checkbox" role="switch"
+                                       [formField]="formGroup.showScreenHints" class="form-check-input"
+                                       aria-labelledby="auto-close-label">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-switch [title]="t('emulate-comic-book-label')" [subtitle]="t('emulate-comic-book-tooltip')">
+                            <ng-template>
+                              <div class="form-check form-switch float-end">
+                                <input type="checkbox" role="switch"
+                                       [formField]="formGroup.emulateBook" class="form-check-input"
+                                       aria-labelledby="auto-close-label">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-switch [title]="t('swipe-to-paginate-label')" [subtitle]="t('swipe-to-paginate-tooltip')">
+                            <ng-template>
+                              <div class="form-check form-switch float-end">
+                                <input type="checkbox" role="switch"
+                                       [formField]="formGroup.swipeToPaginate" class="form-check-input"
+                                       aria-labelledby="auto-close-label">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-switch [title]="t('allow-auto-webtoon-reader-label')" [subtitle]="t('allow-auto-webtoon-reader-tooltip')">
+                            <ng-template>
+                              <div class="form-check form-switch float-end">
+                                <input type="checkbox" role="switch"
+                                       [formField]="formGroup.allowAutomaticWebtoonReaderDetection" class="form-check-input"
+                                       aria-labelledby="auto-close-label">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('width-override-label')" [subtitle]="t('width-override-tooltip')">
+                            <ng-template #view>
+                              <label for="width-override-slider" class="form-label">
+                                {{ widthOverrideLabel() | sentenceCase }}
+                              </label>
+                            </ng-template>
+                            <ng-template #edit>
+                              <div class="d-flex justify-content-between align-items-center">
+                                <span>{{ widthOverrideLabel() | sentenceCase }}</span>
+                                <button class="btn btn-secondary" (click)="formGroup.widthOverride().value.set(null)">
+                                  {{t('reset')}}
+                                </button>
+                              </div>
+                              <input id="width-override-slider" type="range" class="form-range" [formField]="formGroup.widthOverride">
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('disable-width-override-label')" [subtitle]="t('disable-width-override-tooltip')">
+                            <ng-template #view>
+                              {{ formGroup.disableWidthOverride().value() | breakpoint}}
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-select [formField]="formGroup.disableWidthOverride" [options]="breakPoints">
+                                <ng-template #template let-rd>
+                                  {{ rd | breakpoint }}
+                                </ng-template>
+                              </app-setting-select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                      </div>
+                    }
                   </ng-template>
-                  <ng-template #edit>
-                    <input class="form-control" type="text" [formField]="formGroup.name" [appFormField]="formGroup.name">
+                </li>
+
+                <li [ngbNavItem]="Tabs.BookReader">
+                  <a ngbNavLink (click)="activeTabId = Tabs.BookReader">{{Tabs.BookReader | tabTitle}}</a>
+                  <ng-template ngbNavContent>
+                    @defer (when activeTabId === Tabs.BookReader; prefetch on idle) {
+                      <div>
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-switch [title]="t('tap-to-paginate-label')" [subtitle]="t('tap-to-paginate-tooltip')">
+                            <ng-template>
+                              <div class="form-check form-switch float-end">
+                                <input type="checkbox" role="switch"
+                                       [formField]="formGroup.bookReaderTapToPaginate" class="form-check-input"
+                                       aria-labelledby="auto-close-label">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-switch [title]="t('immersive-mode-label')" [subtitle]="t('immersive-mode-tooltip')">
+                            <ng-template>
+                              <div class="form-check form-switch float-end">
+                                <input type="checkbox" role="switch"
+                                       [formField]="formGroup.bookReaderImmersiveMode" class="form-check-input"
+                                       aria-labelledby="auto-close-label">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('reading-direction-label')" [subtitle]="t('reading-direction-tooltip')">
+                            <ng-template #view>
+                              {{ formGroup.bookReaderReadingDirection().value() | readingDirection }}
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-select [formField]="formGroup.bookReaderReadingDirection" [options]="readingDirections">
+                                <ng-template #template let-rd>
+                                  {{ rd | readingDirection}}
+                                </ng-template>
+                              </app-setting-select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('font-family-label')" [subtitle]="t('font-family-tooltip')">
+                            <ng-template #view>
+                              {{formGroup.bookReaderFontFamily().value() | titlecase}}
+                            </ng-template>
+                            <ng-template #edit>
+                              <select class="form-select" aria-describedby="book-reader-heading"
+                                      [formField]="formGroup.bookReaderFontFamily">
+                                @for (opt of fonts(); track opt.id) {
+                                  <option [value]="opt.family">
+                                    {{opt | epubFontTitle}}
+                                  </option>
+                                }
+                              </select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('writing-style-label')" [subtitle]="t('writing-style-tooltip')">
+                            <ng-template #view>
+                              {{ formGroup.bookReaderWritingStyle().value() | writingStyle }}
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-select [formField]="formGroup.bookReaderWritingStyle" [options]="bookWritingStyles">
+                                <ng-template #template let-rd>
+                                  {{ rd | writingStyle}}
+                                </ng-template>
+                              </app-setting-select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('layout-mode-book-label')" [subtitle]="t('layout-mode-book-tooltip')">
+                            <ng-template #view>
+                              {{ formGroup.bookReaderLayoutMode().value() | bookPageLayoutMode }}
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-select [formField]="formGroup.bookReaderLayoutMode" [options]="bookLayoutModes">
+                                <ng-template #template let-rd>
+                                  {{ rd | bookPageLayoutMode}}
+                                </ng-template>
+                              </app-setting-select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('color-theme-book-label')" [subtitle]="t('color-theme-book-tooltip')">
+                            <ng-template #view>
+                              {{formGroup.bookReaderThemeName().value()}}
+                            </ng-template>
+                            <ng-template #edit>
+                              <select class="form-select" aria-describedby="book-reader-heading" [formField]="formGroup.bookReaderThemeName">
+                                @for (opt of bookColorThemesTranslated; track opt) {
+                                  <option [value]="opt.name">{{opt.name | titlecase}}</option>
+                                }
+                              </select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('font-size-book-label')" [subtitle]="t('font-size-book-tooltip')">
+                            <ng-template #view>
+                              <span class="range-text">{{formGroup.bookReaderFontSize().value() + '%'}}</span>
+                            </ng-template>
+                            <ng-template #edit>
+                              <div class="row g-0">
+                                <div class="col-10">
+                                  <input type="range" class="form-range" id="fontsize" step="10" [formField]="formGroup.bookReaderFontSize">
+                                </div>
+                                <span class="ps-2 col-2 align-middle">{{formGroup.bookReaderFontSize().value() + '%'}}</span>
+                              </div>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('line-height-book-label')" [subtitle]="t('line-height-book-tooltip')">
+                            <ng-template #view>
+                              <span class="range-text">{{formGroup.bookReaderLineSpacing().value() + '%'}}</span>
+                            </ng-template>
+                            <ng-template #edit>
+                              <div class="row g-0">
+                                <div class="col-10">
+                                  <input type="range" class="form-range" id="linespacing" step="10"
+                                         [formField]="formGroup.bookReaderLineSpacing">
+                                </div>
+                                <span class="ps-2 col-2 align-middle">{{formGroup.bookReaderLineSpacing().value() + '%'}}</span>
+                              </div>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('margin-book-label')" [subtitle]="t('margin-book-tooltip')">
+                            <ng-template #view>
+                              <span class="range-text">{{formGroup.bookReaderMargin().value() + '%'}}</span>
+                            </ng-template>
+                            <ng-template #edit>
+                              <div class="row g-0">
+                                <div class="col-10">
+                                  <input type="range" class="form-range" id="margin" step="5" [formField]="formGroup.bookReaderMargin">
+                                </div>
+                                <span class="ps-2 col-2 align-middle">{{formGroup.bookReaderMargin().value() + '%'}}</span>
+                              </div>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-switch [title]="t('disable-bookmark-icon-label')" [subtitle]="t('disable-bookmark-icon-tooltip')">
+                            <ng-template>
+                              <div class="form-check form-switch float-end">
+                                <input type="checkbox" role="switch"
+                                       [formField]="formGroup.bookReaderDisableBookmarkIcon" class="form-check-input"
+                                       aria-labelledby="disable-bookmark-icon-label">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+                      </div>
+                    }
                   </ng-template>
-                </app-setting-item>
+                </li>
 
-                @if (formModel().id !== 0) {
-                  <div class="d-flex justify-content-between">
-                    <button class="btn btn-secondary me-2" (click)="setDevices()" [disabled]="!isNotDefault">
-                      {{t('set-devices')}}
-                    </button>
-                    <button type="button" class="btn btn-danger" (click)="delete(formModel())" [disabled]="!isNotDefault">
-                      <i class="fa fa-trash" aria-hidden="true"></i>
-                      <span class="visually-hidden">{{t('delete')}}</span>
-                    </button>
-                  </div>
-                }
-
-              </div>
-
-              <div class="carousel-tabs-container mb-2">
-                <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs">
-
-                  <li [ngbNavItem]="Tabs.ImageReader">
-                    <a ngbNavLink (click)="activeTabId = Tabs.ImageReader">{{Tabs.ImageReader | tabTitle}}</a>
-                    <ng-template ngbNavContent>
-                      @defer (when activeTabId === Tabs.ImageReader; prefetch on idle) {
-                        <div>
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('reading-direction-label')" [subtitle]="t('reading-direction-tooltip')">
-                              <ng-template #view>
-                                {{formGroup.readingDirection().value() | readingDirection}}
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-select [formField]="formGroup.readingDirection" [options]="readingDirections">
-                                  <ng-template #template let-rd>
-                                    {{ rd | readingDirection }}
-                                  </ng-template>
-                                </app-setting-select>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('scaling-option-label')" [subtitle]="t('scaling-option-tooltip')">
-                              <ng-template #view>
-                                {{ formGroup.scalingOption().value() | scalingOption}}
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-select [formField]="formGroup.scalingOption" [options]="scalingOptions">
-                                  <ng-template #template let-rd>
-                                    {{ rd | scalingOption }}
-                                  </ng-template>
-                                </app-setting-select>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('page-splitting-label')" [subtitle]="t('page-splitting-tooltip')">
-                              <ng-template #view>
-                                {{ formGroup.pageSplitOption().value() | pageSplitOption}}
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-select [formField]="formGroup.pageSplitOption" [options]="pageSplitOptions">
-                                  <ng-template #template let-rd>
-                                    {{ rd | pageSplitOption }}
-                                  </ng-template>
-                                </app-setting-select>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('reading-mode-label')" [subtitle]="t('reading-mode-tooltip')">
-                              <ng-template #view>
-                                {{ formGroup.readerMode().value() | readerMode}}
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-select [formField]="formGroup.readerMode" [options]="readerModes">
-                                  <ng-template #template let-rd>
-                                    {{ rd | readerMode }}
-                                  </ng-template>
-                                </app-setting-select>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('layout-mode-label')" [subtitle]="t('layout-mode-tooltip')">
-                              <ng-template #view>
-                                {{ formGroup.layoutMode().value() | layoutMode}}
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-select [formField]="formGroup.layoutMode" [options]="layoutModes">
-                                  <ng-template #template let-rd>
-                                    {{ rd | layoutMode }}
-                                  </ng-template>
-                                </app-setting-select>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('background-color-label')" [subtitle]="t('background-color-tooltip')">
-                              <ng-template #view>
-                                <div class="d-flex align-items-center">
-                                  <div class="color-box" [ngStyle]="{'background-color': formGroup.backgroundColor().value()}"></div>
-                                  <span class="hex-code ms-2">{{ formGroup.backgroundColor().value().toUpperCase() }}</span>
-                                </div>
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-colour-picker
-                                  [id]="'background-color'"
-                                  [label]="t('background-color-label')"
-                                  [color]="colorscapeService.hexToRGBA(formGroup.backgroundColor().value())"
-                                  (rawColorChange)="handleBackgroundColorChange($event)"
-                                  [selected]="false"
-                                  [editMode]="true"
-                                  [canChangeEditMode]="false"
-                                />
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-switch [title]="t('auto-close-menu-label')" [subtitle]="t('auto-close-menu-tooltip')">
-                              <ng-template>
-                                <div class="form-check form-switch float-end">
-                                  <input type="checkbox" role="switch" class="form-check-input" aria-labelledby="auto-close-label" [formField]="formGroup.autoCloseMenu">
-                                </div>
-                              </ng-template>
-                            </app-setting-switch>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-switch [title]="t('show-screen-hints-label')" [subtitle]="t('show-screen-hints-tooltip')">
-                              <ng-template>
-                                <div class="form-check form-switch float-end">
-                                  <input type="checkbox" role="switch"
-                                         [formField]="formGroup.showScreenHints" class="form-check-input"
-                                         aria-labelledby="auto-close-label">
-                                </div>
-                              </ng-template>
-                            </app-setting-switch>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-switch [title]="t('emulate-comic-book-label')" [subtitle]="t('emulate-comic-book-tooltip')">
-                              <ng-template>
-                                <div class="form-check form-switch float-end">
-                                  <input type="checkbox" role="switch"
-                                         [formField]="formGroup.emulateBook" class="form-check-input"
-                                         aria-labelledby="auto-close-label">
-                                </div>
-                              </ng-template>
-                            </app-setting-switch>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-switch [title]="t('swipe-to-paginate-label')" [subtitle]="t('swipe-to-paginate-tooltip')">
-                              <ng-template>
-                                <div class="form-check form-switch float-end">
-                                  <input type="checkbox" role="switch"
-                                         [formField]="formGroup.swipeToPaginate" class="form-check-input"
-                                         aria-labelledby="auto-close-label">
-                                </div>
-                              </ng-template>
-                            </app-setting-switch>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-switch [title]="t('allow-auto-webtoon-reader-label')" [subtitle]="t('allow-auto-webtoon-reader-tooltip')">
-                              <ng-template>
-                                <div class="form-check form-switch float-end">
-                                  <input type="checkbox" role="switch"
-                                         [formField]="formGroup.allowAutomaticWebtoonReaderDetection" class="form-check-input"
-                                         aria-labelledby="auto-close-label">
-                                </div>
-                              </ng-template>
-                            </app-setting-switch>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('width-override-label')" [subtitle]="t('width-override-tooltip')">
-                              <ng-template #view>
-                                <label for="width-override-slider" class="form-label">
-                                  {{ widthOverrideLabel() | sentenceCase }}
-                                </label>
-                              </ng-template>
-                              <ng-template #edit>
-                                <div class="d-flex justify-content-between align-items-center">
-                                  <span>{{ widthOverrideLabel() | sentenceCase }}</span>
-                                  <button class="btn btn-secondary" (click)="formGroup.widthOverride().value.set(null)">
-                                    {{t('reset')}}
-                                  </button>
-                                </div>
-                                <input id="width-override-slider" type="range" class="form-range" [formField]="formGroup.widthOverride">
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('disable-width-override-label')" [subtitle]="t('disable-width-override-tooltip')">
-                              <ng-template #view>
-                                {{ formGroup.disableWidthOverride().value() | breakpoint}}
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-select [formField]="formGroup.disableWidthOverride" [options]="breakPoints">
-                                  <ng-template #template let-rd>
-                                    {{ rd | breakpoint }}
-                                  </ng-template>
-                                </app-setting-select>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                        </div>
-                      }
-                    </ng-template>
-                  </li>
-
-                  <li [ngbNavItem]="Tabs.BookReader">
-                    <a ngbNavLink (click)="activeTabId = Tabs.BookReader">{{Tabs.BookReader | tabTitle}}</a>
-                    <ng-template ngbNavContent>
-                      @defer (when activeTabId === Tabs.BookReader; prefetch on idle) {
-                        <div>
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-switch [title]="t('tap-to-paginate-label')" [subtitle]="t('tap-to-paginate-tooltip')">
-                              <ng-template>
-                                <div class="form-check form-switch float-end">
-                                  <input type="checkbox" role="switch"
-                                         [formField]="formGroup.bookReaderTapToPaginate" class="form-check-input"
-                                         aria-labelledby="auto-close-label">
-                                </div>
-                              </ng-template>
-                            </app-setting-switch>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-switch [title]="t('immersive-mode-label')" [subtitle]="t('immersive-mode-tooltip')">
-                              <ng-template>
-                                <div class="form-check form-switch float-end">
-                                  <input type="checkbox" role="switch"
-                                         [formField]="formGroup.bookReaderImmersiveMode" class="form-check-input"
-                                         aria-labelledby="auto-close-label">
-                                </div>
-                              </ng-template>
-                            </app-setting-switch>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('reading-direction-label')" [subtitle]="t('reading-direction-tooltip')">
-                              <ng-template #view>
-                                {{ formGroup.bookReaderReadingDirection().value() | readingDirection }}
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-select [formField]="formGroup.bookReaderReadingDirection" [options]="readingDirections">
-                                  <ng-template #template let-rd>
-                                    {{ rd | readingDirection}}
-                                  </ng-template>
-                                </app-setting-select>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                            <div class="row g-0 mt-4 mb-4">
-                              <app-setting-item [title]="t('font-family-label')" [subtitle]="t('font-family-tooltip')">
-                                <ng-template #view>
-                                  {{formGroup.bookReaderFontFamily().value() | titlecase}}
+                <li [ngbNavItem]="Tabs.PdfReader">
+                  <a ngbNavLink (click)="activeTabId = Tabs.PdfReader">{{Tabs.PdfReader | tabTitle}}</a>
+                  <ng-template ngbNavContent>
+                    @defer (when activeTabId === Tabs.PdfReader; prefetch on idle) {
+                      <div>
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('pdf-spread-mode-label')" [subtitle]="t('pdf-spread-mode-tooltip')">
+                            <ng-template #view>
+                              {{formGroup.pdfSpreadMode().value() | pdfSpreadMode}}
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-select [formField]="formGroup.pdfSpreadMode" [options]="pdfSpreadModes">
+                                <ng-template #template let-rd>
+                                  {{ rd | pdfSpreadMode}}
                                 </ng-template>
-                                <ng-template #edit>
-                                  <select class="form-select" aria-describedby="book-reader-heading"
-                                          [formField]="formGroup.bookReaderFontFamily">
-                                    @for (opt of fonts(); track opt.id) {
-                                      <option [value]="opt.family">
-                                        {{opt | epubFontTitle}}
-                                      </option>
-                                    }
-                                  </select>
-                                </ng-template>
-                              </app-setting-item>
-                            </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('writing-style-label')" [subtitle]="t('writing-style-tooltip')">
-                              <ng-template #view>
-                                {{ formGroup.bookReaderWritingStyle().value() | writingStyle }}
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-select [formField]="formGroup.bookReaderWritingStyle" [options]="bookWritingStyles">
-                                  <ng-template #template let-rd>
-                                    {{ rd | writingStyle}}
-                                  </ng-template>
-                                </app-setting-select>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('layout-mode-book-label')" [subtitle]="t('layout-mode-book-tooltip')">
-                              <ng-template #view>
-                                {{ formGroup.bookReaderLayoutMode().value() | bookPageLayoutMode }}
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-select [formField]="formGroup.bookReaderLayoutMode" [options]="bookLayoutModes">
-                                  <ng-template #template let-rd>
-                                    {{ rd | bookPageLayoutMode}}
-                                  </ng-template>
-                                </app-setting-select>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                            <div class="row g-0 mt-4 mb-4">
-                              <app-setting-item [title]="t('color-theme-book-label')" [subtitle]="t('color-theme-book-tooltip')">
-                                <ng-template #view>
-                                  {{formGroup.bookReaderThemeName().value()}}
-                                </ng-template>
-                                <ng-template #edit>
-                                  <select class="form-select" aria-describedby="book-reader-heading" [formField]="formGroup.bookReaderThemeName">
-                                    @for (opt of bookColorThemesTranslated; track opt) {
-                                      <option [value]="opt.name">{{opt.name | titlecase}}</option>
-                                    }
-                                  </select>
-                                </ng-template>
-                              </app-setting-item>
-                            </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('font-size-book-label')" [subtitle]="t('font-size-book-tooltip')">
-                              <ng-template #view>
-                                <span class="range-text">{{formGroup.bookReaderFontSize().value() + '%'}}</span>
-                              </ng-template>
-                              <ng-template #edit>
-                                <div class="row g-0">
-                                  <div class="col-10">
-                                    <input type="range" class="form-range" id="fontsize" step="10" [formField]="formGroup.bookReaderFontSize">
-                                  </div>
-                                  <span class="ps-2 col-2 align-middle">{{formGroup.bookReaderFontSize().value() + '%'}}</span>
-                                </div>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('line-height-book-label')" [subtitle]="t('line-height-book-tooltip')">
-                              <ng-template #view>
-                                <span class="range-text">{{formGroup.bookReaderLineSpacing().value() + '%'}}</span>
-                              </ng-template>
-                              <ng-template #edit>
-                                <div class="row g-0">
-                                  <div class="col-10">
-                                    <input type="range" class="form-range" id="linespacing" step="10"
-                                           [formField]="formGroup.bookReaderLineSpacing">
-                                  </div>
-                                  <span class="ps-2 col-2 align-middle">{{formGroup.bookReaderLineSpacing().value() + '%'}}</span>
-                                </div>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('margin-book-label')" [subtitle]="t('margin-book-tooltip')">
-                              <ng-template #view>
-                                <span class="range-text">{{formGroup.bookReaderMargin().value() + '%'}}</span>
-                              </ng-template>
-                              <ng-template #edit>
-                                <div class="row g-0">
-                                  <div class="col-10">
-                                    <input type="range" class="form-range" id="margin" step="5" [formField]="formGroup.bookReaderMargin">
-                                  </div>
-                                  <span class="ps-2 col-2 align-middle">{{formGroup.bookReaderMargin().value() + '%'}}</span>
-                                </div>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-switch [title]="t('disable-bookmark-icon-label')" [subtitle]="t('disable-bookmark-icon-tooltip')">
-                              <ng-template>
-                                <div class="form-check form-switch float-end">
-                                  <input type="checkbox" role="switch"
-                                         [formField]="formGroup.bookReaderDisableBookmarkIcon" class="form-check-input"
-                                         aria-labelledby="disable-bookmark-icon-label">
-                                </div>
-                              </ng-template>
-                            </app-setting-switch>
-                          </div>
-                        </div>
-                      }
-                    </ng-template>
-                  </li>
-
-                  <li [ngbNavItem]="Tabs.PdfReader">
-                    <a ngbNavLink (click)="activeTabId = Tabs.PdfReader">{{Tabs.PdfReader | tabTitle}}</a>
-                    <ng-template ngbNavContent>
-                      @defer (when activeTabId === Tabs.PdfReader; prefetch on idle) {
-                        <div>
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('pdf-spread-mode-label')" [subtitle]="t('pdf-spread-mode-tooltip')">
-                              <ng-template #view>
-                                {{formGroup.pdfSpreadMode().value() | pdfSpreadMode}}
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-select [formField]="formGroup.pdfSpreadMode" [options]="pdfSpreadModes">
-                                  <ng-template #template let-rd>
-                                    {{ rd | pdfSpreadMode}}
-                                  </ng-template>
-                                </app-setting-select>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('pdf-theme-label')" [subtitle]="t('pdf-theme-tooltip')">
-                              <ng-template #view>
-                                {{formGroup.pdfTheme().value() | pdfTheme}}
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-select [formField]="formGroup.pdfTheme" [options]="pdfThemes">
-                                  <ng-template #template let-rd>
-                                    {{ rd | pdfTheme}}
-                                  </ng-template>
-                                </app-setting-select>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
-
-                          <div class="row g-0 mt-4 mb-4">
-                            <app-setting-item [title]="t('pdf-scroll-mode-label')" [subtitle]="t('pdf-scroll-mode-tooltip')">
-                              <ng-template #view>
-                                {{formGroup.pdfScrollMode().value() | pdfScrollMode}}
-                              </ng-template>
-                              <ng-template #edit>
-                                <app-setting-select [formField]="formGroup.pdfScrollMode" [options]="pdfScrollModes">
-                                  <ng-template #template let-rd>
-                                    {{ rd | pdfScrollMode}}
-                                  </ng-template>
-                                </app-setting-select>
-                              </ng-template>
-                            </app-setting-item>
-                          </div>
+                              </app-setting-select>
+                            </ng-template>
+                          </app-setting-item>
                         </div>
 
-                      }
-                    </ng-template>
-                  </li>
-                </ul>
-              </div>
-            </form>
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('pdf-theme-label')" [subtitle]="t('pdf-theme-tooltip')">
+                            <ng-template #view>
+                              {{formGroup.pdfTheme().value() | pdfTheme}}
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-select [formField]="formGroup.pdfTheme" [options]="pdfThemes">
+                                <ng-template #template let-rd>
+                                  {{ rd | pdfTheme}}
+                                </ng-template>
+                              </app-setting-select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
+                          <app-setting-item [title]="t('pdf-scroll-mode-label')" [subtitle]="t('pdf-scroll-mode-tooltip')">
+                            <ng-template #view>
+                              {{formGroup.pdfScrollMode().value() | pdfScrollMode}}
+                            </ng-template>
+                            <ng-template #edit>
+                              <app-setting-select [formField]="formGroup.pdfScrollMode" [options]="pdfScrollModes">
+                                <ng-template #template let-rd>
+                                  {{ rd | pdfScrollMode}}
+                                </ng-template>
+                              </app-setting-select>
+                            </ng-template>
+                          </app-setting-item>
+                        </div>
+                      </div>
+
+                    }
+                  </ng-template>
+                </li>
+              </ul>
+            </div>
 
             <div [ngbNavOutlet]="nav"></div>
           }

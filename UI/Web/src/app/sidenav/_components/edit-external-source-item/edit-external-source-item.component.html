@@ -25,38 +25,38 @@
 
 
       <div #collapse="ngbCollapse" [ngbCollapse]="isViewMode()" (ngbCollapseChange)="isViewMode.set($event)">
-        <form>
-          <div class="form-group mb-3">
-            <label for="host">{{t('name-label')}}</label>
-            <input id="name" class="form-control" [formField]="formGroup.name" type="text"
-                   [appFormField]="formGroup.name" aria-describedby="name-validations">
 
-            <app-validation-errors inputId="name" [control]="formGroup.name" [messages]="{
+        <div class="form-group mb-3">
+          <label for="host">{{t('name-label')}}</label>
+          <input id="name" class="form-control" [formField]="formGroup.name" type="text"
+                 [appFormField]="formGroup.name" aria-describedby="name-validations">
+
+          <app-validation-errors inputId="name" [control]="formGroup.name" [messages]="{
                 notUnique: t('not-unique')
               }" />
-          </div>
+        </div>
 
-          <div class="form-group mb-3">
-            <label for="host">{{t('host-label')}}</label>
-            <input id="host" class="form-control" [formField]="formGroup.host" type="url"
-                   [appFormField]="formGroup.host" aria-describedby="host-validations">
+        <div class="form-group mb-3">
+          <label for="host">{{t('host-label')}}</label>
+          <input id="host" class="form-control" [formField]="formGroup.host" type="url"
+                 [appFormField]="formGroup.host" aria-describedby="host-validations">
 
 
-            <app-validation-errors inputId="host" [control]="formGroup.host" [messages]="{
+          <app-validation-errors inputId="host" [control]="formGroup.host" [messages]="{
                 notUnique: t('not-unique'),
               }" />
 
 
-          </div>
-          <div class="form-group mb-3">
-            <label for="api-key">{{t('api-key-label')}}</label>
-            <input id="api-key" class="form-control" [formField]="formGroup.apiKey" type="text"
-                   [appFormField]="formGroup.apiKey" aria-describedby="api-key-validations">
-            <app-validation-errors inputId="api-key" [control]="formGroup.apiKey" />
-            <span class="text-muted">{{t('api-key-tooltip')}}</span>
+        </div>
+        <div class="form-group mb-3">
+          <label for="api-key">{{t('api-key-label')}}</label>
+          <input id="api-key" class="form-control" [formField]="formGroup.apiKey" type="text"
+                 [appFormField]="formGroup.apiKey" aria-describedby="api-key-validations">
+          <app-validation-errors inputId="api-key" [control]="formGroup.apiKey" />
+          <span class="text-muted">{{t('api-key-tooltip')}}</span>
 
-          </div>
-        </form>
+        </div>
+
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
           <button type="submit" class="flex-fill btn btn-primary" aria-describedby="anilist-token-header" (click)="saveForm()">{{t('save')}}</button>
         </div>

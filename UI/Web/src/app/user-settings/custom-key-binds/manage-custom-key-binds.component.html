@@ -3,7 +3,7 @@
 
   </p>
 
-  <form class="row mb-4">
+  <div class="row mb-4">
 
     @for (keyBindGroup of filteredKeyBindGroups(); track keyBindGroup.title) {
       @if (!$first) {
@@ -50,12 +50,12 @@
 
                 <div class="float-end">
                   @if (elementState.value().length < MAX_KEYBINDS_PER_TARGET) {
-                    <button class="btn btn-sm" (click)="$event.preventDefault(); addKeyBind(element.target)" [disabled]="isReadOnly()" [ngbTooltip]="t('add', {target: settingDesc.title})">
+                    <button class="btn btn-sm" (click)="addKeyBind(element.target)" [disabled]="isReadOnly()" [ngbTooltip]="t('add', {target: settingDesc.title})">
                       <i class="fa fa-add" [attr.aria-label]="t('add', {target: element.target})"></i>
                     </button>
                   }
 
-                  <button class="btn btn-sm" (click)="$event.preventDefault(); resetKeybindsToDefaults(element.target)" [disabled]="isReadOnly()" [ngbTooltip]="t('reset', {target: settingDesc.title})">
+                  <button class="btn btn-sm" (click)="resetKeybindsToDefaults(element.target)" [disabled]="isReadOnly()" [ngbTooltip]="t('reset', {target: settingDesc.title})">
                     <i class="fa fa-recycle" [attr.aria-label]="t('reset', {target: element.target})"></i>
                   </button>
 
@@ -73,6 +73,6 @@
         </div>
       }
     }
-  </form>
+  </div>
 
 </ng-container>
