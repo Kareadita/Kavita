@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ToastrService} from '@openng/ngx-toastr';
-import {ReactiveFormsModule} from "@angular/forms";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
@@ -24,7 +23,6 @@ import {forkJoin} from "rxjs";
 @Component({
   selector: 'app-bulk-set-reading-profile-modal',
   imports: [
-    ReactiveFormsModule,
     TranslocoDirective,
     ListSelectModalComponent,
     SentenceCasePipe

@@ -1,13 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
-  DestroyRef,
-  effect,
   inject,
   input,
-  model, OnInit,
-  Resource, signal, untracked,
+  OnInit,
+  signal,
   viewChild
 } from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -17,11 +14,11 @@ import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {ThemeService} from "../../../_services/theme.service";
 import {MemberInfo} from "../../../_models/user/member-info";
 import {ReviewService} from "../../../_services/review.service";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {UserReviewExtended} from "../../../_models/user-review";
-import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {toObservable} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, switchMap, tap} from "rxjs";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
+import {form, FormField} from "@angular/forms/signals";
 
 @Component({
   selector: 'app-profile-review-list',
@@ -30,17 +27,17 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
     NgxStarsModule,
     ReviewListItemComponent,
     VirtualScrollerModule,
-    ReactiveFormsModule,
-    LoadingComponent
+    LoadingComponent,
+    FormField
   ],
   templateUrl: './profile-review-list.component.html',
   styleUrl: './profile-review-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileReviewListComponent implements OnInit {
+
   private readonly themeService = inject(ThemeService);
   private readonly reviewService = inject(ReviewService);
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly starsComponent = viewChild.required(NgxStarsComponent);
 
@@ -50,10 +47,11 @@ export class ProfileReviewListComponent implements OnInit {
   isLoading = signal<boolean>(true);
 
   starColor = this.themeService.getCssVariable('--rating-star-color');
-  formGroup = new FormGroup({
-    query: new FormControl('', []),
-    rating: new FormControl(0, []),
+  formModel = signal({
+    query: '',
+    rating: 0
   });
+  formGroup = form(this.formModel);
 
   trackByReview = (_index: number, review: UserReviewExtended): string => {
     return `${review.id}-${review.seriesId}-${review.chapterId || review.createdUtc}`;
@@ -67,15 +65,8 @@ export class ProfileReviewListComponent implements OnInit {
     return this.trackByReview(0, item1) === this.trackByReview(0, item2);
   };
 
-  ngOnInit() {
-    this.reviewService.getReviewsByUser(this.memberInfo().id, null, null).pipe(
-      tap(_ => this.isLoading.set(true)),
-      tap(reviews => this.reviews.set(reviews)),
-      tap(_ => this.isLoading.set(false)),
-    ).subscribe();
-
-    this.formGroup.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef),
+  constructor() {
+    toObservable(this.formModel).pipe(
       debounceTime(300),
       distinctUntilChanged(),
       switchMap(v => this.reviewService.getReviewsByUser(this.memberInfo().id, v.query?.trim() ?? null, v.rating ?? null)),
@@ -83,11 +74,20 @@ export class ProfileReviewListComponent implements OnInit {
     ).subscribe();
   }
 
+  ngOnInit() {
+    this.reviewService.getReviewsByUser(this.memberInfo().id, null, null).pipe(
+      tap(_ => this.isLoading.set(true)),
+      tap(reviews => this.reviews.set(reviews)),
+      tap(_ => this.isLoading.set(false)),
+    ).subscribe();
+  }
+
   updateRating(rating: number) {
-    this.formGroup.get('rating')!.setValue(rating);
+    this.formGroup.rating().value.set(rating);
   }
 
   resetRating() {
     this.starsComponent().setRating(0);
+    this.updateRating(0);
   }
 }

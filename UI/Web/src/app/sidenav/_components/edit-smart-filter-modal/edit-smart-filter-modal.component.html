@@ -8,24 +8,22 @@
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
 
-  <form [formGroup]="smartFilterForm">
+  <form>
 
     <div class="m-3">
       <label for="smart-filter-title" class="form-label">{{t('name-label')}}</label>
-      @if (smartFilterForm.get('name'); as formControl) {
-        <input id="smart-filter-title" class="form-control" formControlName="name" type="text"
-               [appFormField]="formControl" aria-describedby="smart-filter-title-validations">
-        <app-validation-errors inputId="smart-filter-title" [control]="formControl" [messages]="{
+      <input id="smart-filter-title" class="form-control" [formField]="formGroup.name" type="text"
+             [appFormField]="formGroup.name" aria-describedby="smart-filter-title-validations">
+      <app-validation-errors inputId="smart-filter-title" [control]="formGroup.name" [messages]="{
           duplicateName: t('filter-name-unique')
         }" />
-      }
     </div>
 
   </form>
 
   <div class="modal-footer">
     <button type="button" class="btn btn-light" (click)="close()">{{t('cancel')}}</button>
-    <button type="button" class="btn btn-primary" [disabled]="!smartFilterForm.valid" (click)="save()">{{t('save')}}</button>
+    <button type="button" class="btn btn-primary" [disabled]="formGroup().invalid()" (click)="save()">{{t('save')}}</button>
   </div>
 
 </ng-container>

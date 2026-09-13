@@ -1,14 +1,7 @@
-import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {tap} from "rxjs";
-import {toSignal} from "@angular/core/rxjs-interop";
+import {ChangeDetectionStrategy, Component, computed, effect, input, output, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
-
-export type TimeRangeFormGroup = FormGroup<{
-  startDate: FormControl<Date | null>,
-  endDate: FormControl<Date | null>,
-}>
+import {debounce, form, FormField} from "@angular/forms/signals";
 
 export type TimeRange = {
   startDate: Date | null,
@@ -18,7 +11,7 @@ export type TimeRange = {
 @Component({
   selector: 'app-smart-time-range-picker',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslocoDirective, FormFieldDirective],
+  imports: [TranslocoDirective, FormFieldDirective, FormField],
   templateUrl: './smart-time-range-picker.component.html',
   styleUrl: './smart-time-range-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,19 +23,19 @@ export class SmartTimeRangePickerComponent {
 
   timeRangeUpdate = output<TimeRange>();
 
-  readonly formGroup: TimeRangeFormGroup = new FormGroup({
-    startDate: new FormControl<Date | null>(null),
-    endDate: new FormControl<Date | null>(null),
+  formModel = signal<TimeRange>({
+    startDate: null,
+    endDate: null,
+  });
+  formGroup = form(this.formModel, path => {
+    debounce(path, 300);
   });
 
   readonly isOpen = signal(false);
   readonly dropDownMode = signal<'all' | 'year' | 'date'>('all');
 
-  readonly selectedTime = toSignal(this.formGroup.valueChanges,
-    { initialValue: {startDate: null, endDate: null} });
-
   readonly displayText = computed(() => {
-    const selectedTime = this.selectedTime();
+    const selectedTime = this.formModel();
     const start = selectedTime.startDate
     const end = selectedTime.endDate;
 
@@ -77,14 +70,13 @@ export class SmartTimeRangePickerComponent {
   })
 
   constructor() {
-    this.formGroup.valueChanges.pipe(
-      tap(obj => {
-        this.timeRangeUpdate.emit({
-          startDate: obj.startDate ? new Date(obj.startDate) : null,
-          endDate: obj.endDate ? new Date(obj.endDate) : null,
-        });
+    effect(() => {
+      const timeRange = this.formModel();
+      this.timeRangeUpdate.emit({
+        startDate: timeRange.startDate ? new Date(timeRange.startDate) : null,
+        endDate: timeRange.endDate ? new Date(timeRange.endDate) : null,
       })
-    ).subscribe();
+    });
   }
 
   toggleDropdown() {
@@ -97,14 +89,20 @@ export class SmartTimeRangePickerComponent {
   }
 
   selectForever() {
-    this.formGroup.setValue({ startDate: null, endDate: null });
+    this.formModel.set({
+      startDate: null,
+      endDate: null,
+    })
     this.closeDropdown();
   }
 
   setYearRange(year: number) {
     const startDate = new Date(year, 0, 1); // Jan 1
     const endDate = new Date(year, 11, 31); // Dec 31
-    this.formGroup.setValue({ startDate, endDate });
+    this.formModel.set({
+      startDate,
+      endDate
+    });
     this.closeDropdown();
   }
 
