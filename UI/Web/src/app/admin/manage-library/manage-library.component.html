@@ -94,7 +94,7 @@
       <div class="card-body py-2">
         <div class="form-check">
           <input id="select-all-cards" type="checkbox" class="form-check-input"
-                 [ngModel]="libraryTracker.allSelected()" (change)="toggleAll()" [indeterminate]="libraryTracker.hasSomeSelected()">
+                 [checked]="libraryTracker.allSelected()" (change)="toggleAll()" [indeterminate]="libraryTracker.hasSomeSelected()">
           <label for="select-all-cards" class="form-check-label">{{t('select-all')}}</label>
         </div>
       </div>
@@ -119,7 +119,7 @@
           <div class="d-flex align-items-center mb-3">
             <div class="form-check me-2">
               <input [id]="'select-library-card-' + idx" type="checkbox" class="form-check-input"
-                     [ngModel]="libraryTracker.isSelected(library)" (change)="handleSelection(library, idx)">
+                     [checked]="libraryTracker.isSelected(library)" (change)="handleSelection(library, idx)">
               <label [for]="'select-library-card-' + idx" class="visually-hidden">{{library.name}}</label>
             </div>
             <h5 class="card-title mb-0">

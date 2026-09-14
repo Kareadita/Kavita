@@ -22,6 +22,7 @@ using Kavita.Server.Extensions;
 using Kavita.Services.Plus;
 using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
@@ -179,7 +180,24 @@ public class PersonController(
     }
 
     /// <summary>
-    /// Attempts to download the cover from CoversDB (Note: Not yet release in Kavita)
+    /// Returns the CoversDB image url for a Person, if one can be matched. Does not apply the cover.
+    /// </summary>
+    /// <param name="personId"></param>
+    /// <returns>The remote url or an empty string when there is no match</returns>
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [PersonAccess]
+    [HttpGet("coversdb-image")]
+    public async Task<ActionResult<string>> GetCoversDbImage([FromQuery] int personId)
+    {
+        var ct = HttpContext.RequestAborted;
+        var person = await unitOfWork.PersonRepository.GetPersonById(personId, ct: ct);
+        if (person == null) return BadRequest(await localizationService.TranslateAsync(UserId, "person-doesnt-exist"));
+
+        return Ok(await coverDbService.GetPersonImageUrlAsync(person) ?? string.Empty);
+    }
+
+    /// <summary>
+    /// Attempts to download the cover from CoversDB
     /// </summary>
     /// <param name="personId"></param>
     /// <returns></returns>
@@ -187,11 +205,12 @@ public class PersonController(
     [HttpPost("fetch-cover")]
     public async Task<ActionResult<string>> DownloadCoverImage([FromQuery] int personId)
     {
-        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        var person = await unitOfWork.PersonRepository.GetPersonById(personId);
+        var ct = HttpContext.RequestAborted;
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        var person = await unitOfWork.PersonRepository.GetPersonById(personId, ct: ct);
         if (person == null) return BadRequest(await localizationService.TranslateAsync(UserId, "person-doesnt-exist"));
 
-        var personImage = await coverDbService.DownloadPersonImageAsync(person, settings.EncodeMediaAs);
+        var personImage = await coverDbService.DownloadPersonImageAsync(person, settings.EncodeMediaAs, ct: ct);
 
         if (string.IsNullOrEmpty(personImage))
         {
@@ -203,11 +222,12 @@ public class PersonController(
         imageService.UpdateColorScape(person);
         unitOfWork.PersonRepository.Update(person);
 
-        await unitOfWork.CommitAsync();
-        await eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(person.Id, "person"), false);
+        await unitOfWork.CommitAsync(ct);
+        await eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(person.Id, "person"), false, ct);
 
         return Ok(personImage);
     }
+
 
     /// <summary>
     /// Returns the top 20 series that the "person" is known for. This will use Average Rating when applicable (Kavita+ field), else it's a random sort

@@ -11,8 +11,12 @@ public interface ICoverDbService
 {
     Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat, CancellationToken ct = default);
     Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat, CancellationToken ct = default);
-    Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, CancellationToken ct = default);
-    Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url, CancellationToken ct = default);
+    /// <summary>
+    /// Returns the remote CoversDB url for a Person, without downloading or applying it
+    /// </summary>
+    Task<string?> GetPersonImageUrlAsync(Person person, CancellationToken ct = default);
+    Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string? targetDirectory = null, CancellationToken ct = default);
+    Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url, string? targetDirectory = null, CancellationToken ct = default);
     Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false, bool chooseBetterImage = true, CancellationToken ct = default);
     Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true, bool chooseBetterImage = false, CancellationToken ct = default);
     Task SetChapterCoverByUrl(Chapter chapter, string url, bool fromBase64 = true, bool chooseBetterImage = false, CancellationToken ct = default);
