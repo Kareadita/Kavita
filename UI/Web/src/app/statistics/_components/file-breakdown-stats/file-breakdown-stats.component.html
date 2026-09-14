@@ -55,8 +55,8 @@
                 {{t('download-file-for-extension-header')}}
               </ng-template>
               <ng-template let-item="row" ngx-datatable-cell-template>
-                <button class="btn btn-icon" style="color: var(--primary-color)" (click)="export(item.extension)" [disabled]="downloadInProgress[item.extension]">
-                  @if (downloadInProgress[item.extension]) {
+                <button class="btn btn-icon" style="color: var(--primary-color)" (click)="export(item.extension)" [disabled]="downloadInProgress()[item.extension]">
+                  @if (downloadInProgress()[item.extension]) {
                     <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
                   } @else {
                     <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
@@ -81,8 +81,8 @@
                 <h5 class="card-title mb-0" id="adhoctask--{{idx}}">
                   {{item.extension || t('not-classified')}}
                 </h5>
-                <button class="btn btn-icon" style="color: var(--primary-color)" (click)="export(item.extension)" [disabled]="downloadInProgress[item.extension]">
-                  @if (downloadInProgress[item.extension]) {
+                <button class="btn btn-icon" style="color: var(--primary-color)" (click)="export(item.extension)" [disabled]="downloadInProgress()[item.extension]">
+                  @if (downloadInProgress()[item.extension]) {
                     <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
                   } @else {
                     <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
