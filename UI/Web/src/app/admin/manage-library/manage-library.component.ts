@@ -6,7 +6,8 @@ import {
   DestroyRef,
   HostListener,
   inject,
-  OnInit, signal,
+  OnInit,
+  signal,
   TrackByFunction
 } from '@angular/core';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
@@ -53,7 +54,6 @@ import {
 import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
 import {form, FormField} from "@angular/forms/signals";
 import {Tracker} from "../../shared/utils/Tracker";
-import {FormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-manage-library',
@@ -63,7 +63,7 @@ import {FormsModule} from "@angular/forms";
   imports: [RouterLink, NgbTooltip, LibraryTypePipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe,
     LoadingComponent, CardActionablesComponent, NgTemplateOutlet,
     ResponsiveTableComponent, DatatableComponent, DataTableColumnHeaderDirective, DataTableColumnDirective,
-    DataTableColumnCellDirective, TimeDifferencePipe, FormField, FormsModule]
+    DataTableColumnCellDirective, TimeDifferencePipe, FormField]
 })
 export class ManageLibraryComponent implements OnInit {
 

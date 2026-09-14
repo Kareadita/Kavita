@@ -40,14 +40,14 @@
           <ng-template ngx-datatable-header-template>
             <div class="form-check">
               <input id="select-all" type="checkbox" class="form-check-input"
-                     [ngModel]="libraryTracker.allSelected()" (change)="toggleAll()" [indeterminate]="libraryTracker.hasSomeSelected()">
+                     [checked]="libraryTracker.allSelected()" (change)="toggleAll()" [indeterminate]="libraryTracker.hasSomeSelected()">
               <label for="select-all" class="form-check-label d-md-block d-none">{{t('select-all')}}</label>
             </div>
           </ng-template>
           <ng-template let-library="row" let-idx="rowIndex" ngx-datatable-cell-template>
             <div class="form-check">
               <input [id]="'select-library-' + idx" type="checkbox" class="form-check-input"
-                     [ngModel]="libraryTracker.isSelected(library)" (change)="handleSelection(library, idx)">
+                     [checked]="libraryTracker.isSelected(library)" (change)="handleSelection(library, idx)">
               <label [for]="'select-library-' + idx" class="form-check-label visually-hidden">{{library.name}}</label>
             </div>
           </ng-template>
