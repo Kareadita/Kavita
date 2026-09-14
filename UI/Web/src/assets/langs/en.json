@@ -2595,7 +2595,6 @@
         "title": "Edit {{collectionName}} Collection",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
         "name-label": "Name",
         "name-validation": "Name must be unique",
         "promote-label": "Promote",

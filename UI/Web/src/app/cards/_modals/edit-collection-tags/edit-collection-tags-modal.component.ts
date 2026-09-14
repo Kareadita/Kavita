@@ -1,28 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  effect,
-  inject,
-  input,
-  OnInit,
-  signal
-} from '@angular/core';
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {
-  NgbActiveModal,
-  NgbNav,
-  NgbNavContent,
-  NgbNavItem,
-  NgbNavLink,
-  NgbNavOutlet,
-  NgbPagination,
-  NgbTooltip
-} from '@ng-bootstrap/ng-bootstrap';
+import {ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal} from '@angular/core';
+import {NgbActiveModal, NgbPagination, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
-import {concat, debounceTime, delay, distinctUntilChanged, forkJoin, last, Observable, switchMap, tap} from 'rxjs';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {concat, delay, forkJoin, last, Observable, tap} from 'rxjs';
 import {DecimalPipe, NgTemplateOutlet} from "@angular/common";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
 import {
@@ -31,18 +10,15 @@ import {
 } from "../../../_services/cover-chooser-config-factory.service";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
-import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {matchesQuery} from "../../../_helpers/filtered";
 import {AccountService} from "../../../_services/account.service";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
-import {SelectionModel} from "../../../typeahead/_models/selection-model";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
-import {BreakpointService} from "../../../_services/breakpoint.service";
+import {Tracker} from "../../../shared/utils/Tracker";
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {Tabs} from "../../../_models/tabs";
-import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {SeriesService} from "../../../_services/series.service";
 import {CollectionTagService} from "../../../_services/collection-tag.service";
@@ -54,13 +30,24 @@ import {Pagination} from "../../../_models/pagination";
 import {Series} from "../../../_models/series";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {disabled, form, FormField, required, validateAsync} from "@angular/forms/signals";
+import {rxResource} from "@angular/core/rxjs-interop";
+import {FilterFieldComponent} from "../../../shared/_components/filter-field/filter-field.component";
+import {EditModalShellComponent} from "../../../shared/edit-modal-shell/edit-modal-shell.component";
+import {EditTabDirective} from "../../../shared/_directive/edit-tab.directive";
 
+interface FormModel {
+  title: string;
+  summary: string;
+  coverImageLocked: boolean;
+  promoted: boolean;
+}
 
 @Component({
   selector: 'app-edit-collection-tags',
-  imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
-    CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe, DefaultDatePipe,
-    SafeHtmlPipe, SafeUrlPipe, DecimalPipe, UtcToLocalTimePipe, TabTitlePipe, ValidationErrorsComponent, FormFieldDirective],
+  imports: [NgbPagination, CoverImageChooserComponent, NgbTooltip, TranslocoDirective, NgTemplateOutlet,
+    DefaultDatePipe, SafeHtmlPipe, SafeUrlPipe, DecimalPipe, UtcToLocalTimePipe, ValidationErrorsComponent,
+    FormFieldDirective, FormField, FilterFieldComponent, EditModalShellComponent, EditTabDirective],
   templateUrl: './edit-collection-tags-modal.component.html',
   styleUrls: ['./edit-collection-tags-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -69,137 +56,111 @@ export class EditCollectionTagsModalComponent implements OnInit {
 
   public readonly modal = inject(NgbActiveModal);
   public readonly utilityService = inject(UtilityService);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly seriesService = inject(SeriesService);
   private readonly collectionService = inject(CollectionTagService);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   private readonly libraryService = inject(LibraryService);
   private readonly uploadService = inject(UploadService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);
-  protected readonly breakpointService = inject(BreakpointService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   tag = input.required<UserCollection>();
 
-  series: Array<Series> = [];
-  selections!: SelectionModel<Series>;
-  isLoading: boolean = true;
-
-  pagination!: Pagination;
-  selectAll: boolean = true;
-  libraryNames!: any;
-  collectionTagForm!: FormGroup;
-  active = Tabs.General;
-  selectedCover: string = '';
-  coverImageDirty = false;
-  coverImageReset = false;
+  series = signal<Array<Series>>([]);
+  isLoading = signal(true);
+  pagination = signal<Pagination>({totalPages: 1, totalItems: 200, itemsPerPage: 200, currentPage: 0});
+  libraryNames = signal<{[key: number]: string}>({});
+  selectedCover = signal('');
+  coverImageDirty = signal(false);
+  coverImageReset = signal(false);
+  filterQuery = signal<string>('');
   chooserConfig = signal<CoverImageChooserConfig>({});
-  formGroup = new FormGroup({'filter': new FormControl('', [])});
+  activeTab = signal<Tabs>(Tabs.General);
+  protected readonly seriesTracker = Tracker.IdTracker<Series>();
 
+  private readonly formModel = signal<FormModel>({
+    title: '',
+    summary: '',
+    coverImageLocked: false,
+    promoted: false
+  });
 
-  get hasSomeSelected() {
-    return this.selections != null && this.selections.hasSomeSelected();
-  }
+  formGroup = form(this.formModel, p => {
+    required(p.title);
 
-  filterList = (listItem: Series) => matchesQuery(listItem, this.formGroup.get('filter')?.value || '',
-    'name', 'localizedName');
+    disabled(p.title, () => this.tag().source !== ScrobbleProvider.Kavita);
+    disabled(p.summary, () => this.tag().source !== ScrobbleProvider.Kavita);
+    disabled(p.promoted, () => !this.accountService.hasPromoteRole());
 
-  constructor() {
-    effect(() => {
-      if (!this.accountService.hasPromoteRole()) {
-        this.collectionTagForm.get('promoted')?.disable();
-        this.cdRef.markForCheck();
-      }
+    validateAsync(p.title, {
+      params: (ctx) => {
+        const name = ctx.value();
+        if (name.trim().length === 0 || name === this.tag().title) return undefined;
+        return name;
+      },
+      debounce: 100,
+      factory: (params) => rxResource({
+        params,
+        stream: ({params: name}) => this.collectionService.tagNameExists(name)
+      }),
+      onSuccess: (exists) => exists ? {kind: 'duplicateName'} : null,
+      onError: () => null
     });
-  }
+  });
 
+  protected readonly filteredSeries = computed(() =>
+    this.series().filter(s => matchesQuery(s, this.filterQuery(), 'name', 'localizedName')));
 
   ngOnInit(): void {
-    if (this.pagination == undefined) {
-      this.pagination = {totalPages: 1, totalItems: 200, itemsPerPage: 200, currentPage: 0};
-    }
     const tag = this.tag();
-    this.collectionTagForm = new FormGroup({
-      title: new FormControl(tag.title, { nonNullable: true, validators: [Validators.required] }),
-      summary: new FormControl(tag.summary, { nonNullable: true, validators: [] }),
-      coverImageLocked: new FormControl(tag.coverImageLocked, { nonNullable: true, validators: [] }),
-      promoted: new FormControl(tag.promoted, { nonNullable: true, validators: [] }),
+    this.formModel.set({
+      title: tag.title,
+      summary: tag.summary,
+      coverImageLocked: tag.coverImageLocked,
+      promoted: tag.promoted,
     });
-
-    if (tag.source !== ScrobbleProvider.Kavita) {
-      this.collectionTagForm.get('title')?.disable();
-      this.collectionTagForm.get('summary')?.disable();
-    }
-
-
-    this.collectionTagForm.get('title')?.valueChanges.pipe(
-      debounceTime(100),
-      distinctUntilChanged(),
-      switchMap(name => this.collectionService.tagNameExists(name)),
-      tap(exists => {
-        const isExistingName = this.collectionTagForm.get('title')?.value === this.tag().title;
-        if (!exists || isExistingName) {
-          this.collectionTagForm.get('title')?.setErrors(null);
-        } else {
-          this.collectionTagForm.get('title')?.setErrors({duplicateName: true})
-        }
-        this.cdRef.markForCheck();
-      }),
-      takeUntilDestroyed(this.destroyRef)
-      ).subscribe();
 
     this.loadSeries();
   }
 
   onPageChange(pageNum: number) {
-    this.pagination.currentPage = pageNum;
+    this.pagination.update(p => ({...p, currentPage: pageNum}));
     this.loadSeries();
   }
 
   toggleAll() {
-    this.selectAll = !this.selectAll;
-    this.series.forEach(s => this.selections.toggle(s, this.selectAll));
-    this.cdRef.markForCheck();
+    this.seriesTracker.setAll(!this.seriesTracker.allSelected());
   }
 
   loadSeries() {
     forkJoin([
-      this.seriesService.getSeriesForTag(this.tag().id, this.pagination.currentPage, this.pagination.itemsPerPage),
+      this.seriesService.getSeriesForTag(this.tag().id, this.pagination().currentPage, this.pagination().itemsPerPage),
       this.libraryService.getLibraryNames()
     ]).subscribe(results => {
       const series = results[0];
-      this.pagination = series.pagination;
-      this.series = series.result;
+      this.pagination.set(series.pagination);
+      this.series.set(series.result);
 
-      this.chooserConfig.set(this.coverChooserConfigFactory.forCollection(this.tag(), this.series));
+      this.chooserConfig.set(this.coverChooserConfigFactory.forCollection(this.tag(), this.series()));
 
-      this.selections = new SelectionModel<Series>(true, this.series);
-      this.isLoading = false;
+      this.seriesTracker.setData(this.series(), true);
+      this.isLoading.set(false);
 
-      this.libraryNames = results[1];
-      this.cdRef.markForCheck();
+      this.libraryNames.set(results[1]);
     });
   }
 
   handleSelection(item: Series) {
-    this.selections.toggle(item);
-    const numberOfSelected = this.selections.selected().length;
-    if (numberOfSelected == 0) {
-      this.selectAll = false;
-    } else if (numberOfSelected == this.series.length) {
-      this.selectAll = true;
-    }
-    this.cdRef.markForCheck();
+    this.seriesTracker.toggle(item);
   }
 
   libraryName(libraryId: number) {
-    return this.libraryNames[libraryId];
+    return this.libraryNames()[libraryId];
   }
 
   close() {
-    if (this.coverImageReset) {
+    if (this.coverImageReset()) {
       this.modal.close(modalSaved(this.tag(), true));
     } else {
       this.modal.dismiss();
@@ -207,15 +168,10 @@ export class EditCollectionTagsModalComponent implements OnInit {
   }
 
   async save() {
-    const unselectedIds = this.selections.unselected().map(s => s.id);
-    const tag = this.collectionTagForm.value;
+    const unselectedIds = this.seriesTracker.unselected().map(s => s.id);
+    const tag: UserCollection = {...this.tag(), ...this.formModel()};
 
-    tag.id = this.tag().id;
-    tag.title = this.collectionTagForm.get('title')!.value;
-    tag.summary = this.collectionTagForm.get('summary')!.value;
-
-
-    if (unselectedIds.length == this.series.length &&
+    if (unselectedIds.length == this.series().length &&
       !await this.confirmService.confirm(translate('toasts.no-series-collection-warning'))) {
       return;
     }
@@ -225,13 +181,12 @@ export class EditCollectionTagsModalComponent implements OnInit {
       this.collectionService.updateTag(tag).pipe(tap(t => updatedTag = t)),
     ];
 
-    const unselectedSeries = this.selections.unselected().map(s => s.id);
-    if (unselectedSeries.length > 0) {
-      apis.push(this.collectionService.updateSeriesForTag(tag, unselectedSeries));
+    if (unselectedIds.length > 0) {
+      apis.push(this.collectionService.updateSeriesForTag(tag, unselectedIds));
     }
 
-    if (this.coverImageDirty) {
-      apis.push(this.uploadService.updateCollectionCoverImage(this.tag().id, this.selectedCover));
+    if (this.coverImageDirty()) {
+      apis.push(this.uploadService.updateCollectionCoverImage(this.tag().id, this.selectedCover()));
     }
 
     concat(...apis).pipe(
@@ -239,19 +194,18 @@ export class EditCollectionTagsModalComponent implements OnInit {
       last()
     ).subscribe(() => {
       this.toastr.success(translate('toasts.collection-updated'));
-      this.modal.close(modalSaved(updatedTag ?? tag, this.coverImageDirty));
+      this.modal.close(modalSaved(updatedTag ?? tag, this.coverImageDirty()));
     });
   }
 
   handleCoverChanged(event: { isDirty: boolean; fileName: string }) {
-    this.coverImageDirty = event.isDirty;
-    this.selectedCover = event.fileName;
-    this.cdRef.markForCheck();
+    this.coverImageDirty.set(event.isDirty);
+    this.selectedCover.set(event.fileName);
   }
 
   handleReset() {
-    this.coverImageReset = true;
-    this.collectionTagForm.patchValue({ coverImageLocked: false });
+    this.coverImageReset.set(true);
+    this.formGroup.coverImageLocked().value.set(false);
     this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
   }
 

@@ -1,22 +1,14 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
-import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
-import {filter, map, of, startWith, switchMap, tap} from "rxjs";
-import {AgeRating, AgeRatings} from "../../_models/metadata/age-rating";
-import {ReadStatusTransitionRule} from "../../_models/kavitaplus/scrobble-providers/read-status-transition-rule";
-import {
-  ReviewScrobbleTarget,
-  ReviewScrobbleTargets
-} from "../../_models/kavitaplus/scrobble-providers/review-scrobble-target.enum";
+import {filter, forkJoin, map, of, switchMap, tap} from "rxjs";
+import {AgeRatings} from "../../_models/metadata/age-rating";
+import {ReviewScrobbleTargets} from "../../_models/kavitaplus/scrobble-providers/review-scrobble-target.enum";
 import {ScrobbleProviderSettings} from "../../_models/kavitaplus/scrobble-providers/scrobble-provider-settings";
-import {
-  ScrobbleReadStatus,
-  ScrobbleReadStatuses
-} from "../../_models/kavitaplus/scrobble-providers/scrobble-read-status.enum";
+import {ScrobbleReadStatuses} from "../../_models/kavitaplus/scrobble-providers/scrobble-read-status.enum";
 import {UserScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
-import {PublicationStatus, PublicationStatuses} from "../../_models/metadata/publication-status";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {catchError, debounceTime, distinctUntilChanged, take} from "rxjs/operators";
+import {PublicationStatuses} from "../../_models/metadata/publication-status";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
+import {catchError, debounceTime, take} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 import {ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
@@ -52,26 +44,17 @@ import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {ActivatedRoute} from "@angular/router";
 import {TypeaheadConfigFactoryService} from "../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {applyEach, disabled, FieldTree, form, FormField} from "@angular/forms/signals";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 
-type ReadStatusTransitionRuleFromGroup = FormGroup<{
-  enabled: FormControl<boolean>;
-  days: FormControl<number>;
-  transitionStatus: FormControl<ScrobbleReadStatus>;
-  excludedPublicationStatus: FormControl<PublicationStatus[]>;
-}>;
+interface ProviderFormEntry {
+  provider: ScrobbleProvider;
+  settings: ScrobbleProviderSettings;
+}
 
-type ScrobbleProviderSettingsFormGroup = FormGroup<{
-  progressScrobbling: FormControl<boolean>;
-  wantToReadSync: FormControl<boolean>;
-  ratingScrobbling: FormControl<boolean>;
-  reviewsScrobbling: FormControl<boolean>;
-  reviewScrobbleTarget: FormControl<ReviewScrobbleTarget>;
-  allLibraries: FormControl<boolean>;
-  libraries: FormControl<number[]>;
-  highestAgeRating:FormControl<AgeRating>;
-  inactiveSeriesRule: ReadStatusTransitionRuleFromGroup;
-  droppedSeriesRule: ReadStatusTransitionRuleFromGroup;
-}>;
+interface FormModel {
+  providers: ProviderFormEntry[];
+}
 
 const ProviderSupportedEvents: Record<ScrobbleProvider, ScrobbleEventType[]> = {
   [ScrobbleProvider.AniList]: [ScrobbleEventType.ScoreUpdated, ScrobbleEventType.Review, ScrobbleEventType.ChapterRead, ScrobbleEventType.AddWantToRead],
@@ -95,7 +78,6 @@ const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
   selector: 'app-manage-scrobble-providers',
   imports: [
     TranslocoDirective,
-    ReactiveFormsModule,
     ReviewScrobbleTargetNamePipe,
     ScrobbleReadStatusPipe,
     Select2,
@@ -112,7 +94,7 @@ const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
     UtcToLocalTimePipe,
     TimeDifferencePipe,
     TypeaheadComponent,
-    AgeRatingPipe, FormFieldDirective],
+    AgeRatingPipe, FormFieldDirective, FormField, SettingSelectComponent],
   templateUrl: './manage-scrobble-providers.component.html',
   styleUrl: './manage-scrobble-providers.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -121,7 +103,6 @@ export class ManageScrobbleProvidersComponent implements OnInit {
 
   protected readonly scrobbleService = inject(ScrobblingService);
   private readonly libraryService = inject(LibraryService);
-  private readonly fb = inject(NonNullableFormBuilder);
   private readonly destroyRef$ = inject(DestroyRef);
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
@@ -131,13 +112,26 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly typeaheadSettingsFactory = inject(TypeaheadConfigFactoryService);
 
-  formGroups = signal<Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup>>(new Map());
   userScrobbleProviders = signal<Map<ScrobbleProvider, UserScrobbleProvider>>(new Map());
-  loading = computed(() => this.formGroups().size === 0);
+  loading = computed(() => this.userScrobbleProviders().size === 0);
 
   isLoadingInBackground = signal(false);
   libraries = signal<Library[]>([]);
   backfillAttempts: Map<ScrobbleProvider, number> = new Map();
+
+  private readonly formModel = signal<FormModel>({providers: []});
+
+  protected readonly formGroup = form(this.formModel, p => {
+    applyEach(p.providers, entry => {
+      disabled(entry.settings.reviewScrobbleTarget, ({valueOf}) => !valueOf(entry.settings.reviewsScrobbling));
+    });
+  });
+
+  private readonly providerIndexes = computed(() =>
+    new Map(this.formGroup.providers().value().map((e, i) => [e.provider, i])));
+
+  /** Last settings sent to the server, so the autosave only fires for providers the user actually changed */
+  private readonly savedSettings = new Map<ScrobbleProvider, string>();
 
   private readonly publicationStatusPipe = new PublicationStatusPipe();
   private readonly scrobbleProviderNamePipe = new ScrobbleProviderNamePipe();
@@ -146,6 +140,27 @@ export class ManageScrobbleProvidersComponent implements OnInit {
     value: p,
     label: this.publicationStatusPipe.transform(p)
   }));
+
+  constructor() {
+    toObservable(this.formModel).pipe(
+      takeUntilDestroyed(this.destroyRef$),
+      debounceTime(500),
+      switchMap(model => {
+        const changed = model.providers.filter(e => this.savedSettings.get(e.provider) !== JSON.stringify(e.settings));
+        if (changed.length === 0) return of(null);
+
+        changed.forEach(e => this.savedSettings.set(e.provider, JSON.stringify(e.settings)));
+
+        return forkJoin(changed.map(e => this.scrobbleService.saveScrobbleSettings(e.provider, e.settings))).pipe(
+          catchError(err => {
+            console.error(err);
+            this.toastr.error(translate('errors.generic'));
+            return of(null);
+          })
+        );
+      })
+    ).subscribe();
+  }
 
   ngOnInit() {
     this.libraryService.getLibraries().subscribe(libraries => this.libraries.set(libraries));
@@ -171,83 +186,25 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   private loadData() {
     return this.scrobbleService.getScrobbleProviders()
       .pipe(tap(userScrobbleProviders => {
-        const groups: Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup> = new Map();
-
         for (const p of userScrobbleProviders) {
-          const group = this.buildScrobbleProviderSettingsFormGroup(p.settings);
-
-          groups.set(p.provider, group);
-
-          group.valueChanges.pipe(
-            tap(() => console.log('hellO??'))
-          ).subscribe();
-
-          group.get('reviewsScrobbling')!.valueChanges.pipe(
-            takeUntilDestroyed(this.destroyRef$),
-            startWith(group.get('reviewsScrobbling')!.value), // apply immediately on init
-          ).subscribe(value => {
-            if (!value) {
-              group.get('reviewScrobbleTarget')?.disable({ emitEvent: false });
-            } else {
-              group.get('reviewScrobbleTarget')?.enable({ emitEvent: false });
-            }
-          });
+          this.savedSettings.set(p.provider, JSON.stringify(p.settings));
 
           // Build up backfill attempt map (we only keep track of if it ran, it's only important to tell the user it was run)
           this.backfillAttempts.set(p.provider, p.hasRunScrobbleEventGeneration ? 1 : 0);
-
-          this.listenToChanges(p.provider, group);
         }
 
         this.userScrobbleProviders.set(new Map(userScrobbleProviders.map(p => [p.provider, p])));
-        this.formGroups.set(groups);
+        this.formModel.set({
+          providers: userScrobbleProviders.map(p => ({provider: p.provider, settings: p.settings}))
+        });
       }));
   }
 
-  private listenToChanges(provider: ScrobbleProvider, group: ScrobbleProviderSettingsFormGroup) {
-    group.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef$),
-      distinctUntilChanged(),
-      debounceTime(500),
-      switchMap(s => this.scrobbleService.saveScrobbleSettings(provider, group.getRawValue())),
-      catchError(err => {
-        console.error(err);
-        this.toastr.error(translate('errors.generic'))
-        return of(null);
-      })
-    ).subscribe();
-  }
+  protected providerField(provider: ScrobbleProvider): FieldTree<ProviderFormEntry> | undefined {
+    const index = this.providerIndexes().get(provider);
+    if (index === undefined) return undefined;
 
-  private buildScrobbleProviderSettingsFormGroup(scrobbleSettings: ScrobbleProviderSettings): ScrobbleProviderSettingsFormGroup {
-    return this.fb.group({
-      progressScrobbling: this.fb.control(scrobbleSettings.progressScrobbling),
-      wantToReadSync: this.fb.control(scrobbleSettings.wantToReadSync),
-      ratingScrobbling: this.fb.control(scrobbleSettings.ratingScrobbling),
-      reviewsScrobbling: this.fb.control(scrobbleSettings.reviewsScrobbling),
-      reviewScrobbleTarget: this.fb.control(scrobbleSettings.reviewScrobbleTarget),
-      allLibraries: this.fb.control(scrobbleSettings.allLibraries),
-      libraries: this.fb.control(scrobbleSettings.libraries),
-      highestAgeRating: this.fb.control(scrobbleSettings.highestAgeRating),
-      inactiveSeriesRule: this.buildReadStatusTransitionRuleFromGroup(scrobbleSettings.inactiveSeriesRule),
-      droppedSeriesRule: this.buildReadStatusTransitionRuleFromGroup(scrobbleSettings.droppedSeriesRule),
-    });
-  }
-
-  private buildReadStatusTransitionRuleFromGroup(rule: ReadStatusTransitionRule): ReadStatusTransitionRuleFromGroup {
-    return this.fb.group({
-      enabled: this.fb.control(rule.enabled),
-      days: this.fb.control(rule.days),
-      transitionStatus: this.fb.control(rule.transitionStatus),
-      excludedPublicationStatus: this.fb.control(rule.excludedPublicationStatus),
-    })
-  }
-
-  protected inactiveSeriesRule(formGroup: ScrobbleProviderSettingsFormGroup): ReadStatusTransitionRuleFromGroup {
-    return formGroup.get('inactiveSeriesRule') as ReadStatusTransitionRuleFromGroup;
-  }
-
-  protected droppedSeriesRule(formGroup: ScrobbleProviderSettingsFormGroup): ReadStatusTransitionRuleFromGroup {
-    return formGroup.get('droppedSeriesRule') as ReadStatusTransitionRuleFromGroup;
+    return this.formGroup.providers[index];
   }
 
   protected libraryTypeaheadSettings(provider: ScrobbleProvider): TypeaheadConfig<Library> {
@@ -263,9 +220,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   }
 
   updateLibrarySelection(provider: ScrobbleProvider, libraries: Library[]) {
-    const group = this.formGroups().get(provider);
-
-    group?.get('libraries')?.setValue(libraries.map(l => l.id));
+    this.providerField(provider)?.settings.libraries().value.set(libraries.map(l => l.id));
   }
 
   protected async disconnectScrobbleProvider(provider: ScrobbleProvider) {
