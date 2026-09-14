@@ -26,9 +26,10 @@ public class ManageController(IUnitOfWork unitOfWork) : BaseApiController
     [HttpPost("series-metadata")]
     public async Task<ActionResult<PagedList<ManageMatchSeriesDto>>> SeriesMetadata(ManageMatchFilterDto filter, [FromQuery] UserParams? userParams)
     {
+        var ct = HttpContext.RequestAborted;
         userParams ??= UserParams.Default;
 
-        var res = await unitOfWork.ExternalSeriesMetadataRepository.GetAllSeries(filter, userParams);
+        var res = await unitOfWork.ExternalSeriesMetadataRepository.GetAllSeries(filter, userParams, ct);
 
         Response.AddPaginationHeader(res);
         return Ok(res);

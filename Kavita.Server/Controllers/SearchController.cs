@@ -28,10 +28,11 @@ public class SearchController(IUnitOfWork unitOfWork, ILocalizationService local
     [HttpGet("series-for-mangafile")]
     public async Task<ActionResult<SeriesDto>> GetSeriesForMangaFile(int mangaFileId)
     {
-        var series = await unitOfWork.SeriesRepository.GetSeriesForMangaFileAsync(mangaFileId, UserId);
+        var ct = HttpContext.RequestAborted;
+        var series = await unitOfWork.SeriesRepository.GetSeriesForMangaFileAsync(mangaFileId, UserId, ct);
         if (series == null) return NotFound();
 
-        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, series.Id))
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, series.Id, ct))
             return NotFound();
 
         return Ok(series);
@@ -47,7 +48,8 @@ public class SearchController(IUnitOfWork unitOfWork, ILocalizationService local
     [HttpGet("series-for-chapter")]
     public async Task<ActionResult<SeriesDto>> GetSeriesForChapter(int chapterId)
     {
-        return Ok(await unitOfWork.SeriesRepository.GetSeriesForChapterAsync(chapterId, UserId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.SeriesRepository.GetSeriesForChapterAsync(chapterId, UserId, ct));
     }
 
     /// <summary>
@@ -59,6 +61,7 @@ public class SearchController(IUnitOfWork unitOfWork, ILocalizationService local
     [HttpGet("search")]
     public async Task<ActionResult<SearchResultGroupDto>> Search(string queryString, [FromQuery] bool includeChapterAndFiles = true)
     {
+        var ct = HttpContext.RequestAborted;
         // Parse shortcodes off the raw query first; CleanQuery strips ':' which would destroy them
         var searchDto = SearchDto.FromQuery(queryString, includeChapterAndFiles);
         if (!searchDto.HasShortcode)
@@ -66,12 +69,12 @@ public class SearchController(IUnitOfWork unitOfWork, ILocalizationService local
             searchDto.Query = Parser.CleanQuery(queryString);
         }
 
-        var libraries = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(UserId, QueryContext.Search);
+        var libraries = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(UserId, QueryContext.Search, ct);
         if (libraries.Count == 0) return BadRequest(await localizationService.TranslateAsync(UserId, "libraries-restricted"));
 
         var isAdmin = UserContext.HasRole(PolicyConstants.AdminRole);
 
-        var series = await unitOfWork.SeriesRepository.SearchSeriesAsync(UserId, isAdmin, libraries, searchDto);
+        var series = await unitOfWork.SeriesRepository.SearchSeriesAsync(UserId, isAdmin, libraries, searchDto, ct);
 
         return Ok(series);
     }
@@ -80,13 +83,13 @@ public class SearchController(IUnitOfWork unitOfWork, ILocalizationService local
     /// Returns all chapters for a given series with localized titles. Used for CBL chapter-level matching.
     /// </summary>
     [HttpGet("chapters-by-series")]
+    [SeriesAccess]
     public async Task<ActionResult<IList<ChapterDto>>> GetChaptersBySeries([FromQuery] int seriesId)
     {
-        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, seriesId))
-            return Unauthorized();
+        var ct = HttpContext.RequestAborted;
 
-        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
-        var volumes = await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, UserId);
+        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId, ct);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, UserId, ct: ct);
         var namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, UserId, libraryType);
 
         var chapters = volumes

@@ -15,6 +15,7 @@ public class EmailController(IUnitOfWork unitOfWork) : BaseApiController
     [HttpGet("all")]
     public async Task<ActionResult<IList<EmailHistoryDto>>> GetEmails()
     {
-        return Ok(await unitOfWork.EmailHistoryRepository.GetEmailDtos(UserParams.Default));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.EmailHistoryRepository.GetEmailDtos(UserParams.Default, ct));
     }
 }

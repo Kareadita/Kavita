@@ -24,14 +24,15 @@ public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWo
     [HttpPost("save-progress")]
     public async Task<ActionResult> SaveProgress(ProgressDto dto, [FromQuery] string apiKey)
     {
-        if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, dto.ChapterId))
+        var ct = HttpContext.RequestAborted;
+        if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, dto.ChapterId, ct)) // TODO: Use [ChapterAccess] instead?
             return NotFound();
 
-        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId);
+        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId, ct: ct);
         if (chapter == null) return NotFound();
 
         var progressMap = await unitOfWork.AppUserProgressRepository
-            .GetUserProgressForChaptersByChapters(UserId, dto.SeriesId, [dto.ChapterId]);
+            .GetUserProgressForChaptersByChapters(UserId, dto.SeriesId, [dto.ChapterId], ct);
 
         await readerService.SaveReadingProgress(dto, UserId, false);
 
@@ -50,7 +51,8 @@ public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWo
     [HttpGet("get-progress")]
     public async Task<ActionResult<ProgressDto>> GetProgress(int chapterId, [FromQuery] string apiKey)
     {
-        var progress = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, UserId);
+        var ct = HttpContext.RequestAborted;
+        var progress = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, UserId, ct);
         if (progress == null) return Ok(new ProgressDto()
         {
             PageNum = 0,

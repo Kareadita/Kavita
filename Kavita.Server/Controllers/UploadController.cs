@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Kavita.API.Attributes;
@@ -74,6 +75,7 @@ public class UploadController : BaseApiController
     [HttpPost("upload-by-url")]
     public async Task<ActionResult<string>> GetImageFromFile(UploadUrlDto dto)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
             await _urlValidationService.ValidateUrlAsync(dto.Url);
@@ -95,12 +97,12 @@ public class UploadController : BaseApiController
             }
 
             var path = await dto.Url
-                .DownloadFileAsync(_directoryService.TempDirectory, $"coverupload_{dateString}.{format}");
+                .DownloadFileAsync(_directoryService.TempDirectory, $"coverupload_{dateString}.{format}", cancellationToken: ct);
 
             if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
                 return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
 
-            if (!await _imageService.IsImage(path)) return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
+            if (!await _imageService.IsImage(path, ct)) return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
 
             return $"coverupload_{dateString}.{format}";
         }
@@ -118,7 +120,8 @@ public class UploadController : BaseApiController
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<string>> GetImageFromChapterCover([FromQuery] int chapterId)
     {
-        var fileName = await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId);
+        var ct = HttpContext.RequestAborted;
+        var fileName = await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId, ct);
         if (string.IsNullOrEmpty(fileName))
         {
             return NotFound();
@@ -131,7 +134,8 @@ public class UploadController : BaseApiController
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<string>> GetImageFromVolumeCover([FromQuery] int volumeId)
     {
-        var fileName = await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId);
+        var ct = HttpContext.RequestAborted;
+        var fileName = await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId, ct);
         if (string.IsNullOrEmpty(fileName))
         {
             return NotFound();
@@ -144,7 +148,8 @@ public class UploadController : BaseApiController
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<string>> GetImageFromSeriesCover([FromQuery] int seriesId)
     {
-        var fileName = await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId);
+        var ct = HttpContext.RequestAborted;
+        var fileName = await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId, ct);
         if (string.IsNullOrEmpty(fileName))
         {
             return NotFound();
@@ -179,6 +184,7 @@ public class UploadController : BaseApiController
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     public async Task<ActionResult<string>> UploadCoverByFile(IFormFile file)
     {
+        var ct = HttpContext.RequestAborted;
         if (file.Length == 0) return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
 
         // Reject anything that isn't an allowed image extension before we write it to disk, so an executable (or an
@@ -202,7 +208,7 @@ public class UploadController : BaseApiController
         {
             var path = await UploadToTempAsync(file, fileName);
 
-            if (!_directoryService.FileSystem.File.Exists(path) || !await _imageService.IsImage(path))
+            if (!_directoryService.FileSystem.File.Exists(path) || !await _imageService.IsImage(path, ct))
             {
                 _directoryService.DeleteFiles([path]);
                 _logger.LogWarning("Rejected cover upload '{FileName}' - content is not a valid image", file.FileName.Sanitize());
@@ -229,11 +235,12 @@ public class UploadController : BaseApiController
     [HttpPost("series")]
     public async Task<ActionResult> UploadSeriesCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
+        var ct = HttpContext.RequestAborted;
         // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
         try
         {
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadCoverFileDto.Id);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadCoverFileDto.Id, ct: ct);
 
             if (series == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
@@ -260,9 +267,9 @@ public class UploadController : BaseApiController
                     await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                 }
 
+                await _unitOfWork.CommitAsync(ct);
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
-                await _unitOfWork.CommitAsync();
+                    MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false, ct);
                 return Ok();
             }
 
@@ -274,7 +281,7 @@ public class UploadController : BaseApiController
         catch (Exception e)
         {
             _logger.LogError(e, "There was an issue uploading cover image for Series {Id}", uploadCoverFileDto.Id);
-            await _unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync(ct);
         }
 
         return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-series-save"));
@@ -289,11 +296,12 @@ public class UploadController : BaseApiController
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     public async Task<ActionResult> UploadCollectionCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
-        // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
+        // Check if Url is non-empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
+        var ct = HttpContext.RequestAborted;
         try
         {
-            var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(uploadCoverFileDto.Id);
+            var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(uploadCoverFileDto.Id, ct: ct);
             if (tag == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "collection-doesnt-exist"));
 
             if (!User.IsInRole(PolicyConstants.AdminRole) && tag.AppUserId != UserId)
@@ -314,9 +322,9 @@ public class UploadController : BaseApiController
 
             if (_unitOfWork.HasChanges())
             {
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.CommitAsync(ct);
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(tag.Id, MessageFactoryEntityTypes.Collection), false);
+                    MessageFactory.CoverUpdateEvent(tag.Id, MessageFactoryEntityTypes.Collection), false, ct);
                 return Ok();
             }
 
@@ -324,7 +332,7 @@ public class UploadController : BaseApiController
         catch (Exception e)
         {
             _logger.LogError(e, "There was an issue uploading cover image for Collection Tag {Id}", uploadCoverFileDto.Id);
-            await _unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync(ct);
         }
 
         return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-collection-save"));
@@ -340,6 +348,7 @@ public class UploadController : BaseApiController
     [HttpPost("reading-list")]
     public async Task<ActionResult> UploadReadingListCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
+        var ct = HttpContext.RequestAborted;
         // Check if Url is non-empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
         if (await _readingListService.UserHasReadingListAccess(uploadCoverFileDto.Id, Username!) == null)
@@ -347,7 +356,7 @@ public class UploadController : BaseApiController
 
         try
         {
-            var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(uploadCoverFileDto.Id);
+            var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(uploadCoverFileDto.Id, ct: ct);
             if (readingList == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "reading-list-doesnt-exist"));
 
 
@@ -367,9 +376,9 @@ public class UploadController : BaseApiController
 
             if (_unitOfWork.HasChanges())
             {
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.CommitAsync(ct);
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false);
+                    MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false, ct);
                 return Ok();
             }
 
@@ -377,7 +386,7 @@ public class UploadController : BaseApiController
         catch (Exception e)
         {
             _logger.LogError(e, "There was an issue uploading cover image for Reading List {Id}", uploadCoverFileDto.Id);
-            await _unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync(ct);
         }
 
         return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-reading-list-save"));
@@ -432,11 +441,12 @@ public class UploadController : BaseApiController
     [HttpPost("chapter")]
     public async Task<ActionResult> UploadChapterCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
-        // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
+        var ct = HttpContext.RequestAborted;
+        // Check if Url is non-empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
         try
         {
-            var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadCoverFileDto.Id);
+            var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadCoverFileDto.Id, ct: ct);
             if (chapter == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "chapter-doesnt-exist"));
 
             var filePath = string.Empty;
@@ -451,7 +461,7 @@ public class UploadController : BaseApiController
             chapter.CoverImageLocked = lockState;
             chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterCovers);
             _unitOfWork.ChapterRepository.Update(chapter);
-            var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapter.VolumeId);
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapter.VolumeId, ct: ct);
             if (volume != null)
             {
                 volume.CoverImage = chapter.CoverImage;
@@ -461,20 +471,20 @@ public class UploadController : BaseApiController
 
             if (_unitOfWork.HasChanges())
             {
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.CommitAsync(ct);
 
                 // Refresh covers
                 if (!HasCoverSource(uploadCoverFileDto))
                 {
-                    var series = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume!.SeriesId))!;
+                    var series = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume!.SeriesId, ct: ct))!;
                     await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                 }
 
 
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(chapter.VolumeId, MessageFactoryEntityTypes.Volume), false);
+                    MessageFactory.CoverUpdateEvent(chapter.VolumeId, MessageFactoryEntityTypes.Volume), false, ct);
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter), false);
+                    MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter), false, ct);
                 return Ok();
             }
 
@@ -482,7 +492,7 @@ public class UploadController : BaseApiController
         catch (Exception e)
         {
             _logger.LogError(e, "There was an issue uploading cover image for Chapter {Id}", uploadCoverFileDto.Id);
-            await _unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync(ct);
         }
 
         return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-chapter-save"));
@@ -499,11 +509,12 @@ public class UploadController : BaseApiController
     [HttpPost("volume")]
     public async Task<ActionResult> UploadVolumeCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
+        var ct = HttpContext.RequestAborted;
         // Check if Url is non-empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
         try
         {
-            var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(uploadCoverFileDto.Id, VolumeIncludes.Chapters);
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(uploadCoverFileDto.Id, VolumeIncludes.Chapters, ct);
             if (volume == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "volume-doesnt-exist"));
 
             var filePath = string.Empty;
@@ -521,20 +532,20 @@ public class UploadController : BaseApiController
 
             if (_unitOfWork.HasChanges())
             {
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.CommitAsync(ct);
 
                 // Refresh covers
                 if (!HasCoverSource(uploadCoverFileDto))
                 {
-                    var series = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId))!;
+                    var series = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId, ct: ct))!;
                     await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                 }
 
 
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(uploadCoverFileDto.Id, MessageFactoryEntityTypes.Volume), false);
+                    MessageFactory.CoverUpdateEvent(uploadCoverFileDto.Id, MessageFactoryEntityTypes.Volume), false, ct);
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Chapter), false);
+                    MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Chapter), false, ct);
                 return Ok();
             }
 
@@ -542,7 +553,7 @@ public class UploadController : BaseApiController
         catch (Exception e)
         {
             _logger.LogError(e, "There was an issue uploading cover image for Volume {Id}", uploadCoverFileDto.Id);
-            await _unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync(ct);
         }
 
         return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-volume-save"));
@@ -559,7 +570,8 @@ public class UploadController : BaseApiController
     [HttpPost("library")]
     public async Task<ActionResult> UploadLibraryCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(uploadCoverFileDto.Id);
+        var ct = HttpContext.RequestAborted;
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(uploadCoverFileDto.Id, ct: ct);
         if (library == null) return BadRequest("This library does not exist");
 
         // No new cover source provided - reset the cover.
@@ -570,9 +582,9 @@ public class UploadController : BaseApiController
             _unitOfWork.LibraryRepository.Update(library);
             if (_unitOfWork.HasChanges())
             {
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.CommitAsync(ct);
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(library.Id, MessageFactoryEntityTypes.Library), false);
+                    MessageFactory.CoverUpdateEvent(library.Id, MessageFactoryEntityTypes.Library), false, ct);
             }
 
             return Ok();
@@ -592,9 +604,9 @@ public class UploadController : BaseApiController
 
             if (_unitOfWork.HasChanges())
             {
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.CommitAsync(ct);
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(library.Id, MessageFactoryEntityTypes.Library), false);
+                    MessageFactory.CoverUpdateEvent(library.Id, MessageFactoryEntityTypes.Library), false, ct);
                 return Ok();
             }
 
@@ -602,7 +614,7 @@ public class UploadController : BaseApiController
         catch (Exception e)
         {
             _logger.LogError(e, "There was an issue uploading cover image for Library {Id}", uploadCoverFileDto.Id);
-            await _unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync(ct);
         }
 
         return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-library-save"));
@@ -619,9 +631,10 @@ public class UploadController : BaseApiController
     [HttpPost("person")]
     public async Task<ActionResult> UploadPersonCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
-            var person = await _unitOfWork.PersonRepository.GetPersonById(uploadCoverFileDto.Id);
+            var person = await _unitOfWork.PersonRepository.GetPersonById(uploadCoverFileDto.Id, ct: ct);
             if (person == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "person-doesnt-exist"));
 
             // Person covers flow through CoverDbService (placeholder/quality checks). When the image was staged in
@@ -632,12 +645,12 @@ public class UploadController : BaseApiController
                 var tempPath = ResolveTempCoverPath(uploadCoverFileDto.FileName);
                 if (tempPath == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "invalid-filename"));
 
-                var base64 = Convert.ToBase64String(await _directoryService.FileSystem.File.ReadAllBytesAsync(tempPath));
-                await _coverDbService.SetPersonCoverByUrl(person, base64, fromBase64: true, chooseBetterImage: false);
+                var base64 = Convert.ToBase64String(await _directoryService.FileSystem.File.ReadAllBytesAsync(tempPath, ct));
+                await _coverDbService.SetPersonCoverByUrl(person, base64, fromBase64: true, chooseBetterImage: false, ct: ct);
             }
             else
             {
-                await _coverDbService.SetPersonCoverByUrl(person, uploadCoverFileDto.Url ?? string.Empty, chooseBetterImage: false);
+                await _coverDbService.SetPersonCoverByUrl(person, uploadCoverFileDto.Url ?? string.Empty, chooseBetterImage: false, ct: ct);
             }
 
             return Ok();
@@ -645,7 +658,7 @@ public class UploadController : BaseApiController
         catch (Exception e)
         {
             _logger.LogError(e, "There was an issue uploading cover image for Person {Id}", uploadCoverFileDto.Id);
-            await _unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync(ct);
         }
 
         return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-person-save"));
@@ -663,20 +676,21 @@ public class UploadController : BaseApiController
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     public async Task<ActionResult> UploadUserCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
             if (uploadCoverFileDto.Id != UserId) return NotFound();
 
-            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(uploadCoverFileDto.Id);
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(uploadCoverFileDto.Id, ct: ct);
             if (user == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "user-doesnt-exist"));
 
-            await _coverDbService.SetUserCoverByUrl(user, uploadCoverFileDto.Url ?? string.Empty, chooseBetterImage: false);
+            await _coverDbService.SetUserCoverByUrl(user, uploadCoverFileDto.Url ?? string.Empty, chooseBetterImage: false, ct: ct);
             return Ok();
         }
         catch (Exception e)
         {
             _logger.LogError(e, "There was an issue uploading cover image for User {Id}", uploadCoverFileDto.Id);
-            await _unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync(ct);
         }
 
         return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-person-save"));
