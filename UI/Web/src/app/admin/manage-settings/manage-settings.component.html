@@ -5,192 +5,190 @@
   </div>
 
 
-  <form>
-    <div class="alert alert-warning" role="alert">
-      <strong>{{t('notice')}}</strong> {{t('restart-required')}}
-    </div>
+  <div class="alert alert-warning" role="alert">
+    <strong>{{t('notice')}}</strong> {{t('restart-required')}}
+  </div>
 
 
-    <h4>{{t('networking-settings-title')}}</h4>
-    <ng-container>
-      <div class="row g-0 mt-4 mb-4">
-        <app-setting-item [title]="t('host-name-label')" [subtitle]="t('host-name-tooltip')">
-          <ng-template #view>
-            {{formGroup.hostName().value() | defaultValue}}
-          </ng-template>
-          <ng-template #edit>
-            <input id="settings-hostname" aria-describedby="settings-hostname-validations" class="form-control" [formField]="formGroup.hostName" type="text"
-                   [appFormField]="formGroup.hostName" appEnterBlur>
+  <h4>{{t('networking-settings-title')}}</h4>
+  <ng-container>
+    <div class="row g-0 mt-4 mb-4">
+      <app-setting-item [title]="t('host-name-label')" [subtitle]="t('host-name-tooltip')">
+        <ng-template #view>
+          {{formGroup.hostName().value() | defaultValue}}
+        </ng-template>
+        <ng-template #edit>
+          <input id="settings-hostname" aria-describedby="settings-hostname-validations" class="form-control" [formField]="formGroup.hostName" type="text"
+                 [appFormField]="formGroup.hostName" appEnterBlur>
 
-            <app-validation-errors [control]="formGroup.hostName" inputId="settings-hostname" [messages]="{
+          <app-validation-errors [control]="formGroup.hostName" inputId="settings-hostname" [messages]="{
                 pattern: t('host-name-validation')
               }" />
 
-          </ng-template>
-        </app-setting-item>
-      </div>
+        </ng-template>
+      </app-setting-item>
+    </div>
 
-      <div class="row g-0 mt-4 mb-4">
-        <app-setting-item [title]="t('base-url-label')" [subtitle]="t('base-url-tooltip')">
-          <ng-template #view>
-            {{formGroup.baseUrl().value() | defaultValue}}
-          </ng-template>
-          <ng-template #edit>
-            <div class="input-group">
-              <input id="settings-baseurl" aria-describedby="settings-baseurl-validations" class="form-control" [formField]="formGroup.baseUrl" type="text"
-                     [appFormField]="formGroup.baseUrl" appEnterBlur>
-              <button type="button" class="btn btn-outline-secondary" (click)="resetBaseUrl()">{{t('reset')}}</button>
-            </div>
+    <div class="row g-0 mt-4 mb-4">
+      <app-setting-item [title]="t('base-url-label')" [subtitle]="t('base-url-tooltip')">
+        <ng-template #view>
+          {{formGroup.baseUrl().value() | defaultValue}}
+        </ng-template>
+        <ng-template #edit>
+          <div class="input-group">
+            <input id="settings-baseurl" aria-describedby="settings-baseurl-validations" class="form-control" [formField]="formGroup.baseUrl" type="text"
+                   [appFormField]="formGroup.baseUrl" appEnterBlur>
+            <button type="button" class="btn btn-outline-secondary" (click)="resetBaseUrl()">{{t('reset')}}</button>
+          </div>
 
-            <app-validation-errors [control]="formGroup.baseUrl" inputId="settings-baseurl" [messages]="{
+          <app-validation-errors [control]="formGroup.baseUrl" inputId="settings-baseurl" [messages]="{
                 pattern: t('base-url-validation')
               }" />
 
-          </ng-template>
-        </app-setting-item>
-      </div>
+        </ng-template>
+      </app-setting-item>
+    </div>
 
-      <div class="row g-0 mt-4 mb-4">
-        <app-setting-item [title]="t('ip-address-label')" [subtitle]="t('ip-address-tooltip')">
-          <ng-template #view>
-            {{formGroup.ipAddresses().value() | defaultValue}}
-          </ng-template>
-          <ng-template #edit>
-            <div class="input-group">
-              <input id="settings-ipaddresses" aria-describedby="settings-ipaddresses-validations" class="form-control" [formField]="formGroup.ipAddresses" type="text"
-                     [appFormField]="formGroup.ipAddresses" appEnterBlur>
-              <button type="button" class="btn btn-outline-secondary" (click)="resetIPAddresses()">{{t('reset')}}</button>
-            </div>
+    <div class="row g-0 mt-4 mb-4">
+      <app-setting-item [title]="t('ip-address-label')" [subtitle]="t('ip-address-tooltip')">
+        <ng-template #view>
+          {{formGroup.ipAddresses().value() | defaultValue}}
+        </ng-template>
+        <ng-template #edit>
+          <div class="input-group">
+            <input id="settings-ipaddresses" aria-describedby="settings-ipaddresses-validations" class="form-control" [formField]="formGroup.ipAddresses" type="text"
+                   [appFormField]="formGroup.ipAddresses" appEnterBlur>
+            <button type="button" class="btn btn-outline-secondary" (click)="resetIPAddresses()">{{t('reset')}}</button>
+          </div>
 
-            <app-validation-errors [control]="formGroup.ipAddresses" inputId="settings-ipaddresses" [messages]="{
+          <app-validation-errors [control]="formGroup.ipAddresses" inputId="settings-ipaddresses" [messages]="{
                 emptyOrPattern: t('ip-address-validation')
               }" />
 
-          </ng-template>
-        </app-setting-item>
-      </div>
+        </ng-template>
+      </app-setting-item>
+    </div>
 
-      <div class="row g-0 mt-4 mb-4">
-        <app-setting-item [title]="t('port-label')" [subtitle]="t('port-tooltip')" [control]="formGroup.ipAddresses" labelId="settings-port">
-          <ng-template #view>
-            {{formGroup.port().value()}}
-          </ng-template>
-          <ng-template #edit>
-            <input id="settings-port" aria-describedby="settings-port-help" class="form-control"
-                   [formField]="formGroup.ipAddresses" type="number" step="1"
-                   [appFormField]="formGroup.ipAddresses" appEnterBlur>
-          </ng-template>
-        </app-setting-item>
-      </div>
+    <div class="row g-0 mt-4 mb-4">
+      <app-setting-item [title]="t('port-label')" [subtitle]="t('port-tooltip')" [control]="formGroup.ipAddresses" labelId="settings-port">
+        <ng-template #view>
+          {{formGroup.port().value()}}
+        </ng-template>
+        <ng-template #edit>
+          <input id="settings-port" aria-describedby="settings-port-help" class="form-control"
+                 [formField]="formGroup.ipAddresses" type="number" step="1"
+                 [appFormField]="formGroup.ipAddresses" appEnterBlur>
+        </ng-template>
+      </app-setting-item>
+    </div>
 
-    </ng-container>
+  </ng-container>
 
-    <div class="setting-section-break"></div>
+  <div class="setting-section-break"></div>
 
-    <h4>{{t('system-settings-title')}}</h4>
-    <ng-container>
-      <div class="row g-0 mt-4 mb-4">
-        <app-setting-item [title]="t('backup-label')" [subtitle]="t('backup-tooltip')">
-          <ng-template #view>
-            {{formGroup.totalBackups().value()}}
-          </ng-template>
-          <ng-template #edit>
-            <input id="total-backups" aria-describedby="total-backups-validations" class="form-control"
-                   [formField]="formGroup.totalBackups" type="number" inputmode="numeric" step="1"
-                   [appFormField]="formGroup.totalBackups" appEnterBlur>
+  <h4>{{t('system-settings-title')}}</h4>
+  <ng-container>
+    <div class="row g-0 mt-4 mb-4">
+      <app-setting-item [title]="t('backup-label')" [subtitle]="t('backup-tooltip')">
+        <ng-template #view>
+          {{formGroup.totalBackups().value()}}
+        </ng-template>
+        <ng-template #edit>
+          <input id="total-backups" aria-describedby="total-backups-validations" class="form-control"
+                 [formField]="formGroup.totalBackups" type="number" inputmode="numeric" step="1"
+                 [appFormField]="formGroup.totalBackups" appEnterBlur>
 
-            <app-validation-errors [control]="formGroup.totalBackups" inputId="total-backups" [messages]="{
+          <app-validation-errors [control]="formGroup.totalBackups" inputId="total-backups" [messages]="{
                 max: t('max-backup-validation', {num: 30}),
                 min: t('min-backup-validation')
               }" />
-          </ng-template>
-        </app-setting-item>
-      </div>
+        </ng-template>
+      </app-setting-item>
+    </div>
 
-      <div class="row g-0 mt-4 mb-4">
-        <app-setting-item [title]="t('log-label')" [subtitle]="t('log-tooltip')">
-          <ng-template #view>
-            {{formGroup.totalLogs().value()}}
-          </ng-template>
-          <ng-template #edit>
-            <input id="settings-logs" aria-describedby="settings-logs-validations" class="form-control"
-                   [formField]="formGroup.totalLogs" type="number" inputmode="numeric" step="1"
-                   [appFormField]="formGroup.totalLogs" appEnterBlur>
+    <div class="row g-0 mt-4 mb-4">
+      <app-setting-item [title]="t('log-label')" [subtitle]="t('log-tooltip')">
+        <ng-template #view>
+          {{formGroup.totalLogs().value()}}
+        </ng-template>
+        <ng-template #edit>
+          <input id="settings-logs" aria-describedby="settings-logs-validations" class="form-control"
+                 [formField]="formGroup.totalLogs" type="number" inputmode="numeric" step="1"
+                 [appFormField]="formGroup.totalLogs" appEnterBlur>
 
-            <app-validation-errors [control]="formGroup.totalLogs" inputId="settings-logs" [messages]="{
+          <app-validation-errors [control]="formGroup.totalLogs" inputId="settings-logs" [messages]="{
                 max: t('max-logs-validation', {num: 30}),
                 min: t('min-log-validation')
               }" />
-          </ng-template>
-        </app-setting-item>
-      </div>
+        </ng-template>
+      </app-setting-item>
+    </div>
 
-      <div class="row g-0 mt-4 mb-4">
-        <app-setting-item [title]="t('logging-level-label')" [subtitle]="t('logging-level-tooltip')">
-          <ng-template #view>
-            {{formGroup.loggingLevel().value() | logLevel}}
-          </ng-template>
-          <ng-template #edit>
+    <div class="row g-0 mt-4 mb-4">
+      <app-setting-item [title]="t('logging-level-label')" [subtitle]="t('logging-level-tooltip')">
+        <ng-template #view>
+          {{formGroup.loggingLevel().value() | logLevel}}
+        </ng-template>
+        <ng-template #edit>
 
-            <select id="logging-level" aria-describedby="logging-level-validations" class="form-select"  [formField]="formGroup.loggingLevel"
-                    [appFormField]="formGroup.loggingLevel">
-              @for(level of logLevels(); track level) {
-                <option [value]="level">{{level | logLevel}}</option>
-              }
-            </select>
-          </ng-template>
-        </app-setting-item>
-      </div>
+          <select id="logging-level" aria-describedby="logging-level-validations" class="form-select"  [formField]="formGroup.loggingLevel"
+                  [appFormField]="formGroup.loggingLevel">
+            @for(level of logLevels(); track level) {
+              <option [value]="level">{{level | logLevel}}</option>
+            }
+          </select>
+        </ng-template>
+      </app-setting-item>
+    </div>
 
-      <div class="row g-0 mt-4 mb-4">
-        <app-setting-item [title]="t('cache-size-label')" [subtitle]="t('cache-size-tooltip')">
-          <ng-template #view>
-            {{formGroup.cacheSize().value()}}
-          </ng-template>
-          <ng-template #edit>
-            <input id="setting-cache-size" aria-describedby="setting-cache-size-validations" class="form-control" [formField]="formGroup.cacheSize"
-                   type="number" inputmode="numeric" step="5"
-                   [appFormField]="formGroup.cacheSize" appEnterBlur>
+    <div class="row g-0 mt-4 mb-4">
+      <app-setting-item [title]="t('cache-size-label')" [subtitle]="t('cache-size-tooltip')">
+        <ng-template #view>
+          {{formGroup.cacheSize().value()}}
+        </ng-template>
+        <ng-template #edit>
+          <input id="setting-cache-size" aria-describedby="setting-cache-size-validations" class="form-control" [formField]="formGroup.cacheSize"
+                 type="number" inputmode="numeric" step="5"
+                 [appFormField]="formGroup.cacheSize" appEnterBlur>
 
-            <app-validation-errors [control]="formGroup.cacheSize" inputId="setting-cache-size" [messages]="{
+          <app-validation-errors [control]="formGroup.cacheSize" inputId="setting-cache-size" [messages]="{
                 min: t('min-cache-validation')
               }" />
 
-          </ng-template>
-        </app-setting-item>
-      </div>
+        </ng-template>
+      </app-setting-item>
+    </div>
 
-      <div class="row g-0 mt-4 mb-4">
-        <app-setting-switch [title]="t('opds-label')" [subtitle]="t('opds-tooltip')">
-          <ng-template>
-            <div class="form-check form-switch float-end">
-              <input type="checkbox" class="form-check-input" [formField]="formGroup.enableOpds">
-            </div>
-          </ng-template>
-        </app-setting-switch>
-      </div>
+    <div class="row g-0 mt-4 mb-4">
+      <app-setting-switch [title]="t('opds-label')" [subtitle]="t('opds-tooltip')">
+        <ng-template>
+          <div class="form-check form-switch float-end">
+            <input type="checkbox" class="form-check-input" [formField]="formGroup.enableOpds">
+          </div>
+        </ng-template>
+      </app-setting-switch>
+    </div>
 
-      <div class="row g-0 mt-4 mb-4">
-        <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
-          <ng-template>
-            <div class="form-check form-switch float-end">
-              <input type="checkbox" class="form-check-input" [formField]="formGroup.enableFolderWatching" role="switch">
-            </div>
-          </ng-template>
-        </app-setting-switch>
-      </div>
+    <div class="row g-0 mt-4 mb-4">
+      <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
+        <ng-template>
+          <div class="form-check form-switch float-end">
+            <input type="checkbox" class="form-check-input" [formField]="formGroup.enableFolderWatching" role="switch">
+          </div>
+        </ng-template>
+      </app-setting-switch>
+    </div>
 
-      <div class="row g-0 mt-4 mb-4">
-        <app-setting-switch [title]="t('allow-stats-label')" [subtitle]="allowStatsTooltip">
-          <ng-template>
-            <div class="form-check form-switch float-end">
-              <input type="checkbox" class="form-check-input" [formField]="formGroup.allowStatCollection" role="switch">
-            </div>
-          </ng-template>
-        </app-setting-switch>
-      </div>
+    <div class="row g-0 mt-4 mb-4">
+      <app-setting-switch [title]="t('allow-stats-label')" [subtitle]="allowStatsTooltip">
+        <ng-template>
+          <div class="form-check form-switch float-end">
+            <input type="checkbox" class="form-check-input" [formField]="formGroup.allowStatCollection" role="switch">
+          </div>
+        </ng-template>
+      </app-setting-switch>
+    </div>
 
-    </ng-container>
-  </form>
+  </ng-container>
 
 </ng-container>

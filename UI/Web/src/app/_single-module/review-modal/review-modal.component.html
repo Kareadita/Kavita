@@ -7,17 +7,14 @@
           </button>
       </div>
       <div class="modal-body">
-          <form>
-              <div class="row g-0 mt-2">
-                <label for="review" class="form-label">{{t('review-label')}}</label>
-                <textarea id="review" class="form-control" [formField]="reviewForm.reviewBody" rows="3" [appFormField]="reviewForm.reviewBody"
-                          aria-describedby="review-validations"
-                ></textarea>
+        <div class="row g-0 mt-2">
+          <label for="review" class="form-label">{{t('review-label')}}</label>
+          <textarea id="review" class="form-control" [formField]="reviewForm.reviewBody" rows="3" [appFormField]="reviewForm.reviewBody"
+                    aria-describedby="review-validations"
+          ></textarea>
 
-                <app-validation-errors inputId="review" [control]="reviewForm.reviewBody" />
-              </div>
-          </form>
-
+          <app-validation-errors inputId="review" [control]="reviewForm.reviewBody" />
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-danger" (click)="delete()">{{t('delete')}}</button>

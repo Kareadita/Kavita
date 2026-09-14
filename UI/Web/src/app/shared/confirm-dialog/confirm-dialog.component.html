@@ -11,11 +11,9 @@
 
   @if (config()._type === 'prompt') {
     <div class="modal-body" style="overflow-x: auto" [class.book-reader]="config().bookReader">
-      <form>
-        <div [innerHtml]="(config().content | confirmTranslate)! | safeHtml"></div>
-        <input type="text" class="form-control" aria-labelledby="modal-basic-title" [formField]="formGroup.prompt"
-               [appFormField]="formGroup.prompt" />
-      </form>
+      <div [innerHtml]="(config().content | confirmTranslate)! | safeHtml"></div>
+      <input type="text" class="form-control" aria-labelledby="modal-basic-title" [formField]="formGroup.prompt"
+             [appFormField]="formGroup.prompt" />
     </div>
   } @else {
     <div class="modal-body" [class.book-reader]="config().bookReader" style="overflow-x: auto" [innerHtml]="(config().content | confirmTranslate)! | safeHtml"></div>
