@@ -7,13 +7,13 @@ import {
   CUSTOM_ELEMENTS_SCHEMA,
   inject,
   input,
-  Input, model,
+  model,
   output,
   signal,
   TemplateRef
 } from '@angular/core';
 import {Swiper} from 'swiper/types';
-import {NgClass, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
@@ -33,7 +33,7 @@ export type NextPageLoader<T> = (pageNumber: number, pageSize: number) => Observ
   templateUrl: './carousel-reel.component.html',
   styleUrls: ['./carousel-reel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, NgTemplateOutlet, TranslocoDirective, CardActionablesComponent, SafeUrlPipe],
+  imports: [NgTemplateOutlet, TranslocoDirective, CardActionablesComponent, SafeUrlPipe],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class CarouselReelComponent<T> {
@@ -86,6 +86,13 @@ export class CarouselReelComponent<T> {
   totalPages = signal<number>(999_999_999_999);
 
   swiper = signal<Swiper | undefined>(undefined);
+
+  isNextDisabled = computed(() => {
+    const swiper = this.swiper();
+    return swiper?.isEnd
+    && (!this.paginationEnabled() || this.items().length < this.pageSize())
+    || (this.currentPage() >= (this.totalPages()));
+  });
 
   private tryLoadNextPage() {
     if (!this.paginationEnabled() || this.loadingNextPage() || this.currentPage() >= this.totalPages()) {

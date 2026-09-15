@@ -6,7 +6,7 @@
         @if (actionables().length > 0) {
           <app-card-actionables [entity]="actionableEntity()" [actions]="actionables()" (actionHandler)="performAction($event)" />
         }
-        <h4 class="header" (click)="sectionClicked()" [ngClass]="{'non-selectable': !clickableTitle()}">
+        <h4 class="header" (click)="sectionClicked()" [class.non-selectable]="!clickableTitle()">
           @if (titleLink(); as titleLink) {
             <a [href]="titleLink | safeUrl" [class]="headerClass()">{{title()}}</a>
           } @else {
@@ -19,10 +19,10 @@
         </h4>
         @if (swiper(); as swiper) {
           <div class="float-end">
-            <button class="btn btn-icon carousel-btn" [disabled]="swiper.isBeginning" (click)="prevPage()"><i class="fa fa-angle-left" aria-hidden="true"></i><span class="visually-hidden">{{t('prev-items')}}</span></button>
-            <button class="btn btn-icon carousel-btn" [disabled]="swiper.isEnd
-            && (!paginationEnabled() || items().length < pageSize())
-            || (currentPage() >= (totalPages()))"
+            <button class="btn btn-icon carousel-btn" [disabled]="swiper.isBeginning" (click)="prevPage()">
+              <i class="fa fa-angle-left" aria-hidden="true"></i><span class="visually-hidden">{{t('prev-items')}}</span>
+            </button>
+            <button class="btn btn-icon carousel-btn" [disabled]="isNextDisabled()"
                     (click)="nextPage()"><i class="fa fa-angle-right" aria-hidden="true"></i><span class="visually-hidden">{{t('next-items')}}</span></button>
           </div>
         }
