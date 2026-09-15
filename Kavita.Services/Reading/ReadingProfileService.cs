@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -21,26 +22,26 @@ namespace Kavita.Services.Reading;
 public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService localizationService, IMapper mapper): IReadingProfileService
 {
     public async Task<AppUserReadingProfile> GetReadingProfileForSeries(int userId, int libraryId, int seriesId,
-        int? activeDeviceId, bool skipImplicit = false)
+        int? activeDeviceId, bool skipImplicit = false, CancellationToken ct = default)
     {
         return await unitOfWork.AppUserReadingProfileRepository.GetProfileForSeries(userId, libraryId, seriesId,
-            activeDeviceId, skipImplicit);
+            activeDeviceId, skipImplicit, ct);
     }
 
     public async Task<UserReadingProfileDto> GetReadingProfileDtoForSeries(int userId, int libraryId, int seriesId,
-        int? activeDeviceId, bool skipImplicit = false)
+        int? activeDeviceId, bool skipImplicit = false, CancellationToken ct = default)
     {
         return mapper.Map<UserReadingProfileDto>(await GetReadingProfileForSeries(userId, libraryId, seriesId,
-            activeDeviceId, skipImplicit));
+            activeDeviceId, skipImplicit, ct));
     }
 
     public async Task<UserReadingProfileDto> UpdateParent(int userId, int libraryId, int seriesId,
-        UserReadingProfileDto dto, int? activeDeviceId)
+        UserReadingProfileDto dto, int? activeDeviceId, CancellationToken ct = default)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, dto.Id);
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, dto.Id, ct);
         if (profile == null) throw new KavitaException("profile-does-not-exist");
 
-        var parentProfile = await GetReadingProfileForSeries(userId, libraryId, seriesId, activeDeviceId, true);
+        var parentProfile = await GetReadingProfileForSeries(userId, libraryId, seriesId, activeDeviceId, true, ct);
 
         UpdateReaderProfileFields(parentProfile, dto, false);
         unitOfWork.AppUserReadingProfileRepository.Update(parentProfile);
@@ -48,28 +49,30 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         // Delete profile as we'll be using the parent now
         unitOfWork.AppUserReadingProfileRepository.Remove(profile);
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
         return mapper.Map<UserReadingProfileDto>(parentProfile);
     }
 
-    public async Task<UserReadingProfileDto> UpdateReadingProfile(int userId, UserReadingProfileDto dto)
+    public async Task<UserReadingProfileDto> UpdateReadingProfile(int userId, UserReadingProfileDto dto,
+        CancellationToken ct = default)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, dto.Id);
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, dto.Id, ct);
         if (profile == null) throw new KavitaException("profile-does-not-exist");
 
         UpdateReaderProfileFields(profile, dto);
         unitOfWork.AppUserReadingProfileRepository.Update(profile);
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
         return mapper.Map<UserReadingProfileDto>(profile);
     }
 
-    public async Task<UserReadingProfileDto> CreateReadingProfile(int userId, UserReadingProfileDto dto)
+    public async Task<UserReadingProfileDto> CreateReadingProfile(int userId, UserReadingProfileDto dto,
+        CancellationToken ct = default)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
         if (user == null) throw new UnauthorizedAccessException();
 
-        if (await unitOfWork.AppUserReadingProfileRepository.IsProfileNameInUse(userId, dto.Name)) throw new KavitaException("name-already-in-use");
+        if (await unitOfWork.AppUserReadingProfileRepository.IsProfileNameInUse(userId, dto.Name, ct)) throw new KavitaException("name-already-in-use");
 
         var newProfile = new AppUserReadingProfileBuilder(user.Id).Build();
         UpdateReaderProfileFields(newProfile, dto);
@@ -77,15 +80,16 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         unitOfWork.AppUserReadingProfileRepository.Add(newProfile);
         user.ReadingProfiles.Add(newProfile);
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         return mapper.Map<UserReadingProfileDto>(newProfile);
     }
 
-    public async Task<UserReadingProfileDto> PromoteImplicitProfile(int userId, int profileId, int? activeDeviceId)
+    public async Task<UserReadingProfileDto> PromoteImplicitProfile(int userId, int profileId, int? activeDeviceId,
+        CancellationToken ct = default)
     {
         // Get all the user's profiles including the implicit
-        var allUserProfiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        var allUserProfiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId, ct: ct);
         var profileToPromote = allUserProfiles.FirstOrDefault(rp => rp.Id == profileId);
 
         if (profileToPromote == null) throw new KavitaException("profile-does-not-exist");
@@ -106,7 +110,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         }
 
         // Convert the implicit profile into a proper Series
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct);
         if (series == null) throw new KavitaException("series-doesnt-exist"); // Shouldn't happen
 
         profileToPromote.Kind = ReadingProfileKind.User;
@@ -115,7 +119,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         profileToPromote.NormalizedName = profileToPromote.Name.ToNormalized();
         unitOfWork.AppUserReadingProfileRepository.Update(profileToPromote);
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         return mapper.Map<UserReadingProfileDto>(profileToPromote);
     }
@@ -134,25 +138,25 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
     }
 
     public async Task<UserReadingProfileDto> UpdateImplicitReadingProfile(int userId, int libraryId, int seriesId,
-        UserReadingProfileDto dto, int? activeDeviceId)
+        UserReadingProfileDto dto, int? activeDeviceId, CancellationToken ct = default)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
         if (user == null) throw new UnauthorizedAccessException();
 
         var existingProfile = await unitOfWork.AppUserReadingProfileRepository
-            .GetProfileForSeries(userId, libraryId, seriesId, activeDeviceId);
+            .GetProfileForSeries(userId, libraryId, seriesId, activeDeviceId, ct: ct);
 
         // Series already had an implicit profile, update it
         if (existingProfile is {Kind: ReadingProfileKind.Implicit})
         {
             UpdateReaderProfileFields(existingProfile, dto, false);
             unitOfWork.AppUserReadingProfileRepository.Update(existingProfile);
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
 
             return mapper.Map<UserReadingProfileDto>(existingProfile);
         }
 
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId) ?? throw new KeyNotFoundException();
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct) ?? throw new KeyNotFoundException();
         var newProfile = new AppUserReadingProfileBuilder(userId)
             .WithSeries(series)
             .WithKind(ReadingProfileKind.Implicit)
@@ -168,25 +172,25 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         }
 
         user.ReadingProfiles.Add(newProfile);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         return mapper.Map<UserReadingProfileDto>(newProfile);
     }
 
-    public async Task DeleteReadingProfile(int userId, int profileId)
+    public async Task DeleteReadingProfile(int userId, int profileId, CancellationToken ct = default)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId, ct);
         if (profile == null) throw new KavitaException("profile-doesnt-exist");
 
         if (profile.Kind == ReadingProfileKind.Default) throw new KavitaException("cant-delete-default-profile");
 
         unitOfWork.AppUserReadingProfileRepository.Remove(profile);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
     }
 
-    public async Task SetSeriesProfiles(int userId, List<int> profileIds, int seriesId)
+    public async Task SetSeriesProfiles(int userId, List<int> profileIds, int seriesId, CancellationToken ct = default)
     {
-        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId, ct: ct);
 
         var selectedProfiles = profiles
             .Where(rp => profileIds.Contains(rp.Id))
@@ -208,12 +212,13 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
             unitOfWork.AppUserReadingProfileRepository.Update(profile);
         }
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
     }
 
-    public async Task BulkSetSeriesProfiles(int userId, List<int> profileIds, List<int> seriesIds)
+    public async Task BulkSetSeriesProfiles(int userId, List<int> profileIds, List<int> seriesIds,
+        CancellationToken ct = default)
     {
-        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId, ct: ct);
 
         var selectedProfiles = profiles
             .Where(rp => profileIds.Contains(rp.Id))
@@ -235,20 +240,21 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
             unitOfWork.AppUserReadingProfileRepository.Update(profile);
         }
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
     }
 
-    public async Task ClearSeriesProfile(int userId, int seriesId)
+    public async Task ClearSeriesProfile(int userId, int seriesId, CancellationToken ct = default)
     {
         // Null device ids, delete all
-        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId, ct: ct);
         DeleteImplicitAndRemoveFromUserProfiles(profiles, [seriesId], [], null);
-        await unitOfWork.CommitAsync();
+
+        await unitOfWork.CommitAsync(ct);
     }
 
-    public async Task SetLibraryProfiles(int userId, List<int> profileIds, int libraryId)
+    public async Task SetLibraryProfiles(int userId, List<int> profileIds, int libraryId, CancellationToken ct = default)
     {
-        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId, ct: ct);
 
         var selectedProfiles = profiles
             .Where(rp => profileIds.Contains(rp.Id))
@@ -270,12 +276,12 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
             unitOfWork.AppUserReadingProfileRepository.Update(profile);
         }
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
     }
 
-    public async Task ClearLibraryProfile(int userId, int libraryId)
+    public async Task ClearLibraryProfile(int userId, int libraryId, CancellationToken ct = default)
     {
-        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForLibrary(userId, libraryId);
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForLibrary(userId, libraryId, ct);
 
         foreach (var profile in profiles)
         {
@@ -285,31 +291,33 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
 
         if (unitOfWork.HasChanges())
         {
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
         }
     }
 
-    public Task<List<UserReadingProfileDto>> GetReadingProfileDtosForLibrary(int userId, int libraryId)
+    public Task<List<UserReadingProfileDto>> GetReadingProfileDtosForLibrary(int userId, int libraryId,
+        CancellationToken ct = default)
     {
         return unitOfWork.DataContext.AppUserReadingProfiles
             .Where(rp => rp.AppUserId == userId && rp.LibraryIds.Contains(libraryId))
             .Where(rp => rp.Kind == ReadingProfileKind.User)
             .ProjectTo<UserReadingProfileDto>(mapper.ConfigurationProvider)
-            .ToListAsync();
+            .ToListAsync(cancellationToken: ct);
     }
 
-    public Task<List<UserReadingProfileDto>> GetReadingProfileDtosForSeries(int userId, int seriesId)
+    public Task<List<UserReadingProfileDto>> GetReadingProfileDtosForSeries(int userId, int seriesId,
+        CancellationToken ct = default)
     {
         return unitOfWork.DataContext.AppUserReadingProfiles
             .Where(rp => rp.AppUserId == userId && rp.SeriesIds.Contains(seriesId))
             .Where(rp => rp.Kind == ReadingProfileKind.User)
             .ProjectTo<UserReadingProfileDto>(mapper.ConfigurationProvider)
-            .ToListAsync();
+            .ToListAsync(cancellationToken: ct);
     }
 
-    public async Task SetProfileDevices(int userId, int profileId, List<int> deviceIds)
+    public async Task SetProfileDevices(int userId, int profileId, List<int> deviceIds, CancellationToken ct = default)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId, ct);
         if (profile == null) throw new KavitaException("profile-doesnt-exist");
 
         if (profile.Kind == ReadingProfileKind.Default) throw new KavitaException("cant-assign-devices-to-default");
@@ -317,11 +325,11 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         profile.DeviceIds = deviceIds;
         unitOfWork.AppUserReadingProfileRepository.Update(profile);
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         // Remove series & library links from profiles where there is now overlap with devices
         // E.g. for the same series there are now two profiles that would match
-        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId, ct: ct);
 
         var overlappingProfiles = profiles
             .Where(rp => rp.Id != profileId)
@@ -339,14 +347,14 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
             unitOfWork.AppUserReadingProfileRepository.Update(overlap);
         }
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
     }
 
-    public async Task RemoveDeviceLinks(int userId, int deviceId)
+    public async Task RemoveDeviceLinks(int userId, int deviceId, CancellationToken ct = default)
     {
         var profiles = await unitOfWork.DataContext.AppUserReadingProfiles
             .Where(rp => rp.AppUserId == userId && rp.DeviceIds.Contains(deviceId))
-            .ToListAsync();
+            .ToListAsync(cancellationToken: ct);
 
         foreach (var profile in profiles)
         {

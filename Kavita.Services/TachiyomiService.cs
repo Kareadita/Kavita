@@ -37,15 +37,17 @@ public class TachiyomiService(
 
     public async Task<TachiyomiChapterDto?> GetLatestChapter(int seriesId, int userId, CancellationToken ct = default)
     {
-        var currentChapter = await readerService.GetContinuePoint(seriesId, userId);
+        var currentChapter = await readerService.GetContinuePoint(seriesId, userId, ct);
 
         var prevChapterId =
-            await readerService.GetPrevChapterIdAsync(seriesId, currentChapter.VolumeId, currentChapter.Id, userId);
+            await readerService.GetPrevChapterIdAsync(seriesId, currentChapter.VolumeId, currentChapter.Id, userId, ct);
 
         // If prevChapterId is -1, this means either nothing is read or everything is read.
         if (prevChapterId == -1)
         {
             var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId, ct);
+            if (series is null) return null;
+
             var userHasProgress = series.PagesRead != 0 && series.PagesRead <= series.Pages;
 
             // If the user doesn't have progress, then return null, which the extension will catch as 204 (no content) and report nothing as read
@@ -130,7 +132,7 @@ public class TachiyomiService(
         var progressDictionary = await unitOfWork.AppUserProgressRepository
             .GetUserProgressForChaptersByChapters(user.Id, seriesId, chapterIds, ct);
 
-        await readerService.MarkChaptersAsRead(user, seriesId, chapters);
+        await readerService.MarkChaptersAsRead(user, seriesId, chapters, ct);
 
         if (generateReadingSessions)
         {

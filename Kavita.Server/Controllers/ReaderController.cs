@@ -127,7 +127,7 @@ public class ReaderController(ICacheService cacheService,
 
         var images = cacheService.GetCachedPages(chapterId);
 
-        var path = await readerService.GetThumbnail(chapter, pageNum, images);
+        var path = await readerService.GetThumbnail(chapter, pageNum, images, ct);
         return CachedFile(path, maxAge: TimeSpan.FromHours(1).Seconds);
     }
 
@@ -316,9 +316,9 @@ public class ReaderController(ICacheService cacheService,
         var progressDictionary = await unitOfWork.AppUserProgressRepository
             .GetUserProgressForChaptersByChapters(UserId, dto.SeriesId, [dto.ChapterId], HttpContext.RequestAborted);
 
-        await readerService.MarkChaptersAsRead(user, dto.SeriesId, [chapter]);
+        await readerService.MarkChaptersAsRead(user, dto.SeriesId, [chapter], ct);
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         if (dto.GenerateReadingSession)
         {
@@ -350,7 +350,7 @@ public class ReaderController(ICacheService cacheService,
 
         try
         {
-            await readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
+            await readerService.MarkSeriesAsRead(user, markReadDto.SeriesId, ct);
         }
         catch (KavitaException ex)
         {
@@ -383,7 +383,7 @@ public class ReaderController(ICacheService cacheService,
         var ct = HttpContext.RequestAborted;
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct);
         if (user == null) return Unauthorized();
-        await readerService.MarkSeriesAsUnread(user, markReadDto.SeriesId);
+        await readerService.MarkSeriesAsUnread(user, markReadDto.SeriesId, ct);
 
         if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-read-progress"));
 
@@ -405,7 +405,7 @@ public class ReaderController(ICacheService cacheService,
         if (user == null) return Unauthorized();
 
         var chapters = await unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId, ct: ct);
-        await readerService.MarkChaptersAsUnread(user, markVolumeReadDto.SeriesId, chapters);
+        await readerService.MarkChaptersAsUnread(user, markVolumeReadDto.SeriesId, chapters, ct);
 
         if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-read-progress"));
 
@@ -433,7 +433,7 @@ public class ReaderController(ICacheService cacheService,
 
         try
         {
-            await readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
+            await readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters, ct);
 
         }
         catch (KavitaException ex)
@@ -486,7 +486,7 @@ public class ReaderController(ICacheService cacheService,
             .GetUserProgressForChaptersByChapters(UserId, dto.SeriesId, chapterIds.ToList(), HttpContext.RequestAborted);
 
         var chapters = await unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds, ct: ct);
-        await readerService.MarkChaptersAsRead(user, dto.SeriesId, chapters.ToList());
+        await readerService.MarkChaptersAsRead(user, dto.SeriesId, chapters.ToList(), ct);
 
         if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-read-progress"));
 
@@ -521,7 +521,7 @@ public class ReaderController(ICacheService cacheService,
             chapterIds.Add(chapterId);
         }
         var chapters = await unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds, ct: ct);
-        await readerService.MarkChaptersAsUnread(user, dto.SeriesId, chapters.ToList());
+        await readerService.MarkChaptersAsUnread(user, dto.SeriesId, chapters.ToList(), ct);
 
         if (await unitOfWork.CommitAsync(ct))
         {
@@ -559,7 +559,7 @@ public class ReaderController(ICacheService cacheService,
         var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true, ct);
         foreach (var volume in volumes)
         {
-            await readerService.MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
+            await readerService.MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters, ct);
         }
 
         if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-read-progress"));
@@ -594,7 +594,7 @@ public class ReaderController(ICacheService cacheService,
         var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true, ct);
         foreach (var volume in volumes)
         {
-            await readerService.MarkChaptersAsUnread(user, volume.SeriesId, volume.Chapters);
+            await readerService.MarkChaptersAsUnread(user, volume.SeriesId, volume.Chapters, ct);
         }
 
         if (await unitOfWork.CommitAsync(ct))
@@ -644,7 +644,7 @@ public class ReaderController(ICacheService cacheService,
         var ct = HttpContext.RequestAborted;
         var userId = UserId;
 
-        if (!await readerService.SaveReadingProgress(progressDto, userId))
+        if (!await readerService.SaveReadingProgress(progressDto, userId, ct: ct))
         {
             return BadRequest(await localizationService.TranslateAsync(userId, "generic-read-progress"));
         }
@@ -662,7 +662,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult<ChapterDto>> GetContinuePoint(int seriesId)
     {
         var ct = HttpContext.RequestAborted;
-        return Ok(await readerService.GetContinuePoint(seriesId, UserId));
+        return Ok(await readerService.GetContinuePoint(seriesId, UserId, ct));
     }
 
     /// <summary>
@@ -915,7 +915,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
     {
         var ct = HttpContext.RequestAborted;
-        return Ok(await readerService.GetNextChapterIdAsync(seriesId, volumeId, currentChapterId, UserId));
+        return Ok(await readerService.GetNextChapterIdAsync(seriesId, volumeId, currentChapterId, UserId, ct));
     }
 
 
@@ -935,7 +935,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)
     {
         var ct = HttpContext.RequestAborted;
-        return Ok(await readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, UserId));
+        return Ok(await readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, UserId, ct));
     }
 
     /// <summary>
@@ -986,7 +986,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletionForChapter(int seriesId, int chapterId)
     {
         var ct = HttpContext.RequestAborted;
-        return Ok(await readerService.GetEstimateToCompletionForChapter(UserId, seriesId, chapterId));
+        return Ok(await readerService.GetEstimateToCompletionForChapter(UserId, seriesId, chapterId, ct));
     }
 
 
@@ -1086,7 +1086,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult<RereadDto>> ShouldPromptForSeriesReRead(int seriesId, int libraryId)
     {
         var ct = HttpContext.RequestAborted;
-        return Ok(await readerService.CheckSeriesForReRead(UserId, seriesId, libraryId));
+        return Ok(await readerService.CheckSeriesForReRead(UserId, seriesId, libraryId, ct));
     }
 
     /// <summary>
@@ -1101,7 +1101,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult<RereadDto>> ShouldPromptForVolumeReRead(int libraryId, int seriesId, int volumeId)
     {
         var ct = HttpContext.RequestAborted;
-        return Ok(await readerService.CheckVolumeForReRead(UserId, volumeId, seriesId, libraryId));
+        return Ok(await readerService.CheckVolumeForReRead(UserId, volumeId, seriesId, libraryId, ct));
     }
 
     /// <summary>
@@ -1116,7 +1116,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult<RereadDto>> ShouldPromptForChapterReRead(int libraryId, int seriesId, int chapterId)
     {
         var ct = HttpContext.RequestAborted;
-        return Ok(await readerService.CheckChapterForReRead(UserId, chapterId, seriesId, libraryId));
+        return Ok(await readerService.CheckChapterForReRead(UserId, chapterId, seriesId, libraryId, ct));
     }
 
     [ProfilePrivacy]

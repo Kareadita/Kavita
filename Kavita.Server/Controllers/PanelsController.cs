@@ -34,7 +34,7 @@ public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWo
         var progressMap = await unitOfWork.AppUserProgressRepository
             .GetUserProgressForChaptersByChapters(UserId, dto.SeriesId, [dto.ChapterId], ct);
 
-        await readerService.SaveReadingProgress(dto, UserId, false);
+        await readerService.SaveReadingProgress(dto, UserId, false, ct);
 
         BackgroundJob.Enqueue<IReadingSessionService>(s
             => s.GenerateReadingSessionForChapters(UserId, dto.SeriesId, progressMap, CancellationToken.None));
