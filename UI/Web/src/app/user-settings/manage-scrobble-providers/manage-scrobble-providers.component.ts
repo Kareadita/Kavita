@@ -231,6 +231,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
         return this.scrobbleService.saveUserScrobbleProvider({
           provider: provider,
           authenticationToken: '',
+          refreshToken: '',
           userName: '',
         });
       }),
