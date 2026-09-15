@@ -2,13 +2,17 @@ import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal, vi
 import {translate, TranslocoDirective, TranslocoPipe} from "@jsverse/transloco";
 import {StepTrackerComponent, TimelineStep} from "../../reading-list/_components/step-tracker/step-tracker.component";
 import {WikiLink} from "../../_models/wiki";
-import {FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {FileUploadComponent} from "@iplab/ngx-file-upload";
 import {MetadataSettings} from "../_models/metadata-settings";
 import {SettingsService} from "../settings.service";
 import {
   ManageMetadataMappingsComponent,
-  MetadataMappingsExport
+  MetadataMappingsExport,
+  MetadataMappingsFormModel,
+  metadataMappingsSchema,
+  packFieldMappings,
+  toMetadataMappingsFormModel
 } from "../manage-metadata-mappings/manage-metadata-mappings.component";
 import {ToastrService} from '@openng/ngx-toastr';
 import {LoadingComponent} from "../../shared/loading/loading.component";
@@ -31,7 +35,8 @@ import {NgTemplateOutlet} from "@angular/common";
 import {Router} from "@angular/router";
 import {LicenseService} from "../../_services/license.service";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
-import {applyEach, form, FormField, FormRoot, required, validate} from "@angular/forms/signals";
+import {applyEach, apply, form, FormField, FormRoot, required, validate} from "@angular/forms/signals";
+import {packAgeRatingMappings} from "../../shared/_components/age-rating-mapper/age-rating-mapper.component";
 import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 
@@ -92,8 +97,6 @@ export class ImportMappingsComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
 
-  readonly manageMetadataMappingsComponent = viewChild.required(ManageMetadataMappingsComponent);
-
   steps: TimelineStep[] = [
     {title: translate('import-mappings.import-step'), index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
     {title: translate('import-mappings.configure-step'), index: Step.Configure, active: false, icon: 'fa-solid fa-gears'},
@@ -144,9 +147,19 @@ export class ImportMappingsComponent implements OnInit {
   });
 
   /**
-   * This is that contains the data in the finalize step
+   * Holds the mapping data shown in the finalize step, seeded from the import result
    */
-  mappingsForm = new FormGroup({});
+  private readonly mappingsModel = signal<MetadataMappingsFormModel>({
+    enableGenres: false,
+    enableTags: false,
+    filterAboveWeight: null,
+    blacklist: [],
+    whitelist: [],
+    ageRatingMappings: [],
+    externalAgeRatingMappings: [],
+    fieldMappings: [],
+  });
+  protected readonly mappingsGroup = form(this.mappingsModel, p => apply(p, metadataMappingsSchema));
 
   isLoading = signal(false);
   settings = signal<MetadataSettings | undefined>(undefined)
@@ -227,13 +240,13 @@ export class ImportMappingsComponent implements OnInit {
     if (!res) return;
 
     const newSettings = res.resultingMetadataSettings;
-    const data = this.manageMetadataMappingsComponent().packData();
+    const mappings = this.mappingsModel();
 
     // Update settings with data from the final step
-    newSettings.whitelist = data.whitelist;
-    newSettings.blacklist = data.blacklist;
-    newSettings.ageRatingMappings = data.ageRatingMappings;
-    newSettings.fieldMappings = data.fieldMappings;
+    newSettings.whitelist = mappings.whitelist;
+    newSettings.blacklist = mappings.blacklist;
+    newSettings.ageRatingMappings = packAgeRatingMappings(mappings.ageRatingMappings);
+    newSettings.fieldMappings = packFieldMappings(mappings.fieldMappings);
 
     this.settingsService.updateMetadataSettings(newSettings).subscribe({
       next: () => {
@@ -264,6 +277,7 @@ export class ImportMappingsComponent implements OnInit {
         if (res == null) return of(null);
 
         this.importResult.set(res);
+        this.mappingsModel.set(toMetadataMappingsFormModel(res.resultingMetadataSettings));
 
         return this.settingsService.getMetadataSettings().pipe(
           tap(dto => this.settings.set(dto)),

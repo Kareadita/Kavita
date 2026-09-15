@@ -22,7 +22,7 @@ export interface EnumOption<T> {
   styleUrl: './setting-select.component.scss',
   templateUrl: './setting-select.component.html',
 })
-export class SettingSelectComponent<T extends number = number> implements FormValueControl<T> {
+export class SettingSelectComponent<T extends number = number> implements FormValueControl<T | null> {
 
   protected readonly formField = inject(FormField);
 
@@ -33,8 +33,10 @@ export class SettingSelectComponent<T extends number = number> implements FormVa
    * Only needed outside an <app-setting-item>, which wires this up itself.
    */
   ariaDescribedBy = input<string | undefined>(undefined);
-  value = model<T>(0 as T);
+  value = model<T | null>(0 as T);
   extraClasses = input<string>('');
+  /** When set, renders a leading empty option that selects `null` */
+  placeholder = input<string | undefined>(undefined);
 
   options = input.required<(EnumOption<T> | T)[]>();
   template = contentChild<TemplateRef<never>>('template');
@@ -54,6 +56,6 @@ export class SettingSelectComponent<T extends number = number> implements FormVa
   onSelectionChange(event: Event) {
     const select = event.target as HTMLSelectElement;
     const numericValue = select.value === '' ? null : Number(select.value);
-    this.value.set(numericValue as T);
+    this.value.set(numericValue as T | null);
   }
 }

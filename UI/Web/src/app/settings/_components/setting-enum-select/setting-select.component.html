@@ -1,4 +1,7 @@
 <select [id]="inputId()" class="form-select {{extraClasses()}}" (change)="onSelectionChange($event)" [disabled]="formField.state().disabled()" [attr.aria-describedby]="ariaDescribedBy()" [appFormField]="formField.field()">
+  @if (placeholder(); as placeholderLabel) {
+    <option value="" [selected]="formField.state().value() === null">{{placeholderLabel}}</option>
+  }
   @for (opt of options(); track getEnumValue(opt)) {
     @let value = getEnumValue(opt);
 

@@ -124,9 +124,7 @@
         @case (Step.Finalize) {
           @let res = importResult();
           @if (res) {
-            <app-manage-metadata-mappings [settings]="res.resultingMetadataSettings"
-              [settingsForm]="mappingsForm"
-              [showHeader]="false" />
+            <app-manage-metadata-mappings [field]="mappingsGroup" />
           }
         }
       }
