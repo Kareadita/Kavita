@@ -5,12 +5,15 @@ import {
   computed,
   contentChild,
   CUSTOM_ELEMENTS_SCHEMA,
+  effect,
+  ElementRef,
   inject,
   input,
   model,
   output,
   signal,
-  TemplateRef
+  TemplateRef,
+  viewChild
 } from '@angular/core';
 import {Swiper} from 'swiper/types';
 import {NgTemplateOutlet} from '@angular/common';
@@ -43,6 +46,11 @@ export class CarouselReelComponent<T> {
   readonly carouselItemTemplate = contentChild.required<TemplateRef<never>>('carouselItem');
   readonly promptToAddTemplate = contentChild.required<TemplateRef<never>>('promptToAdd');
   readonly noDataTemplate = contentChild<TemplateRef<never>>('noData');
+
+  readonly swiperContainer = viewChild<ElementRef<HTMLElement & {swiper: Swiper}>>('swiperContainer');
+
+  readonly isBeginning = signal(true);
+  readonly isEnd = signal(false);
 
   items = model<T[]>([]);
   title = input<string>('');
@@ -88,11 +96,24 @@ export class CarouselReelComponent<T> {
   swiper = signal<Swiper | undefined>(undefined);
 
   isNextDisabled = computed(() => {
-    const swiper = this.swiper();
-    return swiper?.isEnd
+    return this.isEnd()
     && (!this.paginationEnabled() || this.items().length < this.pageSize())
     || (this.currentPage() >= (this.totalPages()));
   });
+
+  constructor() {
+    // element's connectedCallback -> initialize() sets .swiper synchronously (this avoids binding to swiperprogress like docs suggest and incurring lag on each scroll tick)
+    effect(() => {
+      const swiper = this.swiperContainer()?.nativeElement?.swiper;
+      this.swiper.set(swiper);
+      this.syncEdges(swiper);
+    });
+  }
+
+  syncEdges(s: Swiper | undefined = this.swiper()) {
+    this.isBeginning.set(s?.isBeginning ?? true);
+    this.isEnd.set(s?.isEnd ?? false);
+  }
 
   private tryLoadNextPage() {
     if (!this.paginationEnabled() || this.loadingNextPage() || this.currentPage() >= this.totalPages()) {
@@ -157,12 +178,6 @@ export class CarouselReelComponent<T> {
 
   sectionClicked() {
     this.sectionClick.emit(this.title());
-  }
-
-  // Swiper new implementation makes it so we need to use a progress event to get initialized
-  onProgress(event: any) {
-    const [swiper, progress] = event.detail;
-    this.swiper.set(swiper);
   }
 
   onReachEnd() {

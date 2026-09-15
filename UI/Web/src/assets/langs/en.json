@@ -3158,12 +3158,12 @@
         "include-extras": "Include Chapters & Files",
         "search-alt": "Search…",
         "person-aka-status": "Matches an alias",
-        "no-data": "No results found"
+        "no-data": "No results found",
+        "search-series-alt": "Search series"
     },
 
     "nav-header": {
         "skip-alt": "Skip to main content",
-        "search-series-alt": "Search series",
         "scroll-to-top-alt": "Scroll to Top",
         "server-settings": "Server Settings",
         "settings": "Settings",
