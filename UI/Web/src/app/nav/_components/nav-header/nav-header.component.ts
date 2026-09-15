@@ -6,7 +6,6 @@ import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
 import {EventsWidgetComponent} from '../events-widget/events-widget.component';
 import {ImageComponent} from '../../../shared/image/image.component';
-import {SearchTypeaheadComponent} from '../grouped-typeahead/search-typeahead.component';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
@@ -20,6 +19,7 @@ import {ModalService} from "../../../_services/modal.service";
 import {AccountService} from "../../../_services/account.service";
 import {NavService} from "../../../_services/nav.service";
 import {ImageService} from "../../../_services/image.service";
+import {SearchTypeaheadComponent} from "../search-typeahead/search-typeahead.component";
 
 @Component({
   selector: 'app-nav-header',

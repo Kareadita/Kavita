@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; prefix: 'grouped-typeahead'">
+<ng-container *transloco="let t; prefix: 'search-typeahead'">
   <form [formRoot]="formGroup" class="grouped-typeahead">
     <label [for]="id()" class="form-label visually-hidden">{{t('search-series-alt')}}</label>
     <div class="typeahead-input" [class.focused]="hasFocus()" (click)="onInputClick($event)">
@@ -156,7 +156,7 @@
               @if (!hasAnyData()) {
                 <div class="list-group results">
                   <app-empty-state [titleKey]="'no-data'"
-                                   [i18nPrefix]="'grouped-typeahead'">
+                                   [i18nPrefix]="'search-typeahead'">
                     <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                   </app-empty-state>
                 </div>
