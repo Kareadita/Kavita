@@ -100,16 +100,21 @@
                 <div class="text-muted">{{t('age-ratings-conflicts-tooltip')}}</div>
               }
 
-              @for (arm of res.ageRatingConflicts; track arm) {
+              @for (arm of res.ageRatingConflicts; track arm; let i = $index) {
+                @let conflictField = formGroup.ageRatingConflictResolutions[arm];
+                @let conflictId = 'age-rating-conflict-' + i;
+
                 <div class="col-md-6 col-sm-12 pt-4">
-                  <span class="conflict-title">{{arm}}</span>
-                  <app-setting-select [formField]="formGroup.ageRatingConflictResolution[arm]"
+                  <label class="conflict-title" [for]="conflictId">{{arm}}</label>
+                  <app-setting-select [formField]="conflictField" [inputId]="conflictId"
+                                      [ariaDescribedBy]="conflictId + '-validations'"
                                       [options]="ConflictResolutions" extraClasses="mt-2">
                     <ng-template #template let-resolution>
                       <ng-container [ngTemplateOutlet]="ageRatingConflict"
                                     [ngTemplateOutletContext]="{$implicit: arm, resolution: resolution }" />
                     </ng-template>
                   </app-setting-select>
+                  <app-validation-errors [inputId]="conflictId" [control]="conflictField" />
                 </div>
               }
 

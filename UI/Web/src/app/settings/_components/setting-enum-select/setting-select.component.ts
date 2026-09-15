@@ -28,6 +28,11 @@ export class SettingSelectComponent<T extends number = number> implements FormVa
 
   /** This should only be passed when used outside an <app-setting-item> */
   inputId = input<string | undefined>(undefined);
+  /**
+   * Id of the element describing this select, usually a sibling app-validation-errors ("{inputId}-validations").
+   * Only needed outside an <app-setting-item>, which wires this up itself.
+   */
+  ariaDescribedBy = input<string | undefined>(undefined);
   value = model<T>(0 as T);
   extraClasses = input<string>('');
 
