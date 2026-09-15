@@ -6,10 +6,6 @@ import {
   input,
   model
 } from '@angular/core';
-import {
-  FormsModule,
-  ReactiveFormsModule
-} from "@angular/forms";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {SettingItemComponent} from "../setting-item/setting-item.component";
 import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
@@ -26,8 +22,6 @@ import {FormField, FormValueControl} from "@angular/forms/signals";
   selector: 'app-setting-multi-text-field',
   imports: [
     DefaultValuePipe,
-    FormsModule,
-    ReactiveFormsModule,
     SettingItemComponent,
     TagBadgeComponent,
     FormFieldDirective

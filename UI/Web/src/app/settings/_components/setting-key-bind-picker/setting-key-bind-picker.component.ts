@@ -3,15 +3,12 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   ElementRef,
-  forwardRef,
   inject,
   input, model,
   OnDestroy,
   signal
 } from '@angular/core';
-import {ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR} from "@angular/forms";
 import {KeyBindService, KeyCode, ModifierKeyCodes} from "../../../_services/key-bind.service";
 import {KeyBind, KeyBindTarget} from "../../../_models/preferences/preferences";
 import {KeyBindPipe} from "../../../_pipes/key-bind.pipe";

@@ -35,13 +35,11 @@
       </div>
 
       <div class="d-flex align-items-center gap-3">
-        @if (isEditOrCreateMode() && formGroup) {
-          <form [formGroup]="formGroup" novalidate>
-            <div class="form-check form-switch">
-              <input type="checkbox" id="contains-spoiler" role="switch" formControlName="hasSpoiler" class="form-check-input" aria-labelledby="auto-close-label" switch>
-              <label class="form-check-label" for="contains-spoiler">{{t('contains-spoilers-label')}}</label>
-            </div>
-          </form>
+        @if (isEditOrCreateMode()) {
+          <div class="form-check form-switch">
+            <input type="checkbox" id="contains-spoiler" role="switch" [formField]="formGroup.hasSpoiler" class="form-check-input">
+            <label class="form-check-label" for="contains-spoiler">{{t('contains-spoilers-label')}}</label>
+          </div>
         } @else if (annotation()?.containsSpoiler) {
           <div class="small">
             <i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>
@@ -97,36 +95,32 @@
   </div>
 
   <div class="offcanvas-body">
-    @if (annotation() && formGroup) {
-      <form [formGroup]="formGroup" novalidate>
-        <div class="d-flex justify-content-center">
-          <blockquote class="text-muted pb-2 small fw-lighter mx-3 mx-md-4 mx-lg-5 mx-auto" style="max-width: 90%;">
-            <div id="render-target" #renderTarget>
-              <p class="content-quote mb-0" [class.clamped]="!quoteExpanded()" [innerHTML]="totalText()"></p>
-            </div>
-            <a class="quote-toggle" (click)="quoteExpanded.set(!quoteExpanded())" role="button" href="javascript:void(0);">
-              <i aria-hidden="true" class="fa mx-1" [class.fa-caret-down]="!quoteExpanded()" [class.fa-caret-up]="quoteExpanded()"></i>
-              {{quoteExpanded() ? t('read-less') : t('read-more')}}
-            </a>
-            <cite class="float-end mb-1 annotation-meta">{{annotation()! | pageChapterLabel}}</cite>
-          </blockquote>
-        </div>
+    @if (annotation()) {
+      <div class="d-flex justify-content-center">
+        <blockquote class="text-muted pb-2 small fw-lighter mx-3 mx-md-4 mx-lg-5 mx-auto" style="max-width: 90%;">
+          <div id="render-target" #renderTarget>
+            <p class="content-quote mb-0" [class.clamped]="!quoteExpanded()" [innerHTML]="totalText()"></p>
+          </div>
+          <a class="quote-toggle" (click)="quoteExpanded.set(!quoteExpanded())" role="button" href="javascript:void(0);">
+            <i aria-hidden="true" class="fa mx-1" [class.fa-caret-down]="!quoteExpanded()" [class.fa-caret-up]="quoteExpanded()"></i>
+            {{quoteExpanded() ? t('read-less') : t('read-more')}}
+          </a>
+          <cite class="float-end mb-1 annotation-meta">{{annotation()! | pageChapterLabel}}</cite>
+        </blockquote>
+      </div>
 
-        <div class="setting-section-break" aria-hidden="true"></div>
+      <div class="setting-section-break" aria-hidden="true"></div>
 
-        <div class="row g-0 mt-2 mb-2 mx-auto">
-          @if (isEditOrCreateMode()) {
-            <app-quill-wrapper controlName="note"
-                               [formGroup]="formGroup"
-                               [theme]="QuillTheme.Snow"
-                               (contentChanged)="updateContent($event)"
-            />
-          } @else {
-            <quill-view [content]="annotation()!.comment" format="json" theme="snow" />
-          }
-        </div>
-
-      </form>
+      <div class="row g-0 mt-2 mb-2 mx-auto">
+        @if (isEditOrCreateMode()) {
+          <app-quill-wrapper [field]="formGroup.note"
+                             [theme]="QuillTheme.Snow"
+                             (contentChanged)="updateContent($event)"
+          />
+        } @else {
+          <quill-view [content]="annotation()!.comment" format="json" theme="snow" />
+        }
+      </div>
     }
 
   </div>

@@ -1,4 +1,5 @@
 import {AgeRating} from "../../_models/metadata/age-rating";
+import type {Role} from "../../_services/account.service";
 
 export interface OidcPublicConfig {
   autoLogin: boolean;
@@ -17,7 +18,7 @@ export interface OidcConfig extends OidcPublicConfig {
   rolesPrefix: string;
   rolesClaim: string;
   customScopes: string[];
-  defaultRoles: string[];
+  defaultRoles: Role[];
   defaultLibraries: number[];
   defaultAgeRestriction: AgeRating;
   defaultIncludeUnknowns: boolean;

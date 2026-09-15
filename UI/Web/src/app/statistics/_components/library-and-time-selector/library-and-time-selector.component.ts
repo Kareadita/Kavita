@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  effect,
   ElementRef,
   HostListener,
   inject,
@@ -10,7 +12,6 @@ import {
   output,
   signal
 } from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {
   SmartTimeRangePickerComponent,
   TimeRange
@@ -26,18 +27,9 @@ import {ReaderService} from "../../../_services/reader.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 
-export interface LibraryAndTimeFilterGroup {
-  timeFilter: FormGroup<{
-    startDate: FormControl<Date | null>;
-    endDate: FormControl<Date | null>;
-  }>;
-  libraries: FormControl<number[]>;
-}
-
 @Component({
   selector: 'app-library-and-time-selector',
   imports: [
-    ReactiveFormsModule,
     SmartTimeRangePickerComponent,
     TypeaheadComponent,
     TranslocoDirective
@@ -48,6 +40,7 @@ export interface LibraryAndTimeFilterGroup {
 })
 export class LibraryAndTimeSelectorComponent implements OnInit {
 
+  private readonly destroyRef = inject(DestroyRef);
   private readonly libraryService = inject(LibraryService);
   private readonly readerService = inject(ReaderService);
   private readonly elementRef = inject(ElementRef);
@@ -63,18 +56,14 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
   startYear = signal(new Date().getFullYear())
   allLibraries = signal<Library[]>([]);
   showLibraryTypeahead = signal(false);
-  libraryTypeaheadSettings?: TypeaheadConfig<Library>;
-  protected filterForm = new FormGroup<LibraryAndTimeFilterGroup>({
-    timeFilter: new FormGroup({
-      startDate: new FormControl<Date | null>(null),
-      endDate: new FormControl<Date | null>(null),
-    }),
-    libraries: new FormControl<number[]>([], { nonNullable: true }),
+  libraryTypeaheadSettings = signal<TypeaheadConfig<Library> | undefined>(undefined);
+
+  filter = signal<StatsFilter>({
+    timeFilter: {startDate: null, endDate: null},
+    libraries: [],
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
-
-
-  filter = signal<StatsFilter | undefined>(undefined);
-  year = computed(() => this.filter()?.timeFilter.endDate?.getFullYear() ?? new Date().getFullYear());
+  year = computed(() => this.filter().timeFilter.endDate?.getFullYear() ?? new Date().getFullYear());
 
 
   @HostListener('body:click', ['$event'])
@@ -118,14 +107,9 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
 
   constructor() {
 
-    this.filterForm.valueChanges.pipe(
-      takeUntilDestroyed(),
-    ).subscribe(value => {
-      const filter = value as StatsFilter;
-      filter.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-      this.filterChange.emit(filter);
-      this.yearChange.emit(filter.timeFilter?.endDate?.getFullYear() ?? new Date().getFullYear());
+    effect(() => {
+      this.filterChange.emit(this.filter());
+      this.yearChange.emit(this.year());
     });
 
   }
@@ -133,11 +117,14 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
   ngOnInit() {
     this.libraryService.getLibrariesForUser(this.userId()).pipe(
       tap(libs => this.allLibraries.set(libs)),
-      tap(libs => this.filterForm.get('libraries')?.setValue(libs.map(l => l.id))),
-      tap(libs => this.libraryTypeaheadSettings = this.setupLibrarySettings(libs, libs))
+      tap(libs => this.filter.update(f => ({...f, libraries: libs.map(l => l.id)}))),
+      tap(libs => this.libraryTypeaheadSettings.set(this.setupLibrarySettings(libs, libs))),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe();
 
-    this.readerService.getFirstProgressDateForUser(this.userId()).subscribe(date => {
+    this.readerService.getFirstProgressDateForUser(this.userId()).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(date => {
       const jsDate = new Date(date);
       this.startYear.set(jsDate.getFullYear());
     });
@@ -156,12 +143,12 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
   }
 
   updateSelectedLibraries(libs: Library[]) {
-    this.filterForm.get('libraries')!.setValue(libs.map(l => l.id));
-    this.libraryTypeaheadSettings = this.setupLibrarySettings(this.allLibraries(), libs);
+    this.filter.update(f => ({...f, libraries: libs.map(l => l.id)}));
+    this.libraryTypeaheadSettings.set(this.setupLibrarySettings(this.allLibraries(), libs));
   }
 
   updateTimeRange(tr: TimeRange) {
-    this.filterForm.get('timeFilter')!.setValue(tr);
+    this.filter.update(f => ({...f, timeFilter: tr}));
   }
 
   libraryName(libraryId: number): string {
