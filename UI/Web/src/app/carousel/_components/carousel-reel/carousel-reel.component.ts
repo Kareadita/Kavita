@@ -22,7 +22,7 @@ import {PaginatedResult} from "../../../_models/pagination";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {ActionResult} from "../../../_models/actionables/action-result";
 import {ActionableEntity} from "../../../_services/action-factory.service";
-import {register} from "swiper/element";
+import {register} from "swiper/element/bundle";
 
 register();
 
@@ -88,7 +88,9 @@ export class CarouselReelComponent<T> {
   swiper = signal<Swiper | undefined>(undefined);
 
   private tryLoadNextPage() {
-    if (!this.paginationEnabled() || this.loadingNextPage()) return;
+    if (!this.paginationEnabled() || this.loadingNextPage() || this.currentPage() >= this.totalPages()) {
+      return;
+    }
 
     this.currentPage.update(x => x + 1);
     this.loadingNextPage.set(true);
@@ -112,7 +114,7 @@ export class CarouselReelComponent<T> {
         this.swiper()?.setProgress(newCurrentProgress);
         this.cdRef.markForCheck();
       }),
-      tap(() => this.nextPage()),
+      //tap(() => this.nextPage()),
       tap(() => this.loadingNextPage.set(false)),
     ).subscribe();
   }
@@ -154,6 +156,14 @@ export class CarouselReelComponent<T> {
   onProgress(event: any) {
     const [swiper, progress] = event.detail;
     this.swiper.set(swiper);
+  }
+
+  onReachEnd() {
+    if (this.currentPage() >= this.totalPages()) {
+      return;
+    }
+
+    this.tryLoadNextPage();
   }
 
   performAction(event: ActionResult<T>) {
