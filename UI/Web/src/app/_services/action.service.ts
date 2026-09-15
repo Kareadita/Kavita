@@ -149,7 +149,7 @@ export class ActionService {
 
       case Action.Edit: {
         const modalRef = this.modalService.open(LibrarySettingsModalComponent, editModal());
-        modalRef.componentInstance.library = library;
+        modalRef.setInput('library', library);
         return this.handleEditModal(modalRef, action, library);
       }
 
