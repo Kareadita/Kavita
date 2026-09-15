@@ -61,10 +61,6 @@ export class ViewBookmarkDrawerComponent {
    * Emitted when a bookmark is removed
    */
   removeBookmark: EventEmitter<PageBookmark> = new EventEmitter<PageBookmark>();
-  /**
-   * Used to refresh the Personal PoC
-   */
-  refreshPToC: EventEmitter<void> = new EventEmitter<void>();
   loadPtoc: EventEmitter<LoadPageEvent | null> = new EventEmitter<LoadPageEvent | null>();
 
   tocId: Tabs = Tabs.BookmarkImageTab;

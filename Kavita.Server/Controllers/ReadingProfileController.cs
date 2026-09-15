@@ -27,7 +27,8 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpGet("all")]
     public async Task<ActionResult<IList<UserReadingProfileDto>>> GetAllReadingProfiles()
     {
-        return Ok(await unitOfWork.AppUserReadingProfileRepository.GetProfilesDtoForUser(UserId, true));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.AppUserReadingProfileRepository.GetProfilesDtoForUser(UserId, true, ct));
     }
 
     /// <summary>
@@ -43,9 +44,10 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpGet("{libraryId:int}/{seriesId:int}")]
     public async Task<ActionResult<UserReadingProfileDto>> GetProfileForSeries(int libraryId, int seriesId, [FromQuery] bool skipImplicit, [FromQuery] int? deviceId = null)
     {
+        var ct = HttpContext.RequestAborted;
         deviceId ??= clientInfoAccessor.CurrentDeviceId;
 
-        return Ok(await readingProfileService.GetReadingProfileDtoForSeries(UserId, libraryId, seriesId, deviceId, skipImplicit));
+        return Ok(await readingProfileService.GetReadingProfileDtoForSeries(UserId, libraryId, seriesId, deviceId, skipImplicit, ct));
     }
 
     /// <summary>
@@ -57,11 +59,12 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpGet("series")]
     public async Task<ActionResult<List<UserReadingProfileDto>>> GetProfilesForSeries(int seriesId)
     {
-        return Ok(await readingProfileService.GetReadingProfileDtosForSeries(UserId, seriesId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await readingProfileService.GetReadingProfileDtosForSeries(UserId, seriesId, ct));
     }
 
     /// <summary>
-    /// Returns all the Reading rofiles bound to the library
+    /// Returns all the Reading profiles bound to the library
     /// </summary>
     /// <param name="libraryId"></param>
     /// <returns></returns>
@@ -69,7 +72,8 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpGet("library")]
     public async Task<ActionResult<List<UserReadingProfileDto>>> GetProfilesForLibrary(int libraryId)
     {
-        return Ok(await readingProfileService.GetReadingProfileDtosForLibrary(UserId, libraryId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await readingProfileService.GetReadingProfileDtosForLibrary(UserId, libraryId, ct));
     }
 
     /// <summary>
@@ -81,7 +85,8 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReadingProfileDto>> CreateReadingProfile([FromBody] UserReadingProfileDto dto)
     {
-        return Ok(await readingProfileService.CreateReadingProfile(UserId, dto));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await readingProfileService.CreateReadingProfile(UserId, dto, ct));
     }
 
     /// <summary>
@@ -94,9 +99,10 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReadingProfileDto>> PromoteImplicitReadingProfile([FromQuery] int profileId, [FromQuery] int? deviceId = null)
     {
+        var ct = HttpContext.RequestAborted;
         deviceId ??= clientInfoAccessor.CurrentDeviceId;
 
-        return Ok(await readingProfileService.PromoteImplicitProfile(UserId, profileId, deviceId));
+        return Ok(await readingProfileService.PromoteImplicitProfile(UserId, profileId, deviceId, ct));
     }
 
     /// <summary>
@@ -114,9 +120,10 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     public async Task<ActionResult<UserReadingProfileDto>> UpdateReadingProfileForSeries(
         [FromBody] UserReadingProfileDto dto, [FromQuery] int libraryId, [FromQuery] int seriesId, [FromQuery] int? deviceId = null)
     {
+        var ct = HttpContext.RequestAborted;
         deviceId ??= clientInfoAccessor.CurrentDeviceId;
 
-        var updatedProfile = await readingProfileService.UpdateImplicitReadingProfile(UserId, libraryId, seriesId, dto, deviceId);
+        var updatedProfile = await readingProfileService.UpdateImplicitReadingProfile(UserId, libraryId, seriesId, dto, deviceId, ct);
         return Ok(updatedProfile);
     }
 
@@ -133,9 +140,10 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     public async Task<ActionResult<UserReadingProfileDto>> UpdateParentProfileForSeries(
         [FromBody] UserReadingProfileDto dto, [FromQuery] int libraryId, [FromQuery] int seriesId, [FromQuery] int? deviceId = null)
     {
+        var ct = HttpContext.RequestAborted;
         deviceId ??= clientInfoAccessor.CurrentDeviceId;
 
-        var newParentProfile = await readingProfileService.UpdateParent(UserId, libraryId, seriesId, dto, deviceId);
+        var newParentProfile = await readingProfileService.UpdateParent(UserId, libraryId, seriesId, dto, deviceId, ct);
         return Ok(newParentProfile);
     }
 
@@ -151,7 +159,8 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReadingProfileDto>> UpdateReadingProfile(UserReadingProfileDto dto)
     {
-        return Ok(await readingProfileService.UpdateReadingProfile(UserId, dto));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await readingProfileService.UpdateReadingProfile(UserId, dto, ct));
     }
 
     /// <summary>
@@ -165,7 +174,8 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> DeleteReadingProfile([FromQuery] int profileId)
     {
-        await readingProfileService.DeleteReadingProfile(UserId, profileId);
+        var ct = HttpContext.RequestAborted;
+        await readingProfileService.DeleteReadingProfile(UserId, profileId, ct);
         return Ok();
     }
 
@@ -180,7 +190,8 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> SetSeriesProfiles(int seriesId, List<int> profileIds)
     {
-        await readingProfileService.SetSeriesProfiles(UserId, profileIds, seriesId);
+        var ct = HttpContext.RequestAborted;
+        await readingProfileService.SetSeriesProfiles(UserId, profileIds, seriesId, ct);
         return Ok();
     }
 
@@ -194,7 +205,8 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> ClearSeriesProfile(int seriesId)
     {
-        await readingProfileService.ClearSeriesProfile(UserId, seriesId);
+        var ct = HttpContext.RequestAborted;
+        await readingProfileService.ClearSeriesProfile(UserId, seriesId, ct);
         return Ok();
     }
 
@@ -209,7 +221,8 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> SetLibraryProfiles(int libraryId, List<int> profileIds)
     {
-        await readingProfileService.SetLibraryProfiles(UserId, profileIds, libraryId);
+        var ct = HttpContext.RequestAborted;
+        await readingProfileService.SetLibraryProfiles(UserId, profileIds, libraryId, ct);
         return Ok();
     }
 
@@ -223,7 +236,8 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> ClearLibraryProfile(int libraryId)
     {
-        await readingProfileService.ClearLibraryProfile(UserId, libraryId);
+        var ct = HttpContext.RequestAborted;
+        await readingProfileService.ClearLibraryProfile(UserId, libraryId, ct);
         return Ok();
     }
 
@@ -236,7 +250,8 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> BulkAddReadingProfile(BulkSetSeriesProfiles body)
     {
-        await readingProfileService.BulkSetSeriesProfiles(UserId, body.ProfileIds, body.SeriesIds);
+        var ct = HttpContext.RequestAborted;
+        await readingProfileService.BulkSetSeriesProfiles(UserId, body.ProfileIds, body.SeriesIds, ct);
         return Ok();
     }
 
@@ -250,7 +265,8 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> SetProfileDevices([FromQuery] int profileId, [FromBody] List<int> deviceIds)
     {
-        await readingProfileService.SetProfileDevices(UserId, profileId, deviceIds);
+        var ct = HttpContext.RequestAborted;
+        await readingProfileService.SetProfileDevices(UserId, profileId, deviceIds, ct);
 
         return Ok();
 

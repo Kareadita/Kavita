@@ -1,9 +1,8 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Preferences} from "../../_models/preferences/preferences";
 import {AccountService} from "../../_services/account.service";
 import {LocalizationService} from "../../_services/localization.service";
-import {NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {KavitaLocale} from "../../_models/metadata/language";
 import {toObservable} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, filter, forkJoin, switchMap} from "rxjs";
@@ -31,7 +30,6 @@ import {SettingSelectComponent} from "../../settings/_components/setting-enum-se
   selector: 'app-manga-user-preferences',
   imports: [
     TranslocoDirective,
-    ReactiveFormsModule,
     TitleCasePipe,
     SettingItemComponent,
     SettingSwitchComponent,
@@ -49,12 +47,10 @@ import {SettingSelectComponent} from "../../settings/_components/setting-enum-se
 })
 export class ManageUserPreferencesComponent implements OnInit {
 
-  private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
   private readonly localizationService = inject(LocalizationService);
   protected readonly licenseService = inject(LicenseService);
   private readonly libraryService = inject(LibraryService);
-  private readonly fb = inject(NonNullableFormBuilder);
   private readonly metadataService = inject(MetadataService);
   private readonly typeaheadSettingFactory = inject(TypeaheadConfigFactoryService);
 
@@ -64,7 +60,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   locales = signal<KavitaLocale[]>([]);
   socialLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
 
-  userPreferencesFormModel = signal<Preferences>({
+  formModel = signal<Preferences>({
     aniListScrobblingEnabled: false,
     blurUnreadSummaries: false,
     bookReaderHighlightSlots: [],
@@ -102,18 +98,22 @@ export class ManageUserPreferencesComponent implements OnInit {
       previewUrls: [],
       author: ""
     },
-    wantToReadSync: false
+    wantToReadSync: false,
+    onDeckProgressDays: 0,
+    onDeckUpdateDays: 0
   });
-  userPreferencesFormGroup = form(this.userPreferencesFormModel, (path) => {
+  formGroup = form(this.formModel, (path) => {
     disabled(path, {when: () => this.accountService.hasReadOnlyRole()});
     debounce(path, 100);
 
     min(path.promptForRereadsAfter, 0);
+    min(path.onDeckProgressDays, 1);
+    min(path.onDeckUpdateDays, 1);
     required(path.promptForRereadsAfter);
   });
 
   selectedLocale = computed(() => {
-    const locale = (this.locales() || []).find(l => l.fileName === this.userPreferencesFormGroup.locale().value());
+    const locale = (this.locales() || []).find(l => l.fileName === this.formGroup.locale().value());
     if (!locale) {
       return 'English';
     }
@@ -127,11 +127,11 @@ export class ManageUserPreferencesComponent implements OnInit {
       this.locales.set(res.sort((l1, l2) => l1.renderName.localeCompare(l2.renderName)));
     });
 
-    toObservable(this.userPreferencesFormModel).pipe(
+    toObservable(this.formModel).pipe(
       debounceTime(100),
       distinctUntilChanged(),
-      filter(() => this.userPreferencesFormGroup().valid() && this.userPreferencesFormGroup().dirty() && !this.loading()),
-      switchMap(() => this.accountService.updatePreferences(this.userPreferencesFormModel()))
+      filter(() => this.formGroup().valid() && !this.loading()),
+      switchMap(() => this.accountService.updatePreferences(this.formModel()))
     ).subscribe();
   }
 
@@ -141,15 +141,21 @@ export class ManageUserPreferencesComponent implements OnInit {
       libraries: this.libraryService.getLibraries(),
       ageRatings: this.metadataService.getAllAgeRatings(),
     }).subscribe(({pref, libraries, ageRatings}) => {
+      const socialLibs = this.accountService.userPreferences()?.socialPreferences.socialLibraries ?? [];
+
       this.ageRatings.set([{value: AgeRating.NotApplicable, title: '',}, ...ageRatings]);
-      this.socialLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({id: 'social-libraries', libraries}));
-      this.userPreferencesFormModel.set(pref);
+      this.socialLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({
+        id: 'social-libraries',
+        libraries,
+        savedData: libraries.filter(l => socialLibs.includes(l.id))
+      }));
+      this.formModel.set(pref);
 
       this.loading.set(false);
     });
   }
 
   syncFormWithTypeahead(libs: Library[] | Library) {
-    this.userPreferencesFormGroup.socialPreferences.socialLibraries().value.set((libs as Library[]).map(l => l.id));
+    this.formGroup.socialPreferences.socialLibraries().value.set((libs as Library[]).map(l => l.id));
   }
 }

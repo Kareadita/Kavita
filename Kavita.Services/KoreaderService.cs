@@ -69,7 +69,7 @@ public class KoreaderService(
             userProgressDto.ChapterId, userProgressDto.SeriesId);
 
         // Normal saving from kavita will be //body/h2[1]
-        await readerService.SaveReadingProgress(userProgressDto, userId);
+        await readerService.SaveReadingProgress(userProgressDto, userId, ct: ct);
     }
 
     /// <summary>

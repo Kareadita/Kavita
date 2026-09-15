@@ -1,7 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, inject,} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  inject, OnInit,
+  signal,
+} from '@angular/core';
 import {ToastrService} from '@openng/ngx-toastr';
-import {distinctUntilChanged, tap} from 'rxjs';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
 import {NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -12,14 +17,12 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {ConfirmService} from "../../shared/confirm.service";
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
-import {ReactiveFormsModule} from "@angular/forms";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {PreviewImageModalComponent} from "../../shared/_components/carousel-modal/preview-image-modal.component";
 import {ModalService} from "../../_services/modal.service";
 import {SiteTheme, ThemeProvider} from "../../_models/preferences/site-theme";
 import {ThemeService} from "../../_services/theme.service";
 import {AccountService} from "../../_services/account.service";
-import {User} from "../../_models/user/user";
 import {
   FileDragAndDropUploadComponent
 } from "../../shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
@@ -38,10 +41,9 @@ interface ThemeContainer {
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SentenceCasePipe, TranslocoDirective, CarouselReelComponent,
     ImageComponent, DefaultValuePipe, NgTemplateOutlet, NgxFileDropModule,
-    ReactiveFormsModule, LoadingComponent, FileDragAndDropUploadComponent]
+    LoadingComponent, FileDragAndDropUploadComponent]
 })
-export class ThemeManagerComponent {
-  private readonly destroyRef = inject(DestroyRef);
+export class ThemeManagerComponent implements OnInit {
   protected readonly themeService = inject(ThemeService);
   protected readonly accountService = inject(AccountService);
   private readonly toastr = inject(ToastrService);
@@ -52,38 +54,24 @@ export class ThemeManagerComponent {
   protected readonly ThemeProvider = ThemeProvider;
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
-  currentTheme: SiteTheme | undefined;
-  user: User | undefined;
-  selectedTheme: ThemeContainer | undefined;
-  downloadableThemes: DownloadableSiteTheme[] = [];
-  downloadedThemes: SiteTheme[] = [];
+  currentTheme = this.themeService.currentTheme;
+  downloadedThemes = this.themeService.themes;
+
+  selectedTheme = signal<ThemeContainer | null>(null);
+  downloadableThemes = signal<DownloadableSiteTheme[]>([]);
 
   canUseThemes = computed(() => !this.accountService.hasReadOnlyRole());
 
-  files: NgxFileDropEntry[] = [];
   acceptableExtensions = ['.css'].join(',');
-  isUploadingTheme: boolean = false;
+  isUploadingTheme = signal(false);
 
-  constructor() {
-
-    this.themeService.themes$.pipe(tap(themes => {
-      this.downloadedThemes = themes;
-      this.cdRef.markForCheck();
-    })).subscribe();
-
+  ngOnInit() {
     this.loadDownloadableThemes();
-
-    this.themeService.currentTheme$.pipe(takeUntilDestroyed(this.destroyRef), distinctUntilChanged()).subscribe(theme => {
-      this.currentTheme = theme;
-      this.cdRef.markForCheck();
-    });
-
   }
 
   loadDownloadableThemes() {
     this.themeService.getDownloadableThemes().subscribe(d => {
-      this.downloadableThemes = d;
-      this.cdRef.markForCheck();
+      this.downloadableThemes.set(d);
     });
   }
 
@@ -99,9 +87,8 @@ export class ThemeManagerComponent {
   }
 
   removeDownloadedTheme(theme: SiteTheme) {
-    this.selectedTheme = undefined;
-    this.downloadableThemes = this.downloadableThemes.filter(d => d.name !== theme.name);
-    this.cdRef.markForCheck();
+    this.selectedTheme.set(null);
+    this.downloadableThemes.update(x => [...x.filter(d => d.name !== theme.name)]);
   }
 
   applyTheme(theme: SiteTheme) {
@@ -123,44 +110,38 @@ export class ThemeManagerComponent {
 
   selectTheme(theme: SiteTheme | DownloadableSiteTheme | undefined) {
     if (theme === undefined) {
-      this.selectedTheme = undefined;
+      this.selectedTheme.set(null);
       return;
     }
 
-    if (theme.hasOwnProperty('provider')) {
-      this.selectedTheme = {
+    if (Object.hasOwnProperty.call(theme, 'provider')) {
+      this.selectedTheme.set({
         isSiteTheme: true,
         site: theme as SiteTheme,
         name: theme.name
-      };
+      });
     } else {
-      this.selectedTheme = {
+      this.selectedTheme.set({
         isSiteTheme: false,
         downloadable: theme as DownloadableSiteTheme,
         name: theme.name
-      };
+      });
     }
-
-    this.cdRef.markForCheck();
   }
 
   downloadTheme(theme: DownloadableSiteTheme) {
     this.themeService.downloadTheme(theme).subscribe(downloadedTheme => {
       this.removeDownloadedTheme(downloadedTheme);
-      this.themeService.getThemes().subscribe(themes => {
-        this.downloadedThemes = themes;
-        const oldTheme = this.downloadedThemes.filter(d => d.name === theme.name)[0];
+      this.themeService.getThemes().subscribe(_ => {
+        const oldTheme = this.downloadedThemes()?.filter(d => d.name === theme.name)[0];
         this.selectTheme(oldTheme);
-        this.cdRef.markForCheck();
       });
 
     });
   }
 
   public dropped(files: NgxFileDropEntry[]) {
-    this.files = files;
-    this.isUploadingTheme = true;
-    this.cdRef.markForCheck();
+    this.isUploadingTheme.set(true);
 
     for (const droppedFile of files) {
       if (!droppedFile.fileEntry.isFile) continue;
@@ -168,10 +149,8 @@ export class ThemeManagerComponent {
 
       fileEntry.file((file: File) => {
         this.themeService.uploadTheme(file, droppedFile).subscribe(t => {
-          this.isUploadingTheme = false;
-          this.downloadedThemes.push(t);
+          this.isUploadingTheme.set(false);
           this.selectTheme(t);
-          this.cdRef.markForCheck();
         });
       });
     }

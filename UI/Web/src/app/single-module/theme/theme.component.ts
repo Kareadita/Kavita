@@ -20,7 +20,6 @@ import {PlusMediaFormat} from "../../_models/series-detail/external-series-detai
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {ConfirmService} from "../../shared/confirm.service";
 import {ConfirmConfig} from "../../shared/confirm-dialog/_models/confirm-config";
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {form, FormField, required} from "@angular/forms/signals";
 
 /**
@@ -41,7 +40,6 @@ import {form, FormField, required} from "@angular/forms/signals";
     SettingSwitchComponent,
     SettingMultiTextFieldComponent,
     SettingMultiCheckBox,
-    ReactiveFormsModule,
     FormField,
   ],
   templateUrl: './theme.component.html',

@@ -2,22 +2,20 @@
   @let data = reviews();
   <div class="row mx-2">
 
-    <form [formGroup]="formGroup">
-      <div class="row mb-3">
-        <div class="col-9 ps-0">
-          <label for="review-filter" class="visually-hidden">{{t('filter-label')}}</label>
-          <input id="review-filter" class="form-control" type="text" [placeholder]="t('filter-label')" formControlName="query"/>
-        </div>
-        <div class="col-3 d-flex">
-          <ngx-stars [size]="1" style="margin-top: 0.25rem"
-                     [maxStars]="5" [color]="starColor" (ratingOutput)="updateRating($event)"/>
-          <button class="btn btn-icon ms-1" (click)="resetRating()" style="padding: 0 0 0.5625rem;">
-            <i class="fas fa-ban" style="font-size: 0.8rem; color: var(--primary-color)" aria-hidden="true"></i>
-            <span class="visually-hidden">{{t('clear-rating-alt')}}</span>
-          </button>
-        </div>
+    <div class="row mb-3">
+      <div class="col-9 ps-0">
+        <label for="review-filter" class="visually-hidden">{{t('filter-label')}}</label>
+        <input id="review-filter" class="form-control" type="text" [placeholder]="t('filter-label')" [formField]="formGroup.query" />
       </div>
-    </form>
+      <div class="col-3 d-flex">
+        <ngx-stars [size]="1" style="margin-top: 0.25rem"
+                   [maxStars]="5" [color]="starColor" (ratingOutput)="updateRating($event)"/>
+        <button class="btn btn-icon ms-1" (click)="resetRating()" style="padding: 0 0 0.5625rem;">
+          <i class="fas fa-ban" style="font-size: 0.8rem; color: var(--primary-color)" aria-hidden="true"></i>
+          <span class="visually-hidden">{{t('clear-rating-alt')}}</span>
+        </button>
+      </div>
+    </div>
 
     @if (isLoading()) {
       <app-loading />

@@ -7,7 +7,7 @@ import {
   ElementRef,
   forwardRef,
   inject,
-  input,
+  input, model,
   OnDestroy,
   signal
 } from '@angular/core';
@@ -25,6 +25,7 @@ import {AccountService} from "../../../_services/account.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, take} from "rxjs/operators";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {FormValueControl} from "@angular/forms/signals";
 
 @Component({
   selector: 'app-setting-key-bind-picker',
@@ -38,15 +39,8 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
   templateUrl: './setting-key-bind-picker.component.html',
   styleUrl: './setting-key-bind-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SettingKeyBindPickerComponent),
-      multi: true,
-    }
-  ]
 })
-export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDestroy {
+export class SettingKeyBindPickerComponent implements FormValueControl<KeyBind>, OnDestroy {
 
   private readonly destroyRef = inject(DestroyRef);
   protected readonly keyBindService = inject(KeyBindService);
@@ -55,29 +49,22 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
   private readonly document = inject(DOCUMENT);
   private readonly elementRef = inject(ElementRef);
 
-  control = input.required<FormControl<KeyBind>>();
   target = input.required<KeyBindTarget>();
   index = input.required<number>();
   duplicated = input.required<boolean>();
   tooltipPlacement = input<string>('auto');
 
-  selectedKeyBind = signal<KeyBind>({key: KeyCode.Empty});
-  disabled = signal(false);
+  value = model<KeyBind>({key: KeyCode.Empty});
+  disabled = input(false);
+  invalid = input(false);
 
-  private _onChange: (value: KeyBind) => void = () => {};
-  private _onTouched: () => void = () => {};
   protected readonly subscriptions = signal<Subscription[]>([]);
   protected readonly isListening = computed(() => this.subscriptions().length > 0);
   protected readonly tagBadgeCursor = computed(() =>
     this.accountService.hasReadOnlyRole() ? TagBadgeCursor.NotAllowed : TagBadgeCursor.Clickable);
+  showToolTip = computed(() => !this.invalid() && !this.duplicated());
 
   constructor() {
-    effect(() => {
-      const selectedKeys = this.selectedKeyBind();
-      this._onChange(selectedKeys);
-      this._onTouched();
-    });
-
     fromEvent(this.document, 'click')
       .pipe(
         takeUntilDestroyed(this.destroyRef),
@@ -88,22 +75,6 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
         tap(() => this.stopListening()),
       ).subscribe();
 
-  }
-
-  writeValue(keyBind: KeyBind): void {
-      this.selectedKeyBind.set(keyBind)
-  }
-
-  registerOnChange(fn: (_: KeyBind) => void): void {
-    this._onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this._onTouched = fn;
-  }
-
-  setDisabledState?(isDisabled: boolean): void {
-    this.disabled.set(isDisabled);
   }
 
   ngOnDestroy() {
@@ -121,7 +92,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
     );
 
     const gamePad$ = this.gamePadService.keyDownEvents$.pipe(
-      tap(e => this.selectedKeyBind.set({
+      tap(e => this.value.set({
         key: KeyCode.Empty,
         controllerSequence: e.pressedButtons,
       })),
@@ -130,7 +101,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
     const sub = merge(keydown$, gamePad$).pipe(
       takeUntilDestroyed(this.destroyRef),
       debounceTime(700),
-      filter(() => this.control().valid),
+      filter(() => !this.invalid()),
       take(1),
       tap(() => this.stopListening()),
     ).subscribe();
@@ -147,7 +118,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
   private onKeyDown = (event: KeyboardEvent) => {
     const eventKey = event.key.toLowerCase() as KeyCode;
 
-    this.selectedKeyBind.set({
+    this.value.set({
       key: ModifierKeyCodes.includes(eventKey) ? KeyCode.Empty : eventKey,
       meta: event.metaKey,
       alt: event.altKey,

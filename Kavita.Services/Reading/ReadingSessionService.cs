@@ -128,7 +128,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         {
             var page = chaptersMap[chapterId];
             estimatedHoursByChapter[chapterId] = await readerService
-                .GetEstimateFromPageForChapter(userId, seriesId, chapterId, page);
+                .GetEstimateFromPageForChapter(userId, seriesId, chapterId, page, ct);
         }
 
         var chapterSchedule = ScheduleChapters(estimatedHoursByChapter, DateTime.Now);

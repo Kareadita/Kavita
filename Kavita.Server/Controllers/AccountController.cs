@@ -101,13 +101,14 @@ public class AccountController(UserManager<AppUser> userManager,
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams | AppUserIncludes.AuthKeys);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams | AppUserIncludes.AuthKeys, ct);
         if (user == null) throw new UnauthorizedAccessException();
 
         var roles = await userManager.GetRolesAsync(user);
         if (!roles.Contains(PolicyConstants.LoginRole) && !roles.Contains(PolicyConstants.AdminRole)) return Unauthorized(await localizationService.TranslateAsync(user.Id, "disabled-account"));
 
-        return Ok(await ConstructUserDto(user, roles, false));
+        return Ok(await ConstructUserDto(user, roles, false, ct));
     }
 
     /// <summary>
@@ -119,7 +120,8 @@ public class AccountController(UserManager<AppUser> userManager,
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName);
+        var ct = HttpContext.RequestAborted;
+        var user = await userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName, cancellationToken: ct);
         if (user == null) return Ok(); // Don't report BadRequest as that would allow brute forcing to find accounts on system
 
         logger.LogInformation("{UserName} is changing {ResetUser}'s password", Username!, resetPasswordDto.UserName.Sanitize());
@@ -136,7 +138,7 @@ public class AccountController(UserManager<AppUser> userManager,
                 new ApiException(400,
                     await localizationService.TranslateAsync(UserId, "password-required")));
 
-        var oidcConfig = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        var oidcConfig = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).OidcConfig;
         if (user.IdentityProvider == IdentityProvider.OpenIdConnect  && oidcConfig is {Enabled: true, SyncUserSettings: true})
         {
             return BadRequest(await localizationService.TranslateAsync(user.Id, "oidc-managed"));
@@ -149,7 +151,7 @@ public class AccountController(UserManager<AppUser> userManager,
             return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-password"));
         }
 
-        var errors = await accountService.ChangeUserPassword(user, resetPasswordDto.Password);
+        var errors = await accountService.ChangeUserPassword(user, resetPasswordDto.Password, ct);
         if (errors.Any())
         {
             return BadRequest(errors);
@@ -168,12 +170,13 @@ public class AccountController(UserManager<AppUser> userManager,
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> RegisterFirstUser(RegisterDto registerDto)
     {
+        var ct = HttpContext.RequestAborted;
         var admins = await userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
         if (admins.Count > 0) return BadRequest(await localizationService.GetAsync("en", "denied"));
 
         try
         {
-            var usernameValidation = await accountService.ValidateUsername(registerDto.Username);
+            var usernameValidation = await accountService.ValidateUsername(registerDto.Username, ct);
             if (usernameValidation.Any())
             {
                 return BadRequest(usernameValidation);
@@ -191,7 +194,7 @@ public class AccountController(UserManager<AppUser> userManager,
             var result = await userManager.CreateAsync(user, registerDto.Password);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            await accountService.SeedUser(user);
+            await accountService.SeedUser(user, ct);
 
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest(await localizationService.GetAsync("en", "confirm-token-gen"));
@@ -208,9 +211,9 @@ public class AccountController(UserManager<AppUser> userManager,
         {
             logger.LogError(ex, "Something went wrong when registering user");
             // We need to manually delete the User as we've already committed
-            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(registerDto.Username);
+            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(registerDto.Username, ct: ct);
             unitOfWork.UserRepository.Delete(user);
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
         }
 
         return BadRequest(await localizationService.GetAsync("en",  "register-user"));
@@ -226,6 +229,7 @@ public class AccountController(UserManager<AppUser> userManager,
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
+        var ct = HttpContext.RequestAborted;
         AppUser? user;
         if (!string.IsNullOrEmpty(loginDto.ApiKey))
         {
@@ -237,7 +241,7 @@ public class AccountController(UserManager<AppUser> userManager,
                 .Include(u => u.UserPreferences)
                 .Include(u => u.AuthKeys)
                 .AsSplitQuery()
-                .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpperInvariant());
+                .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpperInvariant(), cancellationToken: ct);
         }
 
         logger.LogInformation("{UserName} attempting to login from {IpAddress}", loginDto.Username.Sanitize(), HttpContext.Connection.RemoteIpAddress?.ToString());
@@ -250,7 +254,7 @@ public class AccountController(UserManager<AppUser> userManager,
         var roles = await userManager.GetRolesAsync(user);
         if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await localizationService.TranslateAsync(user.Id, "disabled-account"));
 
-        var oidcConfig = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        var oidcConfig = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).OidcConfig;
         // Setting only takes effect if OIDC is functional, and if we're not logging in via ApiKey
         var disablePasswordAuthentication = oidcConfig is {Enabled: true, DisablePasswordAuthentication: true} && string.IsNullOrEmpty(loginDto.ApiKey);
         if (disablePasswordAuthentication) return Unauthorized(await localizationService.TranslateAsync(user.Id, "password-authentication-disabled"));
@@ -280,7 +284,7 @@ public class AccountController(UserManager<AppUser> userManager,
         }
 
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         logger.LogInformation("{UserName} logged in at {Time}", user.UserName!.Sanitize(), user.LastActive);
 
@@ -328,7 +332,8 @@ public class AccountController(UserManager<AppUser> userManager,
     [HttpGet("refresh-account")]
     public async Task<ActionResult<UserDto>> RefreshAccount()
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences | AppUserIncludes.AuthKeys);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences | AppUserIncludes.AuthKeys, ct);
         if (user == null) return Unauthorized();
 
         var roles = await userManager.GetRolesAsync(user);
@@ -346,7 +351,8 @@ public class AccountController(UserManager<AppUser> userManager,
     [HttpPost("refresh-token")]
     public async Task<ActionResult<TokenRequestDto>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
     {
-        var token = await tokenService.ValidateRefreshToken(tokenRequestDto);
+        var ct = HttpContext.RequestAborted;
+        var token = await tokenService.ValidateRefreshToken(tokenRequestDto, ct);
         if (token == null)
         {
             return Unauthorized(new { message = await localizationService.GetAsync("en", "invalid-token") });

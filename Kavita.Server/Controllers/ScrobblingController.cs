@@ -49,7 +49,8 @@ public class ScrobblingController(
     [HttpGet("scrobble-settings")]
     public async Task<ActionResult<List<ScrobbleProviderDto>>> GetScrobbleSettings()
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences, ct);
         if (user == null) return Unauthorized();
 
         var providers = user.ScrobbleProviders.Values
@@ -68,7 +69,8 @@ public class ScrobblingController(
     [HttpPost("update-scrobble-settings")]
     public async Task<ActionResult> UpdateScrobbleSettings([FromQuery] ScrobbleProvider provider, [FromBody] ScrobbleProviderSettingsDto scrobbleSettings)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences, ct);
         if (user == null) return Unauthorized();
 
         var scrobbleProvider = user.ScrobbleProviders[provider];
@@ -81,14 +83,14 @@ public class ScrobblingController(
         else if (scrobbleProvider.Settings.Libraries.Count > 0)
         {
             scrobbleProvider.Settings.Libraries = await scrobblingService
-                .FilterLibrariesForProvider(provider, UserId, scrobbleProvider.Settings.Libraries);
+                .FilterLibrariesForProvider(provider, UserId, scrobbleProvider.Settings.Libraries, ct);
         }
 
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         // We don't want this on a background thread to ensure clearance from quick updates
-        await ruleService.PurgeStaleForSettingsAsync(UserId, provider, scrobbleSettings);
+        await ruleService.PurgeStaleForSettingsAsync(UserId, provider, scrobbleSettings, ct);
 
         return Ok();
     }
@@ -102,6 +104,7 @@ public class ScrobblingController(
     [HttpPost("update-user-scrobble-provider")]
     public async Task<ActionResult> UpdateUserScrobbleProvider([FromBody] UpdateScrobbleProviderDto dto)
     {
+        var ct = HttpContext.RequestAborted;
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: HttpContext.RequestAborted);
         if (user == null) return Unauthorized();
 
@@ -124,8 +127,8 @@ public class ScrobblingController(
 
         if (string.IsNullOrEmpty(dto.AuthenticationToken))
         {
-            await unitOfWork.ScrobbleRepository.ClearEventsForProvider(UserId, dto.Provider);
-            await ruleService.PurgeForProviderAsync(UserId, dto.Provider);
+            await unitOfWork.ScrobbleRepository.ClearEventsForProvider(UserId, dto.Provider, ct);
+            await ruleService.PurgeForProviderAsync(UserId, dto.Provider, ct);
         }
 
         BackgroundJob.Enqueue(() => scrobblingService.SyncProviderInfo(UserId, dto.Provider, CancellationToken.None));
@@ -141,10 +144,11 @@ public class ScrobblingController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> GenerateScrobbleEvents([FromQuery] ScrobbleProvider scrobbleProvider)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: ct);
         if (user == null) return Unauthorized();
 
-        BackgroundJob.Enqueue(() => scrobblingService.CreateEventsFromExistingHistory(scrobbleProvider, UserId));
+        BackgroundJob.Enqueue(() => scrobblingService.CreateEventsFromExistingHistory(scrobbleProvider, UserId, CancellationToken.None));
 
         return Ok();
     }
@@ -157,7 +161,8 @@ public class ScrobblingController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<bool>> GenerateScrobbleEventsAll()
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: ct);
         if (user == null) return Unauthorized();
 
         var providers = user.ScrobbleProviders
@@ -181,7 +186,8 @@ public class ScrobblingController(
     [HttpGet("token-expired")]
     public async Task<ActionResult<bool>> HasTokenExpired(ScrobbleProvider provider)
     {
-        return Ok(await scrobblingService.HasTokenExpired(UserId, provider));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await scrobblingService.HasTokenExpired(UserId, provider, ct));
     }
 
     /// <summary>
@@ -191,7 +197,8 @@ public class ScrobblingController(
     [HttpGet("expired-tokens")]
     public async Task<ActionResult<List<ScrobbleProvider>>> GetExpiredTokens()
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: ct);
         if (user == null) return Unauthorized();
 
         // MAL doesn't have a validUntil, thus the date will be 1/1/0001. Just filter that out so it doesn't always proc
@@ -211,7 +218,8 @@ public class ScrobblingController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<IEnumerable<ScrobbleErrorDto>>> GetScrobbleErrors()
     {
-        return Ok(await unitOfWork.ScrobbleRepository.GetScrobbleErrors());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.ScrobbleRepository.GetScrobbleErrors(ct));
     }
 
     /// <summary>
@@ -222,7 +230,8 @@ public class ScrobblingController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> ClearScrobbleErrors()
     {
-        await unitOfWork.ScrobbleRepository.ClearScrobbleErrors();
+        var ct = HttpContext.RequestAborted;
+        await unitOfWork.ScrobbleRepository.ClearScrobbleErrors(ct);
         return Ok();
     }
 
@@ -234,8 +243,9 @@ public class ScrobblingController(
     [HttpPost("scrobble-events")]
     public async Task<ActionResult<PagedList<ScrobbleEventDto>>> GetScrobblingEvents([FromQuery] UserParams pagination, [FromBody] ScrobbleEventFilter filter)
     {
+        var ct = HttpContext.RequestAborted;
         pagination ??= UserParams.Default;
-        var events = await unitOfWork.ScrobbleRepository.GetUserEvents(UserId, filter, pagination);
+        var events = await unitOfWork.ScrobbleRepository.GetUserEvents(UserId, filter, pagination, ct);
         Response.AddPaginationHeader(events.CurrentPage, events.PageSize, events.TotalCount, events.TotalPages);
 
         return Ok(events);
@@ -248,7 +258,8 @@ public class ScrobblingController(
     [HttpGet("holds")]
     public async Task<ActionResult<IEnumerable<ScrobbleHoldDto>>> GetScrobbleHolds()
     {
-        return Ok(await unitOfWork.UserRepository.GetHolds(UserId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.UserRepository.GetHolds(UserId, ct));
     }
 
     /// <summary>
@@ -259,7 +270,8 @@ public class ScrobblingController(
     [HttpGet("has-hold")]
     public async Task<ActionResult<bool>> HasHold(int seriesId)
     {
-        return Ok(await unitOfWork.UserRepository.HasHoldOnSeries(UserId, seriesId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.UserRepository.HasHoldOnSeries(UserId, seriesId, ct));
     }
 
     /// <summary>
@@ -270,7 +282,8 @@ public class ScrobblingController(
     [HttpGet("library-allows-scrobbling")]
     public async Task<ActionResult<bool>> LibraryAllowsScrobbling(int seriesId)
     {
-        return Ok(await unitOfWork.LibraryRepository.GetAllowsScrobblingBySeriesId(seriesId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.LibraryRepository.GetAllowsScrobblingBySeriesId(seriesId, ct));
     }
 
     /// <summary>
@@ -282,7 +295,8 @@ public class ScrobblingController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> AddHold(int seriesId)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ScrobbleHolds);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ScrobbleHolds, ct);
         if (user == null) return Unauthorized();
         if (user.ScrobbleHolds.Any(s => s.SeriesId == seriesId))
             return Ok(await localizationService.TranslateAsync(user.Id, "nothing-to-do"));
@@ -295,25 +309,26 @@ public class ScrobblingController(
         try
         {
             unitOfWork.UserRepository.Update(user);
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
 
             // When a hold is placed on a series, clear any pre-existing Scrobble Events
-            await scrobblingService.ClearEventsForSeries(user.Id, seriesId);
+            await scrobblingService.ClearEventsForSeries(user.Id, seriesId, ct);
             await kavitaPlusAuditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleHoldAdded, seriesId,
                 new AuditLogScrobbleParamsDto(), AuditStatus.Success, null, UserId, ct: HttpContext.RequestAborted);
             return Ok();
         }
         catch (DbUpdateConcurrencyException ex)
         {
+            // TODO: Do I still need this with changes to SQLite write locking?
             foreach (var entry in ex.Entries)
             {
                 // Reload the entity from the database
-                await entry.ReloadAsync();
+                await entry.ReloadAsync(ct);
             }
 
             // Retry the update
             unitOfWork.UserRepository.Update(user);
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
             await kavitaPlusAuditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleHoldAdded, seriesId,
                 new AuditLogScrobbleParamsDto(), AuditStatus.Success, null, UserId, ct: HttpContext.RequestAborted);
             return Ok();
@@ -336,6 +351,7 @@ public class ScrobblingController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> RemoveHold(int seriesId)
     {
+        var ct = HttpContext.RequestAborted;
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ScrobbleHolds, HttpContext.RequestAborted);
         if (user == null) return Unauthorized();
 
@@ -359,9 +375,10 @@ public class ScrobblingController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> BulkRemoveScrobbleEvents(IList<long> eventIds)
     {
-        var events = await unitOfWork.ScrobbleRepository.GetUserEvents(UserId, eventIds);
+        var ct = HttpContext.RequestAborted;
+        var events = await unitOfWork.ScrobbleRepository.GetUserEvents(UserId, eventIds, ct);
         unitOfWork.ScrobbleRepository.Remove(events);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
         return Ok();
     }
 
@@ -369,6 +386,7 @@ public class ScrobblingController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> RemoveScrobbleError(int id)
     {
+        var ct = HttpContext.RequestAborted;
         var scrobbleError = await unitOfWork.ScrobbleRepository.GetScrobbleError(id, HttpContext.RequestAborted);
         if (scrobbleError == null) return NotFound();
 
@@ -387,6 +405,7 @@ public class ScrobblingController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<bool>> RetryScrobble(KavitaPlusAuditEntryDto dto)
     {
+        var ct = HttpContext.RequestAborted;
         if (!dto.UserId.HasValue) return Ok(false);
         if (dto.UserId != UserId && !User.IsInRole(PolicyConstants.AdminRole)) return Ok(false);
 
@@ -401,6 +420,7 @@ public class ScrobblingController(
     [HttpGet("next-scrobble-time")]
     public ActionResult<DateTime?> GetNextScrobbleTime()
     {
+        var ct = HttpContext.RequestAborted;
         return Ok(TaskScheduler.GetNextRun(TaskSchedulerConstants.ProcessScrobblingEventsId));
     }
 }

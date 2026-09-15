@@ -802,7 +802,7 @@ export class ActionService {
     switch (action.action) {
       case Action.Edit:
         const ref = this.modalService.open(EditPersonModalComponent, editModal());
-        ref.componentInstance.person = person;
+        ref.setInput('person', person);
 
         return this.handleEditModal(ref, action, person);
 

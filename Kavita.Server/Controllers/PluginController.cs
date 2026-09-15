@@ -36,10 +36,11 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
     {
         // NOTE: In order to log information about plugins, we need some Plugin Description information for each request
         // Should log into the access table so we can tell the user
+        var ct = HttpContext.RequestAborted;
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
         var userAgent = HttpContext.Request.Headers.UserAgent;
 
-        var userId = await unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
+        var userId = await unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey, ct);
         if (userId <= 0)
         {
             logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {@Information}", pluginName.Replace(Environment.NewLine, string.Empty), new
@@ -50,16 +51,16 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
             });
             throw new KavitaUnauthenticatedUserException();
         }
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({AppUserId})'s API Key", pluginName.Replace(Environment.NewLine, string.Empty), user!.UserName, userId);
 
         return new UserDto
         {
             Username = user.UserName!,
-            Token = await tokenService.CreateToken(user),
-            RefreshToken = await tokenService.CreateRefreshToken(user),
+            Token = await tokenService.CreateToken(user, ct),
+            RefreshToken = await tokenService.CreateRefreshToken(user, ct),
             ApiKey = apiKey,
-            KavitaVersion = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
+            KavitaVersion = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion, ct)).Value
         };
     }
 
@@ -73,9 +74,10 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
     [HttpGet("version")]
     public async Task<ActionResult<string>> GetVersion([Required] string apiKey)
     {
-        var userId = await unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
+        var ct = HttpContext.RequestAborted;
+        var userId = await unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey, ct);
         if (userId <= 0) throw new KavitaUnauthenticatedUserException();
-        return Ok((await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value);
+        return Ok((await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion, ct)).Value);
     }
 
     /// <summary>
@@ -86,11 +88,12 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
     [HttpGet("authkey-expires")]
     public async Task<ActionResult<AuthKeyExpiresAtDto>> GetAuthKeyExpiration()
     {
+        var ct = HttpContext.RequestAborted;
         var authKey = AuthKey;
         if (string.IsNullOrEmpty(authKey))
             return BadRequest();
 
-        var exp = await unitOfWork.UserRepository.GetAuthKeyExpiration(authKey, UserId);
+        var exp = await unitOfWork.UserRepository.GetAuthKeyExpiration(authKey, UserId, ct);
 
         return Ok(new AuthKeyExpiresAtDto { ExpiresAt = exp?.ToUniversalTime() });
     }

@@ -23,7 +23,6 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {CardActionablesComponent} from "../card-actionables/card-actionables.component";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {DeviceService} from "../../_services/device.service";
-import {ReactiveFormsModule} from "@angular/forms";
 import {DOCUMENT} from "@angular/common";
 import {AccountService} from "../../_services/account.service";
 import {User} from "../../_models/user/user";
@@ -51,7 +50,6 @@ interface DeviceFormModel {
     UtcToLocalTimePipe,
     CardActionablesComponent,
     SentenceCasePipe,
-    ReactiveFormsModule,
     TimeDifferencePipe, FormField],
   templateUrl: './client-device-card.component.html',
   styleUrl: './client-device-card.component.scss',

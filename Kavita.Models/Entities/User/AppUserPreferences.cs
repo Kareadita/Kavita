@@ -179,6 +179,14 @@ public class AppUserPreferences
     /// </summary>
     /// <remarks>0 days will disable the feature</remarks>
     public int PromptForRereadsAfter { get; set; }
+    /// <summary>
+    /// How many Days since today in the past for reading progress, should content be considered for On Deck, before it gets removed automatically
+    /// </summary>
+    public int OnDeckProgressDays { get; set; }
+    /// <summary>
+    /// How many Days since today in the past for chapter updates, should content be considered for On Deck, before it gets removed automatically
+    /// </summary>
+    public int OnDeckUpdateDays { get; set; }
 
     /// <summary>
     /// JSON dictionary mappings for custom keybinds across the web app.

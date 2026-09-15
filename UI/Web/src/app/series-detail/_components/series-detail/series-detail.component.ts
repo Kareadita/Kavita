@@ -15,7 +15,6 @@ import {
   signal,
   viewChild
 } from '@angular/core';
-import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {
   NgbDropdown,
@@ -145,7 +144,7 @@ const READING_HISTORY_PAGE_SIZE = 10;
   templateUrl: './series-detail.component.html',
   styleUrls: ['./series-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CardActionablesComponent, ReactiveFormsModule, NgStyle,
+  imports: [CardActionablesComponent, NgStyle,
     NgbTooltip, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
     NgbDropdownItem, BulkOperationsComponent,
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet, NgbPopover, KavitaplusTooltipComponent,

@@ -5396,6 +5396,52 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         Assert.Equal("Original Name", postSeries.Name);
     }
 
+    [Fact]
+    public async Task Name_PrimaryAndOfficialHavePriority()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var target = new SeriesBuilder("Spice & Wolf")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(target);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        metadataSettings.EnableLocalizedName = true;
+        metadataSettings.GlobalNameLanguages = "en";
+        metadataSettings.GlobalLocalizedNameLanguages = "jp-latn";
+        metadataSettings.Overrides = [MetadataSettingField.LocalizedName];
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Spice and Wolf",
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["en"] = [
+                    new LocalizedTitleDto { Title = "Wolf and Spice"},
+                    new LocalizedTitleDto { Title = "Spice and Wolf", IsPrimary = true}
+                ],
+                ["jp-latn"] = [
+                    new LocalizedTitleDto { Title = "Koushinryou to Ookami"},
+                    new LocalizedTitleDto { Title = "Ookami to Koushinryou", IsOfficial = true}
+                ]
+            }
+        }, target.Id);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(target.Id, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Spice and Wolf", postSeries.Name);
+        Assert.Equal("Ookami to Koushinryou", postSeries.LocalizedName);
+    }
+
     #endregion
 
     #region Idempotency

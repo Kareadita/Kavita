@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, Component, inject, input, signal} from '@angula
 import {Library} from "../../../_models/library/library";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {ReactiveFormsModule} from "@angular/forms";
 import {form, FormField} from "@angular/forms/signals";
 
 interface LibraryFormModel {
@@ -13,7 +12,6 @@ interface LibraryFormModel {
   selector: 'app-copy-settings-from-library-modal',
   imports: [
     TranslocoDirective,
-    ReactiveFormsModule,
     FormField,
   ],
   templateUrl: './copy-settings-from-library-modal.component.html',

@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, output, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {ReactiveFormsModule} from "@angular/forms";
 import {WikiLink} from "../../../_models/wiki";
 import {AccountService} from "../../../_services/account.service";
 import {LicenseService} from "../../../_services/license.service";
@@ -27,7 +26,6 @@ interface EdiLicenseFormModel {
   selector: 'app-edit-license-key',
   imports: [
     TranslocoDirective,
-    ReactiveFormsModule,
     ValidationErrorsComponent,
     FormFieldDirective,
     FormField

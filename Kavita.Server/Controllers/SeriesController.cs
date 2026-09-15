@@ -742,7 +742,8 @@ public class SeriesController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<MatchSeriesInfoDto>> GetExistingMatchInfo(int seriesId)
     {
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.ExternalMetadata | SeriesIncludes.Library);
+        var ct = HttpContext.RequestAborted;
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.ExternalMetadata | SeriesIncludes.Library, ct);
         if (series == null) return NotFound();
 
         var plusFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format);

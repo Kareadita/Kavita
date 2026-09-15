@@ -49,8 +49,10 @@ public class ServerController(
     [HttpPost("clear-cache")]
     public ActionResult ClearCache()
     {
+        var ct = HttpContext.RequestAborted;
         logger.LogInformation("{UserName} is clearing cache of server from admin dashboard", Username!);
-        cleanupService.CleanupCacheAndTempDirectories();
+        cleanupService.CleanupCacheAndTempDirectories(ct);
+
 
         return Ok();
     }
@@ -129,7 +131,8 @@ public class ServerController(
     [HttpPost("convert-media")]
     public async Task<ActionResult> ScheduleConvertCovers()
     {
-        var encoding = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
+        var ct = HttpContext.RequestAborted;
+        var encoding = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
         if (encoding == EncodeFormat.PNG)
         {
             return BadRequest(await localizationService.TranslateAsync(UserId, "encode-as-warning"));
@@ -167,7 +170,8 @@ public class ServerController(
     [HttpGet("check-for-updates")]
     public async Task<ActionResult> CheckForAnnouncements()
     {
-        await taskScheduler.CheckForUpdate();
+        var ct = HttpContext.RequestAborted;
+        await taskScheduler.CheckForUpdate(ct);
         return Ok();
     }
 
@@ -177,7 +181,8 @@ public class ServerController(
     [HttpGet("check-update")]
     public async Task<ActionResult<UpdateNotificationDto?>> CheckForUpdates()
     {
-        return Ok(await versionUpdaterService.CheckForUpdate());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await versionUpdaterService.CheckForUpdate(ct));
     }
 
     /// <summary>
@@ -187,7 +192,8 @@ public class ServerController(
     [HttpGet("check-out-of-date")]
     public async Task<ActionResult<int>> CheckHowOutOfDate(bool stableOnly = true)
     {
-        return Ok(await versionUpdaterService.GetNumberOfReleasesBehind(stableOnly));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await versionUpdaterService.GetNumberOfReleasesBehind(stableOnly, ct));
     }
 
 
@@ -199,7 +205,8 @@ public class ServerController(
     [HttpGet("changelog")]
     public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog(int count = 0)
     {
-        return Ok(await versionUpdaterService.GetAllReleases(count));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await versionUpdaterService.GetAllReleases(count, ct));
     }
 
     /// <summary>
@@ -209,6 +216,7 @@ public class ServerController(
     [HttpGet("jobs")]
     public async Task<ActionResult<IEnumerable<JobDto>>> GetJobs()
     {
+        var ct = HttpContext.RequestAborted;
         var jobDtoTasks = JobStorage.Current.GetConnection().GetRecurringJobs().Select(async dto =>
             new JobDto()
             {
@@ -229,7 +237,8 @@ public class ServerController(
     [HttpGet("media-errors")]
     public async Task<ActionResult<IList<MediaErrorDto>>> GetMediaErrors()
     {
-        return Ok(await unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync(ct));
     }
 
     /// <summary>
@@ -240,7 +249,8 @@ public class ServerController(
     [HttpPost("clear-media-alerts")]
     public async Task<ActionResult> ClearMediaErrors()
     {
-        await unitOfWork.MediaErrorRepository.DeleteAll();
+        var ct = HttpContext.RequestAborted;
+        await unitOfWork.MediaErrorRepository.DeleteAll(ct);
         return Ok();
     }
 
@@ -253,9 +263,10 @@ public class ServerController(
     [HttpPost("bust-kavitaplus-cache")]
     public async Task<ActionResult> BustReviewAndRecCache()
     {
+        var ct = HttpContext.RequestAborted;
         logger.LogInformation("Busting Kavita+ Cache");
         var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
-        await provider.FlushAsync();
+        await provider.FlushAsync(ct);
         return Ok();
     }
 
@@ -267,7 +278,8 @@ public class ServerController(
     [HttpPost("sync-themes")]
     public async Task<ActionResult> SyncThemes()
     {
-        await themeService.SyncThemes();
+        var ct = HttpContext.RequestAborted;
+        await themeService.SyncThemes(ct);
         return Ok();
     }
 
@@ -281,6 +293,7 @@ public class ServerController(
     [HttpGet("is-task-running")]
     public ActionResult<bool> HasRunningOrQueuedTask([FromQuery] string methodName, [FromQuery] string? queue = null)
     {
+        var ct = HttpContext.RequestAborted;
         if (string.IsNullOrEmpty(queue))
         {
             return Ok(TaskScheduler.IsMethodRunningOrEnqueued(methodName));

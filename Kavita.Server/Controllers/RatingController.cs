@@ -28,13 +28,14 @@ public class RatingController(
     [HttpPost("series")]
     public async Task<ActionResult> UpdateSeriesRating(UpdateRatingDto updateRating)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings, ct);
         if (user == null) throw new UnauthorizedAccessException();
 
-        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, updateRating.SeriesId))
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, updateRating.SeriesId, ct))
             return NotFound();
 
-        if (await ratingService.UpdateSeriesRating(user, updateRating))
+        if (await ratingService.UpdateSeriesRating(user, updateRating, ct))
         {
             return Ok();
         }
@@ -51,13 +52,14 @@ public class RatingController(
     [HttpPost("chapter")]
     public async Task<ActionResult> UpdateChapterRating(UpdateRatingDto updateRating)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings, ct);
         if (user == null) throw new UnauthorizedAccessException();
 
-        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, updateRating.SeriesId))
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, updateRating.SeriesId, ct))
             return NotFound();
 
-        if (await ratingService.UpdateChapterRating(user, updateRating))
+        if (await ratingService.UpdateChapterRating(user, updateRating, ct))
         {
             return Ok();
         }
@@ -75,10 +77,11 @@ public class RatingController(
     [HttpGet("overall-series")]
     public async Task<ActionResult<RatingDto>> GetOverallSeriesRating(int seriesId)
     {
+        var ct = HttpContext.RequestAborted;
         return Ok(new RatingDto()
         {
             Provider = ScrobbleProvider.Kavita,
-            AverageScore = await unitOfWork.SeriesRepository.GetAverageUserRatingAsync(seriesId, UserId)
+            AverageScore = await unitOfWork.SeriesRepository.GetAverageUserRatingAsync(seriesId, UserId, ct)
         });
     }
 
@@ -92,10 +95,11 @@ public class RatingController(
     [HttpGet("overall-chapter")]
     public async Task<ActionResult<RatingDto>> GetOverallChapterRating(int chapterId)
     {
+        var ct = HttpContext.RequestAborted;
         return Ok(new RatingDto()
         {
             Provider = ScrobbleProvider.Kavita,
-            AverageScore = await unitOfWork.ChapterRepository.GetAverageUserRating(chapterId, UserId)
+            AverageScore = await unitOfWork.ChapterRepository.GetAverageUserRating(chapterId, UserId, ct)
         });
     }
 }

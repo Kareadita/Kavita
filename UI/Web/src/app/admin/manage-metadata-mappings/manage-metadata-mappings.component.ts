@@ -57,7 +57,7 @@ const MangaBakaAgeRatings = ['Safe', 'Suggestive', 'Erotica', 'Pornographic'];
     ValidationErrorsComponent,
     LoadingComponent,
     SettingItemComponent,
-    SettingMultiTextFieldComponent,
+    //SettingMultiTextFieldComponent,
     SettingSwitchComponent,
     TagWeightTitlePipe,
   ],

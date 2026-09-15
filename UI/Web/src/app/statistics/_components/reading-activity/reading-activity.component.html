@@ -5,17 +5,11 @@
         <h3 class="stats-title">{{t('title')}}</h3>
       </div>
       <div class="col-8">
-        <form [formGroup]="formGroup" class="d-inline-flex float-end">
+        <form class="d-inline-flex float-end">
           @if (isAdmin() && !individualUserMode()) {
             <div class="d-flex">
               <label for="user-select-read-by-day" class="visually-hidden">{{t('select-user-alt')}}</label>
-              <select id="user-select-read-by-day" class="form-select" formControlName="users"
-                      [attr.aria-busy]="isLoading()">
-                <option [value]="0">{{t('all-users')}}</option>
-                @for (item of users$ | async; track item.id) {
-                  <option [value]="item.id">{{item.username}}</option>
-                }
-              </select>
+              <app-setting-select [options]="memberOptions()" [formField]="formGroup" />
             </div>
           }
         </form>

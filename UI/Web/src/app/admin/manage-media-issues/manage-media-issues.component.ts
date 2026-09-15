@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, output, signal} from '@angular/core';
 import {filter, shareReplay} from 'rxjs';
 import {KavitaMediaError} from '../_models/media-error';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -10,18 +10,14 @@ import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 import {ServerService} from "../../_services/server.service";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
-import {FormFieldDirective} from "../../_directives/form-field.directive";
-import {form, FormField} from "@angular/forms/signals";
-
-interface MediaIssueFilterModel {
-  filter: string;
-}
+import {FilterFieldComponent} from "../../shared/_components/filter-field/filter-field.component";
+import {filteredBy} from "../../_helpers/filtered";
 
 @Component({
   selector: 'app-manage-media-issues',
   templateUrl: './manage-media-issues.component.html',
   styleUrls: ['./manage-media-issues.component.scss'],
-  imports: [TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule, ResponsiveTableComponent, FormFieldDirective, FormField],
+  imports: [TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule, ResponsiveTableComponent, FilterFieldComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManageMediaIssuesComponent implements OnInit {
@@ -38,21 +34,9 @@ export class ManageMediaIssuesComponent implements OnInit {
 
   data = signal<KavitaMediaError[]>([]);
   isLoading = signal(true);
-  private readonly formModel = signal<MediaIssueFilterModel>({
-    filter: '',
-  });
-  formGroup = form(this.formModel);
+  filterQuery = signal('');
 
-
-  private readonly filterQuery = computed(() => this.formModel().filter ?? '');
-  filteredData = computed(() => {
-    const query = this.filterQuery().toLowerCase();
-
-    return this.data().filter(item =>
-      item.comment.toLowerCase().indexOf(query) >= 0 ||
-      item.filePath.toLowerCase().indexOf(query) >= 0 ||
-      item.details.indexOf(query) >= 0);
-  });
+  filteredData = filteredBy(this.data, this.filterQuery, 'comment', 'filePath', 'details');
   trackBy = (_: number, item: KavitaMediaError) => `${item.filePath}`
 
   ngOnInit(): void {

@@ -1,7 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ServerSettings} from "../_models/server-settings";
-import {ReactiveFormsModule} from "@angular/forms";
 import {SettingsService} from "../settings.service";
 import {AuthorityValidationResult, OidcConfig} from "../_models/oidc-config";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -39,7 +38,6 @@ import {url} from "../../_validators/url.validator";
   selector: 'app-manage-open-idconnect',
   imports: [
     TranslocoDirective,
-    ReactiveFormsModule,
     SettingItemComponent,
     SettingSwitchComponent,
     AgeRatingPipe,
@@ -71,7 +69,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
 
   serverSettings!: ServerSettings;
 
-  oidcSettingsFormModel = signal<OidcConfig>({
+  formModel = signal<OidcConfig>({
     authority: "",
     autoLogin: false,
     clientId: "",
@@ -91,7 +89,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
     syncUserSettings: false
 
   });
-  oidcSettingsFormGroup = form(this.oidcSettingsFormModel, (path) => {
+  formGroup = form(this.formModel, (path) => {
     disabled(path, {when: () => !this.accountService.hasAdminRole()});
 
     url(path.authority, { requireTls: true });
@@ -140,11 +138,11 @@ export class ManageOpenIDConnectComponent implements OnInit {
   autoSavingBlocked = signal(false);
 
   constructor() {
-    toObservable(this.oidcSettingsFormModel).pipe(
+    toObservable(this.formModel).pipe(
       skip(2),
       debounceTime(300),
       distinctUntilChanged(),
-      filter(() => this.oidcSettingsFormGroup().valid()),
+      filter(() => this.formGroup().valid()),
       filter(() => {
         const settings: OidcConfig = this.packData().oidcConfig;
         const autoSave = settings.authority == this.oidcSettings()?.authority && settings.clientId == this.oidcSettings()?.clientId;
@@ -166,7 +164,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
       this.libraries.set(libraries);
 
       this.serverSettings = settings;
-      this.oidcSettingsFormModel.set(this.serverSettings.oidcConfig);
+      this.formModel.set(this.serverSettings.oidcConfig);
       this.oidcSettings.set(this.serverSettings.oidcConfig);
 
       this.loading.set(false);
@@ -176,7 +174,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
   private packData(): ServerSettings {
     const newSettings = Object.assign({}, this.serverSettings);
     newSettings.oidcConfig = {
-      ...this.oidcSettingsFormModel(),
+      ...this.formModel(),
       enabled: false,
     };
     return newSettings;
@@ -193,7 +191,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
   }
 
   save(showToasts: boolean = false) {
-    if (!this.oidcSettingsFormGroup().valid()) {
+    if (!this.formGroup().valid()) {
       if (showToasts) {
         this.toastr.error(translate('errors.invalid-form'));
       }

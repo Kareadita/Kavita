@@ -12,8 +12,7 @@ import {
 } from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {toSignal} from "@angular/core/rxjs-interop";
+import {FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {NgTemplateOutlet} from "@angular/common";
 import {LoadingComponent} from "../../loading/loading.component";
@@ -22,6 +21,8 @@ import {Observable} from "rxjs";
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
 import {ValidationErrorsComponent} from "../validation-errors/validation-errors.component";
+import {FilterFieldComponent} from "../filter-field/filter-field.component";
+import {filteredBy} from "../../../_helpers/filtered";
 
 /**
  * A single selectable item in the list.
@@ -41,7 +42,7 @@ export type ListSelectionItem<T> = {
     SentenceCasePipe,
     NgTemplateOutlet,
     LoadingComponent,
-    VirtualScrollerModule, FormFieldDirective, ValidationErrorsComponent],
+    VirtualScrollerModule, FormFieldDirective, ValidationErrorsComponent, FilterFieldComponent],
   templateUrl: './list-select-modal.component.html',
   styleUrl: './list-select-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -173,19 +174,9 @@ export class ListSelectModalComponent<T> {
     return allItems.length - items.length;
   });
 
-  protected filteredItems = computed(() => {
-    const items = this.items();
-    const filter = (this.filterQuery() ?? '').toLowerCase();
+  filterQuery = signal('');
 
-    if (!filter) return items;
-
-    return items.filter(item => item.label.toLowerCase().includes(filter));
-  });
-
-  protected filterForm = new FormGroup({
-    query: new FormControl('', {nonNullable: true}),
-  });
-  protected filterQuery = toSignal(this.filterForm.get('query')!.valueChanges, {initialValue: ''});
+  protected readonly filteredItems = filteredBy(this.items, this.filterQuery, 'label');
 
   constructor() {
     effect(() => {
@@ -237,7 +228,7 @@ export class ListSelectModalComponent<T> {
 
   /** Resets the filter input. */
   clear() {
-    this.filterForm.get('query')?.setValue('');
+    this.filterQuery.set('');
   }
 
   /** Dismisses the modal without a result. */

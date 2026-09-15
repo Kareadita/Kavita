@@ -954,7 +954,10 @@ public class SeriesService(
     public async Task<PagedList<SeriesDto>> GetCurrentlyReading(int userId, int requestingUserId, UserParams userParams,
         CancellationToken ct = default)
     {
-        var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        var onDeckProgressDays = await unitOfWork.DataContext.AppUserPreferences
+            .Where(p => p.AppUserId == userId)
+            .Select( p => p.OnDeckProgressDays)
+            .FirstAsync(ct);
 
         var filter = new SeriesFilterV2Dto
         {
@@ -969,7 +972,7 @@ public class SeriesService(
                 {
                   Comparison = FilterComparison.GreaterThan,
                   Field = SeriesFilterField.ReadLast,
-                  Value = serverSettings.OnDeckProgressDays.ToString(),
+                  Value = onDeckProgressDays.ToString(),
                 },
                 new SeriesFilterStatementDto
                 {

@@ -36,6 +36,7 @@ public class OidcController(
     [HttpGet("logout")]
     public async Task<IActionResult> Logout()
     {
+        var ct = HttpContext.RequestAborted;
         var baseUrl = Configuration.BaseUrl;
         // Remove trailing / if the baseUrl isn't the default. As it isn't included in the path by ASP.Core
         var cookiePath = baseUrl == "/" ? baseUrl : baseUrl.TrimEnd('/');
@@ -67,7 +68,7 @@ public class OidcController(
         }
 
         // Authelia is dysfunctional and doesn't support logging out like this
-        var config = await configurationManager.GetConfigurationAsync();
+        var config = await configurationManager.GetConfigurationAsync(ct);
         if (config == null || string.IsNullOrEmpty(config.EndSessionEndpoint))
         {
             HttpContext.Response.Cookies.Delete(OidcService.CookieName, new CookieOptions

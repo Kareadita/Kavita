@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component, inject, input, signal} from '@angular/core';
-import {ReactiveFormsModule} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -18,7 +17,7 @@ interface ResetPasswordForm {
   templateUrl: './reset-password-modal.component.html',
   styleUrls: ['./reset-password-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, SentenceCasePipe, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent, FormField]
+  imports: [SentenceCasePipe, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent, FormField]
 })
 export class ResetPasswordModalComponent {
 

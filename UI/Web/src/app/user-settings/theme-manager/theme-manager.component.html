@@ -20,7 +20,7 @@
             <div class="fw-bold section-header">{{t('downloaded')}}</div>
           </li>
 
-          @for (theme of downloadedThemes; track theme.name) {
+          @for (theme of downloadedThemes(); track theme.name) {
             <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme, downloaded: true}" />
           }
 
@@ -28,7 +28,7 @@
             <div class="fw-bold section-header">{{t('downloadable')}}</div>
           </li>
 
-          @for (theme of downloadableThemes; track theme.name) {
+          @for (theme of downloadableThemes(); track theme.name) {
             <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme, downloaded: false}" />
           }
         </ul>
@@ -38,7 +38,8 @@
     <div class="col-lg-9 col-md-7 col-sm-4 col-xs-4 ps-3">
       <div class="card p-3">
 
-        @if (selectedTheme === undefined) {
+        @let selected = selectedTheme();
+        @if (selected === null) {
           <div class="row pb-4">
             <div class="mx-auto">
               <div class="d-flex justify-content-center">
@@ -54,8 +55,8 @@
           </div>
 
 
-          @if (files && files.length > 0) {
-            <app-loading [loading]="isUploadingTheme" />
+          @if (isUploadingTheme()) {
+            <app-loading [loading]="true" />
           } @else if (accountService.hasAdminRole()) {
             <app-file-drag-and-drop-upload
               (dropped)="dropped($event)"
@@ -66,33 +67,33 @@
 
         } @else {
           <h4>
-            {{selectedTheme.name | sentenceCase}}
+            {{selected.name | sentenceCase}}
             <div class="float-end">
-              @if (selectedTheme.isSiteTheme) {
-                @if (selectedTheme.name !== 'Dark' && accountService.hasAdminRole()) {
-                  <button class="btn btn-danger me-1" (click)="deleteTheme(selectedTheme.site!)">{{t('delete')}}</button>
+              @if (selected.isSiteTheme) {
+                @if (selected.name !== 'Dark' && accountService.hasAdminRole()) {
+                  <button class="btn btn-danger me-1" (click)="deleteTheme(selected.site!)">{{t('delete')}}</button>
                 }
                 @if (accountService.hasAdminRole()) {
-                  <button class="btn btn-secondary me-1" [disabled]="selectedTheme.site?.isDefault" (click)="updateDefault(selectedTheme.site!)">{{t('set-default')}}</button>
+                  <button class="btn btn-secondary me-1" [disabled]="selected.site?.isDefault" (click)="updateDefault(selected.site!)">{{t('set-default')}}</button>
                 }
-                <button class="btn btn-primary me-1" [disabled]="currentTheme && selectedTheme.name === currentTheme.name" (click)="applyTheme(selectedTheme.site!)">{{t('apply')}}</button>
+                <button class="btn btn-primary me-1" [disabled]="currentTheme() && selected.name === currentTheme()!.name" (click)="applyTheme(selected.site!)">{{t('apply')}}</button>
               } @else if (canUseThemes()) {
-                <button class="btn btn-primary" [disabled]="selectedTheme.downloadable?.alreadyDownloaded" (click)="downloadTheme(selectedTheme.downloadable!)">{{t('download')}}</button>
+                <button class="btn btn-primary" [disabled]="selected.downloadable?.alreadyDownloaded" (click)="downloadTheme(selected.downloadable!)">{{t('download')}}</button>
               }
             </div>
           </h4>
-          @if(!selectedTheme.isSiteTheme) {
-            <p>{{selectedTheme.downloadable!.description | defaultValue}}</p>
+          @if(!selected.isSiteTheme) {
+            <p>{{selected.downloadable!.description | defaultValue}}</p>
 
-            <app-carousel-reel [items]="selectedTheme.downloadable!.previewUrls" [title]="t('preview-title')">
+            <app-carousel-reel [items]="selected.downloadable!.previewUrls" [title]="t('preview-title')">
               <ng-template #carouselItem let-item>
                 <app-image [imageUrl]="item" height="108px" width="260px" (click)="previewImage(item)" />
               </ng-template>
             </app-carousel-reel>
           } @else {
-            <p>{{selectedTheme.site!.description | defaultValue}}</p>
+            <p>{{selected.site!.description | defaultValue}}</p>
 
-            <app-carousel-reel [items]="selectedTheme.site!.previewUrls" [title]="t('preview-title')">
+            <app-carousel-reel [items]="selected.site!.previewUrls" [title]="t('preview-title')">
               <ng-template #carouselItem let-item>
                 <app-image [imageUrl]="item" height="108px" width="260px" (click)="previewImage(item)" />
               </ng-template>
@@ -107,7 +108,7 @@
   <ng-template #themeOption let-item let-downloaded="downloaded">
     @if (item !== undefined) {
 
-      <li class="list-group-item d-flex justify-content-between align-items-start {{selectedTheme && selectedTheme.name === item.name ? 'active' : ''}}" (click)="selectTheme(item)">
+      <li class="list-group-item d-flex justify-content-between align-items-start {{selectedTheme() && selectedTheme()!.name === item.name ? 'active' : ''}}" (click)="selectTheme(item)">
         <div class="ms-2 me-auto">
           <div class="fw-bold">{{item.name | sentenceCase}}</div>
 
@@ -117,7 +118,7 @@
             <span class="pill p-1 me-1 version">v{{item.lastCompatibleVersion}}</span>
           }
 
-          @if (currentTheme && item.name === currentTheme.name) {
+          @if (currentTheme() && item.name === currentTheme()!.name) {
             <span class="pill p-1 active">{{t('active-theme')}}</span>
           }
 

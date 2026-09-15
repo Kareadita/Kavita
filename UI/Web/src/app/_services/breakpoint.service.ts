@@ -5,6 +5,7 @@ import {debounceTime} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 export enum Breakpoint {
+  Never = 0,
   Mobile = 768,
   Tablet = 1280,
   Desktop = 1440

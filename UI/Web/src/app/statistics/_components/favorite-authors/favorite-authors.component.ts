@@ -5,7 +5,6 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {ImageService} from "../../../_services/image.service";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {StatsFilter} from "../../_models/stats-filter";
 import {RouterLink} from "@angular/router";
@@ -18,8 +17,6 @@ import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.
     LoadingComponent,
     ImageComponent,
     TagBadgeComponent,
-    FormsModule,
-    ReactiveFormsModule,
     NgbTooltip,
     RouterLink,
     StatsNoDataComponent
