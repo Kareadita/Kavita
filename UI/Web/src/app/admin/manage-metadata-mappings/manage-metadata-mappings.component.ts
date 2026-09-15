@@ -27,7 +27,13 @@ import {TagWeightTitlePipe} from "../../_pipes/tag-weight-title.pipe";
 import {allTagWeights, TagWeight} from "../_models/tag-weight.enum";
 import {LicenseService} from "../../_services/license.service";
 import {apply, applyEach, FieldTree, FormField, required, schema} from "@angular/forms/signals";
-import {EnumOption, SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
+import {
+  EnumOption,
+  SettingSelectComponent
+} from "../../settings/_components/setting-enum-select/setting-select.component";
+import {
+  SettingMultiTextFieldComponent
+} from "../../settings/_components/setting-multi-text-field/setting-multi-text-field.component";
 
 export type MetadataMappingsExport = {
   ageRatingMappings: Record<string, AgeRating>,
@@ -119,6 +125,7 @@ const MangaBakaAgeRatings = ['Safe', 'Suggestive', 'Erotica', 'Pornographic'];
     TagWeightTitlePipe,
     FormField,
     SettingSelectComponent,
+    SettingMultiTextFieldComponent,
   ],
   templateUrl: './manage-metadata-mappings.component.html',
   styleUrl: './manage-metadata-mappings.component.scss',

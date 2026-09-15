@@ -38,25 +38,23 @@
             }
 
             <!--TODO: Don't forget this, requires multiple parents to be ported to signals first-->
-<!--            <div class="row g-0 align-items-start mb-4">-->
-<!--              <div class="col">-->
-<!--                <app-setting-multi-text-field-->
-<!--                  [title]="t('blacklist-label')"-->
-<!--                  [tooltip]="t('blacklist-tooltip')"-->
-<!--                  [control]="field().blacklist"-->
-<!--                  [formField]="field().blacklist"-->
-<!--                />-->
-<!--              </div>-->
-<!--            </div>-->
+            <div class="row g-0 align-items-start mb-4">
+              <div class="col">
+                <app-setting-multi-text-field
+                  [title]="t('blacklist-label')"
+                  [tooltip]="t('blacklist-tooltip')"
+                  [formField]="field().blacklist"
+                />
+              </div>
+            </div>
 
-<!--            <div class="row g-0 mt-4 mb-4">-->
-<!--              <app-setting-multi-text-field-->
-<!--                [title]="t('whitelist-label')"-->
-<!--                [tooltip]="t('whitelist-tooltip')"-->
-<!--                [control]="field().whitelist"-->
-<!--                [formField]="field().whitelist"-->
-<!--              />-->
-<!--            </div>-->
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-multi-text-field
+                [title]="t('whitelist-label')"
+                [tooltip]="t('whitelist-tooltip')"
+                [formField]="field().whitelist"
+              />
+            </div>
 
             @if (licenseService.hasActiveLicense()) {
               @let filterAboveWeight = field().filterAboveWeight;
