@@ -1,0 +1,321 @@
+<ng-container *transloco="let t; prefix: 'grouped-typeahead'">
+  <form [formRoot]="formGroup" class="grouped-typeahead">
+    <label [for]="id()" class="form-label visually-hidden">{{t('search-series-alt')}}</label>
+    <div class="typeahead-input" [class.focused]="hasFocus()" (click)="onInputClick($event)">
+      <div class="search">
+        <input #input [id]="id()" type="text" inputmode="search" autocomplete="off" [formField]="formGroup.typeahead" [placeholder]="t('search-alt')"
+               aria-haspopup="listbox" aria-owns="dropdown"
+               [attr.aria-expanded]="hasFocus() && hasAnyData()"
+               aria-autocomplete="list" (focusout)="close($event)" (focus)="open()" role="searchbox">
+
+        @if (searchTerm().length > 0) {
+          @if (isLoading()) {
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">{{t('loading')}}</span>
+            </div>
+          } @else {
+            <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="clearSearch()"></button>
+          }
+        } @else {
+          <div class="input-hint d-none d-lg-block">
+            {{keyBindService.allKeyBinds().OpenSearch.at(0) | keyBind:false}}
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (hasFocus()) {
+      @let data = groupedData();
+
+      <div class="overlay">
+        <div class="dropdown">
+          <ul class="list-group" role="listbox" id="dropdown">
+
+            @if (data.series.length > 0) {
+              <li class="list-group-item section-header"><h5 id="series-group">{{t('series')}}</h5></li>
+              <ul class="list-group results" role="group" aria-describedby="series-group">
+                @for (option of data.series; track option) {
+                  <li class="list-group-item" aria-labelledby="series-group" role="option" tabindex="0">
+                    <ng-container [ngTemplateOutlet]="seriesTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (data.collections.length > 0) {
+              <li class="list-group-item section-header"><h5 id="collections-group">{{t('collections')}}</h5></li>
+              <ul class="list-group results" role="group" aria-describedby="collections-group">
+                @for (option of data.collections; track option) {
+                  <li class="list-group-item" aria-labelledby="collections-group" role="option" tabindex="0">
+                    <ng-container [ngTemplateOutlet]="collectionTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (data.readingLists.length > 0) {
+              <li class="list-group-item section-header"><h5 id="reading-lists-group">{{t('reading-lists')}}</h5></li>
+              <ul class="list-group results" role="group" aria-describedby="reading-lists-group">
+                @for (option of data.readingLists; track option) {
+                  <li class="list-group-item" aria-labelledby="reading-lists-group" role="option" tabindex="0">
+                    <ng-container [ngTemplateOutlet]="readingListTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (data.bookmarks.length > 0) {
+              <li class="list-group-item section-header"><h5 id="bookmarks-group">{{t('bookmarks')}}</h5></li>
+              <ul class="list-group results" role="group" aria-describedby="bookmarks-group">
+                @for (option of data.bookmarks; track option) {
+                  <li class="list-group-item" aria-labelledby="bookmarks-group" role="option" tabindex="0">
+                    <ng-container [ngTemplateOutlet]="bookmarkTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (data.libraries.length > 0) {
+              <li class="list-group-item section-header"><h5 id="libraries-group">{{t('libraries')}}</h5></li>
+              <ul class="list-group results" role="group" aria-describedby="libraries-group">
+                @for (option of data.libraries; track option) {
+                  <li class="list-group-item" aria-labelledby="libraries-group" role="option" tabindex="0">
+                    <ng-container [ngTemplateOutlet]="libraryTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (data.genres.length > 0) {
+              <li class="list-group-item section-header"><h5 id="genres-group">{{t('genres')}}</h5></li>
+              <ul class="list-group results" role="group" aria-describedby="genres-group">
+                @for (option of data.genres; track option) {
+                  <li class="list-group-item" aria-labelledby="genres-group" role="option" tabindex="0">
+                    <ng-container [ngTemplateOutlet]="genreTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (data.tags.length > 0) {
+              <li class="list-group-item section-header"><h5 id="tags-group">{{t('tags')}}</h5></li>
+              <ul class="list-group results" role="group" aria-describedby="tags-group">
+                @for (option of data.tags; track option) {
+                  <li class="list-group-item" aria-labelledby="tags-group" role="option" tabindex="0">
+                    <ng-container [ngTemplateOutlet]="tagTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (data.persons.length > 0) {
+              <li class="list-group-item section-header"><h5 id="people-group">{{t('people')}}</h5></li>
+              <ul class="list-group results" role="group" aria-describedby="people-group">
+                @for (option of data.persons; track option) {
+                  <li class="list-group-item" aria-labelledby="people-group" role="option" tabindex="0">
+                    <ng-container [ngTemplateOutlet]="personTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (data.chapters.length > 0) {
+              <li class="list-group-item section-header"><h5 id="chapters-group">{{t('chapters')}}</h5></li>
+              <ul class="list-group results" role="group" aria-describedby="chapters-group">
+                @for (option of data.chapters; track option) {
+                  <li class="list-group-item" aria-labelledby="chapters-group" role="option" tabindex="0">
+                    <ng-container [ngTemplateOutlet]="chapterTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (data.files.length > 0) {
+              <li class="list-group-item section-header"><h5 id="files-group">{{t('files')}}</h5></li>
+              <ul class="list-group results" role="group" aria-describedby="files-group">
+                @for (option of data.files; track option) {
+                  <li class="list-group-item" aria-labelledby="files-group" role="option" tabindex="0">
+                    <ng-container [ngTemplateOutlet]="fileTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (data.annotations.length > 0) {
+              <li class="list-group-item section-header"><h5 id="annotations-group">{{t('annotations')}}</h5></li>
+              <ul class="list-group results" role="group" aria-describedby="annotations-group">
+                @for (option of data.annotations; track option) {
+                  <li class="list-group-item" aria-labelledby="annotations-group" role="option" tabindex="0">
+                    <ng-container [ngTemplateOutlet]="annotationTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (searchTerm().length > 0 && !isLoading()) {
+              @if (!hasAnyData()) {
+                <div class="list-group results">
+                  <app-empty-state [titleKey]="'no-data'"
+                                   [i18nPrefix]="'grouped-typeahead'">
+                    <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                  </app-empty-state>
+                </div>
+              }
+
+              <li class="list-group-item" style="min-height: 2.125rem" (click)="$event.stopPropagation()">
+                <div class="form-check form-switch">
+                  <input type="checkbox" id="search-include-extras" role="switch" [formField]="formGroup.includeExtras" class="form-check-input" switch>
+                  <label class="form-check-label" for="search-include-extras">{{t('include-extras')}}</label>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    }
+
+  </form>
+
+
+  <ng-template #libraryTemplate let-item>
+    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickLibraryResult(item)">
+      <div class="ms-1">
+        <span>{{item.name}}</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #seriesTemplate let-item>
+    @let normalizedSearchTerm = searchTerm().toLowerCase().trim();
+
+    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickSeriesSearchResult(item)">
+      <div style="width: 1.5rem" class="me-1">
+        <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
+      </div>
+      <div class="ms-1">
+        <app-series-format [format]="item.format" />
+        <span class="ms-1">
+          @if (item.localizedName.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
+            {{item.localizedName}}
+          } @else {
+            {{item.name}}
+          }
+        </span>
+        <div class="text-light fst-italic" style="font-size: 0.8rem;">in {{item.libraryName}}</div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #annotationTemplate let-item>
+    @let normalizedSearchTerm = searchTerm().toLowerCase().trim();
+
+    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickAnnotationSearchResult(item)">
+      <div class="ms-1">
+        @if (item.comment.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
+          <!--We can't render the comment as it's json -->
+          <quill-view [content]="item.context" />
+        } @else {
+          <span>{{item.chapterTitle}}</span>
+        }
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #bookmarkTemplate let-item>
+    @let normalizedSearchTerm = searchTerm().toLowerCase().trim();
+
+    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickBookmarkSearchResult(item)">
+      <div style="width: 1.5rem" class="me-1">
+        <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
+      </div>
+      <div class="ms-1">
+        <app-series-format [format]="item.format" />
+        @if (item.seriesName.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
+          <span>{{item.seriesName}}</span>
+        } @else {
+          <span [innerHTML]="item.localizedSeriesName"></span>
+        }
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #collectionTemplate let-item>
+    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickCollectionSearchResult(item)">
+      <div style="width: 1.5rem" class="me-1">
+        <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)" />
+      </div>
+      <div class="ms-1">
+        <div>
+          <span>{{item.title}}</span>
+          <app-promoted-icon [promoted]="item.promoted" />
+        </div>
+        <app-collection-owner [collection]="item" />
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #readingListTemplate let-item>
+    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickReadingListSearchResult(item)">
+      <div class="ms-1">
+        <span>{{item.title}}</span>
+        <app-promoted-icon [promoted]="item.promoted" />
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #tagTemplate let-item>
+    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="goToOther(FilterField.Tags, item.id)">
+      <div class="ms-1">
+        <span>{{item.title}}</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #personTemplate let-item>
+    <div style="display: flex;padding: 0.3125rem;" class="clickable" (click)="goToPerson(item)">
+      <div style="width: 1.5rem" class="me-1">
+        <app-image class="me-3 search-result"
+                   [styles]="{'background': 'none', 'max-height': '24px', 'height': '24px', 'width': '24px', 'border-radius': '50%'}"
+                   width="24px" [imageUrl]="imageService.getPersonImage(item.id)" [errorImage]="imageService.noPersonImage" />
+      </div>
+      <div class="ms-1">
+        <div>
+          {{item.name}}
+        </div>
+        @if (item.aliases.length > 0) {
+          <span class="small-text">{{t('person-aka-status')}}</span>
+        }
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #genreTemplate let-item>
+    <div style="display: flex;padding: 0.3125rem;" class="clickable" (click)="goToOther(FilterField.Genres, item.id)">
+      <div class="ms-1">
+        <div [innerHTML]="item.title"></div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #chapterTemplate let-item>
+    <div style="display: flex;padding: 0.3125rem;" class="clickable" (click)="clickChapterSearchResult(item)">
+      <div class="ms-1">
+        @if (item.files.length > 0) {
+          <app-series-format [format]="item.files?.[0].format" />
+        }
+        <!-- TODO: this needs the series name before the chapter issue -->
+        <span>{{item.titleName || item.range}}</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #fileTemplate let-item>
+    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickFileSearchResult(item)">
+      <div class="ms-1">
+        <app-series-format [format]="item.format" />
+        <span>{{item.filePath}}</span>
+      </div>
+    </div>
+  </ng-template>
+
+</ng-container>

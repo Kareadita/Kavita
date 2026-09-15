@@ -3152,16 +3152,18 @@
         "libraries": "{{common.libraries}}",
         "reading-lists": "Reading Lists",
         "collections": "Collections",
+        "series": "Series",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
-        "include-extras": "Include Chapters & Files"
+        "include-extras": "Include Chapters & Files",
+        "search-alt": "Search…",
+        "person-aka-status": "Matches an alias",
+        "no-data": "No results found"
     },
 
     "nav-header": {
         "skip-alt": "Skip to main content",
         "search-series-alt": "Search series",
-        "search-alt": "Search…",
-        "no-data": "No results found",
         "scroll-to-top-alt": "Scroll to Top",
         "server-settings": "Server Settings",
         "settings": "Settings",
@@ -3171,7 +3173,6 @@
         "all-filters": "Smart Filters",
         "nav-link-header": "Navigation Options",
         "close": "{{common.close}}",
-        "person-aka-status": "Matches an alias",
         "browse-genres": "Browse Genres",
         "browse-tags": "Browse Tags",
         "all-annotations": "Browse Annotations",
