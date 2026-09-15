@@ -3141,7 +3141,7 @@
         "last-page": "{{keybind-setting-description-pipe.key-bind-title-last-page}}"
     },
 
-    "grouped-typeahead": {
+    "search-typeahead": {
         "files": "Files",
         "chapters": "Chapters",
         "people": "People",
