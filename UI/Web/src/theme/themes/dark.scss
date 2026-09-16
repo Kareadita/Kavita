@@ -557,4 +557,10 @@
   --media-format-pill-light-novel-color: #a5bbff;
   --media-format-pill-comic-color: #fc8452;
   --media-format-pill-book-color: #fac858;
+
+  --format-badge-epub-color: #a5bbff;
+  --format-badge-archive-color: var(--primary-color);
+  --format-badge-image-color: #fac858;
+  --format-badge-pdf-color: #ee6666;
+  --format-badge-unknown-color: var(--text-muted-color);
 }

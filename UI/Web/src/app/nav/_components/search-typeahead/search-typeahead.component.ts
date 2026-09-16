@@ -27,7 +27,7 @@ import {CollectionOwnerComponent} from "../../../collections/_components/collect
 import {ImageComponent} from "../../../shared/image/image.component";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {QuillViewComponent} from "ngx-quill";
-import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
+import {FormatBadgeComponent} from "../../../shared/format-badge/format-badge.component";
 import {SearchResult} from "../../../_models/search/search-result";
 import {Annotation} from "../../../book-reader/_models/annotations/annotation";
 import {BookmarkSearchResult} from "../../../_models/search/bookmark-search-result";
@@ -53,7 +53,6 @@ import {EmptyStateComponent} from "../../../shared/_components/empty-state/empty
 import {TranslocoInjectComponent} from "../../../shared/_components/transloco-inject/transloco-inject.component";
 import {TranslocoSlotDirective} from "../../../_directives/transloco-slot.directive";
 import {NgbPopover} from "@ng-bootstrap/ng-bootstrap";
-import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 
 export interface SearchEvent {
   value: string;
@@ -71,7 +70,7 @@ interface FormModel {
  */
 const GROUP_ORDER = [
   'series', 'collections', 'readingLists', 'bookmarks', 'libraries',
-  'genres', 'tags', 'persons', 'chapters', 'files', 'annotations'
+  'persons', 'genres', 'tags', 'chapters', 'files', 'annotations'
 ] as const;
 
 type GroupKey = typeof GROUP_ORDER[number];
@@ -90,7 +89,7 @@ interface SearchRow {
   templateUrl: './search-typeahead.component.html',
   styleUrls: ['./search-typeahead.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgTemplateOutlet, TranslocoDirective, KeyBindPipe, FormRoot, FormField, CollectionOwnerComponent, ImageComponent, PromotedIconComponent, QuillViewComponent, SeriesFormatComponent, EmptyStateComponent, TranslocoInjectComponent, TranslocoSlotDirective, NgbPopover, SafeHtmlPipe]
+  imports: [NgTemplateOutlet, TranslocoDirective, KeyBindPipe, FormRoot, FormField, CollectionOwnerComponent, ImageComponent, PromotedIconComponent, QuillViewComponent, FormatBadgeComponent, EmptyStateComponent, TranslocoInjectComponent, TranslocoSlotDirective, NgbPopover]
 })
 export class SearchTypeaheadComponent {
 

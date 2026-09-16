@@ -253,9 +253,9 @@
             {{item.name}}
           }
         </div>
-        <div class="subtitle text-truncate">
-          {{t('in-library', {name: item.libraryName})}}
-          <app-series-format [format]="item.format" />
+        <div class="subtitle d-flex align-items-center gap-1">
+          <span class="text-truncate">{{t('in-library', {name: item.libraryName})}}</span>
+          <app-format-badge class="flex-shrink-0" [format]="item.format" />
         </div>
       </div>
       @if (item.volumeCount > 0) {
@@ -294,8 +294,8 @@
         } @else {
           <div class="title text-truncate" [innerHTML]="item.localizedSeriesName"></div>
         }
-        <div class="subtitle text-truncate">
-          <app-series-format [format]="item.format" />
+        <div class="subtitle">
+          <app-format-badge [format]="item.format" />
         </div>
       </div>
     </div>
@@ -373,8 +373,8 @@
         <!-- TODO: this needs the series name before the chapter issue -->
         <div class="title text-truncate">{{item.titleName || item.range}}</div>
         @if (item.files.length > 0) {
-          <div class="subtitle text-truncate">
-            <app-series-format [format]="item.files?.[0].format" />
+          <div class="subtitle">
+            <app-format-badge [format]="item.files?.[0].format" />
           </div>
         }
       </div>
@@ -385,8 +385,8 @@
     <div class="result-row clickable d-flex align-items-center gap-2" (click)="clickFileSearchResult(item)">
       <div class="body">
         <div class="title text-truncate">{{item.filePath}}</div>
-        <div class="subtitle text-truncate">
-          <app-series-format [format]="item.format" />
+        <div class="subtitle">
+          <app-format-badge [format]="item.format" />
         </div>
       </div>
     </div>
