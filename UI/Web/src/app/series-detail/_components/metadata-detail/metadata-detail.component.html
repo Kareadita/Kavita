@@ -1,7 +1,7 @@
 @if (items() && items().length > 0) {
   <div class="row g-0 mb-1">
     <div class="col-lg-3 col-md-4 col-sm-12">
-      <h5>{{heading}}</h5>
+      <h5>{{heading()}}</h5>
     </div>
     <div class="col-lg-9 col-md-8 col-sm-12">
       <app-badge-expander [items]="items()" [itemsTillExpander]="breakpointService.isDesktopOrAbove() ? 30 : 4" [includeComma]="includeComma()">
