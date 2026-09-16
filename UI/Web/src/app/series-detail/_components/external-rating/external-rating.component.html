@@ -13,7 +13,7 @@
       </div>
     }
 
-    @for (rating of ratings; track rating.provider + rating.averageScore) {
+    @for (rating of ratings(); track rating.provider + rating.averageScore) {
       <div class="col-auto custom-col clickable" [ngbPopover]="externalPopContent" [popoverContext]="{rating: rating}"
            [popoverTitle]="(rating.provider | scrobbleProviderName) + getAuthorityTitle(rating)" popoverClass="sm-popover">
         <span class="badge rounded-pill me-1">
@@ -24,11 +24,11 @@
     }
 
     <div class="col-auto" style="padding-top: 0.5rem">
-      <app-loading [loading]="isLoading" size="spinner-border-sm" />
+      <app-loading [loading]="isLoading()" size="spinner-border-sm" />
     </div>
 
     <div class="col-auto ms-2"  style="padding-top: 0.25rem">
-      @for(link of webLinks; track link) {
+      @for(link of webLinks(); track link) {
         <a class="me-1" [href]="link | safeHtml"  target="_blank" rel="noopener noreferrer" [title]="link">
           <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(link)"
                      [errorImage]="imageService.errorWebLinkImage" />
@@ -40,25 +40,25 @@
   <ng-template #kavitaRating>
     <span class="badge rounded-pill ps-0 me-1">
         <app-image classes="me-1" imageUrl="assets/images/logo-32.png" width="24px" height="24px" />
-        @if (hasUserRated) {
-          {{userRating * 20}}
+        @if (hasUserRated()) {
+          {{userRating() * 20}}
         } @else {
           N/A
         }
 
-        @if (overallRating > 0) {
-          + {{overallRating}}
+        @if (overallRating() > 0) {
+          + {{overallRating()}}
         }
-        @if (hasUserRated || overallRating > 0) {
+        @if (hasUserRated() || overallRating() > 0) {
           %
         }
     </span>
   </ng-template>
 
   <ng-template #popContent>
-    <ngx-stars [initialStars]="userRating" (ratingOutput)="updateRating($event)" [size]="2"
+    <ngx-stars [initialStars]="userRating()" (ratingOutput)="updateRating($event)" [size]="2"
                [maxStars]="5" [color]="starColor" />
-    {{userRating * 20}}%
+    {{userRating() * 20}}%
   </ng-template>
 
   <ng-template #externalPopContent let-rating="rating">
