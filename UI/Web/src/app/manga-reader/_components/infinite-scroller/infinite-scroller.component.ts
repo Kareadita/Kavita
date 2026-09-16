@@ -337,7 +337,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       if (breakpoint <= this.readingProfile.disableWidthOverride) {
         return '';
       }
-      return (parseInt(value) <= 0) ? '' : value + '%';
+      return (value <= 0) ? '' : value + '%';
     });
 
     // perform jump so the page stays in view

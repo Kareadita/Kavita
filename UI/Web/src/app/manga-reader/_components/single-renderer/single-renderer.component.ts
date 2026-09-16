@@ -86,7 +86,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
       if (breakpoint <= this.readingProfile.disableWidthOverride) {
         return '';
       }
-      return (parseInt(value) <= 0) ? '' : value + '%';
+      return (value <= 0) ? '' : value + '%';
     });
 
     this.emulateBookClass = computed(() => {

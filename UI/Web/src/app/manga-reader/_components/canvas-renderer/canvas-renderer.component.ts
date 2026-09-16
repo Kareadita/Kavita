@@ -78,10 +78,11 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
 
   ngOnInit(): void {
     this.readerSettings$.pipe(takeUntilDestroyed(this.destroyRef), tap((value: ReaderSetting) => {
+      // Capture before assigning, otherwise the comparison below is always false
+      const rerenderNeeded = this.pageSplit !== value.pageSplit;
       this.fit = value.fitting;
       this.pageSplit = value.pageSplit;
       this.layoutMode = value.layoutMode;
-      const rerenderNeeded = this.pageSplit != value.pageSplit;
       this.pagingDirection = value.pagingDirection;
       if (rerenderNeeded) {
         this.reset();
