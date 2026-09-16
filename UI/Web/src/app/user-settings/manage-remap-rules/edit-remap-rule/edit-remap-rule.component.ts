@@ -1,8 +1,6 @@
 import {ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal} from '@angular/core';
-import {NonNullableFormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {CblService} from '../../../_services/cbl.service';
-import {SearchService} from '../../../_services/search.service';
 import {ImageService} from '../../../_services/image.service';
 import {RemapRule} from '../../../_models/reading-list/cbl/remap-rule';
 import {SearchResult} from '../../../_models/search/search-result';
@@ -12,19 +10,18 @@ import {TypeaheadComponent} from '../../../typeahead/_components/typeahead.compo
 import {ImageComponent} from '../../../shared/image/image.component';
 import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {form, FormField, required} from "@angular/forms/signals";
 
 @Component({
   selector: 'app-edit-remap-rule',
   templateUrl: './edit-remap-rule.component.html',
   styleUrls: ['./edit-remap-rule.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, ReactiveFormsModule, TypeaheadComponent, ImageComponent, FormFieldDirective]
+  imports: [TranslocoDirective, TypeaheadComponent, ImageComponent, FormFieldDirective, FormField]
 })
 export class EditRemapRuleComponent implements OnInit {
 
-  private readonly fb = inject(NonNullableFormBuilder);
   private readonly cblService = inject(CblService);
-  private readonly searchService = inject(SearchService);
   private readonly typeaheadSettingsFactory = inject(TypeaheadConfigFactoryService);
   protected readonly imageService = inject(ImageService);
 
@@ -32,10 +29,13 @@ export class EditRemapRuleComponent implements OnInit {
   saved = output<RemapRule>();
   cancelled = output<void>();
 
-  form = this.fb.group({
+  formModel = signal({
     cblSeriesName: '',
     cblVolume: '',
     cblNumber: '',
+  });
+  formGroup = form(this.formModel, path => {
+    required(path.cblSeriesName);
   });
 
   selectedSeries = signal<SearchResult | null>(null);
@@ -49,7 +49,7 @@ export class EditRemapRuleComponent implements OnInit {
     this.seriesSettings.set(this.createSeriesTypeahead(editRule));
 
     if (editRule) {
-      this.form.patchValue({
+      this.formModel.set({
         cblSeriesName: editRule.cblSeriesName,
         cblVolume: editRule.cblVolume ?? '',
         cblNumber: editRule.cblNumber ?? '',
@@ -94,7 +94,7 @@ export class EditRemapRuleComponent implements OnInit {
   }
 
   save() {
-    const {cblSeriesName, cblVolume, cblNumber} = this.form.value;
+    const {cblSeriesName, cblVolume, cblNumber} = this.formModel();
     const selectedSeries = this.selectedSeries();
     if (!cblSeriesName?.trim() || !selectedSeries) return;
 
