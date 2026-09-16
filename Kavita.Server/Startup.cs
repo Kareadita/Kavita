@@ -608,7 +608,7 @@ public class Startup
     {
         Console.WriteLine("Server is shutting down. Please allow a few seconds to stop any background jobs...");
         TaskScheduler.Client.Dispose();
-        System.Threading.Thread.Sleep(1000);
+        Thread.Sleep(1000);
         Console.WriteLine("You may now close the application window.");
     }
 

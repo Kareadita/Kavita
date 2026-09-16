@@ -3857,7 +3857,8 @@
     "favorite-authors": {
         "title": "Most Read Authors",
         "sub-title": "{{name}}'s most read author is {{author}}, with {{count}} total reads",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "chapter-count": "{{common.chapter-count}}"
     },
 
     "page-spread": {
