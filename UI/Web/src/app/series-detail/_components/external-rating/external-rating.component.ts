@@ -48,7 +48,7 @@ export class ExternalRatingComponent implements OnInit {
   seriesId = input.required<number>();
   libraryType = input.required<LibraryType>();
   ratings = input.required<Rating[]>();
-  webLinks = input.required<string[]>();
+  webLinks = input<string[]>([]);
 
   userRating = model.required<number>();
   hasUserRated = model.required<boolean>();
