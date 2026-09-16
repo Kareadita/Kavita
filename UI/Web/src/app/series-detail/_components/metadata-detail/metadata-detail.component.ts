@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, contentChild, inject, input, Input, TemplateRef} from '@angular/core';
+import {ChangeDetectionStrategy, Component, contentChild, inject, input, TemplateRef} from '@angular/core';
 import {NgTemplateOutlet} from '@angular/common';
 import {A11yClickDirective} from "../../../shared/a11y-click.directive";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
@@ -10,11 +10,11 @@ import {UtilityService} from "../../../shared/_services/utility.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 
 @Component({
-    selector: 'app-metadata-detail',
+  selector: 'app-metadata-detail',
   imports: [BadgeExpanderComponent, TagBadgeComponent, NgTemplateOutlet, A11yClickDirective],
-    templateUrl: './metadata-detail.component.html',
-    styleUrls: ['./metadata-detail.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: './metadata-detail.component.html',
+  styleUrls: ['./metadata-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataDetailComponent<T> {
 

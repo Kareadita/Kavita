@@ -203,6 +203,14 @@ export class VolumeDetailComponent implements OnInit {
 
   coverImage = computed(() => this.imageService.getVolumeCoverImage(this.volume().id));
 
+  /**
+   * The rating block only renders for a single-chapter volume, so its links are that chapter's
+   */
+  weblinks = computed(() => {
+    const chapter = this.volume()?.chapters?.[0];
+    return chapter?.webLinks?.length ? chapter.webLinks.split(',') : [];
+  });
+
   isLoading = signal(true);
 
   activeTabId = Tabs.Chapters;
