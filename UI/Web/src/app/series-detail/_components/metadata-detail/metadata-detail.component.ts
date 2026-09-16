@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, contentChild, inject, Input, TemplateRef} from '@angular/core';
+import {ChangeDetectionStrategy, Component, contentChild, inject, input, Input, TemplateRef} from '@angular/core';
 import {NgTemplateOutlet} from '@angular/common';
 import {A11yClickDirective} from "../../../shared/a11y-click.directive";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
@@ -11,12 +11,12 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
 
 @Component({
     selector: 'app-metadata-detail',
-    imports: [A11yClickDirective, BadgeExpanderComponent, TagBadgeComponent, NgTemplateOutlet],
+  imports: [BadgeExpanderComponent, TagBadgeComponent, NgTemplateOutlet, A11yClickDirective],
     templateUrl: './metadata-detail.component.html',
     styleUrls: ['./metadata-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataDetailComponent {
+export class MetadataDetailComponent<T> {
 
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   public readonly utilityService = inject(UtilityService);
@@ -24,18 +24,19 @@ export class MetadataDetailComponent {
 
   protected readonly TagBadgeCursor = TagBadgeCursor;
 
-  @Input({required: true}) tags: Array<any> = [];
-  @Input({required: true}) libraryId!: number;
-  @Input({required: true}) heading!: string;
-  @Input() queryParam: SeriesFilterField = SeriesFilterField.None;
-  @Input() includeComma: boolean = true;
+  items = input.required<T[]>();
+  libraryId = input.required<number>();
+  heading = input.required<string>();
+  queryParam = input(SeriesFilterField.None);
+  includeComma = input(true);
+
   readonly titleTemplate = contentChild.required<TemplateRef<any>>('titleTemplate');
   readonly itemTemplate = contentChild<TemplateRef<any>>('itemTemplate');
 
 
   goTo(queryParamName: SeriesFilterField, filter: any) {
     if (queryParamName === SeriesFilterField.None) return;
-    this.filterUtilityService.applyFilter(['library', this.libraryId], queryParamName, FilterComparison.Equal, filter).subscribe();
+    this.filterUtilityService.applyFilter(['library', this.libraryId()], queryParamName, FilterComparison.Equal, filter).subscribe();
   }
 
 
