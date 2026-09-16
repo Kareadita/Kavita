@@ -555,6 +555,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.themeService.clearThemes();
     this.cdRef.markForCheck();
 
+    this.setupReaderSettingEffects()
+
     this.columnWidth = computed(() => {
       const layoutMode = this.layoutMode();
       const writingStyle = this.writingStyle();
@@ -962,12 +964,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       await this.readerSettingsService.initialize(this.libraryId, this.seriesId, this.readingProfile);
 
-      // Ensure any changes in the reader settings are applied to the reader
-      this.readerSettingsService.settingUpdates$.pipe(
-        takeUntilDestroyed(this.destroyRef),
-        tap((update) => this.handleReaderSettingsUpdate(update))
-      ).subscribe();
-
       forkJoin({
         chapter: this.seriesService.getChapter(this.chapterId),
         progress: this.readerService.getProgress(this.chapterId),
@@ -1309,7 +1305,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * We can't use a wrapper due to potential for styling issues.
    */
   injectImageBookmarkIndicators(forceRefresh = false) {
-    if (this.readingProfile.bookReaderDisableBookmarkIcon) return;
+    if (this.readerSettingsService.getSettingsForm().bookReaderDisableBookmarkIcon().value()) return;
 
     const imgs = Array.from(this.readingSectionElemRef().nativeElement.querySelectorAll('img') ?? []);
 
@@ -2091,36 +2087,36 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  handleReaderSettingsUpdate(res: ReaderSettingUpdate) {
-    switch (res.setting) {
-      case "pageStyle":
-        this.applyPageStyles(res.object as PageStyle);
-        break;
-      case "clickToPaginate":
-        this.showPaginationOverlay(res.object as boolean);
-        break;
-      case "fullscreen":
-        this.toggleFullscreen();
-        break;
-      case "writingStyle":
-        this.applyWritingStyle();
-        break;
-      case "layoutMode":
-        this.applyLayoutMode(res.object as BookPageLayoutMode, true);
-        break;
-      case "readingDirection":
-        // No extra functionality needs to be done
-        break;
-      case "immersiveMode":
-        this.applyImmersiveMode(res.object as boolean);
-        break;
-      case 'theme':
-        this.applyColorTheme(res.object as BookTheme);
-        break;
-      case "bookReaderDisableBookmarkIcon":
-        this.applyBookmarkIcons(!(res.object as boolean));
-        break;
-    }
+  setupReaderSettingEffects() {
+    effect(() => {
+      this.applyPageStyles(this.readerSettingsService.pageStyles());
+    });
+    effect(() => {
+      this.showPaginationOverlay(this.readerSettingsService.clickToPaginate());
+    });
+    effect(() => {
+      this.readerSettingsService.isFullscreen(); // Run when fullscreen changes
+      this.toggleFullscreen();
+    });
+    effect(() => {
+      this.readerSettingsService.writingStyle();
+      this.applyWritingStyle();
+    });
+    effect(() => {
+      this.applyLayoutMode(this.readerSettingsService.layoutMode(), true);
+    });
+    effect(() => {
+      this.applyImmersiveMode(this.readerSettingsService.immersiveMode());
+    });
+    effect(() => {
+      const bookTheme = this.readerSettingsService.activeTheme();
+      if (bookTheme) {
+        this.applyColorTheme(bookTheme);
+      }
+    });
+    effect(() => {
+      this.applyBookmarkIcons(!this.readerSettingsService.getSettingsForm().bookReaderDisableBookmarkIcon().value());
+    });
   }
 
   toggleDrawer() {
