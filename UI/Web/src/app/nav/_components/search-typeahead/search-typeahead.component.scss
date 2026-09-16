@@ -108,21 +108,43 @@
 }
 
 
-.section-header {
-    color: var(--body-text-color);
-
-    &:hover {
-        background-color: var(--search-list-group-item-bg-color, black) !important;
-        cursor: default;
-    }
+/*
+  Borders are driven through the theme's custom properties rather than by out-specifying
+  theme/components/_list.scss, which also varies them on :first-child / :last-child.
+  Result rows are borderless; only a section header draws the separator above itself.
+*/
+.results {
+  --list-group-item-border-width: 0;
+  --list-group-item-first-border-width: 0;
+  --list-group-item-last-border-width: 0;
 }
 
-.list-group-item {
-  background-color: var(--search-list-group-item-bg-color, black);
+.search-all-row {
+  --list-group-item-border-width: 0;
+  --list-group-item-first-border-width: 0;
+}
+
+.group-header {
+  --list-group-item-border-width: 1px 0 0 0;
+  --list-group-item-first-border-width: 0;
+  --list-group-item-last-border-width: 1px 0 0 0;
+  padding-top: 0.875rem;
+  padding-bottom: 0.25rem;
+
+  .kv-section-header {
+    margin: 0;
+  }
+}
+
+.extras-row {
+  --list-group-item-border-width: 1px 0 0 0;
+  --list-group-item-last-border-width: 1px 0 0 0;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
 }
 
 
-.dropdown {
+.search-dropdown {
     width: 100vw;
     top: 3.4375rem; //header offset
     position: fixed;
@@ -143,6 +165,7 @@
     flex: auto;
     max-height: calc((var(--vh) * 100) - var(--nav-offset));
     height: fit-content;
+    background-color: var(--search-list-group-item-bg-color, black);
 }
 
 .list-group.results {
@@ -156,7 +179,7 @@
 }
 
 .list-group-item {
-    padding: 0.3125rem 0.625rem;
+    padding: 0.3125rem 0.75rem;
 }
 
 
@@ -168,6 +191,37 @@ li {
 
 ul ul {
     border-radius: 0 !important;
+}
+
+
+.result-row {
+  padding: 0.375rem 0.25rem;
+
+  .thumb {
+    width: 2rem;
+  }
+
+  /* Without this the flex child refuses to shrink and the title can't ellipsis */
+  .body {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .title {
+    line-height: 1.4;
+  }
+
+  .subtitle {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--text-muted-color);
+  }
+
+  .meta {
+    font-size: 0.8rem;
+    color: var(--text-muted-color);
+    white-space: nowrap;
+  }
 }
 
 

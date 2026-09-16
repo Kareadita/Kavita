@@ -45,6 +45,8 @@ import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities
 import {ImageService} from "../../../_services/image.service";
 import {generateUniqueId} from "../../../_helpers/random";
 import {EmptyStateComponent} from "../../../shared/_components/empty-state/empty-state.component";
+import {TranslocoInjectComponent} from "../../../shared/_components/transloco-inject/transloco-inject.component";
+import {TranslocoSlotDirective} from "../../../_directives/transloco-slot.directive";
 
 export interface SearchEvent {
   value: string;
@@ -64,7 +66,7 @@ interface FormModel {
   templateUrl: './search-typeahead.component.html',
   styleUrls: ['./search-typeahead.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgTemplateOutlet, TranslocoDirective, KeyBindPipe, FormRoot, FormField, CollectionOwnerComponent, ImageComponent, PromotedIconComponent, QuillViewComponent, SeriesFormatComponent, EmptyStateComponent]
+  imports: [NgTemplateOutlet, TranslocoDirective, KeyBindPipe, FormRoot, FormField, CollectionOwnerComponent, ImageComponent, PromotedIconComponent, QuillViewComponent, SeriesFormatComponent, EmptyStateComponent, TranslocoInjectComponent, TranslocoSlotDirective]
 })
 export class SearchTypeaheadComponent {
 
@@ -281,6 +283,16 @@ export class SearchTypeaheadComponent {
 
   goToOther(field: SeriesFilterField, value: string) {
     this.goTo({field, comparison: FilterComparison.Equal, value: value + ''});
+  }
+
+  /**
+   * Take the raw term to the full series browse, rather than picking one of the suggestions
+   */
+  searchAll() {
+    const term = this.searchTerm().trim();
+    if (term.length === 0) return;
+
+    this.goTo({field: SeriesFilterField.SeriesName, comparison: FilterComparison.Matches, value: term});
   }
 
   goToPerson(person: Person) {

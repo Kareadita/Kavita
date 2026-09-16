@@ -3159,6 +3159,12 @@
         "search-alt": "Search…",
         "person-aka-status": "Matches an alias",
         "no-data": "No results found",
+        "search-for": "Search for {{term}}",
+        "in-library": "in {{name}}",
+        "volume-count": "{{count}} vols",
+        "volume-count-one": "{{count}} vol",
+        "chapter-count": "{{count}} chapters",
+        "chapter-count-one": "{{count}} chapter",
         "search-series-alt": "Search series"
     },
 
