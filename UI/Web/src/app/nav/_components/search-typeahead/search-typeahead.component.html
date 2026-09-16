@@ -4,9 +4,21 @@
     <div class="typeahead-input" [class.focused]="hasFocus()" (click)="onInputClick($event)">
       <div class="search">
         <input #input [id]="id()" type="text" inputmode="search" autocomplete="off" [formField]="formGroup.typeahead" [placeholder]="t('search-alt')"
-               aria-haspopup="listbox" aria-owns="dropdown"
-               [attr.aria-expanded]="hasFocus() && hasAnyData()"
-               aria-autocomplete="list" (focusout)="close($event)" (focus)="open()" role="searchbox">
+               role="combobox" aria-autocomplete="list"
+               [attr.aria-controls]="listboxId()"
+               [attr.aria-expanded]="hasFocus() && rowCount() > 0"
+               [attr.aria-activedescendant]="activeRowId()"
+               (focusout)="close($event)" (focus)="open()">
+
+        <button type="button" class="btn btn-icon search-config flex-shrink-0"
+                #configBtn #configPopover="ngbPopover"
+                [ngbPopover]="configContent" [popoverTitle]="t('search-config-title')"
+                popoverClass="search-config-popover"
+                [autoClose]="false" placement="bottom-end" triggers="click"
+                [attr.aria-expanded]="configPopover.isOpen()"
+                [attr.aria-label]="t('search-config-alt')">
+          <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+        </button>
 
         @if (searchTerm().length > 0) {
           @if (isLoading()) {
@@ -24,175 +36,198 @@
       </div>
     </div>
 
+    <span class="visually-hidden" role="status" aria-live="polite">
+      @if (hasFocus() && searchTerm().length > 0 && !isLoading()) {
+        @if (hasAnyData()) {
+          {{t('results-available-alt', {count: resultCount()})}}
+        } @else {
+          {{t('no-results-alt')}}
+        }
+      }
+    </span>
+
     @if (hasFocus()) {
       @let data = groupedData();
       @let term = searchTerm().trim();
+      @let offset = offsets();
 
       <div class="overlay">
         <div class="search-dropdown">
-          <ul class="list-group" role="listbox" id="dropdown">
+          <div class="panel d-flex flex-column">
+            <ul class="list-group dropdown-list" role="listbox" [id]="listboxId()">
 
-            @if (term.length > 0) {
-              <li class="list-group-item search-all-row" role="option" tabindex="0">
-                <div class="result-row clickable d-flex align-items-center gap-2" (click)="searchAll()">
-                  <div class="thumb flex-shrink-0 text-center">
-                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                  </div>
-                  <div class="body">
-                    <div class="title text-truncate">
-                      <app-transloco-inject key="search-typeahead.search-for">
-                        <ng-template translocoSlot="term"><strong>{{term}}</strong></ng-template>
-                      </app-transloco-inject>
+              @if (term.length > 0) {
+                <li #optionRow class="list-group-item search-all-row" role="option" [id]="rowId(0)"
+                    [class.active]="focusedIndex() === 0" [attr.aria-selected]="focusedIndex() === 0">
+                  <div class="result-row clickable d-flex align-items-center gap-2" (click)="searchAll()">
+                    <div class="thumb flex-shrink-0 text-center">
+                      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    </div>
+                    <div class="body">
+                      <div class="title text-truncate">
+                        <app-transloco-inject key="search-typeahead.search-for">
+                          <ng-template translocoSlot="term"><strong>{{term}}</strong></ng-template>
+                        </app-transloco-inject>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </li>
-            }
-
-            @if (data.series.length > 0) {
-              <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" id="series-group">{{t('series')}}</h5></li>
-              <ul class="list-group results" role="group" aria-labelledby="series-group">
-                @for (option of data.series; track option) {
-                  <li class="list-group-item" role="option" tabindex="0">
-                    <ng-container [ngTemplateOutlet]="seriesTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
-                  </li>
-                }
-              </ul>
-            }
-
-            @if (data.collections.length > 0) {
-              <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" id="collections-group">{{t('collections')}}</h5></li>
-              <ul class="list-group results" role="group" aria-labelledby="collections-group">
-                @for (option of data.collections; track option) {
-                  <li class="list-group-item" role="option" tabindex="0">
-                    <ng-container [ngTemplateOutlet]="collectionTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
-                  </li>
-                }
-              </ul>
-            }
-
-            @if (data.readingLists.length > 0) {
-              <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" id="reading-lists-group">{{t('reading-lists')}}</h5></li>
-              <ul class="list-group results" role="group" aria-labelledby="reading-lists-group">
-                @for (option of data.readingLists; track option) {
-                  <li class="list-group-item" role="option" tabindex="0">
-                    <ng-container [ngTemplateOutlet]="readingListTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
-                  </li>
-                }
-              </ul>
-            }
-
-            @if (data.bookmarks.length > 0) {
-              <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" id="bookmarks-group">{{t('bookmarks')}}</h5></li>
-              <ul class="list-group results" role="group" aria-labelledby="bookmarks-group">
-                @for (option of data.bookmarks; track option) {
-                  <li class="list-group-item" role="option" tabindex="0">
-                    <ng-container [ngTemplateOutlet]="bookmarkTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
-                  </li>
-                }
-              </ul>
-            }
-
-            @if (data.libraries.length > 0) {
-              <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" id="libraries-group">{{t('libraries')}}</h5></li>
-              <ul class="list-group results" role="group" aria-labelledby="libraries-group">
-                @for (option of data.libraries; track option) {
-                  <li class="list-group-item" role="option" tabindex="0">
-                    <ng-container [ngTemplateOutlet]="libraryTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
-                  </li>
-                }
-              </ul>
-            }
-
-            @if (data.genres.length > 0) {
-              <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" id="genres-group">{{t('genres')}}</h5></li>
-              <ul class="list-group results" role="group" aria-labelledby="genres-group">
-                @for (option of data.genres; track option) {
-                  <li class="list-group-item" role="option" tabindex="0">
-                    <ng-container [ngTemplateOutlet]="genreTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
-                  </li>
-                }
-              </ul>
-            }
-
-            @if (data.tags.length > 0) {
-              <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" id="tags-group">{{t('tags')}}</h5></li>
-              <ul class="list-group results" role="group" aria-labelledby="tags-group">
-                @for (option of data.tags; track option) {
-                  <li class="list-group-item" role="option" tabindex="0">
-                    <ng-container [ngTemplateOutlet]="tagTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
-                  </li>
-                }
-              </ul>
-            }
-
-            @if (data.persons.length > 0) {
-              <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" id="people-group">{{t('people')}}</h5></li>
-              <ul class="list-group results" role="group" aria-labelledby="people-group">
-                @for (option of data.persons; track option) {
-                  <li class="list-group-item" role="option" tabindex="0">
-                    <ng-container [ngTemplateOutlet]="personTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
-                  </li>
-                }
-              </ul>
-            }
-
-            @if (data.chapters.length > 0) {
-              <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" id="chapters-group">{{t('chapters')}}</h5></li>
-              <ul class="list-group results" role="group" aria-labelledby="chapters-group">
-                @for (option of data.chapters; track option) {
-                  <li class="list-group-item" role="option" tabindex="0">
-                    <ng-container [ngTemplateOutlet]="chapterTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
-                  </li>
-                }
-              </ul>
-            }
-
-            @if (data.files.length > 0) {
-              <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" id="files-group">{{t('files')}}</h5></li>
-              <ul class="list-group results" role="group" aria-labelledby="files-group">
-                @for (option of data.files; track option) {
-                  <li class="list-group-item" role="option" tabindex="0">
-                    <ng-container [ngTemplateOutlet]="fileTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
-                  </li>
-                }
-              </ul>
-            }
-
-            @if (data.annotations.length > 0) {
-              <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" id="annotations-group">{{t('annotations')}}</h5></li>
-              <ul class="list-group results" role="group" aria-labelledby="annotations-group">
-                @for (option of data.annotations; track option) {
-                  <li class="list-group-item" role="option" tabindex="0">
-                    <ng-container [ngTemplateOutlet]="annotationTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
-                  </li>
-                }
-              </ul>
-            }
-
-            @if (searchTerm().length > 0 && !isLoading()) {
-              @if (!hasAnyData()) {
-                <div class="list-group results">
-                  <app-empty-state [titleKey]="'no-data'"
-                                   [i18nPrefix]="'search-typeahead'">
-                    <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                  </app-empty-state>
-                </div>
+                </li>
               }
 
-              <li class="list-group-item no-hover extras-row" (click)="$event.stopPropagation()">
-                <div class="form-check form-switch">
-                  <input type="checkbox" id="search-include-extras" role="switch" [formField]="formGroup.includeExtras" class="form-check-input" switch>
-                  <label class="form-check-label" for="search-include-extras">{{t('include-extras')}}</label>
-                </div>
-              </li>
+              @if (data.series.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('series')">{{t('series')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('series')">
+                  @for (option of data.series; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.series + i)"
+                        [class.active]="focusedIndex() === offset.series + i" [attr.aria-selected]="focusedIndex() === offset.series + i">
+                      <ng-container [ngTemplateOutlet]="seriesTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.collections.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('collections')">{{t('collections')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('collections')">
+                  @for (option of data.collections; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.collections + i)"
+                        [class.active]="focusedIndex() === offset.collections + i" [attr.aria-selected]="focusedIndex() === offset.collections + i">
+                      <ng-container [ngTemplateOutlet]="collectionTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.readingLists.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('readingLists')">{{t('reading-lists')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('readingLists')">
+                  @for (option of data.readingLists; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.readingLists + i)"
+                        [class.active]="focusedIndex() === offset.readingLists + i" [attr.aria-selected]="focusedIndex() === offset.readingLists + i">
+                      <ng-container [ngTemplateOutlet]="readingListTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.bookmarks.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('bookmarks')">{{t('bookmarks')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('bookmarks')">
+                  @for (option of data.bookmarks; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.bookmarks + i)"
+                        [class.active]="focusedIndex() === offset.bookmarks + i" [attr.aria-selected]="focusedIndex() === offset.bookmarks + i">
+                      <ng-container [ngTemplateOutlet]="bookmarkTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.libraries.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('libraries')">{{t('libraries')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('libraries')">
+                  @for (option of data.libraries; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.libraries + i)"
+                        [class.active]="focusedIndex() === offset.libraries + i" [attr.aria-selected]="focusedIndex() === offset.libraries + i">
+                      <ng-container [ngTemplateOutlet]="libraryTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.genres.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('genres')">{{t('genres')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('genres')">
+                  @for (option of data.genres; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.genres + i)"
+                        [class.active]="focusedIndex() === offset.genres + i" [attr.aria-selected]="focusedIndex() === offset.genres + i">
+                      <ng-container [ngTemplateOutlet]="genreTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.tags.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('tags')">{{t('tags')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('tags')">
+                  @for (option of data.tags; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.tags + i)"
+                        [class.active]="focusedIndex() === offset.tags + i" [attr.aria-selected]="focusedIndex() === offset.tags + i">
+                      <ng-container [ngTemplateOutlet]="tagTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.persons.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('persons')">{{t('people')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('persons')">
+                  @for (option of data.persons; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.persons + i)"
+                        [class.active]="focusedIndex() === offset.persons + i" [attr.aria-selected]="focusedIndex() === offset.persons + i">
+                      <ng-container [ngTemplateOutlet]="personTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.chapters.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('chapters')">{{t('chapters')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('chapters')">
+                  @for (option of data.chapters; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.chapters + i)"
+                        [class.active]="focusedIndex() === offset.chapters + i" [attr.aria-selected]="focusedIndex() === offset.chapters + i">
+                      <ng-container [ngTemplateOutlet]="chapterTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.files.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('files')">{{t('files')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('files')">
+                  @for (option of data.files; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.files + i)"
+                        [class.active]="focusedIndex() === offset.files + i" [attr.aria-selected]="focusedIndex() === offset.files + i">
+                      <ng-container [ngTemplateOutlet]="fileTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.annotations.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('annotations')">{{t('annotations')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('annotations')">
+                  @for (option of data.annotations; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.annotations + i)"
+                        [class.active]="focusedIndex() === offset.annotations + i" [attr.aria-selected]="focusedIndex() === offset.annotations + i">
+                      <ng-container [ngTemplateOutlet]="annotationTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+            </ul>
+
+            <!-- Outside the listbox: a listbox may only contain option and group children -->
+            @if (searchTerm().length > 0 && !isLoading() && !hasAnyData()) {
+              <app-empty-state [titleKey]="'no-data'"
+                               [i18nPrefix]="'search-typeahead'">
+                <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              </app-empty-state>
             }
-          </ul>
+          </div>
         </div>
       </div>
     }
 
   </form>
+
+
+  <ng-template #configContent>
+    <div class="form-check form-switch" (focusout)="onConfigFocusOut($event)">
+      <input type="checkbox" [id]="extrasId()" role="switch" [formField]="formGroup.includeExtras" class="form-check-input" switch>
+      <label class="form-check-label" [attr.for]="extrasId()">{{t('include-extras')}}</label>
+    </div>
+  </ng-template>
 
 
   <ng-template #libraryTemplate let-item>
@@ -297,7 +332,21 @@
   <ng-template #tagTemplate let-item>
     <div class="result-row clickable d-flex align-items-center gap-2" (click)="goToOther(FilterField.Tags, item.id)">
       <div class="body">
-        <div class="title text-truncate">{{item.title}}</div>
+        <div class="title text-truncate">
+          <i class="fas fa-tag" aria-hidden="true"></i>
+          {{item.title}}
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #genreTemplate let-item>
+    <div class="result-row clickable d-flex align-items-center gap-2" (click)="goToOther(FilterField.Genres, item.id)">
+      <div class="body">
+        <div class="title text-truncate">
+          <i class="fas fa-tag" aria-hidden="true"></i>
+          {{item.title}}
+        </div>
       </div>
     </div>
   </ng-template>
@@ -314,14 +363,6 @@
         @if (item.aliases.length > 0) {
           <div class="subtitle text-truncate">{{t('person-aka-status')}}</div>
         }
-      </div>
-    </div>
-  </ng-template>
-
-  <ng-template #genreTemplate let-item>
-    <div class="result-row clickable d-flex align-items-center gap-2" (click)="goToOther(FilterField.Genres, item.id)">
-      <div class="body">
-        <div class="title text-truncate" [innerHTML]="item.title"></div>
       </div>
     </div>
   </ng-template>

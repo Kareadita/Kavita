@@ -3165,6 +3165,10 @@
         "volume-count-one": "{{count}} vol",
         "chapter-count": "{{count}} chapters",
         "chapter-count-one": "{{count}} chapter",
+        "search-config-alt": "Search options",
+        "search-config-title": "Search Options",
+        "results-available-alt": "{{typeahead.results-available-alt}}",
+        "no-results-alt": "{{typeahead.no-results-alt}}",
         "search-series-alt": "Search series"
     },
 
