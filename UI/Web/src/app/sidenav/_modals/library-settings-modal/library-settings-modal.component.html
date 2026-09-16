@@ -2,319 +2,307 @@
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">
       @if (!isAddLibrary()) {
-        {{t('edit-title', {name: library!.name | sentenceCase})}}
+        {{t('edit-title', {name: library()!.name | sentenceCase})}}
       } @else {
         {{t('add-title')}}
       }
     </h4>
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
-  <form [formGroup]="libraryForm">
 
-    <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
-      <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
-          orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
+  <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
+        orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
-        <li [ngbNavItem]="Tabs.General">
-          <a ngbNavLink>{{Tabs.General | tabTitle}}</a>
-          <ng-template ngbNavContent>
-            <div class="mb-3">
-              <label for="library-name" class="form-label">{{t('name-label')}}</label>
-              @if (libraryForm.get('name'); as formControl) {
-                <input id="library-name" class="form-control" formControlName="name" type="text" [appFormField]="formControl">
+      <li [ngbNavItem]="Tabs.General">
+        <a ngbNavLink>{{Tabs.General | tabTitle}}</a>
+        <ng-template ngbNavContent>
+          <div class="mb-3">
+            <label for="library-name" class="form-label">{{t('name-label')}}</label>
+            <input id="library-name" class="form-control" [formField]="formGroup.name" type="text" [appFormField]="formGroup.name">
 
-                <app-validation-errors inputId="library-name" [control]="formControl" [messages]="{
+            <app-validation-errors inputId="library-name" [control]="formGroup.name" [messages]="{
                   duplicateName: t('library-name-unique')
                 }" />
-              }
-            </div>
+          </div>
 
-            <div class="mb-3">
-              <label for="library-type" class="form-label">{{t('type-label')}}</label>
-              <i class="fa fa-info-circle ms-1" placement="end" [ngbTooltip]="typeTooltip" role="button" tabindex="0"></i>
-              @if (supportsMetadata()) {
-                <span class="float-end">
+          <div class="mb-3">
+            <label for="library-type" class="form-label">{{t('type-label')}}</label>
+            <i class="fa fa-info-circle ms-1" placement="end" [ngbTooltip]="typeTooltip" role="button" tabindex="0"></i>
+            @if (supportsMetadata()) {
+              <span class="float-end">
                   {{t('kavitaplus-eligible-label')}}
-                  <i class="fa fa-info-circle ms-1" placement="start" [ngbTooltip]="kavitaplusEligibleTooltip" role="button" tabindex="0"></i>
+                <i class="fa fa-info-circle ms-1" placement="start" [ngbTooltip]="kavitaplusEligibleTooltip" role="button" tabindex="0"></i>
                 </span>
-              }
-              <ng-template #typeTooltip>{{t('type-tooltip')}}</ng-template>
-              <ng-template #kavitaplusEligibleTooltip>{{t('kavitaplus-eligible-tooltip')}}</ng-template>
-              <span class="visually-hidden" id="library-type-help">
+            }
+            <ng-template #typeTooltip>{{t('type-tooltip')}}</ng-template>
+            <ng-template #kavitaplusEligibleTooltip>{{t('kavitaplus-eligible-tooltip')}}</ng-template>
+            <span class="visually-hidden" id="library-type-help">
                 <ng-container [ngTemplateOutlet]="typeTooltip" />
               </span>
-              <select class="form-select" id="library-type" formControlName="type" aria-describedby="library-type-help">
-                @for (opt of libraryTypes; track opt.value) {
-                  <option [value]="opt.value">{{opt.title}}</option>
-                }
-              </select>
-              <div class="text-muted mt-2">
-                {{LibraryTypeValue | libraryTypeSubtitle}}
-              </div>
+            <app-setting-select [formField]="formGroup.type" [options]="libraryTypes" />
+            <div class="text-muted mt-2">
+              {{formGroup.type().value() | libraryTypeSubtitle}}
             </div>
-            @if (!isAddLibrary()) {
-              <div>
-                {{t('last-scanned-label')}}
-                <span>{{library?.lastScanned | utcToLocalTime: 'short' | defaultDate}}</span>
-              </div>
-            }
-          </ng-template>
-        </li>
-
-
-        <li [ngbNavItem]="Tabs.Folder" [disabled]="isAddLibrary() && setupStep < 1">
-          <a ngbNavLink>{{Tabs.Folder | tabTitle}}</a>
-          <ng-template ngbNavContent>
-
-            @if (filesAtRoot().length > 0) {
-              <p class="alert alert-warning">{{t('files-at-root-warning')}}</p>
-            }
-
-            <p>{{t('folder-description')}}</p>
-            <ul class="list-group list-group-flush" style="width: 100%">
-              @for(folder of selectedFolders; track folder) {
-                <li class="list-group-item">
-                  {{folder}}
-
-                  <div class="float-end d-flex flex-row align-items-center">
-                    @if (filesAtRoot().includes(folder)) {
-                      <i class="fa fa-warning text-danger" [ngbTooltip]="t('files-at-root-warning')"></i>
-                    }
-
-                    <button class="btn btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
-                  </div>
-
-                </li>
-              }
-            </ul>
-            <div class="row mt-2">
-              <button class="btn btn-secondary float-end btn-sm" (click)="openDirectoryPicker()">
-                <i class="fa fa-plus" aria-hidden="true"></i>
-                {{t('browse')}}
-              </button>
+          </div>
+          @if (!isAddLibrary()) {
+            <div>
+              {{t('last-scanned-label')}}
+              <span>{{library()?.lastScanned | utcToLocalTime: 'short' | defaultDate}}</span>
             </div>
-            <div class="row mt-2">
-              <p>{{t('help-us-part-1')}}<a [href]="WikiLink.ManagingFiles" rel="noopener noreferrer" target="_blank" referrerpolicy="no-referrer">{{t('help-us-part-2')}}</a> {{t('help-us-part-3')}}</p>
-            </div>
-            <div class="row mt-2">
-              <p>{{t('naming-conventions-part-1')}}<a [href]="WikiLink.Scanner" rel="noopener noreferrer" target="_blank" referrerpolicy="no-referrer">{{t('naming-conventions-part-2')}}</a> {{t('naming-conventions-part-3')}}</p>
-            </div>
-          </ng-template>
-        </li>
-
-        <li [ngbNavItem]="Tabs.CoverImage" [disabled]="isAddLibrary() && setupStep < 2">
-          <a ngbNavLink>{{Tabs.CoverImage | tabTitle}}</a>
-          <ng-template ngbNavContent>
-            @if (isAddLibrary()) {
-              <p class="alert alert-warning" role="alert">{{t('cover-description')}}</p>
-            }
-
-            <p>{{t('cover-description-extra')}}</p>
-            <app-cover-image-chooser [config]="chooserConfig()" (coverChanged)="handleCoverChanged($event)" />
-          </ng-template>
-        </li>
-
-        <li [ngbNavItem]="Tabs.Advanced" [disabled]="isAddLibrary() && setupStep < 3">
-          <a ngbNavLink>{{Tabs.Advanced | tabTitle}}</a>
-          <ng-template ngbNavContent>
-            <div class="row g-0 mt-4 mb-4">
-              <app-setting-item [title]="t('file-type-group-label')" [showEdit]="false" [canEdit]="false"
-                                [subtitle]="t('file-type-group-tooltip')" [toggleOnViewClick]="false">
-                <ng-template #view>
-                  <div class="hstack gap-2">
-                    @for (group of fileTypeGroups; track group) {
-                      <div class="form-check form-switch">
-                        <input class="form-check-input" [formControlName]="group" type="checkbox" [id]="group" switch>
-                        <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
-                      </div>
-                    }
-                  </div>
-                </ng-template>
-              </app-setting-item>
-            </div>
-
-            <div class="row g-0 mt-4 mb-4">
-              <app-setting-switch [title]="t('remove-prefix-for-sortname-label')" [subtitle]="t('remove-prefix-for-sortname-tooltip')">
-                <ng-template>
-                  <div class="form-check form-switch float-end">
-                    <input type="checkbox" role="switch" formControlName="removePrefixForSortName" class="form-check-input">
-                  </div>
-                </ng-template>
-              </app-setting-switch>
-            </div>
-
-            <div class="row g-0 mt-4 mb-4">
-              <app-setting-switch [title]="t('enable-metadata-label')" [subtitle]="t('enable-metadata-tooltip')">
-                <ng-template>
-                  <div class="form-check form-switch float-end">
-                    <input type="checkbox" role="switch" formControlName="enableMetadata" class="form-check-input">
-                  </div>
-                </ng-template>
-              </app-setting-switch>
-            </div>
-
-            @if (libraryForm.get('metadataProvider'); as control) {
-              <div class="row g-0 mt-4 mb-4">
-                <app-setting-item [title]="t('metadata-provider-label')" [subtitle]="t('metadata-provider-tooltip')" [canEdit]="validMetadataProviders.hasValue() && validMetadataProviders.value().length > 1">
-                  <ng-template #view>
-                    {{ control.value | metadataProviderTitle }}
-                  </ng-template>
-                  <ng-template #edit>
-                    <select class="form-select" formControlName="metadataProvider">
-                      @let validMetadataProvidersOptions = validMetadataProviders.hasValue() ? validMetadataProviders.value() : [];
-                      @for (metadataProvider of validMetadataProvidersOptions; track metadataProvider) {
-                        <option [ngValue]="metadataProvider">{{ metadataProvider | metadataProviderTitle }}</option>
-                      }
-                    </select>
-                  </ng-template>
-                </app-setting-item>
-              </div>
-            }
-
-            <div class="row g-0 mt-4 mb-4">
-              <app-setting-switch [title]="t('manage-collection-label')" [subtitle]="t('manage-collection-tooltip')">
-                <ng-template>
-                  <div class="form-check form-switch float-end">
-                    <input type="checkbox" role="switch" formControlName="manageCollections" class="form-check-input">
-                  </div>
-                </ng-template>
-              </app-setting-switch>
-            </div>
-
-            <div class="row g-0 mt-4 mb-4">
-              <app-setting-switch [title]="t('manage-reading-list-label')" [subtitle]="t('manage-reading-list-tooltip')">
-                <ng-template>
-                  <div class="form-check form-switch float-end">
-                    <input type="checkbox" role="switch" formControlName="manageReadingLists" class="form-check-input">
-                  </div>
-                </ng-template>
-              </app-setting-switch>
-            </div>
-
-            <div class="row g-0 mt-4 mb-4">
-              <app-setting-switch [title]="t('allow-scrobbling-label')" [subtitle]="t('allow-scrobbling-tooltip')">
-                <ng-template>
-                  <div class="form-check form-switch float-end">
-                    <input type="checkbox" role="switch" formControlName="allowScrobbling" class="form-check-input">
-                  </div>
-                </ng-template>
-              </app-setting-switch>
-            </div>
-
-            <div class="row g-0 mt-4 mb-4">
-              <app-setting-switch [title]="t('allow-metadata-matching-label')" [subtitle]="t('allow-metadata-matching-tooltip')">
-                <ng-template>
-                  <div class="form-check form-switch float-end">
-                    <input type="checkbox" role="switch" formControlName="allowMetadataMatching" class="form-check-input">
-                  </div>
-                </ng-template>
-              </app-setting-switch>
-            </div>
-
-            <div class="row g-0 mt-4 mb-4">
-              <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
-                <ng-template>
-                  <div class="form-check form-switch float-end">
-                    <input type="checkbox" role="switch" formControlName="folderWatching" class="form-check-input">
-                  </div>
-                </ng-template>
-              </app-setting-switch>
-            </div>
-
-            <div class="row g-0 mt-4 mb-4">
-              <app-setting-switch [title]="t('include-in-dashboard-label')" [subtitle]="t('include-in-dashboard-tooltip')">
-                <ng-template>
-                  <div class="form-check form-switch float-end">
-                    <input type="checkbox" role="switch" formControlName="includeInDashboard" class="form-check-input">
-                  </div>
-                </ng-template>
-              </app-setting-switch>
-            </div>
+          }
+        </ng-template>
+      </li>
 
 
-            <div class="row g-0 mt-4 mb-4">
-              <app-setting-switch [title]="t('include-in-search-label')" [subtitle]="t('include-in-search-tooltip')">
-                <ng-template>
-                  <div class="form-check form-switch float-end">
-                    <input type="checkbox" role="switch" formControlName="includeInSearch" class="form-check-input">
-                  </div>
-                </ng-template>
-              </app-setting-switch>
-            </div>
+      <li [ngbNavItem]="Tabs.Folder" [disabled]="isAddLibrary() && setupStep() < 1">
+        <a ngbNavLink>{{Tabs.Folder | tabTitle}}</a>
+        <ng-template ngbNavContent>
 
-            <div class="row g-0 mt-4 mb-4">
-              <app-setting-switch [title]="t('inherit-web-links-label')" [subtitle]="t('inherit-web-links-tooltip')">
-                <ng-template>
-                  <div class="form-check form-switch float-end">
-                    <input type="checkbox" role="switch" formControlName="inheritWebLinksFromFirstChapter" class="form-check-input">
-                  </div>
-                </ng-template>
-              </app-setting-switch>
-            </div>
+          @if (filesAtRoot().length > 0) {
+            <p class="alert alert-warning">{{t('files-at-root-warning')}}</p>
+          }
 
-            <div class="row g-0 mt-4 mb-4">
-              <app-setting-item [title]="t('default-language-label')" [subtitle]="t('default-language-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
-                <ng-template #view>
-                  @let langConfig = languageSettings();
-                  @if (langConfig) {
-                    <app-typeahead (selectedData)="updateLanguage($event)" [config]="langConfig" [locked]="false">
-                      <ng-template #badgeItem let-item let-position="idx">
-                        {{item.title}}
-                      </ng-template>
-                      <ng-template #optionItem let-item let-position="idx">
-                        {{item.title}} ({{item.isoCode}})
-                      </ng-template>
-                    </app-typeahead>
+          <p>{{t('folder-description')}}</p>
+          <ul class="list-group list-group-flush" style="width: 100%">
+            @for(folder of formGroup.folders().value(); track folder) {
+              <li class="list-group-item">
+                {{folder}}
+
+                <div class="float-end d-flex flex-row align-items-center">
+                  @if (filesAtRoot().includes(folder)) {
+                    <i class="fa fa-warning text-danger" [ngbTooltip]="t('files-at-root-warning')"></i>
                   }
-                </ng-template>
-              </app-setting-item>
-            </div>
 
-            <div class="setting-section-break"></div>
+                  <button class="btn btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+                </div>
 
-            <div class="row g-0 mt-4 pb-4">
-              <app-setting-item [title]="t('exclude-patterns-label')" [showEdit]="false" [canEdit]="false"
-                                [subtitle]="excludePatternTooltip" [toggleOnViewClick]="false">
-                <ng-template #view>
-                  <app-edit-list [items]="excludePatterns" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)" />
-                </ng-template>
-              </app-setting-item>
-            </div>
+              </li>
+            }
+          </ul>
+          <div class="row mt-2">
+            <button class="btn btn-secondary float-end btn-sm" (click)="openDirectoryPicker()">
+              <i class="fa fa-plus" aria-hidden="true"></i>
+              {{t('browse')}}
+            </button>
+          </div>
+          <div class="row mt-2">
+            <p>{{t('help-us-part-1')}}<a [href]="WikiLink.ManagingFiles" rel="noopener noreferrer" target="_blank" referrerpolicy="no-referrer">{{t('help-us-part-2')}}</a> {{t('help-us-part-3')}}</p>
+          </div>
+          <div class="row mt-2">
+            <p>{{t('naming-conventions-part-1')}}<a [href]="WikiLink.Scanner" rel="noopener noreferrer" target="_blank" referrerpolicy="no-referrer">{{t('naming-conventions-part-2')}}</a> {{t('naming-conventions-part-3')}}</p>
+          </div>
+        </ng-template>
+      </li>
 
+      <li [ngbNavItem]="Tabs.CoverImage" [disabled]="isAddLibrary() && setupStep() < 2">
+        <a ngbNavLink>{{Tabs.CoverImage | tabTitle}}</a>
+        <ng-template ngbNavContent>
+          @if (isAddLibrary()) {
+            <p class="alert alert-warning" role="alert">{{t('cover-description')}}</p>
+          }
+
+          <p>{{t('cover-description-extra')}}</p>
+          <app-cover-image-chooser [config]="chooserConfig()" (coverChanged)="handleCoverChanged($event)" />
+        </ng-template>
+      </li>
+
+      <li [ngbNavItem]="Tabs.Advanced" [disabled]="isAddLibrary() && setupStep() < 3">
+        <a ngbNavLink>{{Tabs.Advanced | tabTitle}}</a>
+        <ng-template ngbNavContent>
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-item [title]="t('file-type-group-label')" [showEdit]="false" [canEdit]="false"
+                              [subtitle]="t('file-type-group-tooltip')" [toggleOnViewClick]="false">
+              <ng-template #view>
+                <div class="hstack gap-2">
+                  @for (group of allFileTypeGroup; track group) {
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" (change)="handleFileTypeGroupChange($event, group)" type="checkbox" [id]="group" switch [checked]="formGroup.fileGroupTypes().value().includes(group)">
+                      <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
+                    </div>
+                  }
+                </div>
+              </ng-template>
+            </app-setting-item>
+          </div>
+
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-switch [title]="t('remove-prefix-for-sortname-label')" [subtitle]="t('remove-prefix-for-sortname-tooltip')">
+              <ng-template>
+                <div class="form-check form-switch float-end">
+                  <input type="checkbox" role="switch" [formField]="formGroup.removePrefixForSortName" class="form-check-input">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          </div>
+
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-switch [title]="t('enable-metadata-label')" [subtitle]="t('enable-metadata-tooltip')">
+              <ng-template>
+                <div class="form-check form-switch float-end">
+                  <input type="checkbox" role="switch" [formField]="formGroup.enableMetadata" class="form-check-input">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          </div>
+
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-item [title]="t('metadata-provider-label')" [subtitle]="t('metadata-provider-tooltip')" [canEdit]="validMetadataProviders.hasValue() && validMetadataProviders.value().length > 1">
+              <ng-template #view>
+                {{ formGroup.metadataProvider().value() | metadataProviderTitle }}
+              </ng-template>
+              <ng-template #edit>
+                <app-setting-select [formField]="formGroup.metadataProvider" [options]="validMetadataProviders.hasValue() ? validMetadataProviders.value() : []">
+                  <ng-template #template let-mp>
+                    {{ mp | metadataProviderTitle }}
+                  </ng-template>
+                </app-setting-select>
+              </ng-template>
+            </app-setting-item>
+          </div>
+
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-switch [title]="t('manage-collection-label')" [subtitle]="t('manage-collection-tooltip')">
+              <ng-template>
+                <div class="form-check form-switch float-end">
+                  <input type="checkbox" role="switch" [formField]="formGroup.manageCollections" class="form-check-input">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          </div>
+
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-switch [title]="t('manage-reading-list-label')" [subtitle]="t('manage-reading-list-tooltip')">
+              <ng-template>
+                <div class="form-check form-switch float-end">
+                  <input type="checkbox" role="switch" [formField]="formGroup.manageReadingLists" class="form-check-input">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          </div>
+
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-switch [title]="t('allow-scrobbling-label')" [subtitle]="t('allow-scrobbling-tooltip')">
+              <ng-template>
+                <div class="form-check form-switch float-end">
+                  <input type="checkbox" role="switch" [formField]="formGroup.allowScrobbling" class="form-check-input">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          </div>
+
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-switch [title]="t('allow-metadata-matching-label')" [subtitle]="t('allow-metadata-matching-tooltip')">
+              <ng-template>
+                <div class="form-check form-switch float-end">
+                  <input type="checkbox" role="switch" [formField]="formGroup.allowMetadataMatching" class="form-check-input">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          </div>
+
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
+              <ng-template>
+                <div class="form-check form-switch float-end">
+                  <input type="checkbox" role="switch" [formField]="formGroup.folderWatching" class="form-check-input">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          </div>
+
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-switch [title]="t('include-in-dashboard-label')" [subtitle]="t('include-in-dashboard-tooltip')">
+              <ng-template>
+                <div class="form-check form-switch float-end">
+                  <input type="checkbox" role="switch" [formField]="formGroup.includeInDashboard" class="form-check-input">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          </div>
+
+
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-switch [title]="t('include-in-search-label')" [subtitle]="t('include-in-search-tooltip')">
+              <ng-template>
+                <div class="form-check form-switch float-end">
+                  <input type="checkbox" role="switch" [formField]="formGroup.includeInSearch" class="form-check-input">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          </div>
+
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-switch [title]="t('inherit-web-links-label')" [subtitle]="t('inherit-web-links-tooltip')">
+              <ng-template>
+                <div class="form-check form-switch float-end">
+                  <input type="checkbox" role="switch" [formField]="formGroup.inheritWebLinksFromFirstChapter" class="form-check-input">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          </div>
+
+          <div class="row g-0 mt-4 mb-4">
+            <app-setting-item [title]="t('default-language-label')" [subtitle]="t('default-language-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
+              <ng-template #view>
+                @let langConfig = languageSettings();
+                @if (langConfig) {
+                  <app-typeahead (selectedData)="updateLanguage($event)" [config]="langConfig" [locked]="false">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.title}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.title}} ({{item.isoCode}})
+                    </ng-template>
+                  </app-typeahead>
+                }
+              </ng-template>
+            </app-setting-item>
+          </div>
+
+          <div class="setting-section-break"></div>
+
+          <div class="row g-0 mt-4 pb-4">
+            <app-setting-item [title]="t('exclude-patterns-label')" [showEdit]="false" [canEdit]="false"
+                              [subtitle]="excludePatternTooltip" [toggleOnViewClick]="false">
+              <ng-template #view>
+                <app-edit-list [items]="formGroup.excludePatterns().value()" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)" />
+              </ng-template>
+            </app-setting-item>
+          </div>
+
+        </ng-template>
+      </li>
+
+      <!-- Only show tasks on edit flow -->
+      @if (!isAddLibrary()) {
+        <li [ngbNavItem]="Tabs.Tasks">
+          <a ngbNavLink>{{Tabs.Tasks | tabTitle}}</a>
+          <ng-template ngbNavContent>
+            @for(task of tasks; track task.action) {
+              <div class="mt-3 mb-3">
+                <app-setting-button [subtitle]="task.description">
+                  <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
+                </app-setting-button>
+              </div>
+            }
           </ng-template>
         </li>
 
-        <!-- Only show tasks on edit flow -->
-        @if (!isAddLibrary()) {
-          <li [ngbNavItem]="Tabs.Tasks">
-            <a ngbNavLink>{{Tabs.Tasks | tabTitle}}</a>
-            <ng-template ngbNavContent>
-              @for(task of tasks; track task.action) {
-                <div class="mt-3 mb-3">
-                  <app-setting-button [subtitle]="task.description">
-                    <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
-                  </app-setting-button>
-                </div>
-              }
-            </ng-template>
-          </li>
+      }
+    </ul>
 
-        }
+    <div [ngbNavOutlet]="nav" class="tab-content {{breakpointService.isMobile() ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+  </div>
 
-
-      </ul>
-
-      <div [ngbNavOutlet]="nav" class="tab-content {{breakpointService.isMobile() ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
-    </div>
-  </form>
   <div class="modal-footer">
     <button type="button" class="btn btn-light" (click)="forceScan()" [placement]="'above'"
             [ngbTooltip]="t('force-scan-tooltip')">{{t('force-scan')}}</button>
     <button type="button" class="btn btn-light" (click)="reset()">{{t('reset')}}</button>
     <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
 
-    @if (isAddLibrary() && setupStep !== 3) {
-      <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="isNextDisabled() || libraryForm.invalid">{{t('next')}}</button>
+    @if (isAddLibrary() && setupStep() !== StepID.Advanced) {
+      <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="isNextDisabled() || formGroup().invalid()">{{t('next')}}</button>
     } @else {
       <button type="button" class="btn btn-primary" [disabled]="isDisabled()" (click)="save()">{{t('save')}}</button>
     }

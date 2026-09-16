@@ -1,14 +1,10 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  Input,
+  Component, computed,
+  inject, input,
   OnInit,
   signal
 } from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
   NgbNav,
@@ -20,8 +16,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
-import {concat, debounceTime, delay, distinctUntilChanged, last, Observable, switchMap, tap} from 'rxjs';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {concat, delay, last, Observable, tap} from 'rxjs';
 import {CoverImageChooserComponent} from '../../../cards/cover-image-chooser/cover-image-chooser.component';
 import {
   CoverChooserConfigFactoryService,
@@ -44,6 +39,8 @@ import {AccountService} from "../../../_services/account.service";
 import {ReadingList} from "../../../_models/reading-list/reading-list";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {form, FormField, minLength, required} from "@angular/forms/signals";
+import {uniqueName} from "../../../_validators/unique-name.validator";
 
 
 @Component({
@@ -51,122 +48,117 @@ import {ValidationErrorsComponent} from "../../../shared/_components/validation-
     templateUrl: './edit-reading-list-modal.component.html',
     styleUrls: ['./edit-reading-list-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgbTooltip,
-    NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, TranslocoDirective, TabTitlePipe, SettingItemComponent, TypeaheadComponent, FormFieldDirective, ValidationErrorsComponent]
+  imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbTooltip,
+    NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, TranslocoDirective, TabTitlePipe, SettingItemComponent, TypeaheadComponent, FormFieldDirective, ValidationErrorsComponent, FormField]
 })
 export class EditReadingListModalComponent implements OnInit {
+
   private readonly ngModal = inject(NgbActiveModal);
   private readonly readingListService = inject(ReadingListService);
   protected readonly breakpointService = inject(BreakpointService);
   private readonly uploadService = inject(UploadService);
   private readonly toastr = inject(ToastrService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly accountService = inject(AccountService);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly typeaheadSettingsFactory = inject(TypeaheadConfigFactoryService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
-  @Input({required: true}) readingList!: ReadingList;
+  readingList = input.required<ReadingList>();
+  originalReadingListTitle = computed(() => this.readingList().title);
 
-  reviewGroup!: FormGroup;
-  selectedCover: string = '';
-  coverImageDirty = false;
-  coverImageLocked: boolean = false;
-  coverImageReset = false;
+  formModel = signal({
+    title: '',
+    summary: '',
+    promoted: false,
+    startingMonth: 0,
+    startingYear: 0,
+    endingMonth: 0,
+    endingYear: 0,
+    tags: [] as string[],
+  });
+  formGroup = form(this.formModel, path => {
+    required(path.title);
+    minLength(path.title, 1);
+    uniqueName(path.title, 'readinglist', this.originalReadingListTitle);
+  });
+
+  selectedCover = signal('');
+  coverImageDirty = signal(false);
+  coverImageLocked = signal(false);
+  coverImageReset = signal(false);
+  tags = signal<ReadingListTag[]>([]);
+
   chooserConfig = signal<CoverImageChooserConfig>({});
-  active = Tabs.General;
-  tags: ReadingListTag[] = [];
   tagsSettings = signal<TypeaheadConfig<ReadingListTag> | null>(null);
+
+  active = Tabs.General;
 
   protected readonly Tabs = Tabs;
 
   ngOnInit(): void {
-    this.reviewGroup = new FormGroup({
-      title: new FormControl(this.readingList.title, { nonNullable: true, validators: [Validators.required] }),
-      summary: new FormControl(this.readingList.summary, { nonNullable: true, validators: [] }),
-      promoted: new FormControl(this.readingList.promoted, { nonNullable: true, validators: [] }),
-      startingMonth: new FormControl(this.readingList.startingMonth, { nonNullable: true, validators: [Validators.min(1), Validators.max(12)] }),
-      startingYear: new FormControl(this.readingList.startingYear, { nonNullable: true, validators: [Validators.min(1000)] }),
-      endingMonth: new FormControl(this.readingList.endingMonth, { nonNullable: true, validators: [Validators.min(1), Validators.max(12)] }),
-      endingYear: new FormControl(this.readingList.endingYear, { nonNullable: true, validators: [Validators.min(1000)] }),
-      tags: new FormControl(this.readingList.tags, { nonNullable: true, validators: [] })
+    const readingList = this.readingList();
+
+    this.formModel.set({
+      title: readingList.title,
+      summary: readingList.summary,
+      promoted: readingList.promoted,
+      startingMonth: readingList.startingMonth,
+      startingYear: readingList.startingYear,
+      endingMonth: readingList.endingMonth,
+      endingYear: readingList.endingYear,
+      tags: readingList.tags.map(t => t.title)
     });
 
-    this.coverImageLocked = this.readingList.coverImageLocked;
-    this.tags = this.readingList.tags;
-    this.chooserConfig.set(this.coverChooserConfigFactory.forReadingList(this.readingList));
 
-    this.reviewGroup.get('title')?.valueChanges.pipe(
-      debounceTime(100),
-      distinctUntilChanged(),
-      switchMap(name => this.readingListService.nameExists(name)),
-      tap(exists => {
-        const isExistingName = this.reviewGroup.get('title')?.value === this.readingList.title;
-        if (!exists || isExistingName) {
-          this.reviewGroup.get('title')?.setErrors(null);
-        } else {
-          this.reviewGroup.get('title')?.setErrors({duplicateName: true})
-        }
-        this.cdRef.markForCheck();
-      }),
-      takeUntilDestroyed(this.destroyRef)
-      ).subscribe();
-
-    this.tagsSettings.set(this.typeaheadSettingsFactory.forReadingListTag({id: 'tags', savedData: this.readingList.tags ?? []}));
+    this.coverImageLocked.set(readingList.coverImageLocked);
+    this.chooserConfig.set(this.coverChooserConfigFactory.forReadingList(this.readingList()));
+    this.tagsSettings.set(this.typeaheadSettingsFactory.forReadingListTag({id: 'tags', savedData: this.readingList().tags ?? []}));
   }
 
   close() {
-    if (this.coverImageReset) {
-      this.ngModal.close(modalSaved(this.readingList, true));
+    if (this.coverImageReset()) {
+      this.ngModal.close(modalSaved(this.readingList(), true));
     } else {
       this.ngModal.dismiss();
     }
   }
 
   save() {
-    if (this.reviewGroup.value.title.trim() === '') return;
+    if (this.formGroup().invalid()) return;
 
     let updatedRL: ReadingList | null = null;
 
-    const model = {...this.reviewGroup.value, readingListId: this.readingList.id, coverImageLocked: this.coverImageLocked};
-    model.startingMonth = model.startingMonth || 0;
-    model.startingYear = model.startingYear || 0;
-    model.endingMonth = model.endingMonth || 0;
-    model.endingYear = model.endingYear || 0;
-    model.tags = this.tags.map(t => t.title);
+    const model = {...this.formModel(), readingListId: this.readingList().id, coverImageLocked: this.coverImageLocked()};
 
-    const apis: Observable<any>[] = [this.readingListService.update(model).pipe(
+    const apis: Observable<unknown>[] = [this.readingListService.update(model).pipe(
       tap(result => updatedRL = result)
     )];
 
-    if (this.coverImageDirty) {
-      apis.push(this.uploadService.updateReadingListCoverImage(this.readingList.id, this.selectedCover));
+    if (this.coverImageDirty()) {
+      apis.push(this.uploadService.updateReadingListCoverImage(this.readingList().id, this.selectedCover()));
     }
 
     concat(...apis).pipe(
       delay(10),
       last()
     ).subscribe(() => {
-      this.ngModal.close(modalSaved(updatedRL, this.coverImageDirty));
+      this.ngModal.close(modalSaved(updatedRL, this.coverImageDirty()));
       this.toastr.success(translate('toasts.reading-list-updated'));
     });
   }
 
   handleCoverChanged(event: { isDirty: boolean; fileName: string }) {
-    this.coverImageDirty = event.isDirty;
-    this.selectedCover = event.fileName;
-    this.cdRef.markForCheck();
+    this.coverImageDirty.set(event.isDirty);
+    this.selectedCover.set(event.fileName);
   }
 
   handleReset() {
-    this.coverImageReset = true;
-    this.coverImageLocked = false;
+    this.coverImageReset.set(true);
+    this.coverImageLocked.set(false);
     this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
   }
 
   updateTags(tags: ReadingListTag[]) {
-    this.tags = tags;
-    this.readingList.tags = tags;
+    this.formGroup.tags().value.set(tags.map(t => t.title));
   }
 
 }

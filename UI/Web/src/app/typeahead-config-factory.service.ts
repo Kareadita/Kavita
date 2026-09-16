@@ -272,8 +272,12 @@ export class TypeaheadConfigFactoryService {
     settings.compareFnForAdd = (options: ReadingListTag[], filter: string) => {
       return options.filter(m => this.utilityService.filterMatches(m.title, filter));
     };
+
+    const tags$ = this.metadataService.getAllReadingListTags().pipe(
+      shareReplay({ refCount: true, bufferSize: 1 })
+    );
+
     settings.fetchFn = (filter: string) => {
-      const tags$ = this.metadataService.getAllReadingListTags();
       return tags$.pipe(map(items => settings.compareFn(items, filter)));
     };
     settings.addTransformFn = ((title: string) => {

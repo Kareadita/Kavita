@@ -123,7 +123,7 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
     /// </summary>
     /// <returns></returns>
     [HttpGet("readinglist-tags")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Minute)]
     public async Task<ActionResult<IList<ReadingListTagDto>>> GetAllReadingListTags()
     {
         return Ok(await unitOfWork.ReadingListRepository.GetAllReadingListTagDtosAsync(UserId, HttpContext.RequestAborted));
