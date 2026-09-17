@@ -2,12 +2,6 @@
 
 .image-container {
     height: calc(100vh); // override as on single, we -34px for the potential scrollbar
-    
-    #image-1 {
-        &.double {
-            margin: 0 0 0 auto;
-        }
-    }
 }
 
 .image-container.full-height {
@@ -19,14 +13,6 @@
     margin: 0 auto;
     vertical-align: top;
     max-width: fit-content;
-
-    &.double {
-        width: 50%;
-
-        &.cover {
-            width: 100%;
-        }
-    }
 }
 
 .center-double {

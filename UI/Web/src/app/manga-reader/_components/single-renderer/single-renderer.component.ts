@@ -10,7 +10,6 @@ import {
   Injector,
   Input,
   OnInit,
-  output,
   Signal,
   viewChild
 } from '@angular/core';
@@ -50,7 +49,6 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
 
   readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
-  readonly imageHeight = output<number>();
   private readonly destroyRef = inject(DestroyRef);
 
   imageFitClass$!: Observable<string>;
@@ -58,7 +56,6 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
   showClickOverlayClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
   darkness$: Observable<string> = of('brightness(100%)');
-  emulateBookClass$!: Observable<string>;
   currentImage!: HTMLImageElement;
   layoutMode: LayoutMode = LayoutMode.Single;
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
@@ -95,14 +92,6 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
 
       return 'book-shadow';
     });
-
-
-    this.emulateBookClass$ = this.readerSettings$.pipe(
-      map(data => data.emulateBook),
-      map(enabled => enabled ? 'book-shadow' : ''),
-      filter(_ => this.isValid()),
-      takeUntilDestroyed(this.destroyRef)
-    );
 
     this.imageContainerHeight$ = this.image$.pipe(
       filter(_ => this.isValid()),
@@ -176,19 +165,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
   private calculateImageContainerHeight$(): Observable<string> {
     return this.readerSettings$.pipe(
       map(values => values.fitting),
-      map(mode => {
-        if (mode !== FITTING_OPTION.HEIGHT) return '';
-
-        const readingArea = this.document.querySelector('.reading-area');
-        if (!readingArea) return 'calc(100dvh)';
-
-        // If you ever see fit to height and a bit of scrollbar, it's due to currentImage not being ready on first load
-        if (this.currentImage?.width - readingArea.scrollWidth > 0) {
-          // we also need to check if this is FF or Chrome. FF doesn't require the -34px as it doesn't render a scrollbar
-          return 'calc(100dvh)';
-        }
-        return 'calc(100dvh)';
-      }),
+      map(mode => mode === FITTING_OPTION.HEIGHT ? 'calc(100dvh)' : ''),
       filter(_ => this.isValid())
     );
   }
@@ -203,15 +180,8 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
 
     this.currentImage = img[0];
     this.cdRef.markForCheck();
-    this.imageHeight.emit(this.currentImage.height);
   }
 
-  shouldMovePrev(): boolean {
-    return true;
-  }
-  shouldMoveNext(): boolean {
-    return true;
-  }
   getPageAmount(direction: PAGING_DIRECTION): number {
     if (!this.isValid() || this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return 0;
     return 1;

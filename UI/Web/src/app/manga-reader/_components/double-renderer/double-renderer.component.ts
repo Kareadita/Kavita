@@ -8,7 +8,6 @@ import {
   inject,
   Input,
   OnInit,
-  output,
   viewChild
 } from '@angular/core';
 import {combineLatest, filter, map, Observable, of, shareReplay, tap} from 'rxjs';
@@ -19,7 +18,6 @@ import {DEBUG_MODES, ImageRenderer} from '../../_models/renderer';
 import {MangaReaderService} from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
-import {ReaderService} from "../../../_services/reader.service";
 import {PageSplitOption} from "../../../_models/preferences/page-split-option";
 import {ReaderMode} from "../../../_models/preferences/reader-mode";
 
@@ -37,18 +35,15 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
   private readonly cdRef = inject(ChangeDetectorRef);
   mangaReaderService = inject(MangaReaderService);
   private document = inject<Document>(DOCUMENT);
-  readerService = inject(ReaderService);
 
   readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
 
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
-  @Input({required: true}) image$!: Observable<HTMLImageElement | null>;
   @Input({required: true}) bookmark$!: Observable<number>;
   @Input({required: true}) showClickOverlay$!: Observable<boolean>;
   @Input({required: true}) pageNum$!: Observable<{pageNum: number, maxPages: number}>;
   @Input({required: true}) getPage!: (pageNum: number) => HTMLImageElement;
-  readonly imageHeight = output<number>();
   private readonly destroyRef = inject(DestroyRef);
 
   debugMode: DEBUG_MODES = DEBUG_MODES.None;
@@ -81,10 +76,6 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
    * @remarks This will always fail if the window's width is greater than the height
   */
   shouldRenderDouble$!: Observable<boolean>;
-
-
-  protected readonly ReaderMode = ReaderMode;
-  protected readonly LayoutMode = LayoutMode;
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
@@ -220,21 +211,12 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
 
     // First load, switching from double manga -> double, this is 0 and thus not rendering
     if (!this.shouldRenderDouble() && (this.currentImage.height || img[0].height) > 0) {
-      this.imageHeight.emit(this.currentImage.height || img[0].height);
       return;
     }
 
     this.cdRef.markForCheck();
-    this.imageHeight.emit(Math.max(this.currentImage.height, this.currentImage2.height));
-    this.cdRef.markForCheck();
   }
 
-  shouldMovePrev(): boolean {
-    return true;
-  }
-  shouldMoveNext(): boolean {
-    return true;
-  }
   getPageAmount(direction: PAGING_DIRECTION): number {
     if (!this.isValid()) return 0;
 

@@ -8,7 +8,6 @@ import {
   inject,
   Input,
   OnInit,
-  output,
   viewChild
 } from '@angular/core';
 import {filter, map, Observable, of, tap} from 'rxjs';
@@ -47,9 +46,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
   @Input({required: true}) image$!: Observable<HTMLImageElement | null>;
   @Input({required: true}) bookmark$!: Observable<number>;
   @Input({required: true}) showClickOverlay$!: Observable<boolean>;
-  @Input() imageFit$!: Observable<FITTING_OPTION>;
-  readonly imageHeight = output<number>();
-
 
   readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('content');
   private ctx!: CanvasRenderingContext2D;
@@ -290,7 +286,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
       canvas.nativeElement.width = this.canvasImage.width;
       canvas.nativeElement.height = this.canvasImage.height;
     }
-    this.imageHeight.emit(canvas.nativeElement.height);
     this.cdRef.markForCheck();
   }
 

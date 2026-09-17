@@ -95,22 +95,19 @@
                                [showClickOverlay$]="showClickOverlay$"
                                [readingProfile]="readingProfile()!" />
 
-          <app-double-renderer [image$]="currentImage$"
-                               [readerSettings$]="readerSettings$"
+          <app-double-renderer [readerSettings$]="readerSettings$"
                                [bookmark$]="showBookmarkEffect$"
                                [showClickOverlay$]="showClickOverlay$"
                                [pageNum$]="pageNum$"
                                [getPage]="getPageFn" />
 
-          <app-double-reverse-renderer [image$]="currentImage$"
-                                       [readerSettings$]="readerSettings$"
+          <app-double-reverse-renderer [readerSettings$]="readerSettings$"
                                        [bookmark$]="showBookmarkEffect$"
                                        [showClickOverlay$]="showClickOverlay$"
                                        [pageNum$]="pageNum$"
                                        [getPage]="getPageFn" />
 
-          <app-double-no-cover-renderer [image$]="currentImage$"
-                                        [readerSettings$]="readerSettings$"
+          <app-double-no-cover-renderer [readerSettings$]="readerSettings$"
                                         [bookmark$]="showBookmarkEffect$"
                                         [showClickOverlay$]="showClickOverlay$"
                                         [pageNum$]="pageNum$"

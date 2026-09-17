@@ -8,19 +8,17 @@ import {
   inject,
   Input,
   OnInit,
-  output,
   viewChild
 } from '@angular/core';
 import {combineLatest, filter, map, Observable, of, shareReplay, tap} from 'rxjs';
 import {LayoutMode} from '../../_models/layout-mode';
 import {FITTING_OPTION, PAGING_DIRECTION} from '../../_models/reader-enums';
 import {ReaderSetting} from '../../_models/reader-setting';
-import {DEBUG_MODES} from '../../_models/renderer';
+import {DEBUG_MODES, ImageRenderer} from '../../_models/renderer';
 import {MangaReaderService} from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
 import {ReaderMode} from "../../../_models/preferences/reader-mode";
-import {ReaderService} from "../../../_services/reader.service";
 import {PageSplitOption} from "../../../_models/preferences/page-split-option";
 
 /**
@@ -33,21 +31,18 @@ import {PageSplitOption} from "../../../_models/preferences/page-split-option";
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgClass, AsyncPipe, SafeStylePipe]
 })
-export class DoubleNoCoverRendererComponent implements OnInit {
+export class DoubleNoCoverRendererComponent implements OnInit, ImageRenderer {
   private readonly cdRef = inject(ChangeDetectorRef);
   mangaReaderService = inject(MangaReaderService);
   private document = inject<Document>(DOCUMENT);
-  readerService = inject(ReaderService);
 
   readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
-  @Input({required: true}) image$!: Observable<HTMLImageElement | null>;
   @Input({required: true}) bookmark$!: Observable<number>;
   @Input({required: true}) showClickOverlay$!: Observable<boolean>;
   @Input({required: true}) pageNum$!: Observable<{pageNum: number, maxPages: number}>;
   @Input({required: true}) getPage!: (pageNum: number) => HTMLImageElement;
-  readonly imageHeight = output<number>();
   private readonly destroyRef = inject(DestroyRef);
 
   debugMode: DEBUG_MODES = DEBUG_MODES.None;
@@ -80,11 +75,6 @@ export class DoubleNoCoverRendererComponent implements OnInit {
    * @remarks This will always fail if the window's width is greater than the height
   */
   shouldRenderDouble$!: Observable<boolean>;
-
-
-  get ReaderMode() {return ReaderMode;}
-  get FITTING_OPTION() {return FITTING_OPTION;}
-  get LayoutMode() {return LayoutMode;}
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
@@ -218,21 +208,12 @@ export class DoubleNoCoverRendererComponent implements OnInit {
 
     // First load, switching from double manga -> double, this is 0 and thus not rendering
     if (!this.shouldRenderDouble() && (this.currentImage.height || img[0].height) > 0) {
-      this.imageHeight.emit(this.currentImage.height || img[0].height);
       return;
     }
 
     this.cdRef.markForCheck();
-    this.imageHeight.emit(Math.max(this.currentImage.height, this.currentImage2.height));
-    this.cdRef.markForCheck();
   }
 
-  shouldMovePrev(): boolean {
-    return true;
-  }
-  shouldMoveNext(): boolean {
-    return true;
-  }
   getPageAmount(direction: PAGING_DIRECTION): number {
     if (!this.isValid()) return 0;
 

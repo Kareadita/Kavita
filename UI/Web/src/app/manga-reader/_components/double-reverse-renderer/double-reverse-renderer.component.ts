@@ -8,7 +8,6 @@ import {
   inject,
   Input,
   OnInit,
-  output,
   viewChild
 } from '@angular/core';
 import {combineLatest, filter, map, Observable, of, shareReplay, tap} from 'rxjs';
@@ -19,7 +18,6 @@ import {DEBUG_MODES, ImageRenderer} from '../../_models/renderer';
 import {MangaReaderService} from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
-import {ReaderService} from "../../../_services/reader.service";
 import {PageSplitOption} from "../../../_models/preferences/page-split-option";
 import {ReaderMode} from "../../../_models/preferences/reader-mode";
 
@@ -38,17 +36,14 @@ export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
   private readonly cdRef = inject(ChangeDetectorRef);
   mangaReaderService = inject(MangaReaderService);
   private document = inject<Document>(DOCUMENT);
-  readerService = inject(ReaderService);
 
   readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
-  @Input({required: true}) image$!: Observable<HTMLImageElement | null>;
   @Input({required: true}) bookmark$!: Observable<number>;
   @Input({required: true}) showClickOverlay$!: Observable<boolean>;
   @Input({required: true}) pageNum$!: Observable<{pageNum: number, maxPages: number}>;
   @Input({required: true}) getPage!: (pageNum: number) => HTMLImageElement;
-  readonly imageHeight = output<number>();
   private readonly destroyRef = inject(DestroyRef);
 
   debugMode: DEBUG_MODES = DEBUG_MODES.None;
@@ -82,10 +77,6 @@ export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
    * @remarks This will always fail if the window's width is greater than the height
   */
   shouldRenderDouble$!: Observable<boolean>;
-
-  get ReaderMode() {return ReaderMode;}
-  get FITTING_OPTION() {return FITTING_OPTION;}
-  get LayoutMode() {return LayoutMode;}
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
@@ -122,6 +113,8 @@ export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
 
         this.leftImage = this.getPage(this.pageNum);
         this.rightImage = this.getPage(this.pageNum + 1);
+
+        this.cdRef.markForCheck();
       }),
       filter(_ => this.isValid()),
     ).subscribe(() => {});
@@ -217,16 +210,9 @@ export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
     if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.isValid()) return;
 
-    this.imageHeight.emit(Math.max(this.leftImage.height, this.rightImage.height));
     this.cdRef.markForCheck();
   }
 
-  shouldMovePrev(): boolean {
-    return true;
-  }
-  shouldMoveNext(): boolean {
-    return true;
-  }
   getPageAmount(direction: PAGING_DIRECTION): number {
     if (this.layoutMode !== LayoutMode.DoubleReversed) return 0;
 
