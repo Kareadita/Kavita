@@ -246,8 +246,8 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.library() === undefined) {
-      this.isAddLibrary.set(true);
+    if (this.library() !== undefined) {
+      this.isAddLibrary.set(false);
     }
 
     this.chooserConfig.set(this.coverChooserConfigFactory.forLibrary(this.library()));
