@@ -361,9 +361,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   firstLoad: boolean = true;
 
   /**
-   * Injects information to help debug issues
+   * Injects information to help debug issues. Change the boolean to true to enable
+   * NOTE: Enabling this causes ExpressionChangedAfterItHasBeenCheckedError errors on paging (scroll)
    */
-  debugMode = signal<boolean>(!environment.production && true);
+  debugMode = signal<boolean>(!environment.production && false);
 
   /**
    * Will be set to true if this.scroll(...) is called but the actual scroll is still delayed
