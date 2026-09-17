@@ -54,7 +54,7 @@
          ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
          [ngStyle]="{'background-color': backgroundColor(), 'height': isReaderModeWebtoon() ? 'inherit' : '100dvh'}" #readingArea>
       @if (readerMode() !== ReaderMode.Webtoon) {
-        <div appDblClick (dblclick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
+        <div appDblClick (doubleClick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
           <app-canvas-renderer [readerSettings$]="readerSettings$"
             [image$]="currentImage$"
             [bookmark$]="showBookmarkEffect$"
