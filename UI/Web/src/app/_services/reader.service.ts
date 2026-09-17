@@ -351,6 +351,18 @@ export class ReaderService {
     return false;
   }
 
+  setFullscreen(fullscreen: boolean) {
+    if (!screenfull.isEnabled) return;
+
+    if (fullscreen && !screenfull.isFullscreen) {
+      screenfull.toggle().catch(console.error);
+      return;
+    }
+    if (!fullscreen && screenfull.isFullscreen) {
+      screenfull.toggle().catch(console.error);
+    }
+  }
+
   exitFullscreen() {
     if (screenfull.isEnabled) {
       screenfull.exit();

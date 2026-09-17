@@ -304,8 +304,9 @@ export class EpubReaderSettingsService {
   }
 
   updateFullscreen(value: boolean) {
-    this._isFullscreen.set(value);
     if (!this._isInitialized()) return;
+
+    this._isFullscreen.set(value);
   }
 
   updateImmersiveMode(value: boolean): void {
