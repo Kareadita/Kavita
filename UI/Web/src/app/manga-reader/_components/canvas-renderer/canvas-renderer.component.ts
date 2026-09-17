@@ -35,7 +35,7 @@ const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRigh
 })
 export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRenderer {
 
-  protected readonly isSafari = isSafari;
+
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -278,4 +278,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
   getBookmarkPageCount(): number {
     return 1;
   }
+
+  protected readonly isSafari = isSafari;
 }

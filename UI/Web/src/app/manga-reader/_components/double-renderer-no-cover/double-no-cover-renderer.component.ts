@@ -50,7 +50,7 @@ export class DoubleNoCoverRendererComponent implements OnInit {
   readonly imageHeight = output<number>();
   private readonly destroyRef = inject(DestroyRef);
 
-  debugMode: DEBUG_MODES = DEBUG_MODES.Logs;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;
   imageFitClass$!: Observable<string>;
   showClickOverlayClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
