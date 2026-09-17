@@ -132,6 +132,14 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
       map(showOverlay => showOverlay ? 'blur' : ''),
       takeUntilDestroyed(this.destroyRef)
     );
+
+    // This is needed in case the reader loads on the canvas renderer and first render has a width of 0 from image not loading fully
+    this.image$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      filter(img => img !== null && img === this.canvasImage),
+      filter(() => this.renderWithCanvas && this.currentImageSplitPart !== SPLIT_PAGE_PART.NO_SPLIT),
+      tap(() => this.drawSplitPage())
+    ).subscribe(() => {});
   }
 
   ngAfterViewInit() {
@@ -217,16 +225,27 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
     this.renderWithCanvas = true;
     if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
 
+    this.drawSplitPage();
+  }
+
+  /**
+   * Paints the half of canvasImage that currentImageSplitPart already points at. This only draws, so it
+   * is safe to call again when the image finishes loading, unlike renderPage which advances the split part.
+   */
+  private drawSplitPage() {
+    const canvas = this.canvas();
+    if (this.canvasImage === null || !this.ctx || !canvas) return;
+    // Nothing to paint from yet; the image$ subscription redraws once it has loaded
+    if (this.canvasImage.width === 0 || this.canvasImage.height === 0) return;
+
     this.setCanvasSize();
 
-    if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
+    if (this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
       canvas.nativeElement.width = this.canvasImage.width / 2;
       this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
-      this.cdRef.markForCheck();
-    } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
+    } else if (this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
       canvas.nativeElement.width = this.canvasImage.width / 2;
       this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
-      this.cdRef.markForCheck();
     }
 
     this.cdRef.markForCheck();
