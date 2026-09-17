@@ -415,12 +415,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    /**
    * An event emitter when a bookmark on a page change occurs. Used solely by the webtoon reader.
    */
-  showBookmarkEffectEvent: ReplaySubject<number> = new ReplaySubject<number>();
+  showBookmarkEffectEvent: ReplaySubject<number> = new ReplaySubject<number>(1);
   showBookmarkEffect$: Observable<number> = this.showBookmarkEffectEvent.asObservable();
    /**
    * An event emitter when fullscreen mode is toggled. Used solely by the webtoon reader.
    */
-  fullscreenEvent: ReplaySubject<boolean> = new ReplaySubject<boolean>();
+  fullscreenEvent: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
   /**
    * If the menu is open/visible.
    */
@@ -469,7 +469,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * If the click overlay is rendered on screen
    */
   showClickOverlay = signal<boolean>(false);
-  private showClickOverlaySubject: ReplaySubject<boolean> = new ReplaySubject();
+  private showClickOverlaySubject: ReplaySubject<boolean> = new ReplaySubject(1);
   showClickOverlay$ = this.showClickOverlaySubject.asObservable();
   /**
    * Next Chapter ID. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
@@ -615,7 +615,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     shareReplay({refCount: true, bufferSize: 2})
   );
 
-  private pageNumSubject: Subject<{pageNum: number, maxPages: number}> = new ReplaySubject();
+  private pageNumSubject: Subject<{pageNum: number, maxPages: number}> = new ReplaySubject(1);
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
 
   getPageUrl = (pageNum: number, chapterId: number = this.chapterId()) => {

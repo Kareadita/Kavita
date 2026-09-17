@@ -121,6 +121,7 @@ export class DoubleNoCoverRendererComponent implements OnInit, ImageRenderer {
       takeUntilDestroyed(this.destroyRef),
       map((_) => this.shouldRenderDouble()),
       filter(_ => this.isValid()),
+      shareReplay({refCount: true, bufferSize: 1})
     );
 
     this.imageFitClass$ = this.readerSettings$.pipe(

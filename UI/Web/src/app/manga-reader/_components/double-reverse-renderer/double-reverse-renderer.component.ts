@@ -261,11 +261,6 @@ export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
           return 1;
         }
 
-        if (this.mangaReaderService.isWidePage(this.pageNum) && (!this.mangaReaderService.isWidePage(this.pageNum - 4))) {
-          this.debugLog('Moving back 1 page as left page is wide');
-          return 1;
-        }
-
         if (this.mangaReaderService.isWidePage(this.pageNum - 1)) {
           this.debugLog('Moving back 1 page as prev page is wide');
           return 1;
@@ -277,7 +272,7 @@ export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
         }
 
         if (this.mangaReaderService.isWidePage(this.pageNum + 2)) {
-          this.debugLog('Moving back 2 page as 2 pages back is wide');
+          this.debugLog('Moving back 1 page as 2 pages forward is wide');
           return 1;
         }
         // Not sure about this condition on moving backwards
