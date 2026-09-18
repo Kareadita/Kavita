@@ -4,8 +4,9 @@ import {
   inject,
   isDevMode,
   provideAppInitializer,
+  provideBrowserGlobalErrorListeners,
   provideCheckNoChangesConfig,
-  provideZoneChangeDetection,
+  provideZonelessChangeDetection,
 } from '@angular/core';
 import {routes} from './app/app-routing.module';
 import {bootstrapApplication, BrowserModule, Title} from '@angular/platform-browser';
@@ -200,7 +201,8 @@ bootstrapApplication(AppComponent, {
         },
         provideHttpClient(withInterceptors([jwtInterceptor, errorInterceptor, clientInfoInterceptor])),
         provideAppInitializer(() => bootstrapUser()),
-        provideZoneChangeDetection(),
+        provideZonelessChangeDetection(),
+        provideBrowserGlobalErrorListeners(),
         {
           provide: NgbModalConfig,
           useFactory: () => Object.assign(new NgbModalConfig(), DefaultModalOptions) satisfies Partial<NgbModalConfig>

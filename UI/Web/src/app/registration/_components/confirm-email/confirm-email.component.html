@@ -3,11 +3,11 @@
     <ng-container title><h2>{{t('title')}}</h2></ng-container>
     <ng-container body>
       <p>{{t('description')}}</p>
-      @if (errors.length > 0) {
+      @if (errors().length > 0) {
         <div class="text-danger">
           <p>{{t('error-label')}}</p>
           <div class="mb-2">
-            @for (error of errors; track error) {
+            @for (error of errors(); track error) {
               <div>{{error}}</div>
             }
           </div>

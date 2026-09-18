@@ -47,7 +47,7 @@ export class ConfirmEmailComponent implements OnDestroy {
   /**
    * Validation errors from API
    */
-  errors: Array<string> = [];
+  errors = signal<string[]>([]);
 
 
   constructor() {
@@ -83,7 +83,7 @@ export class ConfirmEmailComponent implements OnDestroy {
     this.accountService.confirmEmail(this.formModel()).pipe(
       catchError(err => {
         console.error('Error from Confirming Email: ', err);
-        this.errors = err;
+        this.errors.set([...err]);
         return EMPTY;
       }),
       tap(() => {
