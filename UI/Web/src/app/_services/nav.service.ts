@@ -49,7 +49,7 @@ export class NavService {
 
   private readonly renderer: Renderer2;
   private readonly baseUrl = environment.apiUrl;
-  public localStorageSideNavKey = 'kavita--sidenav--expanded';
+  public readonly localStorageSideNavKey = 'kavita--sidenav--expanded';
 
   // TODO:This is globally accessed, refactor so it doesn't show as unused
   public readonly navItems: NavItem[] = [
