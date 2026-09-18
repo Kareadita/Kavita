@@ -25,10 +25,9 @@
     @if (fullyLoaded() && filterV2) {
       <div class="filter-section mx-auto pb-3">
         <div class="row justify-content-center g-0">
-          <app-metadata-builder [filter]="filterV2"
+          <app-metadata-builder [(filter)]="filterV2"
                                 [entityType]="filterSettings().type"
-                                [statementLimit]="filterSettings().statementLimit"
-                                (update)="handleFilters($event)" />
+                                [statementLimit]="filterSettings().statementLimit" />
         </div>
         <form [formRoot]="formGroup" class="container-fluid">
           <div class="row mb-3">
@@ -82,7 +81,7 @@
     </div>
     <div class="col-12 col-md-2 mt-2 mt-md-4 pt-md-2">
       <div class="d-flex gap-2"> <!-- TODO: How can we make this wider (col-12, old behv) if no extra buttons are present -->
-        <button class="btn btn-primary flex-fill" (click)="save()" [disabled]="filterSettings().saveDisabled || !this.formGroup.name().value()">
+        <button class="btn btn-primary flex-fill" (click)="save()" [disabled]="isSaveDisabled()">
           <i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>
           {{t('save')}}
         </button>

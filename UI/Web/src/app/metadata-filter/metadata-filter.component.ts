@@ -88,6 +88,9 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
     disabled(p.sortField, {when: ({valueOf}) => this.filterSettings().sortDisabled});
   });
 
+  isSaveDisabled = computed(() => {
+    return this.filterSettings().saveDisabled || !this.formGroup.name().value();
+  })
    /**
    * Controls the visibility of extended controls that sit below the main header.
    */
@@ -174,11 +177,6 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
 
     return clonedObj;
   }
-
-  handleFilters(filter: FilterV2<TFilter, TSort>) {
-    this.filterV2 = filter;
-  }
-
 
   loadFromPresetsAndSetup() {
     this.fullyLoaded.set(false);
