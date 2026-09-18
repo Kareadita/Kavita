@@ -51,7 +51,8 @@ export class NavService {
   private readonly baseUrl = environment.apiUrl;
   public localStorageSideNavKey = 'kavita--sidenav--expanded';
 
-  public navItems: NavItem[] = [
+  // TODO:This is globally accessed, refactor so it doesn't show as unused
+  public readonly navItems: NavItem[] = [
     {
       transLocoKey: 'all-filters',
       routerLink: '/all-filters/',

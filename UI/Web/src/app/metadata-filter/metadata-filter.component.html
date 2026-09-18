@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix: 'metadata-filter'">
-  @if (toggleService.toggleState$ | async; as isOpen) {
+  @if (toggleService.toggleState(); as isOpen) {
     @if (breakpointService.isTabletOrAbove()) {
       <div class="filter-animate-wrapper" animate.enter="filter-enter" animate.leave="filter-leave">
         <div class="filter-animate-inner">
@@ -22,7 +22,7 @@
   }
 
   <ng-template #filterSection let-isOpen="isOpen">
-    @if (fullyLoaded && filterV2) {
+    @if (fullyLoaded() && filterV2) {
       <div class="filter-section mx-auto pb-3">
         <div class="row justify-content-center g-0">
           <app-metadata-builder [filter]="filterV2"
@@ -49,7 +49,7 @@
             </div>
 
             @if (filterSettings().supportsSmartFilter) {
-              <div class="col-md-4 col-sm-12" [ngClass]="{'mt-3': breakpointService.isMobileOrBelow()}">
+              <div class="col-md-4 col-sm-12" [class.mt-3]="breakpointService.isMobileOrBelow()">
                 <label for="filter-name" class="form-label">{{t('filter-name-label')}}</label>
                 <input id="filter-name" type="text" class="form-control" [formField]="formGroup.name" style="height: 2.375rem;">
               </div>

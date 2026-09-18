@@ -16,7 +16,6 @@ import {
   Signal,
   TemplateRef
 } from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
 import {UtilityService} from '../shared/_services/utility.service';
 import {Library} from '../_models/library/library';
@@ -25,7 +24,7 @@ import {ToggleService} from '../_services/toggle.service';
 import {FilterV2} from '../_models/metadata/v2/filter-v2';
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {DrawerComponent} from '../shared/drawer/drawer.component';
-import {AsyncPipe, NgClass, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
 import {FilterService} from "../_services/filter.service";
@@ -51,8 +50,8 @@ interface FormModel {
   styleUrls: ['./metadata-filter.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet, DrawerComponent,
-    ReactiveFormsModule, FormsModule, AsyncPipe, TranslocoModule,
-    MetadataBuilderComponent, NgClass, SortButtonComponent, FormRoot, FormField, SettingSelectComponent, SortFieldPipe]
+    TranslocoModule, MetadataBuilderComponent, SortButtonComponent,
+    FormRoot, FormField, SettingSelectComponent, SortFieldPipe]
 })
 export class MetadataFilterComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
@@ -99,7 +98,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
   isAscendingSort = signal(true);
   updateApplied: number = 0;
 
-  fullyLoaded: boolean = false;
+  fullyLoaded = signal(false);
   filterV2: FilterV2<TFilter, TSort> | undefined;
   sortFieldOptions: Signal<number[]> = computed(() => []);
   filterFieldOptions: Signal<{title: string, value: number}[]> = computed(() => []);
@@ -182,7 +181,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
 
 
   loadFromPresetsAndSetup() {
-    this.fullyLoaded = false;
+    this.fullyLoaded.set(false);
 
     const currentFilterSettings = this.filterSettings();
     this.filterV2 = this.deepClone(currentFilterSettings.presetsV2);
@@ -216,7 +215,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
     //   this.cdRef.markForCheck();
     // });
 
-    this.fullyLoaded = true;
+    this.fullyLoaded.set(true);
     this.apply();
   }
 
@@ -278,7 +277,6 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
 
   toggleSelected() {
     this.toggleService.toggle();
-    this.cdRef.markForCheck();
   }
 
   protected readonly Breakpoint = Breakpoint;
