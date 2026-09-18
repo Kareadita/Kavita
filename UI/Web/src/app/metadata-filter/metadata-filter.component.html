@@ -3,12 +3,12 @@
     @if (breakpointService.isTabletOrAbove()) {
       <div class="filter-animate-wrapper" animate.enter="filter-enter" animate.leave="filter-leave">
         <div class="filter-animate-inner">
-          <ng-container [ngTemplateOutlet]="filterSection" [ngTemplateOutletContext]="{isOpen: isOpen}" />
+          <ng-container [ngTemplateOutlet]="filterSection" />
         </div>
       </div>
     } @else {
       <div>
-        <app-drawer #commentDrawer="drawer" [isOpen]="isOpen" [options]="{topOffset: 75}" (drawerClosed)="toggleService.set(false)" [width]="600">
+        <app-drawer [isOpen]="isOpen" [options]="{topOffset: 75}" (drawerClosed)="toggleService.set(false)" [width]="600">
           <h5 header>
             {{t('filter-title')}}
           </h5>
@@ -21,11 +21,12 @@
     }
   }
 
-  <ng-template #filterSection let-isOpen="isOpen">
-    @if (fullyLoaded() && filterV2) {
+  <ng-template #filterSection>
+    @if (fullyLoaded() && filterV2(); as filter) {
       <div class="filter-section mx-auto pb-3">
         <div class="row justify-content-center g-0">
-          <app-metadata-builder [(filter)]="filterV2"
+          <app-metadata-builder [filter]="filter"
+                                (filterChange)="filterV2.set($event)"
                                 [entityType]="filterSettings().type"
                                 [statementLimit]="filterSettings().statementLimit" />
         </div>
@@ -57,7 +58,7 @@
             }
 
 
-            @if (breakpointService.activeBreakpoint() > Breakpoint.Tablet) {
+            @if (breakpointService.isDesktopOrAbove()) {
               <ng-container [ngTemplateOutlet]="buttons" />
             }
           </div>

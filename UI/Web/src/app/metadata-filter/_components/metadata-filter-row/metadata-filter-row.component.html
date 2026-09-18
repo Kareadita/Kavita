@@ -1,70 +1,67 @@
 <ng-container *transloco="let t; prefix: 'metadata-filter-row'">
-    <form [formGroup]="formGroup">
+    <form [formRoot]="formGroup">
         <div class="row g-0">
             <div class="col-md-3 me-2 col-10 mb-2">
-                <select class="form-select me-2" formControlName="input">
-                  @for (field of filterFieldOptions(); track field.value) {
-                    <option [value]="field.value">{{field.title}}</option>
-                  }
-                </select>
+                <app-setting-select [formField]="formGroup.input" [options]="filterFieldOptions()" extraClasses="me-2">
+                  <ng-template #template let-field>
+                    {{ field | genericFilterField: entityType() }}
+                  </ng-template>
+                </app-setting-select>
             </div>
 
             <div class="col-md-2 me-2 col-10 mb-2">
-                <select class="col-auto form-select" formControlName="comparison">
-                  @for(comparison of validComparisons$ | async; track comparison) {
-                    <option [value]="comparison">{{comparison | filterComparison}}</option>
-                  }
-                </select>
+                <app-setting-select [formField]="formGroup.comparison" [options]="validComparisons()" extraClasses="col-auto">
+                  <ng-template #template let-comparison>
+                    {{ comparison | filterComparison }}
+                  </ng-template>
+                </app-setting-select>
             </div>
 
             <div class="col-md-4 col-10 mb-2">
               @if (!isEmptySelected()) {
-                @if (predicateType$ | async; as predicateType) {
-                  @switch (predicateType) {
-                    @case (PredicateType.Text) {
-                      <input type="text" class="form-control  me-2" autocomplete="true" formControlName="filterValue">
-                    }
-                    @case (PredicateType.Number) {
-                      <input type="number" inputmode="numeric" class="form-control me-2" formControlName="filterValue" min="0">
-                    }
-                    @case (PredicateType.Boolean) {
-                      <input type="checkbox" class="form-check-input mt-2 me-2" style="font-size: 1.5rem" formControlName="filterValue">
-                    }
-                    @case (PredicateType.Date) {
-                      <div class="input-group">
-                        <input
-                          class="form-control"
-                          placeholder="yyyy-mm-dd"
-                          name="dp"
-                          formControlName="filterValue"
-                          (dateSelect)="onDateSelect($event)"
-                          (blur)="updateIfDateFilled()"
-                          ngbDatepicker
-                          #d="ngbDatepicker"
-                        />
-                        <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button">
-                          <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
-                        </button>
-                      </div>
-                    }
-                    @case (PredicateType.Dropdown) {
-                      @if (dropdownOptions$ | async; as opts) {
-                        <select2 [data]="opts"
-                                 formControlName="filterValue"
-                                 [hideSelectedItems]="true"
-                                 [multiple]="isMultiSelectDropdownAllowed()"
-                                 [infiniteScroll]="true"
-                                 [resettable]="true"
-                                 [templates]="template"
-                        >
-                          <ng-template #template let-label="label" let-color="color">
-                            {{label}}
-                            @if (color) {
-                              <i [ngStyle]="selectOptionStyle(color)" class="fas fa-circle"></i>
-                            }
-                          </ng-template>
-                        </select2>
-                      }
+                @switch (predicateType()) {
+                  @case (PredicateType.Text) {
+                    <input type="text" class="form-control  me-2" autocomplete="true" [formField]="formGroup.textValue">
+                  }
+                  @case (PredicateType.Number) {
+                    <input type="number" inputmode="numeric" class="form-control me-2" [formField]="formGroup.numberValue">
+                  }
+                  @case (PredicateType.Boolean) {
+                    <input type="checkbox" class="form-check-input mt-2 me-2" style="font-size: 1.5rem" [formField]="formGroup.booleanValue">
+                  }
+                  @case (PredicateType.Date) {
+                    <div class="input-group">
+                      <input
+                        class="form-control"
+                        placeholder="yyyy-mm-dd"
+                        [formField]="formGroup.dateValue"
+                        ngbDatepicker
+                        #d="ngbDatepicker"
+                      />
+                      <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button">
+                        <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  }
+                  @case (PredicateType.Dropdown) {
+                    @if (dropdownOptions(); as opts) {
+                      <!--Select2 does not work well with formField-->
+                      <select2 [data]="opts"
+                               [value]="formGroup.dropdownValue().value()"
+                               (update)="updateDropdownValue($event.value)"
+                               [hideSelectedItems]="true"
+                               [multiple]="isMultiSelectDropdownAllowed()"
+                               [infiniteScroll]="true"
+                               [resettable]="true"
+                               [templates]="template"
+                      >
+                        <ng-template #template let-label="label" let-color="color">
+                          {{label}}
+                          @if (color) {
+                            <i [ngStyle]="selectOptionStyle(color)" class="fas fa-circle"></i>
+                          }
+                        </ng-template>
+                      </select2>
                     }
                   }
                 }
