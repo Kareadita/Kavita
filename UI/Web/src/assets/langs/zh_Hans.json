@@ -2508,7 +2508,8 @@
         "people-header": "创作人员",
         "tags-header": "标签",
         "source-genre-tags-placeholder": "来源类型/标签",
-        "dest-genre-tags-placeholder": "目标类型/标签"
+        "dest-genre-tags-placeholder": "目标类型/标签",
+        "language-header": "语言"
     },
     "metadata-setting-field-pipe": {
         "covers": "封面",
@@ -2995,7 +2996,8 @@
         "add-auth-key": "新的",
         "description": "授权密钥就像密码一样。轮换密钥会使所有现有客户端失效。",
         "copy-key": "{{common.copy}}",
-        "clients-opds-error": "无法加载密钥的 OPDS URL: {{key}}"
+        "clients-opds-error": "无法加载密钥的 OPDS URL: {{key}}",
+        "no-data-description": "您还没有任何授权密钥。"
     },
     "create-auth-key": {
         "rotate-title": "轮换授权密钥",
@@ -3713,5 +3715,22 @@
         "checked-ago-label": "已于 {{time}} 前查看",
         "refresh-alt": "刷新提供商状态",
         "no-data-label": "无提供商状态数据可用"
+    },
+    "manage-kavitaplus-activity": {
+        "filter-all": "全部",
+        "filter-metadata": "元数据",
+        "yesterday": "昨天",
+        "today": "今天",
+        "filter-user-label": "用户",
+        "system": "系统"
+    },
+    "scrobble-account-card": {
+        "provider-connected": "已连接",
+        "provider-not-connected": "未连接",
+        "provider-settings": "设置"
+    },
+    "kavitaplus-timeline": {
+        "today": "今天",
+        "yesterday": "昨天"
     }
 }
