@@ -88,10 +88,6 @@ export class NavService {
    * If the top Nav bar is rendered or not
    */
   navbarVisibleSignal = this.navBarVisible.asReadonly();
-  /**
-   * If the top Nav bar is rendered or not
-   */
-  navbarVisible$ = toObservable(this.navBarVisible);
 
 
   private sideNavCollapsed = signal(false);
@@ -99,10 +95,6 @@ export class NavService {
    * If the Side Nav is in a collapsed state or not.
    */
   sideNavCollapsedSignal = this.sideNavCollapsed.asReadonly();
-  /**
-   * If the Side Nav is in a collapsed state or not.
-   */
-  sideNavCollapsed$ = toObservable(this.sideNavCollapsed);
 
   private sideNavVisibility = signal(false);
   /**
