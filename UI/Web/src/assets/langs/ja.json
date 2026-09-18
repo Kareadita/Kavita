@@ -2288,12 +2288,18 @@
     },
     "validation": {
         "required-field": "この項目は必須です",
-        "valid-email": "これは有効な電子メールでなければなりません",
+        "valid-email": "これは有効なメールアドレスである必要があります",
         "password-validation": "パスワードの長さは 6 文字以上 256 文字以下です",
         "year-validation": "これは 1000 を超える 4 桁の有効な年である必要があります",
         "invalid-uri": "指定された URI は無効です",
         "other-field-required": "{{other}} が設定されている場合は {{name}} が必要です",
-        "other-field-invalid": "有効性を確認できません。{{other}} は無効です"
+        "other-field-invalid": "有効性を確認できません。{{other}} は無効です",
+        "email-invalid": "これは有効なメールアドレスである必要があります",
+        "min-length": "{{requiredLength}} 文字以上である必要があります",
+        "min": "{{min}} より大きい値でなければなりません",
+        "max": "{{max}} 未満の値でなければなりません",
+        "invalid-amazon-code": "ASIN は B0 または BT で始まる必要があります",
+        "invalid-asin": "これは有効な ASIN ではありません"
     },
     "entity-type": {
         "volume": "巻",
