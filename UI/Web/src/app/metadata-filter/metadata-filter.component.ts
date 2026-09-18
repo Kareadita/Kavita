@@ -12,17 +12,18 @@ import {
   Input,
   OnInit,
   output,
+  signal,
   Signal,
   TemplateRef
 } from '@angular/core';
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
 import {UtilityService} from '../shared/_services/utility.service';
 import {Library} from '../_models/library/library';
 import {FilterEvent, FilterItem} from '../_models/metadata/series-filter';
 import {ToggleService} from '../_services/toggle.service';
 import {FilterV2} from '../_models/metadata/v2/filter-v2';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {DrawerComponent} from '../shared/drawer/drawer.component';
 import {AsyncPipe, NgClass, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
@@ -33,6 +34,15 @@ import {SortButtonComponent} from "../_single-module/sort-button/sort-button.com
 import {FilterSettingsBase} from "./filter-settings";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {Breakpoint, BreakpointService} from "../_services/breakpoint.service";
+import {disabled, form, FormField, FormRoot} from "@angular/forms/signals";
+import {SettingSelectComponent} from "../settings/_components/setting-enum-select/setting-select.component";
+import {SortFieldPipe} from "../_pipes/sort-field.pipe";
+
+interface FormModel {
+  sortField: number;
+  limitTo: number;
+  name: string;
+}
 
 
 @Component({
@@ -42,7 +52,7 @@ import {Breakpoint, BreakpointService} from "../_services/breakpoint.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet, DrawerComponent,
     ReactiveFormsModule, FormsModule, AsyncPipe, TranslocoModule,
-    MetadataBuilderComponent, NgClass, SortButtonComponent]
+    MetadataBuilderComponent, NgClass, SortButtonComponent, FormRoot, FormField, SettingSelectComponent, SortFieldPipe]
 })
 export class MetadataFilterComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
@@ -70,7 +80,14 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
    */
   readonly extraButtonsRef = contentChild.required<TemplateRef<any>>('extraButtons');
 
-
+  private readonly formModel = signal<FormModel>({
+    sortField: 0,
+    limitTo: 0,
+    name: ''
+  });
+  formGroup = form(this.formModel, p => {
+    disabled(p.sortField, {when: ({valueOf}) => this.filterSettings().sortDisabled});
+  });
 
    /**
    * Controls the visibility of extended controls that sit below the main header.
@@ -78,13 +95,13 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
   filteringCollapsed: boolean = true;
   libraries: Array<FilterItem<Library>> = [];
 
-  sortGroup!: FormGroup;
-  isAscendingSort: boolean = true;
+  //sortGroup!: FormGroup;
+  isAscendingSort = signal(true);
   updateApplied: number = 0;
 
   fullyLoaded: boolean = false;
   filterV2: FilterV2<TFilter, TSort> | undefined;
-  sortFieldOptions: Signal<{title: string, value: number}[]> = computed(() => []);
+  sortFieldOptions: Signal<number[]> = computed(() => []);
   filterFieldOptions: Signal<{title: string, value: number}[]> = computed(() => []);
 
   constructor() {
@@ -94,7 +111,12 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
         this.filterV2 = this.deepClone(settings.presetsV2);
         this.cdRef.markForCheck();
       }
-    })
+    });
+
+    toObservable(this.formModel).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.packData();
+    });
+
   }
 
 
@@ -114,7 +136,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
     });
 
     this.sortFieldOptions = computed(() => {
-      return this.filterUtilitiesService.getSortFields(this.filterSettings().type);
+      return this.filterUtilitiesService.getSortFields(this.filterSettings().type).map(t => t.value);
     });
 
 
@@ -165,52 +187,67 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
     const currentFilterSettings = this.filterSettings();
     this.filterV2 = this.deepClone(currentFilterSettings.presetsV2);
 
-    const defaultSortField = this.sortFieldOptions()[0].value;
+    const defaultSortField = this.sortFieldOptions()[0];
 
-    this.sortGroup = new FormGroup({
-      sortField: new FormControl({value: this.filterV2?.sortOptions?.sortField || defaultSortField, disabled: this.filterSettings().sortDisabled}, []),
-      limitTo: new FormControl(this.filterV2?.limitTo || 0, []),
-      name: new FormControl(this.filterV2?.name || '', [])
+    this.formModel.set({
+      sortField: this.filterV2?.sortOptions?.sortField || defaultSortField,
+      limitTo: this.filterV2?.limitTo || 0,
+      name: this.filterV2?.name || ''
     });
 
+
     if (this.filterSettings()?.presetsV2?.sortOptions) {
-      this.isAscendingSort = this.filterSettings()?.presetsV2?.sortOptions!.isAscending || true;
+      this.isAscendingSort.set(this.filterSettings()?.presetsV2?.sortOptions!.isAscending || true);
     }
 
     this.cdRef.markForCheck();
 
-    this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      if (this.filterV2?.sortOptions === null) {
-        this.filterV2.sortOptions = {
-          isAscending: this.isAscendingSort,
-          sortField: parseInt(this.sortGroup.get('sortField')?.value, 10) as TSort
-        };
-      }
-      this.filterV2!.sortOptions!.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10) as TSort;
-      this.filterV2!.limitTo = Math.max(parseInt(this.sortGroup.get('limitTo')?.value || '0', 10), 0);
-      this.filterV2!.name = this.sortGroup.get('name')?.value || '';
-      this.cdRef.markForCheck();
-    });
+
+    // this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+    //   if (this.filterV2?.sortOptions === null) {
+    //     this.filterV2.sortOptions = {
+    //       isAscending: this.isAscendingSort,
+    //       sortField: parseInt(this.sortGroup.get('sortField')?.value, 10) as TSort
+    //     };
+    //   }
+    //   this.filterV2!.sortOptions!.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10) as TSort;
+    //   this.filterV2!.limitTo = Math.max(parseInt(this.sortGroup.get('limitTo')?.value || '0', 10), 0);
+    //   this.filterV2!.name = this.sortGroup.get('name')?.value || '';
+    //   this.cdRef.markForCheck();
+    // });
 
     this.fullyLoaded = true;
     this.apply();
   }
 
+  private packData() {
+    const formData = this.formModel();
+    if (this.filterV2?.sortOptions === null) {
+      this.filterV2.sortOptions = {
+        isAscending: this.isAscendingSort(),
+        sortField: formData.sortField as TSort
+      };
+    }
+    this.filterV2!.sortOptions!.sortField = formData.sortField as TSort
+    this.filterV2!.limitTo = Math.max(parseInt(formData.limitTo + '' || '0', 10), 0);
+    this.filterV2!.name = formData.name || '';
+  }
+
 
   updateSortOrder(isAscending: boolean) {
     if (this.filterSettings().sortDisabled) return;
-    this.isAscendingSort = isAscending;
+    this.isAscendingSort.set(isAscending);
 
     if (this.filterV2?.sortOptions === null) {
-      const defaultSortField = this.sortFieldOptions()[0].value as TSort;
+      const defaultSortField = this.sortFieldOptions()[0] as TSort;
 
       this.filterV2.sortOptions = {
-        isAscending: this.isAscendingSort,
+        isAscending: this.isAscendingSort(),
         sortField: defaultSortField
       }
     }
 
-    this.filterV2!.sortOptions!.isAscending = this.isAscendingSort;
+    this.filterV2!.sortOptions!.isAscending = this.isAscendingSort();
     this.cdRef.markForCheck();
   }
 
@@ -232,7 +269,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
 
   save() {
     if (!this.filterV2) return;
-    this.filterV2.name = this.sortGroup.get('name')?.value;
+    this.filterV2.name = this.formModel().name;
     this.filterService.saveFilter(this.filterV2).subscribe(() => {
       this.toastr.success(translate('toasts.smart-filter-updated'));
       this.apply();

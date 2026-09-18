@@ -30,28 +30,28 @@
                                 [statementLimit]="filterSettings().statementLimit"
                                 (update)="handleFilters($event)" />
         </div>
-        <form [formGroup]="sortGroup" class="container-fluid">
+        <form [formRoot]="formGroup" class="container-fluid">
           <div class="row mb-3">
             <div class="col-md-2 col-sm-3">
               <div class="form-group pe-1">
                 <label for="limit-to" class="form-label">{{t('limit-label')}}</label>
-                <input id="limit-to" type="number" inputmode="numeric" class="form-control" formControlName="limitTo">
+                <input id="limit-to" type="number" inputmode="numeric" class="form-control" [formField]="formGroup.limitTo">
               </div>
             </div>
             <div class="col-md-3 col-sm-9">
               <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
-              <app-sort-button [disabled]="filterSettings().sortDisabled" (isAscendingChange)="updateSortOrder($event)" [isAscending]="isAscendingSort" />
-              <select id="sort-options" class="form-select" formControlName="sortField" style="height: 2.375rem;">
-                @for(field of sortFieldOptions(); track field.value) {
-                  <option [value]="field.value">{{field.title}}</option>
-                }
-              </select>
+              <app-sort-button [disabled]="filterSettings().sortDisabled" (isAscendingChange)="updateSortOrder($event)" [isAscending]="isAscendingSort()" />
+              <app-setting-select [formField]="formGroup.sortField" [options]="sortFieldOptions()" inputId="sort-options">
+                <ng-template #template let-field>
+                  {{ field | sortField: filterSettings().type }}
+                </ng-template>
+              </app-setting-select>
             </div>
 
             @if (filterSettings().supportsSmartFilter) {
               <div class="col-md-4 col-sm-12" [ngClass]="{'mt-3': breakpointService.isMobileOrBelow()}">
                 <label for="filter-name" class="form-label">{{t('filter-name-label')}}</label>
-                <input id="filter-name" type="text" class="form-control" formControlName="name">
+                <input id="filter-name" type="text" class="form-control" [formField]="formGroup.name" style="height: 2.375rem;">
               </div>
             }
 
@@ -80,7 +80,7 @@
     </div>
     <div class="col-md-2 col-sm-6 mt-4 pt-2">
       <div class="d-flex flex-grow-1"> <!-- TODO: How can we make this wider (col-12, old behv) if no extra buttons are present -->
-        <button class="btn btn-primary" (click)="save()" [disabled]="filterSettings().saveDisabled || !this.sortGroup.get('name')?.value">
+        <button class="btn btn-primary" (click)="save()" [disabled]="filterSettings().saveDisabled || !this.formGroup.name().value()">
           <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
           {{t('save')}}
         </button>

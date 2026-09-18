@@ -29,16 +29,6 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {MetadataService} from "../../../_services/metadata.service";
 
-interface FieldConfig {
-  type: PredicateType;
-  baseComparisons: FilterComparison[];
-  defaultValue: any;
-  allowsDateComparisons?: boolean;
-  allowsNumberComparisons?: boolean;
-  excludesMustContains?: boolean;
-  allowsIsEmpty?: boolean;
-}
-
 enum PredicateType {
   Text = 1,
   Number = 2,
