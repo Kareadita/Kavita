@@ -119,7 +119,7 @@
             <app-infinite-scroller [pageNum]="pageNum()"
                                    [bufferPages]="5"
                                    [goToPage]="goToPageEvent"
-                                   (pageNumberChange)="handleWebtoonPageChange($event)"
+                                   (pageNumChange)="handleWebtoonPageChange($event)"
                                    [totalPages]="maxPages()"
                                    [urlProvider]="getPageUrl"
                                    (loadNextChapter)="loadNextChapter(true)"
