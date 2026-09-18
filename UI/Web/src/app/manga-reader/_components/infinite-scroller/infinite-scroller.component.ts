@@ -155,9 +155,18 @@ export class InfiniteScrollerComponent implements OnInit {
    */
   isScrolling = signal(false);
   /**
+   * Pages that have been queued but have not yet fired load or error. Pages are added when queued (before the img is rendered)
+   * so a freshly queued batch is always accounted for.
+   */
+  pendingPages = signal<Set<number>>(new Set());
+  /**
    * Whether all prefetched images have loaded on the screen (not necessarily in viewport)
    */
-  allImagesLoaded = signal<boolean>(false);
+  allImagesLoaded = computed(() => this.pendingPages().size === 0);
+  /**
+   * The current page's image loaded while other pages were still pending. Once they settle, we check if we need to scroll to it.
+   */
+  private scrollToCurrentPageWhenSettled = false;
   /**
    * Pages that have been queued for loading. If pruning is implemented, the page will be removed.
    */
@@ -502,6 +511,8 @@ export class InfiniteScrollerComponent implements OnInit {
   initWebtoonReader() {
     this.recalculateImageWidth();
     this.imagesLoaded.set(new Set());
+    this.pendingPages.set(new Set());
+    this.scrollToCurrentPageWhenSettled = false;
     this.webtoonImages.set([]);
     this.retryImages = new Queue<{page: number, src: string, chapterId: number, retryCount: number}>();
     const [startingIndex, endingIndex] = this.calculatePrefetchIndices();
@@ -515,7 +526,7 @@ export class InfiniteScrollerComponent implements OnInit {
 
   /**
    * Callback for an image onLoad. At this point the image is already rendered in DOM (may not be visible)
-   * This will be used to scroll to current page for intial load
+   * This will be used to scroll to current page for initial load, and for jumps to a page that wasn't rendered yet
    * @param img The image that loaded
    */
   onImageLoad(img: HTMLImageElement) {
@@ -532,20 +543,33 @@ export class InfiniteScrollerComponent implements OnInit {
     this.attachIntersectionObserverElem(img);
 
     if (imagePage === this.pageNum()) {
-      Promise.all(Array.from(this.document.querySelectorAll('img'))
-        .filter((pending: any) => !pending.complete)
-        .map((pending: any) => new Promise(resolve => { pending.onload = pending.onerror = resolve; })))
-        .then(() => {
-          this.debugLog('[Initialization] All images have loaded from initial prefetch');
-          this.debugLog('[Image Load] ! Loaded current page !', this.pageNum());
-          this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum());
-          // There needs to be a bit of time before we scroll
-          if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) {
-            this.scrollToCurrentPage();
-          }
+      this.scrollToCurrentPageWhenSettled = true;
+    }
 
-          this.allImagesLoaded.set(true);
-      });
+    this.settlePage(imagePage);
+  }
+
+  /**
+   * Marks a page as no longer loading (loaded or errored). Once every pending page has settled, performs the
+   * deferred scroll to the current page if its image loaded in the meantime.
+   * @param page The page that fired load or error
+   */
+  private settlePage(page: number) {
+    this.pendingPages.update(pending => {
+      if (!pending.has(page)) return pending;
+      const next = new Set(pending);
+      next.delete(page);
+      return next;
+    });
+
+    if (!this.allImagesLoaded() || !this.scrollToCurrentPageWhenSettled) return;
+    this.scrollToCurrentPageWhenSettled = false;
+
+    this.debugLog('[Initialization] All pending images have settled');
+    this.debugLog('[Image Load] ! Loaded current page !', this.pageNum());
+    this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum());
+    if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) {
+      this.scrollToCurrentPage();
     }
   }
 
@@ -553,6 +577,9 @@ export class InfiniteScrollerComponent implements OnInit {
     const imagePage = this.readerService.imageUrlToPageNum(img.src);
     const chapterId = this.readerService.imageUrlToChapterId(img.src);
     this.debugLog('[Image Error] Failed to load page: ', imagePage);
+
+    // An error counts as settled, otherwise a page that never loads would block allImagesLoaded
+    this.settlePage(imagePage);
 
     // Let's set the height of the img since we already know it then retry
     const dimensions = this.mangaReaderService.getPageDimensions(imagePage);
@@ -705,7 +732,7 @@ export class InfiniteScrollerComponent implements OnInit {
     this.webtoonImages.update(images =>
       [...images, {src: this.urlProvider()(page), page}].sort((a, b) => a.page - b.page)
     );
-    this.allImagesLoaded.set(false);
+    this.pendingPages.update(pending => new Set(pending).add(page));
     this.imagesLoaded.update(loaded => new Set(loaded).add(page));
   }
 
@@ -753,13 +780,6 @@ export class InfiniteScrollerComponent implements OnInit {
     for(let i = startingIndex; i <= endingIndex; i++) {
       this.loadWebtoonImage(i);
     }
-
-    Promise.all(Array.from(document.querySelectorAll('img'))
-      .filter((img: any) => !img.complete)
-      .map((img: any) => new Promise(resolve => { img.onload = img.onerror = resolve; })))
-      .then(() => {
-        this.allImagesLoaded.set(true);
-      });
   }
 
   debugLog(message: string, extraData?: any) {
