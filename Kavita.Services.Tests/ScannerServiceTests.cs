@@ -6,6 +6,7 @@ using Kavita.Database.Tests;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
+using Kavita.Models.Parser;
 using Kavita.Services.Scanner;
 using Kavita.Services.Tests.Helpers;
 using Xunit.Abstractions;
@@ -1083,6 +1084,112 @@ public class ScannerServiceTests: AbstractDbTest
         Assert.Equal(4, spiceAndWolf.Volumes.Count);
         Assert.Equal(6, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
 
+    }
+
+    /// <summary>
+    /// When a series has all its files inside one volume subfolder, LowestFolderPath points at that subfolder.
+    /// Adding a sibling volume folder leaves the first one untouched on disk, so it is skipped and only contributes
+    /// stub ParserInfos. The scan must not treat that as "these files are gone".
+    /// </summary>
+    [Fact]
+    public async Task NestedVolumeFolders_AddSiblingVolume_DoesNotDeleteUnchangedVolume()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Nested Volume Folders - Manga.json";
+        var library = await scannerHelper.GenerateScannerData(testcase, new Dictionary<string, ComicInfo>());
+        var testDirectoryPath = library.Folders.First().Path;
+
+        unitOfWork.LibraryRepository.Update(library);
+        await unitOfWork.CommitAsync();
+
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        var spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+
+        var seriesDir = Path.Join(testDirectoryPath, "Spice and Wolf");
+        var volumeOneDir = Path.Join(seriesDir, "Spice and Wolf Vol. 1");
+
+        Assert.Single(spiceAndWolf.Volumes);
+        Assert.Equal(2, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
+        Assert.Equal(Parser.NormalizePath(volumeOneDir), Parser.NormalizePath(spiceAndWolf.LowestFolderPath!));
+
+        // Add a new volume folder alongside the existing one. Vol. 1's own write time is untouched,
+        // so the scanner skips it and sends no real ParserInfos for those two chapters
+        await scannerHelper.Scaffold(testDirectoryPath,
+            ["Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz"]);
+
+        await scanner.ScanLibrary(library.Id);
+        await unitOfWork.CommitAsync();
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+
+        Assert.Equal(2, spiceAndWolf.Volumes.Count);
+        Assert.Equal(3, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
+
+        var volumeOne = spiceAndWolf.Volumes.First(v => v.Name == "1");
+        Assert.Equal(2, volumeOne.Chapters.Count);
+        Assert.Equal(2, volumeOne.Chapters.Sum(c => c.Files.Count));
+
+        var files = await unitOfWork.SeriesRepository.GetFilesForSeriesAsync(spiceAndWolf.Id);
+        Assert.Equal(3, files.Count);
+        Assert.Equal(2, files.Count(f => f.FilePath.Contains("Spice and Wolf Vol. 1")));
+    }
+
+    /// <summary>
+    /// Same skipped-folder setup, but the new file belongs to the volume that already exists. The volume itself
+    /// survives, which isolates the chapter and file level reconcile from the volume level one.
+    /// </summary>
+    [Fact]
+    public async Task SplitVolumeFolders_AddFileInNewFolder_DoesNotDeleteUnchangedChapter()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Split Volume Folders - Manga.json";
+        var library = await scannerHelper.GenerateScannerData(testcase, new Dictionary<string, ComicInfo>());
+        var testDirectoryPath = library.Folders.First().Path;
+
+        unitOfWork.LibraryRepository.Update(library);
+        await unitOfWork.CommitAsync();
+
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        var spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+
+        Assert.Single(spiceAndWolf.Volumes);
+        Assert.Single(spiceAndWolf.Volumes.First().Chapters);
+        Assert.Equal(Parser.NormalizePath(Path.Join(testDirectoryPath, "Spice and Wolf", "Scans A")),
+            Parser.NormalizePath(spiceAndWolf.LowestFolderPath!));
+
+        // Scans A is left alone on disk, so it is skipped. The new file parses to Volume 1, so Volume 1 stays
+        // mapped and only its existing chapter is missing from the scan
+        await scannerHelper.Scaffold(testDirectoryPath,
+            ["Spice and Wolf/Scans B/Spice and Wolf Vol. 1 Ch. 0002.cbz"]);
+
+        await scanner.ScanLibrary(library.Id);
+        await unitOfWork.CommitAsync();
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+
+        Assert.Single(spiceAndWolf.Volumes);
+        Assert.Equal(2, spiceAndWolf.Volumes.First().Chapters.Count);
+
+        var files = await unitOfWork.SeriesRepository.GetFilesForSeriesAsync(spiceAndWolf.Id);
+        Assert.Equal(2, files.Count);
+        Assert.Contains(files, f => f.FilePath.Contains("Scans A"));
+        Assert.Contains(files, f => f.FilePath.Contains("Scans B"));
     }
 
 
