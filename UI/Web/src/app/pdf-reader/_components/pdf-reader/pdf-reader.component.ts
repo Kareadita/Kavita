@@ -410,7 +410,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   }
 
   closeReader() {
-     this.readerService.closeShortCutModal();
+     if (this.readerService.closeShortCutModal()) return;
      this.readerService.closeReader(this.libraryId, this.seriesId, this.chapterId, this.readingListMode, this.readingListId);
   }
 

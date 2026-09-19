@@ -93,11 +93,13 @@ export class ReaderService {
   }
 
   closeShortCutModal() {
+    const isOpen = !!this.shortCutModalRef;
     if (this.shortCutModalRef) {
       this.shortCutModalRef.dismiss();
       this.shortCutModalRef = undefined;
     }
     this.shortCutModalOpen.set(false);
+    return isOpen;
   }
 
 
