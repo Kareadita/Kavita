@@ -1,6 +1,4 @@
-import { Observable } from "rxjs";
 import { PAGING_DIRECTION } from "./reader-enums";
-import { ReaderSetting } from "./reader-setting";
 
 
 /**
@@ -22,14 +20,6 @@ export const enum DEBUG_MODES {
  */
 export interface ImageRenderer {
 
-    /**
-     * Updates with menu items that may affect renderer. This keeps reader and menu/parent in sync.
-     */
-    readerSettings$: Observable<ReaderSetting>;
-    /**
-     * When a page is bookmarked or unbookmarked. Emits with page number.
-     */
-    bookmark$: Observable<number>;
     /**
      * Performs a rendering pass. This is passed one or more images to render from prefetcher
      */
