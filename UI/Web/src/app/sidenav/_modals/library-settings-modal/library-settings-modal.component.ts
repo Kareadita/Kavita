@@ -6,11 +6,10 @@ import {
   DestroyRef,
   effect,
   inject,
-  Input,
+  model,
   OnInit,
   signal
 } from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
   NgbModalModule,
@@ -22,8 +21,8 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
-import {debounceTime, distinctUntilChanged, switchMap, tap} from 'rxjs';
-import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {skip, tap} from 'rxjs';
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {NgTemplateOutlet} from "@angular/common";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
@@ -43,9 +42,8 @@ import {SettingButtonComponent} from "../../../settings/_components/setting-butt
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 import {LibraryTypeSubtitlePipe} from "../../../_pipes/library-type-subtitle.pipe";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
-import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {TypeaheadConfig} from "../../../typeahead/_models/typeahead-config";
 import {Language} from "../../../_models/metadata/language";
-import {MetadataService} from "../../../_services/metadata.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {Action} from "../../../_models/actionables/action";
@@ -55,7 +53,6 @@ import {ModalService} from "../../../_services/modal.service";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {MetadataProvider} from "../../../_models/kavitaplus/metadata-provider.enum";
-import {map} from "rxjs/operators";
 import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title.pipe";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {UtilityService} from "../../../shared/_services/utility.service";
@@ -67,9 +64,11 @@ import {
   DirectoryPickerModalComponent,
   DirectoryPickerResult
 } from "../../../admin/_modals/directory-picker/directory-picker-modal.component";
-import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
+import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {disabled, form, FormField, required, validate} from "@angular/forms/signals";
+import {SettingSelectComponent} from "../../../settings/_components/setting-enum-select/setting-select.component";
 
 enum StepID {
   General = 0,
@@ -78,11 +77,34 @@ enum StepID {
   Advanced = 3
 }
 
+interface FormModel {
+  id: number;
+  name: string;
+  type: LibraryType;
+  folderWatching: boolean;
+  includeInDashboard: boolean;
+  includeInRecommended: boolean;
+  includeInSearch: boolean;
+  manageCollections: boolean;
+  manageReadingLists: boolean;
+  allowScrobbling: boolean;
+  allowMetadataMatching: boolean;
+  collapseSeriesRelationships: boolean;
+  enableMetadata: boolean;
+  removePrefixForSortName: boolean;
+  inheritWebLinksFromFirstChapter: boolean;
+  defaultLanguage: string;
+  metadataProvider: MetadataProvider;
+  excludePatterns: string[];
+  folders: string[];
+  fileGroupTypes: FileTypeGroup[];
+}
+
 @Component({
   selector: 'app-library-settings-modal',
-  imports: [NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
+  imports: [NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, UtcToLocalTimePipe, FormFieldDirective, ValidationErrorsComponent],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, UtcToLocalTimePipe, FormFieldDirective, ValidationErrorsComponent, FormField, SettingSelectComponent],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -99,10 +121,9 @@ export class LibrarySettingsModalComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly metadataService = inject(MetadataService);
   protected readonly breakpointService = inject(BreakpointService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
-  private readonly typeaheadSettingFactoryService = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingFactoryService = inject(TypeaheadConfigFactoryService);
 
   protected readonly LibraryType = LibraryType;
   protected readonly Tabs = Tabs;
@@ -110,7 +131,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   protected readonly Action = Action;
   protected readonly libraryTypePipe = new LibraryTypePipe();
 
-  @Input({required: true}) library!: Library | undefined;
+  library = model<Library>();
 
   active = Tabs.General;
   chooserConfig = signal<CoverImageChooserConfig>({});
@@ -118,29 +139,52 @@ export class LibrarySettingsModalComponent implements OnInit {
   `<a class="ms-1" href="${WikiLink.ScannerExclude}" rel="noopener noreferrer" target="_blank">${translate('library-settings-modal.help')}` +
   `<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>`;
 
-  libraryForm: FormGroup = new FormGroup({
-    name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
-    type: new FormControl<LibraryType>(LibraryType.Manga, { nonNullable: true, validators: [Validators.required] }),
-    folderWatching: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
-    includeInDashboard: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
-    includeInRecommended: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
-    includeInSearch: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
-    manageCollections: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
-    manageReadingLists: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
-    allowScrobbling: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
-    allowMetadataMatching: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
-    collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
-    enableMetadata: new FormControl<boolean>(true, { nonNullable: true, validators: [] }), // required validator doesn't check value, just if true
-    removePrefixForSortName: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
-    inheritWebLinksFromFirstChapter: new FormControl<boolean>(false, { nonNullable: true, validators: []}),
-    defaultLanguage: new FormControl<string>('', {nonNullable: true, validators: []}),
-    metadataProvider: new FormControl<MetadataProvider>(MetadataProvider.Mangabaka, {nonNullable: true, validators: []}),
-    // TODO: Missing excludePatterns
+  formModel = signal<FormModel>({
+    id: 0,
+    allowMetadataMatching: false,
+    allowScrobbling: false,
+    collapseSeriesRelationships: false,
+    defaultLanguage: "",
+    enableMetadata: false,
+    excludePatterns: [],
+    folderWatching: false,
+    folders: [],
+    includeInDashboard: false,
+    includeInRecommended: false,
+    includeInSearch: false,
+    inheritWebLinksFromFirstChapter: false,
+    fileGroupTypes: [],
+    manageCollections: false,
+    manageReadingLists: false,
+    metadataProvider: MetadataProvider.Mangabaka,
+    name: "",
+    removePrefixForSortName: false,
+    type: LibraryType.Manga
+  });
+  formGroup = form(this.formModel, path => {
+    required(path.name);
+    required(path.type);
+    disabled(path.allowScrobbling, { when: (ctx) => {
+      const libraryType = ctx.valueOf(path.type);
+      return !this.scrobbleEnabledLibraries().includes(libraryType);
+    }});
+    validate(path.name, (ctx) => {
+      const name = ctx.valueOf(path.name);
+      if (this.library()?.name == name) return null;
+
+      if (this.libraryNames().includes(name)) {
+        return {
+          kind: 'duplicateName'
+        };
+      }
+
+      return null;
+    });
   });
 
-  selectedLibraryType = toSignal(this.libraryForm.get('type')!.valueChanges.pipe(
-    map(() => this.libraryForm.getRawValue().type as LibraryType),
-  ), { initialValue: LibraryType.Manga });
+  isDisabled = computed(() => {
+    return this.formGroup().invalid() || (this.formGroup.folders().value().length === 0 && this.formGroup.fileGroupTypes().value().length === 0);
+  });
 
   supportsMetadata = computed(() => {
     if (this.validMetadataProviders.hasValue()) {
@@ -150,220 +194,138 @@ export class LibrarySettingsModalComponent implements OnInit {
     return false;
   });
 
+  libraryNames = signal<string[]>([]);
   scrobbleEnabledLibraries = signal<LibraryType[]>([]);
-  validMetadataProviders = this.libraryService.getSupportedMetadataProviders(() => this.selectedLibraryType());
+  validMetadataProviders = this.libraryService.getSupportedMetadataProviders(() => this.formModel().type);
 
-  selectedFolders: string[] = [];
-  madeChanges = false;
   libraryTypes = allLibraryTypes.map(f => {
     return {title: this.libraryTypePipe.transform(f), value: f};
   }).sort((a, b) => a.title.localeCompare(b.title));
 
-  languageSettings = signal<TypeaheadSettings<Language> | null>(null);
+  languageSettings = signal<TypeaheadConfig<Language> | null>(null);
 
-  isAddLibrary= signal<boolean>(false);
-  setupStep = StepID.General;
-  fileTypeGroups = allFileTypeGroup;
-  excludePatterns: Array<string> = [''];
+  setupStep = signal<StepID>(StepID.General);
+  isAddLibrary= signal<boolean>(true);
   filesAtRoot = signal<Array<string>>([]);
 
   tasks: ActionItem<Library>[] = this.getTasks();
-
-  get LibraryTypeValue() {
-    return  parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
-  }
 
   constructor() {
     effect(() => {
       if (!this.validMetadataProviders.hasValue()) return;
       const validMetadataProviders = this.validMetadataProviders.value();
-      const selectedMetadataProvider = this.libraryForm.get('metadataProvider')!.value as MetadataProvider;
+      const selectedMetadataProvider = this.formModel().metadataProvider;
 
       if (!validMetadataProviders.includes(selectedMetadataProvider)) {
-        this.libraryForm.get('metadataProvider')?.setValue(validMetadataProviders[0]);
+        this.formGroup.metadataProvider().value.set(validMetadataProviders[0]);
       }
     });
+
+    toObservable(this.formGroup.enableMetadata().value).pipe(
+      takeUntilDestroyed(),
+      skip(1), // Skip setting library values on load
+      tap(enableMetadata => {
+        this.formGroup.manageCollections().value.set(enableMetadata);
+        this.formGroup.manageReadingLists().value.set(enableMetadata);
+      })
+    ).subscribe();
+
+    toObservable(this.formGroup.type().value).pipe(
+      takeUntilDestroyed(),
+      skip(1), // Skip setting library values on load
+      tap(libraryType => {
+        this.formGroup.fileGroupTypes().value.set(this.getLibraryFileTypes(libraryType));
+
+        if (this.scrobbleEnabledLibraries().includes(libraryType)) {
+          this.formGroup.allowScrobbling().value.set(true);
+        } else {
+          this.formGroup.allowScrobbling().value.set(false);
+        }
+      })
+    ).subscribe();
   }
 
   ngOnInit(): void {
-    if (this.library === undefined) {
-      this.isAddLibrary.set(true);
+    if (this.library() !== undefined) {
+      this.isAddLibrary.set(false);
     }
 
-    this.chooserConfig.set(this.coverChooserConfigFactory.forLibrary(this.library));
+    this.chooserConfig.set(this.coverChooserConfigFactory.forLibrary(this.library()));
+
+    this.libraryService.getLibraries().pipe(
+      tap(libs => this.libraryNames.set(libs.map(l => l.name)))
+    ).subscribe();
 
     this.libraryService.getLibraryTypesWithScrobbleSupport().pipe(
       takeUntilDestroyed(this.destroyRef),
       tap(libraryTypes => {
         this.scrobbleEnabledLibraries.set(libraryTypes);
-
-        if (!libraryTypes.includes(this.library?.type ?? this.LibraryTypeValue)) {
-          this.libraryForm.get('allowScrobbling')?.setValue(false);
-          this.libraryForm.get('allowScrobbling')?.disable();
-        }
-
         // We want scrobbleEnabledLibraries to be loaded before doing this
         this.setValues();
       })
     ).subscribe();
 
-    this.libraryForm.get('name')?.valueChanges.pipe(
-      debounceTime(100),
-      distinctUntilChanged(),
-      switchMap(name => this.libraryService.libraryNameExists(name)),
-      tap(exists => {
-        const isExistingName = this.libraryForm.get('name')?.value === this.library?.name;
-        if (!exists || isExistingName) {
-          this.libraryForm.get('name')?.setErrors(null);
-        } else {
-          this.libraryForm.get('name')?.setErrors({duplicateName: true})
-        }
-        this.cdRef.markForCheck();
-      }),
-      takeUntilDestroyed(this.destroyRef)
-      ).subscribe();
-
-
-    this.languageSettings.set(this.typeaheadSettingFactoryService.forLanguage({id: 'language', currentSelectedLanguage: this.library?.defaultLanguage,
+    this.languageSettings.set(this.typeaheadSettingFactoryService.forLanguage({id: 'language', currentSelectedLanguage: this.library()?.defaultLanguage,
       overrides: {
         showLocked: false
       }
     }));
+  }
 
-    // Turn on/off manage collections/rl
-    this.libraryForm.get('enableMetadata')?.valueChanges.pipe(
-      tap(enabled => {
-        const manageCollectionsFc = this.libraryForm.get('manageCollections');
-        const manageReadingListsFc = this.libraryForm.get('manageReadingLists');
-
-        manageCollectionsFc?.setValue(enabled);
-        manageReadingListsFc?.setValue(enabled);
-
-        this.cdRef.markForCheck();
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
-
-    // This needs to only apply after first render
-    this.libraryForm.get('type')?.valueChanges.pipe(
-      tap((type: LibraryType) => {
-        const libType = parseInt(type + '', 10) as LibraryType;
-        switch (libType) {
-          case LibraryType.Manga:
-            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(true);
-            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(true);
-            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
-            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
-            break;
-          case LibraryType.Comic:
-          case LibraryType.ComicVine:
-            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(true);
-            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
-            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
-            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
-            break;
-          case LibraryType.Book:
-            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
-            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
-            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(true);
-            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(true);
-            break;
-          case LibraryType.LightNovel:
-            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
-            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
-            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
-            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(true);
-            break;
-          case LibraryType.Images:
-            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
-            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(true);
-            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
-            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
-            break;
-        }
-
-        if (!this.scrobbleEnabledLibraries().includes(libType)) {
-          this.libraryForm.get('allowScrobbling')?.setValue(false);
-          this.libraryForm.get('allowScrobbling')?.disable();
-        } else {
-          this.libraryForm.get('allowScrobbling')?.setValue(true);
-          this.libraryForm.get('allowScrobbling')?.enable();
-        }
-
-        this.libraryForm.get('allowMetadataMatching')?.setValue(true);
-
-        this.cdRef.markForCheck();
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
+  private getLibraryFileTypes(libType: LibraryType) {
+    switch (libType) {
+      case LibraryType.Manga:
+        return [FileTypeGroup.Archive, FileTypeGroup.Images];
+      case LibraryType.Comic:
+      case LibraryType.ComicVine:
+        return [FileTypeGroup.Archive];
+      case LibraryType.Book:
+        return [FileTypeGroup.Pdf, FileTypeGroup.Epub];
+      case LibraryType.Images:
+        return [FileTypeGroup.Images];
+      case LibraryType.LightNovel:
+        return [FileTypeGroup.Epub];
+    }
   }
 
   setValues() {
-    if (this.library !== undefined) {
-      this.libraryForm.get('name')?.setValue(this.library.name);
-      this.libraryForm.get('type')?.setValue(this.library.type);
-      this.libraryForm.get('folderWatching')?.setValue(this.library.folderWatching);
-      this.libraryForm.get('includeInDashboard')?.setValue(this.library.includeInDashboard);
-      this.libraryForm.get('includeInRecommended')?.setValue(this.library.includeInRecommended);
-      this.libraryForm.get('includeInSearch')?.setValue(this.library.includeInSearch);
-      this.libraryForm.get('manageCollections')?.setValue(this.library.manageCollections);
-      this.libraryForm.get('manageReadingLists')?.setValue(this.library.manageReadingLists);
-      this.libraryForm.get('collapseSeriesRelationships')?.setValue(this.library.collapseSeriesRelationships);
-      this.libraryForm.get('allowScrobbling')?.setValue(this.scrobbleEnabledLibraries().includes(this.library.type) ? this.library.allowScrobbling : false);
-      this.libraryForm.get('allowMetadataMatching')?.setValue(this.library.allowMetadataMatching);
-      this.libraryForm.get('metadataProvider')?.setValue(this.library.metadataProvider);
-      this.libraryForm.get('excludePatterns')?.setValue(this.excludePatterns ? this.library.excludePatterns : false);
-      this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata);
-      this.libraryForm.get('removePrefixForSortName')?.setValue(this.library.removePrefixForSortName);
-      this.libraryForm.get('inheritWebLinksFromFirstChapter')?.setValue(this.library.inheritWebLinksFromFirstChapter);
-      this.libraryForm.get('defaultLanguage')?.setValue(this.library.defaultLanguage);
-      this.selectedFolders = this.library.folders;
-      this.checkForFilesAtRoot(); // check after selectedFolders has been set
-
-      this.madeChanges = false;
-
-      // TODO: Refactor into FormArray
-      for(let fileTypeGroup of allFileTypeGroup) {
-        this.libraryForm.addControl(fileTypeGroup + '', new FormControl((this.library.libraryFileTypes || []).includes(fileTypeGroup), []));
-      }
-
-      // TODO: Refactor into FormArray
-      for(let glob of this.library.excludePatterns) {
-        this.libraryForm.addControl('excludeGlob-', new FormControl(glob, []));
-      }
-
-      this.excludePatterns = this.library.excludePatterns;
-    } else {
-      for(let fileTypeGroup of allFileTypeGroup) {
-        this.libraryForm.addControl(fileTypeGroup + '', new FormControl(true, []));
-      }
+    const library = this.library();
+    if (library === undefined) {
+      return;
     }
 
-    if (this.excludePatterns.length === 0) {
-      this.excludePatterns = [''];
-    }
+    this.formModel.set({
+      id: library.id,
+      allowMetadataMatching: library.allowMetadataMatching,
+      allowScrobbling: library.allowScrobbling,
+      collapseSeriesRelationships: library.collapseSeriesRelationships,
+      defaultLanguage: library.defaultLanguage,
+      enableMetadata: library.enableMetadata,
+      excludePatterns: library.excludePatterns,
+      folderWatching: library.folderWatching,
+      folders: library.folders,
+      includeInDashboard: library.includeInDashboard,
+      includeInRecommended: library.includeInRecommended,
+      includeInSearch: library.includeInSearch,
+      inheritWebLinksFromFirstChapter: library.inheritWebLinksFromFirstChapter,
+      fileGroupTypes: library.libraryFileTypes,
+      manageCollections: library.manageCollections,
+      manageReadingLists: library.manageReadingLists,
+      metadataProvider: library.metadataProvider,
+      name: library.name,
+      removePrefixForSortName: library.removePrefixForSortName,
+      type: library.type,
+    });
 
-    this.cdRef.markForCheck();
+    this.checkForFilesAtRoot();
   }
 
   updateLanguage(languages: Array<Language>) {
-    this.libraryForm.get("defaultLanguage")!.setValue(languages.at(0)?.isoCode ?? '');
+    this.formGroup.defaultLanguage().value.set(languages.at(0)?.isoCode ?? '');
   }
 
   updateGlobs(items: Array<string>) {
-    this.excludePatterns = items;
-    this.cdRef.markForCheck();
-  }
-
-  isDisabled() {
-    const selectedFileTypes = [];
-    for(let fileTypeGroup of allFileTypeGroup) {
-      if (this.libraryForm.value[fileTypeGroup]) {
-        selectedFileTypes.push(fileTypeGroup);
-      }
-    }
-
-    return !(this.libraryForm.valid && this.selectedFolders.length > 0 && selectedFileTypes.length > 0);
+    this.formGroup.excludePatterns().value.set(items);
   }
 
   reset() {
@@ -375,7 +337,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   forceScan() {
-    this.libraryService.scan(this.library!.id, true)
+    this.libraryService.scan(this.library()!.id, true)
       .subscribe(() => {
         this.toastr.info(translate('toasts.forced-scan-queued', {name: this.library!.name}));
         this.close();
@@ -383,27 +345,15 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   async save() {
-    const model = this.libraryForm.getRawValue();
-    model.folders = this.selectedFolders;
-    model.fileGroupTypes = [];
-    for(let fileTypeGroup of allFileTypeGroup) {
-      if (model[fileTypeGroup]) {
-        model.fileGroupTypes.push(fileTypeGroup);
-      }
-    }
-    model.excludePatterns = this.excludePatterns;
-
-
-    if (this.libraryForm.errors) {
+    if (this.formGroup().invalid()) {
       return;
     }
 
-    if (this.library !== undefined) {
-      model.id = this.library.id;
-      model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
-      model.type = parseInt(model.type, 10);
+    const model = this.formModel();
+    model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substring(1, item.length) : item);
 
-      if (model.type !== this.library.type) {
+    if (this.library() !== undefined) {
+      if (model.type !== this.library()?.type) {
         if (!await this.confirmService.confirm(translate('toasts.confirm-library-type-change'))) return;
       }
 
@@ -411,8 +361,6 @@ export class LibrarySettingsModalComponent implements OnInit {
         this.modal.close(modalSaved(updatedLib));
       });
     } else {
-      model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
-      model.type = parseInt(model.type, 10);
       this.libraryService.create(model).subscribe((lib) => {
         this.toastr.success(translate('toasts.library-created'));
         this.modal.close(modalSaved(lib));
@@ -421,8 +369,8 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   nextStep() {
-    this.setupStep++;
-    switch(this.setupStep) {
+    this.setupStep.update(x => x + 1);
+    switch(this.setupStep()) {
       case StepID.Folder:
         this.active = Tabs.Folder;
         break;
@@ -437,7 +385,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   applyCoverImage(coverUrl: string) {
-    this.uploadService.updateLibraryCoverImage(this.library!.id, coverUrl).subscribe();
+    this.uploadService.updateLibraryCoverImage(this.library()!.id, coverUrl).subscribe();
   }
 
   handleCoverChanged(event: { isDirty: boolean; fileName: string }) {
@@ -450,35 +398,41 @@ export class LibrarySettingsModalComponent implements OnInit {
     const modalRef = this.modalService.open(DirectoryPickerModalComponent);
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
       if (closeResult.success) {
-        if (!this.selectedFolders.includes(closeResult.folderPath)) {
-          this.selectedFolders.push(closeResult.folderPath);
-          this.madeChanges = true;
+        if (!this.formGroup.folders().value().includes(closeResult.folderPath)) {
+          this.formGroup.folders().value.update(x => [...x, closeResult.folderPath]);
           this.checkForFilesAtRoot(true);
-          this.cdRef.markForCheck();
         }
       }
     });
   }
 
   removeFolder(folder: string) {
-    this.selectedFolders = this.selectedFolders.filter(item => item !== folder);
-    this.madeChanges = true;
+    this.formGroup.folders().value.update(x => [...x.filter(item => item !== folder)]);
     this.checkForFilesAtRoot();
-    this.cdRef.markForCheck();
   }
 
-  isNextDisabled() {
-    switch (this.setupStep) {
+  handleFileTypeGroupChange($event: Event, group: FileTypeGroup) {
+    const enabled = ($event.target as HTMLInputElement).checked;
+    if (enabled) {
+      this.formGroup.fileGroupTypes().value.update(x => [...x, group]);
+      return;
+    }
+
+    this.formGroup.fileGroupTypes().value.update(x => [...x.filter(item => item !== group)]);
+  }
+
+  isNextDisabled = computed(() => {
+    switch (this.setupStep()) {
       case StepID.General:
-        return this.libraryForm.get('name')?.invalid || this.libraryForm.get('type')?.invalid;
+        return this.formGroup().invalid();
       case StepID.Folder:
-        return this.selectedFolders.length === 0;
+        return this.formGroup.folders().value().length === 0;
       case StepID.Cover:
         return false; // Covers are optional
       case StepID.Advanced:
         return false; // Advanced are optional
     }
-  }
+  })
 
   getTasks() {
     const blackList = [Action.Edit];
@@ -487,12 +441,12 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   runTask(task: ActionItem<Library>) {
     if (task.callback) {
-      task.callback(task, this.library!).subscribe();
+      task.callback(task, this.library()!).subscribe();
     }
   }
 
   checkForFilesAtRoot(showToast: boolean = false) {
-    this.libraryService.hasFilesAtRoot(this.selectedFolders).subscribe(results => {
+    this.libraryService.hasFilesAtRoot(this.formGroup.folders().value()).subscribe(results => {
       const newValues = results.filter(item => !this.filesAtRoot().includes(item));
       if (showToast && newValues.length > 0) {
         this.toastr.error(translate('library-settings-modal.files-at-root-warning'))
@@ -501,4 +455,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.filesAtRoot.set(results);
     })
   }
+
+  protected readonly StepID = StepID;
+  protected readonly allFileTypeGroup = allFileTypeGroup;
 }

@@ -1,20 +1,14 @@
 <ng-container *transloco="let t; prefix: 'manage-media-issues'">
   <p>{{t('description-part-1')}} <a rel="noopener noreferrer" target="_blank" [href]="WikiLink.MediaIssues">{{t('description-part-2')}}</a></p>
 
-  <form [formGroup]="formGroup">
-    <div class="row g-0 mb-3">
-      @if (formGroup.get('filter'); as formControl) {
-        <div class="col-md-12">
-          <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
-          <div class="input-group">
-            <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter"
-                   [appFormField]="formControl" />
-            <button class="btn btn-primary" type="button" (click)="clear()">{{t('clear-alerts')}}</button>
-          </div>
-        </div>
-      }
+  <div class="row g-0 justify-content-between align-items-end mb-3">
+    <div class="col">
+      <app-filter-field [(query)]="filterQuery" [label]="t('filter-label')" />
     </div>
-  </form>
+    <div class="col-auto ms-2">
+      <button class="btn btn-primary" type="button" (click)="clear()">{{t('clear-alerts')}}</button>
+    </div>
+  </div>
 
   @let filteredRows = filteredData();
   <app-responsive-table [rows]="filteredRows" [trackByFn]="trackBy">

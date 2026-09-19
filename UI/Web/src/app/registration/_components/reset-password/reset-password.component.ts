@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
 import {ToastrService} from '@openng/ngx-toastr';
@@ -8,13 +8,14 @@ import {NavService} from "../../../_services/nav.service";
 import {AccountService} from "../../../_services/account.service";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {email, form, FormField, required} from "@angular/forms/signals";
 
 @Component({
     selector: 'app-reset-password',
     templateUrl: './reset-password.component.html',
     styleUrls: ['./reset-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SplashContainerComponent, ReactiveFormsModule, TranslocoDirective, ValidationErrorsComponent, FormFieldDirective]
+  imports: [SplashContainerComponent, ReactiveFormsModule, TranslocoDirective, ValidationErrorsComponent, FormFieldDirective, FormField]
 })
 export class ResetPasswordComponent {
 
@@ -23,8 +24,12 @@ export class ResetPasswordComponent {
   private readonly toastr = inject(ToastrService);
   private readonly navService = inject(NavService);
 
-  registerForm: FormGroup = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.email]),
+  formModel = signal({
+    email: ''
+  });
+  formGroup = form(this.formModel, path => {
+    required(path.email);
+    email(path.email);
   });
 
   constructor() {
@@ -33,12 +38,9 @@ export class ResetPasswordComponent {
   }
 
   submit() {
-    const model = this.registerForm.get('email')?.value;
-    this.accountService.requestResetPasswordEmail(model).subscribe((resp: string) => {
+    this.accountService.requestResetPasswordEmail(this.formModel().email).subscribe((resp: string) => {
       this.toastr.info(resp);
       this.router.navigateByUrl('login');
-    }, err => {
-      this.toastr.error(err.error);
     });
   }
 

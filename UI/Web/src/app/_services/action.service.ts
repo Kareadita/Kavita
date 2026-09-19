@@ -149,7 +149,7 @@ export class ActionService {
 
       case Action.Edit: {
         const modalRef = this.modalService.open(LibrarySettingsModalComponent, editModal());
-        modalRef.componentInstance.library = library;
+        modalRef.setInput('library', library);
         return this.handleEditModal(modalRef, action, library);
       }
 
@@ -224,7 +224,7 @@ export class ActionService {
 
       case Action.Edit: {
         const modalRef = this.modalService.open(EditSeriesModalComponent, editModal());
-        modalRef.componentInstance.series = series;
+        modalRef.setInput('series', series);
         return this.handleEditModal(modalRef, action, series);
       }
 
@@ -423,10 +423,10 @@ export class ActionService {
 
       case Action.Edit: {
         const ref = this.modalService.open(EditVolumeModalComponent, editModal());
-        ref.componentInstance.volume = volume;
-        ref.componentInstance.libraryType = libraryType;
-        ref.componentInstance.seriesId = seriesId;
-        ref.componentInstance.libraryId = libraryId;
+        ref.setInput('volume', volume);
+        ref.setInput('libraryType', libraryType);
+        ref.setInput('seriesId', seriesId);
+        ref.setInput('libraryId', libraryId);
         return this.handleEditModal(ref, action, volume);
       }
 
@@ -549,10 +549,10 @@ export class ActionService {
 
       case Action.Edit:
         const ref = this.modalService.open(EditChapterModalComponent, editModal());
-        ref.componentInstance.chapter = chapter;
-        ref.componentInstance.libraryType = libraryType;
-        ref.componentInstance.seriesId = seriesId;
-        ref.componentInstance.libraryId = libraryId;
+        ref.setInput('chapter', chapter);
+        ref.setInput('libraryType', libraryType);
+        ref.setInput('seriesId', seriesId);
+        ref.setInput('libraryId', libraryId);
 
         return this.handleEditModal(ref, action, chapter);
 
@@ -665,10 +665,11 @@ export class ActionService {
         this.downloadService.download(DownloadEntityType.ReadingList, readingList, 0, 0);
         return of(this.fromAction(action, readingList, 'none'));
 
-      case Action.Edit:
+      case Action.Edit: {
         const ref = this.modalService.open(EditReadingListModalComponent, editModal());
-        ref.componentInstance.readingList = readingList;
+        ref.setInput('readingList', readingList);
         return this.handleEditModal(ref, action, readingList);
+      }
       case Action.RefreshMetadata:
         return this.readingListService.refreshCover(readingList.id).pipe(
           map(() => this.fromAction(action, {...readingList}, 'none'))
@@ -802,7 +803,7 @@ export class ActionService {
     switch (action.action) {
       case Action.Edit:
         const ref = this.modalService.open(EditPersonModalComponent, editModal());
-        ref.componentInstance.person = person;
+        ref.setInput('person', person);
 
         return this.handleEditModal(ref, action, person);
 
@@ -1454,7 +1455,8 @@ export class ActionService {
 
   editReadingList(readingList: ReadingList, callback?: ReadingListActionCallback) {
     const readingListModalRef = this.modalService.open(EditReadingListModalComponent, editModal());
-    readingListModalRef.componentInstance.readingList = readingList;
+    readingListModalRef.setInput('readingList', readingList);
+
     readingListModalRef.closed.pipe(take(1)).subscribe((list) => {
       if (callback && list !== undefined) {
         callback(readingList);

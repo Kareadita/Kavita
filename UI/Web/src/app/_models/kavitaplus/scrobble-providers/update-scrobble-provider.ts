@@ -4,4 +4,5 @@ export type UpdateScrobbleProvider = {
   provider: ScrobbleProvider;
   userName: string;
   authenticationToken: string;
+  refreshToken: string;
 }

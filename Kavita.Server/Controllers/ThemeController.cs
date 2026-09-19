@@ -24,9 +24,14 @@ public class ThemeController(
     IMapper mapper)
     : BaseApiController
 {
+    /// <summary>
+    /// Returns all Themes
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SiteThemeDto>>> GetThemes()
     {
+        var ct = HttpContext.RequestAborted;
         return Ok(await unitOfWork.SiteThemeRepository.GetThemeDtos());
     }
 
@@ -35,9 +40,10 @@ public class ThemeController(
     [HttpPost("update-default")]
     public async Task<ActionResult> UpdateDefault(UpdateDefaultThemeDto dto)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
-            await themeService.UpdateDefault(dto.ThemeId);
+            await themeService.UpdateDefault(dto.ThemeId, ct);
         }
         catch (KavitaException)
         {
@@ -55,9 +61,10 @@ public class ThemeController(
     [HttpGet("download-content")]
     public async Task<ActionResult<string>> GetThemeContent(int themeId)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
-            return Ok(await themeService.GetContent(themeId));
+            return Ok(await themeService.GetContent(themeId, ct));
         }
         catch (KavitaException ex)
         {
@@ -73,7 +80,8 @@ public class ThemeController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
     public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> BrowseThemes()
     {
-        var themes = await themeService.GetDownloadableThemes();
+        var ct = HttpContext.RequestAborted;
+        var themes = await themeService.GetDownloadableThemes(ct);
         return Ok(themes.Where(t => !t.AlreadyDownloaded));
     }
 
@@ -86,7 +94,8 @@ public class ThemeController(
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> DeleteTheme(int themeId)
     {
-        await themeService.DeleteTheme(themeId);
+        var ct = HttpContext.RequestAborted;
+        await themeService.DeleteTheme(themeId, ct);
 
         return Ok();
     }
@@ -100,7 +109,8 @@ public class ThemeController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<SiteThemeDto>> DownloadTheme(DownloadableSiteThemeDto dto)
     {
-        return Ok(mapper.Map<SiteThemeDto>(await themeService.DownloadRepoTheme(dto)));
+        var ct = HttpContext.RequestAborted;
+        return Ok(mapper.Map<SiteThemeDto>(await themeService.DownloadRepoTheme(dto, ct)));
     }
 
     /// <summary>
@@ -112,12 +122,13 @@ public class ThemeController(
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<SiteThemeDto>> DownloadTheme(IFormFile formFile)
     {
+        var ct = HttpContext.RequestAborted;
         if (!formFile.FileName.EndsWith(".css")) return BadRequest("Invalid file");
         if (!IsPathWithinDirectory(directoryService.TempDirectory, formFile.FileName)) return BadRequest("Invalid file");
         var tempFile = await UploadToTempAsync(formFile);
 
         // Set summary as "Uploaded by Username! on DATE"
-        var theme = await themeService.CreateThemeFromFile(tempFile, Username!);
+        var theme = await themeService.CreateThemeFromFile(tempFile, Username!, ct);
         return Ok(mapper.Map<SiteThemeDto>(theme));
     }
 

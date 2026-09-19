@@ -4,7 +4,6 @@ import {AgeRatingPipe} from '../../_pipes/age-rating.pipe';
 import {RestrictionSelectorComponent} from '../restriction-selector/restriction-selector.component';
 import {NgClass} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {ReactiveFormsModule} from "@angular/forms";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {AccountService} from "../../_services/account.service";
 import {AgeRestriction} from "../../_models/metadata/age-restriction";
@@ -15,8 +14,7 @@ import {AgeRating} from "../../_models/metadata/age-rating";
     templateUrl: './change-age-restriction.component.html',
     styleUrls: ['./change-age-restriction.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [RestrictionSelectorComponent, AgeRatingPipe, TranslocoDirective,
-        ReactiveFormsModule, SettingItemComponent, NgClass]
+    imports: [RestrictionSelectorComponent, AgeRatingPipe, TranslocoDirective, SettingItemComponent, NgClass]
 })
 export class ChangeAgeRestrictionComponent {
 

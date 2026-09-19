@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import {DOCUMENT, NgOptimizedImage} from '@angular/common';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {ReactiveFormsModule} from "@angular/forms";
 import {UserReview} from "../../_models/user-review";
 import {SpoilerComponent} from "../spoiler/spoiler.component";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
@@ -19,7 +18,7 @@ import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 
 @Component({
   selector: 'app-review-card-modal',
-  imports: [ReactiveFormsModule, SafeHtmlPipe, TranslocoDirective, NgOptimizedImage, ProviderImagePipe],
+  imports: [SafeHtmlPipe, TranslocoDirective, NgOptimizedImage, ProviderImagePipe],
   templateUrl: './review-card-modal.component.html',
   styleUrls: ['./review-card-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

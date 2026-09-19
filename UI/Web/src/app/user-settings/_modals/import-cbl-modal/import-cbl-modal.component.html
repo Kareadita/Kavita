@@ -122,7 +122,7 @@
               @if (isEditingSeries(row)) {
                 <div class="d-flex align-items-center gap-1">
                   <div class="flex-grow-1">
-                    <app-typeahead [settings]="activeSeriesTypeahead()!"
+                    <app-typeahead [config]="activeSeriesTypeahead()!"
                                    (selectedData)="onSeriesTypeaheadSelected(row, $event)">
                       <ng-template #badgeItem let-item>
                         {{item.name}} ({{libraryNames()[item.libraryId]}})
@@ -190,7 +190,7 @@
               @if (isEditingChapter(row)) {
                 <div class="d-flex align-items-center gap-1">
                   <div class="flex-grow-1">
-                    <app-typeahead [settings]="activeChapterTypeahead()!"
+                    <app-typeahead [config]="activeChapterTypeahead()!"
                                    (selectedData)="onChapterTypeaheadSelected(row, $event)">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.title}}

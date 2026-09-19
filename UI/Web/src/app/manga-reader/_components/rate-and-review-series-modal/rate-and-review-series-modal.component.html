@@ -1,0 +1,27 @@
+<ng-container *transloco="let t; prefix: 'rate-and-review-series-modal'">
+  <div>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">
+        {{t('title', {seriesName: seriesName()})}}
+      </h4>
+      <button type="button" class="btn-close" aria-labelledby="modal-basic-title" [attr.aria-label]="t('close')" (click)="close()"></button>
+    </div>
+    <div class="modal-body">
+      <p>{{t('description')}}</p>
+      <ngx-stars [initialStars]="reviewForm.rating().value()" (ratingOutput)="updateRating($event)" [size]="2"
+                 [maxStars]="5" [color]="starColor" />
+
+      <div class="row g-0 mt-2">
+        <label for="review" class="form-label">{{t('review-label')}}</label>
+        <textarea id="review" class="form-control" [formField]="reviewForm.review" rows="3"
+                  aria-describedby="review-validations" [appFormField]="reviewForm.review"
+        ></textarea>
+        <app-validation-errors inputId="review" [control]="reviewForm.review" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+      <button type="submit" class="btn btn-primary" (click)="save()">{{t('save')}}</button>
+    </div>
+  </div>
+</ng-container>

@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@ang
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
-import {ReactiveFormsModule} from "@angular/forms";
 import {StatsFilter} from "../../_models/stats-filter";
 import {ServerStatsStatsTabComponent} from "../server-stats-stats-tab/server-stats-stats-tab.component";
 import {ServerStatsMgmtTabComponent} from "../server-stats-mgmt-tab/server-stats-mgmt-tab.component";
@@ -14,7 +13,7 @@ import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
     templateUrl: './server-stats.component.html',
     styleUrls: ['./server-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, ReactiveFormsModule, NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, ServerStatsStatsTabComponent, ServerStatsMgmtTabComponent, TabTitlePipe]
+  imports: [TranslocoDirective, NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, ServerStatsStatsTabComponent, ServerStatsMgmtTabComponent, TabTitlePipe]
 })
 export class ServerStatsComponent {
   protected readonly accountService = inject(AccountService);

@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix: 'edit-reading-list-modal'">
 
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">{{ t('title', {name: readingList.title}) }}</h4>
+    <h4 class="modal-title" id="modal-basic-title">{{ t('title', {name: readingList().title}) }}</h4>
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
   <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
@@ -10,104 +10,96 @@
       <li [ngbNavItem]="Tabs.General">
         <a ngbNavLink>{{ Tabs.General | tabTitle }}</a>
         <ng-template ngbNavContent>
-          <form [formGroup]="reviewGroup">
-            <div class="row g-0 mb-3">
-              @if (reviewGroup.get('title'); as formControl) {
-                <div class="col-md-8 col-sm-12 mt-2">
-                  <label for="library-name" class="form-label">{{t('name-label')}}</label>
-                  <input id="library-name" class="form-control" formControlName="title" type="text"
-                         [appFormField]="formControl" aria-describedby="library-name-validations">
-                  <app-validation-errors inputId="library-name" [control]="formControl" [messages]="{
+          <div class="row g-0 mb-3">
+
+            <div class="col-md-8 col-sm-12 mt-2">
+              <label for="library-name" class="form-label">{{t('name-label')}}</label>
+              <input id="library-name" class="form-control" [formField]="formGroup.title" type="text"
+                     [appFormField]="formGroup.title" aria-describedby="library-name-validations">
+              <app-validation-errors inputId="library-name" [control]="formGroup.title" [messages]="{
                     duplicateName: t('name-unique-validation')
                   }" />
-                </div>
-              }
-              @if (accountService.hasAdminRole()) {
-                <div class="col-md-3 col-sm-12 ms-2">
-                  <div class="form-check form-switch">
-                    <input type="checkbox" id="tag-promoted" role="switch" formControlName="promoted"
-                           class="form-check-input" switch
-                           aria-labelledby="auto-close-label" aria-describedby="tag-promoted-help">
-                    <label class="form-check-label me-1" for="tag-promoted">{{ t('promote-label') }}</label>
-                    <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip"
-                       role="button" tabindex="0"></i>
-                    <ng-template #promotedTooltip>{{ t('promote-tooltip') }}</ng-template>
-                    <span class="visually-hidden" id="tag-promoted-help"><ng-container
-                      [ngTemplateOutlet]="promotedTooltip"/></span>
-                  </div>
-                </div>
-              }
             </div>
 
-            <div class="row g-0 mb-3">
-              <div class="col-md-6 col-sm-12">
-                <h6 id="starting-year-header">{{ t('starting-title') }}</h6>
-                @if (reviewGroup.get('startingMonth'); as formControl) {
-                  <div class="col-md-6 col-sm-12" style="width: 90%">
-                    <label for="start-month" class="form-label">{{ t('month-label') }}</label>
-                    <input id="start-month" class="form-control" formControlName="startingMonth"
-                           type="number" inputmode="numeric"
-                           [appFormField]="formControl">
+            @if (accountService.hasAdminRole()) {
+              <div class="col-md-3 col-sm-12 ms-2">
+                <div class="form-check form-switch">
+                  <input type="checkbox" id="tag-promoted" role="switch" [formField]="formGroup.promoted"
+                         class="form-check-input" switch
+                         aria-labelledby="auto-close-label" aria-describedby="tag-promoted-help">
+                  <label class="form-check-label me-1" for="tag-promoted">{{ t('promote-label') }}</label>
+                  <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip"
+                     role="button" tabindex="0"></i>
+                  <ng-template #promotedTooltip>{{ t('promote-tooltip') }}</ng-template>
+                  <span class="visually-hidden" id="tag-promoted-help"><ng-container
+                    [ngTemplateOutlet]="promotedTooltip"/></span>
+                </div>
+              </div>
+            }
+          </div>
 
-                    <app-validation-errors inputId="start-month" [control]="formControl" [messages]="{
+          <div class="row g-0 mb-3">
+            <div class="col-md-6 col-sm-12">
+              <h6 id="starting-year-header">{{ t('starting-title') }}</h6>
+
+              <div class="col-md-6 col-sm-12" style="width: 90%">
+                <label for="start-month" class="form-label">{{ t('month-label') }}</label>
+                <input id="start-month" class="form-control" [formField]="formGroup.startingMonth"
+                       type="number" inputmode="numeric"
+                       [appFormField]="formGroup.startingMonth">
+
+                <app-validation-errors inputId="start-month" [control]="formGroup.startingMonth" [messages]="{
                       min: t('month-validation'),
                       max: t('month-validation')
                     }" />
-                  </div>
-                }
-                @if (reviewGroup.get('startingYear'); as formControl) {
-                  <div class="col-md-6 col-sm-12" style="width: 90%">
-                    <label for="start-year" class="form-label">{{ t('year-label') }}</label>
-                    <input id="start-year" class="form-control" formControlName="startingYear" type="number"
-                           inputmode="numeric"
-                           [appFormField]="formControl"
-                           aria-describedby="starting-year-header">
+              </div>
 
-                    <app-validation-errors inputId="start-year" [control]="formControl" [messages]="{
+              <div class="col-md-6 col-sm-12" style="width: 90%">
+                <label for="start-year" class="form-label">{{ t('year-label') }}</label>
+                <input id="start-year" class="form-control" [formField]="formGroup.startingYear" type="number"
+                       inputmode="numeric"
+                       [appFormField]="formGroup.startingYear"
+                       aria-describedby="starting-year-header">
+
+                <app-validation-errors inputId="start-year" [control]="formGroup.startingYear" [messages]="{
                       min: t('year-validation'),
                       max: t('year-validation')
                     }" />
-
-                  </div>
-                }
               </div>
+            </div>
 
-              <div class="col-md-6 col-sm-12">
-                <h6 id="ending-year-heading">{{ t('ending-title') }}</h6>
-                @if (reviewGroup.get('endingMonth'); as formControl) {
-                  <div class="col-md-6 col-sm-12" style="width: 90%">
-                    <label for="ending-month" class="form-label">{{ t('month-label') }}</label>
-                    <input id="ending-month" class="form-control" formControlName="endingMonth" type="number"
-                           inputmode="numeric"
-                           [appFormField]="formControl">
+            <div class="col-md-6 col-sm-12">
+              <h6 id="ending-year-heading">{{ t('ending-title') }}</h6>
 
-                    <app-validation-errors inputId="start-year" [control]="formControl" [messages]="{
+              <div class="col-md-6 col-sm-12" style="width: 90%">
+                <label for="ending-month" class="form-label">{{ t('month-label') }}</label>
+                <input id="ending-month" class="form-control" [formField]="formGroup.endingMonth" type="number"
+                       inputmode="numeric"
+                       [appFormField]="formGroup.endingMonth">
+
+                <app-validation-errors inputId="start-year" [control]="formGroup.endingMonth" [messages]="{
                       min: t('month-validation'),
                       max: t('month-validation')
                     }" />
+              </div>
 
-                  </div>
-                }
-                @if (reviewGroup.get('endingYear'); as formControl) {
-                  <div class="col-md-6 col-sm-12" style="width: 90%">
-                    <label for="ending-year" class="form-label">{{ t('year-label') }}</label>
-                    <input id="ending-year" class="form-control" formControlName="endingYear" type="number"
-                           inputmode="numeric"
-                           [appFormField]="formControl">
-                    <app-validation-errors inputId="ending-year" [control]="formControl" [messages]="{
+              <div class="col-md-6 col-sm-12" style="width: 90%">
+                <label for="ending-year" class="form-label">{{ t('year-label') }}</label>
+                <input id="ending-year" class="form-control" [formField]="formGroup.endingYear" type="number"
+                       inputmode="numeric"
+                       [appFormField]="formGroup.endingYear">
+                <app-validation-errors inputId="ending-year" [control]="formGroup.endingYear" [messages]="{
                       min: t('year-validation'),
                       max: t('year-validation')
                     }" />
-                  </div>
-                }
               </div>
             </div>
+          </div>
 
-            <div class="row g-0 mb-3">
-              <label for="summary" class="form-label">{{ t('summary-label') }}</label>
-              <textarea id="summary" class="form-control" formControlName="summary" rows="3"></textarea>
-            </div>
-          </form>
+          <div class="row g-0 mb-3">
+            <label for="summary" class="form-label">{{ t('summary-label') }}</label>
+            <textarea id="summary" class="form-control" [formField]="formGroup.summary" rows="3"></textarea>
+          </div>
         </ng-template>
       </li>
 
@@ -122,7 +114,7 @@
                 @if (tagsConf) {
                   <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false">
                     <ng-template #view>
-                      <app-typeahead (selectedData)="updateTags($event)" [settings]="tagsConf">
+                      <app-typeahead (selectedData)="updateTags($event)" [config]="tagsConf">
                         <ng-template #badgeItem let-item let-position="idx">
                           {{item.title}}
                         </ng-template>

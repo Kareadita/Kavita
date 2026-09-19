@@ -25,7 +25,8 @@ public class StreamController(
     [HttpGet("dashboard")]
     public async Task<ActionResult<IEnumerable<DashboardStreamDto>>> GetDashboardLayout(bool visibleOnly = true)
     {
-        return Ok(await streamService.GetDashboardStreams(UserId, visibleOnly));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await streamService.GetDashboardStreams(UserId, visibleOnly, ct));
     }
 
     /// <summary>
@@ -34,7 +35,8 @@ public class StreamController(
     [HttpGet("sidenav")]
     public async Task<ActionResult<IEnumerable<SideNavStreamDto>>> GetSideNav(bool visibleOnly = true)
     {
-        return Ok(await streamService.GetSidenavStreams(UserId, visibleOnly));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await streamService.GetSidenavStreams(UserId, visibleOnly, ct));
     }
 
     /// <summary>
@@ -43,7 +45,8 @@ public class StreamController(
     [HttpGet("external-sources")]
     public async Task<ActionResult<IEnumerable<ExternalSourceDto>>> GetExternalSources()
     {
-        return Ok(await streamService.GetExternalSources(UserId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await streamService.GetExternalSources(UserId, ct));
     }
 
     /// <summary>
@@ -55,7 +58,8 @@ public class StreamController(
     public async Task<ActionResult<ExternalSourceDto>> CreateExternalSource(ExternalSourceDto dto)
     {
         // Check if a host and api key exists for the current user
-        return Ok(await streamService.CreateExternalSource(UserId, dto));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await streamService.CreateExternalSource(UserId, dto, ct));
     }
 
     /// <summary>
@@ -68,7 +72,8 @@ public class StreamController(
     public async Task<ActionResult<ExternalSourceDto>> UpdateExternalSource(ExternalSourceDto dto)
     {
         // Check if a host and api key exists for the current user
-        return Ok(await streamService.UpdateExternalSource(UserId, dto));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await streamService.UpdateExternalSource(UserId, dto, ct));
     }
 
     /// <summary>
@@ -80,7 +85,8 @@ public class StreamController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<bool>> ExternalSourceExists(ExternalSourceDto dto)
     {
-        return Ok(await unitOfWork.AppUserExternalSourceRepository.ExternalSourceExists(UserId, dto.Name, dto.Host, dto.ApiKey));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.AppUserExternalSourceRepository.ExternalSourceExists(UserId, dto.Name, dto.Host, dto.ApiKey, ct));
     }
 
     /// <summary>
@@ -92,7 +98,8 @@ public class StreamController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> ExternalSourceExists(int externalSourceId)
     {
-        await streamService.DeleteExternalSource(UserId, externalSourceId);
+        var ct = HttpContext.RequestAborted;
+        await streamService.DeleteExternalSource(UserId, externalSourceId, ct);
         return Ok();
     }
 
@@ -106,7 +113,8 @@ public class StreamController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<DashboardStreamDto>> AddDashboard([FromQuery] int smartFilterId)
     {
-        return Ok(await streamService.CreateDashboardStreamFromSmartFilter(UserId, smartFilterId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await streamService.CreateDashboardStreamFromSmartFilter(UserId, smartFilterId, ct));
     }
 
     /// <summary>
@@ -118,7 +126,8 @@ public class StreamController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateDashboardStream(DashboardStreamDto dto)
     {
-        await streamService.UpdateDashboardStream(UserId, dto);
+        var ct = HttpContext.RequestAborted;
+        await streamService.UpdateDashboardStream(UserId, dto, ct);
         return Ok();
     }
 
@@ -131,7 +140,8 @@ public class StreamController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateDashboardStreamPosition(UpdateStreamPositionDto dto)
     {
-        await streamService.UpdateDashboardStreamPosition(UserId, dto);
+        var ct = HttpContext.RequestAborted;
+        await streamService.UpdateDashboardStreamPosition(UserId, dto, ct);
         return Ok();
     }
 
@@ -145,7 +155,8 @@ public class StreamController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<SideNavStreamDto>> AddSideNav([FromQuery] int smartFilterId)
     {
-        return Ok(await streamService.CreateSideNavStreamFromSmartFilter(UserId, smartFilterId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await streamService.CreateSideNavStreamFromSmartFilter(UserId, smartFilterId, ct));
     }
 
     /// <summary>
@@ -157,7 +168,8 @@ public class StreamController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<SideNavStreamDto>> AddSideNavFromExternalSource([FromQuery] int externalSourceId)
     {
-        return Ok(await streamService.CreateSideNavStreamFromExternalSource(UserId, externalSourceId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await streamService.CreateSideNavStreamFromExternalSource(UserId, externalSourceId, ct));
     }
 
     /// <summary>
@@ -169,7 +181,8 @@ public class StreamController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateSideNavStream(SideNavStreamDto dto)
     {
-        await streamService.UpdateSideNavStream(UserId, dto);
+        var ct = HttpContext.RequestAborted;
+        await streamService.UpdateSideNavStream(UserId, dto, ct);
         return Ok();
     }
 
@@ -182,7 +195,8 @@ public class StreamController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateSideNavStreamPosition(UpdateStreamPositionDto dto)
     {
-        await streamService.UpdateSideNavStreamPosition(UserId, dto);
+        var ct = HttpContext.RequestAborted;
+        await streamService.UpdateSideNavStreamPosition(UserId, dto, ct);
         return Ok();
     }
 
@@ -190,7 +204,8 @@ public class StreamController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> BulkUpdateSideNavStream(BulkUpdateSideNavStreamVisibilityDto dto)
     {
-        await streamService.UpdateSideNavStreamBulk(UserId, dto);
+        var ct = HttpContext.RequestAborted;
+        await streamService.UpdateSideNavStreamBulk(UserId, dto, ct);
         return Ok();
     }
 
@@ -203,7 +218,8 @@ public class StreamController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteSmartFilterSideNavStream([FromQuery] int sideNavStreamId)
     {
-        await streamService.DeleteSideNavSmartFilterStream(UserId, sideNavStreamId);
+        var ct = HttpContext.RequestAborted;
+        await streamService.DeleteSideNavSmartFilterStream(UserId, sideNavStreamId, ct);
         return Ok();
     }
 
@@ -216,7 +232,8 @@ public class StreamController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteSmartFilterDashboardStream([FromQuery] int dashboardStreamId)
     {
-        await streamService.DeleteDashboardSmartFilterStream(UserId, dashboardStreamId);
+        var ct = HttpContext.RequestAborted;
+        await streamService.DeleteDashboardSmartFilterStream(UserId, dashboardStreamId, ct);
         return Ok();
     }
 }

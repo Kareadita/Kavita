@@ -1,13 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
+  DestroyRef, effect,
   inject,
   input,
   OnInit,
   output,
   signal,
-  TemplateRef
+  TemplateRef, untracked
 } from '@angular/core';
 import {NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -28,12 +28,11 @@ import {ToggleService} from "../../../_services/toggle.service";
   styleUrls: ['./side-nav-companion-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SideNavCompanionBarComponent implements OnInit {
+export class SideNavCompanionBarComponent {
   private readonly navService = inject(NavService);
   protected readonly toggleService = inject(ToggleService);
   private readonly offcanvasService = inject(NgbOffcanvas);
   protected readonly breakpointService = inject(BreakpointService);
-  private readonly destroyRef = inject(DestroyRef);
 
   /**
    * If the page should show a filter
@@ -56,20 +55,17 @@ export class SideNavCompanionBarComponent implements OnInit {
 
   filterOpen = output<boolean>();
 
-
-
-  ngOnInit(): void {
-    // If user opens side nav while filter is open on mobile, then collapse filter (as it doesn't render well) TODO: Change this when we have new drawer
-    this.navService.sideNavCollapsed$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(sideNavCollapsed => {
-      if (this.isFilterOpen() && sideNavCollapsed && this.breakpointService.isMobile()) {
+  constructor() {
+    effect(() => {
+      const sideNavCollapsed = this.navService.sideNavCollapsedSignal();
+      if (untracked(this.isFilterOpen) && sideNavCollapsed && untracked(this.breakpointService.isMobile)) {
         this.isFilterOpen.set(false);
         this.filterOpen.emit(false);
       }
     });
-
-    this.toggleService.toggleState$.pipe(takeUntilDestroyed(this.destroyRef), tap(isOpen => {
-      this.isFilterOpen.set(isOpen);
-    })).subscribe();
+    effect(() => {
+      this.isFilterOpen.set(this.toggleService.toggleState());
+    });
   }
 
   openExtrasDrawer() {

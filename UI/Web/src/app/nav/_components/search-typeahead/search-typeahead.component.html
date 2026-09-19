@@ -1,0 +1,395 @@
+<ng-container *transloco="let t; prefix: 'search-typeahead'">
+  <form [formRoot]="formGroup" class="grouped-typeahead">
+    <label [for]="id()" class="form-label visually-hidden">{{t('search-series-alt')}}</label>
+    <div class="typeahead-input" [class.focused]="hasFocus()" (click)="onInputClick($event)">
+      <div class="search">
+        <input #input [id]="id()" type="text" inputmode="search" autocomplete="off" [formField]="formGroup.typeahead" [placeholder]="t('search-alt')"
+               role="combobox" aria-autocomplete="list"
+               [attr.aria-controls]="listboxId()"
+               [attr.aria-expanded]="hasFocus() && rowCount() > 0"
+               [attr.aria-activedescendant]="activeRowId()"
+               (focusout)="close($event)" (focus)="open()">
+
+        <button type="button" class="btn btn-icon search-config flex-shrink-0"
+                #configBtn #configPopover="ngbPopover"
+                [ngbPopover]="configContent" [popoverTitle]="t('search-config-title')"
+                popoverClass="search-config-popover"
+                [autoClose]="false" placement="bottom-end" triggers="click"
+                [attr.aria-expanded]="configPopover.isOpen()"
+                [attr.aria-label]="t('search-config-alt')">
+          <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+        </button>
+
+        @if (searchTerm().length > 0) {
+          @if (isLoading()) {
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">{{t('loading')}}</span>
+            </div>
+          } @else {
+            <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="clearSearch()"></button>
+          }
+        } @else {
+          <div class="input-hint d-none d-lg-block">
+            {{keyBindService.allKeyBinds().OpenSearch.at(0) | keyBind:false}}
+          </div>
+        }
+      </div>
+    </div>
+
+    <span class="visually-hidden" role="status" aria-live="polite">
+      @if (hasFocus() && searchTerm().length > 0 && !isLoading()) {
+        @if (hasAnyData()) {
+          {{t('results-available-alt', {count: resultCount()})}}
+        } @else {
+          {{t('no-results-alt')}}
+        }
+      }
+    </span>
+
+    @if (hasFocus()) {
+      @let data = groupedData();
+      @let term = searchTerm().trim();
+      @let offset = offsets();
+
+      <div class="overlay">
+        <div class="search-dropdown">
+          <div class="panel d-flex flex-column">
+            <ul class="list-group dropdown-list" role="listbox" [id]="listboxId()">
+
+              @if (term.length > 0) {
+                <li #optionRow class="list-group-item search-all-row" role="option" [id]="rowId(0)"
+                    [class.active]="focusedIndex() === 0" [attr.aria-selected]="focusedIndex() === 0">
+                  <div class="result-row clickable d-flex align-items-center gap-2" (click)="searchAll()">
+                    <div class="thumb flex-shrink-0 text-center">
+                      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    </div>
+                    <div class="body">
+                      <div class="title text-truncate">
+                        <app-transloco-inject key="search-typeahead.search-for">
+                          <ng-template translocoSlot="term"><strong>{{term}}</strong></ng-template>
+                        </app-transloco-inject>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              }
+
+              @if (data.series.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('series')">{{t('series')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('series')">
+                  @for (option of data.series; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.series + i)"
+                        [class.active]="focusedIndex() === offset.series + i" [attr.aria-selected]="focusedIndex() === offset.series + i">
+                      <ng-container [ngTemplateOutlet]="seriesTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.collections.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('collections')">{{t('collections')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('collections')">
+                  @for (option of data.collections; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.collections + i)"
+                        [class.active]="focusedIndex() === offset.collections + i" [attr.aria-selected]="focusedIndex() === offset.collections + i">
+                      <ng-container [ngTemplateOutlet]="collectionTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.readingLists.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('readingLists')">{{t('reading-lists')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('readingLists')">
+                  @for (option of data.readingLists; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.readingLists + i)"
+                        [class.active]="focusedIndex() === offset.readingLists + i" [attr.aria-selected]="focusedIndex() === offset.readingLists + i">
+                      <ng-container [ngTemplateOutlet]="readingListTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.bookmarks.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('bookmarks')">{{t('bookmarks')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('bookmarks')">
+                  @for (option of data.bookmarks; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.bookmarks + i)"
+                        [class.active]="focusedIndex() === offset.bookmarks + i" [attr.aria-selected]="focusedIndex() === offset.bookmarks + i">
+                      <ng-container [ngTemplateOutlet]="bookmarkTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.libraries.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('libraries')">{{t('libraries')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('libraries')">
+                  @for (option of data.libraries; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.libraries + i)"
+                        [class.active]="focusedIndex() === offset.libraries + i" [attr.aria-selected]="focusedIndex() === offset.libraries + i">
+                      <ng-container [ngTemplateOutlet]="libraryTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.genres.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('genres')">{{t('genres')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('genres')">
+                  @for (option of data.genres; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.genres + i)"
+                        [class.active]="focusedIndex() === offset.genres + i" [attr.aria-selected]="focusedIndex() === offset.genres + i">
+                      <ng-container [ngTemplateOutlet]="genreTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.tags.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('tags')">{{t('tags')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('tags')">
+                  @for (option of data.tags; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.tags + i)"
+                        [class.active]="focusedIndex() === offset.tags + i" [attr.aria-selected]="focusedIndex() === offset.tags + i">
+                      <ng-container [ngTemplateOutlet]="tagTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.persons.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('persons')">{{t('people')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('persons')">
+                  @for (option of data.persons; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.persons + i)"
+                        [class.active]="focusedIndex() === offset.persons + i" [attr.aria-selected]="focusedIndex() === offset.persons + i">
+                      <ng-container [ngTemplateOutlet]="personTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.chapters.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('chapters')">{{t('chapters')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('chapters')">
+                  @for (option of data.chapters; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.chapters + i)"
+                        [class.active]="focusedIndex() === offset.chapters + i" [attr.aria-selected]="focusedIndex() === offset.chapters + i">
+                      <ng-container [ngTemplateOutlet]="chapterTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.files.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('files')">{{t('files')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('files')">
+                  @for (option of data.files; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.files + i)"
+                        [class.active]="focusedIndex() === offset.files + i" [attr.aria-selected]="focusedIndex() === offset.files + i">
+                      <ng-container [ngTemplateOutlet]="fileTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (data.annotations.length > 0) {
+                <li class="list-group-item no-hover group-header" role="presentation"><h5 class="kv-section-header" [id]="groupId('annotations')">{{t('annotations')}}</h5></li>
+                <ul class="list-group results" role="group" [attr.aria-labelledby]="groupId('annotations')">
+                  @for (option of data.annotations; track option; let i = $index) {
+                    <li #optionRow class="list-group-item" role="option" [id]="rowId(offset.annotations + i)"
+                        [class.active]="focusedIndex() === offset.annotations + i" [attr.aria-selected]="focusedIndex() === offset.annotations + i">
+                      <ng-container [ngTemplateOutlet]="annotationTemplate" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    </li>
+                  }
+                </ul>
+              }
+            </ul>
+
+            <!-- Outside the listbox: a listbox may only contain option and group children -->
+            @if (searchTerm().length > 0 && !isLoading() && !hasAnyData()) {
+              <app-empty-state [titleKey]="'no-data'"
+                               [i18nPrefix]="'search-typeahead'">
+                <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              </app-empty-state>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+  </form>
+
+
+  <ng-template #configContent>
+    <div class="form-check form-switch" (focusout)="onConfigFocusOut($event)">
+      <input type="checkbox" [id]="extrasId()" role="switch" [formField]="formGroup.includeExtras" class="form-check-input" switch>
+      <label class="form-check-label" [attr.for]="extrasId()">{{t('include-extras')}}</label>
+    </div>
+  </ng-template>
+
+
+  <ng-template #libraryTemplate let-item>
+    <div class="result-row clickable d-flex align-items-center gap-2" (click)="clickLibraryResult(item)">
+      <div class="body">
+        <div class="title text-truncate">{{item.name}}</div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #seriesTemplate let-item>
+    @let normalizedSearchTerm = searchTerm().toLowerCase().trim();
+
+    <div class="result-row clickable d-flex align-items-center gap-2" (click)="clickSeriesSearchResult(item)">
+      <div class="thumb flex-shrink-0">
+        <app-image class="search-result" width="32px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
+      </div>
+      <div class="body">
+        <div class="title text-truncate">
+          @if (item.localizedName.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
+            {{item.localizedName}}
+          } @else {
+            {{item.name}}
+          }
+        </div>
+        <div class="subtitle d-flex align-items-center gap-1">
+          <span class="text-truncate">{{t('in-library', {name: item.libraryName})}}</span>
+          <app-format-badge class="flex-shrink-0" [format]="item.format" />
+        </div>
+      </div>
+      @if (item.volumeCount > 0) {
+        <div class="meta ms-auto flex-shrink-0">{{t(item.volumeCount === 1 ? 'volume-count-one' : 'volume-count', {count: item.volumeCount})}}</div>
+      } @else if (item.chapterCount > 0) {
+        <div class="meta ms-auto flex-shrink-0">{{t(item.chapterCount === 1 ? 'chapter-count-one' : 'chapter-count', {count: item.chapterCount})}}</div>
+      }
+    </div>
+  </ng-template>
+
+  <ng-template #annotationTemplate let-item>
+    @let normalizedSearchTerm = searchTerm().toLowerCase().trim();
+
+    <div class="result-row clickable d-flex align-items-center gap-2" (click)="clickAnnotationSearchResult(item)">
+      <div class="body">
+        @if (item.comment.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
+          <!--We can't render the comment as it's json -->
+          <quill-view [content]="item.context" />
+        } @else {
+          <div class="title text-truncate">{{item.chapterTitle}}</div>
+        }
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #bookmarkTemplate let-item>
+    @let normalizedSearchTerm = searchTerm().toLowerCase().trim();
+
+    <div class="result-row clickable d-flex align-items-center gap-2" (click)="clickBookmarkSearchResult(item)">
+      <div class="thumb flex-shrink-0">
+        <app-image class="search-result" width="32px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
+      </div>
+      <div class="body">
+        @if (item.seriesName.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
+          <div class="title text-truncate">{{item.seriesName}}</div>
+        } @else {
+          <div class="title text-truncate" [innerHTML]="item.localizedSeriesName"></div>
+        }
+        <div class="subtitle">
+          <app-format-badge [format]="item.format" />
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #collectionTemplate let-item>
+    <div class="result-row clickable d-flex align-items-center gap-2" (click)="clickCollectionSearchResult(item)">
+      <div class="thumb flex-shrink-0">
+        <app-image class="search-result" width="32px" [imageUrl]="imageService.getCollectionCoverImage(item.id)" />
+      </div>
+      <div class="body">
+        <div class="title text-truncate">
+          <span>{{item.title}}</span>
+          <app-promoted-icon [promoted]="item.promoted" />
+        </div>
+        <div class="subtitle text-truncate">
+          <app-collection-owner [collection]="item" />
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #readingListTemplate let-item>
+    <div class="result-row clickable d-flex align-items-center gap-2" (click)="clickReadingListSearchResult(item)">
+      <div class="body">
+        <div class="title text-truncate">
+          <span>{{item.title}}</span>
+          <app-promoted-icon [promoted]="item.promoted" />
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #tagTemplate let-item>
+    <div class="result-row clickable d-flex align-items-center gap-2" (click)="goToOther(FilterField.Tags, item.id)">
+      <div class="body">
+        <div class="title text-truncate">
+          <i class="fas fa-tag" aria-hidden="true"></i>
+          {{item.title}}
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #genreTemplate let-item>
+    <div class="result-row clickable d-flex align-items-center gap-2" (click)="goToOther(FilterField.Genres, item.id)">
+      <div class="body">
+        <div class="title text-truncate">
+          <i class="fas fa-tag" aria-hidden="true"></i>
+          {{item.title}}
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #personTemplate let-item>
+    <div class="result-row clickable d-flex align-items-center gap-2" (click)="goToPerson(item)">
+      <div class="thumb flex-shrink-0">
+        <app-image class="search-result"
+                   [styles]="{'background': 'none', 'max-height': '32px', 'height': '32px', 'width': '32px', 'border-radius': '50%'}"
+                   width="32px" [imageUrl]="imageService.getPersonImage(item.id)" [errorImage]="imageService.noPersonImage" />
+      </div>
+      <div class="body">
+        <div class="title text-truncate">{{item.name}}</div>
+        @if (item.aliases.length > 0) {
+          <div class="subtitle text-truncate">{{t('person-aka-status')}}</div>
+        }
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #chapterTemplate let-item>
+    <div class="result-row clickable d-flex align-items-center gap-2" (click)="clickChapterSearchResult(item)">
+      <div class="body">
+        <!-- TODO: this needs the series name before the chapter issue -->
+        <div class="title text-truncate">{{item.titleName || item.range}}</div>
+        @if (item.files.length > 0) {
+          <div class="subtitle">
+            <app-format-badge [format]="item.files?.[0].format" />
+          </div>
+        }
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #fileTemplate let-item>
+    <div class="result-row clickable d-flex align-items-center gap-2" (click)="clickFileSearchResult(item)">
+      <div class="body">
+        <div class="title text-truncate">{{item.filePath}}</div>
+        <div class="subtitle">
+          <app-format-badge [format]="item.format" />
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+</ng-container>

@@ -5,7 +5,6 @@ import {
   ElementRef,
   inject,
   input,
-  NgZone,
   OnDestroy,
   OnInit,
   untracked
@@ -49,7 +48,6 @@ export class EChartsDirective implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly el = inject(ElementRef);
   private readonly themeService = inject(ThemeService);
-  private ngZone = inject(NgZone);
 
   readonly options = input<ECOption | null>(null);
   readonly initOptions = input<EChartsInitOpts | undefined>(undefined);
@@ -69,13 +67,11 @@ export class EChartsDirective implements OnInit, OnDestroy {
       const options = untracked(this.options);
       if (!kavitaTheme || !options) return;
 
-      this.ngZone.runOutsideAngular(() => {
-        registerTheme(kavitaTheme.name, this.createTheme());
+      registerTheme(kavitaTheme.name, this.createTheme());
 
-        this.echart?.dispose();
-        this.echart = init(this.el.nativeElement, kavitaTheme.name, untracked(this.initOptions));
-        this.echart.setOption(options);
-      });
+      this.echart?.dispose();
+      this.echart = init(this.el.nativeElement, kavitaTheme.name, untracked(this.initOptions));
+      this.echart.setOption(options);
     });
 
     // Keep up to date with options
@@ -83,9 +79,7 @@ export class EChartsDirective implements OnInit, OnDestroy {
       const options = this.options();
       if (!options || !this.echart) return;
 
-      this.ngZone.runOutsideAngular(() => {
-        this.echart!.setOption(options);
-      });
+      this.echart!.setOption(options);
     });
   }
 
@@ -94,12 +88,10 @@ export class EChartsDirective implements OnInit, OnDestroy {
     const kavitaTheme = this.themeService.currentTheme();
     if (!options || !kavitaTheme) return;
 
-    this.ngZone.runOutsideAngular(() => {
-      registerTheme(kavitaTheme.name, this.createTheme());
+    registerTheme(kavitaTheme.name, this.createTheme());
 
-      this.echart = init(this.el.nativeElement, kavitaTheme.name, this.initOptions());
-      this.echart.setOption(options);
-    });
+    this.echart = init(this.el.nativeElement, kavitaTheme.name, this.initOptions());
+    this.echart.setOption(options);
 
     this.resizer$.pipe(
       takeUntilDestroyed(this.destroyRef),
@@ -110,26 +102,23 @@ export class EChartsDirective implements OnInit, OnDestroy {
         }
       })).subscribe();
 
-    this.resizeObserver = this.ngZone.runOutsideAngular(
-      () =>
-        new window.ResizeObserver(entries => {
-          for (const entry of entries) {
-            if (entry.target === this.el.nativeElement) {
-              if (!this.resizeObserverHasFired) {
-                this.resizeObserverHasFired = true;
+    this.resizeObserver = new window.ResizeObserver(entries => {
+      for (const entry of entries) {
+        if (entry.target === this.el.nativeElement) {
+          if (!this.resizeObserverHasFired) {
+            this.resizeObserverHasFired = true;
 
-                if (this.ignoreFirstResize()) {
-                  return;
-                }
-              }
-
-              this.animationFrameID = window.requestAnimationFrame(() => {
-                this.resizer$.next();
-              });
+            if (this.ignoreFirstResize()) {
+              return;
             }
           }
-        })
-    );
+
+          this.animationFrameID = window.requestAnimationFrame(() => {
+            this.resizer$.next();
+          });
+        }
+      }
+    });
 
     this.resizeObserver.observe(this.el.nativeElement);
   }

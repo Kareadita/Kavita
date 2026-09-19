@@ -1,5 +1,5 @@
-import {computed, DestroyRef, effect, inject, Injectable, signal} from '@angular/core';
-import {firstValueFrom, Observable, Subject} from 'rxjs';
+import {computed, DestroyRef, effect, inject, Injectable, signal, untracked} from '@angular/core';
+import {firstValueFrom, Observable, skip, Subject} from 'rxjs';
 import {bookColorThemes, PageStyle} from "../book-reader/_components/reader-settings/reader-settings.component";
 import {ReadingDirection} from '../_models/preferences/reading-direction';
 import {WritingStyle} from '../_models/preferences/writing-style';
@@ -13,43 +13,44 @@ import {BookTheme} from "../_models/preferences/book-theme";
 import {DOCUMENT} from "@angular/common";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from '@openng/ngx-toastr';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {UtilityService} from "../shared/_services/utility.service";
 import {environment} from "../../environments/environment";
 import {EpubFont, FontProvider} from "../_models/preferences/epub-font";
 import {FontService} from "./font.service";
 import {BreakpointService} from "./breakpoint.service";
+import {FieldTree, form, max, min} from "@angular/forms/signals";
 
 export interface ReaderSettingUpdate {
   setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme' | 'pageCalcMethod' | 'bookReaderDisableBookmarkIcon';
   object: any;
 }
 
-export type BookReadingProfileFormGroup = FormGroup<{
-  bookReaderMargin: FormControl<number>;
-  bookReaderLineSpacing: FormControl<number>;
-  bookReaderFontSize: FormControl<number>;
-  bookReaderFontFamily: FormControl<string>;
-  bookReaderTapToPaginate: FormControl<boolean>;
-  bookReaderReadingDirection: FormControl<ReadingDirection>;
-  bookReaderWritingStyle: FormControl<WritingStyle>;
-  bookReaderThemeName: FormControl<string>;
-  bookReaderLayoutMode: FormControl<BookPageLayoutMode>;
-  bookReaderImmersiveMode: FormControl<boolean>;
-  bookReaderDisableBookmarkIcon: FormControl<boolean>;
-}>
+export interface BookReadingProfileFormModel {
+  bookReaderMargin: number;
+  bookReaderLineSpacing: number;
+  bookReaderFontSize: number;
+  bookReaderFontFamily: string;
+  bookReaderTapToPaginate: boolean;
+  bookReaderReadingDirection: ReadingDirection;
+  bookReaderWritingStyle: WritingStyle;
+  bookReaderThemeName: string;
+  bookReaderLayoutMode: BookPageLayoutMode;
+  bookReaderImmersiveMode: boolean;
+  bookReaderDisableBookmarkIcon: boolean;
+}
 
 @Injectable()
 export class EpubReaderSettingsService {
-  private readonly destroyRef = inject(DestroyRef);
+
   private readonly fontService = inject(FontService);
   private readonly themeService = inject(ThemeService);
   private readonly readingProfileService = inject(ReadingProfileService);
-  private readonly utilityService = inject(UtilityService);
   private readonly toastr = inject(ToastrService);
   private readonly document = inject(DOCUMENT);
-  private readonly fb = inject(NonNullableFormBuilder);
   protected readonly breakpointService = inject(BreakpointService);
+
+  //#region State
 
   // Core signals - these will be the single source of truth
   private readonly _currentReadingProfile = signal<ReadingProfile | null>(null);
@@ -58,42 +59,61 @@ export class EpubReaderSettingsService {
   private readonly _currentLibraryId = signal<number | null>(null);
   private readonly _isInitialized = signal<boolean>(false);
   private readonly _epubFonts = signal<EpubFont[]>([]);
-
-  // Settings signals
-  private readonly _pageStyles = signal<PageStyle>(this.getDefaultPageStyles()); // Internal property used to capture all the different css properties to render on all elements
-  private readonly _readingDirection = signal<ReadingDirection>(ReadingDirection.LeftToRight);
-  private readonly _writingStyle = signal<WritingStyle>(WritingStyle.Horizontal);
   private readonly _activeTheme = signal<BookTheme | undefined>(undefined);
-  private readonly _clickToPaginate = signal<boolean>(false);
-  private readonly _layoutMode = signal<BookPageLayoutMode>(BookPageLayoutMode.Default);
-  private readonly _immersiveMode = signal<boolean>(false);
   private readonly _isFullscreen = signal<boolean>(false);
 
-  // Form will be managed separately but updated from signals
-  private settingsForm!: BookReadingProfileFormGroup;
-  private isUpdatingFromForm = false; // Flag to prevent infinite loops
-  private isInitialized = this._isInitialized(); // Non-signal, updates in effect
-
-  // Event subject for component communication (keep this for now, can be converted to effect later)
-  private settingUpdateSubject = new Subject<ReaderSettingUpdate>();
+  formModel = signal<BookReadingProfileFormModel>({
+    bookReaderDisableBookmarkIcon: false,
+    bookReaderFontFamily: "",
+    bookReaderFontSize: 0,
+    bookReaderImmersiveMode: false,
+    bookReaderLayoutMode: BookPageLayoutMode.Default,
+    bookReaderLineSpacing: 0,
+    bookReaderMargin: 0,
+    bookReaderReadingDirection: ReadingDirection.LeftToRight,
+    bookReaderTapToPaginate: false,
+    bookReaderThemeName: "",
+    bookReaderWritingStyle: WritingStyle.Horizontal
+  })
+  formGroup = form(this.formModel, path => {
+    min(path.bookReaderFontSize, 50);
+    max(path.bookReaderFontSize, 300);
+    min(path.bookReaderLineSpacing, 100);
+    max(path.bookReaderLineSpacing, 200);
+    min(path.bookReaderMargin, 0);
+    max(path.bookReaderMargin, 30);
+  });
 
   // Public readonly signals
   public readonly currentReadingProfile = this._currentReadingProfile.asReadonly();
   public readonly parentReadingProfile = this._parentReadingProfile.asReadonly();
 
   // Settings as readonly signals
-  public readonly pageStyles = this._pageStyles.asReadonly();
-  public readonly readingDirection = this._readingDirection.asReadonly();
-  public readonly writingStyle = this._writingStyle.asReadonly();
+  public readonly pageStyles = computed<PageStyle>(() => {
+    const fontFamily = this.formGroup.bookReaderFontFamily().value();
+    const fontSize = this.formGroup.bookReaderFontSize().value();
+    const lineSpacing = this.formGroup.bookReaderLineSpacing().value();
+    const margin = this.formGroup.bookReaderMargin().value();
+
+    return {
+      'font-family': this.toCssFontFamily(fontFamily),
+      'font-size': `${fontSize}%`,
+      'line-height': `${lineSpacing}%`,
+      'margin-left': `${margin}vw`,
+      'margin-right': `${margin}vw`,
+    };
+  });
+  public readonly readingDirection = computed(() => this.formGroup.bookReaderReadingDirection().value());
+  public readonly writingStyle = computed(() => this.formGroup.bookReaderWritingStyle().value());
   public readonly activeTheme = this._activeTheme.asReadonly();
-  public readonly clickToPaginate = this._clickToPaginate.asReadonly();
-  public readonly immersiveMode = this._immersiveMode.asReadonly();
+  public readonly clickToPaginate = computed(() => this.formGroup.bookReaderTapToPaginate().value());
+  public readonly immersiveMode = computed(() => this.formGroup.bookReaderImmersiveMode().value());
   public readonly isFullscreen = this._isFullscreen.asReadonly();
   public readonly epubFonts = this._epubFonts.asReadonly();
 
   // Computed signals for derived state
   public readonly layoutMode = computed(() => {
-    const layout = this._layoutMode();
+    const layout = this.formGroup.bookReaderLayoutMode().value();
     const mobileDevice = this.breakpointService.isMobile();
 
     if (layout !== BookPageLayoutMode.Column2 || !mobileDevice) return layout;
@@ -102,7 +122,6 @@ export class EpubReaderSettingsService {
     this.toastr.info(translate('book-reader.force-selected-one-column'));
     return BookPageLayoutMode.Column1;
   });
-
 
   public readonly canPromoteProfile = computed(() => {
     const profile = this._currentReadingProfile();
@@ -113,104 +132,32 @@ export class EpubReaderSettingsService {
     return this._parentReadingProfile() !== null;
   });
 
-  // Keep observable for now - can be converted to effect later
-  public readonly settingUpdates$ = this.settingUpdateSubject.asObservable()
-    .pipe(filter(val => {
-    if (!environment.production) {
-      console.log(`[SETTINGS EFFECT] ${val.setting}`, val.setting === 'theme' ? val.object.name : val.object);
-    }
-
-    return this._isInitialized();
-  }), debounceTime(10));
+  //#endregion
 
   constructor() {
-    // Effect to update form when signals change (only when not updating from form)
     effect(() => {
-      const profile = this._currentReadingProfile();
-      if (profile && this._isInitialized() && !this.isUpdatingFromForm) {
-        this.updateFormFromSignals();
+      const layoutMode = this.layoutMode();
+
+      if (untracked(this.writingStyle) === WritingStyle.Vertical && layoutMode == BookPageLayoutMode.Column2) {
+        this.toastr.info(translate('book-reader.forced-vertical-switch'));
       }
     });
 
-
     effect(() => {
-      this.isInitialized = this._isInitialized();
-    });
+      const immersiveMode = this.immersiveMode();
 
-    // Effect to emit setting updates when signals change
-    effect(() => {
-      const styles = this._pageStyles();
-      if (!this.isInitialized) return;
-
-      this.settingUpdateSubject.next({
-        setting: 'pageStyle',
-        object: styles,
-      });
-    });
-
-    effect(() => {
-      const clickToPaginate = this._clickToPaginate();
-      if (!this.isInitialized) return;
-
-      this.settingUpdateSubject.next({
-        setting: 'clickToPaginate',
-        object: clickToPaginate,
-      });
-    });
-
-    effect(() => {
-      const mode = this._layoutMode();
-      if (!this.isInitialized) return;
-
-      this.settingUpdateSubject.next({
-        setting: 'layoutMode',
-        object: mode,
-      });
-    });
-
-    effect(() => {
-      const direction = this._readingDirection();
-      if (!this.isInitialized) return;
-
-      this.settingUpdateSubject.next({
-        setting: 'readingDirection',
-        object: direction,
-      });
-    });
-
-    effect(() => {
-      const style = this._writingStyle();
-      if (!this.isInitialized) return;
-
-      this.settingUpdateSubject.next({
-        setting: 'writingStyle',
-        object: style,
-      });
-    });
-
-    effect(() => {
-      const mode = this._immersiveMode();
-      if (!this.isInitialized) return;
-
-      this.settingUpdateSubject.next({
-        setting: 'immersiveMode',
-        object: mode,
-      });
-    });
-
-    effect(() => {
-      const theme = this._activeTheme();
-      if (!this.isInitialized) return;
-
-      if (theme) {
-        this.settingUpdateSubject.next({
-          setting: 'theme',
-          object: theme
-        });
+      if (immersiveMode && !untracked(this.clickToPaginate)) {
+        this.formGroup.bookReaderTapToPaginate().value.set(true);
       }
     });
+
+    toObservable(this.formGroup().value).pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      skip(1), // Data loaded
+      tap(() => this.updateImplicitProfile()),
+    ).subscribe();
   }
-
 
   /**
    * Initialize the service with a reading profile and series ID
@@ -236,8 +183,8 @@ export class EpubReaderSettingsService {
     }
 
     // Setup defaults and update signals
-    this.setupDefaultsFromProfile(readingProfile);
-    this.setupSettingsForm();
+    this.correctInvalidReadingProfileOptions(readingProfile);
+    this.setFormModelFromReadingProfile();
 
     // Set initial theme
     const themeName = readingProfile.bookReaderThemeName || this.themeService.defaultBookTheme;
@@ -248,9 +195,9 @@ export class EpubReaderSettingsService {
   }
 
   /**
-   * Setup default values and update signals from profile
+   * Correct invalid values in a reading profile
    */
-  private setupDefaultsFromProfile(profile: ReadingProfile): void {
+  private correctInvalidReadingProfileOptions(profile: ReadingProfile): void {
     // Set defaults if undefined
     if (profile.bookReaderFontFamily === undefined || profile.bookReaderFontFamily === 'default') {
       profile.bookReaderFontFamily = FontService.DefaultEpubFont;
@@ -273,28 +220,13 @@ export class EpubReaderSettingsService {
     if (profile.bookReaderLayoutMode === undefined) {
       profile.bookReaderLayoutMode = BookPageLayoutMode.Default;
     }
-
-    // Update signals from profile
-    this._readingDirection.set(profile.bookReaderReadingDirection);
-    this._writingStyle.set(profile.bookReaderWritingStyle);
-    this._clickToPaginate.set(profile.bookReaderTapToPaginate);
-    this._layoutMode.set(profile.bookReaderLayoutMode);
-    this._immersiveMode.set(profile.bookReaderImmersiveMode);
-
-    // Set up page styles
-    this._pageStyles.set(this.buildPageStyles(
-      this.toCssFontFamily(profile.bookReaderFontFamily),
-      profile.bookReaderFontSize + '%',
-      profile.bookReaderMargin + 'vw',
-      profile.bookReaderLineSpacing + '%'
-    ));
   }
 
   /**
    * Get the current settings form (for components that need direct form access)
    */
-  getSettingsForm(): BookReadingProfileFormGroup {
-    return this.settingsForm;
+  getSettingsForm(): FieldTree<BookReadingProfileFormModel> {
+    return this.formGroup;
   }
 
   /**
@@ -315,33 +247,31 @@ export class EpubReaderSettingsService {
    * Toggle reading direction
    */
   toggleReadingDirection(): void {
-    const current = this._readingDirection();
+    const current = this.readingDirection();
     const newDirection = current === ReadingDirection.LeftToRight
       ? ReadingDirection.RightToLeft
       : ReadingDirection.LeftToRight;
 
-    this._readingDirection.set(newDirection);
-    this.settingsForm.get('bookReaderReadingDirection')!.setValue(newDirection);
+    this.formGroup.bookReaderReadingDirection().value.set(newDirection);
   }
 
   /**
    * Toggle writing style
    */
   toggleWritingStyle(): void {
-    const current = this._writingStyle();
+    const current = this.writingStyle();
     const newStyle = current === WritingStyle.Horizontal
       ? WritingStyle.Vertical
       : WritingStyle.Horizontal;
 
     // Default back to Col 1 in this case
     if (newStyle === WritingStyle.Vertical ) {
-      if (this._layoutMode() === BookPageLayoutMode.Column2) {
+      if (this.layoutMode() === BookPageLayoutMode.Column2) {
         this.updateLayoutMode(BookPageLayoutMode.Column1);
       }
     }
 
-    this._writingStyle.set(newStyle);
-    this.settingsForm.get('bookReaderWritingStyle')!.setValue(newStyle);
+    this.formGroup.bookReaderWritingStyle().value.set(newStyle);
   }
 
   /**
@@ -352,43 +282,37 @@ export class EpubReaderSettingsService {
     if (theme) {
       this._activeTheme.set(theme);
       if (update) {
-        this.settingsForm.get('bookReaderThemeName')!.setValue(themeName);
+        this.formGroup.bookReaderThemeName().value.set(theme.name);
       }
     }
   }
 
   updateLayoutMode(mode: BookPageLayoutMode): void {
-    this._layoutMode.set(mode);
-    // Update form control to keep in sync
-    this.settingsForm.get('bookReaderLayoutMode')?.setValue(mode, { emitEvent: false });
+    this.formGroup.bookReaderLayoutMode().value.set(mode);
   }
 
   updateClickToPaginate(value: boolean): void {
-    this._clickToPaginate.set(value);
-    this.settingsForm.get('bookReaderTapToPaginate')?.setValue(value);
+    this.formGroup.bookReaderTapToPaginate().value.set(value);
   }
 
   updateReadingDirection(value: ReadingDirection): void {
-    this._readingDirection.set(value);
-    this.settingsForm.get('bookReaderReadingDirection')?.setValue(value);
+    this.formGroup.bookReaderReadingDirection().value.set(value);
   }
 
   updateWritingStyle(value: WritingStyle) {
-    this._writingStyle.set(value);
-    this.settingsForm.get('bookReaderWritingStyle')?.setValue(value);
+    this.formGroup.bookReaderWritingStyle().value.set(value);
   }
 
   updateFullscreen(value: boolean) {
-    this._isFullscreen.set(value);
     if (!this._isInitialized()) return;
 
-    this.settingUpdateSubject.next({ setting: 'fullscreen', object: null }); // TODO: Refactor into an effect
+    this._isFullscreen.set(value);
   }
 
   updateImmersiveMode(value: boolean): void {
-    this._immersiveMode.set(value);
+    this.formGroup.bookReaderImmersiveMode().value.set(value);
     if (value) {
-      this._clickToPaginate.set(true);
+      this.formGroup.bookReaderTapToPaginate().value.set(true);
     }
   }
 
@@ -434,167 +358,26 @@ export class EpubReaderSettingsService {
     );
   }
 
-
-  /**
-   * Update form controls from current signal values
-   */
-  private updateFormFromSignals(): void {
-    const profile = this._currentReadingProfile();
-    if (!profile) return;
-
-    // Update form controls without triggering valueChanges
-    this.settingsForm.patchValue({
-      bookReaderFontFamily: profile.bookReaderFontFamily,
-      bookReaderFontSize: profile.bookReaderFontSize,
-      bookReaderTapToPaginate: this._clickToPaginate(),
-      bookReaderLineSpacing: profile.bookReaderLineSpacing,
-      bookReaderMargin: profile.bookReaderMargin,
-      bookReaderLayoutMode: this._layoutMode(),
-      bookReaderImmersiveMode: this._immersiveMode()
-    }, { emitEvent: false });
-  }
-
   /**
    * Sets up the reactive form and bidirectional binding with signals
    */
-  private setupSettingsForm(): void {
+  private setFormModelFromReadingProfile(): void {
     const profile = this._currentReadingProfile();
     if (!profile) return;
 
-    // Recreate the form
-    this.settingsForm = new FormGroup({
-      bookReaderMargin: this.fb.control(profile.bookReaderMargin),
-      bookReaderLineSpacing: this.fb.control(profile.bookReaderLineSpacing),
-      bookReaderFontSize: this.fb.control(profile.bookReaderFontSize),
-      bookReaderFontFamily: this.fb.control(profile.bookReaderFontFamily),
-      bookReaderTapToPaginate: this.fb.control(this._clickToPaginate()),
-      bookReaderReadingDirection: this.fb.control(this._readingDirection()),
-      bookReaderWritingStyle: this.fb.control(profile.bookReaderWritingStyle),
-      bookReaderThemeName: this.fb.control(profile.bookReaderThemeName),
-      bookReaderLayoutMode: this.fb.control(this._layoutMode()),
-      bookReaderImmersiveMode: this.fb.control(this._immersiveMode()),
-      bookReaderDisableBookmarkIcon: this.fb.control(profile.bookReaderDisableBookmarkIcon),
+    this.formModel.set({
+      bookReaderDisableBookmarkIcon: profile.bookReaderDisableBookmarkIcon,
+      bookReaderFontFamily: profile.bookReaderFontFamily,
+      bookReaderFontSize: profile.bookReaderFontSize,
+      bookReaderImmersiveMode: profile.bookReaderImmersiveMode,
+      bookReaderLayoutMode: profile.bookReaderLayoutMode,
+      bookReaderLineSpacing: profile.bookReaderLineSpacing,
+      bookReaderMargin: profile.bookReaderMargin,
+      bookReaderReadingDirection: profile.bookReaderReadingDirection,
+      bookReaderTapToPaginate: profile.bookReaderTapToPaginate,
+      bookReaderThemeName: profile.bookReaderThemeName,
+      bookReaderWritingStyle: profile.bookReaderWritingStyle,
     });
-
-    // Set up value change subscriptions
-    this.setupFormSubscriptions();
-  }
-
-  /**
-   * Sets up form value change subscriptions to update signals
-   */
-  private setupFormSubscriptions(): void {
-    // Font family changes
-    this.settingsForm.get('bookReaderFontFamily')?.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(fontFamily => {
-      this.isUpdatingFromForm = true;
-
-      const newStyles = { ...this._pageStyles() };
-      newStyles['font-family'] = this.toCssFontFamily(fontFamily);
-      this._pageStyles.set(newStyles);
-      this.isUpdatingFromForm = false;
-    });
-
-    // Font size changes
-    this.settingsForm.get('bookReaderFontSize')?.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(value => {
-      this.isUpdatingFromForm = true;
-
-      const currentStyles = this._pageStyles();
-      const newStyles = { ...currentStyles };
-      newStyles['font-size'] = value + '%';
-      this._pageStyles.set(newStyles);
-
-      this.isUpdatingFromForm = false;
-    });
-
-    // Tap to paginate changes
-    this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(value => {
-      this.isUpdatingFromForm = true;
-      this._clickToPaginate.set(value);
-      this.isUpdatingFromForm = false;
-    });
-
-    // Line spacing changes
-    this.settingsForm.get('bookReaderLineSpacing')?.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(value => {
-      this.isUpdatingFromForm = true;
-
-      const currentStyles = this._pageStyles();
-      const newStyles = { ...currentStyles };
-      newStyles['line-height'] = value + '%';
-      this._pageStyles.set(newStyles);
-
-      this.isUpdatingFromForm = false;
-    });
-
-    // Margin changes
-    this.settingsForm.get('bookReaderMargin')?.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(value => {
-      this.isUpdatingFromForm = true;
-
-      const currentStyles = this._pageStyles();
-      const newStyles = { ...currentStyles };
-      newStyles['margin-left'] = value + 'vw';
-      newStyles['margin-right'] = value + 'vw';
-      this._pageStyles.set(newStyles);
-
-      this.isUpdatingFromForm = false;
-    });
-
-    // Layout mode changes
-    this.settingsForm.get('bookReaderLayoutMode')?.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe((layoutMode: BookPageLayoutMode) => {
-      this.isUpdatingFromForm = true;
-
-      if (this.writingStyle() === WritingStyle.Vertical && layoutMode === BookPageLayoutMode.Column2) {
-        this.toastr.info(translate('book-reader.forced-vertical-switch'));
-        this.isUpdatingFromForm = false;
-        return;
-      }
-
-
-      this._layoutMode.set(layoutMode);
-      this.isUpdatingFromForm = false;
-    });
-
-    // Immersive mode changes
-    this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe((immersiveMode: boolean) => {
-      this.isUpdatingFromForm = true;
-
-      if (immersiveMode) {
-        this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true, { emitEvent: false });
-        this._clickToPaginate.set(true);
-      }
-      this._immersiveMode.set(immersiveMode);
-
-      this.isUpdatingFromForm = false;
-    });
-
-    this.settingsForm.get('bookReaderDisableBookmarkIcon')?.valueChanges.pipe(
-     takeUntilDestroyed(this.destroyRef)
-    ).subscribe((bookReaderDisableBookmarkIcon: boolean) => {
-      this.settingUpdateSubject.next({ setting: 'bookReaderDisableBookmarkIcon', object: bookReaderDisableBookmarkIcon });
-    });
-
-
-    // Update implicit profile on form changes (debounced) - ONLY source of profile updates
-    this.settingsForm.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef),
-      filter(() => !this.isUpdatingFromForm),
-      tap(() => this.updateImplicitProfile()),
-    ).subscribe();
   }
 
   /**
@@ -611,10 +394,10 @@ export class EpubReaderSettingsService {
     );
 
     // Update form to ensure RP is updated, forgive me for the replace...
-    this.settingsForm.get('bookReaderFontFamily')!.setValue(styles["font-family"]);
-    this.settingsForm.get('bookReaderFontSize')!.setValue(parseInt(styles["font-size"].replace("%", "")));
-    this.settingsForm.get('bookReaderMargin')!.setValue(parseInt(styles["margin-left"].replace("vw", "")));
-    this.settingsForm.get('bookReaderLineSpacing')!.setValue(parseInt(styles["line-height"].replace("%", "")));
+    this.formGroup.bookReaderFontFamily().value.set(styles['font-family']);
+    this.formGroup.bookReaderFontSize().value.set(parseInt(styles["font-size"].replace("%", "")));
+    this.formGroup.bookReaderMargin().value.set(parseInt(styles["margin-left"].replace("vw", "")));
+    this.formGroup.bookReaderLineSpacing().value.set(parseInt(styles["line-height"].replace("%", "")));
   }
 
 
@@ -641,7 +424,7 @@ export class EpubReaderSettingsService {
       throw new Error('No current reading profile');
     }
 
-    const modelSettings = this.settingsForm.getRawValue();
+    const modelSettings = this.formModel();
     const data = { ...currentProfile };
 
     // Update from form values
@@ -652,11 +435,11 @@ export class EpubReaderSettingsService {
     data.bookReaderDisableBookmarkIcon = modelSettings.bookReaderDisableBookmarkIcon;
 
     // Update from signals
-    data.bookReaderTapToPaginate = this._clickToPaginate();
-    data.bookReaderLayoutMode = this._layoutMode();
-    data.bookReaderImmersiveMode = this._immersiveMode();
-    data.bookReaderReadingDirection = this._readingDirection();
-    data.bookReaderWritingStyle = this._writingStyle();
+    data.bookReaderTapToPaginate = this.clickToPaginate();
+    data.bookReaderLayoutMode = this.layoutMode();
+    data.bookReaderImmersiveMode = this.immersiveMode();
+    data.bookReaderReadingDirection = this.readingDirection();
+    data.bookReaderWritingStyle = this.writingStyle();
 
     const activeTheme = this._activeTheme();
     if (activeTheme) {
@@ -684,7 +467,7 @@ export class EpubReaderSettingsService {
       defaultMargin = '5vw';
     }
 
-    const currentStyles = this._pageStyles();
+    const currentStyles = this.pageStyles();
     const newStyles: PageStyle = {
       'font-family': fontFamily || currentStyles['font-family'] || FontService.DefaultEpubFont,
       'font-size': fontSize || currentStyles['font-size'] || '100%',

@@ -27,21 +27,11 @@
       <span class="text-warning" role="alert">{{t(hiddenTranslationKey(), {amount: hiddenItems()})}}</span>
     }
 
-    <form [formGroup]="filterForm">
-
-      @if (itemsValue.length > itemsBeforeFilter()) {
-        @if (filterForm.get('query'); as formControl) {
-          <div class="mb-3">
-            <label for="filter" class="form-label">{{t('common.filter')}}</label>
-            <div class="input-group">
-              <input id="filter" autocomplete="off" class="form-control" formControlName="query" type="text" aria-describedby="reset-input"
-                     [appFormField]="formControl">
-              <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="clear()">{{t('common.clear')}}</button>
-            </div>
-          </div>
-        }
-      }
-    </form>
+    @if (itemsValue.length > itemsBeforeFilter()) {
+      <div class="mb-3">
+        <app-filter-field [(query)]="filterQuery" [showLabel]="true" clearMode="button" />
+      </div>
+    }
 
     <ul class="list-group">
       @if (!loading()) {

@@ -49,9 +49,10 @@ export class NavService {
 
   private readonly renderer: Renderer2;
   private readonly baseUrl = environment.apiUrl;
-  public localStorageSideNavKey = 'kavita--sidenav--expanded';
+  public readonly localStorageSideNavKey = 'kavita--sidenav--expanded';
 
-  public navItems: NavItem[] = [
+  // TODO:This is globally accessed, refactor so it doesn't show as unused
+  public readonly navItems: NavItem[] = [
     {
       transLocoKey: 'all-filters',
       routerLink: '/all-filters/',
@@ -87,10 +88,6 @@ export class NavService {
    * If the top Nav bar is rendered or not
    */
   navbarVisibleSignal = this.navBarVisible.asReadonly();
-  /**
-   * If the top Nav bar is rendered or not
-   */
-  navbarVisible$ = toObservable(this.navBarVisible);
 
 
   private sideNavCollapsed = signal(false);
@@ -98,10 +95,6 @@ export class NavService {
    * If the Side Nav is in a collapsed state or not.
    */
   sideNavCollapsedSignal = this.sideNavCollapsed.asReadonly();
-  /**
-   * If the Side Nav is in a collapsed state or not.
-   */
-  sideNavCollapsed$ = toObservable(this.sideNavCollapsed);
 
   private sideNavVisibility = signal(false);
   /**

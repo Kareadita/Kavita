@@ -30,13 +30,14 @@ public class ReviewController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReviewDto>> UpdateSeriesReview(UpdateUserReviewDto dto)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings, ct);
         if (user == null) return Unauthorized();
 
-        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesId))
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesId, ct))
             return NotFound();
 
-        var ratingBuilder = new RatingBuilder(await unitOfWork.UserRepository.GetUserRatingAsync(dto.SeriesId, user.Id));
+        var ratingBuilder = new RatingBuilder(await unitOfWork.UserRepository.GetUserRatingAsync(dto.SeriesId, user.Id, ct));
 
         var rating = ratingBuilder
             .WithBody(dto.Body)
@@ -50,7 +51,7 @@ public class ReviewController(
 
         unitOfWork.UserRepository.Update(user);
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         BackgroundJob.Enqueue(() => scrobblingService.ScrobbleSeriesReviewUpdate(user.Id, dto.SeriesId,
             string.Empty, dto.Body, CancellationToken.None));
@@ -64,20 +65,19 @@ public class ReviewController(
     /// <param name="dto">chapterId must be set</param>
     /// <returns></returns>
     [HttpPost("chapter")]
+    [ChapterAccess]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReviewDto>> UpdateChapterReview(UpdateUserReviewDto dto)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ChapterRatings);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ChapterRatings, ct);
         if (user == null) return Unauthorized();
 
         if (dto.ChapterId == null) return BadRequest();
 
-        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesId))
-            return NotFound();
-
         var chapterId = dto.ChapterId.Value;
 
-        var ratingBuilder = new ChapterRatingBuilder(await unitOfWork.UserRepository.GetUserChapterRatingAsync(user.Id, chapterId));
+        var ratingBuilder = new ChapterRatingBuilder(await unitOfWork.UserRepository.GetUserChapterRatingAsync(user.Id, chapterId, ct));
 
         var rating = ratingBuilder
             .WithBody(dto.Body)
@@ -92,7 +92,7 @@ public class ReviewController(
 
         unitOfWork.UserRepository.Update(user);
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         BackgroundJob.Enqueue(() => scrobblingService.ScrobbleChapterReviewUpdate(user.Id, dto.SeriesId,
             chapterId, string.Empty, dto.Body, CancellationToken.None));
@@ -109,14 +109,15 @@ public class ReviewController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteSeriesReview([FromQuery] int seriesId)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings, ct);
         if (user == null) return Unauthorized();
 
         user.Ratings = user.Ratings.Where(r => r.SeriesId != seriesId).ToList();
 
         unitOfWork.UserRepository.Update(user);
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         return Ok();
     }
@@ -129,14 +130,15 @@ public class ReviewController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteChapterReview([FromQuery] int chapterId)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ChapterRatings);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ChapterRatings, ct);
         if (user == null) return Unauthorized();
 
         user.ChapterRatings = user.ChapterRatings.Where(r => r.ChapterId != chapterId).ToList();
 
         unitOfWork.UserRepository.Update(user);
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         return Ok();
     }
@@ -151,6 +153,15 @@ public class ReviewController(
     [HttpGet("all")]
     public async Task<ActionResult<IList<UserReviewExtendedDto>>> GetAllReviewsForUser(int userId, float? rating = null, string? filterQuery = null)
     {
-        return Ok(await unitOfWork.UserRepository.GetAllReviewsForUser(userId, UserId, filterQuery, rating));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.UserRepository.GetAllReviewsForUser(userId, UserId, filterQuery, rating, ct));
+    }
+
+    [HttpGet("my-series")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult<UserRatingAndReviewDto>> GetMySeriesRatingAndReview(int seriesId)
+    {
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.UserRepository.GetMyRatingAndReviewForSeries(UserId, seriesId, HttpContext.RequestAborted));
     }
 }

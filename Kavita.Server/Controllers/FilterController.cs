@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -39,11 +40,12 @@ public class FilterController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> CreateOrUpdateSeriesSmartFilter(SeriesFilterV2Dto dto)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
             if (string.IsNullOrEmpty(dto.Name)) return BadRequest("Name is required");
             var encodedString = SmartFilterHelper.Encode(dto);
-            await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType);
+            await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType, ct);
             return Ok();
         }
         catch (KavitaException ex)
@@ -61,11 +63,12 @@ public class FilterController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> CreateOrUpdateReadingListSmartFilter(ReadingListFilterDto dto)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
             if (string.IsNullOrEmpty(dto.Name)) return BadRequest("Name is required");
             var encodedString = SmartFilterHelper.Encode(dto);
-            await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType);
+            await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType, ct);
             return Ok();
         }
         catch (KavitaException ex)
@@ -83,11 +86,12 @@ public class FilterController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> CreateOrUpdatePersonSmartFilter(PersonFilterDto dto)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
             if (string.IsNullOrEmpty(dto.Name)) return BadRequest("Name is required");
             var encodedString = SmartFilterHelper.Encode(dto);
-            await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType);
+            await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType, ct);
             return Ok();
         }
         catch (KavitaException ex)
@@ -105,11 +109,12 @@ public class FilterController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> CreateOrUpdateAnnotationSmartFilter(AnnotationFilterDto dto)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
             if (string.IsNullOrEmpty(dto.Name)) return BadRequest("Name is required");
             var encodedString = SmartFilterHelper.Encode(dto);
-            await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType);
+            await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType, ct);
             return Ok();
         }
         catch (KavitaException ex)
@@ -118,9 +123,9 @@ public class FilterController(
         }
     }
 
-    private async Task ValidateAndSaveFilterUpsert(string filterName, string encodedFilter,  FilterEntityType entityType)
+    private async Task ValidateAndSaveFilterUpsert(string filterName, string encodedFilter,  FilterEntityType entityType, CancellationToken ct = default)
     {
-        var user = (await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.SmartFilters))!;
+        var user = (await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.SmartFilters, ct))!;
 
         if (string.IsNullOrWhiteSpace(filterName)) throw new KavitaException("Name must be set");
         if (Defaults.DefaultStreams.Any(s => s.Name.Equals(filterName, StringComparison.InvariantCultureIgnoreCase)))
@@ -149,7 +154,7 @@ public class FilterController(
         }
 
         if (!unitOfWork.HasChanges()) return;
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
     }
 
 
@@ -160,7 +165,8 @@ public class FilterController(
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SmartFilterDto>>> GetFilters()
     {
-        return Ok(await unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(UserId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(UserId, ct));
     }
 
     /// <summary>
@@ -173,7 +179,8 @@ public class FilterController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteFilter(int filterId)
     {
-        var filter = await unitOfWork.AppUserSmartFilterRepository.GetById(filterId);
+        var ct = HttpContext.RequestAborted;
+        var filter = await unitOfWork.AppUserSmartFilterRepository.GetById(filterId, ct);
         if (filter == null) return Ok();
 
         if (filter.AppUserId != UserId)
@@ -182,17 +189,17 @@ public class FilterController(
         }
 
         // This needs to delete any dashboard filters that have it too
-        var streams = await unitOfWork.UserRepository.GetDashboardStreamWithFilter(filter.Id);
+        var streams = await unitOfWork.UserRepository.GetDashboardStreamWithFilter(filter.Id, ct);
         unitOfWork.UserRepository.Delete(streams);
 
-        var streams2 = await unitOfWork.UserRepository.GetSideNavStreamWithFilter(filter.Id);
+        var streams2 = await unitOfWork.UserRepository.GetSideNavStreamWithFilter(filter.Id, ct);
         unitOfWork.UserRepository.Delete(streams2);
 
         unitOfWork.AppUserSmartFilterRepository.Delete(filter);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         await eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(UserId),
-            UserId, HttpContext.RequestAborted);
+            UserId, ct);
 
         return Ok();
     }
@@ -266,9 +273,10 @@ public class FilterController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> RenameFilter([FromQuery] int filterId, [FromQuery] [Required] string name)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
-            var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.SmartFilters);
+            var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.SmartFilters, ct);
             if (user == null) return Unauthorized();
 
             name = name.Trim();
@@ -291,9 +299,9 @@ public class FilterController(
 
             filter.Name = name;
             unitOfWork.AppUserSmartFilterRepository.Update(filter);
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
 
-            await streamService.RenameSmartFilterStreams(filter);
+            await streamService.RenameSmartFilterStreams(filter, ct);
             return Ok();
         }
         catch (Exception ex)

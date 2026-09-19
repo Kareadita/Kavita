@@ -25,7 +25,8 @@ public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService local
     [HttpGet]
     public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
-        return Ok(await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId, ct));
     }
 
     /// <summary>
@@ -37,17 +38,18 @@ public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService local
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<VolumeDto>> UpdateVolume(UpdateVolumeDto dto)
     {
-        var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(dto.Id);
+        var ct = HttpContext.RequestAborted;
+        var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(dto.Id, ct: ct);
         if (volume == null) return BadRequest(await localizationService.TranslateAsync(UserId, "volume-doesnt-exist"));
 
         ExternalMetadataIdHelper.SetExternalMetadataIds(volume, dto);
 
         unitOfWork.VolumeRepository.Update(volume);
 
-        if (unitOfWork.HasChanges() && !await unitOfWork.CommitAsync())
+        if (unitOfWork.HasChanges() && !await unitOfWork.CommitAsync(ct))
             return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
 
-        return Ok(await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volume.Id, UserId));
+        return Ok(await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volume.Id, UserId, ct));
     }
 
     /// <summary>
@@ -59,16 +61,17 @@ public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService local
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<bool>> DeleteVolume(int volumeId)
     {
+        var ct = HttpContext.RequestAborted;
         var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId,
-            VolumeIncludes.Chapters | VolumeIncludes.People | VolumeIncludes.Tags);
+            VolumeIncludes.Chapters | VolumeIncludes.People | VolumeIncludes.Tags, ct);
         if (volume == null)
             return BadRequest(await localizationService.TranslateAsync(UserId, "volume-doesnt-exist"));
 
         unitOfWork.VolumeRepository.Remove(volume);
 
-        if (await unitOfWork.CommitAsync())
+        if (await unitOfWork.CommitAsync(ct))
         {
-            await eventHub.SendMessageAsync(MessageFactory.VolumeRemoved, MessageFactory.VolumeRemovedEvent(volume.Id, volume.SeriesId), false);
+            await eventHub.SendMessageAsync(MessageFactory.VolumeRemoved, MessageFactory.VolumeRemovedEvent(volume.Id, volume.SeriesId), false, ct);
             return Ok(true);
         }
 
@@ -84,7 +87,8 @@ public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService local
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<bool>> DeleteMultipleVolumes(int[] volumesIds)
     {
-        var volumes = await unitOfWork.VolumeRepository.GetVolumesById(volumesIds);
+        var ct = HttpContext.RequestAborted;
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesById(volumesIds, ct: ct);
         if (volumes.Count != volumesIds.Length)
         {
             return BadRequest(await localizationService.TranslateAsync(UserId, "volume-doesnt-exist"));
@@ -92,14 +96,14 @@ public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService local
 
         unitOfWork.VolumeRepository.Remove(volumes);
 
-        if (!await unitOfWork.CommitAsync())
+        if (!await unitOfWork.CommitAsync(ct))
         {
             return Ok(false);
         }
 
         foreach (var volume in volumes)
         {
-            await eventHub.SendMessageAsync(MessageFactory.VolumeRemoved, MessageFactory.VolumeRemovedEvent(volume.Id, volume.SeriesId), false);
+            await eventHub.SendMessageAsync(MessageFactory.VolumeRemoved, MessageFactory.VolumeRemovedEvent(volume.Id, volume.SeriesId), false, ct);
         }
 
         return Ok(true);

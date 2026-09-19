@@ -254,6 +254,8 @@ public class ProcessSeries(
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
     {
+        // BUG: This is wrong most of the time, need to figure a better way to narrow in on the issue for the user
+
         // Re-run the same lookup args that GetFullSeriesByAnyName used so the report reflects the real collision set.
         var seriesCollisions = await unitOfWork.SeriesRepository.GetAllSeriesByAnyNameAsync(
             firstInfo.Series, firstInfo.LocalizedSeries, library.Id, firstInfo.Format);

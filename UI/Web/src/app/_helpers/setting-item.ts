@@ -54,7 +54,7 @@ function addDescribedBy(element: HTMLElement, token: string) {
 }
 
 function warnOnMultipleControls(scope: HTMLElement, title: string) {
-  const bound = scope.querySelectorAll('[formControlName]');
+  const bound = scope.querySelectorAll('[formControlName], [formField]');
   if (bound.length <= 1) return;
 
   console.warn(`[app-setting-item] "${title}" projects ${bound.length} form controls. `

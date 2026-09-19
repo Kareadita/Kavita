@@ -1,0 +1,12 @@
+<ng-container *transloco="let t; prefix:'lockable-field'">
+  <div class="input-group lock-btn" [class.lock-active]="locked()">
+    <button class="input-group-text clickable" type="button"
+            (click)="toggle()"
+            (keydown.enter)="toggle()"
+            (keydown.space)="$event.preventDefault(); toggle()">
+        <i class="fa fa-lock" aria-hidden="true"></i>
+        <span class="visually-hidden">{{t('field-locked-alt')}}</span>
+    </button>
+    <ng-content />
+  </div>
+</ng-container>

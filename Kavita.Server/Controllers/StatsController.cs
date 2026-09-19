@@ -39,9 +39,9 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
     public async Task<ActionResult<ServerStatisticsDto>> GetHighLevelStats()
     {
-        return Ok(await statService.GetServerStatistics());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetServerStatistics(ct));
     }
-
 
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -49,7 +49,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
     public async Task<ActionResult<IEnumerable<StatCount<PublicationStatus>>>> GetPublicationStatus()
     {
-        return Ok(await statService.GetPublicationCount());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetPublicationCount(ct));
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -57,7 +58,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
     public async Task<ActionResult<IEnumerable<StatCount<MangaFormat>>>> GetMangaFormat()
     {
-        return Ok(await statService.GetMangaFormatCount());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetMangaFormatCount(ct));
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -65,7 +67,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
     public async Task<ActionResult<IEnumerable<StatBucketDto>>> GetPopularDecades()
     {
-        return Ok(await statService.GetPopularDecades());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetPopularDecades(ct));
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -73,7 +76,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
     public async Task<ActionResult<IList<StatCount<LibraryDto>>>> GetPopularLibraries()
     {
-        return Ok(await statService.GetPopularLibraries());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetPopularLibraries(ct));
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -81,7 +85,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
     public async Task<ActionResult<IList<StatCount<SeriesDto>>>> GetPopularSeries()
     {
-        return Ok(await statService.GetPopularSeries());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetPopularSeries(ct));
     }
 
     /// <summary>
@@ -93,7 +98,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
     public async Task<ActionResult<IList<StatCount<SeriesDto>>>> GetPopularReadingList()
     {
-        return Ok(await statService.GetPopularReadingList());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetPopularReadingList(ct: ct));
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -101,7 +107,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
     public async Task<ActionResult<IList<StatCount<GenreTagDto>>>> GetPopularGenres()
     {
-        return Ok(await statService.GetPopularGenres());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetPopularGenres(ct));
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -109,7 +116,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
     public async Task<ActionResult<IList<StatCount<TagDto>>>> GetPopularTags()
     {
-        return Ok(await statService.GetPopularTags());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetPopularTags(ct));
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -117,7 +125,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute, VaryByQueryKeys = ["role"])]
     public async Task<ActionResult<IList<StatCount<PersonDto>>>> GetPopularPeople(PersonRole role)
     {
-        return Ok(await statService.GetPopularPerson(role));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetPopularPerson(role, ct));
     }
 
     /// <summary>
@@ -129,7 +138,8 @@ public class StatsController(
     [HttpGet("most-active-users")]
     public async Task<ActionResult<IEnumerable<TopReadDto>>> GetMostActiveUsers([FromQuery] StatsFilterDto filter)
     {
-        return Ok(await statService.GetMostActiveUsers(filter));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetMostActiveUsers(filter, ct));
     }
 
     /// <summary>
@@ -141,7 +151,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IEnumerable<FileExtensionBreakdownDto>>> GetFileSize()
     {
-        return Ok(await statService.GetFileBreakdown());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetFileBreakdown(ct));
     }
 
     /// <summary>
@@ -153,6 +164,7 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics, VaryByQueryKeys = ["fileExtension"])]
     public async Task<ActionResult> DownloadFilesByExtension(string fileExtension)
     {
+        var ct = HttpContext.RequestAborted;
         if (!Regex.IsMatch(fileExtension, Parser.SupportedExtensions))
         {
             return BadRequest("Invalid file format");
@@ -162,10 +174,10 @@ public class StatsController(
 
         if (!directoryService.FileSystem.File.Exists(tempFile))
         {
-            var results = await statService.GetFilesByExtension(fileExtension);
+            var results = await statService.GetFilesByExtension(fileExtension, ct);
             await using var writer = new StreamWriter(tempFile);
             await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-            await csv.WriteRecordsAsync(results);
+            await csv.WriteRecordsAsync(results, ct);
         }
 
         return PhysicalFile(tempFile, MimeTypeMap.GetMimeType(Path.GetExtension(tempFile)),
@@ -182,25 +194,27 @@ public class StatsController(
     [HttpGet("reading-counts")]
     public async Task<ActionResult<IEnumerable<StatCountWithFormat<DateTime>>>> ReadCounts([FromQuery] StatsFilterDto filter, [FromQuery] int userId)
     {
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, ct: ct);
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         if (!isAdmin && userId != user!.Id) return BadRequest();
 
-        return Ok(await statService.ReadCounts(filter, userId));
+        return Ok(await statService.ReadCounts(filter, userId, ct));
     }
 
     [HttpGet("day-breakdown")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute, VaryByQueryKeys = ["userId"])]
     public async Task<ActionResult<IList<StatCount<DayOfWeek>>>> GetDayBreakdown(int userId = 0)
     {
+        var ct = HttpContext.RequestAborted;
         if (userId == 0)
         {
-            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-            var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user);
+            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, ct: ct);
+            var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user, ct);
             if (!isAdmin) return BadRequest();
         }
 
-        return Ok(await statService.GetDayBreakdown(userId));
+        return Ok(await statService.GetDayBreakdown(userId, ct));
     }
 
 
@@ -214,9 +228,10 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute, VaryByQueryKeys = ["userId"])]
     public async Task<ActionResult<IList<StatCount<int>>>> GetPagesReadPerYear(int? userId)
     {
+        var ct = HttpContext.RequestAborted;
         userId ??= UserId;
 
-        return Ok(await statService.GetPagesReadCountByYear(userId.Value));
+        return Ok(await statService.GetPagesReadCountByYear(userId.Value, ct));
     }
 
     /// <summary>
@@ -229,16 +244,18 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute, VaryByQueryKeys = ["userId"])]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetWordsReadPerYear(int? userId)
     {
+        var ct = HttpContext.RequestAborted;
         userId ??= UserId;
 
-        return Ok(await statService.GetWordsReadCountByYear(userId.Value));
+        return Ok(await statService.GetWordsReadCountByYear(userId.Value, ct));
     }
 
     [HttpGet("files-added-over-time")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
     public async Task<ActionResult<IList<StatCountWithFormat<DateTime>>>> GetFilesAddedOverTime()
     {
-        return Ok(await statService.GetFilesAddedOverTime());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetFilesAddedOverTime(ct));
     }
 
 
@@ -255,7 +272,8 @@ public class StatsController(
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<DeviceClientBreakdownDto>> GetClientTypeBreakdown()
     {
-        return Ok(await statService.GetClientTypeBreakdown(DateTime.UtcNow.StartOfMonth()));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetClientTypeBreakdown(DateTime.UtcNow.StartOfMonth(), ct));
     }
 
 
@@ -268,7 +286,8 @@ public class StatsController(
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<StatCount<string>>> GetDeviceTypeCounts()
     {
-        return Ok(await statService.GetDeviceTypeCounts(DateTime.UtcNow.StartOfMonth()));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await statService.GetDeviceTypeCounts(DateTime.UtcNow.StartOfMonth(), ct));
     }
 
     #endregion
@@ -280,9 +299,10 @@ public class StatsController(
     [HttpGet("reading-activity")]
     public async Task<ActionResult<ReadingActivityGraphDto>> GetReadingActivity([FromQuery] StatsFilterDto filter, int userId, int year)
     {
+        var ct = HttpContext.RequestAborted;
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetReadingActivityGraphData(filter, userId, year, UserId));
+        return Ok(await statService.GetReadingActivityGraphData(filter, userId, year, UserId, ct));
     }
 
     #endregion
@@ -303,6 +323,7 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
     public async Task<ActionResult<ReadingPaceDto>> GetReadingPace([FromQuery] StatsFilterDto filter, int userId, int year, bool booksOnly)
     {
+        var ct = HttpContext.RequestAborted;
         await CleanStatsFilter(filter, UserId);
 
         return Ok(await statService.GetReadingPaceForUser(filter, userId, year, booksOnly, UserId, HttpContext.RequestAborted));
@@ -466,7 +487,7 @@ public class StatsController(
     public async Task<ActionResult<PagedList<ReadingHistoryItemDto>>> GetReadingHistoryItemsForSeries(
         int seriesId, [FromQuery] string tzId, [FromQuery] UserParams userParams)
     {
-
+        var ct = HttpContext.RequestAborted;
         var result = await statService.GetReadingHistoryItemsForSeries(UserId, seriesId,
             tzId, userParams, HttpContext.RequestAborted);
 
@@ -484,7 +505,8 @@ public class StatsController(
     /// <returns></returns>
     private async Task CleanStatsFilter(StatsFilterDto filter, int userId)
     {
-        var libraries = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
+        var ct = HttpContext.RequestAborted;
+        var libraries = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId, ct: ct);
 
         filter.Libraries = filter.Libraries.Intersect(libraries).ToList();
     }

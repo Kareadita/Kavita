@@ -1,23 +1,18 @@
-import {Component, computed, inject, OnInit, signal, viewChild, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal, viewChild} from '@angular/core';
 import {translate, TranslocoDirective, TranslocoPipe} from "@jsverse/transloco";
 import {StepTrackerComponent, TimelineStep} from "../../reading-list/_components/step-tracker/step-tracker.component";
 import {WikiLink} from "../../_models/wiki";
-import {
-  AbstractControl,
-  FormArray,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  ValidatorFn,
-  Validators
-} from "@angular/forms";
-import {FileUploadComponent, FileUploadValidators} from "@iplab/ngx-file-upload";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {FileUploadComponent} from "@iplab/ngx-file-upload";
 import {MetadataSettings} from "../_models/metadata-settings";
 import {SettingsService} from "../settings.service";
 import {
   ManageMetadataMappingsComponent,
-  MetadataMappingsExport
+  MetadataMappingsExport,
+  MetadataMappingsFormModel,
+  metadataMappingsSchema,
+  packFieldMappings,
+  toMetadataMappingsFormModel
 } from "../manage-metadata-mappings/manage-metadata-mappings.component";
 import {ToastrService} from '@openng/ngx-toastr';
 import {LoadingComponent} from "../../shared/loading/loading.component";
@@ -34,13 +29,16 @@ import {
   ImportSettings
 } from "../../_models/import-field-mappings";
 import {catchError, firstValueFrom, of, switchMap} from "rxjs";
-import {map, tap} from "rxjs/operators";
+import {tap} from "rxjs/operators";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {NgTemplateOutlet} from "@angular/common";
 import {Router} from "@angular/router";
 import {LicenseService} from "../../_services/license.service";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
-import {toSignal} from "@angular/core/rxjs-interop";
+import {applyEach, apply, form, FormField, FormRoot, required, validate} from "@angular/forms/signals";
+import {packAgeRatingMappings} from "../../shared/_components/age-rating-mapper/age-rating-mapper.component";
+import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 
 enum Step {
   Import = 0,
@@ -48,6 +46,23 @@ enum Step {
   Conflicts = 2,
   Finalize = 3,
 }
+
+interface FileFormModel {
+  files: File[];
+}
+
+function defaultImportSettings(): ImportSettings {
+  return {
+    importMode: ImportMode.Merge,
+    resolution: ConflictResolution.Manual,
+    ageRatingConflictResolutions: {},
+    ageRatings: true,
+    blacklist: true,
+    fieldMappings: true,
+    whitelist: true
+  };
+}
+
 
 @Component({
   selector: 'app-import-mappings',
@@ -66,10 +81,14 @@ enum Step {
     NgTemplateOutlet,
     TranslocoPipe,
     ManageMetadataMappingsComponent,
+    FormField,
+    FormRoot,
+    SettingSelectComponent,
+    ValidationErrorsComponent,
   ],
   templateUrl: './import-mappings.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './import-mappings.component.scss'
+  styleUrl: './import-mappings.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImportMappingsComponent implements OnInit {
 
@@ -77,8 +96,6 @@ export class ImportMappingsComponent implements OnInit {
   private readonly licenseService = inject(LicenseService);
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
-
-  readonly manageMetadataMappingsComponent = viewChild.required(ManageMetadataMappingsComponent);
 
   steps: TimelineStep[] = [
     {title: translate('import-mappings.import-step'), index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
@@ -88,38 +105,71 @@ export class ImportMappingsComponent implements OnInit {
   ];
   currentStepIndex = signal(this.steps[0].index);
 
-  fileUploadControl = new FormControl<undefined | Array<File>>(undefined, [
-    FileUploadValidators.accept(['.json']), FileUploadValidators.filesLimit(1)
-  ]);
+  private readonly fileFormModel = signal<FileFormModel>({
+    files: []
+  });
 
-  uploadForm = new FormGroup({
-    files: this.fileUploadControl,
+  private readonly formModel = signal<ImportSettings>(defaultImportSettings());
+
+  fileFormGroup = form(this.fileFormModel, p => {
+
+    // Only json files may be uploaded
+    validate(p.files, ({value}) => {
+      const files = value();
+      if (!files || files.length === 0) return null;
+
+      if (files.every(f => f.name.toLowerCase().endsWith('.json'))) {
+        return null;
+      }
+
+      return { kind: 'fileType', message: translate('import-mappings.select-files-warning') };
+    });
+
+    // Only a single file may be uploaded
+    validate(p.files, ({value}) => {
+      const files = value();
+      if (!files || files.length <= 1) return null;
+
+      return { kind: 'fileLimit', message: translate('import-mappings.select-files-warning') };
+    });
   });
-  importSettingsForm = new FormGroup({
-    importMode: new FormControl(ImportMode.Merge, [Validators.required]),
-    resolution: new FormControl(ConflictResolution.Manual),
-    whitelist: new FormControl(true),
-    blacklist: new FormControl(true),
-    ageRatings: new FormControl(true),
-    fieldMappings: new FormControl(true),
-    ageRatingConflictResolutions: new FormGroup({}),
+  formGroup = form(this.formModel, p => {
+    required(p.importMode);
+
+    // Every age rating collision must be explicitly resolved before the import can continue
+    applyEach(p.ageRatingConflictResolutions, resolution => {
+      validate(resolution, ({value}) => {
+        if (value() !== ConflictResolution.Manual) return null;
+
+        return { kind: 'notManual', message: translate('import-mappings.to-pick') };
+      });
+    });
   });
+
   /**
-   * This is that contains the data in the finalize step
+   * Holds the mapping data shown in the finalize step, seeded from the import result
    */
-  mappingsForm = new FormGroup({});
+  private readonly mappingsModel = signal<MetadataMappingsFormModel>({
+    enableGenres: false,
+    enableTags: false,
+    filterAboveWeight: null,
+    blacklist: [],
+    whitelist: [],
+    ageRatingMappings: [],
+    externalAgeRatingMappings: [],
+    fieldMappings: [],
+  });
+  protected readonly mappingsGroup = form(this.mappingsModel, p => apply(p, metadataMappingsSchema));
 
   isLoading = signal(false);
   settings = signal<MetadataSettings | undefined>(undefined)
   importedMappings = signal<MetadataMappingsExport | undefined>(undefined);
   importResult = signal<FieldMappingsImportResult | undefined>(undefined);
 
-  isFileSelected = toSignal(this.uploadForm.get('files')!.valueChanges
-    .pipe(map((files) => !!files && files.length == 1)), {initialValue: false});
-
-  isImportSettingsFormValid = toSignal(this.importSettingsForm.valueChanges.pipe(
-    map(() => this.importSettingsForm.valid),
-  ), { initialValue: false });
+  isFileSelected = computed(() => {
+    const files = this.fileFormGroup.files().value();
+    return !!files && files.length == 1;
+  });
 
   nextButtonLabel = computed(() => {
     switch(this.currentStepIndex()) {
@@ -141,7 +191,7 @@ export class ImportMappingsComponent implements OnInit {
       case Step.Configure:
         return true;
       case Step.Conflicts:
-        return this.isImportSettingsFormValid();
+        return this.formGroup().valid();
       default:
         return false;
     }
@@ -190,13 +240,13 @@ export class ImportMappingsComponent implements OnInit {
     if (!res) return;
 
     const newSettings = res.resultingMetadataSettings;
-    const data = this.manageMetadataMappingsComponent().packData();
+    const mappings = this.mappingsModel();
 
     // Update settings with data from the final step
-    newSettings.whitelist = data.whitelist;
-    newSettings.blacklist = data.blacklist;
-    newSettings.ageRatingMappings = data.ageRatingMappings;
-    newSettings.fieldMappings = data.fieldMappings;
+    newSettings.whitelist = mappings.whitelist;
+    newSettings.blacklist = mappings.blacklist;
+    newSettings.ageRatingMappings = packAgeRatingMappings(mappings.ageRatingMappings);
+    newSettings.fieldMappings = packFieldMappings(mappings.fieldMappings);
 
     this.settingsService.updateMetadataSettings(newSettings).subscribe({
       next: () => {
@@ -215,7 +265,7 @@ export class ImportMappingsComponent implements OnInit {
       return Promise.resolve();
     }
 
-    const settings = this.importSettingsForm.value as ImportSettings;
+    const settings = this.formModel();
 
     return firstValueFrom(this.settingsService.importFieldMappings(data, settings).pipe(
       catchError(err => {
@@ -227,6 +277,7 @@ export class ImportMappingsComponent implements OnInit {
         if (res == null) return of(null);
 
         this.importResult.set(res);
+        this.mappingsModel.set(toMetadataMappingsFormModel(res.resultingMetadataSettings));
 
         return this.settingsService.getMetadataSettings().pipe(
           tap(dto => this.settings.set(dto)),
@@ -244,7 +295,7 @@ export class ImportMappingsComponent implements OnInit {
   }
 
   async validateImport() {
-    const files = this.fileUploadControl.value;
+    const files = this.fileFormModel().files;
     if (!files || files.length === 0) {
       this.toastr.error(translate('import-mappings.select-files-warning'));
       return;
@@ -267,25 +318,25 @@ export class ImportMappingsComponent implements OnInit {
     this.currentStepIndex.update(x => x + 1);
   }
 
+  /**
+   * Seeds a resolution field for every collision the server reported. The record is rebuilt from the
+   * response so collisions from a previous attempt don't linger and hold the form invalid, but a
+   * choice the user already made for a key that is still in conflict is carried over.
+   */
   private setupSettingConflicts(res: FieldMappingsImportResult) {
-    const ageRatingGroup = this.importSettingsForm.get('ageRatingConflictResolutions')! as FormGroup;
+    const existing = this.formModel().ageRatingConflictResolutions;
+    const resolutions: Record<string, ConflictResolution> = {};
 
-    for (let key of res.ageRatingConflicts) {
-      if (!ageRatingGroup.get(key)) {
-        ageRatingGroup.addControl(key, new FormControl(ConflictResolution.Manual, [this.notManualValidator()]))
-      }
+    for (const key of res.ageRatingConflicts) {
+      resolutions[key] = existing[key] ?? ConflictResolution.Manual;
     }
-  }
 
-  private notManualValidator(): ValidatorFn {
-    return (control: AbstractControl) => {
-      const value = control.value;
-      try {
-        if (parseInt(value, 10) !== ConflictResolution.Manual) return null;
-      } catch (e) {
-      }
+    this.formModel.update(model => ({...model, ageRatingConflictResolutions: resolutions}));
 
-      return {'notManualValidator': {'value': value}}
+    // The user is being asked to resolve these, so surface the "unresolved" message straight away
+    // rather than waiting for a blur that may never come (Next is disabled until they all resolve).
+    for (const key of res.ageRatingConflicts) {
+      this.formGroup.ageRatingConflictResolutions[key]().markAsTouched();
     }
   }
 
@@ -305,8 +356,11 @@ export class ImportMappingsComponent implements OnInit {
 
     // Reset when returning to the first step
     if (this.currentStepIndex() === Step.Import) {
-      this.fileUploadControl.reset();
-      (this.importSettingsForm.get('ageRatingConflictResolutions') as FormArray).clear();
+      this.fileFormModel.set({files: []});
+      this.fileFormGroup().reset();
+
+      this.formModel.update(model => ({...model, ageRatingConflictResolutions: {}}));
+      this.formGroup().reset();
     }
 
   }

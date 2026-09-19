@@ -1,21 +1,22 @@
-import {AsyncPipe, DOCUMENT, NgClass, NgTemplateOutlet} from '@angular/common';
+import {DOCUMENT, NgClass, NgTemplateOutlet} from '@angular/common';
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
+  computed,
   contentChild,
   DestroyRef,
   ElementRef,
-  EventEmitter,
-  HostListener,
   inject,
-  Input,
+  input,
+  model,
   OnInit,
-  Output,
-  Renderer2,
-  RendererStyleFlags2,
+  output,
+  signal,
+  Signal,
   TemplateRef,
-  viewChild
+  viewChild,
+  viewChildren
 } from '@angular/core';
 import {
   CdkConnectedOverlay,
@@ -24,298 +25,303 @@ import {
   ScrollStrategy,
   ScrollStrategyOptions
 } from '@angular/cdk/overlay';
-import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {Observable, ReplaySubject} from 'rxjs';
-import {auditTime, filter, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
-import {TypeaheadSettings} from '../_models/typeahead-settings';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {timer} from 'rxjs';
+import {audit, filter, map, switchMap, tap} from 'rxjs/operators';
+import {TypeaheadConfig} from '../_models/typeahead-config';
+import {takeUntilDestroyed, toObservable, toSignal} from "@angular/core/rxjs-interop";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SelectionModel} from "../_models/selection-model";
 import {KEY_CODES} from "../../shared/_services/utility.service";
+import {generateUniqueId} from "../../_helpers/random";
+import {form, FormField} from "@angular/forms/signals";
+
+interface FormModel {
+  typeahead: string;
+}
+
+/**
+ * Context handed to the badgeItem and optionItem templates a consumer projects in.
+ */
+export interface TypeaheadTemplateContext<T> {
+  $implicit: T;
+  /** Position within the rendered list */
+  idx: number;
+  /** Current query text, for highlighting the match */
+  value: string;
+}
 
 @Component({
   selector: 'app-typeahead',
-  imports: [TagBadgeComponent, ReactiveFormsModule, TranslocoDirective, AsyncPipe, NgTemplateOutlet, NgClass, CdkConnectedOverlay, CdkOverlayOrigin],
+  imports: [TagBadgeComponent, TranslocoDirective, NgTemplateOutlet, NgClass, CdkConnectedOverlay, CdkOverlayOrigin, FormField],
   templateUrl: './typeahead.component.html',
   styleUrls: ['./typeahead.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(body:click)': 'handleDocumentClick($event)',
+    '(window:keydown)': 'handleKeyPress($event)'
+  }
 })
-export class TypeaheadComponent implements OnInit {
+export class TypeaheadComponent<T> implements OnInit {
   private readonly document = inject<Document>(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
 
   /**
    * Settings for the typeahead
    */
-  @Input({required: true}) settings!: TypeaheadSettings<any>;
-  /**
-   * When true, will reset field to no selections. When false, will reset to saved data
-   */
-  @Input() reset: ReplaySubject<boolean> = new ReplaySubject(1);
+  config = input.required<TypeaheadConfig<T>>();
   /**
    * When a field is locked, we render custom css to indicate to the user. Does not affect functionality.
    */
-  @Input() locked: boolean = false;
+  locked = model<boolean>(false);
   /**
    * If disabled, a user will not be able to interact with the typeahead
    */
-  @Input() disabled: boolean = false;
-  /**
-   * When triggered, will focus the input if the passed string matches the id
-   */
-  @Input() focus: EventEmitter<string> | undefined;
-  /**
-   * When triggered, will unfocus the input if the passed string matches the id
-   */
-  @Input() unFocus: EventEmitter<string> | undefined;
-  @Output() selectedData = new EventEmitter<any[] | any>();
-  @Output() newItemAdded = new EventEmitter<any[] | any>();
+  disabled = input<boolean>(false);
+
+  readonly selectedData = output<T[]>();
+  readonly selectedItem = output<T | undefined>();
+  readonly newItemAdded = output<T>();
   // eslint-disable-next-line @angular-eslint/no-output-on-prefix
-  @Output() onUnlock = new EventEmitter<void>();
-  @Output() lockedChange = new EventEmitter<boolean>();
+  readonly onUnlock = output<void>();
 
 
-  readonly inputElem = viewChild.required<ElementRef<HTMLInputElement>>('input');
+  readonly inputElem = viewChild<ElementRef<HTMLInputElement>>('input');
+  readonly optionRows = viewChildren<ElementRef<HTMLElement>>('optionRow');
   readonly triggerEl = viewChild.required<ElementRef<HTMLDivElement>>('triggerEl');
-  readonly optionTemplate = contentChild.required<TemplateRef<any>>('optionItem');
-  readonly badgeTemplate = contentChild.required<TemplateRef<any>>('badgeItem');
+  readonly optionTemplate = contentChild.required<TemplateRef<TypeaheadTemplateContext<T>>>('optionItem');
+  readonly badgeTemplate = contentChild.required<TemplateRef<TypeaheadTemplateContext<T>>>('badgeItem');
 
-  protected triggerWidth = 0;
+  protected readonly triggerWidth = signal(0);
+
   protected readonly overlayPositions: ConnectedPosition[] = [
     { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top' },
     { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom' },
   ];
   protected readonly repositionScrollStrategy: ScrollStrategy = inject(ScrollStrategyOptions).reposition();
 
-  get useOverlay(): boolean {
-    return this.settings?.dropdownPosition === 'body';
+  useOverlay = computed(() => this.config().dropdownPosition === 'body');
+
+  private optionSelection = new SelectionModel<T>();
+  readonly selectedOptions = signal<T[]>([]);
+
+  /** Whether input has active focus */
+  hasFocus = signal(false);
+  focusedIndex = signal<number>(0);
+  showAddItem = signal(false);
+  isLoadingOptions = signal(false);
+  readonly filteredOptions: Signal<T[]>;
+
+  private readonly formModel = signal<FormModel>({typeahead: ''});
+  formGroup = form(this.formModel);
+
+  protected readonly query = computed(() => this.formModel().typeahead);
+  protected readonly inputWidth = computed(() => 15 * (this.query().trim().length + 1));
+  protected readonly showClearSelection = computed(() =>
+    !this.disabled() && this.config().multiple && this.selectedOptions().length > 0);
+
+  // The add-item row occupies index 0 when shown, shifting every option down one
+  protected readonly addItemOffset = computed(() => this.showAddItem() ? 1 : 0);
+  protected readonly rowCount = computed(() => this.filteredOptions().length + this.addItemOffset());
+
+  private readonly uniqueId = generateUniqueId();
+  protected readonly listboxId = `${this.uniqueId}-listbox`;
+  protected readonly activeRowId = computed(() => {
+    if (!this.hasFocus()) return null;
+
+    const index = this.focusedIndex();
+    return index >= 0 && index < this.rowCount() ? this.rowId(index) : null;
+  });
+
+  protected rowId(index: number) {
+    return `${this.uniqueId}-row-${index}`;
   }
 
-  optionSelection!: SelectionModel<any>;
 
-  hasFocus = false; // Whether input has active focus
-  focusedIndex: number = 0;
-  showAddItem: boolean = false;
-  filteredOptions!: Observable<string[]>;
-  isLoadingOptions: boolean = false;
-  typeaheadControl!: FormControl;
-  typeaheadForm!: FormGroup;
 
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly renderer2 = inject(Renderer2);
-  private readonly cdRef = inject(ChangeDetectorRef);
-
-  ngOnInit() {
-    this.reset.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((resetToEmpty: boolean) => {
-      this.clearSelections(resetToEmpty);
-      this.init();
+  constructor() {
+    afterRenderEffect(() => {
+      this.optionRows()[this.focusedIndex()]?.nativeElement.scrollIntoView({block: 'nearest'});
     });
 
-    if (this.focus) {
-      this.focus.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id: string) => {
-        if (this.settings.id !== id) return;
-        this.onInputFocus();
-      });
-    }
-
-    if (this.unFocus) {
-      this.unFocus.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id: string) => {
-        if (this.settings.id !== id) return;
-        this.hasFocus = false;
-        this.cdRef.markForCheck();
-      });
-    }
-
-    this.init();
-  }
-
-  init() {
-    if (this.settings.compareFn === undefined && this.settings.multiple) {
-      console.error('A compare function must be defined');
-      return;
-    }
-
-    if (this.settings.trackByIdentityFn === undefined) {
-      console.warn('No trackby function provided, falling back to an expensive implementation')
-      this.settings.trackByIdentityFn = (_, value) => value;
-    }
-
-    if (this.settings.hasOwnProperty('formControl') && this.settings.formControl) {
-      this.typeaheadControl = this.settings.formControl;
-    } else {
-      this.typeaheadControl = new FormControl('');
-    }
-    this.typeaheadForm = new FormGroup({
-      'typeahead': this.typeaheadControl
-    });
-
-    this.filteredOptions = this.typeaheadForm.get('typeahead')!.valueChanges
+    this.filteredOptions = toSignal(toObservable(this.query)
       .pipe(
-        // Adjust input box to grow
-        tap((val: string) => {
-          const inputElem = this.inputElem();
-          if (this.inputElem != null && inputElem.nativeElement != null) {
-            this.renderer2.setStyle(inputElem.nativeElement, 'width', 15 * (val.trim().length + 1) + 'px');
-            this.focusedIndex = 0;
-          }
-        }),
+        tap(() => this.focusedIndex.set(0)),
         map((val: string) => val.trim()),
-        auditTime(this.settings.debounce),
+        audit(() => timer(this.config().debounce)),
         //distinctUntilChanged(), // ?!: BUG Doesn't trigger the search to run when filtered array changes
         filter((val: string) => {
           // If minimum filter characters not met, do not filter
-          if (this.settings.minCharacters === 0) return true;
+          if (this.config().minCharacters === 0) return true;
 
-          if (!val || val.length < this.settings.minCharacters) {
+          if (!val || val.length < this.config().minCharacters) {
             return false;
           }
 
           return true;
         }),
-
         switchMap((val: string) => {
-          this.isLoadingOptions = true;
-          return this.settings.fetchFn(val.trim()).pipe(takeUntilDestroyed(this.destroyRef), map((items: any[]) => items.filter(item => this.filterSelected(item))));
+          this.isLoadingOptions.set(true);
+          return this.config().fetchFn(val.trim()).pipe(takeUntilDestroyed(this.destroyRef), map((items: T[]) => items.filter(item => this.filterSelected(item))));
         }),
-        tap((filteredOptions: any[]) => {
-          this.isLoadingOptions = false;
-          this.focusedIndex = 0;
-          this.cdRef.markForCheck();
-          setTimeout(() => {
-            this.updateShowAddItem(filteredOptions);
-            this.updateHighlight();
-          }, 10);
-          setTimeout(() => this.updateHighlight(), 20);
-
+        tap((filteredOptions: T[]) => {
+          this.isLoadingOptions.set(false);
+          this.focusedIndex.set(0);
+          this.updateShowAddItem(filteredOptions);
         }),
-        shareReplay(),
         takeUntilDestroyed(this.destroyRef)
-      );
+      ), {initialValue: [] as T[]});
+  }
 
+  ngOnInit() {
+    this.init();
+  }
 
-    if (!this.settings.savedData) {
-      this.optionSelection = new SelectionModel<any>();
+  /**
+   * Focuses the input and opens the dropdown. For parents holding a reference via viewChild.
+   */
+  focusInput() {
+    this.onInputFocus();
+  }
+
+  /**
+   * Closes the dropdown without clearing what is selected.
+   */
+  blurInput() {
+    this.hasFocus.set(false);
+  }
+
+  /**
+   * Restores the selection to config.savedData, or clears it outright when resetToEmpty is true.
+   */
+  resetSelections(resetToEmpty: boolean) {
+    this.clearSelections(resetToEmpty);
+    this.init();
+  }
+
+  init() {
+    if (this.config().compareFn === undefined && this.config().multiple) {
+      console.error('A compare function must be defined');
       return;
     }
 
-    if (this.settings.multiple) {
-      this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);
+    if (this.config().trackByIdentityFn === undefined) {
+      console.error('A trackByIdentity function must be defined');
       return;
     }
 
-    if (Array.isArray(this.settings.savedData)) {
-      this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);
-      return;
-    }
 
-    this.optionSelection = new SelectionModel<any>(true, [this.settings.savedData]);
+    this.optionSelection = new SelectionModel<T>(true, this.config().savedData);
+    this.syncSelection();
   }
 
 
-  @HostListener('body:click', ['$event'])
-  handleDocumentClick(event: any) {
+  handleDocumentClick(event: MouseEvent) {
     // Don't close the typeahead when we select an item from it
     if (event.target && (event.target as HTMLElement).classList.contains('list-group-item')) {
       return;
     }
-    this.hasFocus = false;
-    this.cdRef.markForCheck();
+    this.hasFocus.set(false);
   }
 
-  @HostListener('window:keydown', ['$event'])
   handleKeyPress(event: KeyboardEvent) {
-    if (!this.hasFocus) { return; }
-    if (this.disabled) return;
+    if (!this.hasFocus()) { return; }
+    if (this.disabled()) return;
 
     switch(event.key) {
       case KEY_CODES.DOWN_ARROW:
-      case KEY_CODES.RIGHT_ARROW:
       {
-        this.focusedIndex = Math.min(this.focusedIndex + 1, this.document.querySelectorAll('.list-group-item').length - 1);
-        this.updateHighlight();
+        event.preventDefault();
+        this.focusedIndex.set(Math.min(this.focusedIndex() + 1, this.rowCount() - 1));
         break;
       }
       case KEY_CODES.UP_ARROW:
-      case KEY_CODES.LEFT_ARROW:
       {
-        this.focusedIndex = Math.max(this.focusedIndex - 1, 0);
-        this.updateHighlight();
+        event.preventDefault();
+        this.focusedIndex.set(Math.max(this.focusedIndex() - 1, 0));
         break;
       }
       case KEY_CODES.ENTER:
       {
-        this.document.querySelectorAll('.list-group-item').forEach((item, _) => {
-          if (item.classList.contains('active')) {
-            this.filteredOptions.pipe(take(1)).subscribe((_: any[]) => {
-              // This isn't giving back the filtered array, but everything
-              event.preventDefault();
-              event.stopPropagation();
+        const index = this.focusedIndex();
+        if (index < 0 || index >= this.rowCount()) break;
 
-              (item as HTMLElement).click();
-              this.focusedIndex = 0;
-              this.cdRef.markForCheck();
-            });
-          }
-        });
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (this.showAddItem() && index === 0) {
+          this.addNewItem(this.query());
+        } else {
+          this.handleOptionClick(this.filteredOptions()[index - this.addItemOffset()]);
+        }
+        this.focusedIndex.set(0);
         break;
       }
       case KEY_CODES.BACKSPACE:
       case KEY_CODES.DELETE:
       {
-        if (this.typeaheadControl.value !== null && this.typeaheadControl.value !== undefined && this.typeaheadControl.value.trim() !== '') {
+        const val = this.formModel().typeahead;
+        if (val !== null && val !== undefined && val.trim() !== '') {
           break;
         }
-        const selected = this.optionSelection.selected();
+        const selected = [...this.selectedOptions()];
         if (selected.length > 0) {
-          this.removeSelectedOption(selected.pop());
+          const last = selected.pop();
+          if (last !== undefined) {
+            this.removeSelectedOption(last);
+          }
         }
         break;
       }
+      case KEY_CODES.TAB:
+        this.hasFocus.set(false);
+        break;
       case KEY_CODES.ESC_KEY:
-        this.hasFocus = false;
+        this.hasFocus.set(false);
         event.stopPropagation();
         event.preventDefault();
-        this.cdRef.markForCheck();
         break;
       default:
         break;
     }
   }
 
-  toggleSelection(opt: any): void {
-    this.optionSelection.toggle(opt, undefined, this.settings.selectionCompareFn);
-    this.selectedData.emit(this.optionSelection.selected());
+  toggleSelection(opt: T): void {
+    this.optionSelection.toggle(opt, undefined, this.config().selectionCompareFn);
+    this.emitSelection();
   }
 
-  removeSelectedOption(opt: any) {
-    this.optionSelection.toggle(opt, undefined, this.settings.selectionCompareFn);
-    this.selectedData.emit(this.optionSelection.selected());
+  removeSelectedOption(opt: T) {
+    this.optionSelection.toggle(opt, undefined, this.config().selectionCompareFn);
+    this.emitSelection();
     this.resetField();
   }
 
-  clearSelections(untoggleAll: boolean = false) {
-    if (this.optionSelection) {
-      if (!untoggleAll && this.settings.savedData) {
-        const isArray = this.settings.savedData.hasOwnProperty('length');
-         if (isArray) {
-          this.optionSelection = new SelectionModel<any>(true, this.settings.savedData); // NOTE: Library-detail will break the 'x' button due to how savedData is being set to avoid state reset
-         } else {
-          this.optionSelection = new SelectionModel<any>(true, [this.settings.savedData]);
-         }
-         this.cdRef.markForCheck();
-      } else {
-        this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
-        this.cdRef.markForCheck();
-      }
-
-      this.selectedData.emit(this.optionSelection.selected());
-      this.resetField();
-    }
+  private syncSelection() {
+    this.selectedOptions.set(this.optionSelection.selected());
   }
 
-  handleOptionClick(opt: any) {
-    if (this.disabled) return;
-    if (!this.settings.multiple && this.optionSelection.selected().length > 0) {
+  private emitSelection() {
+    this.syncSelection();
+    const selected = this.selectedOptions();
+    this.selectedData.emit(selected);
+    this.selectedItem.emit(selected[0]);
+  }
+
+  clearSelections(untoggleAll: boolean = false) {
+    if (!untoggleAll && this.config().savedData.length > 0) {
+      this.optionSelection = new SelectionModel<T>(true, this.config().savedData);
+    } else {
+      this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
+    }
+
+    this.emitSelection();
+    this.resetField();
+  }
+
+  handleOptionClick(opt: T) {
+    if (this.disabled()) return;
+    if (!this.config().multiple && this.selectedOptions().length > 0) {
       return;
     }
 
@@ -326,10 +332,10 @@ export class TypeaheadComponent implements OnInit {
   }
 
   addNewItem(title: string) {
-    if (this.settings.addTransformFn == undefined || !this.settings.addIfNonExisting) {
+    if (this.config().addTransformFn == undefined || !this.config().addIfNonExisting) {
       return;
     }
-    const newItem = this.settings.addTransformFn(title);
+    const newItem = this.config().addTransformFn(title);
     this.newItemAdded.emit(newItem);
     this.toggleSelection(newItem);
 
@@ -342,50 +348,43 @@ export class TypeaheadComponent implements OnInit {
    * @param item
    * @returns True if the item is NOT selected already
    */
-  filterSelected(item: any) {
-    if (this.settings.unique && this.settings.multiple) {
-      return !this.optionSelection.isSelected(item, this.settings.selectionCompareFn);
+  filterSelected(item: T) {
+    if (this.config().unique && this.config().multiple) {
+      return !this.optionSelection.isSelected(item, this.config().selectionCompareFn);
     }
 
     return true;
   }
 
   openDropdown() {
-    setTimeout(() => {
-      this.typeaheadControl.setValue(this.typeaheadControl.value);
-      this.hasFocus = true;
-      if (this.useOverlay) {
-        this.triggerWidth = Math.max(
-          this.triggerEl().nativeElement.getBoundingClientRect().width,
-          this.settings.overlayMinWidth ?? 0
-        );
-      }
-    });
+    this.hasFocus.set(true);
   }
 
-  onInputFocus(event?: any) {
+  onInputFocus(event?: Event) {
     if (event) {
       event.stopPropagation();
       event.preventDefault();
     }
-    if (this.disabled) return;
+    if (this.disabled()) return;
 
-    if (!this.settings.multiple && this.optionSelection.selected().length > 0) {
+    if (!this.config().multiple && this.selectedOptions().length > 0) {
       return;
     }
 
     const inputElem = this.inputElem();
     if (inputElem) {
-      // hack: To prevent multiple typeaheads from being open at once, click document then trigger the focus
-      this.document.body.click();
+      if (this.document.activeElement !== inputElem.nativeElement) {
+        // hack: To prevent multiple typeaheads from being open at once, click document then trigger the focus
+        this.document.body.click();
+        inputElem.nativeElement.focus();
+      }
 
-      inputElem.nativeElement.focus();
-      this.hasFocus = true;
-      if (this.useOverlay) {
-        this.triggerWidth = Math.max(
+      this.hasFocus.set(true);
+      if (this.useOverlay()) {
+        this.triggerWidth.set(Math.max(
           this.triggerEl().nativeElement.getBoundingClientRect().width,
-          this.settings.overlayMinWidth ?? 0
-        );
+          this.config().overlayMinWidth ?? 0
+        ));
       }
     }
 
@@ -395,68 +394,45 @@ export class TypeaheadComponent implements OnInit {
 
 
   resetField() {
-    const inputElem = this.inputElem();
-    if (inputElem && inputElem.nativeElement) {
-      this.renderer2.setStyle(inputElem.nativeElement, 'width', 4, RendererStyleFlags2.Important);
-    }
-    this.typeaheadControl.setValue('');
-    this.focusedIndex = 0;
+    this.formGroup.typeahead().value.set('')
+    this.focusedIndex.set(0);
   }
 
-  // Updates the highlight to focus on the selected item
-  updateHighlight() {
-    this.document.querySelectorAll('.list-group-item').forEach((item, index) => {
-      if (index === this.focusedIndex && !item.classList.contains('no-hover')) {
-        // apply active class
-        this.renderer2.addClass(item, 'active');
-      } else {
-        // remove active class
-        this.renderer2.removeClass(item, 'active');
-      }
-    });
-  }
+  updateShowAddItem(options: T[]) {
+    // ?! BUG This will still technically allow you to add the same thing as a previously added item. (Code will just toggle it though)
+    this.showAddItem.set(false);
+    if (!this.config().addIfNonExisting) return;
 
-  updateShowAddItem(options: any[]) {
-    // ?! BUG This will still technicially allow you to add the same thing as a previously added item. (Code will just toggle it though)
-    this.showAddItem = false;
-    this.cdRef.markForCheck();
-    if (!this.settings.addIfNonExisting) return;
-
-    const inputText = this.typeaheadControl.value.trim();
-    if (inputText.length < Math.max(this.settings.minCharacters, 1)) return;
-    if (!this.typeaheadControl.dirty) return; // Do we need this?
+    const inputText = this.formModel().typeahead.trim();
+    if (inputText.length < Math.max(this.config().minCharacters, 1)) return;
+    if (!this.formGroup().dirty()) return; // Do we need this?
 
     // Check if this new option will interfere with any existing ones not shown
 
-    if (typeof this.settings.compareFnForAdd == 'function') {
-      const willDuplicateExist = this.settings.compareFnForAdd(this.optionSelection.selected(), inputText);
+    if (typeof this.config().compareFnForAdd == 'function') {
+      const willDuplicateExist = this.config().compareFnForAdd(this.selectedOptions(), inputText);
       if (willDuplicateExist.length > 0) {
         return;
       }
     }
 
-    if (typeof this.settings.compareFn == 'function') {
+    if (typeof this.config().compareFn == 'function') {
       // The problem here is that compareFn can report that duplicate will exist as it does contains not match
-      const matches = this.settings.compareFn(options, inputText);
-      if (matches.length > 0 && matches.includes(this.settings.addTransformFn(inputText))) {
+      const matches = this.config().compareFn(options, inputText);
+      if (matches.length > 0 && matches.includes(this.config().addTransformFn(inputText))) {
         return;
       }
     }
 
-    this.showAddItem = true;
-
-    if (this.showAddItem) {
-      this.hasFocus = true;
-    }
-    this.cdRef.markForCheck();
+    this.showAddItem.set(true);
+    this.hasFocus.set(true);
   }
 
-  toggleLock(_: any) {
-    if (this.disabled) return;
-    this.locked = !this.locked;
-    this.lockedChange.emit(this.locked);
+  toggleLock() {
+    if (this.disabled()) return;
+    this.locked.update(x => !x);
 
-    if (!this.locked) {
+    if (!this.locked()) {
       this.onUnlock.emit();
     }
   }

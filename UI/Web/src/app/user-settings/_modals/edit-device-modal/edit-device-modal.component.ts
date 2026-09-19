@@ -1,78 +1,98 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, input, OnInit,} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, inject, input, signal,} from '@angular/core';
 import {DeviceService} from "../../../_services/device.service";
 import {ToastrService} from '@openng/ngx-toastr';
 import {Device} from "../../../_models/device/device";
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {DevicePlatform, devicePlatforms} from "../../../_models/device/device-platform";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {allDevicePlatforms, DevicePlatform} from "../../../_models/device/device-platform";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {DevicePlatformPipe} from "../../../_pipes/device-platform.pipe";
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {email, form, FormField, required} from "@angular/forms/signals";
+
+interface FormModel {
+  name: string;
+  emailAddress: string;
+  platform: string;
+}
 
 @Component({
   selector: 'app-edit-device-modal',
   imports: [
     TranslocoDirective,
     DevicePlatformPipe,
-    ReactiveFormsModule,
     NgbTooltip,
     FormFieldDirective,
-    ValidationErrorsComponent
+    ValidationErrorsComponent,
+    FormField
   ],
   templateUrl: './edit-device-modal.component.html',
   styleUrl: './edit-device-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditDeviceModalComponent implements OnInit {
+export class EditDeviceModalComponent {
   protected readonly deviceService = inject(DeviceService);
   private readonly toastr = inject(ToastrService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly modalRef = inject(NgbActiveModal);
 
   device = input<Device | null>(null);
 
-  settingsForm: FormGroup = new FormGroup({});
-  devicePlatforms = devicePlatforms;
+  private readonly formModel = signal<FormModel>({
+    name: '', emailAddress: '', platform: DevicePlatform.Custom.toString()
+  });
+  formGroup = form(this.formModel, p => {
+    required(p.name);
+    required(p.emailAddress);
+    email(p.emailAddress);
+    required(p.platform);
+  });
 
-  ngOnInit(): void {
+  constructor() {
+    effect(() => {
+      const d = this.device();
+      if (!d) return;
 
-    this.settingsForm.addControl('name', new FormControl(this.device()?.name || '', [Validators.required]));
-    this.settingsForm.addControl('email', new FormControl(this.device()?.emailAddress || '', [Validators.required, Validators.email]));
-    this.settingsForm.addControl('platform', new FormControl(this.device()?.platform || DevicePlatform.Custom, [Validators.required]));
+      this.formGroup.name().value.set(d.name);
+      this.formGroup.emailAddress().value.set(d.emailAddress);
+      this.formGroup.platform().value.set(d.platform.toString());
+    });
 
-    // If user has filled in email and the platform hasn't been explicitly updated, try to update it for them
-    this.settingsForm.get('email')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(email => {
-      if (this.settingsForm.get('platform')?.dirty) return;
+    effect(() => {
+      // If user has filled in email and the platform hasn't been explicitly updated, try to update it for them
+      const isPlatformDirty = this.formGroup.platform().dirty();
+      const email = this.formGroup.emailAddress().value();
+      if (isPlatformDirty) return;
       if (email === null || email === undefined || email === '') return;
-      if (email.endsWith('@kindle.com')) this.settingsForm.get('platform')?.setValue(DevicePlatform.Kindle);
-      else if (email.endsWith('@pbsync.com')) this.settingsForm.get('platform')?.setValue(DevicePlatform.PocketBook);
-      else this.settingsForm.get('platform')?.setValue(DevicePlatform.Custom);
-      this.cdRef.markForCheck();
+
+      if (email.endsWith('@kindle.com')) {
+        this.formGroup.platform().value.set(DevicePlatform.Kindle.toString());
+      } else if (email.endsWith('@pbsync.com')) {
+        this.formGroup.platform().value.set(DevicePlatform.PocketBook.toString());
+      } else {
+        this.formGroup.platform().value.set(DevicePlatform.Custom.toString());
+      }
     });
   }
 
+
   save() {
     const device = this.device();
+    const model = this.formModel();
     if (device !== null) {
-      this.deviceService.updateEmailDevice(device.id, this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email)
+      this.deviceService.updateEmailDevice(device.id, model.name, parseInt(model.platform, 10), model.emailAddress)
         .subscribe((device) => {
-          this.settingsForm.reset();
+          this.formGroup().reset();
           this.toastr.success(translate('toasts.device-updated'));
-          this.cdRef.markForCheck();
           this.close(device);
       });
       return;
     }
 
-    this.deviceService.createEmailDevice(this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email)
+    this.deviceService.createEmailDevice(model.name, parseInt(model.platform, 10), model.emailAddress)
       .subscribe((device) => {
-        this.settingsForm.reset();
+        this.formGroup().reset();
         this.toastr.success(translate('toasts.device-created'));
-        this.cdRef.markForCheck();
         this.close(device);
     });
   }
@@ -84,4 +104,6 @@ export class EditDeviceModalComponent implements OnInit {
     }
     this.modalRef.dismiss();
   }
+
+  protected readonly devicePlatforms = allDevicePlatforms;
 }

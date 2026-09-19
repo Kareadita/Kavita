@@ -422,6 +422,7 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<AppUserAuthKey, AuthKeyDto>();
         CreateMap<AppUserScrobbleProvider, ScrobbleProviderDto>();
+        CreateMap<AppUserRating, UserRatingAndReviewDto>();
 
 
     }

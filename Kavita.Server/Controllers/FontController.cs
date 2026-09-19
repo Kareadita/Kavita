@@ -36,7 +36,8 @@ public class FontController(
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<EpubFontDto>>> GetFonts()
     {
-        return Ok(await unitOfWork.EpubFontRepository.GetFontDtosAsync());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.EpubFontRepository.GetFontDtosAsync(ct));
     }
 
     /// <summary>
@@ -48,7 +49,8 @@ public class FontController(
     [SkipDeviceTracking]
     public async Task<IActionResult> GetFont(int fontId)
     {
-        var font = await unitOfWork.EpubFontRepository.GetFontAsync(fontId);
+        var ct = HttpContext.RequestAborted;
+        var font = await unitOfWork.EpubFontRepository.GetFontAsync(fontId, ct);
         if (font == null) return NotFound();
 
         if (font.Provider == FontProvider.System) return BadRequest("System provided fonts are not loaded by API");
@@ -71,8 +73,9 @@ public class FontController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<FontDeleteResultDto>> DeleteFont(int fontId, bool force = false)
     {
+        var ct = HttpContext.RequestAborted;
         var forceDelete = User.IsInRole(PolicyConstants.AdminRole) && force;
-        return Ok(await fontService.DeleteFamily(fontId, forceDelete));
+        return Ok(await fontService.DeleteFamily(fontId, forceDelete, ct));
     }
 
     /// <summary>
@@ -84,13 +87,14 @@ public class FontController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<EpubFontDto>> UploadFont(IFormFile formFile)
     {
+        var ct = HttpContext.RequestAborted;
         if (!_fontFileExtensionRegex.IsMatch(Path.GetExtension(formFile.FileName))) return BadRequest("Invalid file");
 
         if (!IsPathWithinDirectory(directoryService.TempDirectory, formFile.FileName)) return BadRequest("Invalid file");
 
 
         var tempFile = await UploadToTempAsync(formFile);
-        var font = await fontService.CreateFontFromFileAsync(tempFile);
+        var font = await fontService.CreateFontFromFileAsync(tempFile, ct);
         return Ok(mapper.Map<EpubFontDto>(font));
     }
 
@@ -98,9 +102,10 @@ public class FontController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<EpubFontDto[]>> UploadFontByUrl([FromQuery] string url)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
-            var fonts = await fontService.CreateFontsFromUrl(url);
+            var fonts = await fontService.CreateFontsFromUrl(url, ct);
             return Ok(mapper.Map<EpubFontDto[]>(fonts));
         }
         catch (KavitaException ex)

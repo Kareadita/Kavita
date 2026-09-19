@@ -24,9 +24,10 @@ public class KavitaPlusAuditController(IUnitOfWork unitOfWork) : BaseApiControll
     public async Task<ActionResult<PagedList<KavitaPlusAuditEntryDto>>> GetEntries(
         KavitaPlusAuditFilterDto filter, [FromQuery] UserParams? userParams)
     {
+        var ct = HttpContext.RequestAborted;
         userParams ??= UserParams.Default;
 
-        var res = await unitOfWork.KavitaPlusAuditRepository.GetPagedAsync(filter, userParams);
+        var res = await unitOfWork.KavitaPlusAuditRepository.GetPagedAsync(filter, userParams, ct);
         Response.AddPaginationHeader(res);
 
         return Ok(res);
@@ -40,9 +41,10 @@ public class KavitaPlusAuditController(IUnitOfWork unitOfWork) : BaseApiControll
     [SeriesAccess]
     public async Task<ActionResult<KavitaPlusAuditSeriesInfoDto>> GetSeriesInfo(int seriesId)
     {
+        var ct = HttpContext.RequestAborted;
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         var result = await unitOfWork.KavitaPlusAuditRepository
-            .GetSeriesInfoAsync(seriesId, UserId, isAdmin);
+            .GetSeriesInfoAsync(seriesId, UserId, isAdmin, ct);
         return Ok(result);
     }
 
@@ -73,10 +75,11 @@ public class KavitaPlusAuditController(IUnitOfWork unitOfWork) : BaseApiControll
     public async Task<ActionResult<PagedList<KavitaPlusAuditEntryDto>>> GetMyActivity(
         KavitaPlusAuditFilterDto filter, [FromQuery] UserParams? userParams)
     {
+        var ct = HttpContext.RequestAborted;
         userParams ??= UserParams.Default;
 
         var res = await unitOfWork.KavitaPlusAuditRepository
-            .GetMyActivityAsync(UserId, filter, userParams);
+            .GetMyActivityAsync(UserId, filter, userParams, ct);
         Response.AddPaginationHeader(res);
 
         return Ok(res);

@@ -65,8 +65,6 @@ export class EventsWidgetComponent implements OnInit {
         this.errors.update(values => [...values, event.payload as ErrorEvent]);
       } else if (event.event === EVENTS.Info) {
         this.infos.update(values => [...values, event.payload as InfoEvent]);
-      } else if (event.event === EVENTS.UpdateAvailable) {
-        this.handleUpdateAvailableClick(event.payload);
       } else if (event.event === EVENTS.ReadingSessionUpdate) {
         const data = event.payload as ReadingSessionUpdateEvent;
         this.activeReadingSessions.update(set => new Set([...set, data.sessionId]));
@@ -114,11 +112,8 @@ export class EventsWidgetComponent implements OnInit {
   }
 
 
-  handleUpdateAvailableClick(message: NotificationProgressEvent | UpdateVersionEvent) {
-    const update = 'body' in message
-      ? (message as NotificationProgressEvent).body as UpdateVersionEvent
-      : message as UpdateVersionEvent;
-    this.versionService.showUpdateModal('update-available', { update }, true);
+  handleUpdateAvailableClick(message: NotificationProgressEvent) {
+    this.versionService.showUpdateModal('update-available', { update: message.body as UpdateVersionEvent }, true);
   }
 
   async seeMore(event: ErrorEvent | InfoEvent) {

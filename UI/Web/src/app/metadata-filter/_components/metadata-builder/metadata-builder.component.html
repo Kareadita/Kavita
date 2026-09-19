@@ -1,80 +1,74 @@
 <ng-container *transloco="let t; prefix: 'metadata-builder'">
-  @if (filter) {
-    <form [formGroup]="formGroup">
-
-      @if (breakpointService.isDesktop()) {
-        <div class="container-fluid">
-          <div class="row mb-2">
-            <div class="col-auto">
-              <select class="form-select" formControlName="comparison">
-                @for (opt of groupOptions; track opt.value) {
-                  <option [value]="opt.value">{{opt.title}}</option>
-                }
-              </select>
-            </div>
-
-            <div class="col-md-2">
-              <button type="button" class="btn btn-icon" (click)="addFilter()" [ngbTooltip]="t('add-rule')" [disabled]="statementLimit === -1 || (statementLimit > 0 && filter.statements.length >= statementLimit)">
-                <i class="fa fa-solid fa-plus" aria-hidden="true"></i>
-                <span class="visually-hidden" aria-hidden="true">{{t('add-rule')}}</span>
-              </button>
-            </div>
-          </div>
-
-          @for (filterStmt of filter.statements; track filterStmt; let i = $index) {
-            <div class="row mb-2">
-              <div class="col-md-10">
-                <app-metadata-row-filter [preset]="filterStmt" [entityType]="entityType()" (filterStatement)="updateFilter(i, $event)">
-                  <div class="col-md-1 ms-2">
-                    @if (i < (filter.statements.length - 1) && filter.statements.length > 1) {
-                      <button type="button" class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule', {num: i})" (click)="removeFilter(i)">
-                        <i class="fa-solid fa-minus" aria-hidden="true"></i>
-                        <span class="visually-hidden">{{t('remove-rule', {num: i})}}</span>
-                      </button>
-                    }
-                  </div>
-                </app-metadata-row-filter>
-              </div>
-            </div>
-          }
+  @if (breakpointService.isDesktop()) {
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-auto">
+          <app-setting-select [options]="groupOptions" [formField]="formGroup.combination" inputId="filter-combination">
+            <ng-template #template let-combination>
+              {{combination | filterCombination}}
+            </ng-template>
+          </app-setting-select>
         </div>
-      } @else {
-        <div class="container-fluid">
-          <div class="row mb-3">
-            <div class="col-md-4 col-10">
-              <select class="form-select" formControlName="comparison">
-                @for (opt of groupOptions; track opt.value) {
-                  <option [value]="opt.value">{{opt.title}}</option>
-                }
-              </select>
-            </div>
 
-            <div class="col-md-2 col-1">
-              <button class="btn btn-icon" (click)="addFilter()" [ngbTooltip]="t('add-rule')">
-                <i class="fa fa-solid fa-plus" aria-hidden="true"></i>
-                <span class="visually-hidden" aria-hidden="true">{{t('add-rule')}}</span>
-              </button>
-            </div>
-          </div>
-          @for (filterStmt of filter.statements; track filterStmt; let i = $index) {
-            <div class="row mb-3">
-              <div class="col-md-12">
-                <app-metadata-row-filter [preset]="filterStmt" [entityType]="entityType()" (filterStatement)="updateFilter(i, $event)">
-                  <div class="col-md-1 ms-2 col-1">
-                    @if (i < (filter.statements.length - 1) && filter.statements.length > 1) {
-                      <button type="button" class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule')" (click)="removeFilter(i)">
-                        <i class="fa-solid fa-minus" aria-hidden="true"></i>
-                        <span class="visually-hidden">{{t('remove-rule')}}</span>
-                      </button>
-                    }
-                  </div>
-                </app-metadata-row-filter>
+        <div class="col-md-2">
+          <button type="button" class="btn btn-icon" (click)="addFilter()" [ngbTooltip]="t('add-rule')" [disabled]="statementLimit() === -1 || (statementLimit() > 0 && filter().statements.length >= statementLimit())">
+            <i class="fa fa-solid fa-plus" aria-hidden="true"></i>
+            <span class="visually-hidden" aria-hidden="true">{{t('add-rule')}}</span>
+          </button>
+        </div>
+      </div>
+
+      @for (filterStmt of filter().statements; track filterStmt; let i = $index) {
+        <div class="row mb-2">
+          <div class="col-md-10">
+            <app-metadata-row-filter [preset]="filterStmt" [entityType]="entityType()" (filterStatement)="updateFilter(i, $event)">
+              <div class="col-md-1 ms-2">
+                @if (i < (filter().statements.length - 1) && filter().statements.length > 1) {
+                  <button type="button" class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule', {num: i})" (click)="removeFilter(i)">
+                    <i class="fa-solid fa-minus" aria-hidden="true"></i>
+                    <span class="visually-hidden">{{t('remove-rule', {num: i})}}</span>
+                  </button>
+                }
               </div>
-            </div>
-          }
+            </app-metadata-row-filter>
+          </div>
         </div>
       }
+    </div>
+  } @else {
+    <div class="container-fluid">
+      <div class="row mb-3">
+        <div class="col col-md-4">
+          <app-setting-select [options]="groupOptions" [formField]="formGroup.combination" inputId="filter-combination">
+            <ng-template #template let-combination>
+              {{combination | filterCombination}}
+            </ng-template>
+          </app-setting-select>
+        </div>
 
-    </form>
+        <div class="col-auto col-md-2">
+          <button type="button" class="btn btn-icon" (click)="addFilter()" [ngbTooltip]="t('add-rule')" [disabled]="statementLimit() === -1 || (statementLimit() > 0 && filter().statements.length >= statementLimit())">
+            <i class="fa fa-solid fa-plus" aria-hidden="true"></i>
+            <span class="visually-hidden" aria-hidden="true">{{t('add-rule')}}</span>
+          </button>
+        </div>
+      </div>
+      @for (filterStmt of filter().statements; track filterStmt; let i = $index) {
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <app-metadata-row-filter [preset]="filterStmt" [entityType]="entityType()" (filterStatement)="updateFilter(i, $event)">
+              <div class="col-md-1 ms-2 col-1">
+                @if (i < (filter().statements.length - 1) && filter().statements.length > 1) {
+                  <button type="button" class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule')" (click)="removeFilter(i)">
+                    <i class="fa-solid fa-minus" aria-hidden="true"></i>
+                    <span class="visually-hidden">{{t('remove-rule')}}</span>
+                  </button>
+                }
+              </div>
+            </app-metadata-row-filter>
+          </div>
+        </div>
+      }
+    </div>
   }
 </ng-container>

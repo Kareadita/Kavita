@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
-import {DestroyRef, inject, Injectable, signal} from '@angular/core';
-import {EMPTY, switchMap, tap} from 'rxjs';
+import {DestroyRef, effect, inject, Injectable, signal} from '@angular/core';
+import {tap} from 'rxjs';
 import {environment} from '../../environments/environment';
 import {Device} from '../_models/device/device';
 import {DevicePlatform} from '../_models/device/device-platform';
@@ -8,7 +8,7 @@ import {TextResonse} from '../_types/text-response';
 import {AccountService} from './account.service';
 import {ClientDevice} from "../_models/client-device";
 import {map} from "rxjs/operators";
-import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Injectable({
   providedIn: 'root'
@@ -25,24 +25,19 @@ export class DeviceService {
 
   private readonly _devices = signal<Device[]>([]);
   public readonly devices = this._devices.asReadonly();
-  public readonly devices$ = toObservable(this.devices);
 
 
 
   constructor() {
-
-    // Ensure we are authenticated before we make an authenticated api call.
-    toObservable(this.accountService.currentUser).pipe(
-      switchMap(user => {
-        if (!user) {
-          this._devices.set([]);
-          return EMPTY;
-        }
-        return this.httpClient.get<Device[]>(this.baseUrl + 'device');
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(data => {
-      if (data) this._devices.set([...data])
+    effect(() => {
+      // Only reload on userId changes
+      const userId = this.accountService.userId();
+      if (userId) {
+        this.httpClient.get<Device[]>(this.baseUrl + 'device').pipe(
+          takeUntilDestroyed(this.destroyRef),
+          tap(devices => this._devices.set(devices)),
+        ).subscribe();
+      }
     });
   }
 

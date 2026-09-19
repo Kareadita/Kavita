@@ -18,7 +18,8 @@ import {
   PageViewModeType,
   pdfDefaultOptions,
   ProgressBarEvent,
-  ScrollModeType, SpreadType
+  ScrollModeType,
+  SpreadType
 } from 'ngx-extended-pdf-viewer';
 import {ToastrService} from '@openng/ngx-toastr';
 import {take} from 'rxjs';
@@ -79,7 +80,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   private readonly keyBindService = inject(KeyBindService);
   protected readonly breakpointService = inject(BreakpointService);
 
-  protected readonly ScrollModeType = ScrollModeType;
 
   readonly container = viewChild.required<ElementRef>('container');
 
@@ -410,7 +410,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   }
 
   closeReader() {
-     this.readerService.closeShortCutModal();
+     if (this.readerService.closeShortCutModal()) return;
      this.readerService.closeReader(this.libraryId, this.seriesId, this.chapterId, this.readingListMode, this.readingListId);
   }
 
@@ -428,9 +428,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  updateHandTool(event: any) {
-     console.log('event.tool', event);
-  }
 
   updateSearchOpen(event: boolean) {
      this.isSearchOpen = event;
@@ -451,4 +448,5 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
 
   protected readonly Breakpoint = Breakpoint;
+  protected readonly ScrollModeType = ScrollModeType;
 }

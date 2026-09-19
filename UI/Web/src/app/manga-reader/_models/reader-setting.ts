@@ -6,7 +6,7 @@ import {PageSplitOption} from "../../_models/preferences/page-split-option";
 export interface ReaderSetting {
     pageSplit: PageSplitOption;
     fitting: FITTING_OPTION;
-    widthSlider: string;
+    widthSlider: number;
     layoutMode: LayoutMode;
     darkness: number;
     pagingDirection: PAGING_DIRECTION;

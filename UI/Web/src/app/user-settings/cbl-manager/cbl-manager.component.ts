@@ -9,12 +9,12 @@ import {ReadingListService} from '../../_services/reading-list.service';
 import {ReadingList, ReadingListProvider} from '../../_models/reading-list/reading-list';
 import {LoadingComponent} from '../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from '@jsverse/transloco';
+import {FilterFieldComponent} from "../../shared/_components/filter-field/filter-field.component";
 import {BrowseCblRepoModalComponent} from '../_modals/browse-cbl-repo-modal/browse-cbl-repo-modal.component';
 import {ImportCblModalComponent} from '../_modals/import-cbl-modal/import-cbl-modal.component';
 import {CblService} from '../../_services/cbl.service';
 import {CblRepoItem} from '../../_models/reading-list/cbl/cbl-repo-item';
 import {CblSavedFile} from '../../_models/reading-list/cbl/cbl-saved-file';
-import {ReactiveFormsModule} from '@angular/forms';
 import {PromotedIconComponent} from '../../shared/_components/promoted-icon/promoted-icon.component';
 import {ReadingListProviderPipe} from '../../_pipes/reading-list-provider.pipe';
 import {forkJoin} from 'rxjs';
@@ -41,7 +41,6 @@ import {
     NgxFileDropModule,
     LoadingComponent,
     TranslocoDirective,
-    ReactiveFormsModule,
     PromotedIconComponent,
     ReadingListProviderPipe,
     ReadMoreComponent,
@@ -56,7 +55,8 @@ import {
     NgbDropdownItem,
     NgbDropdownMenu,
     NgbDropdownToggle,
-    TimeDifferencePipe
+    TimeDifferencePipe,
+    FilterFieldComponent
   ],
   templateUrl: './cbl-manager.component.html',
   styleUrl: './cbl-manager.component.scss',
@@ -72,9 +72,9 @@ export class CblManagerComponent implements OnInit {
   private readonly cblService = inject(CblService);
   protected readonly imageService = inject(ImageService);
 
-  files: NgxFileDropEntry[] = [];
-  acceptableExtensions = ['.cbl', '.json'].join(',');
+  protected readonly acceptableExtensions = ['.cbl', '.json'].join(',');
   private readonly dateYearRangePipe = new DateYearRangePipe();
+  files = signal<NgxFileDropEntry[]>([]);
   isUploadingCbl = signal<boolean>(false);
   allLists = signal<ReadingList[]>([]);
 
@@ -135,7 +135,7 @@ export class CblManagerComponent implements OnInit {
   }
 
   public dropped(files: NgxFileDropEntry[]) {
-    this.files = files;
+    this.files.set(files);
     this.isUploadingCbl.set(true);
 
     const uploads$ = files
@@ -153,13 +153,13 @@ export class CblManagerComponent implements OnInit {
       forkJoin(observables).subscribe({
         next: (savedFiles) => {
           this.isUploadingCbl.set(false);
-          this.files = [];
+          this.files.set([]);
           this.openImportModal(savedFiles);
         },
         error: () => {
           this.toastr.error('Failed to upload CBL file(s)');
           this.isUploadingCbl.set(false);
-          this.files = [];
+          this.files.set([]);
         }
       });
     });

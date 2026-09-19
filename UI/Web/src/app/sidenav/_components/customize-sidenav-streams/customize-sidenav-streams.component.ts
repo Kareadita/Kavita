@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnDestroy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, signal} from '@angular/core';
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {FilterService} from "../../../_services/filter.service";
 import {forkJoin} from "rxjs";
@@ -13,21 +13,23 @@ import {SidenavStreamListItemComponent} from "../sidenav-stream-list-item/sidena
 import {ExternalSourceService} from "../../../_services/external-source.service";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
-import {tap} from "rxjs/operators";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {UtilityService} from "../../../shared/_services/utility.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {ActionResult} from "../../../_models/actionables/action-result";
-import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {FilterFieldComponent} from "../../../shared/_components/filter-field/filter-field.component";
+import {filteredBy} from "../../../_helpers/filtered";
+import {disabled, form, FormField} from "@angular/forms/signals";
+
+interface FormModel {
+  accessibilityMode: boolean;
+  bulkMode: boolean;
+}
 
 @Component({
   selector: 'app-customize-sidenav-streams',
-  imports: [DraggableOrderedListComponent, TranslocoDirective, SidenavStreamListItemComponent, ReactiveFormsModule,
-    FilterPipe, BulkOperationsComponent, FormFieldDirective],
+  imports: [DraggableOrderedListComponent, TranslocoDirective, SidenavStreamListItemComponent,
+    BulkOperationsComponent, FilterFieldComponent, FormField],
   templateUrl: './customize-sidenav-streams.component.html',
   styleUrls: ['./customize-sidenav-streams.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,180 +39,114 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   private readonly sideNavService = inject(NavService);
   private readonly filterService = inject(FilterService);
   private readonly externalSourceService = inject(ExternalSourceService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly destroyRef = inject(DestroyRef);
-  public readonly bulkSelectionService = inject(BulkSelectionService);
-  public readonly utilityService = inject(UtilityService);
-  protected readonly breakpointService = inject(BreakpointService);
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
+  private readonly breakpointService = inject(BreakpointService);
 
-  items: SideNavStream[] = [];
-  allSmartFilters: SmartFilter[] = [];
-  smartFilters: SmartFilter[] = [];
-  externalSources: ExternalSource[] = [];
-  virtualizeAfter = 100;
+  protected readonly virtualizeAfter = 100;
 
-  listForm: FormGroup = new FormGroup({
-    'filterSideNavStream': new FormControl('', []),
-    'filterSmartFilter': new FormControl('', []),
-    'filterExternalSource': new FormControl('', []),
+  items = signal<SideNavStream[]>([]);
+  allSmartFilters = signal<SmartFilter[]>([]);
+  allExternalSources = signal<ExternalSource[]>([]);
+
+  sideNavStreamQuery = signal('');
+  smartFilterQuery = signal('');
+  externalSourceQuery = signal('');
+
+  private readonly formModel = signal<FormModel>({
+    accessibilityMode: false,
+    bulkMode: false,
   });
-  pageOperationsForm: FormGroup = new FormGroup({
-    'accessibilityMode': new FormControl(false, []),
-    'bulkMode': new FormControl(false, [])
+  protected readonly formGroup = form(this.formModel, (p) => {
+    disabled(p.bulkMode, {when: ({valueOf}) => valueOf(p.accessibilityMode)});
+    disabled(p.accessibilityMode, {when: ({valueOf}) => valueOf(p.bulkMode)});
   });
 
-  filterSideNavStreams = (listItem: SideNavStream) => {
-    const filterVal = (this.listForm.value.filterSideNavStream || '').toLowerCase();
-    return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
-  }
+  protected readonly smartFilters = computed(() => {
+    const streamed = new Set(this.items()
+      .filter(d => !d.isProvided && d.streamType === SideNavStreamType.SmartFilter)
+      .map(d => d.name));
+    return this.allSmartFilters().filter(d => !streamed.has(d.name));
+  });
 
-  filterSmartFilters = (listItem: SmartFilter) => {
-    const filterVal = (this.listForm.value.filterSmartFilter || '').toLowerCase();
-    return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
-  }
+  protected readonly externalSources = computed(() => {
+    const streamed = new Set(this.items()
+      .filter(d => !d.isProvided && d.streamType === SideNavStreamType.ExternalSource)
+      .map(d => d.name));
+    return this.allExternalSources().filter(d => !streamed.has(d.name));
+  });
 
-  filterExternalSources = (listItem: ExternalSource) => {
-    const filterVal = (this.listForm.value.filterExternalSource || '').toLowerCase();
-    return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
-  }
+  protected readonly filteredItems = filteredBy(this.items, this.sideNavStreamQuery, 'name');
+  protected readonly filteredSmartFilters = filteredBy(this.smartFilters, this.smartFilterQuery, 'name');
+  protected readonly filteredExternalSources = filteredBy(this.externalSources, this.externalSourceQuery, 'name', 'host');
+
+  protected readonly filterDisabled = computed(() => this.formModel().accessibilityMode || this.formModel().bulkMode);
+  protected readonly showFilter = computed(() => this.items().length > 3);
 
   constructor() {
 
-    this.bulkSelectionService.registerDataSource('sideNavStream', () => this.items);
+    effect(() => {
+      if (this.formModel().bulkMode) return;
+      this.bulkSelectionService.deselectAll();
+    });
+
+    this.bulkSelectionService.registerDataSource('sideNavStream', () => this.items());
     this.bulkSelectionService.registerPostAction((result: ActionResult<SideNavStream[]>) => {
 
       const updatedStreams = result.entity;
 
-      this.items = this.items.map(item => {
+      this.items.update(items => items.map(item => {
         const updated = updatedStreams.find(u => u.id === item.id);
-        return updated ? { ...updated } : item;
-      });
-      this.cdRef.markForCheck();
+        return updated ? {...updated} : item;
+      }));
     })
-
-    this.pageOperationsForm.get('accessibilityMode')?.valueChanges.pipe(
-        tap(_ => {
-          const accessibleValue = this.pageOperationsForm.get('accessibilityMode')?.value;
-          if (accessibleValue) {
-            if (this.pageOperationsForm.get('bulkMode')?.disabled) return;
-            this.pageOperationsForm.get('bulkMode')?.disable();
-          } else {
-            if (!this.pageOperationsForm.get('bulkMode')?.disabled) return;
-            this.pageOperationsForm.get('bulkMode')?.enable();
-          }
-          this.cdRef.markForCheck();
-        }),
-        takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
-
-    this.pageOperationsForm.get('bulkMode')?.valueChanges.pipe(
-        tap(_ => {
-          const bulkValue = this.pageOperationsForm.get('bulkMode')?.value;
-          if (bulkValue) {
-            if (this.pageOperationsForm.get('accessibilityMode')?.disabled) return;
-            this.pageOperationsForm.get('accessibilityMode')?.disable();
-          } else {
-            this.pageOperationsForm.get('accessibilityMode')?.enable();
-          }
-        }),
-        takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
-
-    this.pageOperationsForm.valueChanges.pipe(
-        tap(_ => {
-          if (this.pageOperationsForm.value.accessibilityMode || this.pageOperationsForm.value.bulkMode) {
-            this.listForm.get('filterSideNavStream')?.disable();
-            return;
-          }
-          this.listForm.get('filterSideNavStream')?.enable();
-        }),
-        takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
 
     forkJoin([this.sideNavService.getSideNavStreams(false),
         this.filterService.getAllFilters(), this.externalSourceService.getExternalSources()
     ]).subscribe(results => {
-      this.items = results[0];
+      this.items.set(results[0]);
 
       // After X items, drag and drop is disabled to use virtualization
-      if (this.items.length > this.virtualizeAfter || this.breakpointService.isTabletOrBelow()) {
-        this.pageOperationsForm.get('accessibilityMode')?.setValue(true);
+      if (results[0].length > this.virtualizeAfter || this.breakpointService.isTabletOrBelow()) {
+        this.formModel.update(m => ({...m, accessibilityMode: true}));
       }
 
-      this.allSmartFilters = results[1];
-      this.updateSmartFilters();
-
-      const existingExternalSourceStreams = new Set(results[0].filter(d => !d.isProvided && d.streamType === SideNavStreamType.ExternalSource).map(d => d.name));
-      this.externalSources = results[2].filter(d => !existingExternalSourceStreams.has(d.name));
-      this.cdRef.markForCheck();
+      this.allSmartFilters.set(results[1]);
+      this.allExternalSources.set(results[2]);
     });
-  }
-
-  updateSmartFilters() {
-    const existingSmartFilterStreams = new Set(this.items.filter(d => !d.isProvided && d.streamType === SideNavStreamType.SmartFilter).map(d => d.name));
-    this.smartFilters = this.allSmartFilters.filter(d => !existingSmartFilterStreams.has(d.name));
-    this.cdRef.markForCheck();
   }
 
   ngOnDestroy() {
     this.bulkSelectionService.deselectAll();
   }
 
-  resetSideNavFilter() {
-    this.listForm.get('filterSideNavStream')?.setValue('');
-    this.cdRef.markForCheck();
-  }
-
-  resetSmartFilterFilter() {
-    this.listForm.get('filterSmartFilter')?.setValue('');
-    this.cdRef.markForCheck();
-  }
-
-  resetExternalSourceFilter() {
-    this.listForm.get('filterExternalSource')?.setValue('');
-    this.cdRef.markForCheck();
-  }
-
   addFilterToStream(filter: SmartFilter) {
     this.sideNavService.createSideNavStream(filter.id).subscribe(stream => {
-      this.smartFilters = this.smartFilters.filter(d => d.name !== filter.name);
-      this.items = [...this.items, stream];
-      this.cdRef.markForCheck();
+      this.items.update(items => [...items, stream]);
     });
   }
 
   addExternalSourceToStream(externalSource: ExternalSource) {
     this.sideNavService.createSideNavStreamFromExternalSource(externalSource.id).subscribe(stream => {
-      this.externalSources = this.externalSources.filter(d => d.name !== externalSource.name);
-      this.items = [...this.items, stream];
-      this.cdRef.markForCheck();
+      this.items.update(items => [...items, stream]);
     });
   }
-
 
   orderUpdated(event: IndexUpdateEvent) {
-
     this.sideNavService.updateSideNavStreamPosition(event.item.name, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
-      this.sideNavService.getSideNavStreams(false).subscribe((data) => {
-        this.items = [...data];
-        this.cdRef.markForCheck();
-      });
+      this.sideNavService.getSideNavStreams(false).subscribe(data => this.items.set([...data]));
     });
   }
 
-  updateVisibility(item: SideNavStream, position: number) {
-    const stream = this.items.filter(s => s.id == item.id)[0];
-    stream.visible = !stream.visible;
-    this.cdRef.markForCheck();
-    this.sideNavService.updateSideNavStream(stream).subscribe();
+  updateVisibility(item: SideNavStream) {
+    const updated = {...item, visible: !item.visible};
+    this.items.update(items => items.map(s => s.id === item.id ? updated : s));
+    this.sideNavService.updateSideNavStream(updated).subscribe();
   }
 
   delete(item: SideNavStream) {
     this.sideNavService.deleteSideNavSmartFilter(item.id).subscribe({
       next: () => {
-        this.items = this.items.filter(i => i.id !== item.id);
-        this.updateSmartFilters();
-        this.cdRef.markForCheck();
+        this.items.update(items => items.filter(i => i.id !== item.id));
       },
       error: err => {
         console.error(err);

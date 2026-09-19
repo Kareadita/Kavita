@@ -1,0 +1,8 @@
+@let formatValue = format();
+
+@if (formatValue !== MangaFormat.UNKNOWN) {
+  <span class="format-badge d-inline-flex align-items-center rounded-pill gap-1" [style.--badge-color]="colorVar()">
+    <i class="{{formatValue | mangaFormatIcon}}" aria-hidden="true"></i>
+    {{formatValue | mangaFormat}}
+  </span>
+}

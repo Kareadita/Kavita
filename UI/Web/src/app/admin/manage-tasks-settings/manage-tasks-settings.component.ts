@@ -12,7 +12,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
-import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 import {VersionService} from "../../_services/version.service";
 import {CronFrequency} from "../../shared/_models/cron-frequency";
@@ -136,8 +136,6 @@ export class ManageTasksSettingsComponent implements OnInit {
   private readonly taskCleanup$ = toObservable(this.taskCleanup);
   private readonly taskCblSync$ = toObservable(this.taskCblSync);
 
-  constructor() {}
-
   ngOnInit(): void {
     this.settingsService.getServerSettings().subscribe(settings => {
       this.serverSettings = settings;
@@ -198,6 +196,4 @@ export class ManageTasksSettingsComponent implements OnInit {
       }
     });
   }
-
-  protected readonly ColumnMode = ColumnMode;
 }

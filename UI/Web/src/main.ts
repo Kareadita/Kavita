@@ -2,8 +2,11 @@ import {
   ApplicationConfig,
   importProvidersFrom,
   inject,
+  isDevMode,
   provideAppInitializer,
-  provideZoneChangeDetection,
+  provideBrowserGlobalErrorListeners,
+  provideCheckNoChangesConfig,
+  provideZonelessChangeDetection,
 } from '@angular/core';
 import {routes} from './app/app-routing.module';
 import {bootstrapApplication, BrowserModule, Title} from '@angular/platform-browser';
@@ -198,7 +201,8 @@ bootstrapApplication(AppComponent, {
         },
         provideHttpClient(withInterceptors([jwtInterceptor, errorInterceptor, clientInfoInterceptor])),
         provideAppInitializer(() => bootstrapUser()),
-        provideZoneChangeDetection(),
+        provideZonelessChangeDetection(),
+        provideBrowserGlobalErrorListeners(),
         {
           provide: NgbModalConfig,
           useFactory: () => Object.assign(new NgbModalConfig(), DefaultModalOptions) satisfies Partial<NgbModalConfig>
@@ -209,7 +213,8 @@ bootstrapApplication(AppComponent, {
             max: 5,
             resettable: true,
           } satisfies Partial<NgbRatingConfig>)
-        }
+        },
+      ...(isDevMode() ? [provideCheckNoChangesConfig({exhaustive: true, interval: 3000})] : [])
     ]
 } as ApplicationConfig)
 .catch(err => console.error(err));

@@ -3,9 +3,9 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  inject,
-  Input,
-  OnInit,
+  inject, input,
+  Input, model,
+  OnInit, signal,
   ViewEncapsulation
 } from '@angular/core';
 import {Rating, RatingAuthority} from "../../../_models/rating";
@@ -37,7 +37,6 @@ import {ModalService} from "../../../_services/modal.service";
 })
 export class ExternalRatingComponent implements OnInit {
 
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly reviewService = inject(ReviewService);
   private readonly themeService = inject(ThemeService);
   protected readonly destroyRef = inject(DestroyRef);
@@ -46,44 +45,43 @@ export class ExternalRatingComponent implements OnInit {
   protected readonly breakpointService = inject(BreakpointService);
 
 
-  @Input({required: true}) seriesId!: number;
-  @Input() chapterId: number | undefined;
-  @Input({required: true}) userRating!: number;
-  @Input({required: true}) hasUserRated!: boolean;
-  @Input({required: true}) libraryType!: LibraryType;
-  @Input({required: true}) ratings: Array<Rating> = [];
-  @Input() webLinks: Array<string> = [];
+  seriesId = input.required<number>();
+  libraryType = input.required<LibraryType>();
+  ratings = input.required<Rating[]>();
+  webLinks = input<string[]>([]);
 
-  isLoading: boolean = false;
-  overallRating: number = -1;
+  userRating = model.required<number>();
+  hasUserRated = model.required<boolean>();
+
+  chapterId = input<number | undefined>(undefined);
+
+  isLoading = signal(false);
+  overallRating = signal(-1);
   starColor = this.themeService.getCssVariable('--rating-star-color');
 
   ngOnInit() {
-    this.reviewService.overallRating(this.seriesId, this.chapterId).subscribe(r => {
-        this.overallRating = r.averageScore;
-        this.cdRef.markForCheck();
+    this.reviewService.overallRating(this.seriesId(), this.chapterId()).subscribe(r => {
+        this.overallRating.set(r.averageScore);
     });
   }
 
   updateRating(rating: number) {
-    this.reviewService.updateRating(this.seriesId, rating, this.chapterId).subscribe(() => {
-      this.userRating = rating;
-      this.hasUserRated = true;
-      this.cdRef.markForCheck();
+    this.reviewService.updateRating(this.seriesId(), rating, this.chapterId()).subscribe(() => {
+      this.userRating.set(rating);
+      this.hasUserRated.set(true);
     });
   }
 
   openRatingModal() {
     const modalRef = this.modalService.open(RatingModalComponent);
-    modalRef.componentInstance.userRating = this.userRating;
-    modalRef.componentInstance.seriesId = this.seriesId;
-    modalRef.componentInstance.hasUserRated = this.hasUserRated;
-    modalRef.componentInstance.chapterId = this.chapterId;
+    modalRef.setInput('userRating', this.userRating());
+    modalRef.setInput('seriesId', this.seriesId());
+    modalRef.setInput('hasUserRated', this.hasUserRated());
+    modalRef.setInput('chapterId', this.chapterId());
 
     modalRef.closed.subscribe((updated: {hasUserRated: boolean, userRating: number}) => {
-      this.userRating = updated.userRating;
-      this.hasUserRated = this.hasUserRated || updated.hasUserRated;
-      this.cdRef.markForCheck();
+      this.userRating.set(updated.userRating);
+      this.hasUserRated.update(x => x || updated.hasUserRated);
     });
   }
 

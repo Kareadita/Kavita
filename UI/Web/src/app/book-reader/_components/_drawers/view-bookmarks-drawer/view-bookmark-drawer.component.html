@@ -14,8 +14,7 @@
       <li [ngbNavItem]="Tabs.BookmarkTextTab">
         <a ngbNavLink>{{Tabs.BookmarkTextTab | tabTitle}}</a>
         <ng-template ngbNavContent>
-          <app-personal-table-of-contents [chapterId]="chapterId()!" [pageNum]="pageNum()" (loadChapter)="loadChapterPart($event)"
-                                          [tocRefresh]="refreshPToC" />
+          <app-personal-table-of-contents [chapterId]="chapterId()!" (loadChapter)="loadChapterPart($event)" />
         </ng-template>
       </li>
       <li [ngbNavItem]="Tabs.BookmarkImageTab">

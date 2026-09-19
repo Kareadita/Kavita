@@ -1,12 +1,22 @@
-import {computed, DestroyRef, Directive, effect, ElementRef, inject, input, Renderer2} from '@angular/core';
+import {
+  computed,
+  DestroyRef,
+  Directive,
+  effect,
+  ElementRef,
+  HostListener,
+  inject,
+  input,
+  Renderer2
+} from '@angular/core';
+import {AnyField, toFieldView} from "../shared/_models/field-view";
+import {isFieldTree} from "@angular/forms/signals";
 import {AbstractControl} from "@angular/forms";
-import {takeUntilDestroyed, toObservable, toSignal} from "@angular/core/rxjs-interop";
-import {startWith, switchMap} from "rxjs";
 
 const validTags = ['input', 'select', 'textarea'];
 
 /**
- * Sets .is-invalid + aria-invalid based on the control's state
+ * Wires a native form element to a field: reflects invalid state, and reports blur as touched (selects need for validation outline)
  */
 @Directive({
   selector: '[appFormField]',
@@ -16,19 +26,26 @@ export class FormFieldDirective {
   private readonly renderer = inject(Renderer2);
   private readonly destroyRef = inject(DestroyRef);
 
-  control = input.required<AbstractControl>({alias: 'appFormField'});
+  control = input.required<AnyField>({alias: 'appFormField'});
 
-  private events = toSignal(
-    toObservable(this.control).pipe(
-      switchMap(c => c.events.pipe(startWith(null))),
-      takeUntilDestroyed(this.destroyRef)
-    )
-  );
+  private readonly view = toFieldView(this.control, this.destroyRef);
+
   isInvalid = computed(() => {
-    this.events();
-    const control = this.control();
-    return control.invalid && control.touched;
+    return this.view.invalid() && this.view.touched();
   });
+
+  @HostListener('blur')
+  onBlur() {
+    if (this.view.touched()) return;
+
+    const c = this.control();
+    if (isFieldTree(c)) {
+      c().markAsTouched();
+    } else {
+      (c as AbstractControl).markAsTouched();
+    }
+  }
+
 
   constructor() {
     const nativeElem = this.el.nativeElement as HTMLElement;

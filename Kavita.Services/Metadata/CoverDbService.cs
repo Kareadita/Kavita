@@ -39,7 +39,7 @@ public class CoverDbService : ICoverDbService
     private readonly IImageService _imageService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
-    private TimeSpan _cacheTime = TimeSpan.FromDays(10);
+    private readonly TimeSpan _cacheTime = TimeSpan.FromDays(10);
 
     private const string NewHost = "https://www.kavitareader.com/CoversDB/";
 
@@ -230,10 +230,11 @@ public class CoverDbService : ICoverDbService
     /// </summary>
     /// <param name="person"></param>
     /// <param name="encodeFormat"></param>
+    /// <param name="targetDirectory">Defaults to CoverImageDirectory</param>
     /// <param name="ct"></param>
     /// <returns>Person image (in correct directory) or null if not found/error</returns>
     public async Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat,
-        CancellationToken ct = default)
+        string? targetDirectory = null,  CancellationToken ct = default)
     {
         try
         {
@@ -242,7 +243,7 @@ public class CoverDbService : ICoverDbService
             {
                 throw new KavitaException($"Could not grab person image for {person.Name}");
             }
-            return await DownloadPersonImageAsync(person, encodeFormat, personImageLink, ct);
+            return await DownloadPersonImageAsync(person, encodeFormat, personImageLink, targetDirectory: targetDirectory, ct: ct);
         } catch (Exception ex)
         {
             _logger.LogError(ex, "Error downloading image for {PersonName}", person.Name);
@@ -261,7 +262,7 @@ public class CoverDbService : ICoverDbService
     /// <returns></returns>
     /// <exception cref="KavitaException"></exception>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public async Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url,
+    public async Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url, string? targetDirectory = null,
         CancellationToken ct = default)
     {
         try
@@ -273,7 +274,7 @@ public class CoverDbService : ICoverDbService
             }
 
 
-            var filename = await DownloadImageFromUrl(ImageService.GetPersonFormat(person.Id), encodeFormat, personImageLink);
+            var filename = await DownloadImageFromUrl(ImageService.GetPersonFormat(person.Id), encodeFormat, personImageLink, targetDirectory: targetDirectory, ct: ct);
 
             _logger.LogDebug("Person image for {PersonName} downloaded and saved successfully", person.Name);
 
@@ -286,7 +287,7 @@ public class CoverDbService : ICoverDbService
         return null;
     }
 
-    private async Task<string> DownloadImageFromUrl(string filenameWithoutExtension, EncodeFormat encodeFormat, string url, string? targetDirectory = null)
+    private async Task<string> DownloadImageFromUrl(string filenameWithoutExtension, EncodeFormat encodeFormat, string url, string? targetDirectory = null, CancellationToken ct = default)
     {
         await _urlValidationService.ValidateUrlAsync(url);
 
@@ -301,25 +302,25 @@ public class CoverDbService : ICoverDbService
         // Download the file using Flurl
         var imageStream = await url
             .AllowHttpStatus("2xx,304")
-            .GetStreamAsync();
+            .GetStreamAsync(cancellationToken: ct);
 
         using var image = Image.NewFromStream(imageStream);
         try
         {
             image.WriteToFile(targetFile);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             switch (encodeFormat)
             {
                 case EncodeFormat.PNG:
-                    image.Pngsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    image.Pngsave(Path.Combine(targetDirectory, filename));
                     break;
                 case EncodeFormat.WEBP:
-                    image.Webpsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    image.Webpsave(Path.Combine(targetDirectory, filename));
                     break;
                 case EncodeFormat.AVIF:
-                    image.Heifsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    image.Heifsave(Path.Combine(targetDirectory, filename));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
@@ -329,7 +330,21 @@ public class CoverDbService : ICoverDbService
         return filename;
     }
 
-    private async Task<string?> GetCoverPersonImagePath(Person person)
+    public async Task<string?> GetPersonImageUrlAsync(Person person, CancellationToken ct = default)
+    {
+        try
+        {
+            return await GetCoverPersonImagePath(person);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error looking up CoversDB image for {PersonName}", person.Name);
+        }
+
+        return null;
+    }
+
+    private async Task<string?> GetCoverPersonImagePath(Person person, CancellationToken ct = default)
     {
         var tempFile = Path.Join(_directoryService.LongTermCacheDirectory, "people.yml");
 
@@ -354,7 +369,7 @@ public class CoverDbService : ICoverDbService
         if (!File.Exists(tempFile))
         {
             var masterPeopleFile = await $"{NewHost}people/people.yml"
-                .DownloadFileAsync(_directoryService.LongTermCacheDirectory);
+                .DownloadFileAsync(_directoryService.LongTermCacheDirectory, cancellationToken: ct);
 
             if (!File.Exists(tempFile) || string.IsNullOrEmpty(masterPeopleFile))
             {

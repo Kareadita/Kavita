@@ -111,17 +111,8 @@
     border: none;
   }
 
-  .search-result {
-    width: 1.5rem;
-    margin-top: 0.3125rem;
-  }
-
   .scroll-to-top:hover {
     animation: MoveUpDown 1s linear infinite;
-  }
-
-  .text-light {
-    color: var(--search-result-text-lite-color) !important;
   }
 
 /* small devices (phones, 650px and down) */
