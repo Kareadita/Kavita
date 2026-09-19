@@ -1,4 +1,4 @@
-import {AsyncPipe, DOCUMENT} from '@angular/common';
+import {DOCUMENT} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -8,12 +8,13 @@ import {
   ElementRef,
   inject,
   Injector,
-  Input,
+  input,
   OnInit,
+  signal,
   Signal,
   viewChild
 } from '@angular/core';
-import {combineLatest, filter, map, Observable, of, shareReplay, switchMap, tap} from 'rxjs';
+import {Observable, tap} from 'rxjs';
 import {LayoutMode} from '../../_models/layout-mode';
 import {FITTING_OPTION, PAGING_DIRECTION} from '../../_models/reader-enums';
 import {ReaderSetting} from '../../_models/reader-setting';
@@ -23,14 +24,13 @@ import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {BreakpointService} from "../../../_services/breakpoint.service";
-import {PageSplitOption} from "../../../_models/preferences/page-split-option";
 import {ReaderMode} from "../../../_models/preferences/reader-mode";
 
 @Component({
     selector: 'app-single-renderer',
     templateUrl: './single-renderer.component.html',
     styleUrls: ['./single-renderer.component.scss'],
-    imports: [AsyncPipe, SafeStylePipe],
+    imports: [SafeStylePipe],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SingleRendererComponent implements OnInit, ImageRenderer {
@@ -38,140 +38,92 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
   private readonly document = inject<Document>(DOCUMENT);
   protected readonly mangaReaderService = inject(MangaReaderService);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
 
-  @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
-  @Input({required: true}) readingProfile!: ReadingProfile;
-  @Input({required: true}) image$!: Observable<HTMLImageElement | null>;
-  @Input({required: true}) bookmark$!: Observable<number>;
-  @Input({required: true}) showClickOverlay$!: Observable<boolean>;
-  @Input({required: true}) pageNum$!: Observable<{pageNum: number, maxPages: number}>;
+  readonly readerSettings$ = input.required<Observable<ReaderSetting>>();
+  readonly readingProfile = input.required<ReadingProfile>();
+  readonly image$ = input.required<Observable<HTMLImageElement | null>>();
+  readonly bookmark$ = input.required<Observable<number>>();
+  readonly showClickOverlay$ = input.required<Observable<boolean>>();
+  readonly pageNum$ = input.required<Observable<{pageNum: number, maxPages: number}>>();
 
   readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
-  private readonly destroyRef = inject(DestroyRef);
-
-  imageFitClass$!: Observable<string>;
-  imageContainerHeight$!: Observable<string>;
-  showClickOverlayClass$!: Observable<string>;
-  readerModeClass$!: Observable<string>;
-  darkness$: Observable<string> = of('brightness(100%)');
   currentImage!: HTMLImageElement;
-  layoutMode: LayoutMode = LayoutMode.Single;
-  pageSplit: PageSplitOption = PageSplitOption.FitSplit;
 
-  pageNum: number = 0;
-  maxPages: number = 1;
+  private readerSettings!: Signal<ReaderSetting>;
+  private showClickOverlay!: Signal<boolean>;
 
-  readerSettings!: Signal<ReaderSetting>;
-  widthOverride!: Signal<string>;
-  emulateBookClass!: Signal<string>;
+  protected readonly pageNum = signal(0);
+
+  protected readonly layoutMode = computed(() => this.readerSettings().layoutMode);
+  protected readonly pageSplit = computed(() => this.readerSettings().pageSplit);
+  protected readonly darkness = computed(() => 'brightness(' + this.readerSettings().darkness + '%)');
+  protected readonly showClickOverlayClass = computed(() => this.showClickOverlay() ? 'blur' : '');
+  protected readonly readerModeClass = computed(() => {
+    const mode = this.readerSettings().readerMode;
+    return mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none';
+  });
+
+  protected readonly isValid = computed(() => this.layoutMode() === LayoutMode.Single);
+
+  protected readonly emulateBookClass = computed(() => {
+    const emulateBook = this.readerSettings().emulateBook;
+    if (!emulateBook || !this.isValid()) return '';
+
+    return 'book-shadow';
+  });
+
+  protected readonly widthOverride = computed(() => {
+    const breakpoint = this.breakpointService.activeBreakpoint();
+    const value = this.readerSettings().widthSlider;
+
+    if (breakpoint <= this.readingProfile().disableWidthOverride) {
+      return '';
+    }
+    return (value <= 0) ? '' : value + '%';
+  });
+
+  protected readonly imageContainerHeight = computed(() =>
+    this.readerSettings().fitting === FITTING_OPTION.HEIGHT ? 'calc(100dvh)' : '');
+
+  protected readonly imageFitClass = computed(() => {
+    if (
+      this.mangaReaderService.isWidePage(this.pageNum()) &&
+      this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit())
+      ) {
+      // Rewriting to fit to width for this cover image
+      return FITTING_OPTION.WIDTH + ' fit-to-screen wide';
+    }
+
+    return this.readerSettings().fitting;
+  });
 
   ngOnInit(): void {
-    this.readerModeClass$ = this.readerSettings$.pipe(
-      map(values => values.readerMode),
-      map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
-      filter(_ => this.isValid()),
-      takeUntilDestroyed(this.destroyRef)
-    );
+    this.readerSettings = toSignal(this.readerSettings$(), {injector: this.injector, requireSync: true});
+    this.showClickOverlay = toSignal(this.showClickOverlay$(), {injector: this.injector, initialValue: false});
 
-    this.readerSettings = toSignal(this.readerSettings$, {injector: this.injector, requireSync: true});
-    this.widthOverride = computed(() => {
-      const breakpoint = this.breakpointService.activeBreakpoint();
-      const value = this.readerSettings().widthSlider;
-
-      if (breakpoint <= this.readingProfile.disableWidthOverride) {
-        return '';
-      }
-      return (value <= 0) ? '' : value + '%';
-    });
-
-    this.emulateBookClass = computed(() => {
-      const emulateBook = this.readerSettings().emulateBook;
-      if (!emulateBook || !this.isValid()) return '';
-
-      return 'book-shadow';
-    });
-
-    this.imageContainerHeight$ = this.image$.pipe(
-      filter(_ => this.isValid()),
-      switchMap(img => {
-        this.cdRef.markForCheck();
-        return this.calculateImageContainerHeight$();
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    );
-
-
-    this.pageNum$.pipe(
+    this.pageNum$().pipe(
       takeUntilDestroyed(this.destroyRef),
-      tap(pageInfo => {
-        this.pageNum = pageInfo.pageNum;
-        this.maxPages = pageInfo.maxPages;
-      }),
-    ).subscribe(() => {});
+      tap(pageInfo => this.pageNum.set(pageInfo.pageNum))
+    ).subscribe();
 
-    this.darkness$ = this.readerSettings$.pipe(
-      map(values => 'brightness(' + values.darkness + '%)'),
-      filter(_ => this.isValid()),
-      takeUntilDestroyed(this.destroyRef)
-    );
-
-    this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
-      map(showOverlay => showOverlay ? 'blur' : ''),
+    // currentImage is the same element across renders, so a load that lands later needs the view re-checked
+    this.image$().pipe(
       takeUntilDestroyed(this.destroyRef),
-      filter(_ => this.isValid()),
-    );
+      tap(() => this.cdRef.markForCheck())
+    ).subscribe();
 
-    this.readerSettings$.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      tap(values => {
-        this.layoutMode = values.layoutMode;
-        this.pageSplit = values.pageSplit;
-        this.cdRef.markForCheck();
-      })
-    ).subscribe(() => {});
-
-    this.bookmark$.pipe(
+    this.bookmark$().pipe(
       takeUntilDestroyed(this.destroyRef),
       tap(_ => {
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
         if (image1 != null) elements.push(image1);
         this.mangaReaderService.applyBookmarkEffect(elements);
-      }),
-      filter(_ => this.isValid()),
-    ).subscribe(() => {});
-
-    this.imageFitClass$ = combineLatest([this.readerSettings$, this.pageNum$]).pipe(
-      map(values => values[0].fitting),
-      map(fit => {
-        if (
-          this.mangaReaderService.isWidePage(this.pageNum) &&
-          this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
-          ) {
-          // Rewriting to fit to width for this cover image
-          return FITTING_OPTION.WIDTH + ' fit-to-screen wide';
-        }
-
-        return fit;
-      }),
-      shareReplay({refCount: true, bufferSize: 1}),
-      filter(_ => this.isValid()),
-      takeUntilDestroyed(this.destroyRef),
-    );
-  }
-
-  private calculateImageContainerHeight$(): Observable<string> {
-    return this.readerSettings$.pipe(
-      map(values => values.fitting),
-      map(mode => mode === FITTING_OPTION.HEIGHT ? 'calc(100dvh)' : ''),
-      filter(_ => this.isValid())
-    );
-  }
-
-  isValid() {
-    return this.layoutMode === LayoutMode.Single;
+      })
+    ).subscribe();
   }
 
   renderPage(img: Array<HTMLImageElement | null>): void {
@@ -183,7 +135,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
   }
 
   getPageAmount(direction: PAGING_DIRECTION): number {
-    if (!this.isValid() || this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return 0;
+    if (!this.isValid() || this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit())) return 0;
     return 1;
   }
   reset(): void {}
