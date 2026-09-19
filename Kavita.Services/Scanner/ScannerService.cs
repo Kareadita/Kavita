@@ -624,12 +624,9 @@ public class ScannerService(
                 continue;
             }
 
-            // Filter out ParserInfos where FullFilePath is empty (i.e., folder not modified)
-            var validInfos = series.Value.Where(info => !string.IsNullOrEmpty(info.Filename)).ToList();
-
-            if (validInfos.Count != 0)
+            if (series.Value.Any(info => !string.IsNullOrEmpty(info.Filename)))
             {
-                toProcess[series.Key] = validInfos;
+                toProcess[series.Key] = series.Value.Where(info => !string.IsNullOrEmpty(info.Filename) || !string.IsNullOrEmpty(info.UnchangedFolderPath)).ToList();
             }
         }
 
@@ -755,7 +752,8 @@ public class ScannerService(
         {
             foreach (var pSeries in toProcess)
             {
-                totalFiles += pSeries.Count;
+                // Placeholders for skipped folders aren't files
+                totalFiles += pSeries.Count(info => string.IsNullOrEmpty(info.UnchangedFolderPath));
 
                 using var scope = scopeFactory.CreateScope();
                 var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();

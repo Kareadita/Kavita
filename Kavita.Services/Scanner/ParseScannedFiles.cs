@@ -742,7 +742,7 @@ public partial class ParseScannedFiles
         if (!result.HasChanged)
         {
             result.ParserInfos = seriesPaths[normalizedFolder]
-                .Select(fp => new ParserInfo { Series = fp.SeriesName, Format = fp.Format })
+                .Select(fp => new ParserInfo { Series = fp.SeriesName, Format = fp.Format, UnchangedFolderPath = normalizedFolder })
                 .ToList();
 
             // // We are certain TryGetSeriesList will return a valid result here, if the series wasn't present yet. It will have been changed.
@@ -814,11 +814,14 @@ public partial class ParseScannedFiles
 
     public static void UpdateSortOrder(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParsedSeries series)
     {
+        // Placeholders from skipped folders don't map to a chapter, so they have nothing to sort
+        var fileInfos = scannedSeries[series].Where(info => string.IsNullOrEmpty(info.UnchangedFolderPath)).ToList();
+
         // Set the Sort order per Volume
-        var volumes = scannedSeries[series].GroupBy(info => info.Volumes);
+        var volumes = fileInfos.GroupBy(info => info.Volumes);
         foreach (var volume in volumes)
         {
-            var infos = scannedSeries[series].Where(info => info.Volumes == volume.Key).ToList();
+            var infos = fileInfos.Where(info => info.Volumes == volume.Key).ToList();
             IList<ParserInfo> chapters;
             var specialTreatment = infos.TrueForAll(info => info.IsSpecial);
             var hasAnySpMarker = infos.Exists(info => info.SpecialIndex > 0);

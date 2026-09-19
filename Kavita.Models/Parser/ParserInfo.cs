@@ -47,6 +47,11 @@ public class ParserInfo
     public string FullFilePath { get; set; } = string.Empty;
 
     /// <summary>
+    /// Set if the file is skipped because of no changes
+    /// </summary>
+    public string UnchangedFolderPath { get; set; } = string.Empty;
+
+    /// <summary>
     /// <see cref="MangaFormat"/> that represents the type of the file
     /// <remarks>Mainly used to show in the UI and so caching service knows how to cache for reading.</remarks>
     /// </summary>

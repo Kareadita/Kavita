@@ -45,6 +45,11 @@ internal sealed record ProcessParserInfosArgs
     public required Series Series { get; init; }
     public required IList<ParserInfo> ParsedInfos { get; init; }
     public required Dictionary<string, Person> DatabasePeople { get; init; }
+    /// <summary>
+    /// Folders the scanner skipped because nothing in them changed. Their files are known to still be on disk,
+    /// but nothing about them was read this scan.
+    /// </summary>
+    public IReadOnlyCollection<string> UnchangedFolders { get; init; } = [];
     public bool ForceUpdate { get; init; }
 }
 
@@ -124,12 +129,20 @@ public class ProcessSeries(
             var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
             var databasePeople = await LoadAndCreateMissingChapterPeople(series, parsedInfos);
 
+            var fileInfos = parsedInfos.Where(info => string.IsNullOrEmpty(info.UnchangedFolderPath)).ToList();
+            var unchangedFolders = parsedInfos
+                .Select(info => info.UnchangedFolderPath)
+                .Where(path => !string.IsNullOrEmpty(path))
+                .Distinct()
+                .ToList();
+
             await ProcessParserInfos(new ProcessParserInfosArgs
             {
                 Settings = settings,
                 Series = series,
-                ParsedInfos = parsedInfos,
+                ParsedInfos = fileInfos,
                 DatabasePeople = databasePeople,
+                UnchangedFolders = unchangedFolders,
                 ForceUpdate = args.ForceUpdate,
             });
 
@@ -178,8 +191,9 @@ public class ProcessSeries(
 
             await UpdateSeriesMetadata(databasePeople, settings, series, library);
 
-            // Update series FolderPath here
-            await UpdateSeriesFolderPath(parsedInfos, library, series);
+            await UpdateSeriesFolderPath(
+                [.. fileInfos.Select(info => info.FullFilePath), .. GetFilesInUnchangedFolders(series, unchangedFolders).Select(f => f.FilePath)],
+                library, series);
 
             series.UpdateLastFolderScanned();
 
@@ -340,10 +354,12 @@ public class ProcessSeries(
     }
 
 
-    private async Task UpdateSeriesFolderPath(IEnumerable<ParserInfo> parsedInfos, Library library, Series series)
+    private async Task UpdateSeriesFolderPath(IReadOnlyCollection<string> filePaths, Library library, Series series)
     {
         var libraryFolders = library.Folders.Select(l => Parser.NormalizePath(l.Path)).ToList();
-        var seriesFiles = parsedInfos.Select(f => Parser.NormalizePath(f.FullFilePath)).ToList();
+        var seriesFiles = filePaths.Select(Parser.NormalizePath).ToList();
+        if (seriesFiles.Count == 0) return;
+
         var seriesDirs = directoryService.FindHighestDirectoriesFromFiles(libraryFolders, seriesFiles);
         if (seriesDirs.Keys.Count == 0)
         {
@@ -686,6 +702,10 @@ public class ProcessSeries(
         var foundChapters = new HashSet<Chapter>();
         var foundMangaFiles = new HashSet<MangaFile>();
 
+        var unverifiedFileIds = GetFilesInUnchangedFolders(args.Series, args.UnchangedFolders)
+            .Select(f => f.Id)
+            .ToHashSet();
+
         foreach (var parsedInfo in args.ParsedInfos)
         {
             var volume = FindOrCreateVolume(args, parsedInfo);
@@ -722,7 +742,7 @@ public class ProcessSeries(
         {
             foreach (var chapter in volume.Chapters)
             {
-                chapter.Files = [.. chapter.Files.Where(f => mangaFileIds.Contains(f.Id))];
+                chapter.Files = [.. chapter.Files.Where(f => mangaFileIds.Contains(f.Id) || unverifiedFileIds.Contains(f.Id))];
                 chapter.Pages = chapter.Files.Sum(f => f.Pages);
             }
 
@@ -730,16 +750,31 @@ public class ProcessSeries(
         }
 
         // Remove volumes and chapter that did not match any files on disk
-        RemoveUnmappedEntities(args.Series, volumeIds, chapterIds);
+        RemoveUnmappedEntities(args.Series, volumeIds, chapterIds, unverifiedFileIds);
     }
 
-    private void RemoveUnmappedEntities(Series series, HashSet<int> foundVolumes, HashSet<int> foundChapters)
+    private void RemoveUnmappedEntities(Series series, HashSet<int> foundVolumes, HashSet<int> foundChapters,
+        HashSet<int> unverifiedFileIds)
     {
-        var unmappedVolumes = series.Volumes.Where(v => !foundVolumes.Contains(v.Id)).ToList();
+        bool HasUnverifiedFile(IEnumerable<MangaFile> files) => files.Any(f => unverifiedFileIds.Contains(f.Id));
+
+        var unmappedVolumes = series.Volumes
+            .Where(v => !foundVolumes.Contains(v.Id) && !HasUnverifiedFile(v.Chapters.SelectMany(c => c.Files)))
+            .ToList();
         var unmappedChapters = series.Volumes
             .SelectMany(v => v.Chapters)
-            .Where(c => !foundChapters.Contains(c.Id))
+            .Where(c => !foundChapters.Contains(c.Id) && !HasUnverifiedFile(c.Files))
             .ToList();
+
+        var keptUnverifiedChapters = series.Volumes
+            .SelectMany(v => v.Chapters)
+            .Count(c => !foundChapters.Contains(c.Id) && HasUnverifiedFile(c.Files));
+
+        if (keptUnverifiedChapters > 0)
+        {
+            logger.LogTrace("Keeping {Count} chapters for {SeriesId} as their files are in folders that were skipped this scan",
+                keptUnverifiedChapters, series.Id);
+        }
 
         if (unmappedVolumes.Count == 0 && unmappedChapters.Count == 0)
         {
@@ -760,6 +795,27 @@ public class ProcessSeries(
                 unmappedChapters.Count, series.Id, string.Join(", ", unmappedChapters.Select(c => c.Id)));
             unitOfWork.ChapterRepository.Remove(unmappedChapters);
         }
+    }
+
+    /// <summary>
+    /// Files belonging to folders the scanner skipped this scan. Nothing read them, so their entities must be kept.
+    /// </summary>
+    private static IEnumerable<MangaFile> GetFilesInUnchangedFolders(Series series,
+        IReadOnlyCollection<string> unchangedFolders)
+    {
+        return series.Volumes
+            .SelectMany(v => v.Chapters)
+            .SelectMany(c => c.Files)
+            .Where(f => IsInUnchangedFolder(f, unchangedFolders));
+    }
+
+    /// <summary>
+    /// Whether the file lives under a folder the scanner skipped. Such a file was never looked at this scan, so it
+    /// must not be treated as missing from disk.
+    /// </summary>
+    private static bool IsInUnchangedFolder(MangaFile file, IReadOnlyCollection<string> unchangedFolders)
+    {
+        return unchangedFolders.Any(folder => file.FilePath.StartsWith(folder + Path.AltDirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
     }
 
     private Volume FindOrCreateVolume(ProcessParserInfosArgs args, ParserInfo info)
@@ -819,7 +875,10 @@ public class ProcessSeries(
         var filesMatchingOnVolume = args.ParsedInfos.Select(p => p.Volumes)
             .Count(v => Parser.MinNumberFromRange(v).Is(minVolumeRange) && Parser.MaxNumberFromRange(v).Is(maxVolumeRange));
 
-        if (volume?.Chapters.Count == 1 && filesMatchingOnVolume == 1)
+        // Don't use volume if any files are unchanged
+        var volumeFullyRead = volume?.Chapters.All(c => c.Files.All(f => !IsInUnchangedFolder(f, args.UnchangedFolders))) ?? true;
+
+        if (volume?.Chapters.Count == 1 && filesMatchingOnVolume == 1 && volumeFullyRead)
         {
             var match = volume.Chapters[0];
 
