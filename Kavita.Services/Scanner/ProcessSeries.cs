@@ -720,12 +720,13 @@ public class ProcessSeries(
         // Update page count once all pages have been processed
         foreach (var volume in args.Series.Volumes)
         {
-            volume.Pages = volume.Chapters.Sum(chapter => chapter.Pages);
-
             foreach (var chapter in volume.Chapters)
             {
                 chapter.Files = [.. chapter.Files.Where(f => mangaFileIds.Contains(f.Id))];
+                chapter.Pages = chapter.Files.Sum(f => f.Pages);
             }
+
+            volume.Pages = volume.Chapters.Sum(chapter => chapter.Pages);
         }
 
         // Remove volumes and chapter that did not match any files on disk

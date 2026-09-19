@@ -1,3 +1,4 @@
+using Kavita.Common.Extensions;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
@@ -136,5 +137,5 @@ public class ParserInfo
     /// </summary>
     public float LowestChapter { get; set; }
 
-    public string DebugString => $"ParserInfo{{Volume={Volumes},Chapter={Chapters},Path={FullFilePath}}}";
+    public string DebugString => $"ParserInfo{{Volume={Volumes},Chapter={Chapters},Path={FullFilePath.NormalizePath()}}}";
 }
