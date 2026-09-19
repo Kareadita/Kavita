@@ -330,7 +330,7 @@ public class ScannerService(
         await metadataService.RemoveAbandonedMetadataKeys();
 
         BackgroundJob.Enqueue(() => cacheService.CleanupChapters(existingChapterIdsToClean));
-        BackgroundJob.Enqueue(() => directoryService.ClearDirectory(directoryService.CacheDirectory));
+        BackgroundJob.Enqueue(() => cacheService.CleanupCacheExceptActiveChaptersAsync());
     }
 
     private static Dictionary<ParsedSeries, IList<ParserInfo>> TrackFoundSeriesAndFiles(IList<ScannedSeriesResult> seenSeries)
@@ -574,7 +574,7 @@ public class ScannerService(
             MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
         await metadataService.RemoveAbandonedMetadataKeys();
 
-        BackgroundJob.Enqueue(() => directoryService.ClearDirectory(directoryService.CacheDirectory));
+        BackgroundJob.Enqueue(() => cacheService.CleanupCacheExceptActiveChaptersAsync());
     }
 
     private async Task RemoveSeriesNotFound(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Library library)
