@@ -2,6 +2,10 @@
   display: block;
 }
 
+.lock-btn:not(.lock-active) i {
+  color: var(--bs-body-color);
+}
+
 .lock-active {
   > .input-group-text {
     background-color: var(--primary-color);

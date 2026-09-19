@@ -12,4 +12,8 @@ import {TranslocoDirective} from "@jsverse/transloco";
 })
 export class LockableFieldComponent {
   locked = model.required<boolean>();
+
+  toggle() {
+    this.locked.update(x => !x);
+  }
 }
