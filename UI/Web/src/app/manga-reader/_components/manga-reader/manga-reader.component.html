@@ -57,8 +57,7 @@
         <div appDblClick (doubleClick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
           <app-canvas-renderer [readerSettings$]="readerSettings$"
             [image$]="currentImage$"
-            [bookmark$]="showBookmarkEffect$"
-            [showClickOverlay$]="showClickOverlay$" />
+            [bookmark$]="showBookmarkEffect$" />
         </div>
 
         <!-- Pagination controls and screen hints-->

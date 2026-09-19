@@ -1,24 +1,27 @@
-import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
+import {DOCUMENT} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   inject,
-  Input,
+  Injector,
+  input,
   OnInit,
+  signal,
+  Signal,
   viewChild
 } from '@angular/core';
-import {combineLatest, filter, map, Observable, of, shareReplay, tap} from 'rxjs';
+import {Observable, tap} from 'rxjs';
 import {LayoutMode} from '../../_models/layout-mode';
 import {FITTING_OPTION, PAGING_DIRECTION} from '../../_models/reader-enums';
 import {ReaderSetting} from '../../_models/reader-setting';
 import {DEBUG_MODES, ImageRenderer} from '../../_models/renderer';
 import {MangaReaderService} from '../../_service/manga-reader.service';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
-import {PageSplitOption} from "../../../_models/preferences/page-split-option";
 import {ReaderMode} from "../../../_models/preferences/reader-mode";
 
 /**
@@ -29,34 +32,63 @@ import {ReaderMode} from "../../../_models/preferences/reader-mode";
     templateUrl: './double-renderer.component.html',
     styleUrls: ['./double-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass, AsyncPipe, SafeStylePipe]
+    imports: [SafeStylePipe]
 })
 export class DoubleRendererComponent implements OnInit, ImageRenderer {
   private readonly cdRef = inject(ChangeDetectorRef);
-  mangaReaderService = inject(MangaReaderService);
-  private document = inject<Document>(DOCUMENT);
+  private readonly mangaReaderService = inject(MangaReaderService);
+  private readonly document = inject<Document>(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
 
   readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
-
-  @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
-  @Input({required: true}) bookmark$!: Observable<number>;
-  @Input({required: true}) showClickOverlay$!: Observable<boolean>;
-  @Input({required: true}) pageNum$!: Observable<{pageNum: number, maxPages: number}>;
-  @Input({required: true}) getPage!: (pageNum: number) => HTMLImageElement;
-  private readonly destroyRef = inject(DestroyRef);
+  readonly readerSettings$ = input.required<Observable<ReaderSetting>>();
+  readonly bookmark$ = input.required<Observable<number>>();
+  readonly showClickOverlay$ = input.required<Observable<boolean>>();
+  readonly pageNum$ = input.required<Observable<{pageNum: number, maxPages: number}>>();
+  readonly getPage = input.required<(pageNum: number) => HTMLImageElement>();
 
   debugMode: DEBUG_MODES = DEBUG_MODES.None;
-  imageFitClass$!: Observable<string>;
-  showClickOverlayClass$!: Observable<string>;
-  readerModeClass$!: Observable<string>;
-  layoutClass$!: Observable<string>;
-  darkness$: Observable<string> = of('brightness(100%)');
-  emulateBookClass$: Observable<string> = of('');
-  layoutMode: LayoutMode = LayoutMode.Single;
-  pageSplit: PageSplitOption = PageSplitOption.FitSplit;
-  pageNum: number = 0;
-  maxPages: number = 0;
+
+  private readerSettings!: Signal<ReaderSetting>;
+  private showClickOverlay!: Signal<boolean>;
+
+  private readonly pageNum = signal(0);
+  private readonly maxPages = signal(0);
+
+  protected readonly layoutMode = computed(() => this.readerSettings().layoutMode);
+  protected readonly imageFitClass = computed(() => this.readerSettings().fitting);
+  protected readonly darkness = computed(() => 'brightness(' + this.readerSettings().darkness + '%)');
+  protected readonly emulateBookClass = computed(() => this.readerSettings().emulateBook ? 'book-shadow' : '');
+  protected readonly showClickOverlayClass = computed(() => this.showClickOverlay() ? 'blur' : '');
+  protected readonly readerModeClass = computed(() => {
+    const mode = this.readerSettings().readerMode;
+    return mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none';
+  });
+
+  protected readonly isValid = computed(() => this.layoutMode() === LayoutMode.Double);
+
+  /**
+   * Determines if we should render a double page.
+   * The general gist is if we are on double layout mode, the current page (first page) is not a cover image or a wide image
+   * and the next page is not a wide image (as only non-wides should be shown next to each other).
+   * @remarks This will always fail if the window's width is greater than the height
+   */
+  protected readonly shouldRenderDouble = computed(() => this.calculateShouldRenderDouble());
+
+  protected readonly layoutClass = computed(() => {
+    if (this.shouldRenderDouble()) {
+      switch (this.readerSettings().fitting) {
+        case FITTING_OPTION.WIDTH: return 'fit-to-width-double-offset';
+        case FITTING_OPTION.HEIGHT: return 'fit-to-height-double-offset';
+        case FITTING_OPTION.ORIGINAL: return 'original-double-offset';
+      }
+    }
+
+    if (this.mangaReaderService.isWidePage(this.pageNum())) return 'double-offset';
+    return '';
+  });
 
   /**
    * Used to render a page on the canvas or in the image tag. This Image element is prefetched by the cachedImages buffer.
@@ -69,92 +101,24 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
     */
   currentImage2 = new Image();
 
-  /**
-   * Determines if we should render a double page.
-   * The general gist is if we are on double layout mode, the current page (first page) is not a cover image or a wide image
-   * and the next page is not a wide image (as only non-wides should be shown next to each other).
-   * @remarks This will always fail if the window's width is greater than the height
-  */
-  shouldRenderDouble$!: Observable<boolean>;
-
   ngOnInit(): void {
-    this.readerModeClass$ = this.readerSettings$.pipe(
-      map(values => values.readerMode),
-      map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
-      filter(_ => this.isValid()),
-      takeUntilDestroyed(this.destroyRef)
-    );
+    this.readerSettings = toSignal(this.readerSettings$(), {injector: this.injector, requireSync: true});
+    this.showClickOverlay = toSignal(this.showClickOverlay$(), {injector: this.injector, initialValue: false});
 
-    this.darkness$ = this.readerSettings$.pipe(
-      map(values => 'brightness(' + values.darkness + '%)'),
-      filter(_ => this.isValid()),
-      takeUntilDestroyed(this.destroyRef)
-    );
-
-    this.emulateBookClass$ = this.readerSettings$.pipe(
-      map(data => data.emulateBook),
-      map(enabled => enabled ? 'book-shadow' : ''),
-      filter(_ => this.isValid()),
-      takeUntilDestroyed(this.destroyRef)
-    );
-
-    this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
-      map(showOverlay => showOverlay ? 'blur' : ''),
-      filter(_ => this.isValid()),
-      takeUntilDestroyed(this.destroyRef)
-    );
-
-    this.pageNum$.pipe(
+    this.pageNum$().pipe(
       takeUntilDestroyed(this.destroyRef),
       tap(pageInfo => {
-        this.pageNum = pageInfo.pageNum;
-        this.maxPages = pageInfo.maxPages;
+        this.pageNum.set(pageInfo.pageNum);
+        this.maxPages.set(pageInfo.maxPages);
 
-        this.currentImage = this.getPage(this.pageNum);
-        this.currentImage2 = this.getPage(this.pageNum + 1);
+        this.currentImage = this.getPage()(pageInfo.pageNum);
+        this.currentImage2 = this.getPage()(pageInfo.pageNum + 1);
 
-        this.cdRef.markForCheck();
-      }),
-      filter(_ => this.isValid()),
-    ).subscribe(() => {});
-
-    this.shouldRenderDouble$ = this.pageNum$.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      map((_) => this.shouldRenderDouble()),
-      filter(_ => this.isValid()),
-      shareReplay({refCount: true, bufferSize: 1})
-    );
-
-    this.imageFitClass$ = this.readerSettings$.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      map(values => values.fitting),
-      filter(_ => this.isValid()),
-      shareReplay()
-    );
-
-    this.layoutClass$ = combineLatest([this.shouldRenderDouble$, this.readerSettings$]).pipe(
-      takeUntilDestroyed(this.destroyRef),
-      map((value) =>  {
-        if (value[0] && value[1].fitting === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
-        if (value[0] && value[1].fitting === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
-        if (value[0] && value[1].fitting === FITTING_OPTION.ORIGINAL) return 'original-double-offset';
-        if (this.mangaReaderService.isWidePage(this.pageNum) ) return 'double-offset';
-        return '';
-      }),
-      filter(_ => this.isValid()),
-    );
-
-
-    this.readerSettings$.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      tap(values => {
-        this.layoutMode = values.layoutMode;
-        this.pageSplit = values.pageSplit;
         this.cdRef.markForCheck();
       })
-    ).subscribe(() => {});
+    ).subscribe();
 
-    this.bookmark$.pipe(
+    this.bookmark$().pipe(
       takeUntilDestroyed(this.destroyRef),
       tap(_ => {
         const elements = [];
@@ -165,36 +129,35 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
         if (image2 != null) elements.push(image2);
 
         this.mangaReaderService.applyBookmarkEffect(elements);
-      }),
-      filter(_ => this.isValid()),
-    ).subscribe(() => {});
+      })
+    ).subscribe();
   }
 
-
-  shouldRenderDouble() {
+  // Dimensions arrive as images load, so the cached signal can be stale when a render pass asks
+  calculateShouldRenderDouble() {
     if (!this.isValid()) return false;
 
-    if (this.mangaReaderService.isCoverImage(this.pageNum)) {
+    if (this.mangaReaderService.isCoverImage(this.pageNum())) {
       this.debugLog('Not rendering double as current page is cover image');
       return false;
     }
 
-    if (this.mangaReaderService.isWidePage(this.pageNum) ) {
+    if (this.mangaReaderService.isWidePage(this.pageNum()) ) {
       this.debugLog('Not rendering double as current page is wide image');
       return false;
     }
 
-    if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
+    if (this.mangaReaderService.isSecondLastImage(this.pageNum(), this.maxPages())) {
       this.debugLog('Not rendering double as current page is last');
       return false;
     }
 
-    if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
+    if (this.mangaReaderService.isLastImage(this.pageNum(), this.maxPages())) {
       this.debugLog('Not rendering double as current page is last');
       return false;
     }
 
-    if (this.mangaReaderService.isWidePage(this.pageNum + 1) ) {
+    if (this.mangaReaderService.isWidePage(this.pageNum() + 1) ) {
       this.debugLog('Not rendering double as next page is wide image');
       return false;
     }
@@ -202,16 +165,12 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
     return true;
   }
 
-  isValid() {
-    return this.layoutMode === LayoutMode.Double;
-  }
-
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.isValid()) return;
 
     // First load, switching from double manga -> double, this is 0 and thus not rendering
-    if (!this.shouldRenderDouble() && (this.currentImage.height || img[0].height) > 0) {
+    if (!this.calculateShouldRenderDouble() && (this.currentImage.height || img[0].height) > 0) {
       return;
     }
 
@@ -221,51 +180,54 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
   getPageAmount(direction: PAGING_DIRECTION): number {
     if (!this.isValid()) return 0;
 
+    const pageNum = this.pageNum();
+    const maxPages = this.maxPages();
+
     switch (direction) {
       case PAGING_DIRECTION.FORWARD:
-        if (this.mangaReaderService.isCoverImage(this.pageNum)) {
+        if (this.mangaReaderService.isCoverImage(pageNum)) {
           this.debugLog('Moving forward 1 page as on cover image');
           return 1;
         }
-        if (this.mangaReaderService.isWidePage(this.pageNum)) {
+        if (this.mangaReaderService.isWidePage(pageNum)) {
           this.debugLog('Moving forward 1 page as current page is wide');
           return 1;
         }
-        if (this.mangaReaderService.isWidePage(this.pageNum + 1)) {
+        if (this.mangaReaderService.isWidePage(pageNum + 1)) {
           this.debugLog('Moving forward 1 page as next page is wide');
           return 1;
         }
-        if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
+        if (this.mangaReaderService.isSecondLastImage(pageNum, maxPages)) {
           this.debugLog('Moving forward 1 page as 2 pages left');
           return 1;
         }
-        if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
+        if (this.mangaReaderService.isLastImage(pageNum, maxPages)) {
           this.debugLog('Moving forward 1 page as 1 page left');
           return 1;
         }
         this.debugLog('Moving forward 2 pages');
         return 2;
       case PAGING_DIRECTION.BACKWARDS:
-        if (this.mangaReaderService.isCoverImage(this.pageNum)) {
+        if (this.mangaReaderService.isCoverImage(pageNum)) {
           this.debugLog('Moving back 1 page as on cover image');
           return 1;
         }
 
-        if (this.mangaReaderService.adjustForDoubleReader(this.pageNum - 1) != this.pageNum - 1 && !this.mangaReaderService.isWidePage(this.pageNum - 2)) {
+        if (this.mangaReaderService.adjustForDoubleReader(pageNum - 1) != pageNum - 1 && !this.mangaReaderService.isWidePage(pageNum - 2)) {
           this.debugLog('Moving back 2 pages as previous pair should be in a pair');
           return 2;
         }
 
-        if (this.mangaReaderService.isWidePage(this.pageNum)) {
+        if (this.mangaReaderService.isWidePage(pageNum)) {
           this.debugLog('Moving back 1 page as current page is wide');
           return 1;
         }
 
-        if (this.mangaReaderService.isWidePage(this.pageNum - 1)) {
+        if (this.mangaReaderService.isWidePage(pageNum - 1)) {
           this.debugLog('Moving back 1 page as prev page is wide');
           return 1;
         }
-        if (this.mangaReaderService.isWidePage(this.pageNum - 2)) {
+        if (this.mangaReaderService.isWidePage(pageNum - 2)) {
           this.debugLog('Moving back 1 page as 2 pages back is wide');
           return 1;
         }
@@ -277,7 +239,7 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
   reset(): void {}
 
   getBookmarkPageCount(): number {
-    return this.shouldRenderDouble() ? 2 : 1;
+    return this.calculateShouldRenderDouble() ? 2 : 1;
   }
 
   debugLog(message: string, extraData?: any) {
