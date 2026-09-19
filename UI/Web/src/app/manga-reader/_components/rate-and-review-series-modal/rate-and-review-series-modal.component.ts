@@ -1,4 +1,4 @@
-import {Component, inject, input, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReviewService} from "../../../_services/review.service";
@@ -26,6 +26,7 @@ interface RateAndReviewForm {
   selector: 'app-rate-and-review-series-modal',
   styleUrl: './rate-and-review-series-modal.component.scss',
   templateUrl: './rate-and-review-series-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RateAndReviewSeriesModalComponent {
 

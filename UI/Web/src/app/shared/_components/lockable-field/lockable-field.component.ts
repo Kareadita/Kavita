@@ -1,4 +1,4 @@
-import {Component, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, model} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
@@ -8,6 +8,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
   selector: 'app-lockable-field',
   styleUrl: './lockable-field.component.scss',
   templateUrl: './lockable-field.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LockableFieldComponent {
   locked = model.required<boolean>();

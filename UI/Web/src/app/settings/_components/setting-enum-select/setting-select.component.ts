@@ -1,4 +1,4 @@
-import {Component, contentChild, inject, input, model, TemplateRef} from '@angular/core';
+import {ChangeDetectionStrategy, Component, contentChild, inject, input, model, TemplateRef} from '@angular/core';
 import {FormField, FormValueControl} from "@angular/forms/signals";
 import {NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
@@ -21,6 +21,7 @@ export interface EnumOption<T> {
   selector: 'app-setting-select',
   styleUrl: './setting-select.component.scss',
   templateUrl: './setting-select.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingSelectComponent<T extends number = number> implements FormValueControl<T | null> {
 

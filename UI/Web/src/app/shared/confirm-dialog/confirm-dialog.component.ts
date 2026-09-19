@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, signal} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {ConfirmButton} from './_models/confirm-button';
 import {ConfirmConfig} from './_models/confirm-config';
@@ -17,6 +17,7 @@ interface ConfirmFormModel {
   imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe, FormFieldDirective, FormField],
   templateUrl: './confirm-dialog.component.html',
   styleUrls: ['./confirm-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClass()',
   }

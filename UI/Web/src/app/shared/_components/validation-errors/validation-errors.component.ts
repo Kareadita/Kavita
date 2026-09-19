@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, inject, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input} from '@angular/core';
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {AnyField, toFieldView} from "../../_models/field-view";
 
@@ -28,6 +28,7 @@ export const idPostfix = '-validations';
   selector: 'app-validation-errors',
   styleUrl: './validation-errors.component.scss',
   templateUrl: './validation-errors.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ValidationErrorsComponent {
 

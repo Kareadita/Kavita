@@ -2,11 +2,10 @@ import {
   AfterContentInit,
   ChangeDetectionStrategy,
   Component,
-  ContentChildren,
+  contentChildren,
   DestroyRef,
   inject,
   input,
-  QueryList,
   signal,
   TemplateRef
 } from '@angular/core';
@@ -52,15 +51,14 @@ type Part =
       }
     }
     <!-- ng-template[translocoSlot] children render nothing here;
-         they're only projected so ContentChildren can query them. -->
+         they're only projected so the content query can find them. -->
     <ng-content />
   `,
 })
 export class TranslocoInjectComponent implements AfterContentInit {
   readonly key = input.required<string>();
 
-  @ContentChildren(TranslocoSlotDirective)
-  private readonly slotDirectives!: QueryList<TranslocoSlotDirective>;
+  private readonly slotDirectives = contentChildren(TranslocoSlotDirective);
 
   private readonly transloco = inject(TranslocoService);
   private readonly destroyRef = inject(DestroyRef);
@@ -84,7 +82,7 @@ export class TranslocoInjectComponent implements AfterContentInit {
     // 2. Swap each {{slotName}} for a null-byte sentinel BEFORE handing off to Transloco.
     //    Null bytes cannot appear in real translation strings, so splits are unambiguous.
     let processed = raw;
-    for (const d of this.slotDirectives) {
+    for (const d of this.slotDirectives()) {
       processed = processed.replaceAll(`{{${d.translocoSlot()}}}`, `\x00SLOT:${d.translocoSlot()}\x00`);
     }
 
@@ -117,6 +115,6 @@ export class TranslocoInjectComponent implements AfterContentInit {
   }
 
   protected getTemplate(name: string): TemplateRef<unknown> | null {
-    return this.slotDirectives?.find(d => d.translocoSlot() === name)?.tpl ?? null;
+    return this.slotDirectives().find(d => d.translocoSlot() === name)?.tpl ?? null;
   }
 }
