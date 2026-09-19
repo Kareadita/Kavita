@@ -1,3 +1,4 @@
+using Kavita.Common.Extensions;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
@@ -44,6 +45,11 @@ public class ParserInfo
     /// <example>C:/Manga/Beastars v01 (digital).cbz</example>
     /// </summary>
     public string FullFilePath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Set if the file is skipped because of no changes
+    /// </summary>
+    public string UnchangedFolderPath { get; set; } = string.Empty;
 
     /// <summary>
     /// <see cref="MangaFormat"/> that represents the type of the file
@@ -135,4 +141,6 @@ public class ParserInfo
     /// Lowest Chapter from ComicInfo then Parsed
     /// </summary>
     public float LowestChapter { get; set; }
+
+    public string DebugString => $"ParserInfo{{Volume={Volumes},Chapter={Chapters},Path={FullFilePath.NormalizePath()}}}";
 }

@@ -29,6 +29,11 @@ public static class ChapterListExtensions
     /// <returns></returns>
     public static Chapter? GetChapterByRange(this IEnumerable<Chapter> chapters, ParserInfo info)
     {
+        return chapters.GetChaptersByRange(info).FirstOrDefault();
+    }
+
+    public static IEnumerable<Chapter> GetChaptersByRange(this IEnumerable<Chapter> chapters, ParserInfo info)
+    {
         var normalizedPath = Scanner.Parser.NormalizePath(info.FullFilePath);
         var specialTreatment = info.IsSpecialInfo();
 
@@ -37,10 +42,10 @@ public static class ChapterListExtensions
         fakeChapter.UpdateFrom(info);
 
         return specialTreatment
-             ? chapters.FirstOrDefault(c =>
-                 c.Range == Scanner.Parser.RemoveExtensionIfSupported(info.Filename)
-                 || c.Files.Select(f => Scanner.Parser.NormalizePath(f.FilePath)).Contains(normalizedPath))
-             : chapters.FirstOrDefault(c => c.Range == fakeChapter.GetNumberTitle());
+            ? chapters.Where(c =>
+                c.Range == Scanner.Parser.RemoveExtensionIfSupported(info.Filename)
+                || c.Files.Select(f => Scanner.Parser.NormalizePath(f.FilePath)).Contains(normalizedPath))
+            : chapters.Where(c => c.Range == fakeChapter.GetNumberTitle());
     }
 
     /// <summary>

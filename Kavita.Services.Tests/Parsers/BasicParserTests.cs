@@ -42,9 +42,10 @@ public class BasicParserTests : AbstractFsTest
     [Fact]
     public void Parse_MangaLibrary_JustCover_ShouldReturnNull()
     {
-        var actual = _parser.Parse($"{_rootDirectory}Accel World/cover.png", $"{_rootDirectory}Accel World/",
+        var result = _parser.Parse($"{_rootDirectory}Accel World/cover.png", $"{_rootDirectory}Accel World/",
             _rootDirectory, LibraryType.Manga);
-        Assert.Null(actual);
+        Assert.True(result.Success);
+        Assert.Null(result.Info);
     }
 
     /// <summary>
@@ -54,7 +55,7 @@ public class BasicParserTests : AbstractFsTest
     public void Parse_MangaLibrary_OtherImage_ShouldReturnNull()
     {
         var actual = _parser.Parse($"{_rootDirectory}Accel World/page 01.png", $"{_rootDirectory}Accel World/",
-            _rootDirectory, LibraryType.Manga);
+            _rootDirectory, LibraryType.Manga).Info;
         Assert.NotNull(actual);
     }
 
@@ -65,7 +66,7 @@ public class BasicParserTests : AbstractFsTest
     public void Parse_MangaLibrary_VolumeAndChapterInFilename()
     {
         var actual = _parser.Parse($"{_rootDirectory}Mujaki no Rakuen/Mujaki no Rakuen Vol12 ch76.cbz", $"{_rootDirectory}Mujaki no Rakuen/",
-            _rootDirectory, LibraryType.Manga);
+            _rootDirectory, LibraryType.Manga).Info;
         Assert.NotNull(actual);
 
         Assert.Equal("Mujaki no Rakuen", actual.Series);
@@ -82,7 +83,7 @@ public class BasicParserTests : AbstractFsTest
     {
         var actual = _parser.Parse($"{_rootDirectory}Shimoneta to Iu Gainen ga Sonzai Shinai Taikutsu na Sekai Man-hen/Vol 1.cbz",
             $"{_rootDirectory}Shimoneta to Iu Gainen ga Sonzai Shinai Taikutsu na Sekai Man-hen/",
-            _rootDirectory, LibraryType.Manga);
+            _rootDirectory, LibraryType.Manga).Info;
         Assert.NotNull(actual);
 
         Assert.Equal("Shimoneta to Iu Gainen ga Sonzai Shinai Taikutsu na Sekai Man-hen", actual.Series);
@@ -99,7 +100,7 @@ public class BasicParserTests : AbstractFsTest
     {
         var actual = _parser.Parse($"{_rootDirectory}Beelzebub/Beelzebub_01_[Noodles].zip",
             $"{_rootDirectory}Beelzebub/",
-            _rootDirectory, LibraryType.Manga);
+            _rootDirectory, LibraryType.Manga).Info;
         Assert.NotNull(actual);
 
         Assert.Equal("Beelzebub", actual.Series);
@@ -116,7 +117,7 @@ public class BasicParserTests : AbstractFsTest
     {
         var actual = _parser.Parse($"{_rootDirectory}Summer Time Rendering/Specials/Record 014 (between chapter 083 and ch084) SP11.cbr",
             $"{_rootDirectory}Summer Time Rendering/",
-            _rootDirectory, LibraryType.Manga);
+            _rootDirectory, LibraryType.Manga).Info;
         Assert.NotNull(actual);
 
         Assert.Equal("Summer Time Rendering", actual.Series);
@@ -134,7 +135,7 @@ public class BasicParserTests : AbstractFsTest
     {
         var actual = _parser.Parse($"{_rootDirectory}Summer Time Rendering/Volume SP01.cbr",
             $"{_rootDirectory}Summer Time Rendering/",
-            _rootDirectory, LibraryType.Manga);
+            _rootDirectory, LibraryType.Manga).Info;
         Assert.NotNull(actual);
 
         Assert.Equal("Summer Time Rendering", actual.Series);
@@ -152,7 +153,7 @@ public class BasicParserTests : AbstractFsTest
     {
         var actual = _parser.Parse("M:/Kimi wa Midara na Boku no Joou/Specials/[Renzokusei] Special 1 SP02.zip",
             "M:/Kimi wa Midara na Boku no Joou/",
-            _rootDirectory, LibraryType.Manga);
+            _rootDirectory, LibraryType.Manga).Info;
         Assert.NotNull(actual);
 
         Assert.Equal("Kimi wa Midara na Boku no Joou", actual.Series);
@@ -170,7 +171,7 @@ public class BasicParserTests : AbstractFsTest
     {
         var actual = _parser.Parse($"{_rootDirectory}My Dress-Up Darling/SP01 1. Special Name.cbz",
             _rootDirectory,
-            _rootDirectory, LibraryType.Manga);
+            _rootDirectory, LibraryType.Manga).Info;
         Assert.NotNull(actual);
 
         Assert.Equal("My Dress-Up Darling", actual.Series);
@@ -188,7 +189,7 @@ public class BasicParserTests : AbstractFsTest
     {
         var actual = _parser.Parse($"{_rootDirectory}Air Gear/Air Gear Omnibus v01 (2016) (Digital) (Shadowcat-Empire).cbz",
             $"{_rootDirectory}Air Gear/",
-            _rootDirectory, LibraryType.Manga);
+            _rootDirectory, LibraryType.Manga).Info;
         Assert.NotNull(actual);
 
         Assert.Equal("Air Gear", actual.Series);
@@ -209,7 +210,7 @@ public class BasicParserTests : AbstractFsTest
     {
         var actual = _parser.Parse($"{_rootDirectory}Epubs/Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub",
             $"{_rootDirectory}Epubs/",
-            _rootDirectory, LibraryType.Manga);
+            _rootDirectory, LibraryType.Manga).Info;
         Assert.NotNull(actual);
 
         Assert.Equal("Harrison, Kim - The Good, The Bad, and the Undead - Hollows", actual.Series);

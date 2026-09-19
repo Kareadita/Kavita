@@ -6,6 +6,7 @@ using Kavita.Database.Tests;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
+using Kavita.Models.Parser;
 using Kavita.Services.Scanner;
 using Kavita.Services.Tests.Helpers;
 using Xunit.Abstractions;
@@ -1024,6 +1025,103 @@ public class ScannerServiceTests: AbstractDbTest
     }
 
     [Fact]
+    public async Task ScanLibrary_RemovedVolume_NotCountedInSeriesMetadata()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Removed Volume Metadata - Manga";
+        var infos = new Dictionary<string, ComicInfo>
+        {
+            ["Spice and Wolf Vol. 1.cbz"] = new() { Volume = "1", Count = 2 },
+            ["Spice and Wolf Vol. 2.cbz"] = new() { Volume = "2", Count = 2 },
+        };
+        var library = await scannerHelper.GenerateScannerData(testcase, [
+            "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+            "Spice and Wolf/Spice and Wolf Vol. 2.cbz",
+        ], infos);
+
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        var series = postLib.Series.Single();
+        Assert.Equal(2, series.Volumes.Count);
+        Assert.Equal(2, series.Pages);
+        Assert.Equal(2, series.Metadata.MaxCount);
+        Assert.Equal(PublicationStatus.Completed, series.Metadata.PublicationStatus);
+
+        // Vol 2 is removed from disk, so the scan deletes it
+        await scannerHelper.UpdateTestData(testcase, ["Spice and Wolf/Spice and Wolf Vol. 1.cbz"], infos);
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        series = postLib.Series.Single();
+
+        Assert.Single(series.Volumes);
+        Assert.Equal(1, series.Pages);
+        Assert.Equal(series.Volumes.Sum(v => v.Pages), series.Pages);
+
+        // The deleted volume no longer determines the series' metadata
+        Assert.Equal(1, series.Metadata.MaxCount);
+        Assert.Equal(PublicationStatus.Ended, series.Metadata.PublicationStatus);
+
+        // And its file went with it
+        Assert.Equal(1, context.MangaFile.Count());
+    }
+
+    [Fact]
+    public async Task ScanLibrary_RemovedChapter_NotCountedInSeriesMetadata()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Removed Chapter Metadata - Manga";
+        var infos = new Dictionary<string, ComicInfo>
+        {
+            ["Spice and Wolf Vol. 1 Ch. 0001.cbz"] = new() { Count = 2 },
+            ["Spice and Wolf Vol. 1 Ch. 0002.cbz"] = new() { Count = 2 },
+        };
+        var library = await scannerHelper.GenerateScannerData(testcase, [
+            "Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0002.cbz",
+        ], infos);
+
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        var series = postLib.Series.Single();
+        Assert.Single(series.Volumes);
+        Assert.Equal(2, series.Volumes.First().Chapters.Count);
+        Assert.Equal(2, series.Metadata.MaxCount);
+        Assert.Equal(PublicationStatus.Completed, series.Metadata.PublicationStatus);
+
+        // Chapter 2 is removed from disk
+        await scannerHelper.UpdateTestData(testcase, ["Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0001.cbz"], infos);
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        series = postLib.Series.Single();
+
+        var volume = Assert.Single(series.Volumes);
+        Assert.Equal(series.Volumes.Sum(v => v.Pages), series.Pages);
+
+        // The deleted chapter no longer determines the series' metadata
+        Assert.Single(volume.Chapters);
+        Assert.Equal(1, series.Metadata.MaxCount);
+        Assert.Equal(PublicationStatus.Ended, series.Metadata.PublicationStatus);
+    }
+
+    [Fact]
     public async Task SubFoldersNoSubFolders_CorrectPickupAfterAdd()
     {
         // This test case is used in multiple tests and can result in conflict if not separated
@@ -1085,6 +1183,158 @@ public class ScannerServiceTests: AbstractDbTest
 
     }
 
+    /// <summary>
+    /// When a series has all its files inside one volume subfolder, LowestFolderPath points at that subfolder.
+    /// Adding a sibling volume folder leaves the first one untouched on disk, so it is skipped and only contributes
+    /// stub ParserInfos. The scan must not treat that as "these files are gone".
+    /// </summary>
+    [Fact]
+    public async Task NestedVolumeFolders_AddSiblingVolume_DoesNotDeleteUnchangedVolume()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Nested Volume Folders - Manga.json";
+        var library = await scannerHelper.GenerateScannerData(testcase, new Dictionary<string, ComicInfo>());
+        var testDirectoryPath = library.Folders.First().Path;
+
+        unitOfWork.LibraryRepository.Update(library);
+        await unitOfWork.CommitAsync();
+
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        var spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+
+        var seriesDir = Path.Join(testDirectoryPath, "Spice and Wolf");
+        var volumeOneDir = Path.Join(seriesDir, "Spice and Wolf Vol. 1");
+
+        Assert.Single(spiceAndWolf.Volumes);
+        Assert.Equal(2, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
+        Assert.Equal(Parser.NormalizePath(volumeOneDir), Parser.NormalizePath(spiceAndWolf.LowestFolderPath!));
+
+        // Add a new volume folder alongside the existing one. Vol. 1's own write time is untouched,
+        // so the scanner skips it and sends no real ParserInfos for those two chapters
+        await scannerHelper.Scaffold(testDirectoryPath,
+            ["Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz"]);
+
+        await scanner.ScanLibrary(library.Id);
+        await unitOfWork.CommitAsync();
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+
+        Assert.Equal(2, spiceAndWolf.Volumes.Count);
+        Assert.Equal(3, spiceAndWolf.Volumes.Sum(v => v.Chapters.Count));
+
+        var volumeOne = spiceAndWolf.Volumes.First(v => v.Name == "1");
+        Assert.Equal(2, volumeOne.Chapters.Count);
+        Assert.Equal(2, volumeOne.Chapters.Sum(c => c.Files.Count));
+
+        var files = await unitOfWork.SeriesRepository.GetFilesForSeriesAsync(spiceAndWolf.Id);
+        Assert.Equal(3, files.Count);
+        Assert.Equal(2, files.Count(f => f.FilePath.Contains("Spice and Wolf Vol. 1")));
+    }
+
+    /// <summary>
+    /// Same skipped-folder setup, but the new file belongs to the volume that already exists. The volume itself
+    /// survives, which isolates the chapter and file level reconcile from the volume level one.
+    /// </summary>
+    [Fact]
+    public async Task SplitVolumeFolders_AddFileInNewFolder_DoesNotDeleteUnchangedChapter()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Split Volume Folders - Manga.json";
+        var library = await scannerHelper.GenerateScannerData(testcase, new Dictionary<string, ComicInfo>());
+        var testDirectoryPath = library.Folders.First().Path;
+
+        unitOfWork.LibraryRepository.Update(library);
+        await unitOfWork.CommitAsync();
+
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        var spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+
+        Assert.Single(spiceAndWolf.Volumes);
+        Assert.Single(spiceAndWolf.Volumes.First().Chapters);
+        Assert.Equal(Parser.NormalizePath(Path.Join(testDirectoryPath, "Spice and Wolf", "Scans A")),
+            Parser.NormalizePath(spiceAndWolf.LowestFolderPath!));
+
+        // Scans A is left alone on disk, so it is skipped. The new file parses to Volume 1, so Volume 1 stays
+        // mapped and only its existing chapter is missing from the scan
+        await scannerHelper.Scaffold(testDirectoryPath,
+            ["Spice and Wolf/Scans B/Spice and Wolf Vol. 1 Ch. 0002.cbz"]);
+
+        await scanner.ScanLibrary(library.Id);
+        await unitOfWork.CommitAsync();
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+
+        Assert.Single(spiceAndWolf.Volumes);
+        Assert.Equal(2, spiceAndWolf.Volumes.First().Chapters.Count);
+
+        var files = await unitOfWork.SeriesRepository.GetFilesForSeriesAsync(spiceAndWolf.Id);
+        Assert.Equal(2, files.Count);
+        Assert.Contains(files, f => f.FilePath.Contains("Scans A"));
+        Assert.Contains(files, f => f.FilePath.Contains("Scans B"));
+    }
+
+    [Fact]
+    public async Task NestedVolumeFolders_ChapterNumberCollision_DoesNotReuseSkippedChapter()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Nested Volume Folders - Manga.json";
+        var library = await scannerHelper.GenerateScannerData(testcase, new Dictionary<string, ComicInfo>());
+        var testDirectoryPath = library.Folders.First().Path;
+
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        var spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+
+        var volumeOneChapterIds = spiceAndWolf.Volumes.Single().Chapters.Select(c => c.Id).ToHashSet();
+        Assert.Equal(2, volumeOneChapterIds.Count);
+
+        // Vol. 1's folder is never touched, so the scan skips it. The new file re-uses chapter number 1
+        await scannerHelper.Scaffold(testDirectoryPath,
+            ["Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0001.cbz"]);
+
+        await scanner.ScanLibrary(library.Id);
+        await unitOfWork.CommitAsync();
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        spiceAndWolf = postLib.Series.First(x => x.Name == "Spice and Wolf");
+
+        Assert.Equal(2, spiceAndWolf.Volumes.Count);
+
+        // The skipped chapter stays where it is, with only its own file
+        var volumeOne = spiceAndWolf.Volumes.First(v => v.Name == "1");
+        Assert.Equal(volumeOneChapterIds, volumeOne.Chapters.Select(c => c.Id).ToHashSet());
+        Assert.Equal(2, volumeOne.Chapters.Sum(c => c.Files.Count));
+
+        var volumeTwo = spiceAndWolf.Volumes.First(v => v.Name == "2");
+        var newChapter = Assert.Single(volumeTwo.Chapters);
+        Assert.Single(newChapter.Files);
+        Assert.Contains("Spice and Wolf Vol. 2", newChapter.Files.First().FilePath);
+
+        var files = await unitOfWork.SeriesRepository.GetFilesForSeriesAsync(spiceAndWolf.Id);
+        Assert.Equal(3, files.Count);
+    }
 
     /// <summary>
     /// Ensure when Kavita scans, the sort order of chapters is correct
@@ -1229,5 +1479,364 @@ public class ScannerServiceTests: AbstractDbTest
 
         Assert.Equal("The Avengers", postLib.Series.First().Name);
         Assert.Equal("Avengers", postLib.Series.First().SortName);
+    }
+
+    /// <summary>
+    /// When parsing rules change, a file that used to map to one chapter and now maps to another must shed the
+    /// old chapter. Ex: "Blade Runner 2019 - Volume 1.pdf" used to parse as Volume 1/Chapter 2019 and now parses
+    /// as Volume 1 only, but Chapter 2019 lingered in the library forever, even on a forced scan.
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_ChapterNoLongerParsed_IsRemovedOnRescan()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Stale Chapter - Book.json";
+        var library = await scannerHelper.GenerateScannerData(testcase);
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        var volume = postLib.Series.First().Volumes.Single();
+        var chapter = volume.Chapters.Single();
+        var expectedRange = chapter.Range;
+        Assert.NotEqual("2019", expectedRange);
+
+        // Simulate what the old parser wrote to the DB for this exact file: Chapter 2019
+        var stale = await unitOfWork.ChapterRepository.GetChapterAsync(chapter.Id);
+        stale!.Range = "2019";
+        stale.MinNumber = 2019f;
+        stale.MaxNumber = 2019f;
+        unitOfWork.ChapterRepository.Update(stale);
+        await unitOfWork.CommitAsync();
+
+        // Force a full rescan, which is what a user would reach for
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+        await scanner.ScanLibrary(library.Id, true);
+
+        var postLib2 = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib2);
+        Assert.Single(postLib2.Series);
+
+        var volume2 = postLib2.Series.First().Volumes.Single();
+        Assert.DoesNotContain(volume2.Chapters, c => c.Range == "2019");
+        var survivor = Assert.Single(volume2.Chapters);
+        Assert.Equal(expectedRange, survivor.Range);
+        Assert.Single(survivor.Files);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_AddingChapterMarkersDoesNotRecreateEntities()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Changing Chapter Markers - Manga.json";
+        var library = await scannerHelper.GenerateScannerData(testcase);
+        var scanner = scannerHelper.CreateServices();
+
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(2, postLib.Series.First().Volumes.Count);
+
+        var firstRunVolumeIds = postLib.Series.First().Volumes.Select(v => v.Id).ToHashSet();
+        var firstRunChapterIds = postLib.Series.First().Volumes.SelectMany(v => v.Chapters).Select(c => c.Id).ToHashSet();
+
+        await scannerHelper.UpdateTestData(testcase, new Dictionary<string, ComicInfo>()
+        {
+            ["Spice and Wolf Vol. 1.cbz"] = new()
+            {
+                Number = "1-6"
+            },
+            ["Spice and Wolf Vol. 2.cbz"] = new()
+            {
+                Number = "7-12"
+            }
+        });
+
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(2, postLib.Series.First().Volumes.Count);
+
+        var secondRunVolumeIds = postLib.Series.First().Volumes.Select(v => v.Id).ToHashSet();
+        var secondRunChapterIds = postLib.Series.First().Volumes.SelectMany(v => v.Chapters).Select(c => c.Id).ToHashSet();
+
+        Assert.Equal(firstRunVolumeIds, secondRunVolumeIds);
+        Assert.Equal(firstRunChapterIds, secondRunChapterIds);
+
+        var volume1 = postLib.Series.First().Volumes.Single(v => v.LookupName == "1");
+        var volume2 = postLib.Series.First().Volumes.Single(v => v.LookupName == "2");
+
+        Assert.Single(volume1.Chapters);
+        Assert.Single(volume2.Chapters);
+        Assert.Equal("1-6", volume1.Chapters[0].Range);
+        Assert.Equal("7-12", volume2.Chapters[0].Range);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_AddingVolumeMarkersDoesNotRecreateEntities()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Changing Volume Markers - Manga.json";
+        var library = await scannerHelper.GenerateScannerData(testcase);
+        var scanner = scannerHelper.CreateServices();
+
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Single(postLib.Series.First().Volumes);
+        Assert.Equal(5, postLib.Series.First().Volumes[0].Chapters.Count);
+
+        var firstRunVolumeIds = postLib.Series.First().Volumes.Select(v => v.Id).ToHashSet();
+        var firstRunChapterIds = postLib.Series.First().Volumes.SelectMany(v => v.Chapters).Select(c => c.Id).ToHashSet();
+
+        // Assign all to volume 1
+        await scannerHelper.UpdateTestData(testcase, new Dictionary<string, ComicInfo>
+        {
+            ["Adachi and Shimamura Ch. 0001.cbz"] = new()
+            {
+                Volume = "1"
+            },
+            ["Adachi and Shimamura Ch. 0002.cbz"] = new()
+            {
+                Volume = "1"
+            },
+            ["Adachi and Shimamura Ch. 0003.cbz"] = new()
+            {
+                Volume = "1"
+            },
+            ["Adachi and Shimamura Ch. 0004.cbz"] = new()
+            {
+                Volume = "1"
+            },
+            ["Adachi and Shimamura Ch. 0005.cbz"] = new()
+            {
+                Volume = "1"
+            },
+        });
+
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Single(postLib.Series.First().Volumes);
+
+        Assert.Equal(5, postLib.Series.First().Volumes[0].Chapters.Count);
+
+        var seriesId = postLib.Series.First().Id;
+        var secondRunVolumeIds = postLib.Series.First().Volumes.Select(v => v.Id).ToHashSet();
+        var secondRunChapterIds = postLib.Series.First().Volumes.SelectMany(v => v.Chapters).Select(c => c.Id).ToHashSet();
+
+        // Volume recreated, underlying chapters are re-used
+        Assert.NotEqual(firstRunVolumeIds, secondRunVolumeIds);
+        Assert.Equal(firstRunChapterIds, secondRunChapterIds);
+
+        Assert.Equal("1", postLib.Series.First().Volumes[0].LookupName);
+
+        // Assign some to volume 2
+        await scannerHelper.UpdateTestData(testcase, new Dictionary<string, ComicInfo>
+        {
+            ["Adachi and Shimamura Ch. 0001.cbz"] = new()
+            {
+                Volume = "1"
+            },
+            ["Adachi and Shimamura Ch. 0002.cbz"] = new()
+            {
+                Volume = "1"
+            },
+            ["Adachi and Shimamura Ch. 0003.cbz"] = new()
+            {
+                Volume = "1"
+            },
+            ["Adachi and Shimamura Ch. 0004.cbz"] = new()
+            {
+                Volume = "2"
+            },
+            ["Adachi and Shimamura Ch. 0005.cbz"] = new()
+            {
+                Volume = "2"
+            },
+        });
+
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(seriesId, postLib.Series.First().Id);
+        Assert.Equal(2, postLib.Series.First().Volumes.Count);
+
+        var volume1 = postLib.Series.First().Volumes[0];
+        var volume2 = postLib.Series.First().Volumes[1];
+
+        Assert.Equal(3, volume1.Chapters.Count);
+        Assert.Equal(2, volume2.Chapters.Count);
+
+        // Volume 1 is re-used
+        Assert.Equal(secondRunVolumeIds.First(), volume1.Id);
+
+        var thirdRunChapterIds = postLib.Series.First().Volumes.SelectMany(v => v.Chapters).Select(c => c.Id).ToHashSet();
+
+        // All chapters are re-used. Chapter number did not change!
+        Assert.Equal(secondRunChapterIds, thirdRunChapterIds);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_SplittingVolumeRecreatesEntities()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Splitting Volume Recreates Entities - Manga";
+        var library = await scannerHelper.GenerateScannerData(testcase, [
+            "I Want to Love You Till Your Dying Day/I Want to Love You Till Your Dying Day Vol. 1.cbz"
+        ], null);
+
+        var scanner = scannerHelper.CreateServices();
+
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Single(postLib.Series.First().Volumes);
+        Assert.Single(postLib.Series.First().Volumes[0].Chapters);
+
+        var volumeId = postLib.Series.First().Volumes[0].Id;
+        var chapterId = postLib.Series.First().Volumes[0].Chapters[0].Id;
+
+        await scannerHelper.UpdateTestData(testcase, [
+            "I Want to Love You Till Your Dying Day/I Want to Love You Till Your Dying Day Vol. 1 Ch. 1-3.cbz",
+            "I Want to Love You Till Your Dying Day/I Want to Love You Till Your Dying Day Vol. 1 Ch. 4-6.cbz"
+        ], null);
+
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Single(postLib.Series.First().Volumes);
+        Assert.Equal(2, postLib.Series.First().Volumes[0].Chapters.Count);
+
+        Assert.Equal(volumeId, postLib.Series.First().Volumes[0].Id);
+
+        var newChapterIds = postLib.Series.First().Volumes[0].Chapters.Select(c => c.Id).ToHashSet();
+        Assert.DoesNotContain(chapterId, newChapterIds);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_UpdateVolumeRecreatesEntityIfChaptersRepeat()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Updated Volume Recreates Entities repeated chapters - Manga";
+        var library = await scannerHelper.GenerateScannerData(testcase, [
+            // This series doesn't actually do this. It does happen in Anthology sometimes
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 1 Ch. 1.cbz",
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 2 Ch. 1.cbz"
+        ], null);
+
+        var scanner = scannerHelper.CreateServices();
+
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(2, postLib.Series.First().Volumes.Count);
+
+        var volume1Id = postLib.Series.First().Volumes.Single(v => v.LookupName == "1").Id;
+        var volume1Chapter1Id =  postLib.Series.First().Volumes.Single(v => v.LookupName == "1").Chapters[0].Id;
+        var volume2Id = postLib.Series.First().Volumes.Single(v => v.LookupName == "2").Id;
+        var volume2Chapter1Id = postLib.Series.First().Volumes.Single(v => v.LookupName == "2").Chapters[0].Id;
+
+
+        await scannerHelper.UpdateTestData(testcase, [
+            // This series doesn't actually do this. It does happen in Anthology sometimes
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 1 Ch. 1.cbz",
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 3 Ch. 1.cbz"
+        ], null);
+
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(2, postLib.Series.First().Volumes.Count);
+
+        Assert.Equal(volume1Id, postLib.Series.First().Volumes.Single(v => v.LookupName == "1").Id);
+        Assert.Equal(volume1Chapter1Id, postLib.Series.First().Volumes.Single(v => v.LookupName == "1").Chapters[0].Id);
+        // Volume 2 is deleted, and volume 3 got created
+        Assert.NotEqual(volume2Id, postLib.Series.First().Volumes.Single(v => v.LookupName == "3").Id);
+        // Since there are two chapter 1's, we cannot re-use the chapter, and it got recreated
+        Assert.NotEqual(volume2Chapter1Id, postLib.Series.First().Volumes.Single(v => v.LookupName == "3").Chapters[0].Id);
+
+    }
+
+    [Fact]
+    public async Task ScanLibrary_CorrectTrackingWithMetadata()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Commits in UpdateChapters don't cause deletion - Manga";
+        var library = await scannerHelper.GenerateScannerData(testcase, [
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 1.cbz",
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 2.cbz"
+        ], new Dictionary<string, ComicInfo>
+        {
+            ["The Moon on a Rainy Night Vol. 2.cbz"] = new()
+            {
+                Genre = "Romance,Girls Love"
+            }
+        });
+
+        var scanner = scannerHelper.CreateServices();
+
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Equal(2, postLib.Series.First().Volumes.Count);
+
+        await scannerHelper.UpdateTestData(testcase, [
+            "The Moon on a Rainy Night/The Moon on a Rainy Night Vol. 1.cbz",
+        ]);
+
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+
+        await scanner.ScanLibrary(library.Id);
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+        Assert.Single(postLib.Series.First().Volumes);
     }
 }

@@ -74,7 +74,7 @@ public class DefaultParserTests
     [InlineData("C:/", "C:/Something Random/Mujaki no Rakuen SP01.cbz", "Something Random")]
     public void ParseFromFallbackFolders_FallbackShouldParseSeries(string rootDir, string inputPath, string expectedSeries)
     {
-        var actual = _defaultParser.Parse(inputPath, rootDir, rootDir, LibraryType.Manga, true, null);
+        var actual = _defaultParser.Parse(inputPath, rootDir, rootDir, LibraryType.Manga, true, null).Info;
         if (actual == null)
         {
             Assert.NotNull(actual);
@@ -115,7 +115,7 @@ public class DefaultParserTests
         fs.AddFile(inputFile, new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
         var parser = new BasicParser(ds, new ImageParser(ds));
-        var actual = parser.Parse(inputFile, rootDirectory, rootDirectory, LibraryType.Manga, true, null);
+        var actual = parser.Parse(inputFile, rootDirectory, rootDirectory, LibraryType.Manga, true, null).Info;
         _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
         Assert.Equal(expectedParseInfo, actual.Series);
     }
@@ -131,7 +131,7 @@ public class DefaultParserTests
         fs.AddFile(inputFile, new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
         var parser = new BasicParser(ds, new ImageParser(ds));
-        var actual = parser.Parse(inputFile, rootDirectory, rootDirectory, LibraryType.Manga, true, null);
+        var actual = parser.Parse(inputFile, rootDirectory, rootDirectory, LibraryType.Manga, true, null).Info;
         _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
         Assert.Equal(expectedParseInfo, actual.Series);
     }
@@ -292,7 +292,8 @@ public class DefaultParserTests
         foreach (var file in expected.Keys)
         {
             var expectedInfo = expected[file];
-            var actual = _defaultParser.Parse(file, rootPath, rootPath, LibraryType.Manga, true, null);
+            var result = _defaultParser.Parse(file, rootPath, rootPath, LibraryType.Manga, true, null);
+            var actual = result.Info;
             if (expectedInfo == null)
             {
                 Assert.Null(actual);
@@ -330,7 +331,7 @@ public class DefaultParserTests
             Chapters = "8", Filename = "13.jpg", Format = MangaFormat.Image,
             FullFilePath = filepath, IsSpecial = false
         };
-        var actual2 = _defaultParser.Parse(filepath, @"E:/Manga/Monster #8", "E:/Manga", LibraryType.Manga, true, null);
+        var actual2 = _defaultParser.Parse(filepath, @"E:/Manga/Monster #8", "E:/Manga", LibraryType.Manga, true, null).Info;
         Assert.NotNull(actual2);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expectedInfo2.Format, actual2.Format);
@@ -356,7 +357,7 @@ public class DefaultParserTests
             FullFilePath = filepath, IsSpecial = false
         };
 
-        actual2 = _defaultParser.Parse(filepath, @"E:/Manga/Extra layer for no reason/", "E:/Manga",LibraryType.Manga, true, null);
+        actual2 = _defaultParser.Parse(filepath, @"E:/Manga/Extra layer for no reason/", "E:/Manga",LibraryType.Manga, true, null).Info;
         Assert.NotNull(actual2);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expectedInfo2.Format, actual2.Format);
@@ -382,7 +383,7 @@ public class DefaultParserTests
             FullFilePath = filepath, IsSpecial = false
         };
 
-        actual2 = _defaultParser.Parse(filepath, @"E:/Manga/Extra layer for no reason/", "E:/Manga", LibraryType.Manga, true, null);
+        actual2 = _defaultParser.Parse(filepath, @"E:/Manga/Extra layer for no reason/", "E:/Manga", LibraryType.Manga, true, null).Info;
         Assert.NotNull(actual2);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expectedInfo2.Format, actual2.Format);
@@ -423,7 +424,7 @@ public class DefaultParserTests
             FullFilePath = filepath
         };
 
-        var actual = parser.Parse(filepath, rootPath, rootPath, LibraryType.Manga, true, null);
+        var actual = parser.Parse(filepath, rootPath, rootPath, LibraryType.Manga, true, null).Info;
 
         Assert.NotNull(actual);
         _testOutputHelper.WriteLine($"Validating {filepath}");
@@ -452,7 +453,7 @@ public class DefaultParserTests
             FullFilePath = filepath
         };
 
-        actual = parser.Parse(filepath, rootPath, rootPath, LibraryType.Manga, true, null);
+        actual = parser.Parse(filepath, rootPath, rootPath, LibraryType.Manga, true, null).Info;
         Assert.NotNull(actual);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expected.Format, actual.Format);
@@ -515,7 +516,7 @@ public class DefaultParserTests
             foreach (var file in expected.Keys)
             {
                 var expectedInfo = expected[file];
-                var actual = _defaultParser.Parse(file, rootPath, rootPath, LibraryType.Comic, true, null);
+                var actual = _defaultParser.Parse(file, rootPath, rootPath, LibraryType.Comic, true, null).Info;
                 if (expectedInfo == null)
                 {
                     Assert.Null(actual);
