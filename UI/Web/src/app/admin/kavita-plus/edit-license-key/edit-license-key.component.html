@@ -13,7 +13,6 @@
       }
 
       <app-validation-errors [control]="formGroup.licenseKey" inputId="license-key" [messages]="{
-            required: t('required-field-validation'),
             minlength: t('license-length-validation'),
             maxlength: t('license-length-validation'),
             pattern: t('license-format-validation')
@@ -29,7 +28,6 @@
       </div>
 
       <app-validation-errors [control]="formGroup.email" inputId="email" [messages]="{
-            required: t('required-field-validation'),
             email: t('email-format-validation'),
           }" />
     </div>

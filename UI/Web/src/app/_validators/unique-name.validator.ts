@@ -13,7 +13,7 @@ const baseUrl = environment.apiUrl;
  */
 export function uniqueName(path: SchemaPath<string>, controller: string, originalName: Signal<string>) {
   validateHttp<string, boolean>(path, {
-    request: ctx => `${baseUrl}${controller}/name-exists?name=${ctx.valueOf(path)}`,
+    request: ctx => `${baseUrl}${controller}/name-exists?name=${encodeURIComponent(ctx.valueOf(path))}`,
     onSuccess: (result, ctx) => {
       const name = ctx.valueOf(path);
       if (name != originalName() && result) {

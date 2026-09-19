@@ -4,7 +4,7 @@ import {ConfirmDialogComponent} from './confirm-dialog/confirm-dialog.component'
 import {ConfirmConfig} from './confirm-dialog/_models/confirm-config';
 import {confirmModal} from "../_models/modal/modal-options";
 import {ModalService} from "../_services/modal.service";
-import {fromPromise} from "rxjs/internal/observable/innerFrom";
+import {from} from "rxjs";
 
 
 @Injectable({
@@ -46,7 +46,7 @@ export class ConfirmService {
   }
 
   public confirm$(content?: string, config?: ConfirmConfig) {
-    return fromPromise(this.confirm(content, config));
+    return from(this.confirm(content, config));
   }
 
   public async confirm(content?: string, config?: ConfirmConfig): Promise<boolean> {

@@ -14,6 +14,7 @@ function formatColorVar(format: MangaFormat): string {
     case MangaFormat.PDF:
       return '--format-badge-pdf-color';
     case MangaFormat.UNKNOWN:
+    default:
       return '--format-badge-unknown-color';
   }
 }

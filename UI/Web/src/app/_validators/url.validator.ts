@@ -16,18 +16,20 @@ export function url<TPathKind extends PathKind = PathKind.Root>(
 
   validate(path, (value) => {
     const uri = value.value();
-    if (!uri || uri.trim().length === 0) {
+    const trimmed = uri?.trim();
+
+    if (!trimmed || trimmed.length === 0) {
       return null;
     }
 
-    if (environment.production && finalOptions.requireTls && !uri.startsWith('https')) {
+    if (environment.production && finalOptions.requireTls && !trimmed.toLowerCase().startsWith('https://')) {
       return {
         kind: 'requireTls',
       }
     }
 
     try {
-      new URL(uri);
+      new URL(trimmed);
     } catch {
       return {
         kind: 'invalidUri'

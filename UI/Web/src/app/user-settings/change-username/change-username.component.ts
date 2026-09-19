@@ -42,8 +42,10 @@ export class ChangeUsernameComponent {
 
   constructor() {
     effect(() => {
+      const username = this.accountService.username();
+
       untracked(() => {
-        this.formGroup.username().value.set(this.accountService.username()!);
+        this.formGroup.username().value.set(username ?? '');
       });
     })
   }

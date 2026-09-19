@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {DestroyRef, effect, inject, Injectable, signal} from '@angular/core';
-import {EMPTY, switchMap, tap} from 'rxjs';
+import {tap} from 'rxjs';
 import {environment} from '../../environments/environment';
 import {Device} from '../_models/device/device';
 import {DevicePlatform} from '../_models/device/device-platform';
@@ -8,7 +8,7 @@ import {TextResonse} from '../_types/text-response';
 import {AccountService} from './account.service';
 import {ClientDevice} from "../_models/client-device";
 import {map} from "rxjs/operators";
-import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +34,7 @@ export class DeviceService {
       const userId = this.accountService.userId();
       if (userId) {
         this.httpClient.get<Device[]>(this.baseUrl + 'device').pipe(
+          takeUntilDestroyed(this.destroyRef),
           tap(devices => this._devices.set(devices)),
         ).subscribe();
       }
