@@ -209,6 +209,6 @@ public class ReadingItemService : IReadingItemService
             return _basicParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path, enableMetadata));
         }
 
-        return null;
+        return ParseInfoResult.FailedParse();
     }
 }

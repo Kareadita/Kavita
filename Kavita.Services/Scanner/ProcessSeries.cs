@@ -737,6 +737,9 @@ public class ProcessSeries(
         var volumeIds  = foundVolumes.Select(v => v.Id).ToHashSet();
         var chapterIds = foundChapters.Select(c => c.Id).ToHashSet();
 
+        // Remove volumes and chapter that did not match any files on disk
+        RemoveUnmappedEntities(args.Series, volumeIds, chapterIds, unverifiedFileIds);
+
         // Update page count once all pages have been processed
         foreach (var volume in args.Series.Volumes)
         {
@@ -748,16 +751,11 @@ public class ProcessSeries(
 
             volume.Pages = volume.Chapters.Sum(chapter => chapter.Pages);
         }
-
-        // Remove volumes and chapter that did not match any files on disk
-        RemoveUnmappedEntities(args.Series, volumeIds, chapterIds, unverifiedFileIds);
     }
 
     private void RemoveUnmappedEntities(Series series, HashSet<int> foundVolumes, HashSet<int> foundChapters,
         HashSet<int> unverifiedFileIds)
     {
-        bool HasUnverifiedFile(IEnumerable<MangaFile> files) => files.Any(f => unverifiedFileIds.Contains(f.Id));
-
         var unmappedVolumes = series.Volumes
             .Where(v => !foundVolumes.Contains(v.Id) && !HasUnverifiedFile(v.Chapters.SelectMany(c => c.Files)))
             .ToList();
@@ -787,6 +785,8 @@ public class ProcessSeries(
             logger.LogTrace("Deleting {Count} volumes for {SeriesId}. IDS: {VolumeIds}",
                 unmappedVolumes.Count, series.Id, string.Join(", ", unmappedVolumes.Select(v => v.Id)));
             unitOfWork.VolumeRepository.Remove(unmappedVolumes);
+
+            series.Volumes = [.. series.Volumes.Where(v => !unmappedVolumes.Contains(v))];
         }
 
         if (unmappedChapters.Count > 0)
@@ -794,7 +794,16 @@ public class ProcessSeries(
             logger.LogTrace("Deleting {Count} chapters for {SeriesId}. IDS: {ChapterIds}",
                 unmappedChapters.Count, series.Id, string.Join(", ", unmappedChapters.Select(c => c.Id)));
             unitOfWork.ChapterRepository.Remove(unmappedChapters);
+
+            foreach (var volume in series.Volumes)
+            {
+                volume.Chapters = [.. volume.Chapters.Where(c => !unmappedChapters.Contains(c))];
+            }
         }
+
+        return;
+
+        bool HasUnverifiedFile(IEnumerable<MangaFile> files) => files.Any(f => unverifiedFileIds.Contains(f.Id));
     }
 
     /// <summary>
@@ -891,7 +900,11 @@ public class ProcessSeries(
         var minRange = Parser.MinNumberFromRange(info.Chapters);
         var maxRange = Parser.MaxNumberFromRange(info.Chapters);
 
-        var matchingChapter = args.Series.Volumes.SelectMany(v => v.Chapters).GetChaptersByRange(info).OneOrDefault();
+        var matchingChapter = args.Series.Volumes
+            .SelectMany(v => v.Chapters)
+            .Where(c => c.Files.All(f => !IsInUnchangedFolder(f, args.UnchangedFolders)))
+            .GetChaptersByRange(info)
+            .OneOrDefault();
         var filesMatchingOnChapter = args.ParsedInfos.Select(p => p.Chapters)
             .Count(c => Parser.MinNumberFromRange(c).Is(minRange) &&  Parser.MaxNumberFromRange(c).Is(maxRange));
 
