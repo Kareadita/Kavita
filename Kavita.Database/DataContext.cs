@@ -225,6 +225,30 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasJsonConversion([])
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<MetadataSettingField>());
+
+        builder.Entity<ExternalRating>()
+            .HasOne<Chapter>()
+            .WithMany(c => c.ExternalRatings)
+            .HasForeignKey(e => e.ChapterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<ExternalReview>()
+            .HasOne<Chapter>()
+            .WithMany(c => c.ExternalReviews)
+            .HasForeignKey(e => e.ChapterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<ScrobbleEvent>()
+            .HasOne(e => e.Chapter)
+            .WithMany()
+            .HasForeignKey(e => e.ChapterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<ScrobbleError>()
+            .HasOne(e => e.Chapter)
+            .WithMany()
+            .HasForeignKey(e => e.ChapterId)
+            .OnDelete(DeleteBehavior.Cascade);
         #endregion
 
         #region User & Preferences
