@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.4",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.5",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.1.4"
+    "version": "0.9.1.5"
   },
   "servers": [
     {
@@ -2752,7 +2752,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChapterDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChapterDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChapterDto"
+                }
+              }
+            }
           }
         }
       }
@@ -9553,12 +9570,53 @@
         }
       }
     },
+    "/api/Person/coversdb-image": {
+      "get": {
+        "tags": [
+          "Person"
+        ],
+        "summary": "Returns the CoversDB image url for a Person, if one can be matched. Does not apply the cover.",
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Person/fetch-cover": {
       "post": {
         "tags": [
           "Person"
         ],
-        "summary": "Attempts to download the cover from CoversDB (Note: Not yet release in Kavita)",
+        "summary": "Attempts to download the cover from CoversDB",
         "parameters": [
           {
             "name": "personId",
@@ -13239,7 +13297,7 @@
         "tags": [
           "ReadingProfile"
         ],
-        "summary": "Returns all the Reading rofiles bound to the library",
+        "summary": "Returns all the Reading profiles bound to the library",
         "parameters": [
           {
             "name": "libraryId",
@@ -13987,6 +14045,45 @@
                   "items": {
                     "$ref": "#/components/schemas/UserReviewExtendedDto"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Review/my-series": {
+      "get": {
+        "tags": [
+          "Review"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRatingAndReviewDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRatingAndReviewDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRatingAndReviewDto"
                 }
               }
             }
@@ -20240,6 +20337,7 @@
         "tags": [
           "Theme"
         ],
+        "summary": "Returns all Themes",
         "responses": {
           "200": {
             "description": "OK",
@@ -34550,6 +34648,8 @@
           "dataSaver",
           "locale",
           "noTransitions",
+          "onDeckProgressDays",
+          "onDeckUpdateDays",
           "opdsPreferences",
           "promptForDownloadSize",
           "promptForRereadsAfter",
@@ -34587,6 +34687,14 @@
             "type": "boolean"
           },
           "promptForRereadsAfter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "onDeckProgressDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "onDeckUpdateDays": {
             "type": "integer",
             "format": "int32"
           },
@@ -34727,6 +34835,23 @@
           },
           "opdsPreferences": {
             "$ref": "#/components/schemas/AppUserOpdsPreferences"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserRatingAndReviewDto": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "number",
+            "format": "float"
+          },
+          "review": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasBeenRated": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
