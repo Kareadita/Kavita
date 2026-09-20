@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   inject,
   model,
   OnInit,
@@ -14,11 +13,11 @@ import {
 } from '@angular/core';
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {AnnotationService} from "../../../../_services/annotation.service";
-import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
+import {form, FormField} from "@angular/forms/signals";
 import {Annotation} from "../../../_models/annotations/annotation";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, switchMap} from "rxjs/operators";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
+import {debounceTime, filter, switchMap} from "rxjs/operators";
 import {of} from "rxjs";
 import {HighlightBarComponent} from "../../_annotations/highlight-bar/highlight-bar.component";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
@@ -49,13 +48,19 @@ export enum AnnotationMode {
   Create = 2,
 }
 
+interface FormModel {
+  note: object;
+  hasSpoiler: boolean;
+  selectedSlotIndex: number;
+}
+
 const INIT_HIGHLIGHT_DELAY = 200;
 
 @Component({
   selector: 'app-view-edit-annotation-drawer',
   imports: [
     QuillWrapperComponent,
-    ReactiveFormsModule,
+    FormField,
     TranslocoDirective,
     HighlightBarComponent,
     NgStyle,
@@ -82,7 +87,6 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   private readonly safeHtml = new SafeHtmlPipe();
   private readonly sanitizer = inject(DomSanitizer);
   private readonly epubHighlightService = inject(EpubHighlightService);
-  private readonly fb = inject(NonNullableFormBuilder);
   protected readonly utilityService = inject(UtilityService);
   protected readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
@@ -100,11 +104,12 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
 
   quoteExpanded = signal(false);
 
-  formGroup!: FormGroup<{
-    note: FormControl<object>,
-    hasSpoiler: FormControl<boolean>,
-    selectedSlotIndex: FormControl<number>,
-  }>;
+  formModel = signal<FormModel>({
+    note: {},
+    hasSpoiler: false,
+    selectedSlotIndex: 0,
+  });
+  formGroup = form(this.formModel);
   annotationNote: object = {};
   annotationHtml: string = '';
 
@@ -211,40 +216,32 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
       return this.sanitizer.bypassSecurityTrustHtml(`${this.safeHtml.transform(beforeText)}<app-epub-highlight id="epub-highlight-${annotationId}">${this.safeHtml.transform(selectedText)}</app-epub-highlight>${this.safeHtml.transform(trimmedAfterText)}`);
     });
 
-    this.formGroup = this.fb.group({
-      note: this.fb.control<object>({}, []),
-      hasSpoiler: this.fb.control<boolean>(false, []),
-      selectedSlotIndex: this.fb.control<number>(0, []),
-    });
+    toObservable(this.formModel).pipe(
+      debounceTime(350),
+      filter(() => this.isEditMode() && this.formGroup().dirty()),
+      switchMap(_ => {
+        const updatedAnnotation = this.annotation();
+        if (!updatedAnnotation) return of();
 
-    effect(() => {
-      const editMode = this.isEditMode();
-      if (!editMode) return;
+        updatedAnnotation.containsSpoiler = this.formModel().hasSpoiler;
+        updatedAnnotation.comment = JSON.stringify(this.annotationNote);
+        updatedAnnotation.commentHtml = this.annotationHtml;
 
-      this.formGroup.valueChanges.pipe(
-        debounceTime(350),
-        switchMap(_ => {
-          const updatedAnnotation = this.annotation();
-          if (!updatedAnnotation) return of();
-
-          updatedAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
-          updatedAnnotation.comment = JSON.stringify(this.annotationNote);
-          updatedAnnotation.commentHtml = this.annotationHtml;
-
-          return this.annotationService.updateAnnotation(updatedAnnotation);
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe();
-    });
+        return this.annotationService.updateAnnotation(updatedAnnotation);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
   }
 
   ngOnInit(){
     const annotation = this.annotation();
     if (annotation) {
       this.annotationNote = annotation?.comment ? JSON.parse(annotation.comment) : {};
-      this.formGroup.get('note')!.setValue(this.annotationNote);
-      this.formGroup.get('hasSpoiler')!.setValue(annotation.containsSpoiler);
-      this.formGroup.get('selectedSlotIndex')!.setValue(annotation.selectedSlotIndex);
+      this.formModel.set({
+        note: this.annotationNote,
+        hasSpoiler: annotation.containsSpoiler,
+        selectedSlotIndex: annotation.selectedSlotIndex,
+      });
     }
   }
 
@@ -252,7 +249,7 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     const highlightAnnotation = this.annotation();
     if (!highlightAnnotation) return;
 
-    highlightAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
+    highlightAnnotation.containsSpoiler = this.formModel().hasSpoiler;
     highlightAnnotation.comment = JSON.stringify(this.annotationNote);
     highlightAnnotation.commentHtml = this.annotationHtml;
     // For create annotation, we have to have this hack
@@ -278,7 +275,7 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
 
     if (annotation) {
       this.annotation.set({...annotation, selectedSlotIndex: slotIndex});
-      this.formGroup.get('selectedSlotIndex')?.setValue(slotIndex);
+      this.formModel.update(m => ({...m, selectedSlotIndex: slotIndex}));
     }
   }
 

@@ -1,8 +1,8 @@
-<div [formGroup]="formGroup()!" *transloco="let t; prefix: 'quill-wrapper'">
+<ng-container *transloco="let t; prefix: 'quill-wrapper'">
   <quill-editor class="w-100"
                 [format]="format()"
                 [theme]="theme()"
-                [formControlName]="controlName()"
+                [formField]="field()"
                 (onContentChanged)="onContentChange($event)"
                 (onEditorCreated)="editor.set($event)"
   >
@@ -43,4 +43,4 @@
     </div>
 
   </quill-editor>
-</div>
+</ng-container>

@@ -1,5 +1,3 @@
-import {AbstractControl, ValidationErrors, ValidatorFn} from "@angular/forms";
-
 /**
  * Utilities for semicolon separated lists of BCP-47 language codes, used by the Kavita+
  * Series Name/LocalizedName language priority settings.
@@ -131,21 +129,6 @@ export function scriptSubtag(code: string): string | null {
 
   const candidate = parts[1];
   return candidate.length === 4 && ALPHA.test(candidate) ? candidate.toLowerCase() : null;
-}
-
-/**
- * Error-tier validator. Flags only codes that are malformed, which blocks saving.
- *
- * Deliberately does NOT flag unrecognized languages or scripts - those are surfaced separately as warnings so
- * that `form.valid` continues to mean "safe to save".
- */
-export function languageCodeListValidator(): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const malformed = splitLanguageCodes(control.value)
-      .filter(c => !isWellFormedLanguageCode(c) && !isReservedToken(c));
-
-    return malformed.length > 0 ? {malformedLanguageCodes: malformed} : null;
-  };
 }
 
 /**

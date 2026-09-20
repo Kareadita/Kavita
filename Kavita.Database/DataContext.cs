@@ -295,6 +295,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserPreferences>()
             .Property(b => b.PromptForRereadsAfter)
             .HasDefaultValue(30);
+        builder.Entity<AppUserPreferences>()
+            .Property(b => b.OnDeckProgressDays)
+            .HasDefaultValue(30);
+        builder.Entity<AppUserPreferences>()
+            .Property(b => b.OnDeckUpdateDays)
+            .HasDefaultValue(7);
 
         builder.Entity<AppUserPreferences>()
             .Property(a => a.BookReaderHighlightSlots)

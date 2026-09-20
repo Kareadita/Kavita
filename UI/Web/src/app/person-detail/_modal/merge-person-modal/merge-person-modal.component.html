@@ -16,7 +16,7 @@
             <ng-template #view>
               @let config = typeAheadSettings();
               @if (config) {
-                <app-typeahead [settings]="config" (selectedData)="updatePerson($event)" [unFocus]="typeAheadUnfocus">
+                <app-typeahead [config]="config" (selectedData)="updatePerson($event)">
                   <ng-template #badgeItem let-item let-position="idx">
                     {{item.name}}
                   </ng-template>

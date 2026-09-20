@@ -5,15 +5,18 @@ import {
   computed,
   contentChild,
   CUSTOM_ELEMENTS_SCHEMA,
+  effect,
+  ElementRef,
   inject,
   input,
-  Input,
+  model,
   output,
   signal,
-  TemplateRef
+  TemplateRef,
+  viewChild
 } from '@angular/core';
 import {Swiper} from 'swiper/types';
-import {NgClass, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
@@ -22,73 +25,104 @@ import {PaginatedResult} from "../../../_models/pagination";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {ActionResult} from "../../../_models/actionables/action-result";
 import {ActionableEntity} from "../../../_services/action-factory.service";
-import {register} from "swiper/element";
+import {register} from "swiper/element/bundle";
 
 register();
 
-export type NextPageLoader = (pageNumber: number, pageSize: number) => Observable<any[] | PaginatedResult<any[]>>;
+export type NextPageLoader<T> = (pageNumber: number, pageSize: number) => Observable<T[] | PaginatedResult<T[]>>;
 
 @Component({
   selector: 'app-carousel-reel',
   templateUrl: './carousel-reel.component.html',
   styleUrls: ['./carousel-reel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, NgTemplateOutlet, TranslocoDirective, CardActionablesComponent, SafeUrlPipe],
+  imports: [NgTemplateOutlet, TranslocoDirective, CardActionablesComponent, SafeUrlPipe],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class CarouselReelComponent {
+export class CarouselReelComponent<T> {
 
   private readonly cdRef = inject(ChangeDetectorRef);
 
-  readonly carouselItemTemplate = contentChild.required<TemplateRef<any>>('carouselItem');
-  readonly promptToAddTemplate = contentChild.required<TemplateRef<any>>('promptToAdd');
-  readonly noDataTemplate = contentChild<TemplateRef<any>>('noData');
-  @Input() items: any[] = [];
-  @Input() title = '';
+  readonly carouselItemTemplate = contentChild.required<TemplateRef<never>>('carouselItem');
+  readonly promptToAddTemplate = contentChild.required<TemplateRef<never>>('promptToAdd');
+  readonly noDataTemplate = contentChild<TemplateRef<never>>('noData');
+
+  readonly swiperContainer = viewChild<ElementRef<HTMLElement & {swiper: Swiper}>>('swiperContainer');
+
+  readonly isBeginning = signal(true);
+  readonly isEnd = signal(false);
+
+  items = model<T[]>([]);
+  title = input<string>('');
   /**
    * If provided, will render the title as an anchor
    */
-  @Input() titleLink = '';
-  @Input() clickableTitle: boolean = true;
-  @Input() iconClasses = '';
+  titleLink = input<string>('');
+  clickableTitle = input<boolean>(true);
+  iconClasses = input<string>('');
   /**
    * Show's the carousel component even if there is nothing in it
    */
-  @Input() alwaysShow = false;
+  alwaysShow = input<boolean>(false);
   /**
    * Track by identity. By default, this has an implementation based on title, item's name, pagesRead, and index
    */
-  @Input() trackByIdentity: (index: number, item: any) => string = (index: number, item: any) => `${this.title}_${item.id}_${item?.name}_${item?.pagesRead}_${index}`;
+  trackByIdentity = input<(index: number, item: T) => string>((index: number, item: any) => {
+    return `${this.title()}_${item.id}_${item?.name}_${item?.pagesRead}_${index}`;
+  });
   /**
    * Actionables to render to the left of the title
    */
-  @Input() actionables: Array<ActionItem<any>> = [];
+  actionables = input<ActionItem<T>[]>([]);
   /**
    * If using actionables, this is the entity to allow Action.Service to handle logic
    */
-  @Input() actionableEntity: ActionableEntity = null;
+  actionableEntity = input<ActionableEntity | null>(null);
   headerClass = input<string>('section-title');
-  readonly sectionClick = output<string>();
-  readonly handleAction = output<ActionItem<any>>();
 
-  readonly actionHandler = output<ActionResult<any>>();
+  readonly sectionClick = output<string>();
+  readonly handleAction = output<ActionItem<T>>();
+
+  readonly actionHandler = output<ActionResult<T>>();
 
   currentPage = signal<number>(1);
   pageSize = input(20);
-  nextPageLoader = input<NextPageLoader | null>(null);
+  nextPageLoader = input<NextPageLoader<T> | null>(null);
 
   paginationEnabled = computed(() => this.nextPageLoader() != null);
   loadingNextPage = signal(false);
   totalPages = signal<number>(999_999_999_999);
 
-  swiper: Swiper | undefined;
+  swiper = signal<Swiper | undefined>(undefined);
+
+  isNextDisabled = computed(() => {
+    return this.isEnd()
+    && (!this.paginationEnabled() || this.items().length < this.pageSize())
+    || (this.currentPage() >= (this.totalPages()));
+  });
+
+  constructor() {
+    // element's connectedCallback -> initialize() sets .swiper synchronously (this avoids binding to swiperprogress like docs suggest and incurring lag on each scroll tick)
+    effect(() => {
+      const swiper = this.swiperContainer()?.nativeElement?.swiper;
+      this.swiper.set(swiper);
+      this.syncEdges(swiper);
+    });
+  }
+
+  syncEdges(s: Swiper | undefined = this.swiper()) {
+    this.isBeginning.set(s?.isBeginning ?? true);
+    this.isEnd.set(s?.isEnd ?? false);
+  }
 
   private tryLoadNextPage() {
-    if (!this.paginationEnabled() || this.loadingNextPage()) return;
+    if (!this.paginationEnabled() || this.loadingNextPage() || this.currentPage() >= this.totalPages()) {
+      return;
+    }
 
     this.currentPage.update(x => x + 1);
     this.loadingNextPage.set(true);
-    const oldSize = this.items.length;
+    const oldSize = this.items().length;
 
     this.nextPageLoader()!(this.currentPage(), this.pageSize()).pipe(
       map(items => {
@@ -96,62 +130,65 @@ export class CarouselReelComponent {
           return items;
         }
 
-        const pagedList = items as PaginatedResult<any[]>;
+        const pagedList = items as PaginatedResult<T[]>;
         this.totalPages.set(pagedList.pagination.totalPages)
 
         return pagedList.result;
       }),
       tap(items => {
-        this.items = [...this.items, ...items];
+        this.items.set([...this.items(), ...items]);
 
-        const newCurrentProgress = oldSize / this.items.length;
-        this.swiper?.setProgress(newCurrentProgress);
+        const newCurrentProgress = oldSize / this.items().length;
+        this.swiper()?.setProgress(newCurrentProgress);
         this.cdRef.markForCheck();
       }),
-      tap(() => this.nextPage()),
+      //tap(() => this.nextPage()),
       tap(() => this.loadingNextPage.set(false)),
     ).subscribe();
   }
 
   get progressChange() {
-    const totalItems = this.items.length;
+    const totalItems = this.items().length;
     const itemsToMove = Math.min(5, totalItems);
     const progressPerItem = 1 / totalItems;
     return Math.min(0.25, progressPerItem * itemsToMove);
   }
 
   nextPage() {
-    if (this.swiper) {
-      if (this.swiper.isEnd) {
+    const swiper = this.swiper();
+    if (swiper) {
+      if (swiper.isEnd) {
         this.tryLoadNextPage();
         return;
       }
 
-      this.swiper.setProgress(this.swiper.progress + this.progressChange, 600);
+      swiper.setProgress(swiper.progress + this.progressChange, 600);
       this.cdRef.markForCheck();
     }
   }
 
   prevPage() {
-    if (this.swiper) {
-      if (this.swiper.isBeginning) return;
-      this.swiper.setProgress(this.swiper.progress - this.progressChange, 600);
+    const swiper = this.swiper();
+    if (swiper) {
+      if (swiper.isBeginning) return;
+      swiper.setProgress(swiper.progress - this.progressChange, 600);
       this.cdRef.markForCheck();
     }
   }
 
-  sectionClicked(event: any) {
-    this.sectionClick.emit(this.title);
+  sectionClicked() {
+    this.sectionClick.emit(this.title());
   }
 
-  // Swiper new implementation makes it so we need to use a progress event to get initialized
-  onProgress(event: any) {
-    let progress = 0;
-    [this.swiper, progress] = event.detail;
-    this.cdRef.markForCheck();
+  onReachEnd() {
+    if (this.currentPage() >= this.totalPages()) {
+      return;
+    }
+
+    this.tryLoadNextPage();
   }
 
-  performAction(event: ActionResult<any>) {
+  performAction(event: ActionResult<T>) {
     this.actionHandler.emit(event);
   }
 }

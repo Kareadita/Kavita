@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; prefix: 'manage-metadata-settings'" [formGroup]="settingsForm()">
+<ng-container *transloco="let t; prefix: 'manage-metadata-settings'">
 
   <app-loading [loading]="isLoading()" />
   <div ngbAccordion [closeOthers]="false">
@@ -12,40 +12,38 @@
       <div ngbAccordionCollapse>
         <div ngbAccordionBody>
           <ng-template>
-            @if (licenseService.hasActiveLicense()) {
+            @if (licenseService.hasActiveLicense() && showGenreTagToggles()) {
               <div class="row mt-4 mb-4">
                 <div class="col-md-6">
-                  @if(settingsForm().get('enableGenres'); as formControl) {
-                    <app-setting-switch [title]="t('enable-genres-label')" [subtitle]="t('enable-genres-tooltip')">
-                      <ng-template>
-                        <div class="form-check form-switch float-end">
-                          <input id="enable-genres-status" type="checkbox" class="form-check-input" formControlName="enableGenres">
-                        </div>
-                      </ng-template>
-                    </app-setting-switch>
-                  }
+                  <app-setting-switch [title]="t('enable-genres-label')" [subtitle]="t('enable-genres-tooltip')"
+                                      [control]="field().enableGenres">
+                    <ng-template>
+                      <div class="form-check form-switch float-end">
+                        <input id="enable-genres-status" type="checkbox" class="form-check-input" [formField]="field().enableGenres">
+                      </div>
+                    </ng-template>
+                  </app-setting-switch>
                 </div>
                 <div class="col-md-6">
-                  @if(settingsForm().get('enableTags'); as formControl) {
-                    <app-setting-switch [title]="t('enable-tags-label')" [subtitle]="t('enable-tags-tooltip')">
-                      <ng-template>
-                        <div class="form-check form-switch float-end">
-                          <input id="enable-tags-status" type="checkbox" class="form-check-input" formControlName="enableTags">
-                        </div>
-                      </ng-template>
-                    </app-setting-switch>
-                  }
+                  <app-setting-switch [title]="t('enable-tags-label')" [subtitle]="t('enable-tags-tooltip')"
+                                      [control]="field().enableTags">
+                    <ng-template>
+                      <div class="form-check form-switch float-end">
+                        <input id="enable-tags-status" type="checkbox" class="form-check-input" [formField]="field().enableTags">
+                      </div>
+                    </ng-template>
+                  </app-setting-switch>
                 </div>
               </div>
             }
 
+            <!--TODO: Don't forget this, requires multiple parents to be ported to signals first-->
             <div class="row g-0 align-items-start mb-4">
               <div class="col">
                 <app-setting-multi-text-field
                   [title]="t('blacklist-label')"
                   [tooltip]="t('blacklist-tooltip')"
-                  [control]="settingsForm().get('blacklist')!"
-                  formControlName="blacklist"
+                  [formField]="field().blacklist"
                 />
               </div>
             </div>
@@ -54,29 +52,30 @@
               <app-setting-multi-text-field
                 [title]="t('whitelist-label')"
                 [tooltip]="t('whitelist-tooltip')"
-                [control]="settingsForm().get('whitelist')!"
-                formControlName="whitelist"
+                [formField]="field().whitelist"
               />
             </div>
 
             @if (licenseService.hasActiveLicense()) {
+              @let filterAboveWeight = field().filterAboveWeight;
               <div class="row g-0 mt-4 mb-4">
-                <app-setting-item [title]="t('tag-weight-label')" [subtitle]="t('tag-weight-tooltip')" [labelId]="'filter-above-weight'">
+                <app-setting-item [title]="t('tag-weight-label')" [subtitle]="t('tag-weight-tooltip')"
+                                  [control]="filterAboveWeight" labelId="filter-above-weight">
                   <ng-template #view>
-                    @if (settingsForm().get('filterAboveWeight')?.value == null) {
+                    @let weight = filterAboveWeight().value();
+                    @if (weight === null) {
                       {{t('tag-weight-disabled')}}
                     } @else {
-                      {{settingsForm().get('filterAboveWeight')?.value | tagWeightTitle}}
+                      {{weight | tagWeightTitle}}
                     }
-
                   </ng-template>
                   <ng-template #edit>
-                    <select class="form-select" formControlName="filterAboveWeight" [id]="'filter-above-weight'">
-                      <option [ngValue]="null">{{t('tag-weight-disabled')}}</option>
-                      @for(weight of allTagWeights; track weight) {
-                        <option [ngValue]="weight">{{weight | tagWeightTitle}}</option>
-                      }
-                    </select>
+                    <app-setting-select [formField]="filterAboveWeight" inputId="filter-above-weight"
+                                        [placeholder]="t('tag-weight-disabled')" [options]="allTagWeightOptions">
+                      <ng-template #template let-weight>
+                        {{weight | tagWeightTitle}}
+                      </ng-template>
+                    </app-setting-select>
                   </ng-template>
                 </app-setting-item>
               </div>
@@ -98,7 +97,7 @@
           <div ngbAccordionBody>
             <ng-template>
               <p>{{t('external-age-rating-description')}}</p>
-              <app-age-rating-mapper [form]="settingsForm()" controlName="externalAgeRatingMappings"
+              <app-age-rating-mapper [field]="field().externalAgeRatingMappings"
                                      [sourceLabel]="t('external-age-rating-label')"
                                      [addLabel]="t('add-age-rating-mapping-label')"
                                      [removeLabel]="t('remove-age-rating-mapping-label')"
@@ -121,7 +120,7 @@
           <ng-template>
             <p>{{t('age-rating-mapping-description')}}</p>
 
-            <app-age-rating-mapper [form]="settingsForm()" controlName="ageRatingMappings"
+            <app-age-rating-mapper [field]="field().ageRatingMappings"
                                    [addLabel]="t('add-age-rating-mapping-label')"
                                    [removeLabel]="t('remove-age-rating-mapping-label')" />
           </ng-template>
@@ -139,64 +138,60 @@
         <div ngbAccordionBody>
           <ng-template>
             <p>{{t('field-mapping-description')}}</p>
-            <div formArrayName="fieldMappings">
-              @for (mapping of fieldMappings.controls; track mapping; let i = $index) {
-                <div [formGroupName]="i" class="row mb-2">
-                  <div class="col-md-2">
-                    <select class="form-select" formControlName="sourceType">
-                      <option [ngValue]="MetadataFieldType.Genre">{{t('genre')}}</option>
-                      <option [ngValue]="MetadataFieldType.Tag">{{t('tag')}}</option>
-                    </select>
-                  </div>
-                  <div class="col-md-2">
-                    @if (mapping.get('sourceValue'); as formControl) {
-                      <input id="field-mapping-{{i}}" type="text" class="form-control" formControlName="sourceValue"
-                             [placeholder]="t('source-genre-tags-placeholder')"
-                             [appFormField]="formControl" [attr.aria-describedby]="'field-mapping-' + i + '-validations'" />
-                      <app-validation-errors [inputId]="'field-mapping-' + i" [control]="formControl" />
-                    }
-                  </div>
-                  <div class="col-md-2">
-                    <select class="form-select" formControlName="destinationType">
-                      <option [ngValue]="MetadataFieldType.Genre">{{t('genre')}}</option>
-                      <option [ngValue]="MetadataFieldType.Tag">{{t('tag')}}</option>
-                    </select>
-                  </div>
-                  <div class="col-md-2">
-                    @if (mapping.get('destinationValue'); as formControl) {
-                      <input type="text" class="form-control" formControlName="destinationValue"
-                             [placeholder]="t('dest-genre-tags-placeholder')" [appFormField]="formControl" />
-                    }
-                  </div>
-                  <div class="col-md-2">
-                    <div class="form-check">
-                      <input id="remove-source-tag-{{i}}" type="checkbox" class="form-check-input"
-                             formControlName="excludeFromSource">
-                      <label [for]="'remove-source-tag-' + i" class="form-check-label">
-                        {{t('remove-source-tag-label')}}
-                      </label>
-                    </div>
-                  </div>
-                  <div class="col-md-2">
-                    <button [attr.aria-label]="'field-mapping-' + i" class="btn btn-icon" (click)="removeFieldMappingRow(i)">
-                      <i class="fa fa-trash-alt" aria-hidden="true"></i>
-                      <span class="visually-hidden">{{t('remove-field-mapping-label')}}</span>
-                    </button>
-
-                    @if ($last) {
-                      <button [attr.aria-label]="'field-mapping-header'" class="btn btn-icon" (click)="addFieldMapping()">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                        <span class="visually-hidden">{{t('add-field-mapping-label')}}</span>
-                      </button>
-                    }
+            @for (mapping of field().fieldMappings; track mapping; let i = $index) {
+              <div class="row mb-2">
+                <div class="col-md-2">
+                  <app-setting-select [formField]="mapping.sourceType" [options]="metadataFieldTypeOptions">
+                    <ng-template #template let-fieldType>
+                      {{fieldType === MetadataFieldType.Genre ? t('genre') : t('tag')}}
+                    </ng-template>
+                  </app-setting-select>
+                </div>
+                <div class="col-md-2">
+                  <input id="field-mapping-{{i}}" type="text" class="form-control" [formField]="mapping.sourceValue"
+                         [placeholder]="t('source-genre-tags-placeholder')"
+                         [appFormField]="mapping.sourceValue" [attr.aria-describedby]="'field-mapping-' + i + '-validations'" />
+                  <app-validation-errors [inputId]="'field-mapping-' + i" [control]="mapping.sourceValue" />
+                </div>
+                <div class="col-md-2">
+                  <app-setting-select [formField]="mapping.destinationType" [options]="metadataFieldTypeOptions">
+                    <ng-template #template let-fieldType>
+                      {{fieldType === MetadataFieldType.Genre ? t('genre') : t('tag')}}
+                    </ng-template>
+                  </app-setting-select>
+                </div>
+                <div class="col-md-2">
+                  <input type="text" class="form-control" [formField]="mapping.destinationValue"
+                         [placeholder]="t('dest-genre-tags-placeholder')" [appFormField]="mapping.destinationValue" />
+                </div>
+                <div class="col-md-2">
+                  <div class="form-check">
+                    <input id="remove-source-tag-{{i}}" type="checkbox" class="form-check-input"
+                           [formField]="mapping.excludeFromSource">
+                    <label [for]="'remove-source-tag-' + i" class="form-check-label">
+                      {{t('remove-source-tag-label')}}
+                    </label>
                   </div>
                 </div>
-              } @empty {
-                <button [attr.aria-label]="'field-mapping-header'" class="btn btn-secondary" (click)="addFieldMapping()">
-                  <i class="fa fa-plus me-1" aria-hidden="true"></i>{{t('add-field-mapping-label')}}
-                </button>
-              }
-            </div>
+                <div class="col-md-2">
+                  <button [attr.aria-label]="'field-mapping-' + i" class="btn btn-icon" (click)="removeFieldMappingRow(i)">
+                    <i class="fa fa-trash-alt" aria-hidden="true"></i>
+                    <span class="visually-hidden">{{t('remove-field-mapping-label')}}</span>
+                  </button>
+
+                  @if ($last) {
+                    <button [attr.aria-label]="'field-mapping-header'" class="btn btn-icon" (click)="addFieldMapping()">
+                      <i class="fa fa-plus" aria-hidden="true"></i>
+                      <span class="visually-hidden">{{t('add-field-mapping-label')}}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+            } @empty {
+              <button [attr.aria-label]="'field-mapping-header'" class="btn btn-secondary" (click)="addFieldMapping()">
+                <i class="fa fa-plus me-1" aria-hidden="true"></i>{{t('add-field-mapping-label')}}
+              </button>
+            }
           </ng-template>
         </div>
       </div>

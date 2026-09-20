@@ -3166,6 +3166,12 @@ namespace Kavita.Database.Migrations
                     b.Property<bool>("NoTransitions")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("OnDeckProgressDays")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OnDeckUpdateDays")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("OpdsPreferences")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")

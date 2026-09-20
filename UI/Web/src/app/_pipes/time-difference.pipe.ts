@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, inject, NgZone, OnDestroy, Pipe, PipeTransform} from '@angular/core';
+import {inject, OnDestroy, Pipe, PipeTransform, signal} from '@angular/core';
 import {TranslocoService} from "@jsverse/transloco";
 
 /**
@@ -11,16 +11,17 @@ import {TranslocoService} from "@jsverse/transloco";
   standalone: true
 })
 export class TimeDifferencePipe implements PipeTransform, OnDestroy {
-  private readonly changeDetectorRef = inject(ChangeDetectorRef);
-  private readonly ngZone = inject(NgZone);
   private readonly translocoService = inject(TranslocoService);
 
+  private tick = signal(0);
   private timer: number | null = null;
 
   transform(value: string | Date | number | null) {
     if (value === '' || value === null || value === undefined || (typeof value === 'string' && value.split('T')[0] === '0001-01-01')) {
       return this.translocoService.translate('time-difference-pipe.never');
     }
+
+    this.tick(); // Read looks unused: it is what registers this pipe's timer with the view, so the timeout below re-renders it
 
     this.removeTimer();
     const d = new Date(value);
@@ -30,14 +31,9 @@ export class TimeDifferencePipe implements PipeTransform, OnDestroy {
     const isFuture = diffMs > 0;
     const timeToUpdate = Number.isNaN(seconds) ? 1000 : this.getSecondsUntilUpdate(seconds) * 1000;
 
-    this.timer = this.ngZone.runOutsideAngular(() => {
-      if (typeof window !== 'undefined') {
-        return window.setTimeout(() => {
-          this.ngZone.run(() => this.changeDetectorRef.markForCheck());
-        }, timeToUpdate);
-      }
-      return null;
-    });
+    if (typeof window !== 'undefined') {
+      this.timer = window.setTimeout(() => this.tick.update(v => v + 1), timeToUpdate);
+    }
 
     const minutes = Math.round(Math.abs(seconds / 60));
     const hours = Math.round(Math.abs(minutes / 60));

@@ -32,8 +32,7 @@
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
-                "@angular/localize/init",
-                "zone.js"
+              "@angular/localize/init"
             ],
             "inlineStyleLanguage": "scss",
             "tsConfig": "tsconfig.app.json",

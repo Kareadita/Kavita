@@ -1,30 +1,22 @@
 <ng-container *transloco="let t; prefix: 'customize-dashboard-streams'">
-  <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
-                              [showRemoveButton]="false">
+  <app-draggable-ordered-list [items]="items()" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode()"
+                              [showRemoveButton]="false" [virtualizeAfter]="virtualizeAfter">
     <ng-template #draggableItem let-position="idx" let-item>
       <app-dashboard-stream-list-item [item]="item" [position]="position"
-                                      (hide)="updateVisibility($event, position)"
+                                      (hide)="updateVisibility($event)"
                                       (delete)="delete($event)"
       />
     </ng-template>
   </app-draggable-ordered-list>
 
   <h5>{{t('smart-filter-title')}}</h5>
-  <form [formGroup]="listForm">
-    @if (smartFilters.length >= 3) {
-      @if (listForm.get('filterQuery'); as formControl) {
-        <div class="mb-3">
-          <label for="filter" class="form-label">{{t('filter')}}</label>
-          <div class="input-group">
-            <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input" [appFormField]="formControl">
-            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
-          </div>
-        </div>
-      }
-    }
-  </form>
+  @if (showFilter()) {
+    <div class="mb-3">
+      <app-filter-field [(query)]="filterQuery" [label]="t('filter')" />
+    </div>
+  }
   <ul class="list-group filter-list">
-    @for (filter of smartFilters | filter: filterList; track filter) {
+    @for (filter of filteredSmartFilters(); track filter.name) {
       <li class="filter list-group-item">
         {{filter.name}}
         <button class="btn btn-icon" (click)="addFilterToStream(filter)">

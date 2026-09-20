@@ -18,7 +18,6 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ActivatedRoute} from "@angular/router";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
-import {ReactiveFormsModule} from "@angular/forms";
 import {ProfileImageComponent} from "../profile-image/profile-image.component";
 import {LicenseService} from "../../../_services/license.service";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
@@ -51,7 +50,6 @@ import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
     NgbNavOutlet,
     TitleCasePipe,
     UtcToLocalDatePipe,
-    ReactiveFormsModule,
     ProfileImageComponent,
     LoadingComponent,
     VirtualScrollerModule,

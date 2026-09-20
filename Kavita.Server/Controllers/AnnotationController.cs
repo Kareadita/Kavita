@@ -33,9 +33,10 @@ public class AnnotationController(
     [HttpPost("all-filtered")]
     public async Task<ActionResult<PagedList<AnnotationDto>>> GetAnnotationsForBrowse(AnnotationFilterDto filter, [FromQuery] UserParams? userParams)
     {
+        var ct = HttpContext.RequestAborted;
         userParams ??= UserParams.Default;
 
-        var list = await unitOfWork.AnnotationRepository.GetAnnotationDtos(UserId, filter, userParams);
+        var list = await unitOfWork.AnnotationRepository.GetAnnotationDtos(UserId, filter, userParams, ct);
         Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
 
         return Ok(list);
@@ -50,7 +51,8 @@ public class AnnotationController(
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<AnnotationDto>>> GetAnnotations(int chapterId)
     {
-        return Ok(await unitOfWork.UserRepository.GetAnnotations(UserId, chapterId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.UserRepository.GetAnnotations(UserId, chapterId, ct));
     }
 
     /// <summary>
@@ -62,7 +64,8 @@ public class AnnotationController(
     [HttpGet("all-for-series")]
     public async Task<ActionResult<AnnotationDto>> GetAnnotationsBySeries(int seriesId)
     {
-        return Ok(await unitOfWork.UserRepository.GetAnnotationDtosBySeries(UserId, seriesId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.UserRepository.GetAnnotationDtosBySeries(UserId, seriesId, ct));
     }
 
     /// <summary>
@@ -73,11 +76,11 @@ public class AnnotationController(
     [HttpGet("{annotationId}")]
     public async Task<ActionResult<AnnotationDto?>> GetAnnotation(int annotationId)
     {
-        var annotation = await unitOfWork.UserRepository.GetAnnotationDtoById(UserId, annotationId);
+        var ct = HttpContext.RequestAborted;
+        var annotation = await unitOfWork.UserRepository.GetAnnotationDtoById(UserId, annotationId, ct);
         if (annotation == null) return NotFound();
 
-        if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, annotation.ChapterId,
-                HttpContext.RequestAborted))
+        if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, annotation.ChapterId, ct))
         {
             return NotFound();
         }
@@ -94,9 +97,10 @@ public class AnnotationController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<AnnotationDto>> CreateAnnotation(AnnotationDto dto)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
-            return Ok(await annotationService.CreateAnnotation(UserId, dto));
+            return Ok(await annotationService.CreateAnnotation(UserId, dto, ct));
         }
         catch (KavitaException ex)
         {
@@ -113,9 +117,10 @@ public class AnnotationController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<AnnotationDto>> UpdateAnnotation(AnnotationDto dto)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
-            return Ok(await annotationService.UpdateAnnotation(UserId, dto));
+            return Ok(await annotationService.UpdateAnnotation(UserId, dto, ct));
         }
         catch (KavitaException ex)
         {
@@ -132,9 +137,10 @@ public class AnnotationController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> LikeAnnotations(IList<int> ids)
     {
+        var ct = HttpContext.RequestAborted;
         var userId = UserId;
 
-        var annotations = await unitOfWork.AnnotationRepository.GetAnnotations(userId, ids);
+        var annotations = await unitOfWork.AnnotationRepository.GetAnnotations(userId, ids, ct);
         if (annotations.Count != ids.Count)
         {
             return BadRequest();
@@ -148,7 +154,7 @@ public class AnnotationController(
 
         if (unitOfWork.HasChanges())
         {
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
         }
 
 
@@ -164,9 +170,10 @@ public class AnnotationController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UnLikeAnnotations(IList<int> ids)
     {
+        var ct = HttpContext.RequestAborted;
         var userId = UserId;
 
-        var annotations = await unitOfWork.AnnotationRepository.GetAnnotations(userId, ids);
+        var annotations = await unitOfWork.AnnotationRepository.GetAnnotations(userId, ids, ct);
         if (annotations.Count != ids.Count)
         {
             return BadRequest();
@@ -180,7 +187,7 @@ public class AnnotationController(
 
         if (unitOfWork.HasChanges())
         {
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
         }
 
 
@@ -196,11 +203,12 @@ public class AnnotationController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteAnnotation(int annotationId)
     {
-        var annotation = await unitOfWork.AnnotationRepository.GetAnnotation(annotationId);
+        var ct = HttpContext.RequestAborted;
+        var annotation = await unitOfWork.AnnotationRepository.GetAnnotation(annotationId, ct);
         if (annotation == null || annotation.AppUserId != UserId) return BadRequest(await localizationService.TranslateAsync(UserId, "annotation-delete"));
 
         unitOfWork.AnnotationRepository.Remove(annotation);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         return Ok();
     }
@@ -214,16 +222,17 @@ public class AnnotationController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteAnnotationsBulk(IList<int> annotationIds)
     {
+        var ct = HttpContext.RequestAborted;
         var userId = UserId;
 
-        var annotations = await unitOfWork.AnnotationRepository.GetAnnotations(userId, annotationIds);
+        var annotations = await unitOfWork.AnnotationRepository.GetAnnotations(userId, annotationIds, ct);
         if (annotations.Any(a => a.AppUserId != userId))
         {
             return BadRequest();
         }
 
         unitOfWork.AnnotationRepository.Remove(annotations);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         return Ok();
     }
@@ -236,12 +245,13 @@ public class AnnotationController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> ExportAnnotationsFilter(AnnotationFilterDto filter, [FromQuery] UserParams? userParams)
     {
+        var ct = HttpContext.RequestAborted;
         userParams ??= UserParams.Default;
 
-        var list = await unitOfWork.AnnotationRepository.GetAnnotationDtos(UserId, filter, userParams);
+        var list = await unitOfWork.AnnotationRepository.GetAnnotationDtos(UserId, filter, userParams, ct);
         var annotations = list.Select(a => a.Id).ToList();
 
-        var json = await annotationService.ExportAnnotations(UserId, annotations);
+        var json = await annotationService.ExportAnnotations(UserId, annotations, ct);
         if (string.IsNullOrEmpty(json)) return BadRequest();
 
         var bytes = Encoding.UTF8.GetBytes(json);
@@ -258,7 +268,8 @@ public class AnnotationController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> ExportAnnotations(IList<int>? annotations = null)
     {
-        var json = await annotationService.ExportAnnotations(UserId, annotations);
+        var ct = HttpContext.RequestAborted;
+        var json = await annotationService.ExportAnnotations(UserId, annotations, ct);
         if (string.IsNullOrEmpty(json)) return BadRequest();
 
         var bytes = Encoding.UTF8.GetBytes(json);

@@ -2,13 +2,11 @@
 
   @if (showDebugBar()) {
     <div class="fixed-top overlay">
-      <strong>Captures Scroll Events:</strong> {{!isScrolling && allImagesLoaded}}
-      <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{isScrolling}}
-      <strong>All Images Loaded:</strong> {{allImagesLoaded}}
-      <strong>Prefetched</strong> {{minPageLoaded}}-{{maxPageLoaded}}
-      <strong>Pages:</strong> {{pageNum}} / {{totalPages - 1}}
-      <strong>At Top:</strong> {{atTop}}
-      <strong>At Bottom:</strong> {{atBottom}}
+      <strong>Captures Scroll Events:</strong> {{!isScrolling() && allImagesLoaded()}}
+      <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{isScrolling()}}
+      <strong>All Images Loaded:</strong> {{allImagesLoaded()}}
+      <strong>Prefetched</strong> {{minPageLoaded()}}-{{maxPageLoaded()}}
+      <strong>Pages:</strong> {{pageNum()}} / {{totalPages() - 1}}
       <strong>Total Height:</strong> {{getTotalHeight()}}
       <strong>Total Scroll:</strong> {{getTotalScroll()}}
       <strong>Scroll Top:</strong> {{getScrollTop()}}
@@ -18,19 +16,21 @@
   <app-pull-to-load
     [direction]="'down'"
     [title]="t('continuous-reading-prev-chapter')"
-    [scrollContainer]="scrollElement"
+    [scrollContainer]="scrollElement()"
     (triggered)="loadPrevChapter.emit()" />
 
   <div #scroller tabindex="0" [style.outline]="'none'" infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50">
-    @for(item of webtoonImages | async; let index = $index; track item.src) {
-      <img src="{{item.src}}" style="display: block;"
-           [style.filter]="(darkness$ | async)  ?? '' | safeStyle"
+    @for(item of webtoonImages(); let index = $index; track item.src) {
+      <img #img src="{{item.src}}"
+           [style.filter]="darknessStyle()"
            [style.width]="widthOverride()"
-           class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}"
+           [class.active]="pageNum() === item.page && showDebugOutline()"
+           [class.full-width]="areImagesWiderThanWindow"
+           class="d-block mx-auto"
            rel="nofollow"
            alt="image {{item.page}}"
-           (load)="onImageLoad($event)"
-           (error)="onImageLoadError($event)"
+           (load)="onImageLoad(img)"
+           (error)="onImageLoadError(img)"
            id="page-{{item.page}}"
            [attr.page]="item.page"
            ondragstart="return false;"
@@ -41,7 +41,7 @@
   <app-pull-to-load #pullToLoadNext
     [direction]="'up'"
     [title]="t('continuous-reading-next-chapter')"
-    [scrollContainer]="scrollElement"
+    [scrollContainer]="scrollElement()"
     (triggered)="moveToNextChapter()" />
 
 </ng-container>

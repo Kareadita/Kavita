@@ -5,7 +5,7 @@ import {asyncScheduler, filter, firstValueFrom, forkJoin, of, tap} from 'rxjs';
 import {download, parseContentDisposition} from '../_models/download';
 import {map, switchMap, throttleTime} from 'rxjs/operators';
 import {translate, TranslocoService} from "@jsverse/transloco";
-import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SAVER} from "../../_providers/saver.provider";
 import {UtilityService} from "./utility.service";
 import {DateTime} from 'luxon';
@@ -142,8 +142,6 @@ export class DownloadService {
   private _olderItems = signal<DownloadQueueItem[]>([]);
   readonly olderCompletedItems = this._olderItems.asReadonly();
   private _olderLoaded = false;
-
-  private readonly activeQueue$ = toObservable(this.activeQueue);
 
   /**
    * Sliding window of recent byte snapshots for smoothed speed calculation.

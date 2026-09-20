@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, Subject, switchMap, tap} from "rxjs";
-import {FormsModule} from "@angular/forms";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CronFrequency} from "../../../shared/_models/cron-frequency";
 import {CronFrequencyPipe} from "../../../_pipes/cron-frequency.pipe";
@@ -21,7 +20,6 @@ import {SettingItemComponent} from "../setting-item/setting-item.component";
 @Component({
   selector: 'app-setting-cron-item',
   imports: [
-    FormsModule,
     TranslocoDirective,
     CronFrequencyPipe,
     SettingItemComponent
@@ -77,7 +75,9 @@ export class SettingCronItemComponent implements OnInit {
     ).subscribe();
   }
 
-  onFrequencyChange(freq: CronFrequency) {
+  onFrequencyChange(event: Event) {
+    const freq = (event.target as HTMLSelectElement).value as CronFrequency;
+
     this.selectedFrequency.set(freq);
     if (freq !== CronFrequency.Custom) {
       this.cronInvalid.set(false);
@@ -87,7 +87,9 @@ export class SettingCronItemComponent implements OnInit {
     // If custom, wait for user to type a valid cron
   }
 
-  onCustomCronChange(val: string) {
+  onCustomCronChange(event: Event) {
+    const val = (event.target as HTMLInputElement).value;
+
     this.customCron.set(val);
     if (!val) {
       this.cronInvalid.set(true);

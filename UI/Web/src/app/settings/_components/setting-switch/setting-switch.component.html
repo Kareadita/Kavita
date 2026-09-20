@@ -18,6 +18,9 @@
       </div>
     </div>
 
+    @if (control(); as boundControl) {
+      <app-validation-errors [control]="boundControl" [inputId]="elementId()" [messages]="validations()" />
+    }
 
     @if (subtitle()) {
       <div class="text-muted mt-2" [innerHTML]="subtitle()! | safeHtml"></div>

@@ -3,7 +3,6 @@ import {NgOptimizedImage} from '@angular/common';
 import {ExternalSeries} from "../../_models/series-detail/external-series";
 import {ImageComponent} from "../../shared/image/image.component";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {ReactiveFormsModule} from "@angular/forms";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
@@ -14,7 +13,7 @@ import {ScrobbleProvider} from "../../_services/scrobbling.service";
 
 @Component({
   selector: 'app-external-series-card',
-  imports: [ImageComponent, NgbTooltip, ReactiveFormsModule, TranslocoDirective, NgOptimizedImage, ProviderImagePipe, RecommendationSourcePipe],
+  imports: [ImageComponent, NgbTooltip, TranslocoDirective, NgOptimizedImage, ProviderImagePipe, RecommendationSourcePipe],
   templateUrl: './external-series-card.component.html',
   styleUrls: ['./external-series-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

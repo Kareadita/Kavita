@@ -34,9 +34,10 @@ public class KoreaderController(IKoreaderService koreaderService, ILogger<Koread
     [HttpPut("{apiKey}/syncs/progress")]
     public async Task<ActionResult<KoreaderProgressUpdateDto>> UpdateProgress(string apiKey, KoreaderBookDto request)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
-            await koreaderService.SaveProgress(request, UserId);
+            await koreaderService.SaveProgress(request, UserId, ct);
 
             return Ok(new KoreaderProgressUpdateDto{ Document = request.document, Timestamp = DateTime.UtcNow });
         }
@@ -57,9 +58,10 @@ public class KoreaderController(IKoreaderService koreaderService, ILogger<Koread
     [HttpGet("{apiKey}/syncs/progress/{ebookHash}")]
     public async Task<IActionResult> GetProgress(string apiKey, string ebookHash)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
-            var response = await koreaderService.GetProgress(ebookHash, UserId);
+            var response = await koreaderService.GetProgress(ebookHash, UserId, ct);
             logger.LogDebug("Koreader response progress for User ({UserName}): {Progress}", Username, response.progress.Sanitize());
 
 

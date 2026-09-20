@@ -9,8 +9,8 @@ import {ReaderService} from "../../../_services/reader.service";
     TranslocoDirective
   ],
   templateUrl: './text-bookmark-item.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './text-bookmark-item.component.scss'
+  styleUrl: './text-bookmark-item.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TextBookmarkItemComponent {
   private readonly readerService = inject(ReaderService);

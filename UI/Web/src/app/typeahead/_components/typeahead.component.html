@@ -1,94 +1,110 @@
 <ng-container *transloco="let t; prefix:'typeahead'">
+  @let settings = config();
   @if(settings) {
-    <form [formGroup]="typeaheadForm">
-      <div class="input-group {{hasFocus ? 'open': ''}} {{locked ? 'lock-active' : ''}}" #triggerEl cdkOverlayOrigin #trigger="cdkOverlayOrigin">
-        @if (settings.showLocked) {
-          <span class="input-group-text clickable" (click)="toggleLock($event)"><i class="fa fa-lock" aria-hidden="true"></i>
-          <span class="visually-hidden">{{t('locked-field')}}</span>
-        </span>
-        }
-
-        <div class="typeahead-input" [ngClass]="{'disabled': disabled}" (click)="onInputFocus($event)">
-          @if (optionSelection) {
-            @for (option of optionSelection.selected(); track option; let i = $index) {
-              <app-tag-badge fillStyle="filled">
-                <ng-container [ngTemplateOutlet]="badgeTemplate()" [ngTemplateOutletContext]="{ $implicit: option, idx: i, value:  typeaheadControl.value }" />
-                @if (!disabled) {
-                  <i class="fa fa-times" (click)="toggleSelection(option)" tabindex="0" [attr.aria-label]="t('close')"></i>
-                }
-              </app-tag-badge>
-            }
-          }
-
-          @if (!disabled) {
-            <input #input [id]="settings.id" type="text" autocomplete="off" formControlName="typeahead">
-          }
-
-
-          @if (isLoadingOptions) {
-            <div class="spinner-border spinner-border-sm {{settings.multiple ? 'close-offset' : ''}}" role="status">
-              <span class="visually-hidden">{{t('loading')}}</span>
-            </div>
-          }
-
-          @if (!disabled && settings.multiple && (selectedData | async); as selected) {
-            @if (selected.length > 0) {
-              <button class="btn btn-close float-end mt-2" style="font-size: 0.8rem;" (click)="clearSelections(true);$event.stopPropagation()"></button>
-            }
-          }
-        </div>
-      </div>
-
-      <!-- Dropdown content template -->
-      <ng-template #dropdownContent let-options>
-        <div class="dropdown" [class.dropdown-overlay]="useOverlay"
-             animate.enter="slide-in-from-top"
-             animate.leave="slide-out-to-top">
-          <ul class="list-group results" #results>
-            @if (showAddItem) {
-              <li class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
-                {{t('add-item', {item: typeaheadControl.value})}}
-              </li>
-            }
-
-            @for(option of options; track settings.trackByIdentityFn(index, option); let index = $index) {
-              <li (click)="handleOptionClick(option)"
-                  class="list-group-item" role="option" [attr.data-index]="index"
-                  (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
-                <ng-container [ngTemplateOutlet]="optionTemplate()" [ngTemplateOutletContext]="{ $implicit: option, idx: index, value:  typeaheadControl.value }" />
-              </li>
-            }
-
-            @if (options.length === 0 && !showAddItem) {
-              <li class="list-group-item no-hover" role="listitem">
-                {{t('no-data')}}{{settings.addIfNonExisting ? t('add-custom-item') : ''}}
-              </li>
-            }
-          </ul>
-        </div>
-      </ng-template>
-
-      <!-- Relative mode (default) -->
-      @if (!useOverlay) {
-        @if (filteredOptions | async; as options) {
-          @if (hasFocus) {
-            <ng-container *ngTemplateOutlet="dropdownContent; context: { $implicit: options }" />
-          }
-        }
+    <div class="input-group {{hasFocus() ? 'open': ''}} {{locked() ? 'lock-active' : ''}}" #triggerEl cdkOverlayOrigin
+         #trigger="cdkOverlayOrigin">
+      @if (settings.showLocked) {
+        <button type="button" class="input-group-text clickable" (click)="toggleLock()"
+                [attr.aria-pressed]="locked()" [attr.aria-label]="t('toggle-lock-alt')" [disabled]="disabled()">
+          <i class="fa fa-lock" aria-hidden="true"></i>
+        </button>
       }
 
-      <!-- Body/overlay mode -->
-      <ng-template cdkConnectedOverlay
-        [cdkConnectedOverlayOrigin]="trigger"
-        [cdkConnectedOverlayOpen]="hasFocus && useOverlay"
-        [cdkConnectedOverlayWidth]="triggerWidth"
-        [cdkConnectedOverlayPositions]="overlayPositions"
-        [cdkConnectedOverlayPush]="true"
-        [cdkConnectedOverlayScrollStrategy]="repositionScrollStrategy">
-        @if (filteredOptions | async; as options) {
-          <ng-container *ngTemplateOutlet="dropdownContent; context: { $implicit: options }" />
+      <div class="typeahead-input" [ngClass]="{'disabled': disabled()}" (click)="onInputFocus($event)">
+        @if (disabled() && selectedOptions().length > 0) {
+          <span class="visually-hidden">{{t('selected-items-alt')}}</span>
         }
-      </ng-template>
-    </form>
+
+        @for (option of selectedOptions(); track option; let i = $index) {
+          <app-tag-badge fillStyle="filled">
+            <ng-container [ngTemplateOutlet]="badgeTemplate()" [ngTemplateOutletContext]="{ $implicit: option, idx: i, value: query() }" />
+            @if (!disabled()) {
+              <button type="button" class="border-0 bg-transparent p-0 lh-1 remove-badge" (click)="toggleSelection(option)"
+                      [attr.aria-label]="settings.titleFn ? t('remove-alt', {title: settings.titleFn(option)}) : t('remove-item-alt')">
+                <i class="fa fa-times" aria-hidden="true"></i>
+              </button>
+            }
+          </app-tag-badge>
+        }
+
+        @if (!disabled()) {
+          <input #input [id]="settings.id" type="text" autocomplete="off" [style.width.px]="inputWidth()"
+                 role="combobox" aria-autocomplete="list" [attr.aria-expanded]="hasFocus()"
+                 [attr.aria-controls]="listboxId" [attr.aria-activedescendant]="activeRowId()"
+                 (focus)="onInputFocus($event)" [formField]="formGroup.typeahead">
+        }
+
+
+        @if (isLoadingOptions()) {
+          <div class="spinner-border spinner-border-sm" [class.close-offset]="settings.multiple" role="status">
+            <span class="visually-hidden">{{t('loading')}}</span>
+          </div>
+        }
+
+        @if (showClearSelection()) {
+          <button type="button" class="btn btn-close float-end mt-2" style="font-size: 0.8rem;"
+                  [attr.aria-label]="t('clear-selections-alt')" (click)="clearSelections(true)"></button>
+        }
+      </div>
+    </div>
+
+    <span class="visually-hidden" role="status" aria-live="polite">
+      @if (hasFocus()) {
+        @if (rowCount() === 0) {
+          {{t('no-results-alt')}}
+        } @else {
+          {{t('results-available-alt', {count: rowCount()})}}
+        }
+      }
+    </span>
+
+    <!-- Dropdown content template -->
+    <ng-template #dropdownContent let-options>
+      <div class="dropdown" [class.dropdown-overlay]="useOverlay()"
+           animate.enter="slide-in-from-top"
+           animate.leave="slide-out-to-top">
+        <ul class="list-group results" #results role="listbox" [id]="listboxId">
+          @if (showAddItem()) {
+            <li #optionRow class="list-group-item add-item" role="option" [id]="rowId(0)"
+                [class.active]="focusedIndex() === 0" [attr.aria-selected]="focusedIndex() === 0"
+                (mouseenter)="focusedIndex.set(0)" (click)="addNewItem(query())">
+              {{t('add-item', {item: query()})}}
+            </li>
+          }
+
+          @for(option of options; track config().trackByIdentityFn(index, option); let index = $index) {
+            <li #optionRow (click)="handleOptionClick(option)"
+                class="list-group-item" [class.active]="focusedIndex() === index + addItemOffset()" role="option"
+                [id]="rowId(index + addItemOffset())" [attr.aria-selected]="focusedIndex() === index + addItemOffset()"
+                [attr.data-index]="index"
+                (mouseenter)="focusedIndex.set(index + addItemOffset())">
+              <ng-container [ngTemplateOutlet]="optionTemplate()" [ngTemplateOutletContext]="{ $implicit: option, idx: index, value:  query() }" />
+            </li>
+          }
+
+          @if (options.length === 0 && !showAddItem()) {
+            <li class="list-group-item no-hover" role="presentation">
+              {{t('no-data')}}{{settings.addIfNonExisting ? t('add-custom-item') : ''}}
+            </li>
+          }
+        </ul>
+      </div>
+    </ng-template>
+
+    <!-- Relative mode (default) -->
+    @if (!useOverlay() && hasFocus()) {
+      <ng-container *ngTemplateOutlet="dropdownContent; context: { $implicit: filteredOptions() }" />
+    }
+
+    <!-- Body/overlay mode -->
+    <ng-template cdkConnectedOverlay
+                 [cdkConnectedOverlayOrigin]="trigger"
+                 [cdkConnectedOverlayOpen]="hasFocus() && useOverlay()"
+                 [cdkConnectedOverlayWidth]="triggerWidth()"
+                 [cdkConnectedOverlayPositions]="overlayPositions"
+                 [cdkConnectedOverlayPush]="true"
+                 [cdkConnectedOverlayScrollStrategy]="repositionScrollStrategy">
+      <ng-container *ngTemplateOutlet="dropdownContent; context: { $implicit: filteredOptions() }" />
+    </ng-template>
   }
 </ng-container>

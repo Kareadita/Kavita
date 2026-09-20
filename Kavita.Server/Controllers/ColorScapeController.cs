@@ -20,7 +20,8 @@ public class ColorScapeController(IUnitOfWork unitOfWork) : BaseApiController
     [HttpGet("series")]
     public async Task<ActionResult<ColorScapeDto>> GetColorScapeForSeries(int id)
     {
-        var entity = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(id, UserId);
+        var ct = HttpContext.RequestAborted;
+        var entity = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(id, UserId, ct);
         return GetColorSpaceDto(entity);
     }
 
@@ -33,7 +34,8 @@ public class ColorScapeController(IUnitOfWork unitOfWork) : BaseApiController
     [HttpGet("volume")]
     public async Task<ActionResult<ColorScapeDto>> GetColorScapeForVolume(int id)
     {
-        var entity = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(id, UserId);
+        var ct = HttpContext.RequestAborted;
+        var entity = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(id, UserId, ct);
         return GetColorSpaceDto(entity);
     }
 
@@ -46,7 +48,8 @@ public class ColorScapeController(IUnitOfWork unitOfWork) : BaseApiController
     [HttpGet("chapter")]
     public async Task<ActionResult<ColorScapeDto>> GetColorScapeForChapter(int id)
     {
-        var entity = await unitOfWork.ChapterRepository.GetChapterDtoAsync(id, UserId);
+        var ct = HttpContext.RequestAborted;
+        var entity = await unitOfWork.ChapterRepository.GetChapterDtoAsync(id, UserId, ct);
         return GetColorSpaceDto(entity);
     }
 

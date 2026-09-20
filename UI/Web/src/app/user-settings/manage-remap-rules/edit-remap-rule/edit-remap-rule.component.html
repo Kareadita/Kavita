@@ -2,80 +2,76 @@
   <div class="card mb-3 mt-5">
     <div class="card-body">
       <h5 class="card-title">{{rule() ? t('edit-rule-title') : t('new-rule-title')}}</h5>
-      <form [formGroup]="form">
-        <div class="row g-3 align-items-end">
-          @if (form.get('cblSeriesName'); as formControl) {
-            <div class="col-md-4">
-              <label class="form-label">{{t('cbl-series-name-label')}}</label>
-              <input type="text" class="form-control" formControlName="cblSeriesName" [placeholder]="t('cbl-series-name-placeholder')"
-                     [appFormField]="formControl">
-            </div>
+      <div class="row g-3 align-items-end">
+
+        <div class="col-md-4">
+          <label class="form-label">{{t('cbl-series-name-label')}}</label>
+          <input type="text" class="form-control" [formField]="formGroup.cblSeriesName" [placeholder]="t('cbl-series-name-placeholder')"
+                 [appFormField]="formGroup.cblSeriesName">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">{{t('cbl-volume-label')}}</label>
+          <input type="text" class="form-control" [formField]="formGroup.cblVolume" [placeholder]="t('cbl-volume-placeholder')"
+                 [appFormField]="formGroup.cblVolume">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">{{t('cbl-number-label')}}</label>
+          <input type="text" class="form-control" [formField]="formGroup.cblNumber" [placeholder]="t('cbl-number-placeholder')"
+                 [appFormField]="formGroup.cblNumber">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">{{t('kavita-series-label')}}</label>
+          @let seriesConfig = seriesSettings();
+          @if (seriesConfig) {
+            <app-typeahead [config]="seriesConfig" (selectedData)="onSeriesSelected($event)" id="remap-series">
+              <ng-template #optionItem let-item let-position="idx" let-value="value">
+                {{item.name}}
+              </ng-template>
+              <ng-template #badgeItem let-item let-position="idx">
+                {{item.name}}
+              </ng-template>
+            </app-typeahead>
           }
-          @if (form.get('cblVolume'); as formControl) {
-            <div class="col-md-2">
-              <label class="form-label">{{t('cbl-volume-label')}}</label>
-              <input type="text" class="form-control" formControlName="cblVolume" [placeholder]="t('cbl-volume-placeholder')"
-                     [appFormField]="formControl">
-            </div>
-          }
-          @if (form.get('cblNumber'); as formControl) {
-            <div class="col-md-2">
-              <label class="form-label">{{t('cbl-number-label')}}</label>
-              <input type="text" class="form-control" formControlName="cblNumber" [placeholder]="t('cbl-number-placeholder')"
-                     [appFormField]="formControl">
-            </div>
-          }
+        </div>
+      </div>
+
+      @if (selectedSeries() && chapterSettings()) {
+        <div class="row g-3 align-items-end mt-1">
           <div class="col-md-4">
-            <label class="form-label">{{t('kavita-series-label')}}</label>
-            @let seriesConfig = seriesSettings();
-            @if (seriesConfig) {
-              <app-typeahead [settings]="seriesConfig" [reset]="seriesReset" (selectedData)="onSeriesSelected($event)" id="remap-series">
-                <ng-template #optionItem let-item let-position="idx" let-value="value">
-                  {{item.name}}
-                </ng-template>
-                <ng-template #badgeItem let-item let-position="idx">
-                  {{item.name}}
-                </ng-template>
-              </app-typeahead>
-            }
-          </div>
-        </div>
-
-        @if (selectedSeries() && chapterSettings()) {
-          <div class="row g-3 align-items-end mt-1">
-            <div class="col-md-4">
-              <label class="form-label">{{t('kavita-chapter-label')}}</label>
-              <app-typeahead [settings]="chapterSettings()!" [reset]="chapterReset" (selectedData)="onChapterSelected($event)">
-                <ng-template #badgeItem let-item let-position="idx">
-                  {{item.title}}
-                </ng-template>
-                <ng-template #optionItem let-item let-position="idx">
-                  <div class="d-flex align-items-center gap-2">
-                    <app-image [imageUrl]="item.coverImage" height="40px" width="30px" />
-                    <div>
-                      <div>{{item.title}}</div>
-                      @if (item.volumeTitle) {
-                        <small class="text-muted">{{item.volumeTitle}}</small>
-                      }
-                    </div>
+            <label class="form-label">{{t('kavita-chapter-label')}}</label>
+            <app-typeahead [config]="chapterSettings()!" (selectedData)="onChapterSelected($event)">
+              <ng-template #badgeItem let-item let-position="idx">
+                {{item.title}}
+              </ng-template>
+              <ng-template #optionItem let-item let-position="idx">
+                <div class="d-flex align-items-center gap-2">
+                  <app-image [imageUrl]="item.coverImage" height="40px" width="30px" />
+                  <div>
+                    <div>{{item.title}}</div>
+                    @if (item.volumeTitle) {
+                      <small class="text-muted">{{item.volumeTitle}}</small>
+                    }
                   </div>
-                </ng-template>
-              </app-typeahead>
-            </div>
-          </div>
-        }
-
-        <div class="row g-3 mt-1">
-          <div class="col-md-12 d-flex justify-content-end">
-            <button class="btn btn-secondary me-2" (click)="cancel()" type="button">
-              {{t('cancel')}}
-            </button>
-            <button class="btn btn-primary" type="button" [disabled]="!form.get('cblSeriesName')?.value?.trim() || !selectedSeries()" (click)="save()">
-              {{t('save')}}
-            </button>
+                </div>
+              </ng-template>
+            </app-typeahead>
           </div>
         </div>
-      </form>
+      }
+
+      <div class="row g-3 mt-1">
+        <div class="col-md-12 d-flex justify-content-end">
+          <button class="btn btn-secondary me-2" (click)="cancel()" type="button">
+            {{t('cancel')}}
+          </button>
+          <button class="btn btn-primary" type="button" [disabled]="formGroup().invalid() || !selectedSeries()" (click)="save()">
+            {{t('save')}}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </ng-container>

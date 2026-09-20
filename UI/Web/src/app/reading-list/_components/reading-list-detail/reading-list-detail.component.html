@@ -1,8 +1,7 @@
 <div class="main-container container-fluid">
   <ng-container *transloco="let t; prefix: 'reading-list-detail'">
-    <form [formGroup]="formGroup">
-      @let rl = readingList();
-      @if (rl) {
+    @let rl = readingList();
+    @if (rl) {
       <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
         <div class="row mb-0 mb-xl-3 info-container">
           <div class="image-container series col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
@@ -88,7 +87,7 @@
 
                 @if (isOwnedReadingList()) {
                   <div class="col-auto ms-2 d-none d-md-block btn-actions">
-                    <button [class]="formGroup.get('edit')?.value ? 'btn btn-primary' : 'btn btn-icon'" (click)="toggleReorder()" [ngbTooltip]="t('reorder-alt')">
+                    <button [class]="formGroup.edit().value() ? 'btn btn-primary' : 'btn btn-icon'" (click)="toggleReorder()" [ngbTooltip]="t('reorder-alt')">
                       <i class="fa-solid fa-list-ol" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -171,7 +170,7 @@
               <!-- Edit Row -->
               <div class="row g-0">
 
-                @if (formGroup.get('edit')?.value) {
+                @if (formGroup.edit().value()) {
                   @if (!rl.promoted && this.isOwnedReadingList()) {
                     <div class="col-auto">
                       <button class="btn btn-sm btn-outline-danger" (click)="removeRead()">
@@ -183,7 +182,7 @@
 
                   <div class="col-auto ms-2">
                     <div class="form-check form-switch form-check-inline mt-1">
-                      <input class="form-check-input" type="checkbox" id="accessibility-mode" formControlName="accessibilityMode">
+                      <input class="form-check-input" type="checkbox" id="accessibility-mode" [formField]="formGroup.accessibilityMode">
                       <label class="form-check-label" for="accessibility-mode">{{t('order-numbers-label')}}</label>
                     </div>
                   </div>
@@ -194,7 +193,7 @@
         </div>
 
         <div class="carousel-tabs-container mb-2">
-          <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="false" (navChange)="onNavChange($event)">
+          <ul ngbNav #nav="ngbNav" [activeId]="activeTabId" class="nav nav-tabs" [destroyOnHide]="false" (navChange)="onNavChange($event)">
 
             <li [ngbNavItem]="Tabs.Storyline">
               <a ngbNavLink>{{Tabs.Storyline | tabTitle}}</a>
@@ -206,7 +205,7 @@
                     <div class="row ms-0 mb-2 pe-2" >
                       <label for="rl-filter" class="visually-hidden">{{t('filter-label')}}</label>
                       <div class="input-group">
-                        <input type="text" class="form-control form-control-sm" formControlName="filter" id="rl-filter" [placeholder]="t('filter-label')">
+                        <input type="text" class="form-control form-control-sm" [formField]="formGroup.filter" id="rl-filter" [placeholder]="t('filter-label')">
                       </div>
 
                     </div>
@@ -226,12 +225,12 @@
                                                 [filterFn]="filterFn()"
                                                 (orderUpdated)="orderUpdated($event)"
                                                 (itemRemove)="removeItem($event)"
-                                                [showRemoveButton]="formGroup.get('edit')?.value || false"
+                                                [showRemoveButton]="formGroup.edit().value()"
                                                 [trackByIdentity]="trackByIdentity">
 
                       <ng-template #draggableItem let-item let-position="idx">
                         <app-reading-list-item [ngClass]="{'content-container': items().length < 100, 'non-virtualized-container': items().length >= 100}" [item]="item"
-                                               [position]="position" [editMode]="formGroup.get('edit')?.value || false"
+                                               [position]="position" [editMode]="formGroup.edit().value()"
                                                (read)="readChapter($event)"
                                                (remove)="removeItem($event)" />
                       </ng-template>
@@ -262,6 +261,5 @@
         <div [ngbNavOutlet]="nav" style="min-height: 18.75rem"></div>
       </div>
     }
-    </form>
   </ng-container>
 </div>

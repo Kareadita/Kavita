@@ -18,6 +18,7 @@ public class ActivityController(IUnitOfWork unitOfWork) : BaseApiController
     [HttpGet("current")]
     public async Task<ActionResult<List<ReadingSessionDto>>> GetActiveReadingSessions()
     {
-        return Ok(await unitOfWork.ReadingSessionRepository.GetAllReadingSessionAsync());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.ReadingSessionRepository.GetAllReadingSessionAsync(ct: ct));
     }
 }

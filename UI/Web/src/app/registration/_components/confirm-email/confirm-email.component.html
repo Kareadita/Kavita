@@ -3,52 +3,46 @@
     <ng-container title><h2>{{t('title')}}</h2></ng-container>
     <ng-container body>
       <p>{{t('description')}}</p>
-      @if (errors.length > 0) {
+      @if (errors().length > 0) {
         <div class="text-danger">
           <p>{{t('error-label')}}</p>
           <div class="mb-2">
-            @for (error of errors; track error) {
+            @for (error of errors(); track error) {
               <div>{{error}}</div>
             }
           </div>
         </div>
       }
 
-      <form [formGroup]="registerForm" (ngSubmit)="submit()">
-        @if (registerForm.get('username'); as formControl) {
-          <div class="mb-3">
-            <label for="username" class="form-label">{{t('username-label')}}</label>
-            <input id="username" class="form-control" formControlName="username" type="text"
-                   [appFormField]="formControl" aria-describedby="username-validations">
-            <app-validation-errors inputId="username" [control]="formControl" />
-          </div>
-        }
+      <form (submit)="submit()">
+        <div class="mb-3">
+          <label for="username" class="form-label">{{t('username-label')}}</label>
+          <input id="username" class="form-control" [formField]="formGroup.username" type="text"
+                 [appFormField]="formGroup.username" aria-describedby="username-validations">
+          <app-validation-errors inputId="username" [control]="formGroup.username" />
+        </div>
 
-        @if (registerForm.get('email'); as formControl) {
-          <div class="mb-3" style="width:100%">
-            <label for="email" class="form-label">{{t('email-label')}}</label>
-            <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" readonly
-                   [appFormField]="formControl" aria-describedby="email-validations">
-            <app-validation-errors inputId="email" [control]="formControl" />
-          </div>
-        }
+        <div class="mb-3" style="width:100%">
+          <label for="email" class="form-label">{{t('email-label')}}</label>
+          <input class="form-control" type="email" inputmode="email" id="email" [formField]="formGroup.email"
+                 [appFormField]="formGroup.email" aria-describedby="email-validations">
+          <app-validation-errors inputId="email" [control]="formGroup.email" />
+        </div>
 
-        @if (registerForm.get('password'); as formControl) {
-          <div class="mb-3">
-            <label for="password" class="form-label">{{t('password-label')}}</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="passwordTooltip" role="button" tabindex="0"></i>
-            <ng-template #passwordTooltip>
-              {{t('password-validation')}}
-            </ng-template>
-            <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip" /></span>
-            <input id="password" class="form-control" formControlName="password" type="password"
-                   [appFormField]="formControl" aria-describedby="password-help password-validations">
-            <app-validation-errors inputId="password" [control]="formControl" [messages]="{
+        <div class="mb-3">
+          <label for="password" class="form-label">{{t('password-label')}}</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="passwordTooltip" role="button" tabindex="0"></i>
+          <ng-template #passwordTooltip>
+            {{t('password-validation')}}
+          </ng-template>
+          <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip" /></span>
+          <input id="password" class="form-control" [formField]="formGroup.password" type="password"
+                 [appFormField]="formGroup.password" aria-describedby="password-help password-validations">
+          <app-validation-errors inputId="password" [control]="formGroup.password" [messages]="{
               minlength: t('password-validation'),
               maxlength: t('password-validation'),
               pattern: t('password-validation')
             }" />
-          </div>
-        }
+        </div>
 
         <div class="float-end">
           <button class="btn btn-secondary alt" type="submit">{{t('register')}}</button>

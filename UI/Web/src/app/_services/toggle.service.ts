@@ -1,17 +1,14 @@
-import { Injectable, inject } from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
-import {filter, ReplaySubject, take} from 'rxjs';
+import {filter} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ToggleService {
 
-  toggleState: boolean = false;
-
-
-  private toggleStateSource: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
-  public toggleState$ = this.toggleStateSource.asObservable();
+  private _toggleState = signal(false);
+  public readonly toggleState = this._toggleState.asReadonly();
 
   constructor() {
     const router = inject(Router);
@@ -19,23 +16,16 @@ export class ToggleService {
     router.events
     .pipe(filter(event => event instanceof NavigationStart))
     .subscribe((event) => {
-      this.toggleState = false;
-      this.toggleStateSource.next(this.toggleState);
+      this._toggleState.set(false);
     });
-    this.toggleStateSource.next(false);
+    this._toggleState.set(false);
   }
 
   toggle() {
-    this.toggleState = !this.toggleState;
-    this.toggleStateSource.pipe(take(1)).subscribe(state => {
-      this.toggleState = !state;
-      this.toggleStateSource.next(this.toggleState);
-    });
-
+    this._toggleState.update(x => !x);
   }
 
   set(state: boolean) {
-    this.toggleState = state;
-    this.toggleStateSource.next(state);
+    this._toggleState.set(state);
   }
 }

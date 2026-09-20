@@ -1,8 +1,8 @@
 <ng-container *transloco="let t; prefix: 'card-item'">
-  <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}">
+  <div class="card-item-container card {{selected() ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
-      @if(entity.coverImage) {
-        <app-image [imageUrl]="imageUrl" [errorImage]="imageService.noPersonImage" [styles]="{'border-radius': '.25rem .25rem 0 0'}" height="158px" width="158px" />
+      @if(entity().coverImage) {
+        <app-image [imageUrl]="imageUrl()" [errorImage]="imageService.noPersonImage" [styles]="{'border-radius': '.25rem .25rem 0 0'}" height="158px" width="158px" />
     } @else {
       <div class="missing-img mx-auto">
         <i class="fas fa-user fs-2" aria-hidden="true"></i>
@@ -10,29 +10,29 @@
     }
 
 
-      @if (allowSelection) {
+      @if (allowSelection()) {
         <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)">
-          <input type="checkbox" class="form-check-input" attr.aria-labelledby="{{title}}_{{entity.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
+          <input type="checkbox" class="form-check-input" attr.aria-labelledby="{{title()}}_{{entity().id}}" [ngModel]="selected()" [ngModelOptions]="{standalone: true}">
         </div>
       }
 
-      @if (count > 1) {
+      @if (count() > 1) {
         <div class="count">
-          <span class="badge bg-primary">{{count}}</span>
+          <span class="badge bg-primary">{{count()}}</span>
         </div>
       }
 
       <div class="card-overlay"></div>
     </div>
-    @if (title.length > 0 || actions.length > 0) {
+    @if (title().length > 0 || actions().length > 0) {
       <div class="card-body">
         <div>
-          <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
-            {{title}}
+          <span class="card-title" placement="top" id="{{title()}}_{{entity().id}}" [ngbTooltip]="title()" (click)="handleClick($event)" tabindex="0">
+            {{title()}}
           </span>
-          @if (actions && actions.length > 0) {
+          @if (actions() && actions().length > 0) {
             <span class="card-actions float-end">
-              <app-card-actionables [entity]="entity" [actions]="actions" [labelBy]="title" />
+              <app-card-actionables [entity]="entity()" [actions]="actions()" [labelBy]="title()" />
             </span>
           }
         </div>
@@ -40,7 +40,7 @@
         @let subtitle = subtitleTemplate();
         @if (subtitle) {
           <div style="text-align: center">
-            <ng-container [ngTemplateOutlet]="subtitle" [ngTemplateOutletContext]="{ $implicit: entity }" />
+            <ng-container [ngTemplateOutlet]="subtitle" [ngTemplateOutletContext]="{ $implicit: entity() }" />
           </div>
         }
       </div>

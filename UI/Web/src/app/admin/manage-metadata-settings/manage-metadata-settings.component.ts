@@ -1,30 +1,22 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  OnInit,
-  signal,
-  viewChild
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal, viewChild} from '@angular/core';
 import {NgTemplateOutlet} from "@angular/common";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {SettingsService} from "../settings.service";
 import {debounceTime, filter, switchMap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {map, tap} from "rxjs/operators";
 import {MetadataSettings, SeriesNameLanguage} from "../_models/metadata-settings";
 import {PersonRole} from "../../_models/metadata/person";
 import {PersonRolePipe} from "../../_pipes/person-role.pipe";
-import {allMetadataSettingField, MetadataSettingField} from "../_models/metadata-setting-field";
+import {allMetadataSettingField} from "../_models/metadata-setting-field";
 import {MetadataSettingFiledPipe} from "../../_pipes/metadata-setting-filed.pipe";
 import {
   ManageMetadataMappingsComponent,
-  MetadataMappingsExport
+  MetadataMappingsFormModel,
+  metadataMappingsSchema,
+  packMetadataMappings,
+  toMetadataMappingsFormModel
 } from "../manage-metadata-mappings/manage-metadata-mappings.component";
 import {RouterLink} from "@angular/router";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
@@ -50,22 +42,104 @@ import {Library} from "../../_models/library/library";
 import {Language} from "../../_models/metadata/language";
 import {
   isNativeToken,
+  isReservedToken,
   isRomajiToken,
-  languageCodeListValidator,
+  isWellFormedLanguageCode,
   primarySubtag,
   splitLanguageCodes,
   unknownLanguageSubtags,
   unknownScriptSubtags
 } from "../../shared/utils/language-code.util";
 import {
-  packAgeRatingMappings
-} from "../../shared/_components/age-rating-mapper/age-rating-mapper.component";
+  apply,
+  applyEach,
+  disabled,
+  FieldTree,
+  form,
+  FormField,
+  FormRoot,
+  PathKind,
+  required,
+  SchemaPath,
+  SchemaPathRules,
+  validate
+} from "@angular/forms/signals";
+import {
+  EnumOption,
+  SettingSelectComponent
+} from "../../settings/_components/setting-enum-select/setting-select.component";
+
+interface LibraryLanguageOverrideFormModel {
+  libraryId: number | null;
+  name: string;
+  localizedName: string;
+}
+
+interface FormModel {
+  enabled: boolean;
+  enableExtendedMetadataProcessing: boolean;
+
+  enableSummary: boolean;
+  enableLocalizedName: boolean;
+  enableName: boolean;
+  enablePublicationStatus: boolean;
+  enableAgeRating: boolean;
+  enableRelationships: boolean;
+  enablePeople: boolean;
+  enableStartDate: boolean;
+  enableCoverImage: boolean;
+
+  enableChapterTitle: boolean;
+  enableChapterSummary: boolean;
+  enableChapterReleaseDate: boolean;
+  enableChapterPublisher: boolean;
+  enableChapterCoverImage: boolean;
+
+  enableVolumeCoverImage: boolean;
+
+  firstLastPeopleNaming: boolean;
+
+  globalLanguageTitleSettings: SeriesNameLanguage;
+  libraryLanguageTitleOverrides: Array<LibraryLanguageOverrideFormModel>;
+
+  /** Keyed by {@link PersonRole}, true when that role is written */
+  personRoles: Record<string, boolean>;
+  /** Keyed by {@link MetadataSettingField}, true when Kavita's own value is overwritten */
+  overrides: Record<string, boolean>;
+
+  /** Owned by {@link ManageMetadataMappingsComponent} */
+  mappings: MetadataMappingsFormModel;
+}
+
+const MalformedLanguageCodes = 'malformedLanguageCodes';
+
+/**
+ * Error tier for a semicolon separated BCP-47 priority list. Flags only malformed codes, so unrecognized
+ * (but well-formed) languages and scripts stay warnings surfaced by {@link ManageMetadataSettingsComponent.warningCodesFor}.
+ *
+ * Stays local to this component as the language priority lists are the only place this shape exists.
+ */
+function languageCodeList<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string, SchemaPathRules.Supported, TPathKind>
+) {
+  validate(path, ({value}) => {
+    const malformed = splitLanguageCodes(value())
+      .filter(c => !isWellFormedLanguageCode(c) && !isReservedToken(c));
+
+    if (malformed.length === 0) return null;
+
+    return {
+      kind: MalformedLanguageCodes,
+      message: translate('manage-metadata-settings.language-code-malformed', {codes: malformed.join(', ')})
+    };
+  });
+}
+
 
 @Component({
   selector: 'app-manage-metadata-settings',
   imports: [
     TranslocoDirective,
-    ReactiveFormsModule,
     SettingSwitchComponent,
     PersonRolePipe,
     MetadataSettingFiledPipe,
@@ -78,6 +152,9 @@ import {
     NgbAccordionCollapse,
     NgbAccordionBody,
     NgTemplateOutlet,
+    FormField,
+    FormRoot,
+    SettingSelectComponent,
   ],
   templateUrl: './manage-metadata-settings.component.html',
   styleUrl: './manage-metadata-settings.component.scss',
@@ -85,60 +162,85 @@ import {
 })
 export class ManageMetadataSettingsComponent implements OnInit {
 
-  readonly manageMetadataMappingsComponent = viewChild.required(ManageMetadataMappingsComponent);
+  readonly manageMetadataMappingsComponent = viewChild(ManageMetadataMappingsComponent);
 
   private readonly settingService = inject(SettingsService);
   private readonly metadataService = inject(MetadataService);
   private readonly libraryService = inject(LibraryService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly fb = inject(FormBuilder);
   private readonly modalService = inject(ModalService);
   private readonly messageHub = inject(MessageHubService);
   private readonly serverService = inject(ServerService);
 
-  settingsForm: FormGroup = new FormGroup({});
-  settings = signal<MetadataSettings | undefined>(undefined);
+  private readonly formModel = signal<FormModel>({
+    enabled: false,
+    enableExtendedMetadataProcessing: false,
+
+    enableSummary: false,
+    enableLocalizedName: false,
+    enableName: false,
+    enablePublicationStatus: false,
+    enableAgeRating: false,
+    enableRelationships: false,
+    enablePeople: false,
+    enableStartDate: false,
+    enableCoverImage: false,
+
+    enableChapterTitle: false,
+    enableChapterSummary: false,
+    enableChapterReleaseDate: false,
+    enableChapterPublisher: false,
+    enableChapterCoverImage: false,
+
+    enableVolumeCoverImage: false,
+
+    firstLastPeopleNaming: false,
+
+    globalLanguageTitleSettings: {name: '', localizedName: ''},
+    libraryLanguageTitleOverrides: [],
+
+    personRoles: {},
+    overrides: {},
+
+    mappings: {
+      enableGenres: false,
+      enableTags: false,
+      filterAboveWeight: null,
+      blacklist: [],
+      whitelist: [],
+      ageRatingMappings: [],
+      externalAgeRatingMappings: [],
+      fieldMappings: [],
+    },
+  });
+  protected readonly formGroup = form(this.formModel, p => {
+    languageCodeList(p.globalLanguageTitleSettings.name);
+    languageCodeList(p.globalLanguageTitleSettings.localizedName);
+
+    applyEach(p.libraryLanguageTitleOverrides, row => {
+      required(row.libraryId);
+      languageCodeList(row.name);
+      languageCodeList(row.localizedName);
+    });
+
+    disabled(p.firstLastPeopleNaming, {when: ({valueOf}) => !valueOf(p.enablePeople)});
+    disabled(p.personRoles, {when: ({valueOf}) => !valueOf(p.enablePeople)});
+
+    apply(p.mappings, metadataMappingsSchema);
+  });
+
   personRoles = signal<PersonRole[]>([PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character]);
   isLoaded = signal<boolean>(false);
 
 
   isReRunInProgress = signal(true);
 
-  libraryLanguageOverrides = this.fb.array<FormGroup<{
-    libraryId: FormControl<number | null>,
-    name: FormControl<string | null>,
-    localizedName: FormControl<string | null>,
-  }>>([]);
-
   libraries = signal<Array<Library>>([]);
   bcp47Languages = signal<Array<Language>>([]);
 
-  get globalLanguageGroup(): FormGroup | null {
-    return this.settingsForm.get('globalLanguageTitleSettings') as FormGroup | null;
-  }
-
-  private languageCodeControls(): Array<AbstractControl> {
-    const globalGroup = this.globalLanguageGroup;
-    const controls: Array<AbstractControl> = [];
-
-    if (globalGroup) {
-      controls.push(globalGroup.get('name')!, globalGroup.get('localizedName')!);
-    }
-
-    for (const row of this.libraryLanguageOverrides.controls) {
-      controls.push(row.get('name')!, row.get('localizedName')!);
-    }
-
-    return controls;
-  }
-
-  /**
-   * Whether a malformed language code is currently blocking saves.
-   */
-  hasMalformedLanguageCodes(): boolean {
-    return this.languageCodeControls().some(c => !!c.errors?.['malformedLanguageCodes']);
-  }
+  protected readonly canAddLibraryOverride = computed(
+    () => this.formModel().libraryLanguageTitleOverrides.length < this.libraries().length
+  );
 
   private readonly languageTitleByCode = computed(() => {
     const map = new Map<string, string>();
@@ -155,6 +257,18 @@ export class ManageMetadataSettingsComponent implements OnInit {
     () => new Set(this.bcp47Languages().map(l => primarySubtag(l.isoCode)))
   );
 
+  constructor() {
+    // The page autosaves on every change
+    toObservable(this.formModel).pipe(
+      filter(() => this.isLoaded()),
+      debounceTime(300),
+      filter(() => this.formGroup().valid()),
+      map(() => this.packData()),
+      switchMap((data) => this.settingService.updateMetadataSettings(data)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe();
+  }
+
   ngOnInit(): void {
     this.metadataService.getAllBcp47Languages().subscribe(languages => {
       this.bcp47Languages.set(languages);
@@ -165,97 +279,8 @@ export class ManageMetadataSettingsComponent implements OnInit {
     });
 
     this.settingService.getMetadataSettings().subscribe(settings => {
-      this.settings.set(settings);
-
-      this.settingsForm.addControl('enabled', new FormControl(settings.enabled, []));
-      this.settingsForm.addControl('enableExtendedMetadataProcessing', new FormControl(settings.enableExtendedMetadataProcessing, []));
-      this.settingsForm.addControl('enableSummary', new FormControl(settings.enableSummary, []));
-      this.settingsForm.addControl('enableLocalizedName', new FormControl(settings.enableLocalizedName, []));
-      this.settingsForm.addControl('enableName', new FormControl(settings.enableName, []));
-      this.settingsForm.addControl('enablePublicationStatus', new FormControl(settings.enablePublicationStatus, []));
-      this.settingsForm.addControl('enableAgeRating', new FormControl(settings.enableAgeRating, []));
-      this.settingsForm.addControl('enableRelations', new FormControl(settings.enableRelationships, []));
-      this.settingsForm.addControl('enableGenres', new FormControl(settings.enableGenres, []));
-      this.settingsForm.addControl('enableTags', new FormControl(settings.enableTags, []));
-      this.settingsForm.addControl('enableRelationships', new FormControl(settings.enableRelationships, []));
-      this.settingsForm.addControl('enablePeople', new FormControl(settings.enablePeople, []));
-      this.settingsForm.addControl('enableStartDate', new FormControl(settings.enableStartDate, []));
-      this.settingsForm.addControl('enableCoverImage', new FormControl(settings.enableCoverImage, []));
-
-
-      this.settingsForm.addControl('enableChapterTitle', new FormControl(settings.enableChapterTitle, []));
-      this.settingsForm.addControl('enableChapterSummary', new FormControl(settings.enableChapterSummary, []));
-      this.settingsForm.addControl('enableChapterReleaseDate', new FormControl(settings.enableChapterReleaseDate, []));
-      this.settingsForm.addControl('enableChapterPublisher', new FormControl(settings.enableChapterPublisher, []));
-      this.settingsForm.addControl('enableChapterCoverImage', new FormControl(settings.enableChapterCoverImage, []));
-
-      this.settingsForm.addControl('enableVolumeCoverImage', new FormControl(settings.enableVolumeCoverImage, []));
-
-      this.settingsForm.addControl('globalLanguageTitleSettings', this.fb.group({
-        name: [settings.globalLanguageTitleSettings.name, [languageCodeListValidator()]],
-        localizedName: [settings.globalLanguageTitleSettings.localizedName, [languageCodeListValidator()]],
-      }));
-
-      this.settingsForm.addControl('libraryLanguageTitleOverrides', this.libraryLanguageOverrides);
-      Object.entries(settings.libraryLanguageTitleOverrides || {}).forEach(([libraryId, override]) => {
-        this.addLibraryLanguageOverride(parseInt(libraryId, 10), override);
-      });
-
-      this.settingsForm.addControl('firstLastPeopleNaming', new FormControl((settings.firstLastPeopleNaming), []));
-      this.settingsForm.addControl('personRoles', this.fb.group(
-        Object.fromEntries(
-          this.personRoles().map((role, index) => [
-            `personRole_${index}`,
-            this.fb.control((settings.personRoles || this.personRoles).includes(role)),
-          ])
-        )
-      ));
-
-      this.settingsForm.addControl('overrides', this.fb.group(
-        Object.fromEntries(
-          this.allMetadataSettingFields.map((role: MetadataSettingField, index: number) => [
-            `override_${index}`,
-            this.fb.control((settings.overrides || []).includes(role)),
-          ])
-        )
-      ));
-
-      this.settingsForm.get('enablePeople')?.valueChanges.subscribe(enabled => {
-        const firstLastControl = this.settingsForm.get('firstLastPeopleNaming');
-        if (enabled) {
-          firstLastControl?.enable();
-        } else {
-          firstLastControl?.disable();
-        }
-      });
-
-      this.settingsForm.get('enablePeople')?.updateValueAndValidity();
-
-      // Disable personRoles checkboxes based on enablePeople state
-      this.settingsForm.get('enablePeople')?.valueChanges.subscribe(enabled => {
-        const personRolesArray = this.settingsForm.get('personRoles') as FormArray;
-        if (enabled) {
-          personRolesArray.enable();
-        } else {
-          personRolesArray.disable();
-        }
-      });
-
+      this.formModel.set(this.toFormModel(settings));
       this.isLoaded.set(true);
-
-
-      this.settingsForm.valueChanges.pipe(
-        takeUntilDestroyed(this.destroyRef),
-      ).subscribe(() => this.cdRef.markForCheck());
-
-      this.settingsForm.valueChanges.pipe(
-        debounceTime(300),
-        takeUntilDestroyed(this.destroyRef),
-        filter(() => this.settingsForm.valid),
-        map(_ => this.packData()),
-        switchMap((data) => this.settingService.updateMetadataSettings(data)),
-      ).subscribe();
-
     });
 
     this.serverService.isTaskRunning(TaskMethodNames.RunMetadataMappings, QueueNames.Scan).pipe(
@@ -272,31 +297,77 @@ export class ManageMetadataSettingsComponent implements OnInit {
     ).subscribe();
   }
 
-  packData(withFieldMappings: boolean = true) {
-    const model = this.settingsForm.value;
+  private toFormModel(settings: MetadataSettings): FormModel {
+    return {
+      enabled: settings.enabled,
+      enableExtendedMetadataProcessing: settings.enableExtendedMetadataProcessing,
 
-    const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent().packData()
+      enableSummary: settings.enableSummary,
+      enableLocalizedName: settings.enableLocalizedName,
+      enableName: settings.enableName,
+      enablePublicationStatus: settings.enablePublicationStatus,
+      enableAgeRating: settings.enableAgeRating,
+      enableRelationships: settings.enableRelationships,
+      enablePeople: settings.enablePeople,
+      enableStartDate: settings.enableStartDate,
+      enableCoverImage: settings.enableCoverImage,
+
+      enableChapterTitle: settings.enableChapterTitle,
+      enableChapterSummary: settings.enableChapterSummary,
+      enableChapterReleaseDate: settings.enableChapterReleaseDate,
+      enableChapterPublisher: settings.enableChapterPublisher,
+      enableChapterCoverImage: settings.enableChapterCoverImage,
+
+      enableVolumeCoverImage: settings.enableVolumeCoverImage,
+
+      firstLastPeopleNaming: settings.firstLastPeopleNaming,
+
+      globalLanguageTitleSettings: {
+        name: settings.globalLanguageTitleSettings?.name || '',
+        localizedName: settings.globalLanguageTitleSettings?.localizedName || '',
+      },
+      libraryLanguageTitleOverrides: Object.entries(settings.libraryLanguageTitleOverrides || {})
+        .map(([libraryId, override]) => ({
+          libraryId: parseInt(libraryId, 10),
+          name: override.name || '',
+          localizedName: override.localizedName || '',
+        })),
+
+      personRoles: Object.fromEntries(
+        this.personRoles().map(role => [role, (settings.personRoles || this.personRoles()).includes(role)])
+      ),
+      overrides: Object.fromEntries(
+        this.allMetadataSettingFields.map(field => [field, (settings.overrides || []).includes(field)])
+      ),
+
+      mappings: toMetadataMappingsFormModel(settings),
+    };
+  }
+
+  packData(withFieldMappings: boolean = true): MetadataSettings {
+    const {mappings, ...model} = this.formModel();
 
     return {
       ...model,
-      ageRatingMappings: exp.ageRatingMappings,
-      fieldMappings: withFieldMappings ? exp.fieldMappings : [],
-      blacklist: exp.blacklist,
-      whitelist: exp.whitelist,
-      personRoles: Object.entries(this.settingsForm.get('personRoles')!.value)
-        .filter(([_, value]) => value)
-        .map(([key, _]) => this.personRoles()[parseInt(key.split('_')[1], 10)]),
-      overrides: Object.entries(this.settingsForm.get('overrides')!.value)
-        .filter(([_, value]) => value)
-        .map(([key, _]) => this.allMetadataSettingFields[parseInt(key.split('_')[1], 10)]),
-      libraryLanguageTitleOverrides: this.packLibraryLanguageOverrides(),
-      externalAgeRatingMappings: packAgeRatingMappings(this.settingsForm.get('externalAgeRatingMappings')?.value ?? []),
+      ...packMetadataMappings(mappings, withFieldMappings),
+      personRoles: this.packCheckedKeys(model.personRoles),
+      overrides: this.packCheckedKeys(model.overrides),
+      libraryLanguageTitleOverrides: this.packLibraryLanguageOverrides(this.formModel()),
     }
   }
 
-  private packLibraryLanguageOverrides(): Record<string, SeriesNameLanguage> {
-    return this.libraryLanguageOverrides.controls.reduce((acc: Record<string, SeriesNameLanguage>, control) => {
-      const {libraryId, name, localizedName} = control.value;
+  /**
+   * Record keys are stringified enum members, the API wants the numbers back
+   */
+  private packCheckedKeys(checked: Record<string, boolean>): Array<number> {
+    return Object.entries(checked)
+      .filter(([_, isChecked]) => isChecked)
+      .map(([key, _]) => parseInt(key, 10));
+  }
+
+  private packLibraryLanguageOverrides(model: FormModel): Record<string, SeriesNameLanguage> {
+    return model.libraryLanguageTitleOverrides.reduce((acc: Record<string, SeriesNameLanguage>, row) => {
+      const {libraryId, name, localizedName} = row;
       if (!libraryId) return acc;
       if (!name && !localizedName) return acc;
 
@@ -309,29 +380,37 @@ export class ManageMetadataSettingsComponent implements OnInit {
     this.modalService.open(RunMetadataMappingsModalComponent, DefaultModalOptions);
   }
 
-  addLibraryLanguageOverride(libraryId: number | null = null, override: SeriesNameLanguage | null = null) {
-    this.libraryLanguageOverrides.push(this.fb.group({
-      libraryId: [libraryId],
-      name: [override?.name || '', [languageCodeListValidator()]],
-      localizedName: [override?.localizedName || '', [languageCodeListValidator()]],
-    }));
-    this.cdRef.markForCheck();
+  addLibraryLanguageOverride() {
+    this.formGroup.libraryLanguageTitleOverrides().value.update(
+      rows => [...rows, {libraryId: null, name: '', localizedName: ''}]
+    );
   }
 
   removeLibraryLanguageOverride(index: number) {
-    this.libraryLanguageOverrides.removeAt(index);
-    this.cdRef.markForCheck();
+    this.formGroup.libraryLanguageTitleOverrides().value.update(rows => rows.filter((_, i) => i !== index));
   }
 
-  availableLibrariesFor(index: number): Array<Library> {
+  /**
+   * The libraries still selectable in a given row, so no two overrides can claim the same library.
+   */
+  libraryOptionsFor(index: number): Array<EnumOption<number>> {
     const claimed = new Set(
-      this.libraryLanguageOverrides.controls
+      this.formModel().libraryLanguageTitleOverrides
         .filter((_, i) => i !== index)
-        .map(c => c.value.libraryId)
-        .filter(id => id != null)
+        .map(row => row.libraryId)
+        .filter(id => id !== null)
     );
 
-    return this.libraries().filter(l => !claimed.has(l.id));
+    return this.libraries()
+      .filter(l => !claimed.has(l.id))
+      .map(l => ({value: l.id, title: l.name}));
+  }
+
+  /**
+   * The localized malformed-code message on a language priority field, or null when every code is well-formed.
+   */
+  malformedCodeMessage(field: FieldTree<string>): string | null {
+    return field().errors().find(e => e.kind === MalformedLanguageCodes)?.message ?? null;
   }
 
   resolvedLanguageNames(codes: string | null | undefined): Array<string> {

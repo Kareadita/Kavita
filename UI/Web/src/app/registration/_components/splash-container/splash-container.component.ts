@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
-import {AsyncPipe, NgStyle} from "@angular/common";
+import {NgStyle} from "@angular/common";
 import {NavService} from "../../../_services/nav.service";
 
 @Component({
@@ -8,8 +8,7 @@ import {NavService} from "../../../_services/nav.service";
     styleUrls: ['./splash-container.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
-        NgStyle,
-        AsyncPipe
+        NgStyle
     ]
 })
 export class SplashContainerComponent {

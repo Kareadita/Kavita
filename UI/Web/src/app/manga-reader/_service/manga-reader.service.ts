@@ -167,6 +167,22 @@ export class MangaReaderService {
   }
 
   /**
+   * The inverse of translateScalingOption. Note that ScalingOption.Automatic has no representation as
+   * a FITTING_OPTION, so the caller is responsible for preserving it when the user hasn't changed the
+   * fitting away from whatever Automatic resolved to.
+   */
+  translateFittingOption(option: FITTING_OPTION): ScalingOption {
+    switch (option) {
+      case FITTING_OPTION.HEIGHT:
+        return ScalingOption.FitToHeight;
+      case FITTING_OPTION.WIDTH:
+        return ScalingOption.FitToWidth;
+      default:
+        return ScalingOption.Original;
+    }
+  }
+
+  /**
    * If the page dimensions are all "webtoon-like", then reader mode will be converted for the user
    */
   shouldBeWebtoonMode() {

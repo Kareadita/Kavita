@@ -1,21 +1,15 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  OnInit, signal,
-  viewChild
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal, viewChild} from '@angular/core';
 import {SettingsService} from "../settings.service";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {
   ManageMetadataMappingsComponent,
-  MetadataMappingsExport
+  MetadataMappingsFormModel,
+  metadataMappingsSchema,
+  packMetadataMappings,
+  toMetadataMappingsFormModel
 } from "../manage-metadata-mappings/manage-metadata-mappings.component";
 import {MetadataSettings} from "../_models/metadata-settings";
 import {debounceTime, filter, switchMap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {map, tap} from "rxjs/operators";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {LicenseService} from "../../_services/license.service";
@@ -30,6 +24,25 @@ import {ModalService} from "../../_services/modal.service";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
 import {QueueNames, ServerService, TaskMethodNames} from "../../_services/server.service";
+import {apply, form, FormField} from "@angular/forms/signals";
+
+interface FormModel {
+  enableExtendedMetadataProcessing: boolean;
+  mappings: MetadataMappingsFormModel;
+}
+
+function emptyMappings(): MetadataMappingsFormModel {
+  return {
+    enableGenres: false,
+    enableTags: false,
+    filterAboveWeight: null,
+    blacklist: [],
+    whitelist: [],
+    ageRatingMappings: [],
+    externalAgeRatingMappings: [],
+    fieldMappings: [],
+  };
+}
 
 /**
  * Metadata settings for which a K+ license is not required
@@ -39,9 +52,9 @@ import {QueueNames, ServerService, TaskMethodNames} from "../../_services/server
   imports: [
     ManageMetadataMappingsComponent,
     TranslocoDirective,
-    ReactiveFormsModule,
     RouterLink,
     SettingSwitchComponent,
+    FormField,
   ],
   templateUrl: './manage-public-metadata-settings.component.html',
   styleUrl: './manage-public-metadata-settings.component.scss',
@@ -49,34 +62,45 @@ import {QueueNames, ServerService, TaskMethodNames} from "../../_services/server
 })
 export class ManagePublicMetadataSettingsComponent implements OnInit {
 
-  readonly manageMetadataMappingsComponent = viewChild.required(ManageMetadataMappingsComponent);
+  readonly manageMetadataMappingsComponent = viewChild(ManageMetadataMappingsComponent);
 
   private readonly settingService = inject(SettingsService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly licenseService = inject(LicenseService);
   private readonly modalService = inject(ModalService);
   private readonly messageHub = inject(MessageHubService);
   private readonly serverService = inject(ServerService);
 
-  settingsForm: FormGroup = new FormGroup({});
-  settings: MetadataSettings | undefined = undefined;
+  private readonly formModel = signal<FormModel>({
+    enableExtendedMetadataProcessing: false,
+    mappings: emptyMappings(),
+  });
+  protected readonly formGroup = form(this.formModel, p => {
+    apply(p.mappings, metadataMappingsSchema);
+  });
+
+  settings = signal<MetadataSettings | undefined>(undefined);
   isReRunInProgress = signal(true);
+
+  constructor() {
+    toObservable(this.formModel).pipe(
+      filter(() => this.settings() !== undefined),
+      debounceTime(300),
+      filter(() => this.formGroup().valid()),
+      map(() => this.packData()),
+      switchMap((data) => this.settingService.updateMetadataSettings(data)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe();
+  }
 
   ngOnInit(): void {
     this.settingService.getMetadataSettings().subscribe(settings => {
-      this.settings = settings;
-
-      this.settingsForm.addControl('enableExtendedMetadataProcessing', new FormControl(this.settings.enableExtendedMetadataProcessing, []));
-      this.cdRef.markForCheck();
+      this.formModel.set({
+        enableExtendedMetadataProcessing: settings.enableExtendedMetadataProcessing,
+        mappings: toMetadataMappingsFormModel(settings),
+      });
+      this.settings.set(settings);
     });
-
-    this.settingsForm.valueChanges.pipe(
-      debounceTime(300),
-      takeUntilDestroyed(this.destroyRef),
-      map(_ => this.packData()),
-      switchMap((data) => this.settingService.updateMetadataSettings(data)),
-    ).subscribe();
 
     this.serverService.isTaskRunning(TaskMethodNames.RunMetadataMappings, QueueNames.Scan).pipe(
       tap(b => this.isReRunInProgress.set(b))
@@ -92,19 +116,17 @@ export class ManagePublicMetadataSettingsComponent implements OnInit {
     ).subscribe();
   }
 
-  packData() {
-    const model = Object.assign({}, this.settings);
-    const formValue = this.settingsForm.value;
+  /**
+   * Writes the fields this page edits, everything else rides along from the loaded settings.
+   */
+  packData(): MetadataSettings {
+    const {enableExtendedMetadataProcessing, mappings} = this.formModel();
 
-    const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent().packData()
-
-    model.enableExtendedMetadataProcessing = formValue.enableExtendedMetadataProcessing;
-    model.ageRatingMappings = exp.ageRatingMappings;
-    model.fieldMappings = exp.fieldMappings;
-    model.whitelist = exp.whitelist;
-    model.blacklist = exp.blacklist;
-
-    return model;
+    return {
+      ...this.settings()!,
+      enableExtendedMetadataProcessing,
+      ...packMetadataMappings(mappings),
+    };
   }
 
   reRunMappings() {

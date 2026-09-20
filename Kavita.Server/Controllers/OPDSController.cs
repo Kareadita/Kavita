@@ -731,7 +731,7 @@ public class OpdsController(
                     SeriesId = seriesId,
                     VolumeId = volumeId,
                     LibraryId =libraryId
-                }, userId);
+                }, userId, ct: HttpContext.RequestAborted);
             }
 
             return CachedContent(content, MimeTypeMap.GetMimeType(format));

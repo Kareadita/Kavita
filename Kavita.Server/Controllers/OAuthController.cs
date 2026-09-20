@@ -37,7 +37,8 @@ public class OAuthController(
     [HttpGet("start")]
     public async Task<IActionResult> StartFlow([FromQuery] OAuthUpstream upstream)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.AuthKeys);
+        var ct = HttpContext.RequestAborted;
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.AuthKeys, ct);
         if (user == null) return Unauthorized();
 
         if (upstream == OAuthUpstream.Discord && !UserContext.HasRole(PolicyConstants.AdminRole))
@@ -47,7 +48,7 @@ public class OAuthController(
 
         var apiKey = user.GetOpdsAuthKey();
 
-        var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         var instanceUrl = GetInstanceUrl(HttpContext.Request, serverSettings);
 
         var jwt = await kavitaPlusApiService.StartOAuthFlow(upstream, instanceUrl, apiKey, HttpContext.RequestAborted);

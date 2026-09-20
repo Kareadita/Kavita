@@ -8,6 +8,8 @@ import {KeyCode} from "../_services/key-bind.service";
 })
 export class KeyBindPipe implements PipeTransform {
 
+  private readonly isMac = navigator.platform.includes('Mac');
+
   private readonly customMappings: Partial<Record<KeyCode, string>> = {
     [KeyCode.ArrowDown]: '↓',
     [KeyCode.ArrowUp]: '↑',
@@ -23,15 +25,13 @@ export class KeyBindPipe implements PipeTransform {
       return keyBind.controllerSequence.join('+');
     }
 
-    let keys: string[] = [];
+    const keys: string[] = [];
 
     if (keyBind.control) keys.push('Ctrl');
     if (keyBind.shift) keys.push('Shift');
-    if (keyBind.alt) keys.push('Alt');
+    if (keyBind.alt) keys.push(this.isMac ? '⌥' : 'Alt');
 
-    // TODO: Use new device code after progress merge?
-    const isMac = navigator.platform.includes('Mac');
-    if (keyBind.meta) keys.push(isMac ? '⌘' : 'Win');
+    if (keyBind.meta) keys.push(this.isMac ? '⌘' : 'Win');
 
     keys.push(this.customMappings[keyBind.key] ?? keyBind.key.toUpperCase())
     const joinKey = withSpacing ? ' + ' : '+';

@@ -8,9 +8,9 @@
       }
     </ng-template>
     <ng-template #edit>
-      <select class="form-select" [ngModel]="selectedFrequency()" (ngModelChange)="onFrequencyChange($event)">
+      <select class="form-select" (change)="onFrequencyChange($event)">
         @for (freq of frequencies(); track freq) {
-          <option [value]="freq">{{freq | cronFrequency}}</option>
+          <option [value]="freq" [selected]="freq === selectedFrequency()">{{freq | cronFrequency}}</option>
         }
       </select>
 
@@ -18,8 +18,8 @@
         <div class="mt-3">
           <label class="form-label">{{t('custom-label')}}</label>
           <input class="form-control" type="text"
-                 [ngModel]="customCron()"
-                 (ngModelChange)="onCustomCronChange($event)"
+                 [value]="customCron()"
+                 (input)="onCustomCronChange($event)"
                  [class.is-invalid]="cronInvalid()">
 
           @if (cronInvalid()) {

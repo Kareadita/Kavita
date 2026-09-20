@@ -1,5 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ChangeDetectionStrategy, Component, inject, OnDestroy, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from '@openng/ngx-toastr';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
@@ -11,55 +10,63 @@ import {ThemeService} from "../../../_services/theme.service";
 import {NavService} from "../../../_services/nav.service";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {email, form, FormField, maxLength, minLength, readonly, required} from "@angular/forms/signals";
+import {catchError, EMPTY, tap} from "rxjs";
 
 @Component({
     selector: 'app-confirm-email',
     templateUrl: './confirm-email.component.html',
     styleUrls: ['./confirm-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent]
+  imports: [SplashContainerComponent, NgbTooltip, NgTemplateOutlet, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent, FormField]
 })
 export class ConfirmEmailComponent implements OnDestroy {
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private accountService = inject(AccountService);
   private toastr = inject(ToastrService);
   private themeService = inject(ThemeService);
   private navService = inject(NavService);
-  private readonly cdRef = inject(ChangeDetectorRef);
 
-  /**
-   * Email token used for validating
-   */
-  token: string = '';
 
-  registerForm: FormGroup = new FormGroup({
-    email: new FormControl('', [Validators.required]),
-    username: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required, Validators.maxLength(256), Validators.minLength(6), Validators.pattern("^.{6,256}$")]),
+  formModel = signal({
+    token: '',
+    email: '',
+    username: '',
+    password: ''
+  });
+  formGroup = form(this.formModel, path => {
+    required(path);
+    email(path.email);
+    minLength(path.password, 6);
+    maxLength(path.password, 256);
+    readonly(path.email);
   });
 
   /**
    * Validation errors from API
    */
-  errors: Array<string> = [];
+  errors = signal<string[]>([]);
 
 
   constructor() {
       this.navService.hideSideNav();
       this.themeService.setTheme(this.themeService.defaultTheme);
       const token = this.route.snapshot.queryParamMap.get('token');
-      const email = this.route.snapshot.queryParamMap.get('email');
-      this.cdRef.markForCheck();
-      if (this.isNullOrEmpty(token) || this.isNullOrEmpty(email)) {
+      const emailQuery = this.route.snapshot.queryParamMap.get('email');
+      if (this.isNullOrEmpty(token) || this.isNullOrEmpty(emailQuery)) {
         // This is not a valid url, redirect to login
         this.toastr.error(translate('errors.invalid-confirmation-url'));
         this.router.navigateByUrl('login');
         return;
       }
-      this.token = token!;
-      this.registerForm.get('email')?.setValue(email || '');
-      this.cdRef.markForCheck();
+      this.formModel.set({
+        token: token!,
+        email: emailQuery || '',
+        password: '',
+        username: '',
+      });
   }
 
   ngOnDestroy() {
@@ -73,16 +80,17 @@ export class ConfirmEmailComponent implements OnDestroy {
   }
 
   submit() {
-    const model = this.registerForm.getRawValue();
-    model.token = this.token;
-    this.accountService.confirmEmail(model).subscribe((user) => {
-      this.toastr.success(translate('toasts.account-registration-complete'));
-      this.router.navigateByUrl('login');
-    }, err => {
-      console.error('Error from Confirming Email: ', err);
-      this.errors = err;
-      this.cdRef.markForCheck();
-    });
+    this.accountService.confirmEmail(this.formModel()).pipe(
+      catchError(err => {
+        console.error('Error from Confirming Email: ', err);
+        this.errors.set([...err]);
+        return EMPTY;
+      }),
+      tap(() => {
+        this.toastr.success(translate('toasts.account-registration-complete'));
+        this.router.navigateByUrl('login');
+      })
+    ).subscribe();
   }
 
 }

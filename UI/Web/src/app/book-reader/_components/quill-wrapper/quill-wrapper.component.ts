@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, Component, computed, input, OnInit, signal, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, signal, output} from '@angular/core';
 import {ContentChange, QuillEditorComponent, QuillFormat} from "ngx-quill";
 import type QuillType from 'quill'
-import {FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FieldTree, FormField} from "@angular/forms/signals";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 
@@ -96,7 +96,7 @@ const defaultToolbarItems: ToolbarItem[][] = [
   selector: 'app-quill-wrapper',
   imports: [
     QuillEditorComponent,
-    ReactiveFormsModule,
+    FormField,
     NgbTooltip,
     TranslocoDirective,
   ],
@@ -118,8 +118,10 @@ export class QuillWrapperComponent {
    */
   theme = input(QuillTheme.Snow);
 
-  formGroup = input.required<FormGroup>();
-  controlName = input.required<string>();
+  /**
+   * The field holding the editor content
+   */
+  field = input.required<FieldTree<object>>();
 
   /**
    * Deligation of the quill onContentChange event

@@ -14,6 +14,8 @@ import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {generateUniqueId} from "../../../_helpers/random";
 import {wireSettingControl} from "../../../_helpers/setting-item";
 import {NgTemplateOutlet} from "@angular/common";
+import {AnyField} from "../../../shared/_models/field-view";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 /**
  * Provides the setting-item styling and accessibility (id generation) for switches
@@ -23,7 +25,8 @@ import {NgTemplateOutlet} from "@angular/common";
   imports: [
     TranslocoDirective,
     SafeHtmlPipe,
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    ValidationErrorsComponent
   ],
     templateUrl: './setting-switch.component.html',
     styleUrl: './setting-switch.component.scss',
@@ -33,6 +36,10 @@ export class SettingSwitchComponent {
 
   title = input.required<string>();
   subtitle = input<string | undefined>();
+  /** The field backing the projected switch, so the label and validation messaging can be wired to it */
+  control = input<AnyField | null>(null);
+  /** Custom validation messages */
+  validations = input<Record<string, string>>({});
   switchRef = contentChild(TemplateRef);
 
   switchWrapper = viewChild<ElementRef<HTMLElement>>('switchWrapper');
@@ -48,6 +55,7 @@ export class SettingSwitchComponent {
   protected readonly hasControl = wireSettingControl({
     scope: this.wrapperScope,
     elementId: this.elementId,
+    describeValidation: computed(() => this.control() !== null),
     label: this.title,
   }).hasControl;
 }

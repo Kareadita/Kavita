@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input} from '@angular/core';
 import {NgClass} from "@angular/common";
 
 
@@ -22,7 +22,7 @@ export interface TimelineStep {
 export class StepTrackerComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
 
-  @Input() steps: Array<TimelineStep> = [];
-  @Input() currentStep: number = 0;
+  steps = input<TimelineStep[]>([]);
+  currentStep = input(0);
 
 }

@@ -8,7 +8,7 @@ import {
   effect,
   ElementRef,
   EventEmitter,
-  inject,
+  inject, Injector,
   OnDestroy,
   OnInit,
   Renderer2,
@@ -167,6 +167,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly keyBindService = inject(KeyBindService);
   protected readonly breakpointService = inject(BreakpointService);
   private readonly entityTitleService = inject(EntityTitleService);
+  private readonly injector = inject(Injector);
 
   libraryId!: number;
   seriesId!: number;
@@ -360,9 +361,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   firstLoad: boolean = true;
 
   /**
-   * Injects information to help debug issues
+   * Injects information to help debug issues. Change the boolean to true to enable
+   * NOTE: Enabling this causes ExpressionChangedAfterItHasBeenCheckedError errors on paging (scroll)
    */
-  debugMode = signal<boolean>(!environment.production && true);
+  debugMode = signal<boolean>(!environment.production && false);
 
   /**
    * Will be set to true if this.scroll(...) is called but the actual scroll is still delayed
@@ -685,12 +687,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           case KeyBindTarget.PageRight:
             this.movePage(this.readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
             break;
-          case KeyBindTarget.Escape:
+          case KeyBindTarget.Escape: {
             const isHighlighting = window.getSelection()?.toString() != '';
             if (isHighlighting && this.isLineOverlayOpen()) return;
 
             this.closeReader();
             break;
+          }
           case KeyBindTarget.GoTo:
             await this.goToPage();
             break;
@@ -962,11 +965,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       await this.readerSettingsService.initialize(this.libraryId, this.seriesId, this.readingProfile);
 
-      // Ensure any changes in the reader settings are applied to the reader
-      this.readerSettingsService.settingUpdates$.pipe(
-        takeUntilDestroyed(this.destroyRef),
-        tap((update) => this.handleReaderSettingsUpdate(update))
-      ).subscribe();
+      this.setupReaderSettingEffects(this.injector);
 
       forkJoin({
         chapter: this.seriesService.getChapter(this.chapterId),
@@ -1309,7 +1308,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * We can't use a wrapper due to potential for styling issues.
    */
   injectImageBookmarkIndicators(forceRefresh = false) {
-    if (this.readingProfile.bookReaderDisableBookmarkIcon) return;
+    if (this.readerSettingsService.getSettingsForm().bookReaderDisableBookmarkIcon().value()) return;
 
     const imgs = Array.from(this.readingSectionElemRef().nativeElement.querySelectorAll('img') ?? []);
 
@@ -1422,8 +1421,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         maxHeight = `${height}px`;
         maxWidth = `${this.getVerticalPageWidth()}px`;
         break
-
-      case BookPageLayoutMode.Column2:
+      case BookPageLayoutMode.Column2: {
         maxWidth = `${this.getVerticalPageWidth()}px`;
         if (isVerticalWritingStyle && !this.isSingleImagePage)  {
           maxHeight = `${height / 2}px`;
@@ -1432,7 +1430,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         maxWidth = `${(this.getVerticalPageWidth() / 2) - (COLUMN_GAP / 2)}px`;
         break
+      }
     }
+
     this.document.documentElement.style.setProperty('--book-reader-content-max-height', maxHeight);
     this.document.documentElement.style.setProperty('--book-reader-content-max-width', maxWidth);
   }
@@ -2091,36 +2091,40 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  handleReaderSettingsUpdate(res: ReaderSettingUpdate) {
-    switch (res.setting) {
-      case "pageStyle":
-        this.applyPageStyles(res.object as PageStyle);
-        break;
-      case "clickToPaginate":
-        this.showPaginationOverlay(res.object as boolean);
-        break;
-      case "fullscreen":
-        this.toggleFullscreen();
-        break;
-      case "writingStyle":
-        this.applyWritingStyle();
-        break;
-      case "layoutMode":
-        this.applyLayoutMode(res.object as BookPageLayoutMode, true);
-        break;
-      case "readingDirection":
-        // No extra functionality needs to be done
-        break;
-      case "immersiveMode":
-        this.applyImmersiveMode(res.object as boolean);
-        break;
-      case 'theme':
-        this.applyColorTheme(res.object as BookTheme);
-        break;
-      case "bookReaderDisableBookmarkIcon":
-        this.applyBookmarkIcons(!(res.object as boolean));
-        break;
-    }
+  private hasSetupReaderEffects = false;
+  setupReaderSettingEffects(injector: Injector) {
+    if (this.hasSetupReaderEffects) return;
+
+    this.hasSetupReaderEffects = true;
+
+    effect(() => {
+      this.applyPageStyles(this.readerSettingsService.pageStyles());
+    }, { injector: injector });
+    effect(() => {
+      this.showPaginationOverlay(this.readerSettingsService.clickToPaginate());
+    }, { injector: injector });
+    effect(() => {
+      this.readerService.setFullscreen(this.readerSettingsService.isFullscreen());
+    }, { injector: injector });
+    effect(() => {
+      this.readerSettingsService.writingStyle();
+      this.applyWritingStyle();
+    }, { injector: injector });
+    effect(() => {
+      this.applyLayoutMode(this.readerSettingsService.layoutMode(), true);
+    }, { injector: injector });
+    effect(() => {
+      this.applyImmersiveMode(this.readerSettingsService.immersiveMode());
+    }, { injector: injector });
+    effect(() => {
+      const bookTheme = this.readerSettingsService.activeTheme();
+      if (bookTheme) {
+        this.applyColorTheme(bookTheme);
+      }
+    }, { injector: injector });
+    effect(() => {
+      this.applyBookmarkIcons(!this.readerSettingsService.getSettingsForm().bookReaderDisableBookmarkIcon().value());
+    }, { injector: injector });
   }
 
   toggleDrawer() {
@@ -2478,7 +2482,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const visibleBoundingBox = this.bookContentElemRef().nativeElement.getBoundingClientRect();
 
     let bookContentPadding = 20;
-    let bookPadding = getComputedStyle(this.bookContentElemRef()?.nativeElement!).paddingTop;
+    const bookPadding = getComputedStyle(this.bookContentElemRef()?.nativeElement!).paddingTop;
     if (bookPadding) {
       bookContentPadding = parseInt(bookPadding.toString().replace('px', ''), 10);
     }

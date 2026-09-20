@@ -1,25 +1,21 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
-  DestroyRef,
+  effect,
   inject,
-  Injector,
   input,
-  Input,
-  OnInit,
+  linkedSignal,
   output,
-  Signal
+  untracked
 } from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
-import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
-import {AsyncPipe, NgStyle} from "@angular/common";
+import {NgStyle} from "@angular/common";
 import {FilterComparisonPipe} from "../../../_pipes/filter-comparison.pipe";
-import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
-import {Select2, Select2Option} from "ng-select2-component";
-import {NgbDate, NgbDateParserFormatter, NgbInputDatepicker, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {rxResource} from "@angular/core/rxjs-interop";
+import {Select2, Select2Option, Select2UpdateValue} from "ng-select2-component";
+import {Observable} from "rxjs";
+import {NgbDateParserFormatter, NgbDateStruct, NgbInputDatepicker, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ValidFilterEntity} from "../../filter-settings";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
@@ -28,16 +24,9 @@ import {RgbaColor} from "../../../book-reader/_models/annotations/highlight-slot
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {MetadataService} from "../../../_services/metadata.service";
-
-interface FieldConfig {
-  type: PredicateType;
-  baseComparisons: FilterComparison[];
-  defaultValue: any;
-  allowsDateComparisons?: boolean;
-  allowsNumberComparisons?: boolean;
-  excludesMustContains?: boolean;
-  allowsIsEmpty?: boolean;
-}
+import {form, FormField, FormRoot, min} from "@angular/forms/signals";
+import {SettingSelectComponent} from "../../../settings/_components/setting-enum-select/setting-select.component";
+import {GenericFilterFieldPipe} from "../../../_pipes/generic-filter-field.pipe";
 
 enum PredicateType {
   Text = 1,
@@ -98,193 +87,247 @@ const BooleanComparisons = [
   FilterComparison.Equal
 ]
 
+interface FilterValues {
+  textValue: string;
+  numberValue: number | null;
+  booleanValue: boolean;
+  /** NgbDateStruct, or the raw string while typing an unparsable date */
+  dateValue: NgbDateStruct | string | null;
+  /** Ids, or the language code for Languages. Multi-select holds an array */
+  dropdownValue: number | string | number[] | null;
+}
+
+/**
+ * Each predicate type gets its own value so native controls bind to a correctly typed field. Only the one matching the
+ * selected field's PredicateType is read.
+ */
+interface FormModel extends FilterValues {
+  comparison: FilterComparison;
+  input: number;
+}
+
+/**
+ * Value a control resets to when the user picks a different field
+ */
+const defaultValues: FilterValues = {
+  textValue: '',
+  numberValue: 0,
+  booleanValue: false,
+  dateValue: null,
+  dropdownValue: 0
+};
+
+interface FieldConfig {
+  comparisons: FilterComparison[];
+  predicateType: PredicateType;
+}
+
+const defaultFieldConfig: FieldConfig = {
+  comparisons: [FilterComparison.Equal],
+  predicateType: PredicateType.Text
+};
+
+const MultiSelectComparisons = [FilterComparison.Contains, FilterComparison.NotContains, FilterComparison.MustContains];
+
 @Component({
   selector: 'app-metadata-row-filter',
   templateUrl: './metadata-filter-row.component.html',
   styleUrls: ['./metadata-filter-row.component.scss'],
   imports: [
-    ReactiveFormsModule,
-    AsyncPipe,
     FilterComparisonPipe,
     NgbTooltip,
     TranslocoDirective,
     NgbInputDatepicker,
     Select2,
-    NgStyle
+    NgStyle,
+    FormRoot,
+    FormField,
+    SettingSelectComponent,
+    GenericFilterFieldPipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataFilterRowComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
+export class MetadataFilterRowComponent<TFilter extends number = number, TSort extends number = number> {
 
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly dateParser = inject(NgbDateParserFormatter);
   private readonly metadataService = inject(MetadataService);
   private readonly filterUtilitiesService = inject(FilterUtilitiesService);
-  private readonly injector = inject(Injector);
 
   /**
-   * Slightly misleading as this is the initial state and will be updated on the filterStatement event emitter
+   * Initial state of the row. Changes are sent back up through filterStatement, which the parent applies in place
    */
-  @Input() preset!: FilterStatement<TFilter>;
-  entityType = input.required<ValidFilterEntity>();
+  readonly preset = input.required<FilterStatement<TFilter>>();
+  readonly entityType = input.required<ValidFilterEntity>();
   readonly filterStatement = output<FilterStatement<TFilter>>();
 
+  private seededModel: FormModel | undefined;
+  private readonly formModel = linkedSignal<FilterStatement<TFilter>, FormModel>({
+    source: this.preset,
+    computation: (preset) => {
+      this.seededModel = this.toFormModel(preset);
+      return this.seededModel;
+    }
+  });
+  protected readonly formGroup = form(this.formModel, p => {
+    min(p.numberValue, 0);
+  });
 
-  formGroup!: FormGroup;
-  validComparisons$: BehaviorSubject<FilterComparison[]> = new BehaviorSubject([FilterComparison.Equal] as FilterComparison[]);
-  predicateType$: BehaviorSubject<PredicateType> = new BehaviorSubject(PredicateType.Text as PredicateType);
-  dropdownOptions$ = of<Select2Option[]>([]);
+  private readonly selectedField = computed(() => this.formModel().input as TFilter);
+  private readonly selectedComparison = computed(() => this.formModel().comparison);
 
-  loaded: boolean = false;
+  /**
+   * Comparisons and control type for the selected field. An unknown field keeps the last config
+   */
+  private readonly fieldConfig = linkedSignal<TFilter, FieldConfig>({
+    source: this.selectedField,
+    computation: (field, previous) => this.getFieldConfig(field) ?? previous?.value ?? defaultFieldConfig
+  });
+  protected readonly validComparisons = computed(() => [...new Set(this.fieldConfig().comparisons)]);
+  protected readonly predicateType = computed(() => this.fieldConfig().predicateType);
 
+  protected readonly isEmptySelected = computed(() => {
+    const comparison = this.selectedComparison();
+    return comparison === FilterComparison.IsEmpty || comparison === FilterComparison.IsNotEmpty;
+  });
+  protected readonly isMultiSelectDropdownAllowed = computed(() => MultiSelectComparisons.includes(this.selectedComparison()));
+  protected readonly uiLabel = computed(() => unitLabels.get(this.entityType())?.get(this.selectedField()) ?? null);
+  protected readonly filterFieldOptions = computed(() => this.filterUtilitiesService.getFilterFields<TFilter>(this.entityType()));
 
-  private comparisonSignal!: Signal<FilterComparison>;
-  private inputSignal!: Signal<TFilter>;
+  // Dropdown dynamic option selection
+  private readonly dropdownOptionsResource = rxResource({
+    params: () => {
+      const field = this.selectedField();
+      return this.filterUtilitiesService.getDropdownFields<TFilter>(this.entityType()).includes(field) ? field : undefined;
+    },
+    stream: ({params: field}): Observable<Select2Option[]> => this.metadataService.getOptionsForFilterField<TFilter>(field, this.entityType())
+  });
+  protected readonly dropdownOptions = computed(() => {
+    // Undefined until loaded, select2 only resolves the preset value against the data it's created with
+    return this.dropdownOptionsResource.hasValue() ? this.dropdownOptionsResource.value() : undefined;
+  });
 
-  isEmptySelected: Signal<boolean> = computed(() => false);
-  uiLabel: Signal<FilterRowUi | null> = computed(() => null);
-  isMultiSelectDropdownAllowed: Signal<boolean> = computed(() => false);
+  constructor() {
+    // When the user picks a different field, reset the value and comparison to the new field's defaults
+    effect(() => {
+      const config = this.fieldConfig();
+      untracked(() => {
+        if (this.isSeededModel(this.formModel())) return;
 
-  filterFieldOptions: Signal<{title: string, value: TFilter}[]> = computed(() => []);
-
-  ngOnInit() {
-
-    this.formGroup = new FormGroup({
-      'comparison': new FormControl<FilterComparison>(FilterComparison.Equal, []),
-      'filterValue': new FormControl<string | number>('', []),
-      'input': new FormControl<TFilter>(this.filterUtilitiesService.getDefaultFilterField<TFilter>(this.entityType()), [])
+        this.formModel.update(model => ({
+          ...model,
+          ...defaultValues,
+          comparison: config.comparisons[0]
+        }));
+      });
     });
 
-    this.comparisonSignal = toSignal<FilterComparison>(
-      this.formGroup.get('comparison')!.valueChanges.pipe(
-        startWith(this.formGroup.get('comparison')!.value),
-        map(d => parseInt(d + '', 10) as FilterComparison)
-      )
-      , {requireSync: true, injector: this.injector});
-    this.inputSignal = toSignal<TFilter>(
-      this.formGroup.get('input')!.valueChanges.pipe(
-        startWith(this.formGroup.get('input')!.value),
-        map(d => parseInt(d + '', 10) as TFilter)
-      )
-      , {requireSync: true, injector: this.injector});
+    effect(() => {
+      const model = this.formModel();
+      untracked(() => {
+        if (this.isSeededModel(model)) return;
 
-    this.isEmptySelected = computed(() => this.comparisonSignal() === FilterComparison.IsEmpty || this.comparisonSignal() === FilterComparison.IsNotEmpty);
-    this.uiLabel = computed(() => unitLabels.get(this.entityType())?.get(this.inputSignal()) ?? null);
-
-    this.isMultiSelectDropdownAllowed = computed(() => {
-      return this.comparisonSignal() === FilterComparison.Contains || this.comparisonSignal() === FilterComparison.NotContains || this.comparisonSignal() === FilterComparison.MustContains;
+        this.propagateFilterUpdate(model);
+      });
     });
-
-    this.filterFieldOptions = computed(() => {
-      return this.filterUtilitiesService.getFilterFields(this.entityType());
-    });
-
-    this.formGroup.get('input')?.valueChanges.pipe(
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef),
-      tap((val: string) => this.handleFieldChange(val)),
-    ).subscribe();
-    this.populateFromPreset();
-
-    this.formGroup.get('filterValue')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
-
-    // Dropdown dynamic option selection
-    this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
-      startWith(this.preset.value),
-      distinctUntilChanged(),
-      filter(() => {
-        return this.filterUtilitiesService.getDropdownFields<TFilter>(this.entityType()).includes(this.inputSignal());
-      }),
-      switchMap((_) => this.getDropdownObservable()),
-      takeUntilDestroyed(this.destroyRef)
-    );
-
-
-
-    this.formGroup!.valueChanges.pipe(
-      distinctUntilChanged(),
-      tap(_ => this.propagateFilterUpdate()),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
-
-    this.loaded = true;
-    this.cdRef.markForCheck();
   }
 
-  propagateFilterUpdate() {
-    const stmt = {
-      comparison: parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison,
-      field: parseInt(this.formGroup.get('input')?.value, 10) as TFilter,
-      value: this.formGroup.get('filterValue')?.value!
-    };
+  /**
+   * True when the model is untouched since it was seeded from the preset. Field writes always produce a new object.
+   * Keeps a seed from resetting the preset's value, or echoing it back to the parent.
+   */
+  private isSeededModel(model: FormModel) {
+    return model === this.seededModel;
+  }
 
-    const dateFields = this.filterUtilitiesService.getDateFields(this.entityType());
+  /**
+   * select2 isn't bound through [formField]: its CVA reports undefined whenever the value has no matching option
+   * (options still loading, or the 0 default after a field change), and an undefined value orphans a signal form field.
+   */
+  protected updateDropdownValue(value: Select2UpdateValue) {
+    const next = (value ?? null) as FilterValues['dropdownValue'];
+    const current = this.formModel().dropdownValue;
+
+    // select2 echoes a preselected multi-select back through update, don't treat that as a change
+    const isSame = Array.isArray(next) && Array.isArray(current)
+      ? next.length === current.length && next.every((v, i) => v === current[i])
+      : next === current;
+    if (isSame) return;
+
+    this.formModel.update(model => ({...model, dropdownValue: next}));
+  }
+
+  private propagateFilterUpdate(model: FormModel) {
+    const field = model.input as TFilter;
+    const value = this.serializeValue(model);
+
+    // A multi-select is sent even when emptied, so the statement doesn't keep the old selection
+    const isMultiSelect = this.fieldConfig().predicateType === PredicateType.Dropdown && Array.isArray(model.dropdownValue);
+
     const booleanFields = this.filterUtilitiesService.getBooleanFields(this.entityType());
-    if (typeof stmt.value === 'object' && dateFields.includes(stmt.field)) {
-      stmt.value = this.dateParser.format(stmt.value);
+    if (model.comparison !== FilterComparison.IsEmpty) {
+      if (!value && !isMultiSelect && (![SeriesFilterField.SeriesName, SeriesFilterField.Summary].includes(field) && !booleanFields.includes(field))) return;
     }
 
-    // Some ids can get through and be numbers, convert them to strings for the backend
-    if (typeof stmt.value === 'number' && !Number.isNaN(stmt.value)) {
-      stmt.value = stmt.value + '';
-    }
-
-    if (typeof stmt.value === 'boolean') {
-      stmt.value = stmt.value + '';
-    }
-
-    if (stmt.comparison !== FilterComparison.IsEmpty) {
-      if (!stmt.value && (![SeriesFilterField.SeriesName, SeriesFilterField.Summary].includes(stmt.field) && !booleanFields.includes(stmt.field))) return;
-    }
-
-    this.filterStatement.emit(stmt);
+    this.filterStatement.emit({comparison: model.comparison, field, value});
   }
 
-  populateFromPreset() {
-    const val = this.preset.value === "undefined" || !this.preset.value ? '' : this.preset.value;
-    this.formGroup.get('comparison')?.patchValue(this.preset.comparison);
-    this.formGroup.get('input')?.patchValue(this.preset.field);
+  /**
+   * Reads the value for the selected field's predicate type, as the string the backend expects. Empty values become ''
+   */
+  private serializeValue(model: FormModel): string {
+    switch (this.fieldConfig().predicateType) {
+      case PredicateType.Text:
+        return model.textValue;
+      case PredicateType.Number:
+        return this.serializeNumber(model.numberValue);
+      case PredicateType.Boolean:
+        return model.booleanValue + '';
+      case PredicateType.Date:
+        return typeof model.dateValue === 'string' ? model.dateValue : this.dateParser.format(model.dateValue);
+      case PredicateType.Dropdown: {
+        const value = model.dropdownValue;
+        if (Array.isArray(value)) return value.join(',');
+        return typeof value === 'string' ? value : this.serializeNumber(value);
+      }
+    }
+  }
+
+  private serializeNumber(value: number | null) {
+    return value === null || Number.isNaN(value) ? '' : value + '';
+  }
+
+  private toFormModel(preset: FilterStatement<TFilter>): FormModel {
+    const val = preset.value === "undefined" || !preset.value ? '' : preset.value;
+    const model: FormModel = {...defaultValues, comparison: preset.comparison, input: preset.field};
 
     const dropdownFields = this.filterUtilitiesService.getDropdownFields<TFilter>(this.entityType());
     const stringFields = this.filterUtilitiesService.getStringFields<TFilter>(this.entityType());
     const dateFields = this.filterUtilitiesService.getDateFields(this.entityType());
     const booleanFields = this.filterUtilitiesService.getBooleanFields(this.entityType());
 
-    if (stringFields.includes(this.preset.field)) {
-      this.formGroup.get('filterValue')?.patchValue(val);
-    } else if (booleanFields.includes(this.preset.field)) {
-      // Must be an empty string for checkbox to see it as false
-      this.formGroup.get('filterValue')?.patchValue(val === 'true' ? val : '');
-    } else if (dateFields.includes(this.preset.field)) {
-      this.formGroup.get('filterValue')?.patchValue(this.dateParser.parse(val));
-    }
-    else if (dropdownFields.includes(this.preset.field)) {
-      if (this.isMultiSelectDropdownAllowed() || val.includes(',')) {
-        this.formGroup.get('filterValue')?.patchValue(val.split(',').map(d => parseInt(d, 10)));
+    if (stringFields.includes(preset.field)) {
+      model.textValue = val;
+    } else if (booleanFields.includes(preset.field)) {
+      model.booleanValue = val === 'true';
+    } else if (dateFields.includes(preset.field)) {
+      model.dateValue = this.dateParser.parse(val);
+    } else if (dropdownFields.includes(preset.field)) {
+      if (MultiSelectComparisons.includes(preset.comparison) || val.includes(',')) {
+        model.dropdownValue = val.split(',').map(d => parseInt(d, 10));
+      } else if (preset.field === SeriesFilterField.Languages) {
+        model.dropdownValue = val;
       } else {
-        if (this.preset.field === SeriesFilterField.Languages) {
-          this.formGroup.get('filterValue')?.patchValue(val);
-        } else {
-          this.formGroup.get('filterValue')?.patchValue(parseInt(val, 10));
-        }
+        model.dropdownValue = parseInt(val, 10);
       }
     } else {
-      this.formGroup.get('filterValue')?.patchValue(parseInt(val, 10));
+      const num = parseInt(val, 10);
+      model.numberValue = Number.isNaN(num) ? null : num;
     }
 
-
-    this.cdRef.markForCheck();
+    return model;
   }
 
-  getDropdownObservable(): Observable<Select2Option[]> {
-      const filterField = this.inputSignal();
-      return this.metadataService.getOptionsForFilterField<TFilter>(filterField, this.entityType());
-  }
-
-  handleFieldChange(val: string) {
-    const inputVal = parseInt(val, 10) as TFilter;
-
+  private getFieldConfig(inputVal: TFilter): FieldConfig | null {
     const stringFields = this.filterUtilitiesService.getStringFields<TFilter>(this.entityType());
     const dropdownFields = this.filterUtilitiesService.getDropdownFields<TFilter>(this.entityType());
     const numberFields = this.filterUtilitiesService.getNumberFields<TFilter>(this.entityType());
@@ -299,27 +342,22 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
 
     let baseComparisons: FilterComparison[] = [];
     let predicateType: PredicateType;
-    let defaultValue: string | number | boolean;
 
     if (stringFields.includes(inputVal)) {
       baseComparisons = [...StringComparisons];
       predicateType = PredicateType.Text;
-      defaultValue = '';
     } else if (numberFields.includes(inputVal)) {
       baseComparisons = [...NumberComparisons];
       if (numberFieldsThatIncludeDateComparisons.includes(inputVal)) {
         baseComparisons.push(...DateComparisons);
       }
       predicateType = PredicateType.Number;
-      defaultValue = 0;
     } else if (dateFields.includes(inputVal)) {
       baseComparisons = [...DateComparisons];
       predicateType = PredicateType.Date;
-      defaultValue = false;
     } else if (booleanFields.includes(inputVal)) {
       baseComparisons = [...BooleanComparisons];
       predicateType = PredicateType.Boolean;
-      defaultValue = false;
     } else if (dropdownFields.includes(inputVal)) {
       baseComparisons = [...DropdownComparisons];
       if (dropdownFieldsThatIncludeNumberComparisons.includes(inputVal)) {
@@ -329,37 +367,17 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
         baseComparisons = baseComparisons.filter(c => c !== FilterComparison.MustContains);
       }
       predicateType = PredicateType.Dropdown;
-      defaultValue = 0;
-    } else{
-      return;
+    } else {
+      return null;
     }
 
     if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) baseComparisons.push(FilterComparison.IsEmpty);
     if (fieldsThatShouldIncludeIsNotEmpty.includes(inputVal)) baseComparisons.push(FilterComparison.IsNotEmpty);
 
     // Custom comparisons need to also be included in some base type to drive the fields
-    const comps = (customComparisons?.length ?? 0) > 0 ? customComparisons : baseComparisons;
+    const comparisons = (customComparisons?.length ?? 0) > 0 ? customComparisons! : baseComparisons;
 
-    this.validComparisons$.next([...new Set(comps)]);
-    this.predicateType$.next(predicateType);
-
-    if (this.loaded) {
-      this.formGroup.get('filterValue')?.patchValue(defaultValue);
-
-      if (comps) {
-        this.formGroup.get('comparison')?.patchValue(comps[0]);
-      }
-    }
-
-    this.cdRef.markForCheck();
-  }
-
-  onDateSelect(_: NgbDate) {
-    this.propagateFilterUpdate();
-  }
-
-  updateIfDateFilled() {
-    this.propagateFilterUpdate();
+    return {comparisons, predicateType};
   }
 
   selectOptionStyle(c?: RgbaColor) {
@@ -368,6 +386,5 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
     return { 'color': `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})` };
   }
 
-  protected readonly FilterComparison = FilterComparison;
   protected readonly PredicateType = PredicateType;
 }

@@ -1,13 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed, effect,
-  forwardRef,
-  input, model,
-  signal
+  computed,
+  input,
+  model
 } from '@angular/core';
 import {RgbaColor} from "../../../book-reader/_models/annotations/highlight-slot";
-import {ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule} from "@angular/forms";
+import {FormValueControl} from "@angular/forms/signals";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {NgStyle} from "@angular/common";
@@ -21,7 +20,7 @@ export interface MultiCheckBoxItem<T> {
    */
   label: string,
   /**
-   * Value passed to the FormControl
+   * Value passed to the field
    */
   value: T,
   /**
@@ -38,7 +37,7 @@ export interface MultiCheckBoxItem<T> {
 
 /**
  * The SettingMultiCheckBox should be used when wanting to display all options, of which any may be selected at once.
- * The component should have a formControlName bound to it of type FormControl<T[]>.
+ * The component should have a formField bound to it of type FieldTree<T[]>.
  *
  * An example can be found in ManageUserPreferencesComponent
  */
@@ -47,22 +46,14 @@ export interface MultiCheckBoxItem<T> {
   imports: [
     TranslocoDirective,
     LoadingComponent,
-    ReactiveFormsModule,
     NgStyle
   ],
   standalone: true,
   templateUrl: './setting-multi-check-box.component.html',
   styleUrl: './setting-multi-check-box.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SettingMultiCheckBox<any>),
-      multi: true,
-    }
-  ]
 })
-export class SettingMultiCheckBox<T> implements ControlValueAccessor {
+export class SettingMultiCheckBox<T> implements FormValueControl<T[]> {
 
   /**
    * Id to prepend to input id to ensure uniqueness
@@ -89,7 +80,7 @@ export class SettingMultiCheckBox<T> implements ControlValueAccessor {
   /**
    * Disable all checkboxes
    */
-  disabled = model(false);
+  disabled = input(false);
   /**
    * An optional warning to display underneath the title
    * @optional
@@ -100,45 +91,17 @@ export class SettingMultiCheckBox<T> implements ControlValueAccessor {
     const loading = this.loading();
     return loading !== undefined && loading;
   });
-  allSelected = computed(() => this.options().length === this.selectedValues().length);
+  allSelected = computed(() => this.options().length === this.value().length);
 
-  selectedValues = signal<T[]>([]);
-
-  private _onChange: (value: T[]) => void = () => {};
-  private _onTouched: () => void = () => {};
-
-  constructor() {
-    // Auto propagate changes to the FormGroup
-    effect(() => {
-      const selectedValues = this.selectedValues();
-      this._onChange(selectedValues);
-      this._onTouched();
-    });
-  }
-
-  writeValue(obj: T[]): void {
-    this.selectedValues.set(obj || []);
-  }
-
-  registerOnChange(fn: (_: T[]) => void): void {
-    this._onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this._onTouched = fn;
-  }
-
-  setDisabledState?(isDisabled: boolean): void {
-    this.disabled.set(isDisabled);
-  }
+  value = model<T[]>([]);
 
   isChecked(item: MultiCheckBoxItem<T>) {
-    return this.selectedValues().includes(item.value);
+    return this.value().includes(item.value);
   }
 
   isDisabled(item: MultiCheckBoxItem<T>) {
     const disabled = this.disabled();
-    const selected = this.selectedValues();
+    const selected = this.value();
 
     if (disabled) {
       return true;
@@ -151,17 +114,17 @@ export class SettingMultiCheckBox<T> implements ControlValueAccessor {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
-      this.selectedValues.update(x => [...x, item.value]);
+      this.value.update(x => [...x, item.value]);
     } else {
-      this.selectedValues.update(x => x.filter(t => t !== item.value));
+      this.value.update(x => x.filter(t => t !== item.value));
     }
   }
 
   toggleAll() {
     if (this.allSelected()) {
-      this.selectedValues.set([]);
+      this.value.set([]);
     } else {
-      this.selectedValues.set(this.options().map(opt => opt.value));
+      this.value.set(this.options().map(opt => opt.value));
     }
   }
 

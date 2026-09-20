@@ -16,7 +16,7 @@ export interface TypedModalRef<C> extends NgbModalRef {
 })
 export class ModalService {
 
-  private modal = inject(NgbModal);
+  private readonly modal = inject(NgbModal);
 
   /** * TODO: This is a hack to get the ComponentRef because NgbModalRef does not expose it.
    * See https://github.com/ng-bootstrap/ng-bootstrap/issues/4688 */

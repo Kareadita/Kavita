@@ -12,6 +12,7 @@ import {ReadingList} from "../_models/reading-list/reading-list";
 import {Person} from "../_models/metadata/person";
 import {LicenseService} from "./license.service";
 import {ReadingListService} from "./reading-list.service";
+import {PersonService} from "./person.service";
 
 export interface CoverImageOption {
   /** Image URL used to render the preview (remote URL, cover-upload URL, or data URL). */
@@ -48,6 +49,7 @@ export class CoverChooserConfigFactoryService {
   private readonly entityTitleService = inject(EntityTitleService);
   private readonly licenseService = inject(LicenseService);
   private readonly readinglistService = inject(ReadingListService);
+  private readonly personService = inject(PersonService);
 
 
   public forSeries(series: Series, volumes: Volume[], libraryType: LibraryType) {
@@ -136,6 +138,9 @@ export class CoverChooserConfigFactoryService {
       isLocked: person.coverImageLocked,
       resetFunc: () => this.uploadService.updatePersonCoverImage(person.id, '', false),
       selected: { url: this.imageService.getPersonImage(person.id), title: person.name },
+      otherFunc: this.personService.getCoversDbImageUrl(person.id).pipe(
+        map(url => url ? [{ url, title: 'CoversDB' } as CoverImageOption] : [])
+      ),
     };
   }
 

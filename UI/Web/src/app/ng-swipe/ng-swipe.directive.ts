@@ -1,14 +1,14 @@
-import {Directive, ElementRef, inject, input, NgZone, OnDestroy, OnInit, output} from '@angular/core';
+import {Directive, ElementRef, inject, input, OnDestroy, OnInit, output} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {createSwipeSubscription, SwipeDirection, SwipeEvent} from './ag-swipe.core';
 
 @Directive({
+  // eslint-disable-next-line @angular-eslint/directive-selector
     selector: '[ngSwipe]',
     standalone: true
 })
 export class SwipeDirective implements OnInit, OnDestroy {
   private readonly elementRef = inject(ElementRef);
-  private readonly zone = inject(NgZone);
 
   restrictSwipeToLeftSide = input<boolean>(false);
   readonly swipeMove = output<SwipeEvent>();
@@ -21,17 +21,15 @@ export class SwipeDirective implements OnInit, OnDestroy {
   private swipeSubscription: Subscription | undefined;
 
   ngOnInit() {
-    this.zone.runOutsideAngular(() => {
-      this.swipeSubscription = createSwipeSubscription({
-        domElement: this.elementRef.nativeElement,
-        onSwipeMove: (swipeMoveEvent: SwipeEvent) => this.swipeMove.emit(swipeMoveEvent),
-        onSwipeEnd: (swipeEndEvent: SwipeEvent) => {
-          if (this.isSwipeWithinRestrictedArea(swipeEndEvent)) {
-            this.swipeEnd.emit(swipeEndEvent);
-            this.detectSwipeDirection(swipeEndEvent);
-          }
+    this.swipeSubscription = createSwipeSubscription({
+      domElement: this.elementRef.nativeElement,
+      onSwipeMove: (swipeMoveEvent: SwipeEvent) => this.swipeMove.emit(swipeMoveEvent),
+      onSwipeEnd: (swipeEndEvent: SwipeEvent) => {
+        if (this.isSwipeWithinRestrictedArea(swipeEndEvent)) {
+          this.swipeEnd.emit(swipeEndEvent);
+          this.detectSwipeDirection(swipeEndEvent);
         }
-      });
+      }
     });
   }
 

@@ -4,6 +4,7 @@ import {ConfirmDialogComponent} from './confirm-dialog/confirm-dialog.component'
 import {ConfirmConfig} from './confirm-dialog/_models/confirm-config';
 import {confirmModal} from "../_models/modal/modal-options";
 import {ModalService} from "../_services/modal.service";
+import {from} from "rxjs";
 
 
 @Injectable({
@@ -44,8 +45,11 @@ export class ConfirmService {
     this.defaultPrompt._type = 'prompt';
   }
 
-  public async confirm(content?: string, config?: ConfirmConfig): Promise<boolean> {
+  public confirm$(content?: string, config?: ConfirmConfig) {
+    return from(this.confirm(content, config));
+  }
 
+  public async confirm(content?: string, config?: ConfirmConfig): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if (content === undefined && config === undefined) {
         console.error('Confirm must have either text or a config object passed');
@@ -62,7 +66,7 @@ export class ConfirmService {
       }
 
       const modalRef = this.modalService.open(ConfirmDialogComponent, confirmModal());
-      modalRef.componentInstance.config = config;
+      modalRef.setInput('config', config ?? new ConfirmConfig());
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
       });
@@ -90,7 +94,7 @@ export class ConfirmService {
       }
 
       const modalRef = this.modalService.open(ConfirmDialogComponent, confirmModal());
-      modalRef.componentInstance.config = config;
+      modalRef.setInput('config', config ?? new ConfirmConfig());
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
       });
@@ -114,7 +118,7 @@ export class ConfirmService {
       }
 
       const modalRef = this.modalService.open(ConfirmDialogComponent, confirmModal());
-      modalRef.componentInstance.config = config;
+      modalRef.setInput('config', config ?? new ConfirmConfig());
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
       });
@@ -140,8 +144,8 @@ export class ConfirmService {
         config!.header = title;
       }
 
-      const modalRef = this.modalService.open(ConfirmDialogComponent);
-      modalRef.componentInstance.config = config;
+      const modalRef = this.modalService.open(ConfirmDialogComponent, confirmModal());
+      modalRef.setInput('config', config ?? new ConfirmConfig());
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
       });

@@ -1,63 +1,26 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  inject,
-  input,
-  OnInit,
-  signal
-} from '@angular/core';
-import {
-  FormArray,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators
-} from "@angular/forms";
+import {ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal} from '@angular/core';
 import {translate} from "@jsverse/transloco";
 import {AgeRating} from "../../../_models/metadata/age-rating";
 import {AgeRatingDto} from "../../../_models/metadata/age-rating-dto";
 import {AgeRatingPipe} from "../../../_pipes/age-rating.pipe";
 import {MetadataService} from "../../../_services/metadata.service";
-import {FormFieldDirective} from "../../../_directives/form-field.directive";
 import {ValidationErrorsComponent} from "../validation-errors/validation-errors.component";
+import {applyEach, FieldTree, FormField, required, schema} from "@angular/forms/signals";
+import {SettingSelectComponent} from "../../../settings/_components/setting-enum-select/setting-select.component";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 let nextId = 0;
 
 /**
- * A row in the mapper, as it lives in the FormArray
+ * A row in the mapper. The API stores these as a Record, but a form needs a stable, ordered list.
  */
-export type AgeRatingMappingRow = {
-  str?: string | null,
-  rating?: AgeRating | null
-};
-
-export type AgeRatingMappingsArray = FormArray<FormGroup<{
-  str: FormControl<string | null>,
-  rating: FormControl<AgeRating | null>
-}>>;
-
-export function createAgeRatingMappingRow(fb: FormBuilder, str: string = '', rating: AgeRating = AgeRating.Unknown) {
-  return fb.group({
-    str: [str, Validators.required],
-    rating: [rating, Validators.required]
-  });
+export interface AgeRatingMappingRow {
+  str: string;
+  rating: AgeRating;
 }
 
-export function buildAgeRatingMappingsArray(fb: FormBuilder, mappings: Record<string, AgeRating> | undefined | null): AgeRatingMappingsArray {
-  const array = fb.array<FormGroup<{
-    str: FormControl<string | null>,
-    rating: FormControl<AgeRating | null>
-  }>>([]);
-
-  Object.entries(mappings || {}).forEach(([str, rating]) => {
-    array.push(createAgeRatingMappingRow(fb, str, rating));
-  });
-
-  return array;
+export function toAgeRatingMappingRows(mappings: Record<string, AgeRating> | undefined | null): Array<AgeRatingMappingRow> {
+  return Object.entries(mappings || {}).map(([str, rating]) => ({str, rating}));
 }
 
 export function packAgeRatingMappings(rows: Array<AgeRatingMappingRow>): Record<string, AgeRating> {
@@ -70,6 +33,13 @@ export function packAgeRatingMappings(rows: Array<AgeRatingMappingRow>): Record<
   }, {});
 }
 
+export const ageRatingMappingsSchema = schema<Array<AgeRatingMappingRow>>(p => {
+  applyEach(p, row => {
+    required(row.str);
+    required(row.rating);
+  });
+});
+
 /**
  * Reusable editor for a set of string -> {@link AgeRating} mappings.
  */
@@ -77,19 +47,19 @@ export function packAgeRatingMappings(rows: Array<AgeRatingMappingRow>): Record<
   selector: 'app-age-rating-mapper',
   imports: [
     AgeRatingPipe,
-    FormsModule,
-    ReactiveFormsModule, FormFieldDirective, ValidationErrorsComponent],
+    ValidationErrorsComponent,
+    FormField,
+    FormFieldDirective,
+    SettingSelectComponent,
+  ],
   templateUrl: './age-rating-mapper.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeRatingMapperComponent implements OnInit {
 
   private readonly metadataService = inject(MetadataService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly fb = inject(FormBuilder);
 
-  form = input.required<FormGroup>();
-  controlName = input.required<string>();
+  field = input.required<FieldTree<Array<AgeRatingMappingRow>>>();
   addLabel = input<string>('');
   removeLabel = input<string>('');
   sourceLabel = input<string>('');
@@ -101,10 +71,7 @@ export class AgeRatingMapperComponent implements OnInit {
   strValues = input<string[]>([]);
 
   ageRatings = signal<Array<AgeRatingDto>>([]);
-
-  get mappingRows(): AgeRatingMappingsArray {
-    return this.form().get(this.controlName()) as AgeRatingMappingsArray;
-  }
+  protected readonly ageRatingOptions = computed(() => this.ageRatings().map(r => r.value));
 
   ngOnInit(): void {
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
@@ -113,13 +80,11 @@ export class AgeRatingMapperComponent implements OnInit {
   }
 
   addRow(str: string = '', rating: AgeRating = AgeRating.Unknown) {
-    this.mappingRows.push(createAgeRatingMappingRow(this.fb, str, rating));
-    this.cdRef.markForCheck();
+    this.field()().value.update(rows => [...rows, {str, rating}]);
   }
 
   removeRow(index: number) {
-    this.mappingRows.removeAt(index);
-    this.cdRef.markForCheck();
+    this.field()().value.update(rows => rows.filter((_, i) => i !== index));
   }
 
   protected readonly addText = computed(() => this.addLabel() || translate('common.add'));

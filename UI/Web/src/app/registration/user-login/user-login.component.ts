@@ -1,14 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  effect,
-  inject,
-  OnInit,
-  signal
-} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ToastrService} from '@openng/ngx-toastr';
 import {AccountService} from '../../_services/account.service';
@@ -22,14 +12,20 @@ import {OidcPublicConfig} from "../../admin/_models/oidc-config";
 import {SettingsService} from "../../admin/settings.service";
 import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {form, FormField, FormRoot, required} from "@angular/forms/signals";
 
+interface LoginFormModel {
+  username: string;
+  password: string;
+}
 
 @Component({
-    selector: 'app-user-login',
-    templateUrl: './user-login.component.html',
-    styleUrls: ['./user-login.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SplashContainerComponent, ReactiveFormsModule, RouterLink, TranslocoDirective, ImageComponent, ValidationErrorsComponent, FormFieldDirective]
+  selector: 'app-user-login',
+  templateUrl: './user-login.component.html',
+  styleUrls: ['./user-login.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SplashContainerComponent, RouterLink, TranslocoDirective, ImageComponent,
+    ValidationErrorsComponent, FormFieldDirective, FormField, FormRoot]
 })
 export class UserLoginComponent implements OnInit {
 
@@ -38,16 +34,23 @@ export class UserLoginComponent implements OnInit {
   private readonly memberService = inject(MemberService);
   private readonly toastr = inject(ToastrService);
   private readonly navService = inject(NavService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
   protected readonly settingsService = inject(SettingsService);
 
-  baseUrl = environment.apiUrl.substring(0, environment.apiUrl.indexOf("api"));
+  baseUrl = environment.apiUrl.substring(0, environment.apiUrl.indexOf('api'));
 
-  loginForm: FormGroup = new FormGroup({
-      username: new FormControl('', [Validators.required]),
-      password: new FormControl('', [Validators.required, Validators.maxLength(256), Validators.minLength(6), Validators.pattern("^.{6,256}$")])
+  formModel = signal<LoginFormModel>({
+    username: '',
+    password: '',
   });
+  formGroup = form(this.formModel, (path) => {
+    required(path.username);
+    required(path.password);
+    // For login screen, we hide validation
+    // maxLength(path.password, 256);
+    // minLength(path.password, 6);
+  });
+
 
   /**
    * Used for first time the page loads to ensure no flashing
@@ -90,9 +93,7 @@ export class UserLoginComponent implements OnInit {
       const user = this.accountService.currentUser();
       if (!user) return;
       this.navService.handleLogin();
-      this.cdRef.markForCheck();
     });
-
   }
 
   ngOnInit(): void {
@@ -131,12 +132,15 @@ export class UserLoginComponent implements OnInit {
 
 
   login(apiKey: string = '') {
-    const model = this.loginForm.getRawValue();
-    model.apiKey = apiKey;
+    const model = {
+      ...this.formModel(),
+      apiKey
+    };
+
     this.isSubmitting.set(true);
     this.accountService.login(model).subscribe({
       next: () => {
-          this.loginForm.reset();
+          this.formGroup().reset();
           this.navService.handleLogin()
 
           this.isSubmitting.set(false);

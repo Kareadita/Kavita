@@ -1,14 +1,14 @@
 <ng-container *transloco="let t; prefix: 'metadata-filter'">
-  @if (toggleService.toggleState$ | async; as isOpen) {
+  @if (toggleService.toggleState(); as isOpen) {
     @if (breakpointService.isTabletOrAbove()) {
       <div class="filter-animate-wrapper" animate.enter="filter-enter" animate.leave="filter-leave">
         <div class="filter-animate-inner">
-          <ng-container [ngTemplateOutlet]="filterSection" [ngTemplateOutletContext]="{isOpen: isOpen}" />
+          <ng-container [ngTemplateOutlet]="filterSection" />
         </div>
       </div>
     } @else {
       <div>
-        <app-drawer #commentDrawer="drawer" [isOpen]="isOpen" [options]="{topOffset: 75}" (drawerClosed)="toggleService.set(false)" [width]="600">
+        <app-drawer [isOpen]="isOpen" [options]="{topOffset: 75}" (drawerClosed)="toggleService.set(false)" [width]="600">
           <h5 header>
             {{t('filter-title')}}
           </h5>
@@ -21,42 +21,44 @@
     }
   }
 
-  <ng-template #filterSection let-isOpen="isOpen">
-    @if (fullyLoaded && filterV2) {
+  <ng-template #filterSection>
+    @if (fullyLoaded() && filterV2(); as filter) {
       <div class="filter-section mx-auto pb-3">
         <div class="row justify-content-center g-0">
-          <app-metadata-builder [filter]="filterV2"
+          <app-metadata-builder [filter]="filter"
+                                (filterChange)="filterV2.set($event)"
                                 [entityType]="filterSettings().type"
-                                [statementLimit]="filterSettings().statementLimit"
-                                (update)="handleFilters($event)" />
+                                [statementLimit]="filterSettings().statementLimit" />
         </div>
-        <form [formGroup]="sortGroup" class="container-fluid">
+        <form [formRoot]="formGroup" class="container-fluid">
           <div class="row mb-3">
-            <div class="col-md-2 col-sm-3">
+            <div class="col-5 col-md-2">
               <div class="form-group pe-1">
                 <label for="limit-to" class="form-label">{{t('limit-label')}}</label>
-                <input id="limit-to" type="number" inputmode="numeric" class="form-control" formControlName="limitTo">
+                <input id="limit-to" type="number" inputmode="numeric" class="form-control" [formField]="formGroup.limitTo">
               </div>
             </div>
-            <div class="col-md-3 col-sm-9">
-              <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
-              <app-sort-button [disabled]="filterSettings().sortDisabled" (isAscendingChange)="updateSortOrder($event)" [isAscending]="isAscendingSort" />
-              <select id="sort-options" class="form-select" formControlName="sortField" style="height: 2.375rem;">
-                @for(field of sortFieldOptions(); track field.value) {
-                  <option [value]="field.value">{{field.title}}</option>
-                }
-              </select>
+            <div class="col-7 col-md-3">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <label for="sort-options" class="form-label mb-0">{{t('sort-by-label')}}</label>
+                <app-sort-button [disabled]="filterSettings().sortDisabled" (isAscendingChange)="updateSortOrder($event)" [isAscending]="isAscendingSort()" />
+              </div>
+              <app-setting-select [formField]="formGroup.sortField" [options]="sortFieldOptions()" inputId="sort-options">
+                <ng-template #template let-field>
+                  {{ field | sortField: filterSettings().type }}
+                </ng-template>
+              </app-setting-select>
             </div>
 
             @if (filterSettings().supportsSmartFilter) {
-              <div class="col-md-4 col-sm-12" [ngClass]="{'mt-3': breakpointService.isMobileOrBelow()}">
+              <div class="col-12 col-md-4" [class.mt-3]="breakpointService.isMobileOrBelow()">
                 <label for="filter-name" class="form-label">{{t('filter-name-label')}}</label>
-                <input id="filter-name" type="text" class="form-control" formControlName="name">
+                <input id="filter-name" type="text" class="form-control" [formField]="formGroup.name" style="height: 2.375rem;">
               </div>
             }
 
 
-            @if (breakpointService.activeBreakpoint() > Breakpoint.Tablet) {
+            @if (breakpointService.isDesktopOrAbove()) {
               <ng-container [ngTemplateOutlet]="buttons" />
             }
           </div>
@@ -74,14 +76,14 @@
 
   <ng-template #buttons>
     <!-- TODO: I might want to put a Clear button which blanks out the whole filter -->
-    <div class="col-md-6 col-sm-6 mt-4 pt-2 d-flex justify-content-between">
-      <button class="btn btn-secondary col-6 me-1" (click)="clear()"><i class="fa-solid fa-arrow-rotate-left me-1" aria-hidden="true"></i>{{t('reset')}}</button>
-      <button class="btn btn-primary col-6" (click)="apply()"><i class="fa-solid fa-play me-1" aria-hidden="true"></i>{{t('apply')}}</button>
+    <div class="col-12 col-md-6 mt-3 mt-md-4 pt-md-2 d-flex gap-2">
+      <button class="btn btn-secondary flex-fill" (click)="clear()"><i class="fa-solid fa-arrow-rotate-left me-1" aria-hidden="true"></i>{{t('reset')}}</button>
+      <button class="btn btn-primary flex-fill" (click)="apply()"><i class="fa-solid fa-play me-1" aria-hidden="true"></i>{{t('apply')}}</button>
     </div>
-    <div class="col-md-2 col-sm-6 mt-4 pt-2">
-      <div class="d-flex flex-grow-1"> <!-- TODO: How can we make this wider (col-12, old behv) if no extra buttons are present -->
-        <button class="btn btn-primary" (click)="save()" [disabled]="filterSettings().saveDisabled || !this.sortGroup.get('name')?.value">
-          <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+    <div class="col-12 col-md-2 mt-2 mt-md-4 pt-md-2">
+      <div class="d-flex gap-2"> <!-- TODO: How can we make this wider (col-12, old behv) if no extra buttons are present -->
+        <button class="btn btn-primary flex-fill" (click)="save()" [disabled]="isSaveDisabled()">
+          <i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>
           {{t('save')}}
         </button>
         <ng-container [ngTemplateOutlet]="extraButtonsRef()" />

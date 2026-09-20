@@ -3,6 +3,7 @@ import {
   Component,
   contentChild,
   contentChildren,
+  DestroyRef,
   inject,
   input,
   model,
@@ -12,11 +13,11 @@ import {
 import {Tabs} from "../../_models/tabs";
 import {EditTabDirective} from "../_directive/edit-tab.directive";
 import {BreakpointService} from "../../_services/breakpoint.service";
-import {FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {NgTemplateOutlet} from "@angular/common";
 import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {AnyField, toFieldView} from "../_models/field-view";
 
 @Component({
   selector: 'app-edit-modal-shell',
@@ -25,7 +26,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
     NgTemplateOutlet,
     NgbNavItem,
     NgbNav,
-    ReactiveFormsModule,
     NgbNavContent,
     NgbNavLink,
     TabTitlePipe,
@@ -37,11 +37,16 @@ import {TranslocoDirective} from "@jsverse/transloco";
 })
 export class EditModalShellComponent {
   private readonly breakpointService = inject(BreakpointService);
+  private readonly destroyRef = inject(DestroyRef);
 
   translocoPrefix = input.required<string>();
   // eslint-disable-next-line @angular-eslint/no-input-rename
   modalTitle = input.required<string>({ alias: 'title' });
-  formGroup = input.required<FormGroup>();
+
+  field = input.required<AnyField>();
+
+  private readonly fieldView = toFieldView(this.field, this.destroyRef);
+  protected readonly canSave = this.fieldView.valid;
 
   activeTabId = model<Tabs>();
 

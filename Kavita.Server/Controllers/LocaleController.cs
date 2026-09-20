@@ -30,14 +30,15 @@ public class LocaleController(
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<KavitaLocale>>> GetAllLocales()
     {
-        var result = await _localeCacheProvider.GetAsync<IEnumerable<KavitaLocale>>(CacheKey);
+        var ct = HttpContext.RequestAborted;
+        var result = await _localeCacheProvider.GetAsync<IEnumerable<KavitaLocale>>(CacheKey, ct);
         if (result.HasValue)
         {
             return Ok(result.Value);
         }
 
         var ret = localizationService.GetLocales().Where(l => l.TranslationCompletion > 0f);
-        await _localeCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromDays(1));
+        await _localeCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromDays(1), ct);
 
         return Ok(ret);
     }

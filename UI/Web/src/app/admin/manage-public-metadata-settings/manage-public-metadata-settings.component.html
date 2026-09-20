@@ -4,23 +4,22 @@
     <p class="alert alert-warning" role="alert">{{t('k+-warning')}}</p>
   }
 
-  <form class="row g-0 mt-4 mb-4" [formGroup]="settingsForm">
+  <div class="row g-0 mt-4 mb-4">
     <div class="col-md-6 col-sm-12">
-      @if (settingsForm.get('enableExtendedMetadataProcessing'); as control) {
-        <app-setting-switch [title]="t('enable-extended-metadata-processing-label')" [subtitle]="t('enable-extended-metadata-processing-tooltip')">
-          <ng-template>
-            <div class="form-check form-switch float-end">
-              <input type="checkbox" class="form-check-input" formControlName="enableExtendedMetadataProcessing">
-            </div>
-          </ng-template>
-        </app-setting-switch>
-      }
+      <app-setting-switch [title]="t('enable-extended-metadata-processing-label')" [subtitle]="t('enable-extended-metadata-processing-tooltip')"
+                          [control]="formGroup.enableExtendedMetadataProcessing">
+        <ng-template>
+          <div class="form-check form-switch float-end">
+            <input type="checkbox" class="form-check-input" [formField]="formGroup.enableExtendedMetadataProcessing">
+          </div>
+        </ng-template>
+      </app-setting-switch>
     </div>
-  </form>
+  </div>
 
   <div class="row g-0 mt-4 mb-4">
     <div class="col-md-4 col-sm-12">
-      <button class="btn btn-secondary" (click)="manageMetadataMappingsComponent().export()">
+      <button class="btn btn-secondary" (click)="manageMetadataMappingsComponent()?.export()">
         {{t('export-settings')}}
       </button>
       <div class="text-muted mt-2">{{t('export-tooltip')}}</div>
@@ -45,7 +44,7 @@
 
   <h4 class="mb-4">{{t('tags-header')}}</h4>
 
-  @if (settings) {
-    <app-manage-metadata-mappings [settingsForm]="settingsForm" [settings]="settings" />
+  @if (settings()) {
+    <app-manage-metadata-mappings [field]="formGroup.mappings" [showGenreTagToggles]="false" />
   }
 </ng-container>
