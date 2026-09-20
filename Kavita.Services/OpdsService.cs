@@ -389,7 +389,7 @@ public class OpdsService(
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
         var filter = await unitOfWork.AppUserSmartFilterRepository.GetById(request.EntityId, ct);
-        if (filter == null || filter.AppUserId != request.UserId)
+        if (filter == null)
         {
             throw new OpdsException(await localizationService.TranslateAsync(userId, "smart-filter-doesnt-exist"));
         }
