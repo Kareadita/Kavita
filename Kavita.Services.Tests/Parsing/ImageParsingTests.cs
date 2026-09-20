@@ -33,7 +33,7 @@ public class ImageParsingTests
             Chapters = "8", Filename = "13.jpg", Format = MangaFormat.Image,
             FullFilePath = filepath, IsSpecial = false
         };
-        var actual2 = _parser.Parse(filepath, @"E:\Manga\Monster #8", "E:/Manga", LibraryType.Image, true, null);
+        var actual2 = _parser.Parse(filepath, @"E:\Manga\Monster #8", "E:/Manga", LibraryType.Image, true, null).Info;
         Assert.NotNull(actual2);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expectedInfo2.Format, actual2.Format);
@@ -59,7 +59,7 @@ public class ImageParsingTests
             FullFilePath = filepath, IsSpecial = false
         };
 
-        actual2 = _parser.Parse(filepath, @"E:\Manga\Extra layer for no reason\", "E:/Manga", LibraryType.Image, true, null);
+        actual2 = _parser.Parse(filepath, @"E:\Manga\Extra layer for no reason\", "E:/Manga", LibraryType.Image, true, null).Info;
         Assert.NotNull(actual2);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expectedInfo2.Format, actual2.Format);
@@ -85,7 +85,7 @@ public class ImageParsingTests
             FullFilePath = filepath, IsSpecial = false
         };
 
-        actual2 = _parser.Parse(filepath, @"E:\Manga\Extra layer for no reason\", "E:/Manga", LibraryType.Image, true, null);
+        actual2 = _parser.Parse(filepath, @"E:\Manga\Extra layer for no reason\", "E:/Manga", LibraryType.Image, true, null).Info;
         Assert.NotNull(actual2);
         _testOutputHelper.WriteLine($"Validating {filepath}");
         Assert.Equal(expectedInfo2.Format, actual2.Format);

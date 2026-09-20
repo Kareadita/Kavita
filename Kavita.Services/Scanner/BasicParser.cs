@@ -14,11 +14,14 @@ namespace Kavita.Services.Scanner;
 /// </summary>
 public class BasicParser(IDirectoryService directoryService, IDefaultParser imageParser) : DefaultParser(directoryService)
 {
-    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null)
+    public override ParseInfoResult Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null)
     {
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
         // TODO: Potential Bug: This will return null, but on Image libraries, if all images, we would want to include this.
-        if (type != LibraryType.Image && Parser.IsCoverImage(directoryService.FileSystem.Path.GetFileName(filePath))) return null;
+        if (type != LibraryType.Image && Parser.IsCoverImage(directoryService.FileSystem.Path.GetFileName(filePath)))
+        {
+            return ParseInfoResult.SkippedParse();
+        }
 
         if (Parser.IsImage(filePath))
         {
@@ -126,7 +129,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
 
         FinalizeNumbers(ret);
 
-        return ret.Series == string.Empty ? null : ret;
+        return ParseInfoResult.FromParserInfo(ret);
     }
 
     /// <summary>

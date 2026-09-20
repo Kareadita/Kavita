@@ -9,9 +9,9 @@ namespace Kavita.Services.Scanner;
 
 public class ImageParser(IDirectoryService directoryService) : DefaultParser(directoryService)
 {
-    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null)
+    public override ParseInfoResult Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null)
     {
-        if (!IsApplicable(filePath, type)) return null;
+        if (!IsApplicable(filePath, type)) return ParseInfoResult.SkippedParse();
 
         var directoryName = directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
@@ -43,7 +43,7 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
 
         FinalizeNumbers(ret);
 
-        return string.IsNullOrEmpty(ret.Series) ? null : ret;
+        return ParseInfoResult.FromParserInfo(ret);
     }
 
     /// <summary>
