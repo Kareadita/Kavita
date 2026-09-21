@@ -11,7 +11,7 @@
         "no-libraries": "Aún no se ha configurado ninguna biblioteca. Cree una en",
         "server-settings-link": "Configuración del servidor",
         "not-granted": "No tienes autorización para acceder a ninguna biblioteca.",
-        "on-deck-title": "Seguir leyendo",
+        "on-deck-title": "En curso",
         "recently-updated-title": "Series actualizadas recientemente",
         "recently-added-title": "Series añadidas recientemente",
         "more-in-genre-title": "Más en {{genre}}"
@@ -128,7 +128,11 @@
         "embed-progress-indicator-label": "Incrustar Indicador de Progreso",
         "embed-progress-indicator-tooltip": "Indicador de progreso integrado en el título",
         "include-continue-from-label": "Incluir Continuar desde Entrada",
-        "include-continue-from-tooltip": "Inserta una entrada \"Continuar desde X\" en los campos de OPDS para evitar encontrar tu último punto de lectura (Emula el botón de Continuar de Kavita)"
+        "include-continue-from-tooltip": "Inserta una entrada \"Continuar desde X\" en los campos de OPDS para evitar encontrar tu último punto de lectura (Emula el botón de Continuar de Kavita)",
+        "ondeck-progress-days-label": "Último progreso dentro de En curso (días)",
+        "ondeck-update-days-label": "Adición del último capítulo en En curso (días)",
+        "ondeck-update-days-tooltip": "El número de días desde que fue añadido el último capítulo para incluir algo en En curso.",
+        "ondeck-progress-days-tooltip": "El número de días desde el último progreso antes de poner en marcha algo en En curso."
     },
     "user-holds": {
         "title": "Retenciones de scrobble",
@@ -269,7 +273,14 @@
         "loading": "{{common.loading}}",
         "add-item": "Añadir {{item}}…",
         "no-data": "{{common.no-data}}",
-        "add-custom-item": ", escribe para añadir un elemento personalizado"
+        "add-custom-item": ", escribe para añadir un elemento personalizado",
+        "remove-alt": "Eliminar {{title}}",
+        "remove-item-alt": "Eliminar elemento",
+        "clear-selections-alt": "Limpiar todas las selecciones",
+        "selected-items-alt": "Elementos seleccionados",
+        "results-available-alt": "{{count}} resultados disponibles",
+        "no-results-alt": "Ningún resultado disponible",
+        "toggle-lock-alt": "Bloquar campo"
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
@@ -687,7 +698,7 @@
         "folder-watching-label": "Monitorizar Carpetas",
         "folder-watching-tooltip": "Anula la monitorización de carpetas del servidor para esta biblioteca. Si está desactivada, la monitorización de carpetas no se ejecutará en las carpetas que contenga esta biblioteca. Si las bibliotecas comparten carpetas, éstas pueden seguir siendo monitorizadas. Los cambios empezaran a aplicarse a partir de los 10 minutos de haberlos realizado.",
         "include-in-dashboard-label": "Incluir en el panel",
-        "include-in-dashboard-tooltip": "Si deberían incluirse las series de la biblioteca en el panel. Esto afecta a todas las fuentes como Seguir leyendo, Actualizado recientemente, Añadido recientemente o cualquier adición personalizada.",
+        "include-in-dashboard-tooltip": "Si deberían incluirse las series de la biblioteca en el panel. Esto afecta a todos los canales como En curso, Actualizado recientemente, Añadido recientemente o cualquier adición personalizada.",
         "include-in-search-label": "Incluir en Búsqueda",
         "include-in-search-tooltip": "Si deberían incluirse las series y cualquier información derivada (géneros, personas, archivos) de la biblioteca en los resultados de búsqueda.",
         "force-scan": "Escaneo forzado",
@@ -1049,10 +1060,6 @@
         "logging-level-tooltip": "Use la depuración para ayudar a identificar problemas. La depuración puede consumir mucho espacio en disco.",
         "cache-size-label": "Tamaño de caché",
         "cache-size-tooltip": "Cantidad de memoria permitida para almacenar APIs pesadas en caché. Por defecto, 75MB.",
-        "on-deck-last-progress-label": "Último progreso en Seguir leyendo (días)",
-        "on-deck-last-progress-tooltip": "Número de días desde el último progreso antes de quitar contenido de Seguir leyendo.",
-        "on-deck-last-chapter-add-label": "Añadir último capítulo a Seguir leyendo (días)",
-        "on-deck-last-chapter-add-tooltip": "El número de días desde que el último capítulo fue añadido para incluir algo en Seguir leyendo.",
         "allow-stats-label": "Permitir la recopilación de datos de uso anónimos",
         "allow-stats-tooltip-part-1": "Enviar datos anónimos de uso a los servidores de Kavita. Esto incluye información sobre el uso de ciertas características, número de archivos, versión de S.O., versión de Kavita instalada, CPU y memoria. Usaremos esta información para priorizar características, correcciones y optimización del rendimiento. Es necesario reiniciar para que funcione. Mira el ",
         "allow-stats-tooltip-part-2": "para ver qué datos se recopilan.",
@@ -1177,7 +1184,6 @@
         "title": "Editar colección {{collectionName}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
         "name-label": "Nombre",
         "name-validation": "El nombre debe ser único",
         "promote-label": "Ascender",
@@ -1352,26 +1358,8 @@
         "first-page": "{{keybind-setting-description-pipe.key-bind-title-first-page}}",
         "last-page": "{{keybind-setting-description-pipe.key-bind-title-last-page}}"
     },
-    "grouped-typeahead": {
-        "files": "Archivos",
-        "chapters": "Capítulos",
-        "people": "Gente",
-        "tags": "Etiquetas",
-        "genres": "{{metadata-fields.genres-title}}",
-        "bookmarks": "{{side-nav.bookmarks}}",
-        "libraries": "{{common.libraries}}",
-        "reading-lists": "Listas de lectura",
-        "collections": "Colecciones",
-        "close": "{{common.close}}",
-        "loading": "{{common.loading}}",
-        "include-extras": "Incluir capítulos y archivos",
-        "annotations": "{{tabs.annotations-tab}}"
-    },
     "nav-header": {
         "skip-alt": "Saltar al contenido principal",
-        "search-series-alt": "Buscar series",
-        "search-alt": "Buscar…",
-        "no-data": "No se han encontrado resultados",
         "scroll-to-top-alt": "Navegar hasta arriba",
         "server-settings": "Ajustes del servidor",
         "settings": "Ajustes",
@@ -1381,7 +1369,6 @@
         "all-filters": "Filtros inteligentes",
         "nav-link-header": "Opciones de navegación",
         "close": "{{common.close}}",
-        "person-aka-status": "Coincide un alias",
         "browse-genres": "Buscar géneros",
         "browse-tags": "Buscar etiquetas",
         "all-annotations": "Buscar anotaciones",
@@ -1553,7 +1540,8 @@
         "reading-profile-updated": "Perfil de lectura actualizado",
         "reading-profile-promoted": "Perfil de lectura promocionado",
         "page-offset-label": "Desplazamiento de página",
-        "offset-only-double": "El desplazamiento de página solo puede ser usado con Diseño doble"
+        "offset-only-double": "El desplazamiento de página solo puede ser usado con Diseño doble",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-label}}"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1664,7 +1652,6 @@
         "web-link-label": "{{tabs.weblink-tab}}",
         "cover-image-description": "Sube y elige una nueva imagen de portada. Pulsa Guardar para subir y sustituir la portada.",
         "save": "{{common.save}}",
-        "field-locked-alt": "Campo bloqueado",
         "info-title": "Información",
         "library-title": "Biblioteca",
         "format-title": "Formato",
@@ -1731,7 +1718,6 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "pages-label": "Páginas",
         "words-label": "Longitud",
@@ -1901,7 +1887,8 @@
             "failed-to-update-username": "Error al actualizar el nombre de usuario",
             "email-in-use": "El correo electrónico ya está en uso por otra cuenta",
             "syncing-user": "Error al sincronizar tu cuenta desde OIDC, por favor contacta con un administrador"
-        }
+        },
+        "required-if-other-invalid": "{{other}} es inválido"
     },
     "metadata-builder": {
         "or": "Coincidir con cualquiera de los siguientes",
@@ -1966,8 +1953,8 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "pattern": "El host debe ser una URL http(s):// válida",
-        "api-key-tooltip": "No requerido para iniciar sesión automáticamente cuando el host usa OIDC"
+        "api-key-tooltip": "No requerido para iniciar sesión automáticamente cuando el host usa OIDC",
+        "confirm-delete": "¿Estás seguro de que quieres eliminar {{name}} como fuente externa?"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -2210,8 +2197,8 @@
         "add-to-want-to-read-tooltip": "Añadir serie a lecturas deseadas",
         "remove-from-want-to-read": "Quitar de lecturas deseadas",
         "remove-from-want-to-read-tooltip": "Borrar serie de lecturas deseadas",
-        "remove-from-on-deck": "Eliminar de Seguir leyendo",
-        "remove-from-on-deck-tooltip": "No mostrar serie en Seguir leyendo",
+        "remove-from-on-deck": "Eliminar de En curso",
+        "remove-from-on-deck-tooltip": "Dejar de mostrar serie en En curso",
         "others": "Otros",
         "add-to-reading-list": "Añadir a la lista de lectura",
         "add-to-reading-list-tooltip": "Añadir a una lista de lectura",
@@ -2320,7 +2307,13 @@
         "year-validation": "Este debe ser un año válido mayor que 1000 y que conste de 4 caracteres",
         "other-field-invalid": "No se pudo comprobar disponibilidad, {{other}} no es válido",
         "invalid-uri": "La URI proporcionada es inválida",
-        "other-field-required": "{{name}} es requerido cuando se establezca {{other}}"
+        "other-field-required": "{{name}} es requerido cuando se establezca {{other}}",
+        "invalid-asin": "No es un ASIN válido",
+        "invalid-amazon-code": "ASIN debería empezar con B0 o BT",
+        "max": "El valor debe ser menor que {{max}}",
+        "min": "El valor debe ser mayor que {{max}}",
+        "email-invalid": "Esto debe ser un correo electrónico válido",
+        "min-length": "Esto debe ser al menos de {{requiredLength}} caracteres"
     },
     "entity-type": {
         "volume": "volumen",
@@ -2901,7 +2894,8 @@
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "never": "Nunca"
+        "never": "Nunca",
+        "duplicate-name-validation": "El nombre de la clave de autenticación debe ser único"
     },
     "review-list-item": {
         "by-label": "Por",
@@ -3181,7 +3175,8 @@
     "favorite-authors": {
         "no-data": "{{common.no-data}}",
         "title": "Autores más leídos",
-        "sub-title": "El autor más leído de {{name}} es {{author}}, con {{count}} lecturas totales"
+        "sub-title": "El autor más leído de {{name}} es {{author}}, con {{count}} lecturas totales",
+        "chapter-count": "{{common.chapter-count}}"
     },
     "page-spread": {
         "no-data": "{{common.no-data}}",
@@ -4424,5 +4419,45 @@
         "recurrent": "Recurrente",
         "defining": "Determinante",
         "core": "Central"
+    },
+    "search-typeahead": {
+        "annotations": "{{tabs.annotations-tab}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "libraries": "{{common.libraries}}",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "results-available-alt": "{{typeahead.results-available-alt}}",
+        "no-results-alt": "{{typeahead.no-results-alt}}",
+        "files": "Archivos",
+        "chapters": "Capítulos",
+        "people": "Personas",
+        "tags": "Etiquetas",
+        "reading-lists": "Listas de lectura",
+        "collections": "Colecciones",
+        "series": "Series",
+        "include-extras": "Incluir capítulos y archivos",
+        "search-alt": "Buscar…",
+        "no-data": "Ningún resultado encontrado",
+        "search-for": "Buscar por {{term}}",
+        "in-library": "en {{name}}",
+        "volume-count": "{{count}} volúmenes",
+        "volume-count-one": "{{count}} volumen",
+        "chapter-count": "{{count}} capítulos",
+        "chapter-count-one": "{{count}} capítulo",
+        "person-aka-status": "Coincide con un alias",
+        "search-config-title": "Opciones de búsqueda",
+        "search-config-alt": "Opciones de búsqueda",
+        "search-series-alt": "Buscar series"
+    },
+    "rate-and-review-series-modal": {
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "review-label": "{{review-modal.review-label}}",
+        "title": "Calificación y opinión: {{seriesName}}",
+        "description": "Deja una calificación y una opinión sobre la serie."
+    },
+    "locked-field": {
+        "field-locked-alt": "El campo está bloqueado"
     }
 }

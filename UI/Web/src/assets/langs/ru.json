@@ -844,10 +844,6 @@
         "networking-settings-title": "Сетевой",
         "system-settings-title": "Система",
         "notice": "Примечание:",
-        "on-deck-last-progress-label": "На очереди Последний прогресс (дни)",
-        "on-deck-last-progress-tooltip": "Количество дней с последнего прогресса в произведениях На очереди.",
-        "on-deck-last-chapter-add-label": "На очереди Последняя глава добавлена (дней)",
-        "on-deck-last-chapter-add-tooltip": "Количество дней с добавления последней главы, что включает в себя что-то На очереди.",
         "customization-settings-title": "Кастомизация",
         "restart-required": "Смена порта, базового URL, размера кэша или IP, требует ручного перезапуска Kavita чтобы изменения вступили в силу.",
         "base-url-label": "Базовый URL",
@@ -957,7 +953,6 @@
     "edit-collection-tags": {
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}",
         "filter-label": "{{common.filter}}",
@@ -1106,28 +1101,10 @@
         "toggle-menu": "Открыть/закрыть меню",
         "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
     },
-    "grouped-typeahead": {
-        "genres": "{{metadata-fields.genres-title}}",
-        "bookmarks": "{{side-nav.bookmarks}}",
-        "close": "{{common.close}}",
-        "loading": "{{common.loading}}",
-        "files": "Файлы",
-        "chapters": "Главы",
-        "people": "Люди",
-        "tags": "Теги",
-        "annotations": "{{tabs.annotations-tab}}",
-        "libraries": "{{common.libraries}}",
-        "reading-lists": "Списки чтения",
-        "collections": "Коллекции",
-        "include-extras": "Включить главы и файлы"
-    },
     "nav-header": {
         "help": "{{common.help}}",
         "close": "{{common.close}}",
         "skip-alt": "Перейти к основному содержимому",
-        "search-series-alt": "Поиск произведений",
-        "search-alt": "Поиск…",
-        "no-data": "Ничего не найдено",
         "scroll-to-top-alt": "Наверх",
         "server-settings": "Настройки сервера",
         "settings": "Настройки",
@@ -1138,8 +1115,7 @@
         "browse-genres": "Просмотр Жанров",
         "browse-tags": "Просмотр Тэгов",
         "all-annotations": "Просмотр Аннотаций",
-        "my-profile": "Мой профиль",
-        "person-aka-status": "Соответствует псевдониму"
+        "my-profile": "Мой профиль"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1314,7 +1290,6 @@
         "summary-label": "Краткое содержание",
         "web-link-description": "Здесь вы можете добавить несколько разных ссылок на внешние сервисы.",
         "cover-image-description": "Загрузите и выберите новое изображение обложки. Нажмите «Сохранить», чтобы загрузить и изменить обложку.",
-        "field-locked-alt": "Поле заблокировано",
         "info-title": "Информация",
         "library-title": "Библиотека",
         "format-title": "Формат",
@@ -1364,7 +1339,6 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "size-label": "{{edit-series-modal.size-title}}",
         "links-label": "{{metadata-fields.links-title}}",
@@ -1521,8 +1495,7 @@
         "title": "Новый внешний источник",
         "host-label": "Хост",
         "name-label": "Имя",
-        "api-key-label": "API-ключ",
-        "pattern": "Хост должен быть действительным URL-адресом с префиксом http(s)://"
+        "api-key-label": "API-ключ"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",

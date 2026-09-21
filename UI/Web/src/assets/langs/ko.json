@@ -128,7 +128,11 @@
         "prompt-for-rereads-after-label": "다시 읽기 알림",
         "prompt-for-rereads-after-tooltip": "X일 전 이후 진행이 없을 경우 다시 읽기 알림을 표시합니다. 0은 알람을 완전히 비활성화합니다.",
         "social-share-profile-label": "프로필 공유",
-        "social-share-profile-tooltip": "내 독서 활동을 다른 회원들과 공유합니다"
+        "social-share-profile-tooltip": "내 독서 활동을 다른 회원들과 공유합니다",
+        "ondeck-progress-days-label": "계속 읽기 유지 기간(일)",
+        "ondeck-progress-days-tooltip": "마지막으로 읽은 후 이 일수가 지나면 계속 읽기에서 제외됩니다.",
+        "ondeck-update-days-label": "계속 읽기 새 챕터 기준(일)",
+        "ondeck-update-days-tooltip": "마지막 챕터가 추가된 후 이 일수 이내인 항목을 계속 읽기에 포함합니다."
     },
     "user-holds": {
         "title": "독서 기록 동기화 보류",
@@ -269,7 +273,14 @@
         "loading": "{{common.loading}}",
         "add-item": "추가 {{item}}…",
         "no-data": "{{common.no-data}}",
-        "add-custom-item": ", 사용자 정의 목록을 추가하려면 입력하세요"
+        "add-custom-item": ", 사용자 정의 목록을 추가하려면 입력하세요",
+        "toggle-lock-alt": "필드 잠금",
+        "remove-alt": "{{title}} 제거",
+        "remove-item-alt": "항목 제거",
+        "clear-selections-alt": "전체 선택 해제",
+        "selected-items-alt": "선택된 항목",
+        "results-available-alt": "{{count}}개의 결과가 있습니다",
+        "no-results-alt": "결과가 없습니다"
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
@@ -1049,10 +1060,6 @@
         "logging-level-tooltip": "문제를 식별하는 데 도움이 되도록 디버그를 사용하십시오. 디버그는 디스크 공간을 많이 차지할 수 있습니다.",
         "cache-size-label": "캐시 크기",
         "cache-size-tooltip": "무거운 API 캐싱에 허용되는 메모리 양입니다. 기본값은 75MB입니다.",
-        "on-deck-last-progress-label": "계속 읽기 마지막 진행률(일)",
-        "on-deck-last-progress-tooltip": "계속 읽기를 시작하기 전에 마지막 진행 이후 일 수입니다.",
-        "on-deck-last-chapter-add-label": "계속 읽기 마지막 챕터 추가(일)",
-        "on-deck-last-chapter-add-tooltip": "계속 읽기를 포함하기 위해 마지막 챕터 이후의 일수가 추가되었습니다.",
         "allow-stats-label": "익명 사용 수집 허용",
         "allow-stats-tooltip-part-1": "익명의 사용 데이터를 Kavita의 서버로 보냅니다. 여기에는 사용된 특정 기능, 파일 수, OS 버전, Kavita 설치 버전, CPU 및 메모리에 대한 정보가 포함됩니다. 이 정보를 사용하여 기능, 버그 수정 및 성능 튜닝의 우선 순위를 정합니다. 적용하려면 다시 시작해야 합니다. 참조 ",
         "allow-stats-tooltip-part-2": "수집하는 항목들에 대해서.",
@@ -1177,7 +1184,6 @@
         "title": "편집 {{collectionName}} 컬렉션",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
         "name-label": "이름",
         "name-validation": "이름은 고유해야 합니다",
         "promote-label": "공개",
@@ -1352,26 +1358,8 @@
         "first-page": "{{keybind-setting-description-pipe.key-bind-title-first-page}}",
         "last-page": "{{keybind-setting-description-pipe.key-bind-title-last-page}}"
     },
-    "grouped-typeahead": {
-        "files": "파일",
-        "chapters": "챕터",
-        "people": "인물",
-        "tags": "태그",
-        "genres": "{{metadata-fields.genres-title}}",
-        "bookmarks": "{{side-nav.bookmarks}}",
-        "libraries": "{{common.libraries}}",
-        "reading-lists": "읽기 목록",
-        "collections": "컬렉션",
-        "close": "{{common.close}}",
-        "loading": "{{common.loading}}",
-        "include-extras": "챕터 및 파일 포함",
-        "annotations": "{{tabs.annotations-tab}}"
-    },
     "nav-header": {
         "skip-alt": "메인 콘텐츠로 건너뛰기",
-        "search-series-alt": "시리즈 검색",
-        "search-alt": "검색…",
-        "no-data": "검색 결과가 없습니다",
         "scroll-to-top-alt": "맨위로 스크롤",
         "server-settings": "서버 설정",
         "settings": "설정",
@@ -1382,7 +1370,6 @@
         "nav-link-header": "네비게이션 옵션",
         "close": "{{common.close}}",
         "browse-genres": "장르 탐색",
-        "person-aka-status": "별명과 매칭",
         "browse-tags": "태그 탐색",
         "all-annotations": "주석 탐색",
         "my-profile": "내 프로필"
@@ -1664,7 +1651,6 @@
         "web-link-label": "{{tabs.weblink-tab}}",
         "cover-image-description": "새 표지 이미지를 업로드하고 선택합니다. 저장을 눌러 표지를 업로드하고 재정의합니다.",
         "save": "{{common.save}}",
-        "field-locked-alt": "필드가 잠겨 있습니다",
         "info-title": "정보",
         "library-title": "라이브러리",
         "format-title": "포맷",
@@ -1731,7 +1717,6 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "pages-label": "페이지",
         "words-label": "길이",
@@ -1966,7 +1951,6 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "pattern": "호스트는 유효한 http(s):// URL이어야 합니다",
         "api-key-tooltip": "호스트가 OIDC를 사용할 때 자동 로그인이 필요하지 않습니다"
     },
     "stream-pipe": {
@@ -2320,7 +2304,13 @@
         "year-validation": "1000자보다 크고 4자 길이의 유효한 연도여야 합니다",
         "other-field-required": "{{other}}이(가) 설정된 경우 {{name}} 이(가) 필요합니다",
         "invalid-uri": "입력된 URL이 유효하지 않습니다",
-        "other-field-invalid": "유효성 확인 불가. {{other}} 값이 올바르지 않습니다"
+        "other-field-invalid": "유효성 확인 불가. {{other}} 값이 올바르지 않습니다",
+        "email-invalid": "유효한 이메일이어야 합니다",
+        "min-length": "최소 {{requiredLength}}자 이상이어야 합니다",
+        "min": "{{min}}보다 큰 값이어야 합니다",
+        "max": "{{max}}보다 작은 값이어야 합니다",
+        "invalid-amazon-code": "ASIN 코드는 B0 또는 BT로 시작해야 합니다",
+        "invalid-asin": "유효한 ASIN이 아닙니다"
     },
     "entity-type": {
         "volume": "권",
@@ -3181,7 +3171,8 @@
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "never": "무제한"
+        "never": "무제한",
+        "duplicate-name-validation": "인증 키 이름은 고유해야 합니다"
     },
     "review-list-item": {
         "by-label": "작가",
@@ -4424,5 +4415,22 @@
         "excluded-libraries-tooltip": "건너뛸 라이브러리",
         "queued-title": "다시 실행 대기 중",
         "queued-description": "곧 처리가 시작됩니다. 잠시 기다려 주세요."
+    },
+    "search-typeahead": {
+        "files": "파일",
+        "chapters": "챕터",
+        "people": "인물",
+        "annotations": "{{tabs.annotations-tab}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "libraries": "{{common.libraries}}",
+        "series": "시리즈",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "include-extras": "챕터 & 파일 포함",
+        "search-alt": "검색어 입력…",
+        "tags": "태그",
+        "reading-lists": "독서 목록",
+        "collections": "컬렉션"
     }
 }

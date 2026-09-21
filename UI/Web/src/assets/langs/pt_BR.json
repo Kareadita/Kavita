@@ -128,7 +128,11 @@
         "prompt-for-rereads-after-label": "Confirmar Releituras",
         "prompt-for-rereads-after-tooltip": "Exibir a confirmação de Releitura caso não haja progresso desde X dias atrás. O valor 0 desativa completamente a confirmação.",
         "social-share-profile-label": "Compartilhar Perfil",
-        "social-share-profile-tooltip": "Ativar o compartilhamento de informações sobre sua atividade de leitura com outros membros do servidor"
+        "social-share-profile-tooltip": "Ativar o compartilhamento de informações sobre sua atividade de leitura com outros membros do servidor",
+        "ondeck-progress-days-label": "Em Andamento – Último Progresso (dias)",
+        "ondeck-progress-days-tooltip": "O número de dias desde o último progresso antes de remover algo de Em Andamento.",
+        "ondeck-update-days-label": "Em Andamento – Último Capítulo Adicionado (dias)",
+        "ondeck-update-days-tooltip": "O número de dias desde a adição do último capítulo para incluir algo em Em Andamento."
     },
     "user-holds": {
         "title": "Paradas do Scrobble",
@@ -269,7 +273,14 @@
         "loading": "{{common.loading}}",
         "add-item": "Adicionar {{item}}…",
         "no-data": "{{common.no-data}}",
-        "add-custom-item": ", digite para adicionar um item personalizado"
+        "add-custom-item": ", digite para adicionar um item personalizado",
+        "toggle-lock-alt": "Bloquear campo",
+        "remove-alt": "Remover {{title}}",
+        "remove-item-alt": "Remover item",
+        "clear-selections-alt": "Limpar todas as seleções",
+        "selected-items-alt": "Itens selecionados",
+        "results-available-alt": "{{count}} resultados disponíveis",
+        "no-results-alt": "Nenhum resultado disponível"
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
@@ -1049,10 +1060,6 @@
         "logging-level-tooltip": "Use depuração para ajudar a identificar problemas. A depuração pode consumir muito espaço em disco.",
         "cache-size-label": "Tamanho do Cache",
         "cache-size-tooltip": "A quantidade de memória permitida para o cache de APIs pesadas. O padrão é 75 MB.",
-        "on-deck-last-progress-label": "Último Progresso em Em Andamento (dias)",
-        "on-deck-last-progress-tooltip": "O número de dias desde o último progresso antes de remover algo de Em Andamento.",
-        "on-deck-last-chapter-add-label": "Último Capítulo Adicionado em Em Andamento (dias)",
-        "on-deck-last-chapter-add-tooltip": "O número de dias desde que o último capítulo foi adicionado para incluir algo em Em Andamento.",
         "allow-stats-label": "Permitir Coleta de Uso Anônimo",
         "allow-stats-tooltip-part-1": "Enviar dados de uso anônimos para os servidores do Kavita. Isso inclui informações sobre determinados recursos usados, número de arquivos, versão do SO, versão de instalação do Kavita, CPU e memória. Usaremos essas informações para priorizar recursos, correções de bugs e ajustes de desempenho. Requer reinicialização para entrar em vigor. Consulte o ",
         "allow-stats-tooltip-part-2": "para o que é coletado.",
@@ -1177,7 +1184,6 @@
         "title": "Editar Coleção {{collectionName}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
         "name-label": "Nome",
         "name-validation": "O nome deve ser exclusivo",
         "promote-label": "Promover",
@@ -1352,26 +1358,8 @@
         "first-page": "{{keybind-setting-description-pipe.key-bind-title-first-page}}",
         "last-page": "{{keybind-setting-description-pipe.key-bind-title-last-page}}"
     },
-    "grouped-typeahead": {
-        "files": "Arquivos",
-        "chapters": "Capítulos",
-        "people": "Pessoas",
-        "tags": "Etiquetas",
-        "genres": "{{metadata-fields.genres-title}}",
-        "bookmarks": "{{side-nav.bookmarks}}",
-        "libraries": "{{common.libraries}}",
-        "reading-lists": "Listas de Leitura",
-        "collections": "Coleções",
-        "close": "{{common.close}}",
-        "loading": "{{common.loading}}",
-        "include-extras": "Incluir Capítulos & Arquivos",
-        "annotations": "{{tabs.annotations-tab}}"
-    },
     "nav-header": {
         "skip-alt": "Pular para o conteúdo principal",
-        "search-series-alt": "Buscar série",
-        "search-alt": "Pesquisar…",
-        "no-data": "Nenhum resultado encontrado",
         "scroll-to-top-alt": "Rolar para o Topo",
         "server-settings": "Configurações do Servidor",
         "settings": "Configurações",
@@ -1381,7 +1369,6 @@
         "all-filters": "Filtros Inteligentes",
         "nav-link-header": "Opções de Navegação",
         "close": "{{common.close}}",
-        "person-aka-status": "Corresponde a um alias",
         "browse-tags": "Explorar Etiquetas",
         "browse-genres": "Explorar Gêneros",
         "all-annotations": "Explorar Anotações",
@@ -1553,7 +1540,8 @@
         "reading-profile-updated": "Perfil de leitura atualizado",
         "create-new": "{{reader-settings.create-new}}",
         "page-offset-label": "Deslocamento de Página",
-        "offset-only-double": "O deslocamento de página só pode ser usado com o Layout Duplo"
+        "offset-only-double": "O deslocamento de página só pode ser usado com o Layout Duplo",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-label}}"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1664,7 +1652,6 @@
         "web-link-label": "{{tabs.weblink-tab}}",
         "cover-image-description": "Envie e escolha uma nova imagem de capa. Pressione Salvar para enviar e substituir a capa.",
         "save": "{{common.save}}",
-        "field-locked-alt": "Campo bloqueado",
         "info-title": "informação",
         "library-title": "Biblioteca",
         "format-title": "Formato",
@@ -1731,7 +1718,6 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "pages-label": "Páginas",
         "words-label": "Comprimento",
@@ -1901,7 +1887,8 @@
         "font-manual-upload": "Ocorreu um problema ao criar a fonte a partir do upload manual",
         "font-already-in-use": "Já existe uma fonte com esse nome",
         "upload-too-large": "O arquivo é grande demais para upload; selecione uma imagem menor e tente novamente.",
-        "invalid-form": "O formulário que você está tentando enviar contém erros"
+        "invalid-form": "O formulário que você está tentando enviar contém erros",
+        "required-if-other-invalid": "{{other}} é inválido"
     },
     "metadata-builder": {
         "or": "Corresponder a qualquer uma das seguintes",
@@ -1966,8 +1953,8 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "pattern": "O host deve ser uma URL http(s):// válida",
-        "api-key-tooltip": "Não é necessário para login automático quando o host usa OIDC"
+        "api-key-tooltip": "Não é necessário para login automático quando o host usa OIDC",
+        "confirm-delete": "Tem certeza de que deseja excluir {{name}} como fonte externa?"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -2320,7 +2307,13 @@
         "year-validation": "O ano deve ser válido, maior que 1000 e conter 4 caracteres",
         "other-field-required": "{{name}} é obrigatório quando {{other}} está definido",
         "invalid-uri": "O URI informado é inválido",
-        "other-field-invalid": "Não é possível verificar a validade; {{other}} é inválido"
+        "other-field-invalid": "Não é possível verificar a validade; {{other}} é inválido",
+        "email-invalid": "Este deve ser um e-mail válido",
+        "min-length": "Deve ter pelo menos {{requiredLength}} caracteres",
+        "min": "O valor deve ser maior que {{min}}",
+        "max": "O valor deve ser menor que {{max}}",
+        "invalid-amazon-code": "ASIN deve começar com B0 ou BT",
+        "invalid-asin": "Este não é um ASIN válido"
     },
     "entity-type": {
         "volume": "volume",
@@ -3181,7 +3174,8 @@
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "never": "Nunca"
+        "never": "Nunca",
+        "duplicate-name-validation": "O nome da chave de autenticação deve ser exclusivo"
     },
     "review-list-item": {
         "by-label": "Por",
@@ -3376,7 +3370,8 @@
     "favorite-authors": {
         "title": "Autores Mais Lidos",
         "sub-title": "O autor mais lido por {{name}} é {{author}}, com {{count}} leituras no total",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "chapter-count": "{{common.chapter-count}}"
     },
     "page-spread": {
         "title": "Capítulos por Contagem de Páginas",
@@ -4424,5 +4419,45 @@
         "recurrent": "Recorrente",
         "incidental": "Incidental",
         "unweighted": "Sem Peso"
+    },
+    "search-typeahead": {
+        "files": "Arquivos",
+        "chapters": "Capítulos",
+        "people": "Pessoas",
+        "tags": "Etiquetas",
+        "annotations": "{{tabs.annotations-tab}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "libraries": "{{common.libraries}}",
+        "reading-lists": "Listas de Leitura",
+        "collections": "Coleções",
+        "series": "Séries",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "include-extras": "Incluir Capítulos e Arquivos",
+        "search-alt": "Buscar…",
+        "person-aka-status": "Corresponde a um alias",
+        "no-data": "Nenhum resultado encontrado",
+        "search-for": "Buscar por {{term}}",
+        "in-library": "em {{name}}",
+        "volume-count": "{{count}} volumes",
+        "volume-count-one": "{{count}} volume",
+        "chapter-count": "{{count}} capítulos",
+        "chapter-count-one": "{{count}} capítulo",
+        "search-config-alt": "Opções de busca",
+        "search-config-title": "Opções de Busca",
+        "results-available-alt": "{{typeahead.results-available-alt}}",
+        "no-results-alt": "{{typeahead.no-results-alt}}",
+        "search-series-alt": "Buscar séries"
+    },
+    "locked-field": {
+        "field-locked-alt": "O campo está bloqueado"
+    },
+    "rate-and-review-series-modal": {
+        "title": "Avaliar e Analisar: {{seriesName}}",
+        "description": "Deixe uma avaliação e uma análise sobre a série.",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "review-label": "{{review-modal.review-label}}"
     }
 }

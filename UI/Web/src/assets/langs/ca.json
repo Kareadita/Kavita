@@ -202,21 +202,11 @@
     "events-widget": {
         "title-alt": "Activitat"
     },
-    "grouped-typeahead": {
-        "tags": "Etiquetes",
-        "files": "Fitxers",
-        "chapters": "Capítols",
-        "people": "Persones",
-        "libraries": "Biblioteques",
-        "collections": "Col·leccions"
-    },
     "nav-header": {
-        "search-alt": "Cerca…",
         "server-settings": "Paràmetres del servidor",
         "settings": "Paràmetres",
         "all-filters": "Filtres intel·ligents",
-        "nav-link-header": "Opcions de navegació",
-        "no-data": "No s'ha trobat cap resultat"
+        "nav-link-header": "Opcions de navegació"
     },
     "pdf-reader": {
         "incognito-mode": "Mode incògnit",
@@ -292,8 +282,7 @@
         "title": "Font externa nova",
         "host-label": "Amfitrió",
         "name-label": "Nom",
-        "api-key-label": "Clau de l'API",
-        "pattern": "L'amfitrió ha d'indicar-se com un URL http(s):// vàlid"
+        "api-key-label": "Clau de l'API"
     },
     "filter-field-pipe": {
         "collection-tags": "Etiquetes de la col·lecció",

@@ -281,5 +281,9 @@
     "email.username-change.description": "您账户的用户名已在{{InvitingUser}}的Kavita实例上更新。您无需进行任何操作。",
     "email.auth-key-expiring-soon.cta": "轮换",
     "email.auth-key-expired.cta": "轮换",
-    "series-name-exists": "库里已经有一个叫这个名字的系列"
+    "series-name-exists": "库里已经有一个叫这个名字的系列",
+    "series-name-orphans-files": "更改此名称会将当前合并到此系列中的文件拆分开",
+    "series-localized-name-exists": "此名称已被该库中的另一个系列占用",
+    "series-localized-name-orphans-files": "更改此本地化名称将会拆分当前已合并到该系列中的文件",
+    "mappings-re-run-in-progress": "正在处理元数据重新映射请求。请等待其完成后再重新排队"
 }
