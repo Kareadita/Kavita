@@ -35,9 +35,6 @@
     "nav-header": {
         "all-filters": "Älykkäät suodattimet"
     },
-    "grouped-typeahead": {
-        "reading-lists": "Lukulistat"
-    },
     "login": {
         "title": "Kirjaudu sisään tilillesi",
         "username": "{{common.username}}",

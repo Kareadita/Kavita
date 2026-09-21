@@ -1036,10 +1036,6 @@
         "logging-level-tooltip": "使用调试有助于发现问题。调试会占用大量磁盘空间。",
         "cache-size-label": "缓存大小",
         "cache-size-tooltip": "重度API缓存允许的内存容量。默认值75MB。",
-        "on-deck-last-progress-label": "“最近阅读”最后进度（天数）",
-        "on-deck-last-progress-tooltip": "自上次阅读进度加入最近阅读到从最近阅读移除的天数。",
-        "on-deck-last-chapter-add-label": "最近阅读上一次章节加入（天数）",
-        "on-deck-last-chapter-add-tooltip": "上一次章节内容加入至最近阅读的天数。",
         "allow-stats-label": "允许匿名收集使用数据",
         "allow-stats-tooltip-part-1": "采用匿名方式将使用数据发送到Kavita服务器。这些数据包括使用的某些功能、文件数量、操作系统版本、Kavita版本、CPU和内存。我们将使用这些信息来确定功能开发、错误修复和性能调整的优先级。需要重新启动才能生效。请参阅 ",
         "allow-stats-tooltip-part-2": "了解收集的内容。",
@@ -1163,7 +1159,6 @@
         "title": "编辑 {{collectionName}} 收藏",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
         "name-label": "名称",
         "name-validation": "名称必须唯一",
         "promote-label": "推广",
@@ -1323,26 +1318,8 @@
         "toggle-menu": "切换菜单",
         "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
     },
-    "grouped-typeahead": {
-        "files": "文件",
-        "chapters": "章节",
-        "people": "创作人员",
-        "tags": "标签",
-        "genres": "{{metadata-fields.genres-title}}",
-        "bookmarks": "{{side-nav.bookmarks}}",
-        "libraries": "{{common.libraries}}",
-        "reading-lists": "阅读列表",
-        "collections": "收藏",
-        "close": "{{common.close}}",
-        "loading": "{{common.loading}}",
-        "include-extras": "包括章节和文件",
-        "annotations": "{{tabs.annotations-tab}}"
-    },
     "nav-header": {
         "skip-alt": "跳转至主要内容",
-        "search-series-alt": "搜索系列",
-        "search-alt": "搜索…",
-        "no-data": "无结果",
         "scroll-to-top-alt": "滚动到顶部",
         "server-settings": "服务器设置",
         "settings": "设置",
@@ -1352,7 +1329,6 @@
         "all-filters": "智能筛选",
         "nav-link-header": "导航选项",
         "close": "{{common.close}}",
-        "person-aka-status": "匹配别名",
         "browse-genres": "浏览类型",
         "browse-tags": "浏览标签",
         "all-annotations": "浏览注释",
@@ -1623,7 +1599,6 @@
         "web-link-label": "{{tabs.weblink-tab}}",
         "cover-image-description": "选择并上传一张新封面图片。点击保存将上传图片并覆盖原有封面。",
         "save": "{{common.save}}",
-        "field-locked-alt": "字段已锁定",
         "info-title": "信息",
         "library-title": "资料库",
         "format-title": "格式",
@@ -1684,7 +1659,6 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "pages-label": "页数",
         "words-label": "长度",
@@ -1915,8 +1889,7 @@
         "save": "{{common.save}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "delete": "{{common.delete}}",
-        "pattern": "主机必须是一个有效的http(s)://地址"
+        "delete": "{{common.delete}}"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -2508,7 +2481,8 @@
         "people-header": "创作人员",
         "tags-header": "标签",
         "source-genre-tags-placeholder": "来源类型/标签",
-        "dest-genre-tags-placeholder": "目标类型/标签"
+        "dest-genre-tags-placeholder": "目标类型/标签",
+        "language-header": "语言"
     },
     "metadata-setting-field-pipe": {
         "covers": "封面",
@@ -2995,7 +2969,8 @@
         "add-auth-key": "新的",
         "description": "授权密钥就像密码一样。轮换密钥会使所有现有客户端失效。",
         "copy-key": "{{common.copy}}",
-        "clients-opds-error": "无法加载密钥的 OPDS URL: {{key}}"
+        "clients-opds-error": "无法加载密钥的 OPDS URL: {{key}}",
+        "no-data-description": "您还没有任何授权密钥。"
     },
     "create-auth-key": {
         "rotate-title": "轮换授权密钥",
@@ -3713,5 +3688,22 @@
         "checked-ago-label": "已于 {{time}} 前查看",
         "refresh-alt": "刷新提供商状态",
         "no-data-label": "无提供商状态数据可用"
+    },
+    "manage-kavitaplus-activity": {
+        "filter-all": "全部",
+        "filter-metadata": "元数据",
+        "yesterday": "昨天",
+        "today": "今天",
+        "filter-user-label": "用户",
+        "system": "系统"
+    },
+    "scrobble-account-card": {
+        "provider-connected": "已连接",
+        "provider-not-connected": "未连接",
+        "provider-settings": "设置"
+    },
+    "kavitaplus-timeline": {
+        "today": "今天",
+        "yesterday": "昨天"
     }
 }

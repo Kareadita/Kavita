@@ -729,7 +729,6 @@
     "edit-collection-tags": {
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}",
         "filter-label": "{{common.filter}}",
@@ -814,12 +813,6 @@
     },
     "shortcuts-modal": {
         "close": "{{common.close}}"
-    },
-    "grouped-typeahead": {
-        "genres": "{{metadata-fields.genres-title}}",
-        "bookmarks": "{{side-nav.bookmarks}}",
-        "close": "{{common.close}}",
-        "loading": "{{common.loading}}"
     },
     "nav-header": {
         "help": "{{common.help}}",
@@ -990,7 +983,6 @@
         "summary-label": "Összefoglalás",
         "web-link-description": "Itt számos különböző külső szolgáltatásra mutató linket adhatsz hozzá.",
         "cover-image-description": "Töltsön fel és válasszon egy új borítóképet. Nyomja meg a Mentés gombot a borító feltöltéséhez és felülírásához.",
-        "field-locked-alt": "A mező zárolva van",
         "info-title": "Információ",
         "library-title": "Könyvtár",
         "format-title": "Formátum",
@@ -1028,7 +1020,6 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "size-label": "{{edit-series-modal.size-title}}",
         "links-label": "{{metadata-fields.links-title}}",
