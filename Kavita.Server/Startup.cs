@@ -552,6 +552,7 @@ public class Startup
 
                     await new ManualMigrationUnassignDefaultReadingProfile().RunAsync(dataContext, logger);
                     await new ManualMigrateOnDeckSettings().RunAsync(dataContext, logger);
+                    await new ManualMigrationFixInvalidOnDeckSettings().RunAsync(dataContext, logger);
 
                     #endregion
 
