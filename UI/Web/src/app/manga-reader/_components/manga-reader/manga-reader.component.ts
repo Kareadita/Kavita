@@ -60,7 +60,7 @@ import {InfiniteScrollerComponent} from '../infinite-scroller/infinite-scroller.
 import {SwipeDirective} from '../../../ng-swipe/ng-swipe.directive';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {shareReplay} from "rxjs/operators";
+import {shareReplay, take} from "rxjs/operators";
 import {DblClickDirective} from "../../../_directives/dbl-click.directive";
 import {
   layoutModes,
@@ -1580,11 +1580,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         ref.setInput('ratingReview', res);
         ref.setInput('seriesName', this.chapterInfo()!.seriesName);
 
-        ref.dismissed.subscribe(res => {
-          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+        // Navigation after dismal may cause recursion. Only do it once
+        ref.dismissed.pipe(take(1)).subscribe(res => {
+          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
         });
-        ref.closed.subscribe(res => {
-          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+        ref.closed.pipe(take(1)).subscribe(res => {
+          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
         });
       })
 
