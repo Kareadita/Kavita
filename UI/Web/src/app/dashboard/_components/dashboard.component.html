@@ -89,10 +89,10 @@
 
       <ng-template #recentlyUpdated let-stream: DashboardStream>
         @if(stream.api | async; as data) {
+          <!-- NOTE: We cannot paginate this (backend cannot provide page info) so this would load endlessly -->
           <app-carousel-reel
             [items]="data"
             [title]="t('recently-updated-title')"
-            [nextPageLoader]="onRecentlyUpdatedNextPage(stream)"
             (sectionClick)="handleSectionClick(StreamId.RecentlyUpdatedSeries)"
           >
             <ng-template #carouselItem let-item>

@@ -113,6 +113,11 @@ export class CarouselReelComponent<T> {
   syncEdges(s: Swiper | undefined = this.swiper()) {
     this.isBeginning.set(s?.isBeginning ?? true);
     this.isEnd.set(s?.isEnd ?? false);
+
+    // On first load (no items loaded) isBeginning & isEnd may be true at the same time
+    if (!this.isBeginning() && this.isEnd() && s?.initialized) {
+      this.tryLoadNextPage();
+    }
   }
 
   private tryLoadNextPage() {
@@ -178,14 +183,6 @@ export class CarouselReelComponent<T> {
 
   sectionClicked() {
     this.sectionClick.emit(this.title());
-  }
-
-  onReachEnd() {
-    if (this.currentPage() >= this.totalPages()) {
-      return;
-    }
-
-    this.tryLoadNextPage();
   }
 
   performAction(event: ActionResult<T>) {

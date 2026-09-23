@@ -13,7 +13,7 @@ import {Router, RouterLink} from '@angular/router';
 import {filter, Observable, ReplaySubject, Subject, switchMap} from 'rxjs';
 import {debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CarouselReelComponent} from '../../carousel/_components/carousel-reel/carousel-reel.component';
+import {CarouselReelComponent, NextPageLoader} from '../../carousel/_components/carousel-reel/carousel-reel.component';
 import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {
   SideNavCompanionBarComponent
@@ -36,7 +36,7 @@ import {QueryContext} from "../../_models/metadata/v2/query-context";
 import {LicenseService} from "../../_services/license.service";
 import {EntityCardComponent} from "../../cards/entity-card/entity-card.component";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
-import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
+import {CardEntity, CardEntityFactory, SeriesCardEntity} from "../../_models/card/card-entity";
 import {PromotedIconComponent} from "../../shared/_components/promoted-icon/promoted-icon.component";
 import {FilterEntityType} from "../../_models/metadata/v2/filter-entity-type";
 import {ReadingListService} from "../../_services/reading-list.service";
@@ -52,12 +52,24 @@ import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {RecentlyAddedItem} from "../../_models/recently-added-item";
 import {SeriesSortField} from "../../_models/metadata/series-filter";
 import {Library} from "../../_models/library/library";
+import {PaginatedResult} from "../../_models/pagination";
 
 enum StreamId {
   OnDeck,
   RecentlyUpdatedSeries,
   NewlyAddedSeries,
   MoreInGenre,
+}
+
+function mapPaginatedResult<T, U>(fn: (t: T) => U) {
+  return map<PaginatedResult<T[]>, PaginatedResult<U[]>>(paginatedResult => {
+    const result = new PaginatedResult<U[]>();
+
+    result.pagination = paginatedResult.pagination;
+    result.result = paginatedResult.result.map(fn);
+
+    return result;
+  });
 }
 
 
@@ -162,32 +174,25 @@ export class DashboardComponent {
     }
   }
 
-  smartFilterNextPage(stream: DashboardStream) {
+  smartFilterNextPage(stream: DashboardStream): NextPageLoader<SeriesCardEntity> | null {
     if (!stream.smartFilterDecoded) return null;
 
     return (pageNum: number, pageSize: number) => {
       return this.seriesService.getAllSeriesV2(pageNum, pageSize, stream.smartFilterDecoded, QueryContext.Dashboard)
-        .pipe(map(d => d.result.map(series => CardEntityFactory.series(series))));
+        .pipe(mapPaginatedResult(series => CardEntityFactory.series(series)));
     }
   }
 
   onDeckNextPage(stream: DashboardStream) {
     return (pageNum: number, pageSize: number) => {
       return this.seriesService.getOnDeck(pageNum, pageSize)
-        .pipe(map(d => d.result.map(series => CardEntityFactory.series(series))));
+        .pipe(mapPaginatedResult(series => CardEntityFactory.series(series)));
     }
   }
   onRecentlyAddedNextPage(stream: DashboardStream) {
     return (pageNum: number, pageSize: number) => {
       return this.seriesService.getRecentlyAdded(pageNum, pageSize)
-        .pipe(map(d => d.result.map(series => CardEntityFactory.series(series))));
-    }
-  }
-
-  onRecentlyUpdatedNextPage(stream: DashboardStream) {
-    return (pageNum: number, pageSize: number) => {
-      return this.seriesService.getRecentlyUpdatedSeries(pageNum, pageSize)
-        .pipe(map(d => d.map(series => CardEntityFactory.recentlyUpdatedSeries(series))));
+        .pipe(mapPaginatedResult(series => CardEntityFactory.series(series)));
     }
   }
 
