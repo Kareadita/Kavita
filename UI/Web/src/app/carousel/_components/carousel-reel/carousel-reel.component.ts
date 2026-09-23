@@ -4,7 +4,7 @@ import {
   Component,
   computed,
   contentChild,
-  CUSTOM_ELEMENTS_SCHEMA,
+  CUSTOM_ELEMENTS_SCHEMA, DestroyRef,
   effect,
   ElementRef,
   inject,
@@ -26,6 +26,7 @@ import {ActionItem} from "../../../_models/actionables/action-item";
 import {ActionResult} from "../../../_models/actionables/action-result";
 import {ActionableEntity} from "../../../_services/action-factory.service";
 import {register} from "swiper/element/bundle";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 register();
 
@@ -42,6 +43,7 @@ export type NextPageLoader<T> = (pageNumber: number, pageSize: number) => Observ
 export class CarouselReelComponent<T> {
 
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly carouselItemTemplate = contentChild.required<TemplateRef<never>>('carouselItem');
   readonly promptToAddTemplate = contentChild.required<TemplateRef<never>>('promptToAdd');
@@ -130,6 +132,7 @@ export class CarouselReelComponent<T> {
     const oldSize = this.items().length;
 
     this.nextPageLoader()!(this.currentPage(), this.pageSize()).pipe(
+      takeUntilDestroyed(this.destroyRef),
       map(items => {
         if (Array.isArray(items)) {
           return items;
