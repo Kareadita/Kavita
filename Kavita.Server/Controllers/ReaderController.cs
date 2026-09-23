@@ -209,7 +209,10 @@ public class ReaderController(ICacheService cacheService,
         var mangaFile = chapter.Files.First();
 
         var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(dto.SeriesId, UserId, ct);
-        if (series == null) return Unauthorized();
+        if (series == null) return NotFound();
+
+        var publicationStatus = await unitOfWork.SeriesRepository.GetPublicationStatusAsync(dto.SeriesId, ct);
+        if (publicationStatus == null) return NotFound();
 
         var info = new ChapterInfoDto()
         {
@@ -225,6 +228,7 @@ public class ReaderController(ICacheService cacheService,
             Pages = dto.Pages,
             SeriesTotalPages = series.Pages,
             SeriesTotalPagesRead = series.PagesRead,
+            SeriesPublicationStatus = publicationStatus.Value,
             ChapterTitle = dto.ChapterTitle ?? string.Empty,
             Subtitle = string.Empty,
             Title = dto.SeriesName,

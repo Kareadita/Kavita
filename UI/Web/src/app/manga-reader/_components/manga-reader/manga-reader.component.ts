@@ -97,6 +97,7 @@ import {
   EnumOption,
   SettingSelectComponent
 } from "../../../settings/_components/setting-enum-select/setting-select.component";
+import {PublicationStatus} from "../../../_models/metadata/publication-status";
 
 
 const PREFETCH_PAGES = 10;
@@ -1560,6 +1561,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Open a Modal to ask for a review then close out the reader when they haven't rated it
       if (this.bookmarkMode()) {
         this.router.navigate(['library', this.libraryId, 'series', this.seriesId], {fragment: 'review-tab'});
+        return;
+      }
+
+      const publicationStatus = this.chapterInfo()!.seriesPublicationStatus;
+      if (publicationStatus !== PublicationStatus.Completed && publicationStatus !== PublicationStatus.Cancelled) {
+        this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
         return;
       }
 

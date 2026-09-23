@@ -683,6 +683,14 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .FirstOrDefaultAsync(ct);
     }
 
+    public Task<PublicationStatus?> GetPublicationStatusAsync(int seriesId, CancellationToken ct = default)
+    {
+        return context.Series
+            .Where(s => s.Id == seriesId)
+            .Select(s => (PublicationStatus?) s.Metadata.PublicationStatus)
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<string?> GetSeriesCoverImageAsync(int seriesId, CancellationToken ct = default)
     {
         return await context.Series
