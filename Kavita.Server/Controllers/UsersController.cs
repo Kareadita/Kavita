@@ -33,11 +33,11 @@ public class UsersController(
 {
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpDelete("delete-user")]
-    public async Task<ActionResult> DeleteUser(string username)
+    public async Task<ActionResult> DeleteUser(int userId)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(username, ct: ct);
-        if (user == null) return BadRequest();
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
+        if (user == null) return NotFound();
 
         // Remove all likes for the user, so like counts are correct
         var annotations = await unitOfWork.AnnotationRepository.GetAllAnnotations(ct);
