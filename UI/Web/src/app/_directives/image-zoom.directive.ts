@@ -143,6 +143,8 @@ export class ImageZoomDirective {
   private readonly momentumMaxFrameTime = 32;
   /** The reference frame duration used by the decay rate */
   private readonly momentumReferenceFrameTime = 16;
+  /** Treat floating-point values this close to 1 as fully reset. */
+  private readonly zoomResetEpsilon = 0.000001;
 
   transform = 'translate3d(0, 0, 0) scale(1)';
   cursor = 'default';
@@ -417,9 +419,10 @@ export class ImageZoomDirective {
     // divide by scale to translate from screen pixels to image pixels
     const imagePointX = (clientX - layoutCenterX - this.translateX) / previousScale;
     const imagePointY = (clientY - layoutCenterY - this.translateY) / previousScale;
+    const isReset = nextScaleClamped <= 1 + this.zoomResetEpsilon;
 
     // User has zoomed all the way out, reset translation
-    if (nextScaleClamped === 1) {
+    if (isReset) {
       this.scale = 1;
       this.translateX = 0;
       this.translateY = 0;
