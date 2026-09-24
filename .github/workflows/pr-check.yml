@@ -5,6 +5,11 @@ on:
         branches: [ main, develop, canary ]
         types: [synchronize]
 
+permissions:
+  contents: read
+  # The body check reads the pull request through the API.
+  pull-requests: read
+
 jobs:
     check_pr:
         runs-on: ubuntu-24.04
@@ -14,7 +19,7 @@ jobs:
               run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
               id: extract_branch
             - name: Check PR Body
-              uses: JJ/github-pr-contains-action@releases/v10
+              uses: JJ/github-pr-contains-action@43fcaf34d8462de9359ce2a6c8b469d6a13354c8 # releases/v10
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   bodyDoesNotContain: "[\"|`]"
