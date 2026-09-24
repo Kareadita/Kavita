@@ -204,4 +204,13 @@ public class BookServiceTests
         Assert.True(result.IsSuccess);
         Assert.Equal("image/png", result.ContentType);
     }
+
+    [Theory]
+    [InlineData("images/V02%20TBC.jpg", "images%2FV02%20TBC.jpg")]
+    [InlineData("images/V02 TBC.jpg", "images%2FV02%20TBC.jpg")]
+    [InlineData("images/100% cover.jpg", "images%2F100%25%20cover.jpg")]
+    public void EncodeResourcePath_EncodesPathExactlyOnce(string resourcePath, string expected)
+    {
+        Assert.Equal(expected, BookService.EncodeResourcePath(resourcePath));
+    }
 }
