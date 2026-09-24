@@ -52,7 +52,7 @@ export class ImageZoomDirective {
 
     if (event.touches.length === 2) {
       instance.onTouchStart(event);
-    } else if (event.touches.length === 1 && instance.isPaginationEvent(event) && instance.isZoomedIn()) {
+    } else if (event.touches.length === 1 && instance.isPaginationEvent(event) && instance.canPan()) {
       const touch = event.touches[0];
       if (instance.containsPoint(touch.clientX, touch.clientY)) {
         instance.startPan(touch.clientX, touch.clientY);
@@ -155,6 +155,11 @@ export class ImageZoomDirective {
     this.reset();
   }
 
+  @Input()
+  set zoomResetMode(_: unknown) {
+    this.reset();
+  }
+
   /**
    * Handles mouse wheel events.
    * Zooms the image in/out when the ctrl key is pressed.
@@ -198,7 +203,7 @@ export class ImageZoomDirective {
     }
 
     // Pan
-    if (event.touches.length === 1 && this.isZoomedIn()) {
+    if (event.touches.length === 1 && this.canPan()) {
       this.startPan(event.touches[0].clientX, event.touches[0].clientY);
     }
   }
@@ -225,7 +230,7 @@ export class ImageZoomDirective {
 
     // One touch -> pan
     if (event.touches.length === 1){
-      if (!this.isPanning || !this.isZoomedIn()) { return; }
+      if (!this.isPanning || !this.canPan()) { return; }
 
       event.preventDefault();
       event.stopPropagation();
@@ -308,7 +313,7 @@ export class ImageZoomDirective {
       return;
     }
 
-    if (!this.isZoomedIn() || !this.containsPoint(event.touches[0].clientX, event.touches[0].clientY)) {
+    if (!this.canPan() || !this.containsPoint(event.touches[0].clientX, event.touches[0].clientY)) {
       return;
     }
 
@@ -322,7 +327,7 @@ export class ImageZoomDirective {
    * @returns 
    */
   onWindowTouchMove(event: TouchEvent): void {
-    if (event.touches.length !== 1 || !this.isPanning || !this.isZoomedIn()) {
+    if (event.touches.length !== 1 || !this.isPanning || !this.canPan()) {
       return;
     }
 
@@ -339,7 +344,7 @@ export class ImageZoomDirective {
     }
 
     this.isPanning = false;
-    this.cursor = this.isZoomedIn() ? 'grab' : 'default';
+    this.cursor = this.canPan() ? 'grab' : 'default';
     this.startMomentum();
   }
 
@@ -359,14 +364,14 @@ export class ImageZoomDirective {
   /**
    * Determines whether we can start panning when a mouse down event fires.
    * Allows panning when the triggering button is the primary mouse button,
-   * the image is zoomed in, and the click is within the image bounds.
+   * the image overflows the reading area, and the click is within the image bounds.
    * @param button The mouse button that triggered the event
    * @param clientX The x-coordinate of the event
    * @param clientY The y-coordinate of the event
    * @returns True if we can start panning
    */
   private canStartPan(button: number, clientX: number, clientY: number): boolean {
-    return button === 0 && this.isZoomedIn() && this.containsPoint(clientX, clientY);
+    return button === 0 && this.canPan() && this.containsPoint(clientX, clientY);
   }
 
   /**
@@ -384,6 +389,24 @@ export class ImageZoomDirective {
    */
   private isZoomedIn(): boolean {
     return this.scale > 1;
+  }
+
+  /**
+   * Determines whether the image has content extending beyond the reading area.
+   */
+  private canPan(): boolean {
+    if (this.isZoomedIn()) {
+      return true;
+    }
+
+    const readingArea = this.element.nativeElement.closest('.reading-area');
+    if (!readingArea) {
+      return false;
+    }
+
+    const readingAreaRect = readingArea.getBoundingClientRect();
+    const element = this.element.nativeElement;
+    return element.offsetWidth > readingAreaRect.width || element.offsetHeight > readingAreaRect.height;
   }
 
   /**
@@ -419,14 +442,9 @@ export class ImageZoomDirective {
     // divide by scale to translate from screen pixels to image pixels
     const imagePointX = (clientX - layoutCenterX - this.translateX) / previousScale;
     const imagePointY = (clientY - layoutCenterY - this.translateY) / previousScale;
-    const isReset = nextScaleClamped <= 1 + this.zoomResetEpsilon;
-
-    // User has zoomed all the way out, reset translation
-    if (isReset) {
-      this.scale = 1;
-      this.translateX = 0;
-      this.translateY = 0;
-      this.updateTransform();
+    // A pinch-out at the default scale cannot change the image, so preserve
+    // any pan caused by the image's natural overflow.
+    if (nextScaleClamped <= 1 + this.zoomResetEpsilon && previousScale <= 1 + this.zoomResetEpsilon) {
       return;
     }
 
@@ -623,7 +641,7 @@ export class ImageZoomDirective {
    */
   private updateTransform(): void {
     this.transform = `translate3d(${this.translateX}px, ${this.translateY}px, 0) scale(${this.scale})`;
-    this.cursor = this.isZoomedIn() ? (this.isPanning ? 'grabbing' : 'grab') : 'default';
+    this.cursor = this.canPan() ? (this.isPanning ? 'grabbing' : 'grab') : 'default';
 
     // Apply immediately instead of waiting for next repaint
     this.element.nativeElement.style.transform = this.transform;

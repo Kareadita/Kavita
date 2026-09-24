@@ -5,7 +5,7 @@
       <img [attr.alt]="'Page ' + pageNum()"
            tabindex="0" [style.outline]="'none'"
            [style.width]="widthOverride()"
-           appImageZoom [zoomResetKey]="currentImage"
+           appImageZoom [zoomResetKey]="currentImage" [zoomResetMode]="imageFitClass()"
            #image
            [src]="currentImage.src"
            id="image-1"

@@ -2,7 +2,7 @@
   <div class="image-container {{imageFitClass()}} {{layoutClass()}} {{emulateBookClass()}}"
       [class.center-double]="shouldRenderDouble()"
       [style.filter]="darkness() | safeStyle"
-      appImageZoom [zoomResetKey]="currentImage">
+      appImageZoom [zoomResetKey]="currentImage" [zoomResetMode]="imageFitClass()">
 
     @if (currentImage) {
       <img alt=" "

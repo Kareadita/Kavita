@@ -3,7 +3,7 @@
        [class.center-double]="shouldRenderDouble()"
        [class.reverse]="shouldRenderDouble()"
        [style.filter]="darkness() | safeStyle"
-       appImageZoom [zoomResetKey]="leftImage">
+      appImageZoom [zoomResetKey]="leftImage" [zoomResetMode]="imageFitClass()">
 
     @if(leftImage) {
       <img alt=" "
