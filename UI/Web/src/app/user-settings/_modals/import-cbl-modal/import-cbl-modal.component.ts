@@ -87,12 +87,6 @@ export class ImportCblModalComponent implements OnInit {
 
   /** All rows (matched + issues) for the unified table */
   allRows = signal<CblIssueRow[]>([]);
-  classifiedRows = computed(() =>
-    this.allRows().map(r => ({
-      ...r,
-      category: this.classifyRow(r)
-    }))
-  );
   libraryNames = signal<Record<number, string>>({});
 
   showMatched = signal(true);
@@ -105,14 +99,14 @@ export class ImportCblModalComponent implements OnInit {
     if (this.showUnmatched()) active.add('unmatched');
 
     if (active.size === 0) return [];
-    if (active.size === 3) return this.classifiedRows();
+    if (active.size === 3) return this.allRows();
 
-    return this.classifiedRows().filter(r => active.has(r.category));
+    return this.allRows().filter(r => active.has(this.classifyRow(r)));
   });
 
-  matchedCount = computed(() => this.classifiedRows().filter(r => r.category === 'matched').length);
-  issueCount = computed(() => this.classifiedRows().filter(r => r.category === 'issue').length);
-  unmatchedCount = computed(() => this.classifiedRows().filter(r => r.category === 'unmatched').length);
+  matchedCount = computed(() => this.allRows().filter(r => this.classifyRow(r) === 'matched').length);
+  issueCount = computed(() => this.allRows().filter(r => this.classifyRow(r) === 'issue').length);
+  unmatchedCount = computed(() => this.allRows().filter(r => this.classifyRow(r) === 'unmatched').length);
   isCurrentFileUpdate = computed(() => this.currentSummary()?.isUpdate ?? false);
 
   /** Lazy typeahead state, only one row can be resolving at a time */
