@@ -571,7 +571,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         if (ageRatings.Count == 0 || (ageRatings.Count == 1 && ageRatings.Contains(IncludeUnknowns, StringComparer.OrdinalIgnoreCase)))
         {
-            logger.LogDebug("No age restriction found in roles, setting to NotApplicable and Include Unknowns: {IncludeUnknowns}", settings.DefaultIncludeUnknowns);
+            logger.LogDebug("No age restriction found in roles, setting to NotApplicable and Include Unknowns");
 
             user.AgeRestriction = AgeRating.NotApplicable;
             user.AgeRestrictionIncludeUnknowns = true;

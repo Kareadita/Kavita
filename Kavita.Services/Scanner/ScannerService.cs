@@ -413,11 +413,18 @@ public class ScannerService(
         return ScanCancelReason.NoCancel;
     }
 
-    private static void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Series series)
+    private void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Series series)
     {
-        var keys = parsedSeries.Keys;
-        foreach (var key in keys.Where(key => !SeriesHelper.FindSeries(series, key)))
+        var keysToRemove = parsedSeries.Keys
+            .Where(key => !SeriesHelper.FindSeries(series, key))
+            .ToList();
+
+        foreach (var key in keysToRemove)
         {
+            var fileNames = parsedSeries[key].Select(info => info.Filename).ToList();
+            logger.LogTrace("Removing files {FilePaths} for {SeriesName} as no match was found. {@ParsedSeries}. ",
+                fileNames, series.Name, key);
+
             parsedSeries.Remove(key);
         }
     }

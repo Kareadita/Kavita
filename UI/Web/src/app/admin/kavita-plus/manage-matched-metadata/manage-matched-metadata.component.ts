@@ -18,7 +18,7 @@ import {EVENTS, MessageHubService} from "../../../_services/message-hub.service"
 import {ManageMatchSeries, MatchedExternalSeriesCount} from "../../../_models/kavitaplus/manage-match-series";
 import {Series} from "../../../_models/series";
 import {ManageMatchFilter} from "../../../_models/kavitaplus/manage-match-filter";
-import {debounceTime, distinctUntilChanged, tap} from "rxjs";
+import {debounceTime, distinctUntilChanged, skip, tap} from "rxjs";
 import {switchMap} from "rxjs/operators";
 import {ExternalMatchRateLimitErrorEvent} from "../../../_models/events/external-match-rate-limit-error-event";
 import {ToastrService} from '@openng/ngx-toastr';
@@ -110,8 +110,17 @@ export class ManageMatchedMetadataComponent implements OnInit {
     return this.formGroup.matchState().value() === MatchStateOption.Matched;
   });
 
-  ngOnInit() {
+  constructor() {
+    toObservable(this.formModel).pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      skip(1),
+      switchMap(() => this.loadData()),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+  }
 
+  ngOnInit() {
     this.libraryService.getLibraryTypesWithMetadataSupport().pipe(
       takeUntilDestroyed(this.destroyRef),
       tap(types => this.metadataEnabledLibraryTypes.set([
@@ -133,14 +142,6 @@ export class ManageMatchedMetadataComponent implements OnInit {
         this.toastr.error(translate('toasts.external-match-rate-error', {seriesName: evt.seriesName}))
       }
     });
-
-
-    toObservable(this.formModel).pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(() => this.loadData()),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
 
     this.manageService.getMatchedExternalSeriesCount().subscribe(res => {
       this.matchedCounts.set(res);

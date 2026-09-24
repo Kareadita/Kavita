@@ -40,8 +40,8 @@ export class MemberService {
     return this.httpClient.get<boolean>(this.baseUrl + 'admin/exists');
   }
 
-  deleteMember(username: string) {
-    return this.httpClient.delete(this.baseUrl + 'users/delete-user?username=' + encodeURIComponent(username));
+  deleteMember(userId: number) {
+    return this.httpClient.delete(this.baseUrl + 'users/delete-user?userId=' + userId);
   }
 
   hasLibraryAccess(libraryId: number) {

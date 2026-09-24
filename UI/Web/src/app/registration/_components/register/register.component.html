@@ -3,7 +3,7 @@
     <ng-container title><h2>{{t('title')}}</h2></ng-container>
     <ng-container body>
       <p>{{t('description')}}</p>
-      <form (submit)="submit()">
+      <div>
         <div class="mb-3 text-start">
           <label for="username" class="form-label">{{t('username-label')}}</label>
           <input id="username" class="form-control custom-input" [formField]="formGroup.username" type="text" autocomplete="username"
@@ -40,9 +40,9 @@
         </div>
 
         <div>
-          <button class="btn btn-primary" type="submit" [disabled]="formGroup().invalid()">{{t('register')}}</button>
+          <button class="btn btn-primary" (click)="submit()" [disabled]="formGroup().invalid()">{{t('register')}}</button>
         </div>
-      </form>
+      </div>
     </ng-container>
   </app-splash-container>
 

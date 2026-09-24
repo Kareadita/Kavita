@@ -4,6 +4,7 @@ using System.Linq;
 using AutoMapper;
 using Kavita.Common.Helpers;
 using Kavita.Models.AutoMapper.Converters;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.Annotations;
@@ -233,9 +234,9 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.ReleaseYear,
                 opt => opt.MapFrom(src => src.Metadata.ReleaseYear))
             .ForMember(dest => dest.VolumeCount,
-                opt => opt.MapFrom(src => src.Volumes.Count))
+                opt => opt.MapFrom(src => src.Volumes.Count(v => v.MinNumber != ParserConstants.LooseLeafVolumeNumber)))
             .ForMember(dest => dest.ChapterCount,
-                opt => opt.MapFrom(src => src.Volumes.SelectMany(v => v.Chapters).Count()));
+                opt => opt.MapFrom(src => src.Volumes.SelectMany(v => v.Chapters).Count(c => c.MinNumber != ParserConstants.DefaultChapterNumber)));
 
         CreateMap<Library, LiteLibraryDto>();
         CreateMap<Library, LibraryDto>()

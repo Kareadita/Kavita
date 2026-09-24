@@ -60,7 +60,7 @@ import {InfiniteScrollerComponent} from '../infinite-scroller/infinite-scroller.
 import {SwipeDirective} from '../../../ng-swipe/ng-swipe.directive';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {shareReplay} from "rxjs/operators";
+import {shareReplay, take} from "rxjs/operators";
 import {DblClickDirective} from "../../../_directives/dbl-click.directive";
 import {
   layoutModes,
@@ -97,6 +97,7 @@ import {
   EnumOption,
   SettingSelectComponent
 } from "../../../settings/_components/setting-enum-select/setting-select.component";
+import {PublicationStatus} from "../../../_models/metadata/publication-status";
 
 
 const PREFETCH_PAGES = 10;
@@ -1563,6 +1564,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
+      const publicationStatus = this.chapterInfo()!.seriesPublicationStatus;
+      if (publicationStatus !== PublicationStatus.Completed && publicationStatus !== PublicationStatus.Cancelled) {
+        this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
+        return;
+      }
+
       this.reviewService.getMyRatingAndReview(this.seriesId).subscribe((res) => {
         if (res.hasBeenRated) {
           this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
@@ -1573,11 +1580,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         ref.setInput('ratingReview', res);
         ref.setInput('seriesName', this.chapterInfo()!.seriesName);
 
-        ref.dismissed.subscribe(res => {
-          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+        // Navigation after dismissal may cause recursion. Only do it once
+        ref.dismissed.pipe(take(1)).subscribe(res => {
+          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
         });
-        ref.closed.subscribe(res => {
-          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+        ref.closed.pipe(take(1)).subscribe(res => {
+          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
         });
       })
 

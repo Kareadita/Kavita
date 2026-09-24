@@ -13,43 +13,41 @@
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="dismiss.emit()"></button>
   </div>
 
-  <form (submit)="sendCode()">
-    <div class="modal-body d-flex flex-column gap-3">
+  <div class="modal-body d-flex flex-column gap-3">
 
-      <section>
-        <div class="section-label mb-2">{{t('current-email-label')}}</div>
-        <div class="email-row d-flex align-items-center gap-3">
-          <i class="fa-solid fa-envelope flex-shrink-0" aria-hidden="true"></i>
-          <span class="email-address flex-fill text-truncate">{{licenseInfo()?.registeredEmail}}</span>
-          <span class="on-file-pill flex-shrink-0">{{t('on-file-label')}}</span>
-        </div>
-      </section>
+    <section>
+      <div class="section-label mb-2">{{t('current-email-label')}}</div>
+      <div class="email-row d-flex align-items-center gap-3">
+        <i class="fa-solid fa-envelope flex-shrink-0" aria-hidden="true"></i>
+        <span class="email-address flex-fill text-truncate">{{licenseInfo()?.registeredEmail}}</span>
+        <span class="on-file-pill flex-shrink-0">{{t('on-file-label')}}</span>
+      </div>
+    </section>
 
-      <section>
-        <label class="form-label" for="new-email">{{t('new-email-label')}}</label>
-        <input id="new-email" type="email" class="form-control" [formField]="form.newEmail"
-               [placeholder]="t('new-email-placeholder')"
-               [appFormField]="form.newEmail" aria-describedby="new-email-validations" />
-        <app-validation-errors inputId="new-email" [control]="form.newEmail" />
-      </section>
+    <section>
+      <label class="form-label" for="new-email">{{t('new-email-label')}}</label>
+      <input id="new-email" type="email" class="form-control" [formField]="form.newEmail"
+             [placeholder]="t('new-email-placeholder')"
+             [appFormField]="form.newEmail" aria-describedby="new-email-validations" />
+      <app-validation-errors inputId="new-email" [control]="form.newEmail" />
+    </section>
 
-      <p class="confirm-help d-flex align-items-start gap-2 m-0">
-        <i class="fa-solid fa-shield-halved flex-shrink-0" aria-hidden="true"></i>
-        <span>{{t('confirm-help')}}</span>
-      </p>
+    <p class="confirm-help d-flex align-items-start gap-2 m-0">
+      <i class="fa-solid fa-shield-halved flex-shrink-0" aria-hidden="true"></i>
+      <span>{{t('confirm-help')}}</span>
+    </p>
 
-    </div>
+  </div>
 
-    <div class="modal-footer">
-      <button type="button" class="btn btn-outline-secondary me-2" (click)="back.emit()">
-        <i class="fa-solid fa-chevron-left me-1" aria-hidden="true"></i>
-        {{t('back-label')}}
-      </button>
-      <button type="submit" class="btn btn-primary" [disabled]="form().invalid()">
-        <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i>
-        {{t('send-code-label')}}
-      </button>
-    </div>
-  </form>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary me-2" (click)="back.emit()">
+      <i class="fa-solid fa-chevron-left me-1" aria-hidden="true"></i>
+      {{t('back-label')}}
+    </button>
+    <button type="submit" class="btn btn-primary" [disabled]="form().invalid()" (click)="sendCode()">
+      <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i>
+      {{t('send-code-label')}}
+    </button>
+  </div>
 
 </ng-container>
