@@ -8,7 +8,7 @@ import {
   Injectable,
   Renderer2,
   RendererFactory2,
-  SecurityContext
+  SecurityContext, untracked
 } from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ToastrService} from '@openng/ngx-toastr';
@@ -97,7 +97,10 @@ export class ThemeService {
     });
 
     effect(() => {
-      const user = this.accountService.currentUser();
+      this.accountService.userId(); // Change detector
+
+      // We only want to refresh the theme when the user changes, not the user object (token refresh)
+      const user = untracked(this.accountService.currentUser);
       if (user?.preferences && user?.preferences.theme) {
         this.setTheme(user.preferences.theme.name);
       } else {
