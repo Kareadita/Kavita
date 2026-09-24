@@ -1580,7 +1580,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         ref.setInput('ratingReview', res);
         ref.setInput('seriesName', this.chapterInfo()!.seriesName);
 
-        // Navigation after dismal may cause recursion. Only do it once
+        // Navigation after dismissal may cause recursion. Only do it once
         ref.dismissed.pipe(take(1)).subscribe(res => {
           this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
         });
