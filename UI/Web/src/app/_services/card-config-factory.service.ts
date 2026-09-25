@@ -102,9 +102,11 @@ export class CardConfigFactory {
       progressFunc: (s) => ({ pages: s.pages, pagesRead: s.pagesRead }),
 
       formatBadgeFunc: (s) => s.format,
-      // Only multi-volume series show a count - matches every other card type's ">1" badge threshold,
-      // and naturally leaves standalone books (1 volume) with no badge.
-      countFunc: (s) => s.volumeCount,
+      // Fall back to chapterCount whenever there are no real Volumes
+      countFunc: (s) => {
+        if (!this.accountService.userPreferences()?.showSeriesItemCount) return 0;
+        return s.volumeCount > 0 ? s.volumeCount : s.chapterCount;
+      },
       showErrorFunc: (s) => s.pages === 0,
       ariaLabelFunc: (s) => s.name,
 

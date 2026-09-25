@@ -91,9 +91,13 @@ export interface Series extends IHasCover, IHasReadingTime, IHasProgress, IHasMe
    */
   totalReads: number;
   /**
-   * Number of Volumes in the Series
+   * Number of Volumes in the Series, excluding the loose-leaf volume that special/unassigned chapters are stored in
    */
   volumeCount: number;
+  /**
+   * Number of Chapters in the Series, across all Volumes (including the loose-leaf volume)
+   */
+  chapterCount: number;
   isStandAlone: boolean;
   mangaBakaEditionId: string;
   /**

@@ -56,10 +56,15 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     /// <remarks>Calculated at API-time</remarks>
     public DateTime LatestReadDate { get; set; }
     /// <summary>
-    /// Number of Volumes in the Series
+    /// Number of Volumes in the Series, excluding the loose-leaf volume that special/unassigned chapters are stored in
     /// </summary>
     /// <remarks>Calculated at API-time</remarks>
     public int VolumeCount { get; set; }
+    /// <summary>
+    /// Number of Chapters in the Series, across all Volumes (including the loose-leaf volume)
+    /// </summary>
+    /// <remarks>Calculated at API-time</remarks>
+    public int ChapterCount { get; set; }
     #endregion
 
 
