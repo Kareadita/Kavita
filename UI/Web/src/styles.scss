@@ -62,6 +62,10 @@
 
 @use './theme/directives/resize';
 
+// Load Kavita-ng
+@use '@kareadita/kavita-ng/styles';
+@use './theme/kng-mapping';
+
 
 // Global Styles
 @font-face {
