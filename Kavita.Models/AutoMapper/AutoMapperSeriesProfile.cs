@@ -42,6 +42,8 @@ public class AutoMapperSeriesProfile : Profile
             .ForMember(dest => dest.HasUserRated,
                 opt => opt.MapFrom(src =>
                     src.Ratings
-                        .Any(r => r.AppUserId == userId && r.HasBeenRated)));
+                        .Any(r => r.AppUserId == userId && r.HasBeenRated)))
+            .ForMember(dest => dest.VolumeCount,
+                opt => opt.MapFrom(src => src.Volumes.Count));
     }
 }

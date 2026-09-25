@@ -55,6 +55,11 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     /// </summary>
     /// <remarks>Calculated at API-time</remarks>
     public DateTime LatestReadDate { get; set; }
+    /// <summary>
+    /// Number of Volumes in the Series
+    /// </summary>
+    /// <remarks>Calculated at API-time</remarks>
+    public int VolumeCount { get; set; }
     #endregion
 
 
