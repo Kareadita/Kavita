@@ -13,6 +13,7 @@ export interface Preferences {
   promptForDownloadSize: boolean;
   noTransitions: boolean;
   collapseSeriesRelationships: boolean;
+  showSeriesItemCount: boolean;
   locale: string;
   bookReaderHighlightSlots: HighlightSlot[];
   colorScapeEnabled: boolean;
