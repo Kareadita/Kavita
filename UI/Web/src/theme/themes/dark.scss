@@ -39,11 +39,13 @@
   --elevation-layer8-dark-solid: #353535;
   --elevation-layer9-dark-solid: #373737;
 
-  /* Base colors */
-  --primary-color: #4ac694;
-  --primary-color-dark-shade: #3B9E76;
-  --primary-color-darker-shade: #338A67;
-  --primary-color-darkest-shade: #25624A;
+  /* Base colors - rebranded to the Iterverse palette (ad_labs/design-system/tokens.css:
+     --btech-red / --btech-red-dark), shades below darkened proportionally
+     to Kavita's own original teal shade ratios. */
+  --primary-color: #d22030;
+  --primary-color-dark-shade: #a81826;
+  --primary-color-darker-shade: #8a1420;
+  --primary-color-darkest-shade: #6b0f19;
   --error-color: #BD362F;
   --error-accent-color: #ea0d02;
   --warning-color: #dd9f50;

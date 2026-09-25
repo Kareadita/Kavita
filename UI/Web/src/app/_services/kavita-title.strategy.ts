@@ -2,6 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {RouterStateSnapshot, TitleStrategy} from '@angular/router';
 import {TranslocoService} from '@jsverse/transloco';
+import {APP_NAME} from '../branding';
 
 @Injectable({providedIn: 'root'})
 export class KavitaTitleStrategy extends TitleStrategy {
@@ -30,18 +31,18 @@ export class KavitaTitleStrategy extends TitleStrategy {
     }
 
     // 3. Fallback
-    this.title.setTitle('Kavita');
+    this.title.setTitle(APP_NAME);
   }
 
   setFormattedTitle(pageTitle: string): void {
     if (pageTitle.startsWith('title.')) {
       pageTitle = this.translocoService.translate(pageTitle);
     }
-    this.title.setTitle(`${pageTitle} (Kavita)`);
+    this.title.setTitle(`${pageTitle} (${APP_NAME})`);
   }
 
   setTranslatedTitle(key: string, params: Record<string, unknown>): void {
-    this.title.setTitle(`${this.translocoService.translate(key, params)} (Kavita)`);
+    this.title.setTitle(`${this.translocoService.translate(key, params)} (${APP_NAME})`);
   }
 
   private getDeepestRoute(route: RouterStateSnapshot['root']): RouterStateSnapshot['root'] {
