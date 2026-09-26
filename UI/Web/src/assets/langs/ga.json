@@ -128,7 +128,11 @@
         "prompt-for-rereads-after-label": "Iarratas le haghaidh Athléamh",
         "prompt-for-rereads-after-tooltip": "Taispeáin an Pras Athléamh mura bhfuil aon dul chun cinn déanta ó X lá ó shin. Díchumasaíonn 0 an pras go hiomlán.",
         "social-share-profile-label": "Comhroinn Próifíl",
-        "social-share-profile-tooltip": "Cumasaigh faisnéis a roinnt faoi do ghníomhaíocht léitheoireachta le baill eile den fhreastalaí"
+        "social-share-profile-tooltip": "Cumasaigh faisnéis a roinnt faoi do ghníomhaíocht léitheoireachta le baill eile den fhreastalaí",
+        "ondeck-progress-days-label": "An dul chun cinn is déanaí ar an deic (laethanta)",
+        "ondeck-progress-days-tooltip": "An líon laethanta ó tharla an dul chun cinn deireanach sula gcuirtear tús le rud éigin atá ar an liosta 'On Deck'.",
+        "ondeck-update-days-label": "Ar Láimh – An Chéad Chaibidil Eile – Cuir (laethanta) leis",
+        "ondeck-update-days-tooltip": "Líon na laethanta ó cuireadh an chaibidil dheireanach leis chun rud éigin a chur san áireamh sa liosta 'On Deck'."
     },
     "user-holds": {
         "title": "Coinníonn Scrobble",
@@ -269,7 +273,14 @@
         "loading": "{{common.loading}}",
         "add-item": "Cuir {{item}}…",
         "no-data": "{{common.no-data}}",
-        "add-custom-item": ", cineál chun mír saincheaptha a chur leis"
+        "add-custom-item": ", cineál chun mír saincheaptha a chur leis",
+        "toggle-lock-alt": "Glasáil an réimse",
+        "remove-alt": "Bain {{title}}",
+        "remove-item-alt": "Bain an mhír",
+        "clear-selections-alt": "Glan gach rogha",
+        "selected-items-alt": "Míreanna roghnaithe",
+        "results-available-alt": "Tá {{count}} toradh ar fáil",
+        "no-results-alt": "Níl aon torthaí ar fáil"
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
@@ -1529,7 +1540,8 @@
         "reading-profile-promoted": "Próifíl léitheoireachta curtha chun cinn",
         "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
         "page-offset-label": "Fritháireamh Leathanaigh",
-        "offset-only-double": "Ní féidir Fritháireamh Leathanaigh a úsáid ach amháin le Leagan Amach Dúbailte"
+        "offset-only-double": "Ní féidir Fritháireamh Leathanaigh a úsáid ach amháin le Leagan Amach Dúbailte",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-label}}"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1875,7 +1887,8 @@
         "font-manual-upload": "Bhí fadhb ann agus Cló á chruthú ó uaslódáil de láimh",
         "font-already-in-use": "Tá cló ann cheana féin faoin ainm sin",
         "upload-too-large": "Tá an comhad rómhór le huaslódáil, roghnaigh íomhá níos lú agus déan iarracht arís.",
-        "invalid-form": "Tá earráidí san fhoirm atá tú ag iarraidh a chur isteach"
+        "invalid-form": "Tá earráidí san fhoirm atá tú ag iarraidh a chur isteach",
+        "required-if-other-invalid": "Tá {{other}} neamhbhailí"
     },
     "metadata-builder": {
         "or": "Meaitseáil aon cheann díobh seo a leanas",
@@ -1940,7 +1953,8 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "api-key-tooltip": "Ní gá logáil isteach go huathoibríoch nuair a úsáideann an t-óstach OIDC"
+        "api-key-tooltip": "Ní gá logáil isteach go huathoibríoch nuair a úsáideann an t-óstach OIDC",
+        "confirm-delete": "An bhfuil tú cinnte gur mhaith leat {{name}} a scriosadh mar fhoinse sheachtrach?"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -3160,7 +3174,8 @@
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "never": "Choíche"
+        "never": "Choíche",
+        "duplicate-name-validation": "Caithfidh ainm na heochrach fíordheimhnithe a bheith uathúil"
     },
     "review-list-item": {
         "by-label": "De réir",
@@ -3279,7 +3294,8 @@
     "favorite-authors": {
         "title": "Údair is Mó Léite",
         "sub-title": "Is é {{author}} an t-údar is mó a léitear ag {{name}}, le {{count}} léamh san iomlán",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "chapter-count": "{{common.chapter-count}}"
     },
     "page-spread": {
         "title": "Caibidlí de réir Líon Leathanach",
@@ -4403,5 +4419,45 @@
         "recurrent": "Athfhillteach",
         "incidental": "Teagmhasach",
         "unweighted": "Gan ualú"
+    },
+    "search-typeahead": {
+        "files": "Comhaid",
+        "chapters": "Caibidlí",
+        "people": "Daoine",
+        "tags": "Clibeanna",
+        "annotations": "{{tabs.annotations-tab}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "libraries": "{{common.libraries}}",
+        "reading-lists": "Liostaí Léitheoireachta",
+        "collections": "Bailiúcháin",
+        "series": "Sraith",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "include-extras": "Cuir Caibidlí & Comhaid san Áireamh",
+        "search-alt": "Cuardaigh…",
+        "person-aka-status": "Meaitseálann sé ailias",
+        "no-data": "Níor aimsíodh aon torthaí",
+        "search-for": "Cuardaigh {{term}}",
+        "in-library": "i {{name}}",
+        "volume-count": "{{count}} imleabhar",
+        "volume-count-one": "{{count}} imleabhar",
+        "chapter-count": "{{count}} caibidil",
+        "chapter-count-one": "{{count}} caibidil",
+        "search-config-alt": "Roghanna cuardaigh",
+        "search-config-title": "Roghanna Cuardaigh",
+        "results-available-alt": "{{typeahead.results-available-alt}}",
+        "no-results-alt": "{{typeahead.no-results-alt}}",
+        "search-series-alt": "Cuardaigh sraith"
+    },
+    "locked-field": {
+        "field-locked-alt": "Tá an réimse faoi ghlas"
+    },
+    "rate-and-review-series-modal": {
+        "title": "Rátáil agus Léirmheas: {{seriesName}}",
+        "description": "Fág rátáil agus léirmheas ar an tsraith.",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "review-label": "{{review-modal.review-label}}"
     }
 }

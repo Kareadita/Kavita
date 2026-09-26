@@ -128,7 +128,11 @@
         "prompt-for-rereads-after-label": "Výzva k opětovnému přečtení",
         "prompt-for-rereads-after-tooltip": "Zobrazit výzvu k opětovnému přečtení, pokud nedošlo k žádnému pokroku od X dnů. 0 zcela deaktivuje výzvu.",
         "social-share-profile-label": "Sdílet profil",
-        "social-share-profile-tooltip": "Povolit sdílení informací o vaší čtenářské aktivitě s ostatními členy serveru"
+        "social-share-profile-tooltip": "Povolit sdílení informací o vaší čtenářské aktivitě s ostatními členy serveru",
+        "ondeck-progress-days-label": "Na řadě – Poslední pokrok (dny)",
+        "ondeck-progress-days-tooltip": "Počet dní od posledního pokroku kdy se odebralo něco „Na řadě“.",
+        "ondeck-update-days-label": "Na řadě Poslední kapitola Zbývá (dny)",
+        "ondeck-update-days-tooltip": "Počet dní od zveřejnění poslední kapitoly, do které se započítává i „Na řadě“."
     },
     "user-holds": {
         "title": "Scrobble drží",
@@ -269,7 +273,14 @@
         "loading": "{{common.loading}}",
         "add-item": "Přidat {{item}}…",
         "no-data": "{{common.no-data}}",
-        "add-custom-item": ", zadejte pro přidání vlastní položky"
+        "add-custom-item": ", zadejte pro přidání vlastní položky",
+        "toggle-lock-alt": "Zamknout pole",
+        "remove-alt": "Odstranit {{title}}",
+        "remove-item-alt": "Odstranit položku",
+        "clear-selections-alt": "Vymazat veškerý výběr",
+        "selected-items-alt": "Vybrané položky",
+        "results-available-alt": "K dispozici je {{count}} výsledků",
+        "no-results-alt": "Žádné výsledky k dispozici"
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
@@ -1429,7 +1440,8 @@
         "reading-profile-updated": "Profil čtení aktualizován",
         "reading-profile-promoted": "Profil čtení propagován",
         "page-offset-label": "Odsazení stránky",
-        "offset-only-double": "Posun stránky lze použít pouze u dvojitého rozvržení"
+        "offset-only-double": "Posun stránky lze použít pouze u dvojitého rozvržení",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-label}}"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1741,7 +1753,8 @@
         "host-label": "Hostitel",
         "name-label": "Název",
         "api-key-label": "Klíč API",
-        "api-key-tooltip": "Pokud hostitel používá OIDC, není nutné automatické přihlášení"
+        "api-key-tooltip": "Pokud hostitel používá OIDC, není nutné automatické přihlášení",
+        "confirm-delete": "Opravdu chcete odstranit {{name}} jako externí zdroj?"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -1941,7 +1954,7 @@
         "loading-alt": "Načítání výsledků",
         "empty-title": "Vyhledat shodu",
         "empty-description": "Zkuste zadat název série nebo vložte přímý odkaz z AniList, MAL, MangaBaka, CBR nebo Hardcover.",
-        "no-results-title": "Nebyly nalezeny žádné výsledky",
+        "no-results-title": "Nebyly nalezeny žádné párování",
         "no-results-description": "Pro „{{ query }}“ nebyly nalezeny žádné výsledky. Zkuste zadat kratší dotaz, název v latince nebo přímé ID.",
         "dont-match-active-title": "Funkce párování není povolena",
         "dont-match-active-description": "U této série je deaktivováno přiřazování a scrobblování v rámci služby Kavita+.",
@@ -2118,7 +2131,8 @@
         "font-manual-upload": "Při ručním nahrávání písma došlo k problému",
         "font-already-in-use": "Písmo s tímto názvem již existuje",
         "upload-too-large": "Soubor je pro nahrání příliš velký, vyberte menší obrázek a zkuste to znovu.",
-        "invalid-form": "Formulář, který se pokoušíte odeslat, obsahuje chyby"
+        "invalid-form": "Formulář, který se pokoušíte odeslat, obsahuje chyby",
+        "required-if-other-invalid": "{{other}} je neplatný"
     },
     "cover-image-size": {
         "xlarge": "Extra velké (1265x1795)",
@@ -3160,7 +3174,8 @@
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "never": "Nikdy"
+        "never": "Nikdy",
+        "duplicate-name-validation": "Název autentizačního klíče musí být jedinečný"
     },
     "review-list-item": {
         "by-label": "K",
@@ -3279,7 +3294,8 @@
     "favorite-authors": {
         "title": "Nejčtenější autoři",
         "sub-title": "Nejčtenějším autorem {{name}} je {{author}}, s celkovým počtem {{count}} přečtení",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "chapter-count": "{{common.chapter-count}}"
     },
     "page-spread": {
         "title": "Kapitoly podle počtu stránek",
@@ -4403,5 +4419,45 @@
         "recurrent": "Opakující se",
         "incidental": "Vedlejší",
         "unweighted": "Nevážené"
+    },
+    "search-typeahead": {
+        "files": "Soubory",
+        "chapters": "Kapitoly",
+        "people": "Lidé",
+        "annotations": "{{tabs.annotations-tab}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "libraries": "{{common.libraries}}",
+        "series": "Série",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "include-extras": "Zahrnout kapitoly a soubory",
+        "search-alt": "Hledat…",
+        "person-aka-status": "Odpovídá aliasu",
+        "no-data": "Nebyly nalezeny žádné výsledky",
+        "search-for": "Vyhledat {{term}}",
+        "in-library": "v {{name}}",
+        "volume-count": "{{count}} svaz",
+        "volume-count-one": "{{count}} svz",
+        "chapter-count": "{{count}} kapitol",
+        "chapter-count-one": "{{count}} kapitola",
+        "search-config-alt": "Možnosti vyhledávání",
+        "search-config-title": "Možnosti Vyhledávání",
+        "results-available-alt": "{{typeahead.results-available-alt}}",
+        "no-results-alt": "{{typeahead.no-results-alt}}",
+        "search-series-alt": "Vyhledat série",
+        "tags": "Značky",
+        "reading-lists": "Seznamy četby",
+        "collections": "Kolekce"
+    },
+    "locked-field": {
+        "field-locked-alt": "Pole je uzamčeno"
+    },
+    "rate-and-review-series-modal": {
+        "title": "Ohodnoťte a napište recenzi: {{seriesName}}",
+        "description": "Ohodnoťte sérii a napište k ní recenzi.",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "review-label": "{{review-modal.review-label}}"
     }
 }
