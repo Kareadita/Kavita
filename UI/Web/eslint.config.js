@@ -32,6 +32,10 @@ module.exports = tseslint.config(
         {prefix: 'app', style: 'camelCase', type: 'attribute'},
       ],
       '@typescript-eslint/no-unused-vars': 'off',
+      'no-prototype-builtins': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'no-case-declarations': 'off',
+      '@typescript-eslint/no-non-null-asserted-optional-chain': "warn"
     },
   },
   {
