@@ -212,11 +212,12 @@ public partial class BookService(
             if (!match.Success) continue;
 
             var importFile = match.Groups["Filename"].Value;
-            var key = CleanContentKeys(importFile); // Validate if CoalesceKey works well here
+            var key = CleanContentKeys(importFile);
             if (!key.Contains(prepend))
             {
                 key = prepend + key;
             }
+            key = CoalesceKeyForAnyFile(book, key);
             if (!book.Content.AllFiles.TryGetLocalFileRefByKey(key, out var bookFile) || bookFile == null) continue;
 
             var content = await bookFile.ReadContentAsBytesAsync();
@@ -228,7 +229,6 @@ public partial class BookService(
         EscapeCssImportReferences(ref stylesheetHtml, apiBase, prepend);
 
         EscapeFontFamilyReferences(ref stylesheetHtml, apiBase, prepend);
-
 
         // Check if there are any background images and rewrite those urls
         EscapeCssImageReferences(ref stylesheetHtml, apiBase, book);
