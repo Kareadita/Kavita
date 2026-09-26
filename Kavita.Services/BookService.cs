@@ -271,7 +271,7 @@ public partial class BookService(
         {
             if (!match.Success) continue;
             var importFile = match.Groups["Filename"].Value;
-            stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
+            stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + NormalizePath(prepend + importFile));
         }
     }
 
@@ -281,7 +281,7 @@ public partial class BookService(
         {
             if (!match.Success) continue;
             var importFile = match.Groups["Filename"].Value;
-            stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
+            stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + NormalizePath(prepend + importFile));
         }
     }
 
@@ -1623,6 +1623,23 @@ public partial class BookService(
         }
 
         return key;
+    }
+
+    private static string NormalizePath(string path)
+    {
+        var parts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var stack = new List<string>();
+        foreach (var part in parts)
+        {
+            if (part == ".") continue;
+            if (part == "..")
+            {
+                if (stack.Count > 0) stack.RemoveAt(stack.Count - 1);
+                continue;
+            }
+            stack.Add(part);
+        }
+        return string.Join('/', stack);
     }
 
     /// <summary>
