@@ -12,6 +12,7 @@ using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.ReadingLists;
+using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Filtering.v2;
@@ -24,6 +25,7 @@ using Kavita.Models.DTOs.Search;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Helpers.SmartFilter;
+using Kavita.Services.Scanner;
 
 namespace Kavita.Services;
 
@@ -1090,10 +1092,7 @@ public class OpdsService(
             Format = chapter.Format.ToString(),
             Links =
             [
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
-                    $"{request.BaseUrl}api/image/chapter-cover?chapterId={chapter.Id}&apiKey={request.ApiKey}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
-                    $"{request.BaseUrl}api/image/chapter-cover?chapterId={chapter.Id}&apiKey={request.ApiKey}"),
+                ..CreateChapterFeedLinks(request, chapter),
                 accLink
             ],
             Content = new FeedEntryContent
@@ -1116,6 +1115,28 @@ public class OpdsService(
         }
 
         return entry;
+    }
+
+    private static List<FeedLink> CreateChapterFeedLinks(IOpdsRequest request, ChapterDto chapter)
+    {
+        if (!chapter.MinNumber.Is(Parser.DefaultChapterNumber))
+        {
+            return
+            [
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                    $"{request.BaseUrl}api/image/chapter-cover?chapterId={chapter.Id}&apiKey={request.ApiKey}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                    $"{request.BaseUrl}api/image/chapter-cover?chapterId={chapter.Id}&apiKey={request.ApiKey}"),
+            ];
+        }
+
+        return
+        [
+            CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                $"{request.BaseUrl}api/image/volume-cover?volumeId={chapter.VolumeId}&apiKey={request.ApiKey}"),
+            CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                $"{request.BaseUrl}api/image/volume-cover?volumeId={chapter.VolumeId}&apiKey={request.ApiKey}"),
+        ];
     }
 
     private string GetFileSize(ChapterDto chapter)
@@ -1173,10 +1194,7 @@ public class OpdsService(
             Format = chapter.Format.ToString(),
             Links =
             [
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
-                    $"{request.BaseUrl}api/image/chapter-cover?chapterId={item.ChapterId}&apiKey={request.ApiKey}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
-                    $"{request.BaseUrl}api/image/chapter-cover?chapterId={item.ChapterId}&apiKey={request.ApiKey}"),
+                ..CreateChapterFeedLinks(request, chapter),
                 accLink
             ],
             Content = new FeedEntryContent
