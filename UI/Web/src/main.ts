@@ -43,6 +43,8 @@ import {LibraryService} from "./app/_services/library.service";
 import {translocoPrefixKey} from "./libs/transloco-util";
 import {ToastrModule} from "@openng/ngx-toastr";
 import {AppComponent} from "./app/app.component";
+import {provideKngLocalization} from "@kareadita/kavita-ng/i18n";
+import {withTransloco} from "@kareadita/kavita-ng/transloco";
 
 const disableAnimations = !('animate' in document.documentElement);
 if (disableAnimations) {
@@ -185,6 +187,7 @@ bootstrapApplication(AppComponent, {
         provideTranslocoLocale({
           defaultLocale: 'en'
         }),
+        provideKngLocalization(withTransloco()),
         provideTranslocoPersistTranslations({
           loader: HttpLoader,
           storage: { useValue: localStorage },

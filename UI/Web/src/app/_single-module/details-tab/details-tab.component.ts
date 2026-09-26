@@ -32,9 +32,7 @@ import {IHasReadingTime} from '../../_models/common/i-has-reading-time';
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataService} from "../../_services/metadata.service";
-import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
-import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
-import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
+import {DefaultDatePipe, TimeDifferencePipe, UtcToLocalTimePipe} from "@kareadita/kavita-ng/pipes";
 
 export interface BasicMetadataInfo {
   readingTime?: IHasReadingTime | null;
