@@ -141,7 +141,6 @@ interface VolumeCast extends IHasCast {
     EntityTitleComponent,
     RouterLink,
     NgbTooltip,
-    NgStyle,
     NgClass,
     TranslocoDirective,
     VirtualScrollerModule,
