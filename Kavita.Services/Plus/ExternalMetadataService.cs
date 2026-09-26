@@ -2544,12 +2544,14 @@ public class ExternalMetadataService : IExternalMetadataService
             return (false, null);
         }
 
+        var locale = chosenLanguageCode ?? series.Metadata.Language ?? series.Library?.DefaultLanguage ?? string.Empty;
+
         var from = series.Name;
         var fromSortName = series.SortName;
         series.Name = chosen;
         series.NormalizedName = chosen.ToNormalized();
         series.SortName = series.Library is {RemovePrefixForSortName: true}
-            ? BookSortTitlePrefixHelper.GetSortTitle(series.Name)
+            ? BookSortTitlePrefixHelper.GetSortTitle(series.Name, locale)
             : series.Name;
 
         series.NameLocked = true;

@@ -212,7 +212,7 @@ public class SeriesController(
         {
             // An unlocked sort name is derived from Name - reseed it (mirrors the scanner logic)
             series.SortName = series.Library is {RemovePrefixForSortName: true}
-                ? BookSortTitlePrefixHelper.GetSortTitle(series.Name)
+                ? BookSortTitlePrefixHelper.GetSortTitle(series.Name, series.Metadata.Language)
                 : series.Name;
             series.Metadata.KPlusOverrides.Remove(MetadataSettingField.SortName);
         }

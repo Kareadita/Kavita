@@ -158,23 +158,6 @@ public class ProcessSeries(
                 series.Format = firstParsedInfo.Format;
             }
 
-            var removePrefix = library.RemovePrefixForSortName;
-            var sortName = removePrefix ? BookSortTitlePrefixHelper.GetSortTitle(series.Name) : series.Name;
-
-            if (string.IsNullOrEmpty(series.SortName))
-            {
-                series.SortName = sortName;
-            }
-
-            if (!series.SortNameLocked)
-            {
-                series.SortName = sortName;
-                if (!string.IsNullOrEmpty(firstParsedInfo.SeriesSort))
-                {
-                    series.SortName = firstParsedInfo.SeriesSort;
-                }
-            }
-
             // parsedInfos[0] is not the first volume or chapter. We need to find it
             var localizedSeries = parsedInfos.Select(p => p.LocalizedSeries).FirstOrDefault(p => !string.IsNullOrEmpty(p));
             if (!series.LocalizedNameLocked)
@@ -191,6 +174,24 @@ public class ProcessSeries(
             }
 
             await UpdateSeriesMetadata(databasePeople, settings, series, library);
+
+            // After UpdateSeriesMetadata so the language has updated
+            var removePrefix = library.RemovePrefixForSortName;
+            var sortName = removePrefix ? BookSortTitlePrefixHelper.GetSortTitle(series.Name, series.Metadata.Language) : series.Name;
+
+            if (string.IsNullOrEmpty(series.SortName))
+            {
+                series.SortName = sortName;
+            }
+
+            if (!series.SortNameLocked)
+            {
+                series.SortName = sortName;
+                if (!string.IsNullOrEmpty(firstParsedInfo.SeriesSort))
+                {
+                    series.SortName = firstParsedInfo.SeriesSort;
+                }
+            }
 
             await UpdateSeriesFolderPath(
                 [.. fileInfos.Select(info => info.FullFilePath), .. GetFilesInUnchangedFolders(series, unchangedFolders).Select(f => f.FilePath)],

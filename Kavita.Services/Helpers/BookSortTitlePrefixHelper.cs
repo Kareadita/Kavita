@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Kavita.Services.Helpers;
@@ -12,47 +14,67 @@ public static class BookSortTitlePrefixHelper
 {
     private static readonly Dictionary<string, byte> PrefixLookup;
     private static readonly Dictionary<char, List<string>> PrefixesByFirstChar;
+    private static readonly Dictionary<string, Dictionary<string, byte>> PrefixLookupByLanuage;
+    private static readonly Dictionary<string, Dictionary<char, List<string>>> PrefixesByFirstCharByLanuage;
 
     static BookSortTitlePrefixHelper()
     {
-        var prefixes = new[]
+        var prefixesByLanguage = new Dictionary<string, List<string>>
         {
             // English
-            "the", "a", "an",
+            ["en"] = ["the", "a", "an"],
             // Spanish
-            "el", "la", "los", "las", "un", "una", "unos", "unas",
+            ["es"] = ["el", "la", "los", "las", "un", "una", "unos", "unas"],
             // French
-            "le", "la", "les", "un", "une", "des",
+            ["fr"] = ["le", "la", "les", "un", "une", "des"],
             // German
-            "der", "die", "das", "den", "dem", "ein", "eine", "einen", "einer",
+            ["de"] = ["der", "die", "das", "den", "dem", "ein", "eine", "einen", "einer"],
             // Italian
-            "il", "lo", "la", "gli", "le", "un", "uno", "una",
+            ["it"] = ["il", "lo", "la", "gli", "le", "un", "uno", "una"],
             // Portuguese
-            "o", "a", "os", "as", "um", "uma", "uns", "umas",
+            ["pt"] = ["o", "a", "os", "as", "um", "uma", "uns", "umas"],
             // Russian (transliterated common ones)
-            "в", "на", "с", "к", "от", "для",
+            ["ru"] = ["в", "на", "с", "к", "от", "для",]
         };
 
+        var totalPrefixes = prefixesByLanguage.Values.Select(v => v.Count).Sum();
+
         // Build lookup structures
-        PrefixLookup = new Dictionary<string, byte>(prefixes.Length, StringComparer.OrdinalIgnoreCase);
+        PrefixLookup = new Dictionary<string, byte>(totalPrefixes, StringComparer.OrdinalIgnoreCase);
         PrefixesByFirstChar = new Dictionary<char, List<string>>();
+        PrefixLookupByLanuage = new Dictionary<string, Dictionary<string, byte>>(prefixesByLanguage.Count);
+        PrefixesByFirstCharByLanuage = new Dictionary<string, Dictionary<char, List<string>>>();
 
-        foreach (var prefix in prefixes)
+        foreach (var (language, prefixes) in prefixesByLanguage)
         {
-            PrefixLookup[prefix] = 1;
+            PrefixLookupByLanuage[language] = new Dictionary<string, byte>(prefixes.Count, StringComparer.OrdinalIgnoreCase);
+            PrefixesByFirstCharByLanuage[language] = new Dictionary<char, List<string>>();
 
-            var firstChar = char.ToLowerInvariant(prefix[0]);
-            if (!PrefixesByFirstChar.TryGetValue(firstChar, out var list))
+            foreach (var prefix in prefixes)
             {
-                list = [];
-                PrefixesByFirstChar[firstChar] = list;
+                PrefixLookup[prefix] = 1;
+                PrefixLookupByLanuage[language][prefix] = 1;
+
+                var firstChar = char.ToLowerInvariant(prefix[0]);
+                if (!PrefixesByFirstCharByLanuage[language].TryGetValue(firstChar, out var list))
+                {
+                    list = [];
+                    PrefixesByFirstCharByLanuage[language][firstChar] = list;
+                }
+                if (!PrefixesByFirstChar.TryGetValue(firstChar, out var list2))
+                {
+                    list2 = [];
+                    PrefixesByFirstChar[firstChar] = list2;
+                }
+
+                list.Add(prefix);
+                list2.Add(prefix);
             }
-            list.Add(prefix);
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ReadOnlySpan<char> GetSortTitle(ReadOnlySpan<char> title)
+    public static ReadOnlySpan<char> GetSortTitle(ReadOnlySpan<char> title, Dictionary<string, byte> lookup, Dictionary<char, List<string>> byFirstChar)
     {
         if (title.IsEmpty) return title;
 
@@ -74,11 +96,11 @@ public static class BookSortTitlePrefixHelper
 
         // Fast path: check if first character could match any prefix
         firstChar = char.ToLowerInvariant(potentialPrefix[0]);
-        if (!PrefixesByFirstChar.ContainsKey(firstChar))
+        if (!byFirstChar.ContainsKey(firstChar))
             return title;
 
         // Only do the expensive lookup if first character matches
-        if (PrefixLookup.ContainsKey(potentialPrefix.ToString()))
+        if (lookup.ContainsKey(potentialPrefix.ToString()))
         {
             var remainder = title.Slice(firstSpaceIndex + 1);
             return remainder.IsEmpty ? title : remainder;
@@ -91,11 +113,30 @@ public static class BookSortTitlePrefixHelper
     /// Removes the sort prefix
     /// </summary>
     /// <param name="title"></param>
+    /// <param name="language"></param>
     /// <returns></returns>
-    public static string GetSortTitle(string title)
+    public static string GetSortTitle(string title, string language = "")
     {
-        var result = GetSortTitle(title.AsSpan());
+        language = NormalizeLanguage(language);
+
+        var lookup = PrefixLookupByLanuage.GetValueOrDefault(language, PrefixLookup);
+        var byFirstChar = PrefixesByFirstCharByLanuage.GetValueOrDefault(language, PrefixesByFirstChar);
+
+        var result = GetSortTitle(title.AsSpan(), lookup, byFirstChar);
 
         return result.ToString();
+    }
+
+    private static string NormalizeLanguage(string language)
+    {
+        if (string.IsNullOrEmpty(language)) return string.Empty;
+        try
+        {
+            return CultureInfo.GetCultureInfo(language).TwoLetterISOLanguageName;
+        }
+        catch (CultureNotFoundException)
+        {
+            return string.Empty;
+        }
     }
 }

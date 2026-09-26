@@ -11,6 +11,7 @@ public class BookSortTitlePrefixHelperTests
     public void TestEnglishPrefixes(string inputString, string expected)
     {
         Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString));
+        Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString, "en"));
     }
 
     [Theory]
@@ -23,6 +24,7 @@ public class BookSortTitlePrefixHelperTests
     public void TestSpanishPrefixes(string inputString, string expected)
     {
         Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString));
+        Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString, "es"));
     }
 
     [Theory]
@@ -35,6 +37,7 @@ public class BookSortTitlePrefixHelperTests
     public void TestFrenchPrefixes(string inputString, string expected)
     {
         Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString));
+        Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString, "fr"));
     }
 
     [Theory]
@@ -46,6 +49,7 @@ public class BookSortTitlePrefixHelperTests
     public void TestGermanPrefixes(string inputString, string expected)
     {
         Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString));
+        Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString, "de"));
     }
 
     [Theory]
@@ -59,6 +63,7 @@ public class BookSortTitlePrefixHelperTests
     public void TestItalianPrefixes(string inputString, string expected)
     {
         Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString));
+        Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString, "it"));
     }
 
     [Theory]
@@ -71,6 +76,7 @@ public class BookSortTitlePrefixHelperTests
     public void TestPortuguesePrefixes(string inputString, string expected)
     {
         Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString));
+        Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString, "pt"));
     }
 
     [Theory]
@@ -173,5 +179,64 @@ public class BookSortTitlePrefixHelperTests
     public void TestRussianPrefixes(string inputString, string expected)
     {
         Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString));
+    }
+
+    [Theory]
+    // English prefix with non-English language -> no change
+    [InlineData("The Avengers", "The Avengers", "es")]
+    [InlineData("The Avengers", "The Avengers", "fr")]
+    [InlineData("The Avengers", "The Avengers", "de")]
+    [InlineData("The Avengers", "The Avengers", "it")]
+    [InlineData("The Avengers", "The Avengers", "pt")]
+    [InlineData("The Avengers", "The Avengers", "ru")]
+
+    // Spanish prefix with non-Spanish language -> no change
+    [InlineData("El Quijote", "El Quijote", "en")]
+    [InlineData("El Quijote", "El Quijote", "fr")]
+    [InlineData("La Casa de Papel", "La Casa de Papel", "en")]
+    [InlineData("Los Miserables", "Los Miserables", "de")]
+    [InlineData("Las Vegas", "Las Vegas", "it")]
+    [InlineData("Un Mundo Feliz", "Un Mundo Feliz", "pt")]
+    [InlineData("Una Historia", "Una Historia", "ru")]
+
+    // French prefix with non-French language -> no change
+    [InlineData("Le Petit Prince", "Le Petit Prince", "en")]
+    [InlineData("Le Petit Prince", "Le Petit Prince", "es")]
+    [InlineData("La Belle et la Bête", "La Belle et la Bête", "de")]
+    [InlineData("Les Misérables", "Les Misérables", "it")]
+    [InlineData("Un Amour de Swann", "Un Amour de Swann", "pt")]
+    [InlineData("Une Vie", "Une Vie", "ru")]
+    [InlineData("Des Souris et des Hommes", "Des Souris et des Hommes", "en")]
+
+    // German prefix with non-German language -> no change
+    [InlineData("Der Herr der Ringe", "Der Herr der Ringe", "en")]
+    [InlineData("Die Verwandlung", "Die Verwandlung", "es")]
+    [InlineData("Das Kapital", "Das Kapital", "fr")]
+    [InlineData("Ein Sommernachtstraum", "Ein Sommernachtstraum", "it")]
+    [InlineData("Eine Geschichte", "Eine Geschichte", "pt")]
+
+    // Italian prefix with non-Italian language -> no change
+    [InlineData("Il Nome della Rosa", "Il Nome della Rosa", "en")]
+    [InlineData("Lo Hobbit", "Lo Hobbit", "fr")]
+    [InlineData("Gli Ultimi", "Gli Ultimi", "de")]
+    [InlineData("Le Città Invisibili", "Le Città Invisibili", "pt")]
+    [InlineData("Un Giorno", "Un Giorno", "en")]
+    [InlineData("Una Notte", "Una Notte", "ru")]
+
+    // Portuguese prefix with non-Portuguese language -> no change
+    [InlineData("O Alquimista", "O Alquimista", "en")]
+    [InlineData("A Moreninha", "A Moreninha", "es")]
+    [InlineData("Os Lusíadas", "Os Lusíadas", "fr")]
+    [InlineData("As Meninas", "As Meninas", "de")]
+    [InlineData("Um Defeito de Cor", "Um Defeito de Cor", "it")]
+    [InlineData("Uma História", "Uma História", "en")]
+
+    // Russian prefix with non-Russian language -> no change
+    [InlineData("в мире", "в мире", "en")]
+    [InlineData("на столе", "на столе", "es")]
+    [InlineData("с друзьями", "с друзьями", "fr")]
+    public void TestNoCrossLanguage(string inputString, string expected, string language)
+    {
+        Assert.Equal(expected, BookSortTitlePrefixHelper.GetSortTitle(inputString, language));
     }
 }
