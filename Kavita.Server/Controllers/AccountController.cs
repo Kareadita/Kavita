@@ -758,7 +758,7 @@ public class AccountController(UserManager<AppUser> userManager,
     /// <returns></returns>
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("invite")]
-    public async Task<ActionResult<string>> InviteUser(InviteUserDto dto)
+    public async Task<ActionResult<InviteUserResponse>> InviteUser(InviteUserDto dto)
     {
         var ct = HttpContext.RequestAborted;
         var userId = UserId;
