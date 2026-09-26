@@ -2381,11 +2381,6 @@ public class ExternalMetadataService : IExternalMetadataService
             return (false, null);
         }
 
-        if (series.Metadata.ReleaseYear != 0 && !HasForceOverride(settings, series.Metadata, MetadataSettingField.StartDate))
-        {
-            return (false, null);
-        }
-
         var from = series.Metadata.ReleaseYear;
         series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
         series.Metadata.AddKPlusOverride(MetadataSettingField.StartDate);

@@ -405,41 +405,6 @@ public class ExternalMetadataServiceTests: AbstractDbTest
     }
 
     [Fact]
-    public async Task ReleaseYear_Existing_NoModification()
-    {
-        var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
-
-        const string seriesName = "Test - Release Year";
-        var series = new SeriesBuilder(seriesName)
-            .WithLibraryId(1)
-            .WithMetadata(new SeriesMetadataBuilder()
-                .WithReleaseYear(1990)
-                .Build())
-            .Build();
-        context.Series.Attach(series);
-        await context.SaveChangesAsync();
-
-        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
-        metadataSettings.Enabled = true;
-        metadataSettings.EnableStartDate = true;
-        context.MetadataSettings.Update(metadataSettings);
-        await context.SaveChangesAsync();
-
-
-        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
-        {
-            Name = seriesName,
-            StartDate = DateTime.UtcNow
-        }, 1);
-
-
-        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
-        Assert.NotNull(postSeries);
-        Assert.Equal(1990, postSeries.Metadata.ReleaseYear);
-    }
-
-    [Fact]
     public async Task ReleaseYear_Existing_Locked_NoModification()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
