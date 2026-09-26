@@ -145,7 +145,19 @@ async function handleAuthorize(request: Request, env: Env): Promise<Response> {
     return Response.redirect(redirect.toString(), 302);
   }
 
-  const roles = isAdmin(email, env.ADMIN_EMAILS) ? ["Admin", "Login"] : ["Login"];
+  // Kavita reads library grants out of this same roles claim, filtered by a
+  // "library-" prefix (Kavita.Services/OidcService.cs's SyncLibraries) -
+  // matched case-insensitively against the library's exact Name. Without
+  // this, a non-admin's SyncUserSettings pass (which runs on every login,
+  // not just account creation) finds zero library claims and revokes every
+  // library grant the user has, leaving them signed in with nothing to
+  // read. Admins don't need this (they're granted every library
+  // unconditionally), but including it for everyone keeps this one branch
+  // instead of two. If BTECH Catalog is ever renamed in Kavita, this must
+  // be updated to match or every non-admin loses access on their next login.
+  const roles = isAdmin(email, env.ADMIN_EMAILS)
+    ? ["Admin", "Login", "library-BTECH Catalog"]
+    : ["Login", "library-BTECH Catalog"];
 
   const code = await signJwt(
     {
