@@ -183,7 +183,9 @@ export class LibrarySettingsModalComponent implements OnInit {
   });
 
   isDisabled = computed(() => {
-    return this.formGroup().invalid() || (this.formGroup.folders().value().length === 0 && this.formGroup.fileGroupTypes().value().length === 0);
+    const hasFolder = this.formGroup.folders().value().length > 0;
+    const hasFileType = this.formGroup.fileGroupTypes().value().length > 0;
+    return this.formGroup().invalid() || !hasFolder || !hasFileType;
   });
 
   supportsMetadata = computed(() => {
@@ -221,24 +223,13 @@ export class LibrarySettingsModalComponent implements OnInit {
       }
     });
 
-    toObservable(this.formGroup.enableMetadata().value).pipe(
-      takeUntilDestroyed(),
-      skip(1), // Skip setting library values on load
-      tap(enableMetadata => {
-        this.formGroup.manageCollections().value.set(enableMetadata);
-        this.formGroup.manageReadingLists().value.set(enableMetadata);
-      })
-    ).subscribe();
-
     toObservable(this.formGroup.type().value).pipe(
       takeUntilDestroyed(),
       skip(1), // Skip setting library values on load
       tap(libraryType => {
         this.formGroup.fileGroupTypes().value.set(this.getLibraryFileTypes(libraryType));
 
-        if (this.scrobbleEnabledLibraries().includes(libraryType)) {
-          this.formGroup.allowScrobbling().value.set(true);
-        } else {
+        if (!this.scrobbleEnabledLibraries().includes(libraryType)) {
           this.formGroup.allowScrobbling().value.set(false);
         }
       })
