@@ -90,6 +90,20 @@
     max-height: 1.75rem;
     line-height: 2.0625rem;
     margin-left: 0.3125rem;
+
+    // Two-tone wordmark per design-system/assets/iterverse/brand.md's
+    // dark-surface rule: red "iter" isn't readable against a dark navbar,
+    // so both halves render in white here, split only by weight/opacity -
+    // same emphasis the light-background version gets from color instead.
+    .iterverse-wordmark-iter {
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .iterverse-wordmark-verse {
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.62);
+    }
   }
 
   .phone-hidden {

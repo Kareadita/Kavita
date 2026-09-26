@@ -19,6 +19,7 @@ import {AccountService} from "../../../_services/account.service";
 import {NavService} from "../../../_services/nav.service";
 import {ImageService} from "../../../_services/image.service";
 import {SearchTypeaheadComponent} from "../search-typeahead/search-typeahead.component";
+import {PRODUCT_SUFFIX} from "../../../branding";
 
 @Component({
   selector: 'app-nav-header',
@@ -31,6 +32,7 @@ import {SearchTypeaheadComponent} from "../search-typeahead/search-typeahead.com
 })
 export class NavHeaderComponent {
 
+  protected readonly productSuffix = PRODUCT_SUFFIX;
   protected readonly accountService = inject(AccountService);
   protected readonly navService = inject(NavService);
   protected readonly imageService = inject(ImageService);
