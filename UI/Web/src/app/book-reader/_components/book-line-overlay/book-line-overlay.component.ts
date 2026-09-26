@@ -184,11 +184,25 @@ export class BookLineOverlayComponent implements OnInit {
   }
 
   private shouldSkipSelection(selection: Selection | null, isRightClick: boolean): boolean {
+    if (this.selectionTouchesAnnotation(selection)) return true;
+
     return (selection === null ||
         selection === undefined ||
         selection.toString().trim() === '' ||
         selection.toString().trim() === this.selectedText()) ||
       this.hasSelectedAnnotation();
+  }
+
+  private selectionTouchesAnnotation(selection: Selection | null): boolean {
+    if (selection === null || selection === undefined || selection.rangeCount === 0) return false;
+
+    const range = selection.getRangeAt(0);
+    return this.isInsideAnnotation(range.startContainer) || this.isInsideAnnotation(range.endContainer);
+  }
+
+  private isInsideAnnotation(node: Node | null): boolean {
+    const element = node?.nodeType === Node.TEXT_NODE ? node.parentElement : node as Element | null;
+    return element instanceof Element && element.closest('app-epub-highlight') !== null;
   }
 
   /**
