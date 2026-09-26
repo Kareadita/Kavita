@@ -412,6 +412,16 @@ export class LibrarySettingsModalComponent implements OnInit {
     this.formGroup.fileGroupTypes().value.update(x => [...x.filter(item => item !== group)]);
   }
 
+  handleFileTypeGroupLabelClick(group: FileTypeGroup) {
+    const enabled = this.formGroup.fileGroupTypes().value().includes(group);
+    if (enabled) {
+      this.formGroup.fileGroupTypes().value.update(x => [...x.filter(item => item !== group)]);
+      return;
+    }
+
+    this.formGroup.fileGroupTypes().value.update(x => [...x, group]);
+  }
+
   isNextDisabled = computed(() => {
     switch (this.setupStep()) {
       case StepID.General:
