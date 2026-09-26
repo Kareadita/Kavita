@@ -2579,11 +2579,6 @@ public class ExternalMetadataService : IExternalMetadataService
             return (false, null);
         }
 
-        if (!string.IsNullOrWhiteSpace(series.LocalizedName) && !HasForceOverride(settings, series.Metadata, MetadataSettingField.LocalizedName))
-        {
-            return (false, null);
-        }
-
         // If Name took a language, LocalizedName can't have it
         if (!string.IsNullOrEmpty(heldNameLanguageCode))
         {

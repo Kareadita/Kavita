@@ -558,45 +558,6 @@ public class ExternalMetadataServiceTests: AbstractDbTest
     }
 
     [Fact]
-    public async Task LocalizedName_Existing_NoModification()
-    {
-        var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
-
-        const string seriesName = "Test - Localized Name";
-        var series = new SeriesBuilder(seriesName)
-            .WithLibraryId(1)
-            .WithLocalizedName("Localized Name here")
-            .WithMetadata(new SeriesMetadataBuilder()
-                .Build())
-            .Build();
-        context.Series.Attach(series);
-        await context.SaveChangesAsync();
-
-        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
-        metadataSettings.Enabled = true;
-        metadataSettings.EnableLocalizedName = true;
-        context.MetadataSettings.Update(metadataSettings);
-        await context.SaveChangesAsync();
-
-
-        // A perfectly viable candidate - the existing value with no force override is why nothing is written
-        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
-        {
-            Name = seriesName,
-            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
-            {
-                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Kimchi" }]
-            }
-        }, 1);
-
-
-        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
-        Assert.NotNull(postSeries);
-        Assert.Equal("Localized Name here", postSeries.LocalizedName);
-    }
-
-    [Fact]
     public async Task LocalizedName_Existing_Locked_NoModification()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
