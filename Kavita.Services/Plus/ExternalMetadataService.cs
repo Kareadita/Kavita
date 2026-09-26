@@ -2784,25 +2784,32 @@ public class ExternalMetadataService : IExternalMetadataService
         }
     }
 
+    public static (int, int, bool) CountVolumesAndChapters(Series series, List<Chapter> chapters)
+    {
+        var realVolumes = series.Volumes
+            .Where(v => v.MaxNumber.IsNot(Parser.SpecialVolumeNumber) && v.MaxNumber.IsNot(Parser.LooseLeafVolumeNumber))
+            .ToList();
+
+        var isVolumeBased = realVolumes.Count != 0;
+        // One book series (epub/pdf) have it as a special, which won't be caught in the above
+        if (series.Format is MangaFormat.Epub or MangaFormat.Pdf && chapters.Count == 1)
+        {
+            isVolumeBased = true;
+            realVolumes = series.Volumes;
+        }
+
+        var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : Parser.DefaultChapterNumber);
+        var maxChapter = (int)chapters.Max(c => c.MaxNumber);
+
+        return (maxChapter, maxVolume, isVolumeBased);
+    }
+
 
     private PublicationStatus DeterminePublicationStatus(Series series, List<Chapter> chapters, ExternalSeriesDetailDto externalMetadata)
     {
         try
         {
-            var realVolumes = series.Volumes
-                .Where(v => v.MaxNumber.IsNot(Parser.SpecialVolumeNumber) && v.MaxNumber.IsNot(Parser.LooseLeafVolumeNumber))
-                .ToList();
-
-            var isVolumeBased = realVolumes.Count != 0;
-            // One book series (epub/pdf) have it as a special, which won't be caught in the above
-            if (series.Format is MangaFormat.Epub or MangaFormat.Pdf && chapters.Count == 1)
-            {
-                isVolumeBased = true;
-                realVolumes = series.Volumes;
-            }
-
-            var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : Parser.DefaultChapterNumber);
-            var maxChapter = (int)chapters.Max(c => c.MaxNumber);
+            var (maxChapter, maxVolume, isVolumeBased) = CountVolumesAndChapters(series, chapters);
 
             // TODO: When the underlying source is a Manhua, there can be 0 chapters counted in the count. We need to handle this edge case
             var externalExpectedCount = isVolumeBased ? externalMetadata.Volumes : externalMetadata.Chapters;

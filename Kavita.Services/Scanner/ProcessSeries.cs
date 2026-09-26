@@ -27,6 +27,7 @@ using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.Metadata;
+using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Person;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
@@ -414,6 +415,10 @@ public class ProcessSeries(
         {
             DeterminePublicationStatus(series, chapters);
         }
+        else
+        {
+            TryUpdatePublicationStatus(series, chapters);
+        }
 
         if (!series.Metadata.SummaryLocked)
         {
@@ -695,6 +700,31 @@ public class ProcessSeries(
         {
             logger.LogCritical(ex, "There was an issue determining Publication Status");
             series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
+        }
+    }
+
+    /// <summary>
+    /// Updates publication status if new info (added chapters) would update the info. Only does anything if <see cref="SeriesMetadata.TotalCount"/>
+    /// is set and K+ own the field
+    /// </summary>
+    /// <param name="series"></param>
+    /// <param name="chapters"></param>
+    private static void TryUpdatePublicationStatus(Series series, List<Chapter> chapters)
+    {
+        if (series.Metadata.TotalCount == 0 ||
+            !series.Metadata.HasSetKPlusMetadata(MetadataSettingField.PublicationStatus))
+        {
+            return;
+        }
+
+        // K+ owns the field, so we are free to use the same counting method and update if possible
+        // Keep in mind that this updating is less smart as we no longer have access to the expected count from upstream
+
+        var (maxChapter, maxVolume, isVolumeBased) = ExternalMetadataService.CountVolumesAndChapters(series, chapters);
+        series.Metadata.MaxCount = isVolumeBased ? maxVolume : maxChapter;
+        if (series.Metadata.MaxCount >= series.Metadata.TotalCount)
+        {
+            series.Metadata.PublicationStatus = PublicationStatus.Completed;
         }
     }
 
