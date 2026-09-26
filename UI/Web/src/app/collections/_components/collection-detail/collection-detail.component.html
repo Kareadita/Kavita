@@ -27,12 +27,12 @@
               <app-image [styles]="{'max-width': '481px'}" [imageUrl]="imageService.getCollectionCoverImage(collectionTag()!.id)" />
 
               @if (collectionTag()!.source !== ScrobbleProvider.Kavita && collectionTag()!.missingSeriesFromSource !== null
-              && series().length !== collectionTag()!.totalSourceCount && collectionTag()!.totalSourceCount > 0) {
+              && collectedSeries() !== collectionTag()!.totalSourceCount && collectionTag()!.totalSourceCount > 0) {
                 <div class="under-image">
                   <app-image [imageUrl]="collectionTag()!.source | providerImage"
                              width="16px" height="16px"
                              [ngbTooltip]="collectionTag()!.source | scrobbleProviderName" tabindex="0" />
-                  <span class="ms-2 me-2">{{t('sync-progress', {title: series().length + ' / ' + collectionTag()!.totalSourceCount})}}</span>
+                  <span class="ms-2 me-2">{{t('sync-progress', {title: collectedSeries() + ' / ' + collectionTag()!.totalSourceCount})}}</span>
                   <i class="fa-solid fa-question-circle" aria-hidden="true" [ngbTooltip]="t('last-sync', {date: collectionTag()!.lastSyncUtc | utcToLocalTime: 'short' | defaultDate })"></i>
                 </div>
               }

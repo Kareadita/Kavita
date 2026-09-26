@@ -27,6 +27,7 @@ using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.Metadata;
+using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Person;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
@@ -157,23 +158,6 @@ public class ProcessSeries(
                 series.Format = firstParsedInfo.Format;
             }
 
-            var removePrefix = library.RemovePrefixForSortName;
-            var sortName = removePrefix ? BookSortTitlePrefixHelper.GetSortTitle(series.Name) : series.Name;
-
-            if (string.IsNullOrEmpty(series.SortName))
-            {
-                series.SortName = sortName;
-            }
-
-            if (!series.SortNameLocked)
-            {
-                series.SortName = sortName;
-                if (!string.IsNullOrEmpty(firstParsedInfo.SeriesSort))
-                {
-                    series.SortName = firstParsedInfo.SeriesSort;
-                }
-            }
-
             // parsedInfos[0] is not the first volume or chapter. We need to find it
             var localizedSeries = parsedInfos.Select(p => p.LocalizedSeries).FirstOrDefault(p => !string.IsNullOrEmpty(p));
             if (!series.LocalizedNameLocked)
@@ -190,6 +174,24 @@ public class ProcessSeries(
             }
 
             await UpdateSeriesMetadata(databasePeople, settings, series, library);
+
+            // After UpdateSeriesMetadata so the language has updated
+            var removePrefix = library.RemovePrefixForSortName;
+            var sortName = removePrefix ? BookSortTitlePrefixHelper.GetSortTitle(series.Name, series.Metadata.Language) : series.Name;
+
+            if (string.IsNullOrEmpty(series.SortName))
+            {
+                series.SortName = sortName;
+            }
+
+            if (!series.SortNameLocked)
+            {
+                series.SortName = sortName;
+                if (!string.IsNullOrEmpty(firstParsedInfo.SeriesSort))
+                {
+                    series.SortName = firstParsedInfo.SeriesSort;
+                }
+            }
 
             await UpdateSeriesFolderPath(
                 [.. fileInfos.Select(info => info.FullFilePath), .. GetFilesInUnchangedFolders(series, unchangedFolders).Select(f => f.FilePath)],
@@ -413,6 +415,10 @@ public class ProcessSeries(
         if (!series.Metadata.PublicationStatusLocked)
         {
             DeterminePublicationStatus(series, chapters);
+        }
+        else
+        {
+            TryUpdatePublicationStatus(series, chapters);
         }
 
         if (!series.Metadata.SummaryLocked)
@@ -695,6 +701,31 @@ public class ProcessSeries(
         {
             logger.LogCritical(ex, "There was an issue determining Publication Status");
             series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
+        }
+    }
+
+    /// <summary>
+    /// Updates publication status if new info (added chapters) would update the info. Only does anything if <see cref="SeriesMetadata.TotalCount"/>
+    /// is set and K+ own the field
+    /// </summary>
+    /// <param name="series"></param>
+    /// <param name="chapters"></param>
+    private static void TryUpdatePublicationStatus(Series series, List<Chapter> chapters)
+    {
+        if (series.Metadata.TotalCount == 0 ||
+            !series.Metadata.HasSetKPlusMetadata(MetadataSettingField.PublicationStatus))
+        {
+            return;
+        }
+
+        // K+ owns the field, so we are free to use the same counting method and update if possible
+        // Keep in mind that this updating is less smart as we no longer have access to the expected count from upstream
+
+        var (maxChapter, maxVolume, isVolumeBased) = ExternalMetadataService.CountVolumesAndChapters(series, chapters);
+        series.Metadata.MaxCount = isVolumeBased ? maxVolume : maxChapter;
+        if (series.Metadata.MaxCount >= series.Metadata.TotalCount)
+        {
+            series.Metadata.PublicationStatus = PublicationStatus.Completed;
         }
     }
 

@@ -27,7 +27,7 @@
   <div class="list-group mt-2">
     <ul class="ps-0">
       @for (opt of options(); track opt.value; let index = $index) {
-        <li class="list-group-item">
+        <li class="list-group-item" (click)="onContainerClick(opt)">
           <div class="form-check">
             <input id="{{id()}}--option--{{index}}" type="checkbox" class="form-check-input"
                    [checked]="isChecked(opt)" (change)="onCheckboxChange(opt, $event)"

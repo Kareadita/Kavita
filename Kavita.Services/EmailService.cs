@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Kavita.API.Database;
@@ -57,6 +58,7 @@ public class EmailService(
     public const string EmailTestTemplate = "EmailTest";
     public const string EmailChangeTemplate = "EmailChange";
     public const string UsernameChangeTemplate = "UsernameChange";
+    public const string TokenInvalidatedTemplate = "TokenInvalidated";
     public const string TokenExpirationTemplate = "TokenExpiration";
     public const string TokenExpiringSoonTemplate = "TokenExpiringSoon";
     public const string AuthKeyExpiredTemplate = "AuthKeyExpired";
@@ -174,6 +176,26 @@ public class EmailService(
         if (withHost) return $"{basePart}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
         return $"registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}"
             .Replace("//", "/");
+    }
+
+    public async Task<bool> SendTokenInvalidatedEmail(int userId, ScrobbleProvider provider, CancellationToken ct)
+    {
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        if (user == null || !IsValidEmail(user.Email) || !settings.IsEmailSetup()) return false;
+
+        var emailOptions = await CreateEmail()
+            .ForTemplate(TokenInvalidatedTemplate)
+            .WithLocalization(userId, "token-expired")
+            .WithPlaceholder("{{UserName}}", user.UserName!)
+            .WithPlaceholder("{{Provider}}", provider.ToDescription())
+            .WithPlaceholder("{{Link}}", $"{settings.HostName}/settings#scrobble-settings")
+            .To(user.Email!)
+            .Build();
+
+        await SendEmail(emailOptions);
+
+        return true;
     }
 
     public async Task<bool> SendTokenExpiredEmail(int userId, ScrobbleProvider provider)

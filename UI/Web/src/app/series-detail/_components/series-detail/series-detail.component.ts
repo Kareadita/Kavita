@@ -867,6 +867,9 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     this.readerService.getCurrentChapter(this.seriesId()).subscribe(chapter => {
       this.currentlyReadingChapter.set(chapter);
     });
+
+    // We need to reload pages read
+    this.loadPageSource.next(false);
   }
 
   read(incognitoMode: boolean = false) {

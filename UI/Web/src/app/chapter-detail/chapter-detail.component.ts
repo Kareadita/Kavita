@@ -82,6 +82,8 @@ import {getResolvedData, getWritableResolvedData} from "../../libs/route-util";
 import {Tabs} from "../_models/tabs";
 import {TabTitlePipe} from "../_pipes/tab-title.pipe";
 import {NULL_DATE} from "../_pipes/date-year-range.pipe";
+import {ActionResult} from "../_models/actionables/action-result";
+import {Chapter} from "../_models/chapter";
 
 @Component({
   selector: 'app-chapter-detail',
@@ -97,7 +99,6 @@ import {NULL_DATE} from "../_pipes/date-year-range.pipe";
     NgbNavLink,
     NgbTooltip,
     VirtualScrollerModule,
-    NgStyle,
     NgClass,
     TranslocoDirective,
     ReadMoreComponent,
@@ -343,6 +344,20 @@ export class ChapterDetailComponent implements OnInit {
   handleRelatedReload(event: RelatedTabChangeEvent) {
     if (event.entity === 'readingList') {
       this.loadReadingListsForChapter(this.chapterId());
+    }
+  }
+
+  handleChapterActions(action: ActionResult<Chapter>) {
+    switch (action.effect) {
+      case "update":
+      case "reload":
+        this.loadData();
+        break;
+      case "remove":
+        break;
+      case "none":
+        break;
+
     }
   }
 

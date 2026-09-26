@@ -91,6 +91,7 @@ import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component
 import {Tabs} from "../_models/tabs";
 import {TabTitlePipe} from "../_pipes/tab-title.pipe";
 import {EntityTitleService} from "../_services/entity-title.service";
+import {ActionResult} from "../_models/actionables/action-result";
 
 interface VolumeCast extends IHasCast {
   characterLocked: boolean;
@@ -140,7 +141,6 @@ interface VolumeCast extends IHasCast {
     EntityTitleComponent,
     RouterLink,
     NgbTooltip,
-    NgStyle,
     NgClass,
     TranslocoDirective,
     VirtualScrollerModule,
@@ -528,7 +528,25 @@ export class VolumeDetailComponent implements OnInit {
     if (idx >= 0) {
       const chapters = [...volume.chapters];
       chapters[idx] = {...updatedChapter};
-      this.volume.set({...volume, chapters});
+      this.volume.set({
+        ...volume,
+        chapters,
+        pagesRead: chapters.reduce((acc, c) => acc + c.pagesRead, 0),
+      });
+    }
+  }
+
+  handleVolumeAction(event: ActionResult<Volume>) {
+    switch (event.effect) {
+      case "update":
+      case "reload":
+        this.loadVolume();
+        break;
+      case "remove":
+        break;
+      case "none":
+        break;
+
     }
   }
 

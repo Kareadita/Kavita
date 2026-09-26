@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.Email;
 using Kavita.Models.Entities.Enums;
@@ -20,6 +21,7 @@ public interface IEmailService
     Task<string> GenerateEmailLink(HttpRequest request, string token, string routePart, string email,
         bool withHost = true);
 
+    Task<bool> SendTokenInvalidatedEmail(int userId, ScrobbleProvider provider, CancellationToken ct);
     Task<bool> SendTokenExpiredEmail(int userId, ScrobbleProvider provider);
     Task<bool> SendTokenExpiringSoonEmail(int userId, ScrobbleProvider provider);
     Task<bool> SendAuthKeyExpiredEmail(int userId, IList<AppUserAuthKey> keys);
