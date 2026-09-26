@@ -7,7 +7,6 @@ import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-b
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
-import {WikiLink} from "../../../_models/wiki";
 
 
 @Component({
@@ -34,5 +33,4 @@ export class ManageCustomizationComponent {
   activeTab = Tabs.Dashboard;
 
   protected readonly Tabs = Tabs;
-  protected readonly WikiLink = WikiLink;
 }

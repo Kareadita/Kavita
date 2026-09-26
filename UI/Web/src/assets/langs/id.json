@@ -590,7 +590,7 @@
         "restart-required": "Mengubah penyedia atau pengaturan lanjutan memerlukan mulai ulang Kavita secara manual agar perubahan berlaku.",
         "auto-save-required": "Anda telah mengubah pengaturan penting, simpan otomatis agar perubahan tersebut tetap tersimpan",
         "provider-title": "Penyedia",
-        "provider-tooltip": "Pengaturan penyedia mengharuskan Anda untuk mengklik Simpan secara manual. Kavita harus dikonfigurasi sebagai klien rahasia dan memerlukan URL pengalihan. Lihat <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> untuk detail lebih lanjut.",
+        "provider-tooltip": "Pengaturan penyedia mengharuskan Anda untuk mengklik Simpan secara manual. Kavita harus dikonfigurasi sebagai klien rahasia dan memerlukan URL pengalihan. Hubungi BTECH IT untuk detail lebih lanjut.",
         "behavior-title": "Perilaku",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",

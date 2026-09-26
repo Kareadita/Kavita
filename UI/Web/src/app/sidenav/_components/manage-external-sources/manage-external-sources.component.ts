@@ -4,7 +4,6 @@ import {AccountService} from "../../../_services/account.service";
 import {EditExternalSourceItemComponent} from "../edit-external-source-item/edit-external-source-item.component";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {ExternalSourceService} from "../../../_services/external-source.service";
-import {WikiLink} from "../../../_models/wiki";
 import {EmptyStateComponent} from "../../../shared/_components/empty-state/empty-state.component";
 import {FilterFieldComponent} from "../../../shared/_components/filter-field/filter-field.component";
 import {filteredBy} from "../../../_helpers/filtered";
@@ -54,6 +53,4 @@ export class ManageExternalSourcesComponent {
     );
     this.resetFilter();
   }
-
-  protected readonly WikiLink = WikiLink;
 }

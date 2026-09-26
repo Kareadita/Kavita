@@ -15,7 +15,6 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {TranslocoModule} from "@jsverse/transloco";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
-import {WikiLink} from "../../_models/wiki";
 import {TypeaheadConfig} from "../../typeahead/_models/typeahead-config";
 import {SeriesService} from "../../_services/series.service";
 import {LibraryService} from "../../_services/library.service";
@@ -184,5 +183,4 @@ export class EditSeriesRelationComponent implements OnInit {
   }
 
   protected readonly RelationKind = RelationKind;
-  protected readonly WikiLink = WikiLink;
 }

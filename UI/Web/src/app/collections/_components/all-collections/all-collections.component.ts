@@ -22,7 +22,6 @@ import {User} from "../../../_models/user/user";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {ActionService} from "../../../_services/action.service";
-import {WikiLink} from "../../../_models/wiki";
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
 import {CardEntity, CardEntityFactory, CollectionCardEntity} from "../../../_models/card/card-entity";
 import {CardConfigFactory} from "../../../_services/card-config-factory.service";
@@ -59,7 +58,6 @@ export class AllCollectionsComponent implements OnInit {
   private readonly cardConfigFactory = inject(CardConfigFactory);
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
-  protected readonly WikiLink = WikiLink;
 
   protected cardSubtitleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('subtitle');
   protected cardTitleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');

@@ -12,7 +12,6 @@ import {ThemeManagerComponent} from "../../../user-settings/theme-manager/theme-
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {AccountService} from "../../../_services/account.service";
-import {WikiLink} from "../../../_models/wiki";
 import {ManageEmailSettingsComponent} from "../../../admin/manage-email-settings/manage-email-settings.component";
 import {ManageLibraryComponent} from "../../../admin/manage-library/manage-library.component";
 import {ManageMediaSettingsComponent} from "../../../admin/manage-media-settings/manage-media-settings.component";
@@ -141,5 +140,4 @@ export class SettingsComponent {
   }
 
   protected readonly SettingsTabId = SettingsTabId;
-  protected readonly WikiLink = WikiLink;
 }

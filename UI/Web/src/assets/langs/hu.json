@@ -1142,7 +1142,7 @@
         "notice": "Értesítés",
         "restart-required": "A szolgáltatói vagy speciális beállítások módosítása a Kavita manuális újraindítását igényli a módosítás érvénybe lépéséhez.",
         "provider-title": "Szolgáltató",
-        "provider-tooltip": "A szolgáltató beállításai megkövetelik, hogy manuálisan kattintson a Mentés gombra. A Kavitát bizalmas kliensként kell konfigurálni, és átirányítási URL-re van szükség. További részletekért lásd a <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wikit</a>.",
+        "provider-tooltip": "A szolgáltató beállításai megkövetelik, hogy manuálisan kattintson a Mentés gombra. A Kavitát bizalmas kliensként kell konfigurálni, és átirányítási URL-re van szükség. További részletekért forduljon a BTECH IT-hez.",
         "behavior-title": "Viselkedés",
         "tls-required": "Az OIDC-szolgáltatónak TLS-t (https) kell használnia",
         "manual-save-label": "A szolgáltatói beállítások módosítása manuális mentést igényel",
@@ -1762,7 +1762,7 @@
             "title": "Ne maradj le!",
             "subtitle": "Úgy tűnik, a telepítésed több mint {{count}} verzióval van lemaradva!",
             "description-1": "Kérjük, fontold meg a frissítést, hogy a Kavita legújabb verzióját használd.",
-            "description-2": "A frissítéssel kapcsolatos utasításokért tekintse meg a <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wikinket</a>.",
+            "description-2": "A frissítéssel kapcsolatos utasításokért forduljon a BTECH IT-hez.",
             "description-3": "Ha van valami konkrét oka annak, hogy még nem frissítettél, szeretnénk tudni, hogy mi tart vissza egy elavult verziónál! Látogass el a Discord oldalunkra, és tudasd velünk, mi akadályozza a frissítési folyamatot."
         },
         "new-version": {

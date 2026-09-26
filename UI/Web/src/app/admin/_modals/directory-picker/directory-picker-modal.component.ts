@@ -29,7 +29,6 @@ import {LibraryService} from '../../../_services/library.service';
 import {NgClass} from '@angular/common';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {WikiLink} from "../../../_models/wiki";
 import {DirectoryDto} from "../../../_models/system/directory-dto";
 import {Stack} from "../../../shared/data-structures/stack";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
@@ -54,7 +53,7 @@ export class DirectoryPickerModalComponent implements OnInit {
 
   startingFolder = input<string>('');
   /** Url to give more information about selecting directories. Passing nothing will suppress. */
-  helpUrl = input<string>(WikiLink.Library);
+  helpUrl = input<string>('');
   protected readonly instance = viewChild<NgbTypeahead>('instance');
 
 

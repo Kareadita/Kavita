@@ -1,7 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal, viewChild} from '@angular/core';
 import {translate, TranslocoDirective, TranslocoPipe} from "@jsverse/transloco";
 import {StepTrackerComponent, TimelineStep} from "../../reading-list/_components/step-tracker/step-tracker.component";
-import {WikiLink} from "../../_models/wiki";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {FileUploadComponent} from "@iplab/ngx-file-upload";
 import {MetadataSettings} from "../_models/metadata-settings";
@@ -366,7 +365,6 @@ export class ImportMappingsComponent implements OnInit {
   }
 
   protected readonly Step = Step;
-  protected readonly WikiLink = WikiLink;
   protected readonly ImportModes = ImportModes;
   protected readonly ConflictResolutions = ConflictResolutions;
   protected readonly ConflictResolution = ConflictResolution;

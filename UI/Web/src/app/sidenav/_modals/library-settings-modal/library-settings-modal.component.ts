@@ -35,7 +35,6 @@ import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {allFileTypeGroup, FileTypeGroup} from "../../../_models/library/file-type-group.enum";
 import {FileTypeGroupPipe} from "../../../_pipes/file-type-group.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
-import {WikiLink} from "../../../_models/wiki";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../../settings/_components/setting-switch/setting-switch.component";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
@@ -127,7 +126,6 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   protected readonly LibraryType = LibraryType;
   protected readonly Tabs = Tabs;
-  protected readonly WikiLink = WikiLink;
   protected readonly Action = Action;
   protected readonly libraryTypePipe = new LibraryTypePipe();
 
@@ -135,9 +133,7 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   active = Tabs.General;
   chooserConfig = signal<CoverImageChooserConfig>({});
-  protected readonly excludePatternTooltip = `<span>` + translate('library-settings-modal.exclude-patterns-tooltip') +
-  `<a class="ms-1" href="${WikiLink.ScannerExclude}" rel="noopener noreferrer" target="_blank">${translate('library-settings-modal.help')}` +
-  `<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>`;
+  protected readonly excludePatternTooltip = `<span>` + translate('library-settings-modal.exclude-patterns-tooltip') + `</span>`;
 
   formModel = signal<FormModel>({
     id: 0,

@@ -724,7 +724,7 @@
         "restart-required": "Ændring af udbyder eller avancerede indstillinger kræver en manuel genstart af Kavita for at træde i kraft.",
         "auto-save-required": "Du har ændret vigtige indstillinger. Gem dem automatisk for at bevare dem",
         "provider-title": "Udbyder",
-        "provider-tooltip": "Udbyderindstillinger kræver, at du manuelt klikker på Gem. Kavita skal konfigureres som en fortrolig klient og har brug for en omdirigerings-URL. Se <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> for flere detaljer.",
+        "provider-tooltip": "Udbyderindstillinger kræver, at du manuelt klikker på Gem. Kavita skal konfigureres som en fortrolig klient og har brug for en omdirigerings-URL. Kontakt BTECH IT for flere detaljer.",
         "behavior-title": "Adfærd",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",

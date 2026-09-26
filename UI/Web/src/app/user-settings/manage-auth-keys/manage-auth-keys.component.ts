@@ -3,7 +3,6 @@ import {ApiKeyComponent} from "../api-key/api-key.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {SettingsService} from "../../admin/settings.service";
-import {WikiLink} from "../../_models/wiki";
 import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {AuthKey, AuthKeyProvider, OpdsName} from "../../_models/user/auth-key";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
@@ -46,8 +45,6 @@ export class ManageAuthKeysComponent implements OnInit {
   private readonly modalService = inject(ModalService);
   private readonly clipboard = inject(Clipboard);
   private readonly toastr = inject(ToastrService);
-
-  protected readonly opdsUrlLink = `<a href="${WikiLink.OpdsClients}" target="_blank" rel="noopener noreferrer">Wiki</a>`
 
   isReadOnly = this.accountService.hasReadOnlyRole;
 

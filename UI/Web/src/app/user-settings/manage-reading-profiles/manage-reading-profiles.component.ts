@@ -50,7 +50,6 @@ import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ToastrService} from '@openng/ngx-toastr';
 import {ConfirmService} from "../../shared/confirm.service";
-import {WikiLink} from "../../_models/wiki";
 import {BreakpointPipe} from "../../_pipes/breakpoint.pipe";
 import {
   SettingColorPickerComponent
@@ -353,7 +352,6 @@ export class ManageReadingProfilesComponent implements OnInit {
   protected readonly pdfScrollModes = pdfScrollModes;
   protected readonly Tabs = Tabs;
   protected readonly ReadingProfileKind = ReadingProfileKind;
-  protected readonly WikiLink = WikiLink;
   protected readonly breakPoints = breakPoints;
   protected readonly FontProvider = FontProvider;
   protected readonly form = form;

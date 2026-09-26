@@ -1,7 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {UpdateVersionEvent} from "../../../_models/events/update-version-event";
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
-import {WikiLink} from "../../../_models/wiki";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ChangelogUpdateItemComponent} from "../changelog-update-item/changelog-update-item.component";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
@@ -30,10 +29,7 @@ export class VersionUpdateModalComponent {
   versionsOutOfDate = input<number>(0);
 
   isDocker = computed(() => this.update()?.isDocker ?? false);
-  /** Wiki help link - Docker or native install guide */
-  helpUrl = computed(() => {
-    return this.isDocker() ? WikiLink.UpdateDocker : WikiLink.UpdateNative;
-  });
+  readonly helpUrl = 'mailto:it@btech.edu';
   private readonly localePrefix: Record<string, string> = {
     'refresh': 'version-update-modal.new-version',
     'update-available': 'version-update-modal.update-notification',

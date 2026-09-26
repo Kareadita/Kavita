@@ -19,7 +19,7 @@
         <p class="mt-2 text-muted">{{t('processing')}}</p>
       </div>
     } @else if (currentSummary(); as summary) {
-      <p>{{t('description')}} <a [href]="WikiLink.CblImportModal" rel="noopener noreferrer">{{t('wiki')}}</a></p>
+      <p>{{t('description')}}</p>
       <!-- File name -->
       <h5 class="mb-3">
         {{summary.cblName || currentFile().name}}

@@ -2532,7 +2532,7 @@
         "require-verified-email-label": "メール認証を必須にする",
         "save-success": "OIDC 設定が正常に更新されました",
         "restart-required": "プロバイダーまたは詳細設定を変更した場合、変更を反映させるためには Kavita を手動で再起動する必要があります。",
-        "provider-tooltip": "プロバイダー設定では、手動で「保存」をクリックする必要があります。Kavita は機密クライアントとして設定する必要があり、リダイレクト URL が必要です。詳細は <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> をご覧ください。",
+        "provider-tooltip": "プロバイダー設定では、手動で「保存」をクリックする必要があります。Kavita は機密クライアントとして設定する必要があり、リダイレクト URL が必要です。詳細については BTECH IT にお問い合わせください。",
         "manual-save-label": "プロバイダー設定の変更には手動での保存が必要です",
         "authority-label": "権限",
         "authority-tooltip": "OIDC プロバイダーの URL です。.well-known/openid-configuration のパスは含めないでください",
@@ -3476,7 +3476,7 @@
             "title": "遅れをとらないでください！",
             "subtitle": "インストールが {{count}} バージョン以上古いようです!",
             "description-1": "Kavita の最新バージョンをご利用いただけるよう、アップグレードをご検討ください。",
-            "description-2": "更新方法については、<a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> をご覧ください。",
+            "description-2": "更新方法については BTECH IT にお問い合わせください。",
             "description-3": "まだアップデートされていない具体的な理由がある場合は、ぜひ古いバージョンを使い続けている理由を教えて下さい! Discord で、アップグレードの妨げになっている要因をお聞かせください。"
         },
         "new-version": {

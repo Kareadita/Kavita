@@ -3,7 +3,6 @@ import {ToastrService} from '@openng/ngx-toastr';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
-import {WikiLink} from "../../_models/wiki";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {ConfirmService} from "../../shared/confirm.service";
@@ -55,7 +54,6 @@ export class ManageSettingsComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly serverService = inject(ServerService);
   private readonly confirmService = inject(ConfirmService);
-  protected readonly WikiLink = WikiLink;
 
   formModel = signal<FormModel>({
     allowStatCollection: false,
@@ -105,10 +103,7 @@ export class ManageSettingsComponent implements OnInit {
   logLevels = signal<string[]>([]);
   isDocker = signal<boolean>(false);
 
-  allowStatsTooltip = translate('manage-settings.allow-stats-tooltip-part-1') + ' <a href="' +
-    WikiLink.DataCollection +
-    '" rel="noopener noreferrer" target="_blank">wiki</a> ' +
-    translate('manage-settings.allow-stats-tooltip-part-2');
+  allowStatsTooltip = translate('manage-settings.allow-stats-tooltip');
 
   constructor() {
     toObservable(this.formModel).pipe(

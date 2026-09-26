@@ -2922,7 +2922,7 @@
         "notice": "알림",
         "restart-required": "프로바이더(인증 제공자)나 클라이언트 ID(Client ID) 를 변경한 경우 변경 사항을 적용하려면 Kavita를 수동으로 다시 시작해야 합니다.",
         "provider-title": "프로바이더(인증 제공자)",
-        "provider-tooltip": "프로바이더(인증 제공자) 설정을 변경한 후에는 직접 [저장] 버튼을 눌러야 합니다. Kavita는 비공개 클라이언트(confidential client) 로 설정되어야 하며, 리디렉션 URL 이 필요합니다. 자세한 내용은 <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>위키</a>문서를 참조하십시오.",
+        "provider-tooltip": "프로바이더(인증 제공자) 설정을 변경한 후에는 직접 [저장] 버튼을 눌러야 합니다. Kavita는 비공개 클라이언트(confidential client) 로 설정되어야 하며, 리디렉션 URL 이 필요합니다. 자세한 내용은 BTECH IT에 문의하십시오.",
         "behavior-title": "동작 설정 (Behavior)",
         "other-field-required": "{{validation.other-field-required}}",
         "manual-save-label": "프로바이더(인증 제공자) 설정을 변경하려면 수동으로 저장해야 합니다",
@@ -3488,7 +3488,7 @@
             "title": "뒤처지지 마세요!",
             "subtitle": "귀하의 설치 버전이 {{count}}개 이상 뒤처진 것 같습니다!",
             "description-1": "최신 버전의 Kavita를 실행할 수 있도록 업그레이드하는 것을 고려해 보세요.",
-            "description-2": "업데이트 방법에 대한 지침은 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>위키</a>를 살펴보세요.",
+            "description-2": "업데이트 방법에 대한 지침은 BTECH IT에 문의하십시오.",
             "description-3": "아직 업데이트하지 않은 특별한 이유가 있는 경우 오래된 버전을 유지하는 이유가 무엇인지 알고 싶습니다! 우리의 불일치에 들러 업그레이드 경로를 방해하는 것이 무엇인지 알려주십시오."
         },
         "new-version": {

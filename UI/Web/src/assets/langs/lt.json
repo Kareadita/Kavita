@@ -19,7 +19,7 @@
         "notice": "Pranešimas",
         "restart-required": "Norint pakeisti Authority arba Client ID, reikia rankiniu būdu paleisti Kavita iš naujo, kad pakeitimai įsigaliotų.",
         "provider-title": "Tiekėjas",
-        "provider-tooltip": "Tiekėjo nustatymai reikalauja rankiniu būdu nuspausti 'Saugoti'. Kavita turi būti sukonfiguruota kaip konfidencialus klientas ir turi turėti nukreipimo URL. Skaityti <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> norint sužinoti daugiau.",
+        "provider-tooltip": "Tiekėjo nustatymai reikalauja rankiniu būdu nuspausti 'Saugoti'. Kavita turi būti sukonfiguruota kaip konfidencialus klientas ir turi turėti nukreipimo URL. Susisiekite su BTECH IT, jei norite sužinoti daugiau.",
         "behavior-title": "Elgesys",
         "manual-save-label": "Tiekėjo nustatymų keitimas reikalauja rankinio išsaugojimo",
         "authority-tooltip": "URL į jūsų OIDC tiekėją neturi .well-known/openid-configuration kelio",

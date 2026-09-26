@@ -3,7 +3,6 @@ import {filter, shareReplay} from 'rxjs';
 import {KavitaMediaError} from '../_models/media-error';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {WikiLink} from "../../_models/wiki";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {NgxDatatableModule} from "@siemens/ngx-datatable";
@@ -27,7 +26,6 @@ export class ManageMediaIssuesComponent implements OnInit {
   private readonly serverService = inject(ServerService);
   private readonly messageHub = inject(MessageHubService);
   private readonly destroyRef = inject(DestroyRef);
-  protected readonly WikiLink = WikiLink;
 
   messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef),
     filter(m => m.event === EVENTS.ScanSeries), shareReplay());

@@ -2879,7 +2879,7 @@
         "notice": "Hinweis",
         "restart-required": "Änderungen am Anbieter oder an den erweiterten Einstellungen erfordern einen manuellen Neustart von Kavita.",
         "provider-title": "Provider",
-        "provider-tooltip": "In den Anbietereinstellungen müssen Sie manuell auf „Speichern“ klicken. Kavita muss als vertraulicher Client konfiguriert werden und benötigt eine Weiterleitungs-URL. Weitere Informationen finden Sie im <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>.",
+        "provider-tooltip": "In den Anbietereinstellungen müssen Sie manuell auf „Speichern“ klicken. Kavita muss als vertraulicher Client konfiguriert werden und benötigt eine Weiterleitungs-URL. Weitere Informationen erhalten Sie von BTECH IT.",
         "behavior-title": "Verhalten",
         "manual-save-label": "Das Ändern der Providereinstellungen erfordert ein manuelles Speichern",
         "authority-label": "Anbieter-URL (Authority)",
@@ -3476,7 +3476,7 @@
             "title": "Verlieren Sie nicht den Anschluss!",
             "subtitle": "Es sieht so aus, als sei Ihre Installation mehr als {{count}} Versionen im Rückstand!",
             "description-1": "Bitte erwägen Sie ein Upgrade, damit Sie die neueste Version von Kavita verwenden.",
-            "description-2": "In unserem <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>Wiki</a> finden Sie Anleitungen zum Aktualisieren.",
+            "description-2": "Anleitungen zum Aktualisieren erhalten Sie von BTECH IT.",
             "description-3": "Wenn es einen bestimmten Grund gibt, warum Sie noch kein Update durchgeführt haben, würden wir gerne wissen, warum Sie weiterhin eine veraltete Version verwenden! Besuchen Sie unseren Discord-Server und teilen Sie uns mit, was Sie daran hindert, ein Upgrade durchzuführen."
         },
         "new-version": {

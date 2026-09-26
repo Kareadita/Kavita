@@ -7,7 +7,6 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {SiteThemeProviderPipe} from "../../../_pipes/site-theme-provider.pipe";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {WikiLink} from "../../../_models/wiki";
 import {ToastrService} from '@openng/ngx-toastr';
 import {NgbCollapse, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {tap} from "rxjs";
@@ -302,5 +301,4 @@ export class FontManagerComponent implements OnInit {
   }
 
   protected readonly FontProvider = FontProvider;
-  protected readonly WikiLink = WikiLink.EpubFontManager;
 }

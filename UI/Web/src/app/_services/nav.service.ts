@@ -18,7 +18,6 @@ import {AccountService} from "./account.service";
 import {map} from "rxjs/operators";
 import {NavigationEnd, Router} from "@angular/router";
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
-import {WikiLink} from "../_models/wiki";
 import {AUTH_URL_KEY} from "../_guards/auth.guard";
 
 /**
@@ -72,10 +71,6 @@ export class NavService {
     {
       transLocoKey: 'announcements',
       routerLink: '/announcements/',
-    },
-    {
-      transLocoKey: 'help',
-      href: WikiLink.Guides,
     },
     {
       transLocoKey: 'logout',

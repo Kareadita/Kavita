@@ -17,7 +17,6 @@ import {
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
-import {WikiLink} from "../../../_models/wiki";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {User} from "../../../_models/user/user";
@@ -174,6 +173,4 @@ export class ReadingListsComponent implements OnInit {
       this.loadPage();
     });
   }
-
-  protected readonly WikiLink = WikiLink;
 }

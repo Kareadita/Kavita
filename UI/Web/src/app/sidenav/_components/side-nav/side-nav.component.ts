@@ -18,7 +18,6 @@ import {matchesQuery} from "../../../_helpers/filtered";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
-import {WikiLink} from "../../../_models/wiki";
 import {SettingsTabId} from "../../preference-nav/preference-nav.component";
 import {LicenseService} from "../../../_services/license.service";
 import {CdkDrag, CdkDragDrop, CdkDropList} from "@angular/cdk/drag-drop";
@@ -239,7 +238,6 @@ export class SideNavComponent {
     });
   }
 
-  protected readonly WikiLink = WikiLink;
   protected readonly ItemLimit = 13;
   protected readonly SideNavStreamType = SideNavStreamType;
   protected readonly SettingsTabId = SettingsTabId;

@@ -2429,7 +2429,7 @@
         "restart-required": "Att ändra leverantörs- eller avancerade inställningar kräver en manuell omstart av Kavita för att det ska träda i kraft.",
         "auto-save-required": "Du har ändrat viktiga inställningar, spara dem automatiskt för att behålla dem",
         "provider-title": "Leverantör",
-        "provider-tooltip": "Leverantörsinställningar kräver att du manuellt klickar på Spara. Kavita måste konfigureras som en konfidentiell klient och behöver en omdirigerings-URL. Se <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wikin</a> för mer information.",
+        "provider-tooltip": "Leverantörsinställningar kräver att du manuellt klickar på Spara. Kavita måste konfigureras som en konfidentiell klient och behöver en omdirigerings-URL. Kontakta BTECH IT för mer information.",
         "behavior-title": "Beteende",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",
@@ -3152,7 +3152,7 @@
             "title": "Hamna inte efter!",
             "subtitle": "Det verkar som att din installation är mer än {{count}} versioner efter!",
             "description-1": "Överväg att uppgradera så att du kör den senaste versionen av Kavita.",
-            "description-2": "Ta en titt på våran <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> för instruktioner om hur du uppdaterar.",
+            "description-2": "Kontakta BTECH IT för instruktioner om hur du uppdaterar.",
             "description-3": "Om det finns en specifik anledning till att du ännu inte har uppdaterat, vill vi gärna veta vad som håller dig kvar på en äldre version! Titta gärna in på vår Discord och berätta vad som hindrar dig från att uppgradera."
         },
         "new-version": {

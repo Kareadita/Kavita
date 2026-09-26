@@ -48,7 +48,7 @@
         "restart-required": "Changing Provider or advanced settings requires a manual restart of Kavita to take effect.",
         "auto-save-required": "You've changed critical settings, manually save to persist them",
         "provider-title": "Provider",
-        "provider-tooltip": "Provider settings require you to manually click Save. Kavita must be configured as a confidential client and needs a redirect URL. See the <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> for more details.",
+        "provider-tooltip": "Provider settings require you to manually click Save. Kavita must be configured as a confidential client and needs a redirect URL. Contact BTECH IT for more details.",
         "behavior-title": "Behavior",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",
@@ -292,7 +292,7 @@
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Mihon users.",
         "clients-opds-description": "All 3rd Party clients will either use the OPDS Auth key or the Connection Url below. These are like passwords, keep it private.",
         "clients-opds-url-label": "OPDS URL",
-        "clients-opds-url-tooltip": "See a list of supported OPDS clients: ",
+        "clients-opds-url-tooltip": "Use this URL in a third-party OPDS-compatible reading app.",
 
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
@@ -355,7 +355,7 @@
     },
 
     "font-manager": {
-        "description": "Fonts you can choose from in the epub reader. They're grouped by family, the name you pick while reading. Each family holds one or more files for its different weights and styles. Get fonts from {{googleFontsLink}}, or see the {{wikiLink}} for more information. ",
+        "description": "Fonts you can choose from in the epub reader. They're grouped by family, the name you pick while reading. Each family holds one or more files for its different weights and styles. Get fonts from {{googleFontsLink}}.{{wikiLink}}",
         "wiki": "Wiki",
         "google-fonts": "Google Fonts",
         "add": "{{common.add}}",
@@ -905,8 +905,8 @@
             "title": "Don't fall behind!",
             "subtitle": "It seems your install is more than {{count}} versions behind!",
             "description-1": "Please consider upgrading so that you're running the latest version of Kavita.",
-            "description-2": "Take a look at our <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> for instructions on how to update.",
-            "description-3": "If there is a specific reason you haven't updated yet we would love to know what is keeping you on an outdated version! Stop by our discord and let us know what is blocking your upgrade path."
+            "description-2": "Contact BTECH IT for instructions on how to update.",
+            "description-3": "If there is a specific reason you haven't updated yet we would love to know what is keeping you on an outdated version! Stop by our Discord and let us know what is blocking your upgrade path."
         },
         "new-version": {
             "title": "Kavita was updated!",
@@ -915,7 +915,7 @@
         },
         "update-notification": {
             "title": "New Update Available!",
-            "help": "How to Update",
+            "help": "Contact IT",
             "download": "Download"
         }
     },
@@ -1936,6 +1936,7 @@
         "clear": "{{common.clear}}",
         "donate": "Donate",
         "donate-tooltip": "You can remove this by subscribing to Kavita+",
+        "powered-by-kavita-tooltip": "Iterverse Library is built on Kavita, an open-source project",
         "back": "Back",
         "cancel-edit": "Close Reorder",
         "more": "More",
@@ -2444,8 +2445,7 @@
         "cache-size-label": "Cache Size",
         "cache-size-tooltip": "The amount of memory allowed for caching heavy APIs. Default is 75MB.",
         "allow-stats-label": "Allow Anonymous Usage Collection",
-        "allow-stats-tooltip-part-1": "Send anonymous usage data to Kavita's servers. This includes information on certain features used, number of files, OS version, Kavita install version, CPU, and memory. We will use this information to prioritize features, bug fixes, and performance tuning. Requires restart to take effect. See the ",
-        "allow-stats-tooltip-part-2": "for what is collected.",
+        "allow-stats-tooltip": "Send anonymous usage data to Kavita's servers. This includes information on certain features used, number of files, OS version, Kavita install version, CPU, and memory. We will use this information to prioritize features, bug fixes, and performance tuning. Requires restart to take effect.",
         "send-data": "Send Data",
         "opds-label": "OPDS",
         "opds-tooltip": "OPDS support will allow all users to use OPDS to read and download content from the server.",
@@ -2485,6 +2485,7 @@
         "discord-title": "Discord:",
         "donations-title": "Donations:",
         "source-title": "Source:",
+        "support-title": "Support:",
         "feature-request-title": "Feature Requests:",
         "localization-title": "Localizations:",
         "updates-title": "Update History"

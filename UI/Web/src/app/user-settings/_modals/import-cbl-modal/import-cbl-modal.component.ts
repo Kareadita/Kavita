@@ -33,7 +33,6 @@ import {CdkScrollable} from '@angular/cdk/scrolling';
 import {RouterLink} from '@angular/router';
 import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
 import {modalSaved} from "../../../_models/modal/modal-result";
-import {WikiLink} from "../../../_models/wiki";
 import {AccountService} from "../../../_services/account.service";
 import {TypeaheadConfigFactoryService} from "../../../typeahead-config-factory.service";
 
@@ -469,5 +468,4 @@ export class ImportCblModalComponent implements OnInit {
 
   protected readonly CblImportReason = CblImportReason;
   protected readonly CblMatchTier = CblMatchTier;
-  protected readonly WikiLink = WikiLink;
 }

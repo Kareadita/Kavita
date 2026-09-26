@@ -1362,7 +1362,7 @@
         "auto-save-required": "Kritik ayarları değiştirdiniz, değişiklikler kalıcı olsun diye otomatik kaydet özelliğini kullanın",
         "tls-required": "OIDC sağlayıcısı tls (https) kullanmalıdır",
         "manual-save-label": "Sağlayıcı ayarlarını değiştirmek için manuel olarak kaydetmeniz gerekir",
-        "provider-tooltip": "Sağlayıcı ayarları için manuel olarak Kaydet'i tıklamanız gerekir. Kavita, gizli bir istemci olarak yapılandırılmalıdır ve bir yönlendirme URL'si gerektirir. Daha fazla bilgi için <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> sayfasına bakın.",
+        "provider-tooltip": "Sağlayıcı ayarları için manuel olarak Kaydet'i tıklamanız gerekir. Kavita, gizli bir istemci olarak yapılandırılmalıdır ve bir yönlendirme URL'si gerektirir. Daha fazla bilgi için BTECH IT ile iletişime geçin.",
         "authority-tooltip": "OIDC sağlayıcınızın URL'sine .well-known/openid-configuration yolunu eklemeyin",
         "client-id-label": "Müşteri Kimliği",
         "client-id-tooltip": "OIDC sağlayıcınızda ayarlanan ClientID herhangi bir şey olabilir",

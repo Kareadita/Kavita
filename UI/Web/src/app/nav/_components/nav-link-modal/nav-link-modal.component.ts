@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
-import {WikiLink} from "../../../_models/wiki";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {Router, RouterLink} from "@angular/router";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -19,7 +18,6 @@ import {AccountService} from "../../../_services/account.service";
 })
 export class NavLinkModalComponent {
 
-  protected readonly WikiLink = WikiLink;
   protected readonly SettingsTabId = SettingsTabId;
   private readonly modal = inject(NgbActiveModal);
   private readonly router = inject(Router);

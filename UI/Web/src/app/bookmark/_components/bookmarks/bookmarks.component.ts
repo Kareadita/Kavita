@@ -17,7 +17,6 @@ import {
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
-import {WikiLink} from "../../../_models/wiki";
 import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -55,8 +54,6 @@ export class BookmarksComponent {
   public readonly metadataService = inject(MetadataService);
   public readonly destroyRef = inject(DestroyRef);
   public readonly cardConfigFactory = inject(CardConfigFactory);
-
-  protected readonly WikiLink = WikiLink;
 
   bookmarks = signal<PageBookmark[]>([]);
   bookmarkEntities = computed(() => {

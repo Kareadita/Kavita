@@ -2736,7 +2736,7 @@
         "notice": "注意",
         "restart-required": "更改提供商或高级设置需要手动重启 Kavita 才能生效。",
         "provider-title": "提供商",
-        "provider-tooltip": "提供商设置需要您手动点击“保存”。Kavita 必须配置为机密客户端，并且需要重定向网址。更多详情，请参阅<a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>获取更多信息。",
+        "provider-tooltip": "提供商设置需要您手动点击“保存”。Kavita 必须配置为机密客户端，并且需要重定向网址。更多详情，请联系 BTECH IT。",
         "behavior-title": "行为",
         "other-field-required": "{{validation.other-field-required}}",
         "manual-save-label": "更改提供商设置需要手动保存",
@@ -3297,7 +3297,7 @@
             "title": "不要落后！",
             "subtitle": "您的安装似乎落后了超过 {{count}} 个版本！",
             "description-1": "请考虑升级，以便运行最新版本的 Kavita。",
-            "description-2": "请查看我们的 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a>，了解有关如何更新的说明。",
+            "description-2": "请联系 BTECH IT，了解有关如何更新的说明。",
             "description-3": "如果您有特定原因尚未更新，我们很想知道是什么让您一直使用过时的版本！停止我们的 discord，让我们知道是什么阻碍了您的升级之路。"
         },
         "new-version": {

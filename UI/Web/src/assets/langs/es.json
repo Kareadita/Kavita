@@ -2688,7 +2688,7 @@
         "save": "{{common.save}}",
         "save-success": "Se han actualizado correctamente sus configuraciones de OIDC",
         "provider-title": "Proveedor",
-        "provider-tooltip": "Estas configuraciones requieren que manualmente presiones \"Guardar\". Kavita debe ser configurado como un cliente confidencial y necesita una URL de redireccionamiento. Para más información, puede consultar la <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>.",
+        "provider-tooltip": "Estas configuraciones requieren que manualmente presiones \"Guardar\". Kavita debe ser configurado como un cliente confidencial y necesita una URL de redireccionamiento. Para más información, puede contactar a BTECH IT.",
         "behavior-title": "Comportamiento",
         "other-field-required": "{{validation.other-field-required}}",
         "manual-save-label": "Los cambios en las configuraciones de proveedor requieren un guardado manual",
@@ -2835,7 +2835,7 @@
             "title": "¡No te quedes atrás!",
             "subtitle": "¡Parece que tu instalación lleva más de {{count}} versiones de retraso!",
             "description-1": "Considere actualizar para ejecutar la versión más reciente de Kavita.",
-            "description-2": "Eche un vistazo a nuestra <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> para obtener instrucciones sobre cómo actualizar.",
+            "description-2": "Póngase en contacto con BTECH IT para obtener instrucciones sobre cómo actualizar.",
             "description-3": "Si hay una razón específica por la que aún no has actualizado, ¡nos encantaría saber qué te mantienes en una versión obsoleta! Deténgase en nuestro discord y háganos saber qué está bloqueando su camino a la actualización."
         },
         "new-version": {

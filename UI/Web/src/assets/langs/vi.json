@@ -2043,7 +2043,7 @@
             "title": "Đừng tụt hậu!",
             "subtitle": "Có vẻ như bản cài đặt của bạn chậm hơn {{count}} phiên bản!",
             "description-1": "Vui lòng cân nhắc nâng cấp để bạn có thể chạy phiên bản Kavita mới nhất.",
-            "description-2": "Hãy tham khảo <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> của chúng tôi để biết hướng dẫn về cách cập nhật.",
+            "description-2": "Hãy liên hệ BTECH IT để biết hướng dẫn về cách cập nhật.",
             "description-3": "Nếu có lý do cụ thể nào khiến bạn chưa cập nhật, chúng tôi rất muốn biết lý do khiến bạn vẫn sử dụng phiên bản cũ! Hãy ghé qua discord của chúng tôi và cho chúng tôi biết lý do khiến bạn không nâng cấp."
         },
         "update-notification": {
@@ -2089,7 +2089,7 @@
         "restart-required": "Thay đổi nhà cung cấp hoặc các tính năng nâng cao cần phải khởi động Kavita thủ công để có hiệu lực.",
         "auto-save-required": "Bạn đã thay đổi các cài đặt quan trọng. Hãy lưu thủ công để áp dụng các thay đổi",
         "provider-title": "Nhà cung cấp",
-        "provider-tooltip": "Cài đặt nhà cung cấp cần phải nhấn lưu thủ công. Kavita phải được cấu hình dưới dạng confidential client và cần URL chuyển hướng. Xem <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> để biết thêm chi tiết.",
+        "provider-tooltip": "Cài đặt nhà cung cấp cần phải nhấn lưu thủ công. Kavita phải được cấu hình dưới dạng confidential client và cần URL chuyển hướng. Liên hệ BTECH IT để biết thêm chi tiết.",
         "behavior-title": "Hành vi",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",

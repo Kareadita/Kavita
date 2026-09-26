@@ -10,7 +10,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
-import {WikiLink} from "../../../_models/wiki";
 import {NavLinkModalComponent} from "../nav-link-modal/nav-link-modal.component";
 import {MetadataService} from "../../../_services/metadata.service";
 import {ProfileIconComponent} from "../../../_single-module/profile-icon/profile-icon.component";
@@ -64,7 +63,6 @@ export class NavHeaderComponent {
   }
 
   protected readonly FilterField = SeriesFilterField;
-  protected readonly WikiLink = WikiLink;
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly SettingsTabId = SettingsTabId;
 }

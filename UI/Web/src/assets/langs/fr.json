@@ -2879,7 +2879,7 @@
         "notice": "Notification",
         "restart-required": "Changer de fournisseur ou modifier les paramètres avancés nécessite un redémarrage manuel de Kavita pour prendre effet.",
         "provider-title": "Fournisseur",
-        "provider-tooltip": "Les paramètres du fournisseur exigent que vous cliquiez manuellement sur Enregistrer. Kavita doit être configuré comme un client confidentiel et nécessite une URL de redirection. Consultez le <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> pour plus de détails.",
+        "provider-tooltip": "Les paramètres du fournisseur exigent que vous cliquiez manuellement sur Enregistrer. Kavita doit être configuré comme un client confidentiel et nécessite une URL de redirection. Contactez BTECH IT pour plus de détails.",
         "behavior-title": "Comportement",
         "manual-save-label": "La modification des paramètres du fournisseur nécessite un enregistrement manuel",
         "authority-label": "Autorité",
@@ -3476,7 +3476,7 @@
             "title": "Ne prenez pas de retard !",
             "subtitle": "Il semble que votre installation soit en retard de plus de {{count}} versions !",
             "description-1": "Veuillez envisager une mise à jour afin d'utiliser la dernière version de Kavita.",
-            "description-2": "Consultez notre <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> pour savoir comment procéder à la mise à jour.",
+            "description-2": "Contactez BTECH IT pour savoir comment procéder à la mise à jour.",
             "description-3": "S'il y a une raison spécifique pour laquelle vous n'avez pas encore mis à jour, nous aimerions savoir ce qui vous retient sur une version obsolète ! Arrêtez-vous sur notre discord et dites-nous ce qui bloque votre mise à jour."
         },
         "new-version": {

@@ -422,7 +422,7 @@
     "invite-user": {
         "title": "Gebruiker uitnodigen",
         "close": "{{common.close}}",
-        "description": "Nodig een gebruiker uit voor uw server. Voer hun e-mailadres in en we sturen ze een e-mail om een account aan te maken. Als u onze e-mailservice niet wilt gebruiken, kunt u <a href=\"https://wiki.kavitareader.com/guides/admin-settings/email\" rel=\"noopener noreferrer\" target=\"_blank\">uw eigen hosten</a> e-mailservice of gebruik een nep-e-mail (gebruiker vergeten werkt niet). Er wordt hoe dan ook een link gepresenteerd die kan worden gebruikt om het account handmatig in te stellen.",
+        "description": "Nodig een gebruiker uit voor uw server. Voer hun e-mailadres in en we sturen ze een e-mail om een account aan te maken. Als u onze e-mailservice niet wilt gebruiken, kunt u uw eigen gehoste e-mailservice gebruiken of een nep-e-mail gebruiken (gebruiker vergeten werkt niet). Er wordt hoe dan ook een link gepresenteerd die kan worden gebruikt om het account handmatig in te stellen.",
         "email": "{{common.email}}",
         "setup-user-title": "Gebruiker uitgenodigd",
         "setup-user-description": "U kunt de volgende link hieronder gebruiken om het account voor uw gebruiker in te stellen of de kopieerknop gebruiken. Mogelijk moet u zich afmelden voordat u de link gebruikt om een nieuwe gebruiker te registreren. Als uw server extern toegankelijk is, is er een e-mail naar de gebruiker verzonden en kunnen de links door hen worden gebruikt om het instellen van hun account te voltooien.",
@@ -1610,7 +1610,7 @@
         "reset-tooltip": "Externe ID's van alle gebruikers resetten, gebruik dit om de koppelingen tussen gebruikers in Kavita en uw identiteitsprovider te resetten",
         "reset-confirm": "Weet u zeker dat u de externe ID's van alle gebruikers wilt resetten?",
         "auto-save-required": "U heeft kritieke instellingen gewijzigd, gebruik autom. opslaan om deze te behouden",
-        "provider-tooltip": "De instellingen van de provider vereisen dat u handmatig op Opslaan klikt. Kavita moet worden geconfigureerd als een vertrouwde cliënt en heeft een omleidings-URL nodig. Zie de <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> voor meer details.",
+        "provider-tooltip": "De instellingen van de provider vereisen dat u handmatig op Opslaan klikt. Kavita moet worden geconfigureerd als een vertrouwde cliënt en heeft een omleidings-URL nodig. Neem contact op met BTECH IT voor meer details.",
         "authority-tooltip": "De URL van uw OIDC-provider, exclusief het pad .well-known/openid-configuration",
         "client-id-tooltip": "De Client-ID die in uw OIDC-provider is ingesteld, kan van alles zijn",
         "secret-tooltip": "Het geheim zoals gegenereerd door uw OIDC-provider, wordt niet weergegeven nadat het is ingesteld",
