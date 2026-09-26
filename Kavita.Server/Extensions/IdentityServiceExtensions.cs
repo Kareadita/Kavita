@@ -238,7 +238,12 @@ public static class IdentityServiceExtensions
             options.SignedOutCallbackPath = OidcLogoutCallback;
 
             options.SaveTokens = true;
-            options.GetClaimsFromUserInfoEndpoint = true;
+            // Disabled: ASP.NET's OpenIdConnectHandler throws on any UserInfo response whose
+            // Content-Type isn't exactly application/json or application/jwt (e.g. Cloudflare
+            // Access's OIDC UserInfo response), and our id_token already carries every claim
+            // this app needs, so the extra round-trip is unnecessary. See
+            // https://github.com/Kareadita/Kavita/issues/4949.
+            options.GetClaimsFromUserInfoEndpoint = false;
 
             // Due to some (Authelia) OIDC providers, we need to map these claims explicitly. Such that no flow breaks in the
             // OidcService. Claims from the UserInfoEndPoint are not added automatically, we map some to the claim we need.
