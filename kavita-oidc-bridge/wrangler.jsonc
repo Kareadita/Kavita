@@ -1,0 +1,15 @@
+{
+  "name": "kavita-oidc-bridge",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-25",
+  "vars": {
+    "ISSUER": "https://kavita-oidc-bridge.iterverse.net",
+    "CLIENT_ID": "34722feb3e1b845720953e0631fd36fb",
+    "ALLOWED_REDIRECT_URI": "https://library.iterverse.net/signin-oidc",
+    "SIGNING_KID": "fc291e64-4c16-49de-94f3-1c4252a1abd3",
+    "SIGNING_KEY_PUBLIC_JWK": "{\"kty\":\"RSA\",\"n\":\"sCsOWFh8SSAFSdmY92jB_uYqCWd9hc8kmcE-m4DErHkIMOn3eguruCeMx_LpIqAcnrmxVt7AvgHYNEIzTsQuL0ozrV03NKy_Ky-wtRckWp_T8L9UlPFdhcSht4g2ic1MRTs_ZAPi9ErBUvsrsuOGgy7rdbAEzJvYCbKPn9MiiE11ybzGb-Ij0J_4sZjpTVgM6LZH2l8I4vvFrMwQlPT23zPnFbyf0W8YUtWBefL8oBXQaihPVUUvKWYM_ItAVgAuZdJy9urhxi_nB2Z-SSwXCsZU0751dSMQCjxZEsLIOctDCPBBrQrZwI4YYPXHYYGkiIg_AphFdBXc1m58rKPf4Q\",\"e\":\"AQAB\",\"kid\":\"fc291e64-4c16-49de-94f3-1c4252a1abd3\",\"alg\":\"RS256\",\"use\":\"sig\"}",
+    "ACCESS_TEAM_DOMAIN": "dawn-mountain-9c54.cloudflareaccess.com",
+    "ACCESS_AUD": "6a3187644b722f0381837a523ee974d023c9c279543f3fec8ba893179dd19da8",
+    "ROSTER_API_URL": "https://roster-api.iterverse.net"
+  }
+}
