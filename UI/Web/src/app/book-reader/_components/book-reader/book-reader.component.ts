@@ -1202,11 +1202,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     links.forEach((link: any) => {
       link.addEventListener('click', (e: any) => {
         e.stopPropagation();
-        let targetElem = e.target;
-        if (e.target.nodeName !== 'A' && e.target.parentNode.nodeName === 'A') {
-          // Certain combos like <a><sup>text</sup></a> can cause the target to be the sup tag and not the anchor
-          targetElem = e.target.parentNode;
-        }
+
+        const targetElem = e.target.closest?.('a[kavita-page]');
+        if (!targetElem) return;
+
         if (!targetElem.attributes.hasOwnProperty('kavita-page')) { return; }
         const page = parseInt(targetElem.attributes['kavita-page'].value, 10);
         if (this.adhocPageHistory.peek()?.page !== this.pageNum()) {
