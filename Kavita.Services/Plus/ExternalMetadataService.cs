@@ -164,7 +164,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library | SeriesIncludes.Chapters, ct: ct);
         if (series == null) return null;
 
-        if (!series.WillScrobble() || !series.Library.AllowMetadataMatching) return null;
+        if (trigger != MetadataFetchTrigger.OnDemand && !series.WillScrobble() || !series.Library.AllowMetadataMatching) return null;
 
         // OnDemand (Page visit) is allowed to bypass the rate limit to allow for a nicer user experience
         // TODO: Check if this is correct. Do we want a stricter RateLimit on it?
@@ -178,6 +178,9 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             return await GetSeriesDetailPlus(seriesId, libraryType, trigger, ct: ct);
         }
+
+        // When metadata is off, never do automatic match flow
+        if (!series.WillScrobble() || !series.Library.AllowMetadataMatching) return null;
 
         var matchRequest = new MatchRequestV3Dto
         {
@@ -642,19 +645,22 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         if (!IsPlusEligible(libraryType) || !await _licenseService.HasActiveLicense(ct: ct)) return _defaultReturn;
 
-        // Check blacklist (bad matches) or if there is a don't match
+        // Check blacklist (bad matches)
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library,  ct: ct);
-        if (series == null || !series.WillScrobble() || !series.Library.AllowMetadataMatching) return _defaultReturn;
+        if (series == null) return _defaultReturn;
 
         // After a fresh match the external Ids just changed, so any cached data is stale by definition and must be refetched
         var needsRefresh = forceRefresh ||
             await _unitOfWork.ExternalSeriesMetadataRepository.NeedsDataRefresh(seriesId, ct);
 
-        if (!needsRefresh)
+        // Do return known metadata when requesting from the UI while having automatic matching off
+        if (!needsRefresh || (!series.Library.AllowMetadataMatching && trigger == MetadataFetchTrigger.OnDemand))
         {
             // Convert into DTOs and return
             return await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(seriesId, ct);
         }
+
+        if (!series.WillScrobble() || !series.Library.AllowMetadataMatching) return _defaultReturn;
 
         var data = await _unitOfWork.SeriesRepository.GetKavitaPlusSeriesDetailRequestV3Dto(seriesId, ct);
         if (data == null) return _defaultReturn;
