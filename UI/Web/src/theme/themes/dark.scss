@@ -473,7 +473,9 @@
 
   /** Login **/
   --login-card-bg-color: #212121;
-  --login-logo-image: url("/assets/images/logo.png");
+  // mark-on-dark: white "I" bar, for use over the photo/charcoal login background
+  // (the default charcoal-bar mark loses contrast there — see design-system/assets/iterverse/brand.md)
+  --login-logo-image: url("/assets/images/logo-on-dark.svg");
   --login-logo-height: 3.4375rem;
   --login-logo-width: 3.4375rem;
   --login-logo-bg-size: contain;

@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {NgStyle} from "@angular/common";
 import {NavService} from "../../../_services/nav.service";
+import {PRODUCT_SUFFIX} from "../../../branding";
 
 @Component({
     selector: 'app-splash-container',
@@ -13,4 +14,5 @@ import {NavService} from "../../../_services/nav.service";
 })
 export class SplashContainerComponent {
   protected readonly navService = inject(NavService);
+  protected readonly productSuffix = PRODUCT_SUFFIX;
 }

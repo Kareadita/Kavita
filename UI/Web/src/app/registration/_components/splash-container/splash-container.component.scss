@@ -34,6 +34,20 @@
         display: inline-block;
         margin-left: 0.3125rem;
         vertical-align: middle;
+
+        // Two-tone wordmark per design-system/assets/iterverse/brand.md's dark-surface
+        // rule: this sits over the same dark/photo login background as the navbar, so
+        // it gets the same on-dark treatment (white "iter", dimmed "verse") rather than
+        // the light-background red.
+        .iterverse-wordmark-iter {
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .iterverse-wordmark-verse {
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.62);
+        }
     }
 
     .logo-container {
