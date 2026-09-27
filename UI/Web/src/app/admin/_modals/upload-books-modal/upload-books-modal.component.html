@@ -1,0 +1,98 @@
+<ng-container *transloco="let t; prefix:'upload-books-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="modal.close()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="upload-library" class="form-label">{{t('library-label')}}</label>
+      <select id="upload-library" class="form-select" [disabled]="uploading()"
+              (change)="selectLibrary($any($event.target).value ? +$any($event.target).value : null)">
+        <option value="" [selected]="libraryId() === null">{{t('select-library')}}</option>
+        @for (lib of libraries(); track lib.id) {
+          <option [value]="lib.id" [selected]="lib.id === libraryId()">{{lib.name}}</option>
+        }
+      </select>
+    </div>
+
+    @if (selectedLibrary(); as lib) {
+      @if (lib.folders.length > 1) {
+        <div class="mb-3">
+          <label for="upload-folder" class="form-label">{{t('folder-label')}}</label>
+          <select id="upload-folder" class="form-select" [disabled]="uploading()"
+                  (change)="folderPath.set($any($event.target).value)">
+            @for (folder of lib.folders; track folder) {
+              <option [value]="folder" [selected]="folder === folderPath()">{{folder}}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <fieldset class="mb-3" [disabled]="uploading()">
+        <legend class="form-label fs-6">{{t('placement-label')}}</legend>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="placement" id="placement-per-file"
+                 [checked]="folderPerFile()" (change)="folderPerFile.set(true)">
+          <label class="form-check-label" for="placement-per-file">{{t('placement-per-file')}}</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="placement" id="placement-shared"
+                 [checked]="!folderPerFile()" (change)="folderPerFile.set(false)">
+          <label class="form-check-label" for="placement-shared">{{t('placement-shared')}}</label>
+        </div>
+        @if (!folderPerFile()) {
+          <input type="text" class="form-control mt-2" [placeholder]="t('shared-folder-placeholder')"
+                 [attr.aria-label]="t('shared-folder-placeholder')"
+                 [value]="sharedFolder()" (input)="sharedFolder.set($any($event.target).value)">
+        }
+      </fieldset>
+
+      <app-file-drag-and-drop-upload [acceptableExtensions]="acceptedExtensions" (dropped)="dropped($event)"
+                                     [uploadText]="t('upload-text')" />
+      <div class="form-text">{{t('supported', {extensions: acceptedExtensions})}}</div>
+
+      @if (queue().length > 0) {
+        <ul class="list-group mt-3">
+          @for (item of queue(); track item) {
+            <li class="list-group-item">
+              <div class="d-flex align-items-center gap-2">
+                <div class="flex-grow-1 text-truncate">
+                  <div class="text-truncate" [title]="item.file.name">{{item.file.name}}</div>
+                  <small class="text-muted">{{formatSize(item.file.size)}} · {{folderFor(item.file)}}/</small>
+                </div>
+                @switch (item.status) {
+                  @case ('done') { <i class="fa fa-check-circle text-success" [attr.aria-label]="t('done')"></i> }
+                  @case ('error') { <i class="fa fa-exclamation-circle text-danger" [attr.aria-label]="t('failed')"></i> }
+                  @case ('pending') {
+                    <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="uploading()"
+                            (click)="remove(item)" [attr.aria-label]="t('remove')">
+                      <i class="fa fa-times" aria-hidden="true"></i>
+                    </button>
+                  }
+                }
+              </div>
+              @if (item.status === 'uploading') {
+                <div class="progress mt-2" role="progressbar" [attr.aria-valuenow]="item.progress" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar" [style.width.%]="item.progress">{{item.progress}}%</div>
+                </div>
+              }
+              @if (item.status === 'pending' && item.file.size > proxyLimit) {
+                <small class="text-warning d-block">{{t('proxy-limit-warning')}}</small>
+              }
+              @if (item.error) {
+                <small class="text-danger">{{item.error}}</small>
+              }
+            </li>
+          }
+        </ul>
+      }
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close()">{{t('close')}}</button>
+    <button type="button" class="btn btn-primary" [disabled]="!canUpload()" (click)="upload()">
+      @if (uploading()) { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> }
+      {{t('upload')}}
+    </button>
+  </div>
+</ng-container>

@@ -2362,6 +2362,29 @@
     },
 
 
+    "upload-books-modal": {
+        "open-button": "Upload Books",
+        "title": "Upload Books",
+        "close": "{{common.close}}",
+        "library-label": "Library",
+        "select-library": "Select a Library",
+        "folder-label": "Library folder",
+        "placement-label": "Where should the files go?",
+        "placement-per-file": "Give each file its own folder, named after the file",
+        "placement-shared": "Put all files in one folder (e.g. a series name)",
+        "shared-folder-placeholder": "Folder name",
+        "upload-text": "books",
+        "supported": "Supported: {{extensions}}",
+        "unsupported": "{{name}} is not a supported book format",
+        "too-large": "File is too large for the server to accept",
+        "proxy-limit-warning": "Over 100 MB: this will likely be rejected when uploading through library.iterverse.net. Copy it onto the server directly instead.",
+        "remove": "Remove",
+        "done": "Uploaded",
+        "failed": "Failed",
+        "upload": "Upload",
+        "uploaded": "Uploaded {{count}} file(s). A library scan has been started."
+    },
+
     "copy-settings-from-library-modal": {
         "close": "{{common.close}}",
         "select": "Select",

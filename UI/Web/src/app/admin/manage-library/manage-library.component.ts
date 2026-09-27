@@ -54,6 +54,7 @@ import {
 import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
 import {form, FormField} from "@angular/forms/signals";
 import {Tracker} from "../../shared/utils/Tracker";
+import {UploadBooksModalComponent} from "../_modals/upload-books-modal/upload-books-modal.component";
 
 @Component({
   selector: 'app-manage-library',
@@ -179,6 +180,11 @@ export class ManageLibraryComponent implements OnInit {
     modalRef.closed.subscribe((result: ModalResult<Library>) => {
       this.getLibraries();
     });
+  }
+
+  uploadBooks() {
+    const modalRef = this.modalService.open(UploadBooksModalComponent, {size: 'lg', fullscreen: 'md'});
+    modalRef.setInput('libraries', this.libraries());
   }
 
   async deleteLibrary(library: Library) {
