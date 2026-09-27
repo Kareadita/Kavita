@@ -33,7 +33,6 @@ public partial class AccountService(
     ILocalizationService localizationService)
     : IAccountService
 {
-    public const string DefaultPassword = "[k.2@RZ!mxCQkJzE";
     private static readonly Regex AllowedUsernameRegex = AllowedUsernameRegexAttr();
 
 

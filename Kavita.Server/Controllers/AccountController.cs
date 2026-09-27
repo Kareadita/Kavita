@@ -787,7 +787,7 @@ public class AccountController(UserManager<AppUser> userManager,
 
         try
         {
-            var result = await userManager.CreateAsync(user, AccountService.DefaultPassword);
+            var result = await userManager.CreateAsync(user);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
             await accountService.SeedUser(user, ct);
