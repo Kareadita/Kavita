@@ -252,9 +252,11 @@ export class InfiniteScrollerComponent implements OnInit {
     // Reset any modal-induced overflow lock (this can happen when Starting Over and ngBootstrap modal hasn't completed teardown)
     if (element === this.document.body) {
       setTimeout(() => {
-        this.document.body.style.overflow = 'auto';
+        this.renderer.setStyle(element, 'overflow', 'auto');
         this.document.body.classList.remove('modal-open'); // ngBootstrap adds this
-      }, 100);
+        // Increased to 200 to help edge cases; manga-reader#ngOnDestroy runs before it's init (??)
+        // Calling navService#showNavBar which sets overflow to hidden causing the problems
+      }, 200);
     }
 
     fromEvent(element, 'scroll')
