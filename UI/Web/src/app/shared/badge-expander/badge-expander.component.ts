@@ -20,9 +20,9 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
   styleUrls: ['./badge-expander.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BadgeExpanderComponent implements OnInit {
+export class BadgeExpanderComponent<T> implements OnInit {
 
-  items = input.required<any[]>();
+  items = input.required<T[]>();
   itemsTillExpander = input(4);
   allowToggle = input(true);
   includeComma = input(true);
@@ -53,6 +53,8 @@ export class BadgeExpanderComponent implements OnInit {
 
     return allItems.length - visibleItems.length;
   });
+
+  trackBy = input<(item: T, index: number) => string>((t, idx) => idx + '');
 
   ngOnInit(): void {
     this.isCollapsed.set(!this.defaultExpanded());
