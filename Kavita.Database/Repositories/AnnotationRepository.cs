@@ -65,10 +65,14 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
     public async Task<IList<AppUserAnnotation>> GetAnnotations(int userId, IList<int> ids, CancellationToken ct = default)
     {
         var userPreferences = await context.AppUserPreferences.ToListAsync(ct);
+        var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         return await context.AppUserAnnotation
             .Where(a => ids.Contains(a.Id))
             .RestrictBySocialPreferences(userId, userPreferences)
+            .RestrictAgainstAgeRestriction(userRating, userId)
+            .Where(a => libraryIds.Contains(a.LibraryId))
             .ToListAsync(ct);
     }
 
@@ -109,6 +113,7 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
             .ToListAsync();
 
         var userPreferences = await context.AppUserPreferences.ToListAsync();
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
 
         var query = context.AppUserAnnotation.AsNoTracking();
 
@@ -131,7 +136,8 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
 
         query = query
             .WhereIf(allLibrariesCount != userLibs.Count, a => seriesIds.Contains(a.SeriesId))
-            .RestrictBySocialPreferences(userId, userPreferences);
+            .RestrictBySocialPreferences(userId, userPreferences)
+            .RestrictAgainstAgeRestriction(userRating, userId);
 
         var sortedQuery = query.SortBy(filter.SortOptions);
         var limitedQuery = sortedQuery.ApplyLimit(filter.LimitTo);
@@ -162,11 +168,15 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
         CancellationToken ct = default)
     {
         var userPreferences = await context.AppUserPreferences.ToListAsync(ct);
+        var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         return await context.AppUserAnnotation
             .AsNoTracking()
             .Where(a => annotationIds.Contains(a.Id))
             .RestrictBySocialPreferences(userId, userPreferences)
+            .RestrictAgainstAgeRestriction(userRating, userId)
+            .Where(a => libraryIds.Contains(a.LibraryId))
             .ProjectTo<FullAnnotationDto>(mapper.ConfigurationProvider)
             .OrderFullAnnotation()
             .ToListAsync(ct);
@@ -181,9 +191,13 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
     public async Task<IList<FullAnnotationDto>> GetFullAnnotationsByUserIdAsync(int userId, CancellationToken ct = default)
     {
         var userPreferences = await context.AppUserPreferences.ToListAsync(ct);
+        var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         return await context.AppUserAnnotation
             .RestrictBySocialPreferences(userId, userPreferences)
+            .RestrictAgainstAgeRestriction(userRating, userId)
+            .Where(a => libraryIds.Contains(a.LibraryId))
             .ProjectTo<FullAnnotationDto>(mapper.ConfigurationProvider)
             .OrderFullAnnotation()
             .ToListAsync(ct);
