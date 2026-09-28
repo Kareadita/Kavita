@@ -451,3 +451,7 @@ $pagination-opacity: 0;
 .page-progress-slider {
   margin: 0;
 }
+
+::ng-deep .book-content .tooltip-inner {
+  border: none !important;
+}

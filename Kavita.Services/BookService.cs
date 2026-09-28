@@ -143,6 +143,27 @@ public partial class BookService(
         };
     }
 
+    private static void UpdateEpubNoteRef(HtmlDocument document, HtmlNode anchor)
+    {
+        var href = anchor.GetAttributeValue("href", string.Empty);
+
+        anchor.Attributes.Add("kavita-note-ref", href);
+        anchor.Attributes.Remove("href");
+        anchor.Attributes.Add("href", "javascript:void(0)");
+
+        var nodeId = href.TrimStart('#');
+        if (string.IsNullOrEmpty(nodeId)) return;
+
+        // We need to select instead of GetElementbyId because epubs are bad html and a lot of books
+        // reuse the id
+        var candidates = document.DocumentNode
+            .SelectNodes($"//*[@id='{nodeId}']");
+        if (candidates == null) return;
+
+        foreach (var candidate in candidates)
+            candidate?.AddClass("visually-hidden");
+    }
+
     private static void UpdateLinks(HtmlNode anchor, Dictionary<string, int> mappings, int currentPage)
     {
         if (anchor.Name != "a") return;
@@ -444,6 +465,13 @@ public partial class BookService(
 
         foreach (var anchor in anchors)
         {
+            var epubType = anchor.GetAttributeValue("epub:type", string.Empty);
+            if (epubType.Equals("noteref"))
+            {
+                UpdateEpubNoteRef(doc, anchor);
+                continue;
+            }
+
             UpdateLinks(anchor, mappings, page);
         }
     }
