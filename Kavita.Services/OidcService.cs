@@ -547,7 +547,11 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var allLibraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
         // Distinct to ensure each library (id) is only present once
         var librariesIds = allLibraries
-            .Where(l => libraryAccess.Contains(l.Name, StringComparer.OrdinalIgnoreCase))
+            .Where(l =>
+                libraryAccess.Contains(l.Name, StringComparer.OrdinalIgnoreCase)
+                || libraryAccess.Contains(l.Name.Replace(" ", "-"), StringComparer.OrdinalIgnoreCase)
+                || libraryAccess.Contains(l.Id.ToString(), StringComparer.OrdinalIgnoreCase)
+                )
             .Select(l => l.Id).Distinct()
             .ToList();
 
