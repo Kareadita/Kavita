@@ -441,6 +441,8 @@ public class MangaParsingTests
     [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画第25话", "25")]
     [InlineData("자유록 13회#2", "13")]
     [InlineData("이세계에서 고아원을 열었지만, 어째서인지 아무도 독립하려 하지 않는다 38-1화 ", "38")]
+    [InlineData("1화", "1")]
+    [InlineData("5.1화", "5.1")]
     [InlineData("[ハレム]ナナとカオル ～高校生のSMごっこ～　第10話", "10")]
     [InlineData("Dance in the Vampire Bund {Special Edition} v03.5 (2019) (Digital) (KG Manga)", Parser.DefaultChapter)]
     [InlineData("Kebab Том 1 Глава 3", "3")]
