@@ -172,6 +172,16 @@ public partial class BookService(
         // Some keys get uri encoded when parsed, so replace any of those characters with original
         var mappingKey = Uri.UnescapeDataString(hrefParts[0]);
 
+        // Is a href to something on the same page (#ID)
+        if (string.IsNullOrEmpty(mappingKey))
+        {
+            if (hrefParts.Length > 1 && !string.IsNullOrEmpty(hrefParts[1]))
+            {
+                anchor.Attributes.Add("kavita-part", hrefParts[1]);
+            }
+            return;
+        }
+
         if (!mappings.TryGetValue(mappingKey, out var mappedPage))
         {
             if (HasClickableHrefPart(anchor))

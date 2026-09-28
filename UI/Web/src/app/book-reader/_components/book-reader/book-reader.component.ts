@@ -1247,6 +1247,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       link.addEventListener('click', (e: any) => {
         e.stopPropagation();
 
+        const href = link.getAttribute('href') ?? '';
+        if (href.startsWith('#')) {
+          e.preventDefault();
+          const id = href.slice(1);
+          const el = this.readingSectionElemRef().nativeElement.querySelector(`#${CSS.escape(id)}`);
+          el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+
         const targetElem = e.target.closest?.('a[kavita-page]');
         if (!targetElem) return;
 
