@@ -49,6 +49,13 @@ public static class EnumExtensions
                 result = (TEnum)field.GetValue(null)!;
                 return true;
             }
+
+            if (!string.IsNullOrEmpty(description) &&
+                string.Equals(description.Replace(" ", "-"), value, StringComparison.OrdinalIgnoreCase))
+            {
+                result = (TEnum)field.GetValue(null)!;
+                return true;
+            }
         }
 
         return false;
