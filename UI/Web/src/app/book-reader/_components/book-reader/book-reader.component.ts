@@ -1250,9 +1250,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
         const href = link.getAttribute('href') ?? '';
         if (href.startsWith('#')) {
           e.preventDefault();
-          const id = href.slice(1);
-          const el = this.readingSectionElemRef().nativeElement.querySelector(`#${CSS.escape(id)}`);
-          el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          this.scrollTo(href);
           return;
         }
 
