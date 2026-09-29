@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -883,15 +885,46 @@ public class OpdsService(
             else if (property.PropertyType.IsClass) // Handle nested objects
             {
                 var nestedObject = property.GetValue(obj);
-                if (nestedObject != null)
+                if (nestedObject == null) continue;
+
+                if (nestedObject is IEnumerable enumerable and not string)
+                {
+                    foreach (var item in enumerable)
+                        SanitizeFeed(item);
+                }
+                else
+                {
                     SanitizeFeed(nestedObject);
+                }
             }
         }
     }
 
     private static string RemoveInvalidXmlChars(string input)
     {
-        return new string(input.Where(XmlConvert.IsXmlChar).ToArray());
+        if (string.IsNullOrEmpty(input)) return input;
+
+        var sb = new StringBuilder(input.Length);
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var c = input[i];
+            if (XmlConvert.IsXmlChar(c))
+            {
+                sb.Append(c);
+            }
+            else if (char.IsHighSurrogate(c) && i + 1 < input.Length)
+            {
+                var low = input[i + 1];
+                if (XmlConvert.IsXmlSurrogatePair(low, c))
+                {
+                    sb.Append(c).Append(low);
+                    i++;
+                }
+            }
+        }
+
+        return sb.ToString();
     }
 
 
