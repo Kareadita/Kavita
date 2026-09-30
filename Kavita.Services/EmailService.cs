@@ -186,7 +186,7 @@ public class EmailService(
 
         var emailOptions = await CreateEmail()
             .ForTemplate(TokenInvalidatedTemplate)
-            .WithLocalization(userId, "token-expired")
+            .WithLocalization(userId, "token-invalidated")
             .WithPlaceholder("{{UserName}}", user.UserName!)
             .WithPlaceholder("{{Provider}}", provider.ToDescription())
             .WithPlaceholder("{{Link}}", $"{settings.HostName}/settings#scrobble-settings")

@@ -505,10 +505,8 @@ public class ReaderController(ICacheService cacheService,
         user.Progresses ??= [];
 
         var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.SeriesId, dto.VolumeIds, ct);
-        foreach (var chapterId in dto.ChapterIds)
-        {
-            chapterIds.Add(chapterId);
-        }
+
+        chapterIds.AddRange(await unitOfWork.ChapterRepository.GetChapterIdsInSeries(dto.SeriesId, dto.ChapterIds, ct));
 
         chapterIds = chapterIds.Distinct().ToList();
 
@@ -550,10 +548,10 @@ public class ReaderController(ICacheService cacheService,
         user.Progresses ??= [];
 
         var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.SeriesId, dto.VolumeIds, ct);
-        foreach (var chapterId in dto.ChapterIds)
-        {
-            chapterIds.Add(chapterId);
-        }
+        chapterIds.AddRange(await unitOfWork.ChapterRepository.GetChapterIdsInSeries(dto.SeriesId, dto.ChapterIds, ct));
+
+        chapterIds = [.. chapterIds.Distinct()];
+
         var chapters = await unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds, ct: ct);
         await readerService.MarkChaptersAsUnread(user, dto.SeriesId, chapters.ToList(), ct);
 

@@ -72,7 +72,7 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
     /// <param name="volumeIds"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IList<int>> GetChapterIdsByVolumeIds(int seriesId, IReadOnlyList<int> volumeIds, CancellationToken ct = default)
+    public async Task<List<int>> GetChapterIdsByVolumeIds(int seriesId, IReadOnlyList<int> volumeIds, CancellationToken ct = default)
     {
         return await context.Chapter
             .Where(c => volumeIds.Contains(c.VolumeId) && c.Volume.SeriesId == seriesId)

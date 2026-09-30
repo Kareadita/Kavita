@@ -58,6 +58,7 @@ public interface IChapterRepository
     Task<ChapterDto?> GetFirstChapterForVolumeAsync(int volumeId, int userId, CancellationToken ct = default);
     Task<IList<ChapterDto>> GetChapterDtosAsync(IEnumerable<int> chapterIds, int userId, CancellationToken ct = default);
     Task<int?> GetSeriesIdForChapter(int chapterId, CancellationToken ct = default);
+    Task<IEnumerable<int>> GetChapterIdsInSeries(int seriesId, IEnumerable<int> chapterIds, CancellationToken ct = default);
 
     /// <summary>
     /// Fetches chapters matching by ComicVineId or MetronId, with Volume and Series included.

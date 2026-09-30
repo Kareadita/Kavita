@@ -164,7 +164,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library | SeriesIncludes.Chapters, ct: ct);
         if (series == null) return null;
 
-        if (trigger != MetadataFetchTrigger.OnDemand && !series.WillScrobble() || !series.Library.AllowMetadataMatching) return null;
+        if (trigger != MetadataFetchTrigger.OnDemand && (!series.WillScrobble() || !series.Library.AllowMetadataMatching)) return null;
 
         // OnDemand (Page visit) is allowed to bypass the rate limit to allow for a nicer user experience
         // TODO: Check if this is correct. Do we want a stricter RateLimit on it?
