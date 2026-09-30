@@ -9,7 +9,8 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Kavita.Services.SignalR;
 
-public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker presenceTracker, IUnitOfWork unitOfWork)
+public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker presenceTracker, IUnitOfWork unitOfWork,
+    IProgressThrottle progressThrottle)
     : IEventHub
 {
     // TODO: When sending a message, queue the message up and on re-connect, reply the queued messages. Queue messages expire on a rolling basis (rolling array)
@@ -25,6 +26,12 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
         else
         {
             users = await FilterClientsIfNeeded(users, message, ct);
+        }
+
+        if (method == MessageFactory.NotificationProgress)
+        {
+            await progressThrottle.SendAsync(message, () => users.SendAsync(method, message, cancellationToken: ct));
+            return;
         }
 
         await users.SendAsync(method, message, cancellationToken: ct);

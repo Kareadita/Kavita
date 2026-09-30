@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
@@ -18,6 +19,7 @@ public class EventHubTests
     private readonly IClientProxy _filtered = Substitute.For<IClientProxy>();
     private readonly IPresenceTracker _presenceTracker = Substitute.For<IPresenceTracker>();
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    private readonly IProgressThrottle _progressThrottle = Substitute.For<IProgressThrottle>();
     private readonly EventHub _eventHub;
 
     public EventHubTests()
@@ -29,7 +31,29 @@ public class EventHubTests
         _presenceTracker.GetOnlineUserIds().Returns([2]);
         _unitOfWork.UserRepository.HasAccessToLibrary(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(false);
 
-        _eventHub = new EventHub(_hubContext, _presenceTracker, _unitOfWork);
+        _progressThrottle.SendAsync(Arg.Any<SignalRMessage>(), Arg.Any<Func<Task>>())
+            .Returns(call => call.Arg<Func<Task>>()());
+
+        _eventHub = new EventHub(_hubContext, _presenceTracker, _unitOfWork, _progressThrottle);
+    }
+
+    [Fact]
+    public async Task NotificationProgress_GoesThroughThrottle()
+    {
+        var message = MessageFactory.FileScanProgressEvent("M:/One Piece", "Manga", ProgressEventType.Updated);
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, message);
+
+        await _progressThrottle.Received(1).SendAsync(message, Arg.Any<Func<Task>>());
+        await _filtered.Received(1).SendCoreAsync(MessageFactory.NotificationProgress, Arg.Any<object?[]>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task OtherMethods_SkipThrottle()
+    {
+        await _eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent("Comics scan aborted", "Empty root"));
+
+        await _progressThrottle.DidNotReceiveWithAnyArgs().SendAsync(default!, default!);
     }
 
     [Theory]

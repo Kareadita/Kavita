@@ -537,27 +537,37 @@ public static class MessageFactory
     /// <summary>
     /// Represents a file being scanned by Kavita for processing and grouping
     /// </summary>
-    /// <remarks>Does not have a progress as it's unknown how many files there are. Instead sends -1 to represent indeterminate</remarks>
+    /// <remarks>Determinate only when <paramref name="current"/> and <paramref name="total"/> are known</remarks>
     /// <param name="folderPath"></param>
     /// <param name="libraryName"></param>
     /// <param name="eventType"></param>
+    /// <param name="code">Which scan step this belongs to, see <see cref="MessageEventCode"/></param>
+    /// <param name="current">1-based position within the step</param>
+    /// <param name="total">Items in the step</param>
     /// <returns></returns>
-    public static SignalRMessage FileScanProgressEvent(string folderPath, string libraryName, string eventType)
+    public static SignalRMessage FileScanProgressEvent(string folderPath, string libraryName, string eventType,
+        string? code = null, int? current = null, int? total = null)
     {
+        var hasProgress = current.HasValue && total is > 0;
+
         return new SignalRMessage()
         {
             Name = FileScanProgress,
             Priority = MessageEventPriority.Activity,
+            Code = code,
             Title = $"Scanning {libraryName}",
             SubTitle = folderPath,
             EventType = eventType,
-            Progress = ProgressType.Indeterminate,
+            Progress = hasProgress ? ProgressType.Determinate : ProgressType.Indeterminate,
             Body = new
             {
                 Title = $"Scanning {libraryName}",
                 Subtitle = folderPath,
                 Filename = folderPath,
                 EventTime = DateTime.Now,
+                Current = current,
+                Total = total,
+                Progress = hasProgress ? Math.Clamp(current!.Value / (float) total!.Value, 0f, 1f) : (float?) null,
             }
         };
     }
@@ -605,6 +615,7 @@ public static class MessageFactory
         {
             Name = ScanProgress,
             Priority = MessageEventPriority.Activity,
+            Code = MessageEventCode.ScanProcessingSeries,
             Title = $"Processing {seriesName}",
             SubTitle = seriesName,
             EventType = eventType,

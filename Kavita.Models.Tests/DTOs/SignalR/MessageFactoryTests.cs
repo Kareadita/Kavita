@@ -89,6 +89,38 @@ public class MessageFactoryTests
     }
 
     [Fact]
+    public void FileScanProgress_WithCounts_IsDeterminate()
+    {
+        var json = Serialize(MessageFactory.FileScanProgressEvent("M:/Half & Half", "Manga", ProgressEventType.Updated,
+            MessageEventCode.ScanListingFolders, 812, 1496));
+        var body = json.GetProperty("body");
+
+        Assert.Equal("determinate", json.GetProperty("progress").GetString());
+        Assert.Equal("scan-listing-folders", json.GetProperty("code").GetString());
+        Assert.Equal(812, body.GetProperty("current").GetInt32());
+        Assert.Equal(1496, body.GetProperty("total").GetInt32());
+        Assert.Equal(812 / 1496f, body.GetProperty("progress").GetSingle(), 4);
+    }
+
+    [Fact]
+    public void FileScanProgress_WithoutCounts_StaysIndeterminate()
+    {
+        var json = Serialize(MessageFactory.FileScanProgressEvent("File Scan Starting", "Manga", ProgressEventType.Started));
+
+        Assert.Equal("indeterminate", json.GetProperty("progress").GetString());
+        Assert.Equal(JsonValueKind.Null, json.GetProperty("body").GetProperty("progress").ValueKind);
+        Assert.Equal(JsonValueKind.Null, json.GetProperty("code").ValueKind);
+    }
+
+    [Fact]
+    public void LibraryScanProgress_HasProcessingSeriesCode()
+    {
+        var message = MessageFactory.LibraryScanProgressEvent("Manga", ProgressEventType.Updated, "One Piece", 27, 28);
+
+        Assert.Equal(MessageEventCode.ScanProcessingSeries, message.Code);
+    }
+
+    [Fact]
     public void LibraryModified_BodyUsesLibraryId()
     {
         var body = Serialize(MessageFactory.LibraryModifiedEvent(7, "delete")).GetProperty("body");
