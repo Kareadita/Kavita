@@ -520,6 +520,7 @@ public static class MessageFactory
         {
             Name = DownloadProgress,
             Priority = MessageEventPriority.Activity,
+            CorrelationId = correlationId,
             Title = $"Preparing {username.SentenceCase()} the download of {downloadName}",
             SubTitle = subtitle,
             EventType = eventType,

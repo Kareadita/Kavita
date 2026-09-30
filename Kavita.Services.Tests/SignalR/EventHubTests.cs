@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services.SignalR;
+using Kavita.Common.EnvironmentInfo;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Services.SignalR;
 using Microsoft.AspNetCore.SignalR;
@@ -46,6 +47,53 @@ public class EventHubTests
 
         await _progressThrottle.Received(1).SendAsync(message, Arg.Any<Func<Task>>());
         await _filtered.Received(1).SendCoreAsync(MessageFactory.NotificationProgress, Arg.Any<object?[]>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task InsideJob_StampsBootAndJobId()
+    {
+        var message = MessageFactory.FileScanProgressEvent("M:/One Piece", "Manga", ProgressEventType.Updated);
+
+        JobCorrelation.CurrentJobId = "184";
+        try
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, message);
+        }
+        finally
+        {
+            JobCorrelation.CurrentJobId = null;
+        }
+
+        Assert.Matches(@"^[0-9a-f]{8}\.184$", message.CorrelationId);
+        Assert.StartsWith(BuildInfo.BootId.ToString("N")[..8], message.CorrelationId);
+    }
+
+    [Fact]
+    public async Task InsideJob_KeepsExistingCorrelationId()
+    {
+        var message = MessageFactory.DownloadProgressEvent("joe", "One Piece v01.zip", "Preparing", 0.5f, correlationId: "client-abc");
+
+        JobCorrelation.CurrentJobId = "184";
+        try
+        {
+            await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress, message, 1);
+        }
+        finally
+        {
+            JobCorrelation.CurrentJobId = null;
+        }
+
+        Assert.Equal("client-abc", message.CorrelationId);
+    }
+
+    [Fact]
+    public async Task OutsideJob_LeavesCorrelationIdEmpty()
+    {
+        var message = MessageFactory.ErrorEvent("Comics scan aborted", "Empty root");
+
+        await _eventHub.SendMessageAsync(MessageFactory.Error, message);
+
+        Assert.Null(message.CorrelationId);
     }
 
     [Fact]

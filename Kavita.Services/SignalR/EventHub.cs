@@ -17,6 +17,8 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
 
     public async Task SendMessageAsync(string method, SignalRMessage message, bool onlyAdmins = true, CancellationToken ct = default)
     {
+        StampCorrelationId(message);
+
         var users = messageHub.Clients.All;
         if (onlyAdmins)
         {
@@ -74,6 +76,12 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
         return messageHub.Clients.Users(usersWithAccess.Select(i => i.ToString()).ToArray());
     }
 
+    private static void StampCorrelationId(SignalRMessage message)
+    {
+        if (!string.IsNullOrEmpty(message.CorrelationId)) return;
+        message.CorrelationId = JobCorrelation.CurrentCorrelationId;
+    }
+
     private static T? GetBodyProperty<T>(object? body, string propertyName)
     {
         if (body is null) return default;
@@ -96,6 +104,8 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
     /// <returns></returns>
     public async Task SendMessageToAsync(string method, SignalRMessage message, int userId, CancellationToken ct = default)
     {
+        StampCorrelationId(message);
+
         await messageHub.Clients.Users([userId + string.Empty]).SendAsync(method, message, cancellationToken: ct);
     }
 
