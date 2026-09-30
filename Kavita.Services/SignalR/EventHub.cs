@@ -32,6 +32,9 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
 
     private async Task<IClientProxy> FilterClientsIfNeeded(IClientProxy proxy, SignalRMessage message, CancellationToken ct)
     {
+        // On delete, the library is already gone and on an access change, the user losing access still needs to refresh
+        if (message.Name == MessageFactory.LibraryModified) return proxy;
+
         var libraryId = GetBodyProperty<int?>(message.Body, "LibraryId");
         var seriesId = GetBodyProperty<int?>(message.Body, "SeriesId");
 

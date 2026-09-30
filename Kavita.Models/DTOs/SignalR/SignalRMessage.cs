@@ -35,5 +35,17 @@ public class SignalRMessage
     /// <summary>
     /// When event took place
     /// </summary>
-    public readonly DateTime EventTime = DateTime.Now;
+    public DateTime EventTimeUtc { get; set; } = DateTime.UtcNow;
+    /// <summary>
+    /// How much attention this needs. Null when the sender did not set one, the UI then infers it from <see cref="Name"/>
+    /// </summary>
+    public MessageEventPriority? Priority { get; set; }
+    /// <summary>
+    /// Stable key the UI translates. <see cref="Title"/> and <see cref="SubTitle"/> remain the English fallback
+    /// </summary>
+    public string? Code { get; set; }
+    /// <summary>
+    /// Ties every message of a single job run together
+    /// </summary>
+    public string? CorrelationId { get; set; }
 }

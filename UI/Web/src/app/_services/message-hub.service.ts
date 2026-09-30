@@ -85,6 +85,10 @@ export enum EVENTS {
     * When bulk bookmarks are being converted
     */
   ConvertBookmarksProgress = 'ConvertBookmarksProgress',
+  /**
+   * When bulk covers are being converted
+   */
+  ConvertCoversProgress = 'ConvertCoversProgress',
    /**
     * When files are being scanned to calculate word count
     */

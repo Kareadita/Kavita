@@ -111,7 +111,7 @@ public static class MessageFactory
     /// <summary>
     /// When bulk covers are being converted
     /// </summary>
-    private const string ConvertCoversProgress = "ConvertBookmarksProgress";
+    private const string ConvertCoversProgress = "ConvertCoversProgress";
     /// <summary>
     /// When files are being scanned to calculate word count
     /// </summary>
@@ -215,6 +215,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = DashboardUpdate,
+            Priority = MessageEventPriority.Silent,
             Title = "Dashboard Update",
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
@@ -230,6 +231,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = SideNavUpdate,
+            Priority = MessageEventPriority.Silent,
             Title = "SideNav Update",
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
@@ -246,6 +248,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = ScanSeries,
+            Priority = MessageEventPriority.Silent,
             EventType = ProgressEventType.Single,
             Body = new
             {
@@ -261,6 +264,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = SeriesAdded,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 SeriesId = seriesId,
@@ -275,6 +279,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = SeriesRemoved,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 SeriesId = seriesId,
@@ -289,6 +294,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = ChapterRemoved,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 SeriesId = seriesId,
@@ -302,6 +308,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = ChapterUpdated,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 SeriesId = seriesId,
@@ -315,6 +322,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = VolumeRemoved,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 SeriesId = seriesId,
@@ -329,6 +337,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = WordCountAnalyzerProgress,
+            Priority = MessageEventPriority.Activity,
             Title = "Analyzing Word count",
             SubTitle = subtitle,
             EventType = eventType,
@@ -347,6 +356,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = CoverUpdateProgress,
+            Priority = MessageEventPriority.Activity,
             Title = "Refreshing Covers",
             SubTitle = subtitle,
             EventType = eventType,
@@ -365,6 +375,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = BackupDatabaseProgress,
+            Priority = MessageEventPriority.Activity,
             Title = "Backing up Database",
             SubTitle = subtitle,
             EventType = progress switch
@@ -385,6 +396,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = CleanupProgress,
+            Priority = MessageEventPriority.Activity,
             Title = "Performing Cleanup",
             SubTitle = subtitle,
             EventType = progress switch
@@ -407,6 +419,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = UpdateAvailable,
+            Priority = MessageEventPriority.Action,
             Title = "Update Available",
             SubTitle = update.UpdateTitle,
             EventType = ProgressEventType.Single,
@@ -420,6 +433,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = SendingToDevice,
+            Priority = MessageEventPriority.Activity,
             Title = "Sending files to Device",
             SubTitle = subtitle,
             EventType = eventType,
@@ -434,6 +448,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = CollectionUpdated,
+            Priority = MessageEventPriority.Silent,
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
             Body = new
@@ -449,6 +464,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = Error,
+            Priority = MessageEventPriority.Error,
             Title = title,
             SubTitle = subtitle,
             Progress = ProgressType.None,
@@ -467,6 +483,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = Info,
+            Priority = MessageEventPriority.Info,
             Title = title,
             SubTitle = subtitle,
             Progress = ProgressType.None,
@@ -485,12 +502,13 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = LibraryModified,
+            Priority = MessageEventPriority.Silent,
             Title = "Library modified",
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
             Body = new
             {
-                LibrayId = libraryId,
+                LibraryId = libraryId,
                 Action = action,
             }
         };
@@ -501,6 +519,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = DownloadProgress,
+            Priority = MessageEventPriority.Activity,
             Title = $"Preparing {username.SentenceCase()} the download of {downloadName}",
             SubTitle = subtitle,
             EventType = eventType,
@@ -528,6 +547,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = FileScanProgress,
+            Priority = MessageEventPriority.Activity,
             Title = $"Scanning {libraryName}",
             SubTitle = folderPath,
             EventType = eventType,
@@ -555,13 +575,14 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = SmartCollectionSync,
+            Priority = MessageEventPriority.Activity,
             Title = $"Synchronizing {collectionName}",
             SubTitle = seriesName,
             EventType = eventType,
             Progress = ProgressType.Determinate,
             Body = new
             {
-                Progress = float.Min((currentItems / (totalItems * 1.0f)), 100f),
+                Progress = totalItems <= 0 ? 0f : Math.Clamp(currentItems / (float) totalItems, 0f, 1f),
                 EventTime = DateTime.Now
             }
         };
@@ -583,6 +604,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = ScanProgress,
+            Priority = MessageEventPriority.Activity,
             Title = $"Processing {seriesName}",
             SubTitle = seriesName,
             EventType = eventType,
@@ -603,6 +625,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = CoverUpdate,
+            Priority = MessageEventPriority.Silent,
             Title = "Updating Cover",
             Progress = ProgressType.None,
             Body = new
@@ -618,6 +641,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = UserProgressUpdate,
+            Priority = MessageEventPriority.Silent,
             Title = "Updating User Progress",
             Progress = ProgressType.None,
             Body = new
@@ -636,6 +660,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = SiteThemeProgress,
+            Priority = MessageEventPriority.Activity,
             Title = "Processing Site Theme", // TODO: Localize SignalRMessage titles
             SubTitle = subtitle,
             EventType = eventType,
@@ -657,6 +682,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = SiteThemeUpdated,
+            Priority = MessageEventPriority.Silent,
             Title = "SiteTheme Update",
             Progress = ProgressType.None,
             Body = new
@@ -671,6 +697,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = BookThemeProgress,
+            Priority = MessageEventPriority.Activity,
             Title = "Scanning Book Theme",
             SubTitle = subtitle,
             EventType = eventType,
@@ -687,6 +714,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = UserUpdate,
+            Priority = MessageEventPriority.Silent,
             Title = "User Update",
             Progress = ProgressType.None,
             Body = new
@@ -702,6 +730,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = ConvertBookmarksProgress,
+            Priority = MessageEventPriority.Activity,
             Title = "Converting Bookmarks",
             SubTitle = string.Empty,
             EventType = eventType,
@@ -719,6 +748,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = ConvertCoversProgress,
+            Priority = MessageEventPriority.Activity,
             Title = "Converting Covers",
             SubTitle = string.Empty,
             EventType = eventType,
@@ -736,6 +766,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = ScrobblingKeyExpired,
+            Priority = MessageEventPriority.Action,
             Title = "Scrobbling Key Expired",
             SubTitle = provider + " expired. Please re-generate on User Account page.",
             Progress = ProgressType.None,
@@ -748,6 +779,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = PersonMerged,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 srcId = src.Id,
@@ -761,6 +793,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = ExternalMatchRateLimitError,
+            Priority = MessageEventPriority.Error,
             Body = new
             {
                 seriesId,
@@ -774,6 +807,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = AnnotationUpdate,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 Annotation = dto
@@ -786,6 +820,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = ReadingSessionUpdate,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 SessionId = sessionId,
@@ -799,6 +834,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = ReadingSessionClose,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 SessionId = sessionId,
@@ -812,6 +848,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = AuthKeyUpdate,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 AuthKey = authKey
@@ -824,6 +861,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = AuthKeyDeleted,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 Id = id
@@ -836,6 +874,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = ReadingListUpdated,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 Id = id
@@ -848,6 +887,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = SeriesUpdated,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 Id = seriesId
@@ -860,6 +900,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = ScrobbleProviderUpdated,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 Provider = provider
@@ -871,7 +912,8 @@ public static class MessageFactory
     {
         return new SignalRMessage
         {
-            Name = LicenseInfoUpdate
+            Name = LicenseInfoUpdate,
+            Priority = MessageEventPriority.Silent,
         };
     }
 
@@ -880,6 +922,7 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = ExternalMetadataUpdate,
+            Priority = MessageEventPriority.Silent,
             Body = new
             {
                 SeriesId = seriesId
@@ -892,6 +935,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = RerunMetadataMappingsProgress,
+            Priority = MessageEventPriority.Activity,
             Title = "Rerun Metadata Mappings",
             Progress = ProgressType.Determinate,
             EventType = progressEventType,
