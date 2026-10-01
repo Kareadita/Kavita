@@ -14,8 +14,8 @@ public class MessageFactoryTests
 
     public static TheoryData<SignalRMessage, MessageEventPriority> PriorityCases => new()
     {
-        { MessageFactory.FileScanProgressEvent("M:/Manga/One Piece", "Manga", ProgressEventType.Updated), MessageEventPriority.Activity },
-        { MessageFactory.LibraryScanProgressEvent("Manga", ProgressEventType.Updated, "One Piece", 138, 180), MessageEventPriority.Activity },
+        { MessageFactory.FileScanProgressEvent("M:/Manga/One Piece", 1, "Manga", ProgressEventType.Updated), MessageEventPriority.Activity },
+        { MessageFactory.LibraryScanProgressEvent(1, "Manga", ProgressEventType.Updated, "One Piece", 138, 180), MessageEventPriority.Activity },
         { MessageFactory.BackupDatabaseProgressEvent(0.5f), MessageEventPriority.Activity },
         { MessageFactory.ErrorEvent("Comics scan aborted", "Some root folders are empty"), MessageEventPriority.Error },
         { MessageFactory.ExternalMatchRateLimitErrorEvent(1, "Vinland Saga"), MessageEventPriority.Error },
@@ -35,7 +35,7 @@ public class MessageFactoryTests
     [Fact]
     public void Serialize_WritesPriorityAsNumber_AndEventTimeUtc()
     {
-        var json = Serialize(MessageFactory.FileScanProgressEvent("M:/Manga/One Piece", "Manga", ProgressEventType.Started));
+        var json = Serialize(MessageFactory.FileScanProgressEvent("M:/Manga/One Piece", 1, "Manga", ProgressEventType.Started));
 
         Assert.Equal(JsonValueKind.Number, json.GetProperty("priority").ValueKind);
         Assert.Equal((int) MessageEventPriority.Activity, json.GetProperty("priority").GetInt32());
@@ -48,7 +48,7 @@ public class MessageFactoryTests
     [Fact]
     public void Serialize_KeepsExistingEnvelopeFields()
     {
-        var json = Serialize(MessageFactory.FileScanProgressEvent("M:/Manga/One Piece", "Manga", ProgressEventType.Started));
+        var json = Serialize(MessageFactory.FileScanProgressEvent("M:/Manga/One Piece", 1, "Manga", ProgressEventType.Started));
 
         Assert.Equal("FileScanProgress", json.GetProperty("name").GetString());
         Assert.Equal("Scanning Manga", json.GetProperty("title").GetString());
@@ -91,7 +91,7 @@ public class MessageFactoryTests
     [Fact]
     public void FileScanProgress_WithCounts_IsDeterminate()
     {
-        var json = Serialize(MessageFactory.FileScanProgressEvent("M:/Half & Half", "Manga", ProgressEventType.Updated,
+        var json = Serialize(MessageFactory.FileScanProgressEvent("M:/Half & Half", 1, "Manga", ProgressEventType.Updated,
             MessageEventCode.ScanListingFolders, 812, 1496));
         var body = json.GetProperty("body");
 
@@ -105,7 +105,7 @@ public class MessageFactoryTests
     [Fact]
     public void FileScanProgress_WithoutCounts_StaysIndeterminate()
     {
-        var json = Serialize(MessageFactory.FileScanProgressEvent("File Scan Starting", "Manga", ProgressEventType.Started));
+        var json = Serialize(MessageFactory.FileScanProgressEvent("File Scan Starting", 1, "Manga", ProgressEventType.Started));
 
         Assert.Equal("indeterminate", json.GetProperty("progress").GetString());
         Assert.Equal(JsonValueKind.Null, json.GetProperty("body").GetProperty("progress").ValueKind);
@@ -115,7 +115,7 @@ public class MessageFactoryTests
     [Fact]
     public void LibraryScanProgress_HasProcessingSeriesCode()
     {
-        var message = MessageFactory.LibraryScanProgressEvent("Manga", ProgressEventType.Updated, "One Piece", 27, 28);
+        var message = MessageFactory.LibraryScanProgressEvent(1, "Manga", ProgressEventType.Updated, "One Piece", 27, 28);
 
         Assert.Equal(MessageEventCode.ScanProcessingSeries, message.Code);
     }
@@ -127,5 +127,96 @@ public class MessageFactoryTests
 
         Assert.Equal(7, body.GetProperty("libraryId").GetInt32());
         Assert.False(body.TryGetProperty("librayId", out _));
+    }
+
+    [Fact]
+    public void ScanProgressEvents_CarryLibraryId()
+    {
+        var fileScan = Serialize(MessageFactory.FileScanProgressEvent("M:/One Piece", 4, "Manga", ProgressEventType.Updated)).GetProperty("body");
+        var libraryScan = Serialize(MessageFactory.LibraryScanProgressEvent(4, "Manga", ProgressEventType.Updated, "One Piece", 1, 2)).GetProperty("body");
+
+        Assert.Equal(4, fileScan.GetProperty("libraryId").GetInt32());
+        Assert.Equal("Manga", fileScan.GetProperty("libraryName").GetString());
+        Assert.Equal(4, libraryScan.GetProperty("libraryId").GetInt32());
+    }
+
+    [Fact]
+    public void CodedError_HasTypedBodyFields_AndKeepsFallbackText()
+    {
+        var message = MessageFactory.WordCountFailedEvent(2, 42, "Frieren", "B:/Frieren/Frieren v01.epub");
+
+        var json = Serialize(message);
+        var body = json.GetProperty("body");
+
+        Assert.Equal(MessageFactory.Error, message.Name);
+        Assert.Equal(MessageEventPriority.Error, message.Priority);
+        Assert.Equal("word-count-failed", json.GetProperty("code").GetString());
+        Assert.Equal("There was an issue counting words on an epub", json.GetProperty("title").GetString());
+        Assert.Equal("Frieren - B:/Frieren/Frieren v01.epub", json.GetProperty("subTitle").GetString());
+        Assert.Equal("Error", body.GetProperty("name").GetString());
+        Assert.Equal("There was an issue counting words on an epub", body.GetProperty("title").GetString());
+        Assert.Equal(2, body.GetProperty("libraryId").GetInt32());
+        Assert.Equal(42, body.GetProperty("seriesId").GetInt32());
+        Assert.Equal("Frieren", body.GetProperty("seriesName").GetString());
+        Assert.Equal("B:/Frieren/Frieren v01.epub", body.GetProperty("filePath").GetString());
+        Assert.False(body.TryGetProperty("params", out _));
+    }
+
+    [Fact]
+    public void CodedInfo_HasInfoPriority()
+    {
+        var message = MessageFactory.FilesOutsideFolderEvent(1, null, "Zom 100");
+
+        Assert.Equal(MessageFactory.Info, message.Name);
+        Assert.Equal(MessageEventPriority.Info, message.Priority);
+        Assert.Equal(MessageEventCode.FilesOutsideFolder, message.Code);
+        Assert.Equal(JsonValueKind.Null, Serialize(message).GetProperty("body").GetProperty("seriesId").ValueKind);
+    }
+
+    [Fact]
+    public void RootFoldersInaccessible_SendsFoldersAsArray()
+    {
+        var message = MessageFactory.RootFoldersInaccessibleEvent(1, "Manga", ["M:/", "N:/"]);
+        var body = Serialize(message).GetProperty("body");
+
+        Assert.Equal("M:/, N:/", message.SubTitle);
+        Assert.Equal(JsonValueKind.Array, body.GetProperty("folders").ValueKind);
+        Assert.Equal(2, body.GetProperty("folders").GetArrayLength());
+    }
+
+    [Fact]
+    public void InfoEvent_WithoutCode_IsUnchanged()
+    {
+        var json = Serialize(MessageFactory.InfoEvent("Scan library task delayed", "Rescheduled"));
+        var body = json.GetProperty("body");
+
+        Assert.Equal(JsonValueKind.Null, json.GetProperty("code").ValueKind);
+        Assert.Equal("Info", body.GetProperty("name").GetString());
+        Assert.Equal("Rescheduled", body.GetProperty("subTitle").GetString());
+    }
+
+    [Fact]
+    public void ScanSeriesDelayed_CarriesScheduleAndIds()
+    {
+        var runAt = new DateTime(2026, 10, 1, 21, 0, 0, DateTimeKind.Utc);
+
+        var message = MessageFactory.ScanSeriesDelayedEvent(1, 42, "Frieren", runAt);
+        var json = Serialize(message);
+        var body = json.GetProperty("body");
+
+        Assert.Equal(MessageFactory.Info, message.Name);
+        Assert.Equal("scan-series-delayed", json.GetProperty("code").GetString());
+        Assert.Equal(runAt, body.GetProperty("scheduledForUtc").GetDateTime());
+        Assert.Equal(1, body.GetProperty("libraryId").GetInt32());
+        Assert.Equal(42, body.GetProperty("seriesId").GetInt32());
+        Assert.Equal("Frieren", body.GetProperty("seriesName").GetString());
+    }
+
+    [Fact]
+    public void ScrobblingKeyExpired_BodyHasProvider()
+    {
+        var body = Serialize(MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList)).GetProperty("body");
+
+        Assert.Equal((int) ScrobbleProvider.AniList, body.GetProperty("provider").GetInt32());
     }
 }

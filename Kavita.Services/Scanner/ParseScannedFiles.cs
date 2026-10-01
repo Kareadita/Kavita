@@ -103,7 +103,7 @@ public partial class ParseScannedFiles
 
             timings.Events.Start();
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.FileScanProgressEvent(directory, library.Name, ProgressEventType.Updated,
+                MessageFactory.FileScanProgressEvent(directory, library.Id, library.Name, ProgressEventType.Updated,
                     MessageEventCode.ScanListingFolders, i + 1, total));
             timings.Events.Stop();
 
@@ -287,7 +287,7 @@ public partial class ParseScannedFiles
             folderPath;
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.FileScanProgressEvent(normalizedPath, library.Name, ProgressEventType.Updated,
+            MessageFactory.FileScanProgressEvent(normalizedPath, library.Id, library.Name, ProgressEventType.Updated,
                 MessageEventCode.ScanListingFolders, 1, 1));
 
         if (HasSeriesFolderNotChangedSinceLastScan(library, seriesPaths, normalizedPath, forceCheck))
@@ -513,7 +513,7 @@ public partial class ParseScannedFiles
         IDictionary<string, IList<SeriesModified>> seriesPaths, bool forceCheck = false)
     {
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.FileScanProgressEvent("File Scan Starting", library.Name, ProgressEventType.Started));
+            MessageFactory.FileScanProgressEvent("File Scan Starting", library.Id, library.Name, ProgressEventType.Started));
 
         _logger.LogDebug("[ScannerService] Library {LibraryName} Step 1.A: Process {FolderCount} folders", library.Name, folders.Count);
         var processedScannedSeries = new ConcurrentBag<ScannedSeriesResult>();
@@ -531,7 +531,7 @@ public partial class ParseScannedFiles
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.FileScanProgressEvent("File Scan Done", library.Name, ProgressEventType.Ended));
+            MessageFactory.FileScanProgressEvent("File Scan Done", library.Id, library.Name, ProgressEventType.Ended));
 
         return processedScannedSeries.ToList();
     }
@@ -562,7 +562,7 @@ public partial class ParseScannedFiles
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.FileScanProgressEvent(folderPath, library.Name, ProgressEventType.Updated,
+            MessageFactory.FileScanProgressEvent(folderPath, library.Id, library.Name, ProgressEventType.Updated,
                 MessageEventCode.ScanGroupingSeries));
 
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.D: Merge any localized series with series {Folder}", library.Name, folderPath);
@@ -786,7 +786,7 @@ public partial class ParseScannedFiles
 
             _logger.LogDebug("[ScannerService] Skipped File Scan for {Folder} as it hasn't changed", normalizedFolder);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.FileScanProgressEvent($"Skipped {normalizedFolder}", library.Name, ProgressEventType.Updated,
+                MessageFactory.FileScanProgressEvent($"Skipped {normalizedFolder}", library.Id, library.Name, ProgressEventType.Updated,
                     MessageEventCode.ScanReadingFiles, current, total));
             return;
         }
@@ -803,7 +803,7 @@ public partial class ParseScannedFiles
 
         _logger.LogDebug("[ScannerService] Found {Count} files for {Folder}", files.Count, normalizedFolder);
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.FileScanProgressEvent($"{fileCount} files in {normalizedFolder}", library.Name, ProgressEventType.Updated,
+            MessageFactory.FileScanProgressEvent($"{fileCount} files in {normalizedFolder}", library.Id, library.Name, ProgressEventType.Updated,
                 MessageEventCode.ScanReadingFiles, current, total));
 
         // Parse files into ParserInfos

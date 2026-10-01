@@ -41,7 +41,7 @@ public class EventHubTests
     [Fact]
     public async Task NotificationProgress_GoesThroughThrottle()
     {
-        var message = MessageFactory.FileScanProgressEvent("M:/One Piece", "Manga", ProgressEventType.Updated);
+        var message = MessageFactory.FileScanProgressEvent("M:/One Piece", 1, "Manga", ProgressEventType.Updated);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, message);
 
@@ -52,7 +52,7 @@ public class EventHubTests
     [Fact]
     public async Task InsideJob_StampsBootAndJobId()
     {
-        var message = MessageFactory.FileScanProgressEvent("M:/One Piece", "Manga", ProgressEventType.Updated);
+        var message = MessageFactory.FileScanProgressEvent("M:/One Piece", 1, "Manga", ProgressEventType.Updated);
 
         JobCorrelation.CurrentJobId = "184";
         try

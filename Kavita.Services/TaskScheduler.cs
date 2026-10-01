@@ -452,9 +452,9 @@ public class TaskScheduler : ITaskScheduler
         {
             _logger.LogInformation("A Scan is already running, rescheduling ScanLibraries in 3 hours");
             // Send InfoEvent to UI as this is invoked my API
-            BackgroundJob.Schedule(() => ScanLibraries(force), TimeSpan.FromHours(3));
-            await _eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.InfoEvent($"Scan libraries task delayed",
-                $"A scan was ongoing during processing of the scan libraries task. Task has been rescheduled for 3 hours: {DateTime.Now.AddHours(3)}"));
+            var runAt = DateTimeOffset.UtcNow.AddHours(3);
+            BackgroundJob.Schedule(() => ScanLibraries(force), runAt);
+            await _eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.ScanLibrariesDelayedEvent(runAt.UtcDateTime));
             return;
         }
         BackgroundJob.Enqueue(() => _scannerService.ScanLibraries(force));
@@ -471,9 +471,10 @@ public class TaskScheduler : ITaskScheduler
         {
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
             _logger.LogInformation("A Scan is already running, rescheduling ScanLibrary in 3 hours");
-            await _eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.InfoEvent($"Scan library task delayed",
-                $"A scan was ongoing during processing of the {library!.Name} scan task. Task has been rescheduled for 3 hours: {DateTime.Now.AddHours(3)}"));
-            BackgroundJob.Schedule(() => ScanLibrary(libraryId, force), TimeSpan.FromHours(3));
+            var runAt = DateTimeOffset.UtcNow.AddHours(3);
+            await _eventHub.SendMessageAsync(MessageFactory.Info,
+                MessageFactory.ScanLibraryDelayedEvent(libraryId, library!.Name, runAt.UtcDateTime));
+            BackgroundJob.Schedule(() => ScanLibrary(libraryId, force), runAt);
             return;
         }
 
@@ -536,10 +537,11 @@ public class TaskScheduler : ITaskScheduler
             }
 
             _logger.LogInformation("A Scan is already running, rescheduling ScanSeries in 10 minutes");
-            await _eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.InfoEvent($"Scan series task delayed: {series.Name}",
-                $"A scan was ongoing during processing of the scan series task. Task has been rescheduled for 10 minutes: {DateTime.Now.AddMinutes(10)}"));
+            var runAt = DateTimeOffset.UtcNow.AddMinutes(10);
+            await _eventHub.SendMessageAsync(MessageFactory.Info,
+                MessageFactory.ScanSeriesDelayedEvent(libraryId, seriesId, series.Name, runAt.UtcDateTime));
 
-            BackgroundJob.Schedule(() => ScanSeries(libraryId, seriesId, forceUpdate), TimeSpan.FromMinutes(10));
+            BackgroundJob.Schedule(() => ScanSeries(libraryId, seriesId, forceUpdate), runAt);
             return;
         }
 

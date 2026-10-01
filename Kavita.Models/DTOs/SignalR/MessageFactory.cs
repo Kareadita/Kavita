@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
@@ -497,6 +498,297 @@ public static class MessageFactory
         };
     }
 
+    #region Coded Error and Info
+
+    // Body repeats Name, Title and SubTitle because the current widget reads them from the payload.
+    // A LibraryId or SeriesId in Body narrows the audience of an onlyAdmins: false send to users with access
+    private static SignalRMessage CodedEvent(string name, string code, string title, string subtitle, object body)
+    {
+        return new SignalRMessage
+        {
+            Name = name,
+            Priority = name == Error ? MessageEventPriority.Error : MessageEventPriority.Info,
+            Code = code,
+            Title = title,
+            SubTitle = subtitle,
+            Progress = ProgressType.None,
+            EventType = ProgressEventType.Single,
+            Body = body
+        };
+    }
+
+    public static SignalRMessage RootFoldersInaccessibleEvent(int libraryId, string libraryName, string[] folders)
+    {
+        const string title = "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted";
+        var subtitle = string.Join(", ", folders);
+
+        return CodedEvent(Error, MessageEventCode.RootFoldersInaccessible, title, subtitle, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            LibraryName = libraryName,
+            Folders = folders,
+        });
+    }
+
+    public static SignalRMessage RootFoldersEmptyEvent(int libraryId, string libraryName)
+    {
+        var title = $"Some of the root folders for the library, {libraryName}, are empty.";
+        const string subtitle = "Either your mount has been disconnected or you are trying to delete all series in the library. " +
+                                "Scan has been aborted. " +
+                                "Check that your mount is connected or change the library's root folder and rescan";
+
+        return CodedEvent(Error, MessageEventCode.RootFoldersEmpty, title, subtitle, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            LibraryName = libraryName,
+        });
+    }
+
+    /// <param name="detailsHtml">Explanation and collision table, rendered as-is in the details dialog</param>
+    public static SignalRMessage SeriesCollisionEvent(int libraryId, string libraryName, string seriesName, string detailsHtml)
+    {
+        var title = $"Series collision on \"{seriesName}\" in library {libraryName}";
+
+        return CodedEvent(Error, MessageEventCode.SeriesCollision, title, detailsHtml, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = detailsHtml,
+            LibraryId = libraryId,
+            LibraryName = libraryName,
+            SeriesName = seriesName,
+        });
+    }
+
+    /// <param name="seriesId">Null when the series was new and never saved</param>
+    public static SignalRMessage FilesOutsideFolderEvent(int libraryId, int? seriesId, string seriesName)
+    {
+        var title = $"{seriesName} has files spread outside a single series folder";
+        const string subtitle = "This has negative performance effects. Please ensure all series are under a single folder from library";
+
+        return CodedEvent(Info, MessageEventCode.FilesOutsideFolder, title, subtitle, new
+        {
+            Name = Info,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            SeriesId = seriesId,
+            SeriesName = seriesName,
+        });
+    }
+
+    public static SignalRMessage ScanSeriesNotNestedEvent(int libraryId, int seriesId, string seriesName)
+    {
+        var title = $"{seriesName} scan aborted";
+        const string subtitle = "Files for series are not in a nested folder under library path. Correct this and rescan.";
+
+        return CodedEvent(Error, MessageEventCode.ScanSeriesNotNested, title, subtitle, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            SeriesId = seriesId,
+            SeriesName = seriesName,
+        });
+    }
+
+    public static SignalRMessage ScanSeriesNoRootEvent(int libraryId, int seriesId, string seriesName)
+    {
+        var title = $"{seriesName} scan aborted";
+        const string subtitle = "Scan Series could not find a single, valid folder root for files";
+
+        return CodedEvent(Error, MessageEventCode.ScanSeriesNoRoot, title, subtitle, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            SeriesId = seriesId,
+            SeriesName = seriesName,
+        });
+    }
+
+    public static SignalRMessage ScanSeriesNoFilesEvent(int libraryId, int seriesId, string seriesName)
+    {
+        var title = $"Error scanning {seriesName}";
+        const string subtitle = "We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan";
+
+        return CodedEvent(Error, MessageEventCode.ScanSeriesNoFiles, title, subtitle, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            SeriesId = seriesId,
+            SeriesName = seriesName,
+        });
+    }
+
+    public static SignalRMessage ScanSeriesFolderMissingEvent(int libraryId, int seriesId, string seriesName)
+    {
+        var title = $"{seriesName} scan has no work to do";
+        const string subtitle = "The folder the series was in is missing. Delete series manually or perform a library scan.";
+
+        return CodedEvent(Info, MessageEventCode.ScanSeriesFolderMissing, title, subtitle, new
+        {
+            Name = Info,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            SeriesId = seriesId,
+            SeriesName = seriesName,
+        });
+    }
+
+    public static SignalRMessage ScanNoWorkEvent(int libraryId, int seriesId, string seriesName, DateTime lastFolderScanned)
+    {
+        var title = $"{seriesName} scan has no work to do";
+        var subtitle = $"All folders have not been changed since last scan ({lastFolderScanned.ToString(CultureInfo.CurrentCulture)}). Scan will be aborted.";
+
+        return CodedEvent(Info, MessageEventCode.ScanNoWork, title, subtitle, new
+        {
+            Name = Info,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            SeriesId = seriesId,
+            SeriesName = seriesName,
+        });
+    }
+
+    /// <param name="seriesId">Null when the series was new and never saved</param>
+    public static SignalRMessage DbWriteFailedEvent(int libraryId, int? seriesId, string seriesName, string error)
+    {
+        var title = $"There was an issue writing to the DB for Series {seriesName}";
+
+        return CodedEvent(Error, MessageEventCode.DbWriteFailed, title, error, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = error,
+            LibraryId = libraryId,
+            SeriesId = seriesId,
+            SeriesName = seriesName,
+        });
+    }
+
+    /// <param name="scheduledForUtc">Pass the same value given to Hangfire, the UI matches it to the scheduled job</param>
+    public static SignalRMessage ScanLibrariesDelayedEvent(DateTime scheduledForUtc)
+    {
+        const string title = "Scan libraries task delayed";
+        var subtitle = $"A scan was ongoing during processing of the scan libraries task. Task has been rescheduled for 3 hours: {scheduledForUtc.ToLocalTime()}";
+
+        return CodedEvent(Info, MessageEventCode.ScanLibrariesDelayed, title, subtitle, new
+        {
+            Name = Info,
+            Title = title,
+            SubTitle = subtitle,
+            ScheduledForUtc = scheduledForUtc,
+        });
+    }
+
+    /// <inheritdoc cref="ScanLibrariesDelayedEvent"/>
+    public static SignalRMessage ScanLibraryDelayedEvent(int libraryId, string libraryName, DateTime scheduledForUtc)
+    {
+        const string title = "Scan library task delayed";
+        var subtitle = $"A scan was ongoing during processing of the {libraryName} scan task. Task has been rescheduled for 3 hours: {scheduledForUtc.ToLocalTime()}";
+
+        return CodedEvent(Info, MessageEventCode.ScanLibraryDelayed, title, subtitle, new
+        {
+            Name = Info,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            LibraryName = libraryName,
+            ScheduledForUtc = scheduledForUtc,
+        });
+    }
+
+    /// <inheritdoc cref="ScanLibrariesDelayedEvent"/>
+    public static SignalRMessage ScanSeriesDelayedEvent(int libraryId, int seriesId, string seriesName, DateTime scheduledForUtc)
+    {
+        var title = $"Scan series task delayed: {seriesName}";
+        var subtitle = $"A scan was ongoing during processing of the scan series task. Task has been rescheduled for 10 minutes: {scheduledForUtc.ToLocalTime()}";
+
+        return CodedEvent(Info, MessageEventCode.ScanSeriesDelayed, title, subtitle, new
+        {
+            Name = Info,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            SeriesId = seriesId,
+            SeriesName = seriesName,
+            ScheduledForUtc = scheduledForUtc,
+        });
+    }
+
+    public static SignalRMessage BackupFolderUnwritableEvent(string folder)
+    {
+        const string title = "Backup Service Error";
+        var subtitle = $"Could not write to {folder}; aborting backup";
+
+        return CodedEvent(Error, MessageEventCode.BackupFolderUnwritable, title, subtitle, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = subtitle,
+            Folder = folder,
+        });
+    }
+
+    public static SignalRMessage BackupExistsEvent(string path)
+    {
+        const string title = "Backup Service Error";
+        var subtitle = $"{path} already exists, aborting";
+
+        return CodedEvent(Error, MessageEventCode.BackupExists, title, subtitle, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = subtitle,
+            Path = path,
+        });
+    }
+
+    public static SignalRMessage CleanupOnHoldEvent()
+    {
+        const string title = "Cleanup";
+        const string subtitle = "Cleanup put on hold as a media conversion in progress";
+
+        return CodedEvent(Error, MessageEventCode.CleanupOnHold, title, subtitle, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = subtitle,
+        });
+    }
+
+    public static SignalRMessage WordCountFailedEvent(int libraryId, int seriesId, string seriesName, string filePath)
+    {
+        const string title = "There was an issue counting words on an epub";
+        var subtitle = $"{seriesName} - {filePath}";
+
+        return CodedEvent(Error, MessageEventCode.WordCountFailed, title, subtitle, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            SeriesId = seriesId,
+            SeriesName = seriesName,
+            FilePath = filePath,
+        });
+    }
+
+    #endregion
+
     public static SignalRMessage LibraryModifiedEvent(int libraryId, string action)
     {
         return new SignalRMessage
@@ -540,13 +832,14 @@ public static class MessageFactory
     /// </summary>
     /// <remarks>Determinate only when <paramref name="current"/> and <paramref name="total"/> are known</remarks>
     /// <param name="folderPath"></param>
+    /// <param name="libraryId"></param>
     /// <param name="libraryName"></param>
     /// <param name="eventType"></param>
     /// <param name="code">Which scan step this belongs to, see <see cref="MessageEventCode"/></param>
     /// <param name="current">1-based position within the step</param>
     /// <param name="total">Items in the step</param>
     /// <returns></returns>
-    public static SignalRMessage FileScanProgressEvent(string folderPath, string libraryName, string eventType,
+    public static SignalRMessage FileScanProgressEvent(string folderPath, int libraryId, string libraryName, string eventType,
         string? code = null, int? current = null, int? total = null)
     {
         var hasProgress = current.HasValue && total is > 0;
@@ -565,6 +858,8 @@ public static class MessageFactory
                 Title = $"Scanning {libraryName}",
                 Subtitle = folderPath,
                 Filename = folderPath,
+                LibraryId = libraryId,
+                LibraryName = libraryName,
                 EventTime = DateTime.Now,
                 Current = current,
                 Total = total,
@@ -602,13 +897,14 @@ public static class MessageFactory
     /// <summary>
     /// This informs the UI with details about what is being processed by the Scanner
     /// </summary>
+    /// <param name="libraryId"></param>
     /// <param name="libraryName"></param>
     /// <param name="eventType"></param>
     /// <param name="seriesName"></param>
     /// <param name="leftToProcess"></param>
     /// <param name="totalToProcess"></param>
     /// <returns></returns>
-    public static SignalRMessage LibraryScanProgressEvent(string libraryName, string eventType, string seriesName = "", int? leftToProcess = null, int? totalToProcess = null)
+    public static SignalRMessage LibraryScanProgressEvent(int libraryId, string libraryName, string eventType, string seriesName = "", int? leftToProcess = null, int? totalToProcess = null)
     {
         var hasProgress = totalToProcess.HasValue && leftToProcess.HasValue;
 
@@ -624,6 +920,7 @@ public static class MessageFactory
             Body = new
             {
                 SeriesName = seriesName,
+                LibraryId = libraryId,
                 LibraryName = libraryName,
                 LeftToProcess = leftToProcess,
                 TotalToProcess = totalToProcess,
@@ -783,6 +1080,10 @@ public static class MessageFactory
             SubTitle = provider + " expired. Please re-generate on User Account page.",
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
+            Body = new
+            {
+                Provider = provider
+            }
         };
     }
 

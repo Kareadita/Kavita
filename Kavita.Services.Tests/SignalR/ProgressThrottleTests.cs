@@ -27,7 +27,7 @@ public class ProgressThrottleTests
 
     private static SignalRMessage Folder(int current, string eventType = ProgressEventType.Updated,
         string? code = MessageEventCode.ScanListingFolders) =>
-        MessageFactory.FileScanProgressEvent($"M:/{current}", "Manga", eventType, code, current, 100);
+        MessageFactory.FileScanProgressEvent($"M:/{current}", 1, "Manga", eventType, code, current, 100);
 
     [Fact]
     public async Task Burst_SendsFirstImmediately_ThenOnlyTheNewest()

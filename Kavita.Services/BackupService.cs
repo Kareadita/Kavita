@@ -61,7 +61,7 @@ public class BackupService(
         {
             logger.LogCritical("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
             await eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.ErrorEvent("Backup Service Error",$"Could not write to {backupDirectory}; aborting backup"), ct: ct);
+                MessageFactory.BackupFolderUnwritableEvent(backupDirectory), ct: ct);
             return;
         }
 
@@ -75,7 +75,7 @@ public class BackupService(
         {
             logger.LogCritical("{ZipFile} already exists, aborting", zipPath);
             await eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.ErrorEvent("Backup Service Error",$"{zipPath} already exists, aborting"), ct: ct);
+                MessageFactory.BackupExistsEvent(zipPath), ct: ct);
             return;
         }
 

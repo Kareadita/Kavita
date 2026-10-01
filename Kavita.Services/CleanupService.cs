@@ -44,7 +44,7 @@ public class CleanupService(
         {
             logger.LogInformation("Cleanup put on hold as a media conversion in progress");
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ErrorEvent("Cleanup", "Cleanup put on hold as a media conversion in progress"), ct: ct);
+                MessageFactory.CleanupOnHoldEvent(), ct: ct);
             return;
         }
 
