@@ -230,7 +230,7 @@
               <a ngbNavLink>{{Tabs.Storyline | tabTitle}}</a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === Tabs.Storyline; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="storylineItems()" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="storylineItems()" [bufferAmount]="1" [modifyOverflowStyleOfParentScroll]="false" [parentScroll]="companionBar">
 
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track trackStoryLineIdentity(idx, item)) {
@@ -258,7 +258,7 @@
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === Tabs.Volumes; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="volumeEntities()" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="volumeEntities()" [modifyOverflowStyleOfParentScroll]="false" [parentScroll]="companionBar">
                     <div class="card-container row g-0" #container>
                       @for (item of scroll.viewPortItems; let idx = $index; track item.data.id + '_volumes') {
                         <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumeEntities().length}" />
@@ -279,7 +279,7 @@
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === Tabs.Chapters; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="chapterEntities()" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="chapterEntities()" [modifyOverflowStyleOfParentScroll]="false" [parentScroll]="companionBar">
                     <div class="card-container row g-0" #container>
                       @for (item of scroll.viewPortItems; let idx = $index; track item.data.id + '_chapters') {
                         <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapterEntities().length}" />
@@ -300,7 +300,7 @@
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === Tabs.Specials; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="specialEntities()" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="specialEntities()" [modifyOverflowStyleOfParentScroll]="false" [parentScroll]="companionBar">
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track item.data.id + '_specials') {
                         <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: specialEntities().length}" />
@@ -353,7 +353,7 @@
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === Tabs.Recommendations; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="combinedRecs()" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="combinedRecs()" [modifyOverflowStyleOfParentScroll]="false" [parentScroll]="companionBar">
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track idx) {
                         @if (asRecommendedSeries(item); as owned) {

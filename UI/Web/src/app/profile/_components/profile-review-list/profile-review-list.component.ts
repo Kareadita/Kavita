@@ -7,6 +7,7 @@ import {
   signal,
   viewChild
 } from '@angular/core';
+import {DOCUMENT} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NgxStarsComponent, NgxStarsModule} from "ngx-stars";
 import {ReviewListItemComponent} from "../review-list-item/review-list-item.component";
@@ -37,6 +38,10 @@ import {form, FormField} from "@angular/forms/signals";
 export class ProfileReviewListComponent implements OnInit {
 
   private readonly themeService = inject(ThemeService);
+  /**
+   * The element that actually scrolls the page (the app shell's companion bar), for virtual scrollers to track
+   */
+  protected readonly companionBar = inject(DOCUMENT).querySelector<HTMLElement>('.companion-bar') ?? undefined;
   private readonly reviewService = inject(ReviewService);
 
   readonly starsComponent = viewChild.required(NgxStarsComponent);

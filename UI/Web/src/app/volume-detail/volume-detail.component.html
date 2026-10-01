@@ -170,7 +170,7 @@
           </a>
           <ng-template ngbNavContent>
             @defer (when activeTabId === Tabs.Chapters; prefetch on idle) {
-              <virtual-scroller #scroll [items]="chapters()" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
+              <virtual-scroller #scroll [items]="chapters()" [bufferAmount]="1" [modifyOverflowStyleOfParentScroll]="false" [parentScroll]="companionBar">
                 <div class="card-container row g-0" #container>
                   @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_chapter') {
                     <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item"

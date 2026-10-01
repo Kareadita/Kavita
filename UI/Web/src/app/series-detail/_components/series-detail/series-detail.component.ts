@@ -190,6 +190,10 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   private readonly drawerService = inject(DrawerService);
 
   readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
+  /**
+   * The element that actually scrolls the page (the app shell's companion bar), for virtual scrollers to track
+   */
+  protected readonly companionBar = this.document.querySelector<HTMLElement>('.companion-bar') ?? undefined;
 
 
   seriesId = input(0, {transform: numberAttribute });
