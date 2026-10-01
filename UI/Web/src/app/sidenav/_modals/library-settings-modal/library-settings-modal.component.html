@@ -118,7 +118,7 @@
                   @for (group of allFileTypeGroup; track group) {
                     <div class="form-check form-switch">
                       <input class="form-check-input" (change)="handleFileTypeGroupChange($event, group)" type="checkbox" [id]="group" switch [checked]="formGroup.fileGroupTypes().value().includes(group)">
-                      <label class="form-check-label" [for]="group">{{ group | fileTypeGroup }}</label>
+                      <label class="form-check-label" (click)="handleFileTypeGroupLabelClick(group)"  [for]="group">{{ group | fileTypeGroup }}</label>
                     </div>
                   }
                 </div>

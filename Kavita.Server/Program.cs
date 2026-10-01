@@ -236,12 +236,9 @@ public class Program
 
     private static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
-            .UseSerilog((ctx, services, configuration) =>
+            .UseSerilog((ctx, _, configuration) =>
             {
-                LogLevelOptions.CreateConfig(ctx, configuration)
-                    .WriteTo.SignalRSink<LogHub, ILogHub>(
-                        LogEventLevel.Information,
-                        services);
+                LogLevelOptions.CreateConfig(ctx, configuration);
             })
             .ConfigureAppConfiguration((hostingContext, config) =>
             {

@@ -206,7 +206,7 @@ public static class RestrictByAgeExtensions
     /// <param name="queryable"></param>
     extension(IQueryable<AppUserAnnotation> queryable)
     {
-        private IQueryable<AppUserAnnotation> RestrictAgainstAgeRestriction(AgeRestriction restriction, int userId)
+        public IQueryable<AppUserAnnotation> RestrictAgainstAgeRestriction(AgeRestriction restriction, int userId)
         {
             if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
             var q = queryable.Where(a => a.Series.Metadata.AgeRating <= restriction.AgeRating || a.AppUserId == userId);

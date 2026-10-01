@@ -53,6 +53,7 @@ import {EmptyStateComponent} from "../../../shared/_components/empty-state/empty
 import {TranslocoInjectComponent} from "../../../shared/_components/transloco-inject/transloco-inject.component";
 import {TranslocoSlotDirective} from "../../../_directives/transloco-slot.directive";
 import {NgbPopover} from "@ng-bootstrap/ng-bootstrap";
+import {Series} from "../../../_models/series";
 
 export interface SearchEvent {
   value: string;
@@ -488,6 +489,19 @@ export class SearchTypeaheadComponent {
   goToPerson(person: Person) {
     this.clearSearch();
     this.router.navigate(['person', person.name]);
+  }
+
+  /**
+   * Should localized name only if name does not include the search query, and if localized does include it
+   * @param series
+   */
+  shouldShowLocalizedName(series: Series) {
+    const normalizedSearchTerm = this.searchTerm().toLowerCase().trim();
+    if (series.name.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
+      return false;
+    }
+
+    return series.localizedName.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0;
   }
 
   protected readonly FilterField = SeriesFilterField;

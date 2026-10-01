@@ -953,12 +953,12 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     patchEntitySignal(this.chapters, c);
     patchEntitySignal(this.specials, c);
     patchEntitySignal(this.storylineChapters, c);
-    this.setContinuePoint();
+    this.loadPageSource.next(false);
   }
 
   updateVolume(c: Volume) {
     patchEntitySignal(this.volumes, c);
-    this.setContinuePoint();
+    this.loadPageSource.next(false);
   }
 
   protected readonly LibraryType = LibraryType;

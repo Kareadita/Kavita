@@ -164,7 +164,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library | SeriesIncludes.Chapters, ct: ct);
         if (series == null) return null;
 
-        if (!series.WillScrobble() || !series.Library.AllowMetadataMatching) return null;
+        if (trigger != MetadataFetchTrigger.OnDemand && (!series.WillScrobble() || !series.Library.AllowMetadataMatching)) return null;
 
         // OnDemand (Page visit) is allowed to bypass the rate limit to allow for a nicer user experience
         // TODO: Check if this is correct. Do we want a stricter RateLimit on it?
@@ -178,6 +178,9 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             return await GetSeriesDetailPlus(seriesId, libraryType, trigger, ct: ct);
         }
+
+        // When metadata is off, never do automatic match flow
+        if (!series.WillScrobble() || !series.Library.AllowMetadataMatching) return null;
 
         var matchRequest = new MatchRequestV3Dto
         {
@@ -642,19 +645,22 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         if (!IsPlusEligible(libraryType) || !await _licenseService.HasActiveLicense(ct: ct)) return _defaultReturn;
 
-        // Check blacklist (bad matches) or if there is a don't match
+        // Check blacklist (bad matches)
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library,  ct: ct);
-        if (series == null || !series.WillScrobble() || !series.Library.AllowMetadataMatching) return _defaultReturn;
+        if (series == null) return _defaultReturn;
 
         // After a fresh match the external Ids just changed, so any cached data is stale by definition and must be refetched
         var needsRefresh = forceRefresh ||
             await _unitOfWork.ExternalSeriesMetadataRepository.NeedsDataRefresh(seriesId, ct);
 
-        if (!needsRefresh)
+        // Do return known metadata when requesting from the UI while having automatic matching off
+        if (!needsRefresh || (!series.Library.AllowMetadataMatching && trigger == MetadataFetchTrigger.OnDemand))
         {
             // Convert into DTOs and return
             return await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(seriesId, ct);
         }
+
+        if (!series.WillScrobble() || !series.Library.AllowMetadataMatching) return _defaultReturn;
 
         var data = await _unitOfWork.SeriesRepository.GetKavitaPlusSeriesDetailRequestV3Dto(seriesId, ct);
         if (data == null) return _defaultReturn;
@@ -2381,11 +2387,6 @@ public class ExternalMetadataService : IExternalMetadataService
             return (false, null);
         }
 
-        if (series.Metadata.ReleaseYear != 0 && !HasForceOverride(settings, series.Metadata, MetadataSettingField.StartDate))
-        {
-            return (false, null);
-        }
-
         var from = series.Metadata.ReleaseYear;
         series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
         series.Metadata.AddKPlusOverride(MetadataSettingField.StartDate);
@@ -2549,12 +2550,14 @@ public class ExternalMetadataService : IExternalMetadataService
             return (false, null);
         }
 
+        var locale = chosenLanguageCode ?? series.Metadata.Language ?? series.Library?.DefaultLanguage ?? string.Empty;
+
         var from = series.Name;
         var fromSortName = series.SortName;
         series.Name = chosen;
         series.NormalizedName = chosen.ToNormalized();
         series.SortName = series.Library is {RemovePrefixForSortName: true}
-            ? BookSortTitlePrefixHelper.GetSortTitle(series.Name)
+            ? BookSortTitlePrefixHelper.GetSortTitle(series.Name, locale)
             : series.Name;
 
         series.NameLocked = true;
@@ -2580,11 +2583,6 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!settings.EnableLocalizedName) return (false, null);
 
         if (series.LocalizedNameLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.LocalizedName))
-        {
-            return (false, null);
-        }
-
-        if (!string.IsNullOrWhiteSpace(series.LocalizedName) && !HasForceOverride(settings, series.Metadata, MetadataSettingField.LocalizedName))
         {
             return (false, null);
         }
@@ -2789,25 +2787,32 @@ public class ExternalMetadataService : IExternalMetadataService
         }
     }
 
+    public static (int, int, bool) CountVolumesAndChapters(Series series, List<Chapter> chapters)
+    {
+        var realVolumes = series.Volumes
+            .Where(v => v.MaxNumber.IsNot(Parser.SpecialVolumeNumber) && v.MaxNumber.IsNot(Parser.LooseLeafVolumeNumber))
+            .ToList();
+
+        var isVolumeBased = realVolumes.Count != 0;
+        // One book series (epub/pdf) have it as a special, which won't be caught in the above
+        if (series.Format is MangaFormat.Epub or MangaFormat.Pdf && chapters.Count == 1)
+        {
+            isVolumeBased = true;
+            realVolumes = series.Volumes;
+        }
+
+        var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : Parser.DefaultChapterNumber);
+        var maxChapter = (int)chapters.Max(c => c.MaxNumber);
+
+        return (maxChapter, maxVolume, isVolumeBased);
+    }
+
 
     private PublicationStatus DeterminePublicationStatus(Series series, List<Chapter> chapters, ExternalSeriesDetailDto externalMetadata)
     {
         try
         {
-            var realVolumes = series.Volumes
-                .Where(v => v.MaxNumber.IsNot(Parser.SpecialVolumeNumber) && v.MaxNumber.IsNot(Parser.LooseLeafVolumeNumber))
-                .ToList();
-
-            var isVolumeBased = realVolumes.Count != 0;
-            // One book series (epub/pdf) have it as a special, which won't be caught in the above
-            if (series.Format is MangaFormat.Epub or MangaFormat.Pdf && chapters.Count == 1)
-            {
-                isVolumeBased = true;
-                realVolumes = series.Volumes;
-            }
-
-            var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : Parser.DefaultChapterNumber);
-            var maxChapter = (int)chapters.Max(c => c.MaxNumber);
+            var (maxChapter, maxVolume, isVolumeBased) = CountVolumesAndChapters(series, chapters);
 
             // TODO: When the underlying source is a Manhua, there can be 0 chapters counted in the count. We need to handle this edge case
             var externalExpectedCount = isVolumeBased ? externalMetadata.Volumes : externalMetadata.Chapters;

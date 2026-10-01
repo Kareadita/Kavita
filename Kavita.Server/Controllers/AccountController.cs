@@ -758,7 +758,7 @@ public class AccountController(UserManager<AppUser> userManager,
     /// <returns></returns>
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("invite")]
-    public async Task<ActionResult<string>> InviteUser(InviteUserDto dto)
+    public async Task<ActionResult<InviteUserResponse>> InviteUser(InviteUserDto dto)
     {
         var ct = HttpContext.RequestAborted;
         var userId = UserId;
@@ -787,7 +787,7 @@ public class AccountController(UserManager<AppUser> userManager,
 
         try
         {
-            var result = await userManager.CreateAsync(user, AccountService.DefaultPassword);
+            var result = await userManager.CreateAsync(user);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
             await accountService.SeedUser(user, ct);

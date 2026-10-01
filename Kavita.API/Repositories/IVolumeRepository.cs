@@ -29,7 +29,7 @@ public interface IVolumeRepository
     void Remove(IList<Volume> volumes);
     Task<IList<MangaFile>> GetFilesForVolume(int volumeId, CancellationToken ct = default);
     Task<string?> GetVolumeCoverImageAsync(int volumeId, CancellationToken ct = default);
-    Task<IList<int>> GetChapterIdsByVolumeIds(IReadOnlyList<int> volumeIds, CancellationToken ct = default);
+    Task<List<int>> GetChapterIdsByVolumeIds(int seriesId, IReadOnlyList<int> volumeIds, CancellationToken ct = default);
     Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId, VolumeIncludes includes = VolumeIncludes.Chapters, CancellationToken ct = default);
     Task<Volume?> GetVolumeByIdAsync(int volumeId, VolumeIncludes includes = VolumeIncludes.Files, CancellationToken ct = default);
     Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId, CancellationToken ct = default);

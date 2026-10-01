@@ -54,7 +54,6 @@ export class NavHeaderComponent {
 
 
   toggleSideNav(event: any) {
-    console.log('nav-header: toggling side nav');
     event.stopPropagation();
     this.navService.toggleSideNav();
   }

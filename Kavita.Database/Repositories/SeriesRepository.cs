@@ -216,6 +216,12 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         var searchQuery = dto.Query;
         var hasQuery = !string.IsNullOrEmpty(searchQuery);
         var searchQueryNormalized = searchQuery.ToNormalized();
+        // Do not search on empty queries as it matches everything
+        if (string.IsNullOrEmpty(searchQueryNormalized))
+        {
+            searchQueryNormalized = searchQuery;
+        }
+
         var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         var aniListId = dto.AniListId ?? 0;
