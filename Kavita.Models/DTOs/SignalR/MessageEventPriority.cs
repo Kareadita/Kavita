@@ -3,7 +3,7 @@ using System.ComponentModel;
 namespace Kavita.Models.DTOs.SignalR;
 
 /// <summary>
-/// How much attention a <see cref="SignalRMessage"/> needs from the user. Ordered, so higher values can be compared with &gt;=
+/// How much attention a <see cref="SignalRMessageDto"/> needs from the user. Ordered, so higher values can be compared with &gt;=
 /// </summary>
 public enum MessageEventPriority
 {

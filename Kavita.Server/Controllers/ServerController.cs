@@ -9,11 +9,14 @@ using Hangfire.Storage;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
+using Kavita.API.Services.SignalR;
 using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Jobs;
 using Kavita.Models.DTOs.MediaErrors;
+using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.Stats;
 using Kavita.Models.DTOs.Update;
 using Kavita.Models.Entities.Enums;
@@ -39,7 +42,8 @@ public class ServerController(
     IUnitOfWork unitOfWork,
     IEasyCachingProviderFactory cachingProviderFactory,
     IThemeService themeService,
-    ILocalizationService localizationService)
+    ILocalizationService localizationService,
+    IActivityTracker activityTracker)
     : BaseApiController
 {
     /// <summary>
@@ -227,6 +231,26 @@ public class ServerController(
             });
 
         return Ok(await Task.WhenAll(jobDtoTasks));
+    }
+
+    /// <summary>
+    /// What is running, delayed and coming up, so a client can rebuild its activity list after a refresh or a server restart
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("activity")]
+    public ActionResult<ActivitySnapshotDto> GetActivity()
+    {
+        var (scheduled, scheduledTotal) = TaskScheduler.GetScheduledScans(20);
+
+        return Ok(new ActivitySnapshotDto
+        {
+            BootId = BuildInfo.BootId,
+            StartedUtc = BuildInfo.StartedUtc,
+            Running = activityTracker.GetRunning(TaskScheduler.GetProcessingJobIds()),
+            Scheduled = scheduled,
+            ScheduledTotal = scheduledTotal,
+            Upcoming = TaskScheduler.GetUpcomingTasks(),
+        });
     }
 
     /// <summary>

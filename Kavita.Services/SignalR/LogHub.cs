@@ -42,7 +42,7 @@ public class LogHub : Hub<ILogHub>
     [Authorize(PolicyConstants.AdminRole)]
     public async Task SendLogAsString(string message)
     {
-        await _eventHub.SendMessageAsync("LogString", new SignalRMessage()
+        await _eventHub.SendMessageAsync("LogString", new SignalRMessageDto()
         {
             Body = message,
             EventType = "LogString",
@@ -53,7 +53,7 @@ public class LogHub : Hub<ILogHub>
     [Authorize(PolicyConstants.AdminRole)]
     public async Task SendLogAsObject(object messageObject)
     {
-        await _eventHub.SendMessageAsync("LogObject", new SignalRMessage()
+        await _eventHub.SendMessageAsync("LogObject", new SignalRMessageDto()
         {
             Body = messageObject,
             EventType = "LogString",

@@ -28,7 +28,7 @@ public sealed class ProgressThrottle(ILogger<ProgressThrottle> logger, TimeProvi
         public bool FlushScheduled;
     }
 
-    public async Task SendAsync(SignalRMessage message, Func<Task> send)
+    public async Task SendAsync(SignalRMessageDto message, Func<Task> send)
     {
         var key = $"{message.Name}|{message.CorrelationId}";
         var job = _jobs.GetOrAdd(key, _ => new JobState());

@@ -139,7 +139,7 @@ public class VersionUpdaterServiceTests : IDisposable
 
         await _eventHub.Received(1).SendMessageAsync(
             Arg.Is(MessageFactory.UpdateAvailable),
-            Arg.Any<SignalRMessage>(),
+            Arg.Any<SignalRMessageDto>(),
             Arg.Is(true)
         );
     }
@@ -164,7 +164,7 @@ public class VersionUpdaterServiceTests : IDisposable
 
         await _eventHub.DidNotReceive().SendMessageAsync(
             Arg.Any<string>(),
-            Arg.Any<SignalRMessage>(),
+            Arg.Any<SignalRMessageDto>(),
             Arg.Any<bool>()
         );
     }

@@ -106,7 +106,7 @@ public class AnnotationServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         // Ensure event was sent out to UI
         await eventHub.Received().SendMessageToAsync(
             MessageFactory.AnnotationUpdate,
-            Arg.Any<SignalRMessage>(),
+            Arg.Any<SignalRMessageDto>(),
             user.Id);
     }
 

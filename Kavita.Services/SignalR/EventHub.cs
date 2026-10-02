@@ -10,12 +10,10 @@ using Microsoft.AspNetCore.SignalR;
 namespace Kavita.Services.SignalR;
 
 public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker presenceTracker, IUnitOfWork unitOfWork,
-    IProgressThrottle progressThrottle)
+    IProgressThrottle progressThrottle, IActivityTracker activityTracker)
     : IEventHub
 {
-    // TODO: When sending a message, queue the message up and on re-connect, reply the queued messages. Queue messages expire on a rolling basis (rolling array)
-
-    public async Task SendMessageAsync(string method, SignalRMessage message, bool onlyAdmins = true, CancellationToken ct = default)
+    public async Task SendMessageAsync(string method, SignalRMessageDto message, bool onlyAdmins = true, CancellationToken ct = default)
     {
         StampCorrelationId(message);
 
@@ -32,6 +30,7 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
 
         if (method == MessageFactory.NotificationProgress)
         {
+            activityTracker.Record(message);
             await progressThrottle.SendAsync(message, () => users.SendAsync(method, message, cancellationToken: ct));
             return;
         }
@@ -39,7 +38,7 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
         await users.SendAsync(method, message, cancellationToken: ct);
     }
 
-    private async Task<IClientProxy> FilterClientsIfNeeded(IClientProxy proxy, SignalRMessage message, CancellationToken ct)
+    private async Task<IClientProxy> FilterClientsIfNeeded(IClientProxy proxy, SignalRMessageDto message, CancellationToken ct)
     {
         // On delete, the library is already gone and on an access change, the user losing access still needs to refresh
         if (message.Name == MessageFactory.LibraryModified) return proxy;
@@ -76,7 +75,7 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
         return messageHub.Clients.Users(usersWithAccess.Select(i => i.ToString()).ToArray());
     }
 
-    private static void StampCorrelationId(SignalRMessage message)
+    private static void StampCorrelationId(SignalRMessageDto message)
     {
         if (!string.IsNullOrEmpty(message.CorrelationId)) return;
         message.CorrelationId = JobCorrelation.CurrentCorrelationId;
@@ -98,15 +97,15 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
     /// Sends a message directly to a user if they are connected
     /// </summary>
     /// <param name="method"></param>
-    /// <param name="message"></param>
+    /// <param name="messageDto"></param>
     /// <param name="userId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task SendMessageToAsync(string method, SignalRMessage message, int userId, CancellationToken ct = default)
+    public async Task SendMessageToAsync(string method, SignalRMessageDto messageDto, int userId, CancellationToken ct = default)
     {
-        StampCorrelationId(message);
+        StampCorrelationId(messageDto);
 
-        await messageHub.Clients.Users([userId + string.Empty]).SendAsync(method, message, cancellationToken: ct);
+        await messageHub.Clients.Users([userId + string.Empty]).SendAsync(method, messageDto, cancellationToken: ct);
     }
 
 }

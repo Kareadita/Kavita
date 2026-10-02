@@ -47,7 +47,7 @@ public class MetadataService(
     : IMetadataService
 {
     public const string Name = "MetadataService";
-    private readonly IList<SignalRMessage> _updateEvents = new List<SignalRMessage>();
+    private readonly List<SignalRMessageDto> _updateEvents = new List<SignalRMessageDto>();
 
     /// <summary>
     /// Updates the metadata for a Chapter

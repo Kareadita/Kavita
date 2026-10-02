@@ -11,7 +11,7 @@ public interface IProgressThrottle
 {
     /// <summary>
     /// Invokes <paramref name="send"/> now, later with only the newest pending update, or not at all when a newer one replaces it.
-    /// Started, ended and step changes (a new <see cref="SignalRMessage.Code"/>) are always sent immediately
+    /// Started, ended and step changes (a new <see cref="SignalRMessageDto.Code"/>) are always sent immediately
     /// </summary>
-    Task SendAsync(SignalRMessage message, Func<Task> send);
+    Task SendAsync(SignalRMessageDto message, Func<Task> send);
 }

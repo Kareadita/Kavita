@@ -1,4 +1,4 @@
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using Kavita.API.Services;
 using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Metadata;
@@ -112,6 +112,7 @@ public static class ApplicationServiceExtensions
         services.AddSingleton<IReadingSessionService, ReadingSessionService>();
         services.AddSingleton<IEntityNamingService, EntityNamingService>();
         services.AddSingleton<IProgressThrottle, ProgressThrottle>();
+        services.AddSingleton<IActivityTracker, ActivityTracker>();
         services.AddSingleton<ActiveUserTrackerService>(); // This is required for the below lines. It allows IHostedService.StopAsync() to be called on shutdown
         services.AddSingleton<IActiveUserTrackerService>(sp => sp.GetRequiredService<ActiveUserTrackerService>());
         services.AddHostedService(sp => sp.GetRequiredService<ActiveUserTrackerService>());

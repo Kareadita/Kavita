@@ -9,10 +9,10 @@ public class MessageFactoryTests
     // Same shape SignalR's JSON hub protocol writes: camelCase, enums as numbers, NaN rejected
     private static readonly JsonSerializerOptions HubJson = new(JsonSerializerDefaults.Web);
 
-    private static JsonElement Serialize(SignalRMessage message) =>
-        JsonSerializer.SerializeToElement(message, HubJson);
+    private static JsonElement Serialize(SignalRMessageDto messageDto) =>
+        JsonSerializer.SerializeToElement(messageDto, HubJson);
 
-    public static TheoryData<SignalRMessage, MessageEventPriority> PriorityCases => new()
+    public static TheoryData<SignalRMessageDto, MessageEventPriority> PriorityCases => new()
     {
         { MessageFactory.FileScanProgressEvent("M:/Manga/One Piece", 1, "Manga", ProgressEventType.Updated), MessageEventPriority.Activity },
         { MessageFactory.LibraryScanProgressEvent(1, "Manga", ProgressEventType.Updated, "One Piece", 138, 180), MessageEventPriority.Activity },
@@ -27,9 +27,9 @@ public class MessageFactoryTests
 
     [Theory]
     [MemberData(nameof(PriorityCases))]
-    public void Factory_SetsPriority(SignalRMessage message, MessageEventPriority expected)
+    public void Factory_SetsPriority(SignalRMessageDto messageDto, MessageEventPriority expected)
     {
-        Assert.Equal(expected, message.Priority);
+        Assert.Equal(expected, messageDto.Priority);
     }
 
     [Fact]

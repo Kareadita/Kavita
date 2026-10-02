@@ -21,6 +21,7 @@ public class EventHubTests
     private readonly IPresenceTracker _presenceTracker = Substitute.For<IPresenceTracker>();
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly IProgressThrottle _progressThrottle = Substitute.For<IProgressThrottle>();
+    private readonly IActivityTracker _activityTracker = Substitute.For<IActivityTracker>();
     private readonly EventHub _eventHub;
 
     public EventHubTests()
@@ -32,10 +33,10 @@ public class EventHubTests
         _presenceTracker.GetOnlineUserIds().Returns([2]);
         _unitOfWork.UserRepository.HasAccessToLibrary(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(false);
 
-        _progressThrottle.SendAsync(Arg.Any<SignalRMessage>(), Arg.Any<Func<Task>>())
+        _progressThrottle.SendAsync(Arg.Any<SignalRMessageDto>(), Arg.Any<Func<Task>>())
             .Returns(call => call.Arg<Func<Task>>()());
 
-        _eventHub = new EventHub(_hubContext, _presenceTracker, _unitOfWork, _progressThrottle);
+        _eventHub = new EventHub(_hubContext, _presenceTracker, _unitOfWork, _progressThrottle, _activityTracker);
     }
 
     [Fact]

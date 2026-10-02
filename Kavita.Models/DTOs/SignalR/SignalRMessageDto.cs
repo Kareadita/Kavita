@@ -6,7 +6,7 @@ namespace Kavita.Models.DTOs.SignalR;
 /// <summary>
 /// Payload for SignalR messages to Frontend
 /// </summary>
-public class SignalRMessage
+public sealed record SignalRMessageDto
 {
     /// <summary>
     /// Body of the event type
@@ -14,12 +14,12 @@ public class SignalRMessage
     public object? Body { get; set; }
     public required string Name { get; set; }
     /// <summary>
-    /// User friendly Title of the Event
+    /// User-friendly Title of the Event
     /// </summary>
     /// <example>Scanning Manga</example>
     public string Title { get; set; } = string.Empty;
     /// <summary>
-    /// User friendly subtitle. Should have extra info
+    /// User-friendly subtitle. Should have extra info
     /// </summary>
     /// <example>C:/manga/Accel World V01.cbz</example>
     public string SubTitle { get; set; } = string.Empty;

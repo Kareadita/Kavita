@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Storage;
+using Hangfire.Storage.Monitoring;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
@@ -815,6 +816,62 @@ public class TaskScheduler : ITaskScheduler
         }
 
         return false;
+    }
+
+    public static IReadOnlySet<string> GetProcessingJobIds()
+    {
+        return JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue)
+            .Select(j => j.Key)
+            .ToHashSet();
+    }
+
+    /// <summary>
+    /// Scans delayed by <see cref="ScanLibraries"/>, <see cref="ScanLibrary"/> or <see cref="ScanSeries"/> because another scan was running
+    /// </summary>
+    public static (IList<ScheduledScanDto> Scans, int Total) GetScheduledScans(int take)
+    {
+        var scans = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue)
+            .Where(j => j.Value.Job?.Method.DeclaringType == typeof(TaskScheduler))
+            .Select(j => ToScheduledScan(j.Key, j.Value))
+            .Where(s => s != null)
+            .Select(s => s!)
+            .OrderBy(s => s.RunAtUtc)
+            .ToList();
+
+        return (scans.Take(take).ToList(), scans.Count);
+    }
+
+    private static ScheduledScanDto? ToScheduledScan(string jobId, ScheduledJobDto job)
+    {
+        var args = job.Job.Args;
+        var runAtUtc = DateTime.SpecifyKind(job.EnqueueAt, DateTimeKind.Utc);
+
+        return job.Job.Method.Name switch
+        {
+            nameof(ScanLibraries) => new ScheduledScanDto { JobId = jobId, RunAtUtc = runAtUtc },
+            nameof(ScanLibrary) => new ScheduledScanDto { JobId = jobId, LibraryId = (int) args[0], RunAtUtc = runAtUtc },
+            nameof(ScanSeries) => new ScheduledScanDto { JobId = jobId, LibraryId = (int) args[0], SeriesId = (int) args[1], RunAtUtc = runAtUtc },
+            _ => null,
+        };
+    }
+
+    /// <summary>
+    /// Next run of the recurring tasks the activity widget shows. A disabled task has no next run and is left out
+    /// </summary>
+    public static IList<UpcomingTaskDto> GetUpcomingTasks()
+    {
+        string[] taskIds = [ScanLibrariesTaskId, CleanupTaskId, BackupTaskId, TaskCblSyncId];
+
+        using var connection = JobStorage.Current.GetConnection();
+        return connection.GetRecurringJobs(taskIds)
+            .Where(j => j.NextExecution.HasValue)
+            .Select(j => new UpcomingTaskDto
+            {
+                TaskId = j.Id,
+                NextRunUtc = DateTime.SpecifyKind(j.NextExecution!.Value, DateTimeKind.Utc),
+            })
+            .OrderBy(t => t.NextRunUtc)
+            .ToList();
     }
 
     /// <summary>

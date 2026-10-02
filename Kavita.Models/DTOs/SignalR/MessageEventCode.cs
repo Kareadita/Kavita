@@ -1,7 +1,7 @@
 namespace Kavita.Models.DTOs.SignalR;
 
 /// <summary>
-/// Stable keys set on <see cref="SignalRMessage.Code"/>. The UI translates these, so never rename a value (see event-message-pipe localization scope)
+/// Stable keys set on <see cref="SignalRMessageDto.Code"/>. The UI translates these, so never rename a value (see event-message-pipe localization scope)
 /// </summary>
 public static class MessageEventCode
 {

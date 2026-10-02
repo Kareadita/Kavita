@@ -211,9 +211,9 @@ public static class MessageFactory
     public const string RerunMetadataMappingsProgress = nameof(RerunMetadataMappingsProgress);
 
 
-    public static SignalRMessage DashboardUpdateEvent(int userId)
+    public static SignalRMessageDto DashboardUpdateEvent(int userId)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = DashboardUpdate,
             Priority = MessageEventPriority.Silent,
@@ -227,9 +227,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage SideNavUpdateEvent(int userId)
+    public static SignalRMessageDto SideNavUpdateEvent(int userId)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = SideNavUpdate,
             Priority = MessageEventPriority.Silent,
@@ -244,9 +244,9 @@ public static class MessageFactory
     }
 
 
-    public static SignalRMessage ScanSeriesEvent(int libraryId, int seriesId, string seriesName)
+    public static SignalRMessageDto ScanSeriesEvent(int libraryId, int seriesId, string seriesName)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = ScanSeries,
             Priority = MessageEventPriority.Silent,
@@ -260,9 +260,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage SeriesAddedEvent(int seriesId, string seriesName, int libraryId)
+    public static SignalRMessageDto SeriesAddedEvent(int seriesId, string seriesName, int libraryId)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = SeriesAdded,
             Priority = MessageEventPriority.Silent,
@@ -275,9 +275,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage SeriesRemovedEvent(int seriesId, string seriesName, int libraryId)
+    public static SignalRMessageDto SeriesRemovedEvent(int seriesId, string seriesName, int libraryId)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = SeriesRemoved,
             Priority = MessageEventPriority.Silent,
@@ -290,9 +290,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage ChapterRemovedEvent(int chapterId, int seriesId)
+    public static SignalRMessageDto ChapterRemovedEvent(int chapterId, int seriesId)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = ChapterRemoved,
             Priority = MessageEventPriority.Silent,
@@ -304,9 +304,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage ChapterUpdatedEvent(int chapterId, int seriesId)
+    public static SignalRMessageDto ChapterUpdatedEvent(int chapterId, int seriesId)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = ChapterUpdated,
             Priority = MessageEventPriority.Silent,
@@ -318,9 +318,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage VolumeRemovedEvent(int volumeId, int seriesId)
+    public static SignalRMessageDto VolumeRemovedEvent(int volumeId, int seriesId)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = VolumeRemoved,
             Priority = MessageEventPriority.Silent,
@@ -333,9 +333,9 @@ public static class MessageFactory
     }
 
 
-    public static SignalRMessage WordCountAnalyzerProgressEvent(int libraryId, float progress, string eventType, string subtitle = "")
+    public static SignalRMessageDto WordCountAnalyzerProgressEvent(int libraryId, float progress, string eventType, string subtitle = "")
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = WordCountAnalyzerProgress,
             Priority = MessageEventPriority.Activity,
@@ -352,9 +352,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage CoverUpdateProgressEvent(int libraryId, float progress, string eventType, string subtitle = "")
+    public static SignalRMessageDto CoverUpdateProgressEvent(int libraryId, float progress, string eventType, string subtitle = "")
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = CoverUpdateProgress,
             Priority = MessageEventPriority.Activity,
@@ -371,9 +371,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage BackupDatabaseProgressEvent(float progress, string subtitle = "")
+    public static SignalRMessageDto BackupDatabaseProgressEvent(float progress, string subtitle = "")
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = BackupDatabaseProgress,
             Priority = MessageEventPriority.Activity,
@@ -392,9 +392,9 @@ public static class MessageFactory
             }
         };
     }
-    public static SignalRMessage CleanupProgressEvent(float progress, string subtitle = "")
+    public static SignalRMessageDto CleanupProgressEvent(float progress, string subtitle = "")
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = CleanupProgress,
             Priority = MessageEventPriority.Activity,
@@ -415,9 +415,9 @@ public static class MessageFactory
     }
 
 
-    public static SignalRMessage UpdateVersionEvent(UpdateNotificationDto update)
+    public static SignalRMessageDto UpdateVersionEvent(UpdateNotificationDto update)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = UpdateAvailable,
             Priority = MessageEventPriority.Action,
@@ -429,9 +429,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage SendingToDeviceEvent(string subtitle, string eventType)
+    public static SignalRMessageDto SendingToDeviceEvent(string subtitle, string eventType)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = SendingToDevice,
             Priority = MessageEventPriority.Activity,
@@ -444,9 +444,9 @@ public static class MessageFactory
     }
 
 
-    public static SignalRMessage CollectionUpdatedEvent(int collectionId)
+    public static SignalRMessageDto CollectionUpdatedEvent(int collectionId)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = CollectionUpdated,
             Priority = MessageEventPriority.Silent,
@@ -460,9 +460,9 @@ public static class MessageFactory
     }
 
 
-    public static SignalRMessage ErrorEvent(string title, string subtitle)
+    public static SignalRMessageDto ErrorEvent(string title, string subtitle)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = Error,
             Priority = MessageEventPriority.Error,
@@ -479,9 +479,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage InfoEvent(string title, string subtitle)
+    public static SignalRMessageDto InfoEvent(string title, string subtitle)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = Info,
             Priority = MessageEventPriority.Info,
@@ -502,9 +502,9 @@ public static class MessageFactory
 
     // Body repeats Name, Title and SubTitle because the current widget reads them from the payload.
     // A LibraryId or SeriesId in Body narrows the audience of an onlyAdmins: false send to users with access
-    private static SignalRMessage CodedEvent(string name, string code, string title, string subtitle, object body)
+    private static SignalRMessageDto CodedEvent(string name, string code, string title, string subtitle, object body)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = name,
             Priority = name == Error ? MessageEventPriority.Error : MessageEventPriority.Info,
@@ -517,7 +517,7 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage RootFoldersInaccessibleEvent(int libraryId, string libraryName, string[] folders)
+    public static SignalRMessageDto RootFoldersInaccessibleEvent(int libraryId, string libraryName, string[] folders)
     {
         const string title = "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted";
         var subtitle = string.Join(", ", folders);
@@ -533,7 +533,7 @@ public static class MessageFactory
         });
     }
 
-    public static SignalRMessage RootFoldersEmptyEvent(int libraryId, string libraryName)
+    public static SignalRMessageDto RootFoldersEmptyEvent(int libraryId, string libraryName)
     {
         var title = $"Some of the root folders for the library, {libraryName}, are empty.";
         const string subtitle = "Either your mount has been disconnected or you are trying to delete all series in the library. " +
@@ -551,7 +551,7 @@ public static class MessageFactory
     }
 
     /// <param name="detailsHtml">Explanation and collision table, rendered as-is in the details dialog</param>
-    public static SignalRMessage SeriesCollisionEvent(int libraryId, string libraryName, string seriesName, string detailsHtml)
+    public static SignalRMessageDto SeriesCollisionEvent(int libraryId, string libraryName, string seriesName, string detailsHtml)
     {
         var title = $"Series collision on \"{seriesName}\" in library {libraryName}";
 
@@ -567,7 +567,7 @@ public static class MessageFactory
     }
 
     /// <param name="seriesId">Null when the series was new and never saved</param>
-    public static SignalRMessage FilesOutsideFolderEvent(int libraryId, int? seriesId, string seriesName)
+    public static SignalRMessageDto FilesOutsideFolderEvent(int libraryId, int? seriesId, string seriesName)
     {
         var title = $"{seriesName} has files spread outside a single series folder";
         const string subtitle = "This has negative performance effects. Please ensure all series are under a single folder from library";
@@ -583,7 +583,7 @@ public static class MessageFactory
         });
     }
 
-    public static SignalRMessage ScanSeriesNotNestedEvent(int libraryId, int seriesId, string seriesName)
+    public static SignalRMessageDto ScanSeriesNotNestedEvent(int libraryId, int seriesId, string seriesName)
     {
         var title = $"{seriesName} scan aborted";
         const string subtitle = "Files for series are not in a nested folder under library path. Correct this and rescan.";
@@ -599,7 +599,7 @@ public static class MessageFactory
         });
     }
 
-    public static SignalRMessage ScanSeriesNoRootEvent(int libraryId, int seriesId, string seriesName)
+    public static SignalRMessageDto ScanSeriesNoRootEvent(int libraryId, int seriesId, string seriesName)
     {
         var title = $"{seriesName} scan aborted";
         const string subtitle = "Scan Series could not find a single, valid folder root for files";
@@ -615,7 +615,7 @@ public static class MessageFactory
         });
     }
 
-    public static SignalRMessage ScanSeriesNoFilesEvent(int libraryId, int seriesId, string seriesName)
+    public static SignalRMessageDto ScanSeriesNoFilesEvent(int libraryId, int seriesId, string seriesName)
     {
         var title = $"Error scanning {seriesName}";
         const string subtitle = "We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan";
@@ -631,7 +631,7 @@ public static class MessageFactory
         });
     }
 
-    public static SignalRMessage ScanSeriesFolderMissingEvent(int libraryId, int seriesId, string seriesName)
+    public static SignalRMessageDto ScanSeriesFolderMissingEvent(int libraryId, int seriesId, string seriesName)
     {
         var title = $"{seriesName} scan has no work to do";
         const string subtitle = "The folder the series was in is missing. Delete series manually or perform a library scan.";
@@ -647,7 +647,7 @@ public static class MessageFactory
         });
     }
 
-    public static SignalRMessage ScanNoWorkEvent(int libraryId, int seriesId, string seriesName, DateTime lastFolderScanned)
+    public static SignalRMessageDto ScanNoWorkEvent(int libraryId, int seriesId, string seriesName, DateTime lastFolderScanned)
     {
         var title = $"{seriesName} scan has no work to do";
         var subtitle = $"All folders have not been changed since last scan ({lastFolderScanned.ToString(CultureInfo.CurrentCulture)}). Scan will be aborted.";
@@ -664,7 +664,7 @@ public static class MessageFactory
     }
 
     /// <param name="seriesId">Null when the series was new and never saved</param>
-    public static SignalRMessage DbWriteFailedEvent(int libraryId, int? seriesId, string seriesName, string error)
+    public static SignalRMessageDto DbWriteFailedEvent(int libraryId, int? seriesId, string seriesName, string error)
     {
         var title = $"There was an issue writing to the DB for Series {seriesName}";
 
@@ -680,7 +680,7 @@ public static class MessageFactory
     }
 
     /// <param name="scheduledForUtc">Pass the same value given to Hangfire, the UI matches it to the scheduled job</param>
-    public static SignalRMessage ScanLibrariesDelayedEvent(DateTime scheduledForUtc)
+    public static SignalRMessageDto ScanLibrariesDelayedEvent(DateTime scheduledForUtc)
     {
         const string title = "Scan libraries task delayed";
         var subtitle = $"A scan was ongoing during processing of the scan libraries task. Task has been rescheduled for 3 hours: {scheduledForUtc.ToLocalTime()}";
@@ -695,7 +695,7 @@ public static class MessageFactory
     }
 
     /// <inheritdoc cref="ScanLibrariesDelayedEvent"/>
-    public static SignalRMessage ScanLibraryDelayedEvent(int libraryId, string libraryName, DateTime scheduledForUtc)
+    public static SignalRMessageDto ScanLibraryDelayedEvent(int libraryId, string libraryName, DateTime scheduledForUtc)
     {
         const string title = "Scan library task delayed";
         var subtitle = $"A scan was ongoing during processing of the {libraryName} scan task. Task has been rescheduled for 3 hours: {scheduledForUtc.ToLocalTime()}";
@@ -712,7 +712,7 @@ public static class MessageFactory
     }
 
     /// <inheritdoc cref="ScanLibrariesDelayedEvent"/>
-    public static SignalRMessage ScanSeriesDelayedEvent(int libraryId, int seriesId, string seriesName, DateTime scheduledForUtc)
+    public static SignalRMessageDto ScanSeriesDelayedEvent(int libraryId, int seriesId, string seriesName, DateTime scheduledForUtc)
     {
         var title = $"Scan series task delayed: {seriesName}";
         var subtitle = $"A scan was ongoing during processing of the scan series task. Task has been rescheduled for 10 minutes: {scheduledForUtc.ToLocalTime()}";
@@ -729,7 +729,7 @@ public static class MessageFactory
         });
     }
 
-    public static SignalRMessage BackupFolderUnwritableEvent(string folder)
+    public static SignalRMessageDto BackupFolderUnwritableEvent(string folder)
     {
         const string title = "Backup Service Error";
         var subtitle = $"Could not write to {folder}; aborting backup";
@@ -743,7 +743,7 @@ public static class MessageFactory
         });
     }
 
-    public static SignalRMessage BackupExistsEvent(string path)
+    public static SignalRMessageDto BackupExistsEvent(string path)
     {
         const string title = "Backup Service Error";
         var subtitle = $"{path} already exists, aborting";
@@ -757,7 +757,7 @@ public static class MessageFactory
         });
     }
 
-    public static SignalRMessage CleanupOnHoldEvent()
+    public static SignalRMessageDto CleanupOnHoldEvent()
     {
         const string title = "Cleanup";
         const string subtitle = "Cleanup put on hold as a media conversion in progress";
@@ -770,7 +770,7 @@ public static class MessageFactory
         });
     }
 
-    public static SignalRMessage WordCountFailedEvent(int libraryId, int seriesId, string seriesName, string filePath)
+    public static SignalRMessageDto WordCountFailedEvent(int libraryId, int seriesId, string seriesName, string filePath)
     {
         const string title = "There was an issue counting words on an epub";
         var subtitle = $"{seriesName} - {filePath}";
@@ -789,9 +789,9 @@ public static class MessageFactory
 
     #endregion
 
-    public static SignalRMessage LibraryModifiedEvent(int libraryId, string action)
+    public static SignalRMessageDto LibraryModifiedEvent(int libraryId, string action)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = LibraryModified,
             Priority = MessageEventPriority.Silent,
@@ -806,9 +806,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage DownloadProgressEvent(string username, string downloadName, string subtitle, float progress, string eventType = "updated", string? correlationId = null)
+    public static SignalRMessageDto DownloadProgressEvent(string username, string downloadName, string subtitle, float progress, string eventType = "updated", string? correlationId = null)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = DownloadProgress,
             Priority = MessageEventPriority.Activity,
@@ -839,12 +839,12 @@ public static class MessageFactory
     /// <param name="current">1-based position within the step</param>
     /// <param name="total">Items in the step</param>
     /// <returns></returns>
-    public static SignalRMessage FileScanProgressEvent(string folderPath, int libraryId, string libraryName, string eventType,
+    public static SignalRMessageDto FileScanProgressEvent(string folderPath, int libraryId, string libraryName, string eventType,
         string? code = null, int? current = null, int? total = null)
     {
         var hasProgress = current.HasValue && total is > 0;
 
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = FileScanProgress,
             Priority = MessageEventPriority.Activity,
@@ -876,9 +876,9 @@ public static class MessageFactory
     /// <param name="libraryName"></param>
     /// <param name="eventType"></param>
     /// <returns></returns>
-    public static SignalRMessage SmartCollectionProgressEvent(string collectionName, string seriesName, int currentItems, int totalItems, string eventType)
+    public static SignalRMessageDto SmartCollectionProgressEvent(string collectionName, string seriesName, int currentItems, int totalItems, string eventType)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = SmartCollectionSync,
             Priority = MessageEventPriority.Activity,
@@ -904,11 +904,11 @@ public static class MessageFactory
     /// <param name="leftToProcess"></param>
     /// <param name="totalToProcess"></param>
     /// <returns></returns>
-    public static SignalRMessage LibraryScanProgressEvent(int libraryId, string libraryName, string eventType, string seriesName = "", int? leftToProcess = null, int? totalToProcess = null)
+    public static SignalRMessageDto LibraryScanProgressEvent(int libraryId, string libraryName, string eventType, string seriesName = "", int? leftToProcess = null, int? totalToProcess = null)
     {
         var hasProgress = totalToProcess.HasValue && leftToProcess.HasValue;
 
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = ScanProgress,
             Priority = MessageEventPriority.Activity,
@@ -929,9 +929,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage CoverUpdateEvent(int id, string entityType)
+    public static SignalRMessageDto CoverUpdateEvent(int id, string entityType)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = CoverUpdate,
             Priority = MessageEventPriority.Silent,
@@ -945,9 +945,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage UserProgressUpdateEvent(int userId, int seriesId, int volumeId, int chapterId, int pagesRead)
+    public static SignalRMessageDto UserProgressUpdateEvent(int userId, int seriesId, int volumeId, int chapterId, int pagesRead)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = UserProgressUpdate,
             Priority = MessageEventPriority.Silent,
@@ -964,9 +964,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage SiteThemeProgressEvent(string subtitle, string themeName, string eventType)
+    public static SignalRMessageDto SiteThemeProgressEvent(string subtitle, string themeName, string eventType)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = SiteThemeProgress,
             Priority = MessageEventPriority.Activity,
@@ -986,9 +986,9 @@ public static class MessageFactory
     /// </summary>
     /// <param name="themeName"></param>
     /// <returns></returns>
-    public static SignalRMessage SiteThemeUpdatedEvent(string themeName)
+    public static SignalRMessageDto SiteThemeUpdatedEvent(string themeName)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = SiteThemeUpdated,
             Priority = MessageEventPriority.Silent,
@@ -1001,9 +1001,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage BookThemeProgressEvent(string subtitle, string themeName, string eventType)
+    public static SignalRMessageDto BookThemeProgressEvent(string subtitle, string themeName, string eventType)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = BookThemeProgress,
             Priority = MessageEventPriority.Activity,
@@ -1018,9 +1018,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage UserUpdateEvent(int userId, string userName)
+    public static SignalRMessageDto UserUpdateEvent(int userId, string userName)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = UserUpdate,
             Priority = MessageEventPriority.Silent,
@@ -1034,9 +1034,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage ConvertBookmarksProgressEvent(float progress, string eventType)
+    public static SignalRMessageDto ConvertBookmarksProgressEvent(float progress, string eventType)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = ConvertBookmarksProgress,
             Priority = MessageEventPriority.Activity,
@@ -1052,9 +1052,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage ConvertCoverProgressEvent(float progress, string eventType)
+    public static SignalRMessageDto ConvertCoverProgressEvent(float progress, string eventType)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = ConvertCoversProgress,
             Priority = MessageEventPriority.Activity,
@@ -1070,9 +1070,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage ScrobblingKeyExpiredEvent(ScrobbleProvider provider)
+    public static SignalRMessageDto ScrobblingKeyExpiredEvent(ScrobbleProvider provider)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = ScrobblingKeyExpired,
             Priority = MessageEventPriority.Action,
@@ -1087,9 +1087,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage PersonMergedMessage(Entities.Person.Person dst, Entities.Person.Person src)
+    public static SignalRMessageDto PersonMergedMessage(Entities.Person.Person dst, Entities.Person.Person src)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = PersonMerged,
             Priority = MessageEventPriority.Silent,
@@ -1101,9 +1101,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage ExternalMatchRateLimitErrorEvent(int seriesId, string seriesName)
+    public static SignalRMessageDto ExternalMatchRateLimitErrorEvent(int seriesId, string seriesName)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = ExternalMatchRateLimitError,
             Priority = MessageEventPriority.Error,
@@ -1115,9 +1115,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage AnnotationUpdateEvent(AnnotationDto dto)
+    public static SignalRMessageDto AnnotationUpdateEvent(AnnotationDto dto)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = AnnotationUpdate,
             Priority = MessageEventPriority.Silent,
@@ -1128,9 +1128,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage ReadingSessionUpdateEvent(int userId, int sessionId)
+    public static SignalRMessageDto ReadingSessionUpdateEvent(int userId, int sessionId)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = ReadingSessionUpdate,
             Priority = MessageEventPriority.Silent,
@@ -1142,9 +1142,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage ReadingSessionCloseEvent(int userId, int sessionId)
+    public static SignalRMessageDto ReadingSessionCloseEvent(int userId, int sessionId)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = ReadingSessionClose,
             Priority = MessageEventPriority.Silent,
@@ -1156,9 +1156,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage AuthKeyUpdatedEvent(AuthKeyDto authKey)
+    public static SignalRMessageDto AuthKeyUpdatedEvent(AuthKeyDto authKey)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = AuthKeyUpdate,
             Priority = MessageEventPriority.Silent,
@@ -1169,9 +1169,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage AuthKeyDeletedEvent(int id)
+    public static SignalRMessageDto AuthKeyDeletedEvent(int id)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = AuthKeyDeleted,
             Priority = MessageEventPriority.Silent,
@@ -1182,9 +1182,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage ReadingListUpdatedEvent(int id)
+    public static SignalRMessageDto ReadingListUpdatedEvent(int id)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = ReadingListUpdated,
             Priority = MessageEventPriority.Silent,
@@ -1195,9 +1195,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage SeriesUpdatedEvent(int seriesId)
+    public static SignalRMessageDto SeriesUpdatedEvent(int seriesId)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = SeriesUpdated,
             Priority = MessageEventPriority.Silent,
@@ -1208,9 +1208,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage ScrobbleProviderUpdatedEvent(ScrobbleProvider provider)
+    public static SignalRMessageDto ScrobbleProviderUpdatedEvent(ScrobbleProvider provider)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = ScrobbleProviderUpdated,
             Priority = MessageEventPriority.Silent,
@@ -1221,18 +1221,18 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage LicenseInfoUpdateEvent()
+    public static SignalRMessageDto LicenseInfoUpdateEvent()
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = LicenseInfoUpdate,
             Priority = MessageEventPriority.Silent,
         };
     }
 
-    public static SignalRMessage ExternalMetadataUpdateEvent(int seriesId)
+    public static SignalRMessageDto ExternalMetadataUpdateEvent(int seriesId)
     {
-        return new SignalRMessage
+        return new SignalRMessageDto
         {
             Name = ExternalMetadataUpdate,
             Priority = MessageEventPriority.Silent,
@@ -1243,9 +1243,9 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage ReRunMappingsProgressEvent(string progressEventType, float progress)
+    public static SignalRMessageDto ReRunMappingsProgressEvent(string progressEventType, float progress)
     {
-        return new SignalRMessage()
+        return new SignalRMessageDto()
         {
             Name = RerunMetadataMappingsProgress,
             Priority = MessageEventPriority.Activity,

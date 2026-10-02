@@ -17,15 +17,15 @@ public class ProgressThrottleTests
     private static readonly TimeSpan AfterFlush = TimeSpan.FromMilliseconds(400);
 
     private readonly ProgressThrottle _throttle = new(NullLogger<ProgressThrottle>.Instance, TimeProvider.System, Interval);
-    private readonly ConcurrentQueue<SignalRMessage> _sent = new();
+    private readonly ConcurrentQueue<SignalRMessageDto> _sent = new();
 
-    private Task Send(SignalRMessage message) => _throttle.SendAsync(message, () =>
+    private Task Send(SignalRMessageDto messageDto) => _throttle.SendAsync(messageDto, () =>
     {
-        _sent.Enqueue(message);
+        _sent.Enqueue(messageDto);
         return Task.CompletedTask;
     });
 
-    private static SignalRMessage Folder(int current, string eventType = ProgressEventType.Updated,
+    private static SignalRMessageDto Folder(int current, string eventType = ProgressEventType.Updated,
         string? code = MessageEventCode.ScanListingFolders) =>
         MessageFactory.FileScanProgressEvent($"M:/{current}", 1, "Manga", eventType, code, current, 100);
 
@@ -79,7 +79,7 @@ public class ProgressThrottleTests
         var clock = new ManualTimeProvider();
         var throttle = new ProgressThrottle(NullLogger<ProgressThrottle>.Instance, clock, Interval);
         var sent = new ConcurrentQueue<(string Folder, DateTimeOffset At)>();
-        Task Send(SignalRMessage m) => throttle.SendAsync(m, () =>
+        Task Send(SignalRMessageDto m) => throttle.SendAsync(m, () =>
         {
             sent.Enqueue((m.SubTitle, clock.GetUtcNow()));
             return Task.CompletedTask;
