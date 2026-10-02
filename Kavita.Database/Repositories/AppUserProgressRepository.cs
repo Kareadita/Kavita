@@ -196,6 +196,7 @@ public class AppUserProgressRepository(DataContext context, IMapper mapper) : IA
     {
         return await context.AppUserProgresses
             .Where(p => p.AppUserId == userId && p.ChapterId == chapterId)
+            .OrderBy(p => p.CreatedUtc)
             .Select(p => p.CreatedUtc)
             .FirstOrDefaultAsync(ct);
     }
