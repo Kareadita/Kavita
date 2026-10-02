@@ -1,0 +1,6 @@
+
+// Contain the section break's margins, so each row's box is its real height. Otherwise the margin collapses out of
+// the row and the virtual scroller measures rows 30px shorter than they are.
+.review-row {
+  display: flow-root;
+}

@@ -4,7 +4,7 @@
     <!-- Desktop: Image with overlay -->
     <div class="image-container d-none d-md-block">
       <div class="overlay">
-        <app-image [imageUrl]="imageService.getChapterCoverImage(item().chapterId)" width="6.625rem" />
+        <app-image [imageUrl]="imageService.getChapterCoverImage(item().chapterId)" width="6.625rem" height="9.65rem" objectFit="cover" />
         @if (isUnread()) {
           <div class="not-read-badge"></div>
         }
@@ -36,7 +36,7 @@
 
     <!-- Mobile: image + read button -->
     <div class="d-md-none mobile-section">
-      <app-image [imageUrl]="imageService.getChapterCoverImage(item().chapterId)" width="5rem" />
+      <app-image [imageUrl]="imageService.getChapterCoverImage(item().chapterId)" width="5rem" height="7.28rem" objectFit="cover" />
       @if (!editMode()) {
         <button class="btn btn-outline-primary btn-sm mt-1" (click)="readChapter(item())">
           {{t('read')}}

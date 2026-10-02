@@ -29,7 +29,6 @@ import {
   NgbNavOutlet,
   NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
-import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {ChapterService} from "../_services/chapter.service";
@@ -98,7 +97,6 @@ import {Chapter} from "../_models/chapter";
     NgbNavContent,
     NgbNavLink,
     NgbTooltip,
-    VirtualScrollerModule,
     NgClass,
     TranslocoDirective,
     ReadMoreComponent,

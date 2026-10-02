@@ -39,7 +39,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_models/user-review";
 import {ExternalSeriesCardComponent} from '../../../cards/external-series-card/external-series-card.component';
 import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
-import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
+import {VirtualScrollerComponent} from '@kareadita/ngx-virtual-scroller';
 import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
@@ -147,7 +147,7 @@ const READING_HISTORY_PAGE_SIZE = 10;
   imports: [CardActionablesComponent, NgStyle,
     NgbTooltip, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
     NgbDropdownItem, BulkOperationsComponent,
-    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet, NgbPopover, KavitaplusTooltipComponent,
+    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerComponent, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet, NgbPopover, KavitaplusTooltipComponent,
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, DetailsTabComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
     PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent,
@@ -190,6 +190,10 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   private readonly drawerService = inject(DrawerService);
 
   readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
+  /**
+   * The element that actually scrolls the page (the app shell's companion bar), for virtual scrollers to track
+   */
+  protected readonly companionBar = this.document.querySelector<HTMLElement>('.companion-bar') ?? undefined;
 
 
   seriesId = input(0, {transform: numberAttribute });

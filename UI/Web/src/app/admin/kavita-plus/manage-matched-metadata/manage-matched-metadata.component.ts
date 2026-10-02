@@ -3,7 +3,6 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 import {ImageComponent} from "../../../shared/image/image.component";
-import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {MatchStateOptionPipe} from "../../../_pipes/match-state.pipe";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
@@ -45,7 +44,6 @@ interface FormModel {
   imports: [
     TranslocoDirective,
     ImageComponent,
-    VirtualScrollerModule,
     MatchStateOptionPipe,
     UtcToLocalTimePipe,
     DefaultValuePipe,

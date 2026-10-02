@@ -18,7 +18,7 @@ import {
   WritableSignal
 } from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
-import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
+import {VirtualScrollerComponent} from '@kareadita/ngx-virtual-scroller';
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -53,7 +53,7 @@ const ANIMATION_TIME_MS = 0;
  */
 @Component({
   selector: 'app-card-detail-layout',
-  imports: [LoadingComponent, VirtualScrollerModule, CardActionablesComponent, MetadataFilterComponent, TranslocoDirective, NgTemplateOutlet, NgClass],
+  imports: [LoadingComponent, VirtualScrollerComponent, CardActionablesComponent, MetadataFilterComponent, TranslocoDirective, NgTemplateOutlet, NgClass],
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
