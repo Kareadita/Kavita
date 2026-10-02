@@ -29,7 +29,7 @@
     "@angular/platform-browser": "^22.1.3",
     "@angular/router": "^22.1.3",
     "@fortawesome/fontawesome-free": "^7.3.1",
-    "@iharbeck/ngx-virtual-scroller": "npm:@kareadita/ngx-virtual-scroller@^20.0.1",
+    "@kareadita/ngx-virtual-scroller": "^22.0.0",
     "@iplab/ngx-color-picker": "^22.1.0",
     "@iplab/ngx-file-upload": "^22.1.0",
     "@jsverse/transloco": "^8.4.0",
