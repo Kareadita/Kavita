@@ -9,7 +9,7 @@ import {
   ResizeMode
 } from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 import {AccountService} from "../../../../_services/account.service";
-import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
+import {VirtualScrollerComponent} from "@kareadita/ngx-virtual-scroller";
 import {FilterFieldComponent} from "../../../../shared/_components/filter-field/filter-field.component";
 import {filteredBy} from "../../../../_helpers/filtered";
 
@@ -19,7 +19,7 @@ import {filteredBy} from "../../../../_helpers/filtered";
     TranslocoDirective,
     AnnotationCardComponent,
     OffCanvasResizeComponent,
-    VirtualScrollerModule,
+    VirtualScrollerComponent,
     FilterFieldComponent
   ],
   templateUrl: './view-annotations-drawer.component.html',

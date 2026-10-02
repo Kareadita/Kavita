@@ -11,7 +11,7 @@ import {DOCUMENT} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NgxStarsComponent, NgxStarsModule} from "ngx-stars";
 import {ReviewListItemComponent} from "../review-list-item/review-list-item.component";
-import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
+import {VirtualScrollerComponent} from "@kareadita/ngx-virtual-scroller";
 import {ThemeService} from "../../../_services/theme.service";
 import {MemberInfo} from "../../../_models/user/member-info";
 import {ReviewService} from "../../../_services/review.service";
@@ -27,7 +27,7 @@ import {form, FormField} from "@angular/forms/signals";
     TranslocoDirective,
     NgxStarsModule,
     ReviewListItemComponent,
-    VirtualScrollerModule,
+    VirtualScrollerComponent,
     LoadingComponent,
     FormField
   ],

@@ -16,7 +16,7 @@ import {FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {NgTemplateOutlet} from "@angular/common";
 import {LoadingComponent} from "../../loading/loading.component";
-import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
+import {VirtualScrollerComponent} from "@kareadita/ngx-virtual-scroller";
 import {Observable} from "rxjs";
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
@@ -42,7 +42,7 @@ export type ListSelectionItem<T> = {
     SentenceCasePipe,
     NgTemplateOutlet,
     LoadingComponent,
-    VirtualScrollerModule, FormFieldDirective, ValidationErrorsComponent, FilterFieldComponent],
+    VirtualScrollerComponent, FormFieldDirective, ValidationErrorsComponent, FilterFieldComponent],
   templateUrl: './list-select-modal.component.html',
   styleUrl: './list-select-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
