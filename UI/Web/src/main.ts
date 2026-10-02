@@ -37,6 +37,7 @@ import {KavitaTitleStrategy} from "./app/_services/kavita-title.strategy";
 import {routingErrorHandler} from "./app/_interceptors/routing-error.handler";
 import {NgbModalConfig, NgbRatingConfig} from "@ng-bootstrap/ng-bootstrap";
 import {DefaultModalOptions} from "./app/_models/modal/modal-options";
+import {ActivityStoreService} from './app/_services/activity-store.service';
 import {MessageHubService} from "./app/_services/message-hub.service";
 import {DownloadService} from "./app/shared/_services/download.service";
 import {LibraryService} from "./app/_services/library.service";
@@ -133,6 +134,8 @@ function bootstrapUser() {
   const downloadService = inject(DownloadService);
   const libraryService = inject(LibraryService);
   const transloco = inject(TranslocoService);
+  // Created before the hub connects so no message is missed
+  inject(ActivityStoreService);
 
   // Load user from localStorage so refreshAccount() and locale loading can proceed
   const localUser = accountService.getUserFromLocalStorage();

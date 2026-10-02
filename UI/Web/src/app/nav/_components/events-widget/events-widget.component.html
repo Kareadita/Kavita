@@ -38,7 +38,7 @@
       @for (message of progressEvents(); track message.name + '_' + message.eventType) {
         @if (message.progress === 'indeterminate' || message.progress === 'none') {
           <li class="list-group-item dark-menu-item">
-            <div class="h6 mb-1">{{message.title}}</div>
+            <div class="h6 mb-1">{{message | eventTitle : false : libraryNames()}}</div>
             @if (message.subTitle !== '') {
               <div class="accent-text mb-1" [title]="message.subTitle">{{message.subTitle}}</div>
             }
@@ -57,7 +57,7 @@
           </li>
         } @else {
           <li class="list-group-item dark-menu-item">
-            <div class="h6 mb-1">{{message.title}}</div>
+            <div class="h6 mb-1">{{message | eventTitle : false : libraryNames()}}</div>
             @if (message.subTitle !== '') {
               <div class="accent-text mb-1" [title]="message.subTitle">{{message.subTitle}}</div>
             }

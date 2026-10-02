@@ -219,4 +219,12 @@ public class MessageFactoryTests
 
         Assert.Equal((int) ScrobbleProvider.AniList, body.GetProperty("provider").GetInt32());
     }
+
+    [Fact]
+    public void SmartCollectionProgress_BodyHasCollectionName()
+    {
+        var body = Serialize(MessageFactory.SmartCollectionProgressEvent("Seasonal", "Frieren", 1, 4, ProgressEventType.Updated)).GetProperty("body");
+
+        Assert.Equal("Seasonal", body.GetProperty("collectionName").GetString());
+    }
 }

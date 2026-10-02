@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
 import {NgbPopover} from '@ng-bootstrap/ng-bootstrap';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {NgStyle} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {RouterLink} from "@angular/router";
@@ -16,13 +16,15 @@ import {InfoEvent} from "../../../_models/events/info-event";
 import {ErrorEvent} from "../../../_models/events/error-event";
 import {UpdateVersionEvent} from "../../../_models/events/update-version-event";
 import {ConfirmConfig} from "../../../shared/confirm-dialog/_models/confirm-config";
+import {LibraryService} from "../../../_services/library.service";
+import {EventTitlePipe} from "../../../_pipes/event-title.pipe";
 
 @Component({
   selector: 'app-nav-events-toggle',
   templateUrl: './events-widget.component.html',
   styleUrls: ['./events-widget.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbPopover, NgStyle, TranslocoDirective, RouterLink]
+  imports: [NgbPopover, NgStyle, TranslocoDirective, RouterLink, EventTitlePipe]
 })
 export class EventsWidgetComponent implements OnInit {
   public readonly downloadService = inject(DownloadService);
@@ -31,6 +33,7 @@ export class EventsWidgetComponent implements OnInit {
   protected readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly libraryService = inject(LibraryService);
 
   readonly user = input.required<User>();
 
@@ -42,6 +45,7 @@ export class EventsWidgetComponent implements OnInit {
   readonly activeReadingSessions = signal<Set<number>>(new Set());
 
   readonly isConnected = this.messageHub.isConnectedSignal;
+  protected readonly libraryNames = toSignal(this.libraryService.getLibraryNames());
 
   /**
    * Does not include active reading sessions

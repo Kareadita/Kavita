@@ -633,7 +633,7 @@ public static class MessageFactory
 
     public static SignalRMessageDto ScanSeriesFolderMissingEvent(int libraryId, int seriesId, string seriesName)
     {
-        var title = $"{seriesName} scan has no work to do";
+        var title = $"{seriesName} folder is missing";
         const string subtitle = "The folder the series was in is missing. Delete series manually or perform a library scan.";
 
         return CodedEvent(Info, MessageEventCode.ScanSeriesFolderMissing, title, subtitle, new
@@ -888,6 +888,7 @@ public static class MessageFactory
             Progress = ProgressType.Determinate,
             Body = new
             {
+                CollectionName = collectionName,
                 Progress = totalItems <= 0 ? 0f : Math.Clamp(currentItems / (float) totalItems, 0f, 1f),
                 EventTime = DateTime.Now
             }
