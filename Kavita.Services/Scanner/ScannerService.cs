@@ -292,12 +292,10 @@ public class ScannerService(
 
         var toProcessList = toProcess.Select(k => parsedSeries[k]).ToList();
         var totalCount = toProcessList.Count;
-        var current = 0;
+        var seriesLeftToProcess = totalCount;
 
         foreach (var pSeries in toProcessList)
         {
-            current++;
-
             using var scope = scopeFactory.CreateScope();
             var processSeries = scope.ServiceProvider.GetRequiredService<IProcessSeries>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -307,7 +305,7 @@ public class ScannerService(
             var processedSeriesId = await processSeries.ProcessSeriesAsync(settings, pSeries, new ProcessSeriesArgs
             {
                 Library = scopedLibrary,
-                LeftToProcess = totalCount - current,
+                LeftToProcess = seriesLeftToProcess,
                 TotalToProcess = totalCount,
                 ForceUpdate = bypassFolderOptimizationChecks,
             });
@@ -320,6 +318,8 @@ public class ScannerService(
                 await metadataService.GenerateCoversForSeries(serverSettings, scopedLibrary.Id, processedSeriesId.Value, bypassFolderOptimizationChecks, false);
                 await wordCountAnalyzerService.ScanSeries(scopedLibrary.Id, processedSeriesId.Value, bypassFolderOptimizationChecks);
             }
+
+            seriesLeftToProcess--;
         }
 
         // Tell UI that this series is done
@@ -787,8 +787,12 @@ public class ScannerService(
             channel.Writer.Complete();
         }
 
-        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(libraryId, libraryName, ProgressEventType.Ended));
+        // Not an ended: ScanLibrary sends that after the commit. Progress 1 tells the widget covers and word count are what remain
+        if (totalSeriesToProcess > 0)
+        {
+            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.LibraryScanProgressEvent(libraryId, libraryName, ProgressEventType.Updated, string.Empty, 0, totalSeriesToProcess));
+        }
 
         logger.LogDebug("[ScannerService] Finished writing metadata for {Count} series in {Elapsed}ms", toProcess.Count, sw.ElapsedMilliseconds);
 

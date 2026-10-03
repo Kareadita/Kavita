@@ -217,7 +217,7 @@ export class ActivityStoreService {
     const previous = job?.steps[message.name];
     const isEnded = message.eventType === 'ended';
 
-    // An ended never creates or reopens a job (ScanProgress sends ended twice per scan, plan Phase 13b)
+    // An ended never creates or reopens a job (a scan with no changes sends ScanProgress ended with no prior step)
     if (isEnded && (!previous || previous.eventType === 'ended')) return;
     if (!isEnded) this.dismissed = this.dismissed.filter(d => d.id !== id);
 
@@ -511,7 +511,7 @@ function nextProgress(previous: ActivityStep | undefined, message: SignalRMessag
   if (value === null) return null;
 
   const clamped = Math.min(Math.max(value, 0), 1);
-  const sameRun = previous && message.eventType !== 'started' && previous.code === message.code && previous.progress !== null;
+  const sameRun = previous && message.eventType !== 'started' && previous.eventType !== 'ended' && previous.code === message.code && previous.progress !== null;
   return sameRun ? Math.max(previous.progress!, clamped) : clamped;
 }
 

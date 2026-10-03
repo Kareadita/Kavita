@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.DTOs.Update;
 using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.Tests.DTOs.SignalR;
@@ -55,6 +56,38 @@ public class MessageFactoryTests
         Assert.Equal("M:/Manga/One Piece", json.GetProperty("subTitle").GetString());
         Assert.Equal("started", json.GetProperty("eventType").GetString());
         Assert.Equal("indeterminate", json.GetProperty("progress").GetString());
+    }
+
+    public static TheoryData<SignalRMessageDto> SingleCases => new()
+    {
+        MessageFactory.InfoEvent("Scan library task delayed", "Rescheduled"),
+        MessageFactory.ErrorEvent("Comics scan aborted", "Some root folders are empty"),
+        MessageFactory.WordCountFailedEvent(2, 42, "Frieren", "B:/Frieren/Frieren v01.epub"),
+        MessageFactory.UpdateVersionEvent(new UpdateNotificationDto
+        {
+            CurrentVersion = "0.9.1.0",
+            UpdateVersion = "0.9.2.0",
+            UpdateBody = string.Empty,
+            UpdateTitle = "v0.9.2",
+            UpdateUrl = string.Empty,
+            PublishDate = string.Empty,
+        }),
+    };
+
+    [Theory]
+    [MemberData(nameof(SingleCases))]
+    public void OneOffEvents_SerializeAsSingle(SignalRMessageDto messageDto)
+    {
+        Assert.Equal("single", Serialize(messageDto).GetProperty("eventType").GetString());
+    }
+
+    [Fact]
+    public void LibraryScanProgress_NoneLeft_IsComplete()
+    {
+        var json = Serialize(MessageFactory.LibraryScanProgressEvent(1, "Manga", ProgressEventType.Updated, string.Empty, 0, 28));
+
+        Assert.Equal("updated", json.GetProperty("eventType").GetString());
+        Assert.Equal(1f, json.GetProperty("body").GetProperty("progress").GetSingle());
     }
 
     [Fact]

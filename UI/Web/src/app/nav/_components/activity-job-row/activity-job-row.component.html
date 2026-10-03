@@ -87,6 +87,8 @@
             }
             @if (finishingStep(); as finishing) {
               {{finishing | eventTitle : false : libraryNames()}}
+            } @else if (finishingUp()) {
+              {{t('finishing-up-label')}}
             } @else {
               {{step()?.subTitle}}
             }

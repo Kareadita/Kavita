@@ -38,6 +38,13 @@ export function isFinishingStep(step: ActivityStep) {
   return FinishStepNames.includes(step.name);
 }
 
+/**
+ * ScanProgress only ends after the commit. The update sent after the last series carries 1, per-series updates stop at (N-1)/N
+ */
+export function isProcessingDone(step: ActivityStep | undefined) {
+  return step?.name === EVENTS.ScanProgress && (step.eventType === 'ended' || step.progress === 1);
+}
+
 export function isMultiLibraryJob(job: ActivityJob) {
   return job.libraryIds.length > 1;
 }
@@ -90,7 +97,7 @@ function scanSegments(job: ActivityJob): JobSegment[] {
   const steps = Object.values(job.steps).filter(s => libraryId === undefined || libraryIdOf(s) === libraryId);
   const fileScan = steps.find(s => s.name === EVENTS.FileScanProgress);
   const scan = steps.find(s => s.name === EVENTS.ScanProgress);
-  const processingDone = scan?.eventType === 'ended';
+  const processingDone = isProcessingDone(scan);
 
   const findDone = !!scan || fileScan?.eventType === 'ended';
   const find: JobSegment = {

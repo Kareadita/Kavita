@@ -3067,6 +3067,7 @@
         "restoring-alt": "Restoring activity from before the refresh",
         "scan-summary-label": "Added: {{added}}, removed: {{removed}}",
         "finished-while-away-label": "Finished while you were away",
+        "finishing-up-label": "Finishing up",
         "interrupted-label": "Stopped by a server restart",
         "schedule-lost-label": "Was set for {{time}}, lost in a server restart",
         "progress-counter-label": "{{current}} / {{total}}",

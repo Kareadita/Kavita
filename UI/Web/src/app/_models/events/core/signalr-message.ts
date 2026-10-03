@@ -6,9 +6,6 @@ export interface SignalRMessage<T = unknown> {
   name: string;
   title: string;
   subTitle: string;
-  /**
-   * Info and Error arrive as 'started' until ProgressEventType.Single is fixed (plan Phase 13a)
-   */
   eventType: 'single' | 'started' | 'updated' | 'ended';
   /**
    * The server sends '' for none

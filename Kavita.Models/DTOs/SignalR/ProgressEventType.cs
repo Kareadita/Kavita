@@ -12,6 +12,6 @@ public static class ProgressEventType
     /// <summary>
     /// Represents a single update
     /// </summary>
-    public const string Single = "started";
+    public const string Single = "single";
 
 }

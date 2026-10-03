@@ -6,7 +6,7 @@ import {ToastrService} from '@openng/ngx-toastr';
 import {Observable} from 'rxjs';
 import {ActivityJob} from '../../../_models/activity/activity-job';
 import {ActivityStep} from '../../../_models/activity/activity-step';
-import {currentStep, isFinishingStep, isMultiLibraryJob, isScanJob, jobProgress, titleStep} from '../../../_helpers/activity-job-progress';
+import {currentStep, isFinishingStep, isMultiLibraryJob, isProcessingDone, isScanJob, jobProgress, titleStep} from '../../../_helpers/activity-job-progress';
 import {EventTitlePipe} from '../../../_pipes/event-title.pipe';
 import {EventActionPipe} from '../../../_pipes/event-action.pipe';
 import {ActivityAgePipe} from '../../../_pipes/activity-age.pipe';
@@ -53,6 +53,7 @@ export class ActivityJobRowComponent {
     const step = this.step();
     return this.isScan() && step && isFinishingStep(step) ? step : null;
   });
+  protected readonly finishingUp = computed(() => isProcessingDone(this.step()));
 
   protected readonly currentLibraryName = computed(() => {
     const libraryId = this.job().libraryIds.at(-1);
