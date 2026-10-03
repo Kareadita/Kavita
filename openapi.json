@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.8",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.10",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.1.8"
+    "version": "0.9.1.10"
   },
   "servers": [
     {
@@ -9594,47 +9594,6 @@
         }
       }
     },
-    "/api/Person/fetch-cover": {
-      "post": {
-        "tags": [
-          "Person"
-        ],
-        "summary": "Attempts to download the cover from CoversDB",
-        "parameters": [
-          {
-            "name": "personId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Person/series-known-for": {
       "get": {
         "tags": [
@@ -16865,6 +16824,36 @@
         }
       }
     },
+    "/api/Server/activity": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "What is running, delayed and coming up, so a client can rebuild its activity list after a refresh or a server restart",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivitySnapshotDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivitySnapshotDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivitySnapshotDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Server/media-errors": {
       "get": {
         "tags": [
@@ -21896,6 +21885,59 @@
           },
           "preferredTitle": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ActivitySnapshotDto": {
+        "type": "object",
+        "properties": {
+          "bootId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "running": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SignalRMessageDto"
+            },
+            "nullable": true
+          },
+          "scheduled": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduledScanDto"
+            },
+            "nullable": true
+          },
+          "scheduledTotal": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "upcoming": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpcomingTaskDto"
+            },
+            "nullable": true
+          },
+          "recentJobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecentJobDto"
+            },
+            "nullable": true
+          },
+          "recentEntries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SignalRMessageDto"
+            },
             "nullable": true
           }
         },
@@ -27800,6 +27842,32 @@
         },
         "additionalProperties": false
       },
+      "MessageEventPriority": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Silent\n- `1` — Activity\n- `2` — Info\n- `3` — Action\n- `4` — Error",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Silent",
+          "Activity",
+          "Info",
+          "Action",
+          "Error"
+        ],
+        "x-enum-descriptions": [
+          "Silent",
+          "Activity",
+          "Info",
+          "Action",
+          "Error"
+        ]
+      },
       "MetadataFetchTrigger": {
         "enum": [
           0,
@@ -29994,6 +30062,45 @@
         },
         "additionalProperties": false
       },
+      "RecentJobDto": {
+        "required": [
+          "correlationId"
+        ],
+        "type": "object",
+        "properties": {
+          "correlationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "startedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SignalRMessageDto"
+            },
+            "nullable": true
+          },
+          "completed": {
+            "type": "boolean"
+          },
+          "seriesAdded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesRemoved": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "RecommendationDto": {
         "type": "object",
         "properties": {
@@ -30578,6 +30685,33 @@
           },
           "abortOnNoSeriesMatch": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScheduledScanDto": {
+        "required": [
+          "jobId"
+        ],
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "nullable": true
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "runAtUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -32188,6 +32322,53 @@
           "BrowsePeople"
         ]
       },
+      "SignalRMessageDto": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "body": {
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "subTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "eventType": {
+            "type": "string",
+            "nullable": true
+          },
+          "progress": {
+            "type": "string",
+            "nullable": true
+          },
+          "eventTimeUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/MessageEventPriority"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "correlationId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "SiteThemeDto": {
         "required": [
           "fileName",
@@ -33234,6 +33415,28 @@
           "mangaTime": {
             "type": "number",
             "format": "float"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpcomingTaskDto": {
+        "required": [
+          "cron",
+          "taskId"
+        ],
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "nullable": true
+          },
+          "cron": {
+            "type": "string",
+            "nullable": true
+          },
+          "nextRunUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -34797,6 +35000,12 @@
                 }
               },
               "NavigateHome": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/KeyBind"
+                }
+              },
+              "OpenEventWidget": {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/KeyBind"
