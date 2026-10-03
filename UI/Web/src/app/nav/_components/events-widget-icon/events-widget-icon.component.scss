@@ -1,7 +1,12 @@
 .icon {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 1.25rem;
+  height: 1rem;
   color: var(--event-widget-idle-icon-color);
+
+  // The global .btn-icon i rule would otherwise paint the glyph body-text color in every state
+  i {
+    color: inherit;
+  }
 
   &.running {
     color: var(--event-widget-running-icon-color);
@@ -13,8 +18,13 @@
 }
 
 .ring {
-  width: 100%;
-  height: 100%;
+  top: 50%;
+  left: 50%;
+  width: 2rem;
+  height: 2rem;
+  margin: -1rem 0 0 -1rem;
+  overflow: visible;
+  pointer-events: none;
   fill: none;
   stroke-width: 2.5;
   stroke-linecap: round;
@@ -37,8 +47,8 @@
 }
 
 .count {
-  top: 0;
-  right: -0.25rem;
+  top: -0.625rem;
+  right: -0.75rem;
   min-width: 1.125rem;
   height: 1.125rem;
   font-size: 0.6875rem;

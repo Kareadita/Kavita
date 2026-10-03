@@ -448,7 +448,7 @@
   --event-widget-error-bg-color: var(--error-color);
   --event-widget-update-bg-color: var(--primary-color);
   --event-widget-activity-bg-color: var(--primary-color);
-  --event-widget-idle-icon-color: var(--event-widget-text-color);
+  --event-widget-idle-icon-color: var(--navbar-fa-icon-color);
   --event-widget-running-icon-color: var(--primary-color);
   --event-widget-offline-icon-color: color-mix(in srgb, var(--event-widget-text-color) 35%, transparent);
   --event-widget-offline-slash-color: var(--warning-color);
@@ -460,6 +460,24 @@
   --event-widget-error-badge-text-color: var(--navbar-text-color);
   --event-widget-badge-border-color: var(--navbar-bg-color);
   --event-widget-reading-text-color: var(--primary-color);
+  --event-widget-muted-text-color: color-mix(in srgb, var(--event-widget-text-color) 60%, transparent);
+  --event-widget-link-color: var(--primary-color);
+  --event-widget-link-hover-color: color-mix(in srgb, var(--primary-color) 75%, var(--event-widget-text-color));
+  --event-widget-chip-text-color: color-mix(in srgb, var(--event-widget-text-color) 75%, transparent);
+  --event-widget-chip-border-color: color-mix(in srgb, var(--event-widget-text-color) 20%, transparent);
+  --event-widget-chip-active-bg-color: var(--primary-color);
+  --event-widget-chip-active-text-color: var(--event-widget-bg-color);
+  --event-widget-pinned-bg-color: color-mix(in srgb, var(--warning-color) 8%, transparent);
+  --event-widget-action-icon-color: var(--warning-color);
+  --event-widget-offline-bg-color: color-mix(in srgb, var(--warning-color) 14%, transparent);
+  --event-widget-offline-text-color: var(--warning-color);
+  --event-widget-bar-track-color: color-mix(in srgb, var(--event-widget-text-color) 10%, transparent);
+  --event-widget-bar-fill-color: var(--primary-color);
+  --event-widget-bar-stripe-color: color-mix(in srgb, var(--event-widget-bg-color) 25%, transparent);
+  --event-widget-done-dot-color: var(--primary-color);
+  --event-widget-error-dot-color: var(--error-color);
+  --event-widget-info-dot-color: var(--event-widget-info-bg-color);
+  --event-widget-inset-bg-color: color-mix(in srgb, var(--event-widget-text-color) 4%, transparent);
 
   /* Search */
   --search-result-text-lite-color: initial;

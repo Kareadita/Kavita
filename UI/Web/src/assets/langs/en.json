@@ -2778,6 +2778,8 @@
     "keybind-setting-description-pipe": {
         "key-bind-title-navigate-to-settings": "Open settings",
         "key-bind-tooltip-navigate-to-settings": "Open settings while not in a reader",
+        "key-bind-title-open-event-widget": "Open Event Widget",
+        "key-bind-tooltip-open-event-widget": "Opens event widget popover",
         "key-bind-title-open-search": "Open search",
         "key-bind-tooltip-open-search": "Open the top search bar",
         "key-bind-title-navigate-to-scrobbling": "Open My Activity",
@@ -3051,58 +3053,46 @@
 
     "events-widget": {
         "title-alt": "Activity",
-        "dismiss-all": "Dismiss All",
-        "update-available": "Update available",
-        "downloading-item": "Downloading {{item}}",
-        "more-info": "Click for more information",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Users online",
-        "active-events-title": "Active Events:",
-        "no-data": "{{common.no-data}}",
-        "left-to-process": "Left to Process: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} downloads in Queue",
         "reading-now": "{{num}} reading now",
-        "downloads-active": "{{count}} download(s) in progress",
-        "not-connected": "Not connected, try refreshing",
-
         "filter-all-label": "All",
         "filter-attention-label": "Needs attention",
         "filter-jobs-label": "Jobs",
-        "filter-count-alt": "{{count}} items",
         "clear-finished-label": "Clear finished",
         "dismiss-alt": "Dismiss",
         "now-label": "now",
         "no-data-description": "Nothing is running and nothing needs you.",
+        "filter-empty-label": "Nothing here right now.",
         "server-unreachable-label": "Can’t reach the server. Retrying...",
         "view-activity-label": "View activity",
         "restoring-alt": "Restoring activity from before the refresh",
-        "duration-label": "Took {{duration}}",
-
         "scan-summary-label": "Added: {{added}}, removed: {{removed}}",
         "finished-while-away-label": "Finished while you were away",
         "interrupted-label": "Stopped by a server restart",
         "schedule-lost-label": "Was set for {{time}}, lost in a server restart",
         "progress-counter-label": "{{current}} / {{total}}",
-
         "up-next-label": "Up next",
         "show-more-label": "Show {{count}} more",
         "show-less-label": "Show less",
-        "every-night-label": "Every night",
-        "weekly-label": "Weekly",
-        "task-scan-libraries": "Scan all libraries",
-        "task-backup": "Backup",
-        "task-cleanup": "Cleanup",
-        "task-sync-cbl": "Sync reading lists",
         "scanning-libraries-label": "Scanning libraries",
         "libraries-progress-label": "{{current}} of {{total}}",
         "scans-waiting-label": "Library scans waiting: {{count}}",
         "and-more-label": "and {{count}} more",
         "problems-in-libraries-label": "Libraries with problems: {{count}}",
-
         "status-offline-alt": "Server unreachable",
         "status-attention-alt": "Needs attention: {{count}}",
         "status-attention-error-alt": "Needs attention: {{count}}, including errors",
-        "status-running-alt": "Jobs running: {{count}}"
+        "status-running-alt": "Jobs running: {{count}}",
+        "title-label": "Activity",
+        "filter-group-alt": "Filter activity",
+        "scanned-libraries-label": "Scanned libraries: {{count}}",
+        "rate-limit-description": "Not matched: {{count}}. Try again in a few minutes.",
+        "scan-scheduled": "Scan {{libraryName}}",
+        "scan-libraries-scheduled": "Scan all libraries",
+        "scan-series-scheduled": "Scan {{seriesName}}",
+        "scan-series-in-library-scheduled": "Scan a series in {{libraryName}}",
+        "scan-waiting-description": "Another scan was running",
+        "show-label": "Show",
+        "hide-label": "Hide"
     },
 
     "event-title-pipe": {
@@ -3169,6 +3159,25 @@
         "rescan": "Rescan",
         "scan-now": "Scan now",
         "details": "Details"
+    },
+
+    "activity-age-pipe": {
+        "now": "now",
+        "minutes": "{{value}}m",
+        "hours": "{{value}}h"
+    },
+
+    "activity-duration-pipe": {
+        "seconds": "{{seconds}}s",
+        "minutes": "{{minutes}}m {{seconds}}s",
+        "hours": "{{hours}}h {{minutes}}m"
+    },
+
+    "upcoming-task-name-pipe": {
+        "scan-libraries": "Scan all libraries",
+        "cleanup": "Cleanup",
+        "backup": "Backup",
+        "sync-cbl": "Sync reading lists"
     },
 
     "download-queue-drawer": {

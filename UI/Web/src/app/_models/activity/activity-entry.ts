@@ -15,5 +15,9 @@ export interface ActivityEntry {
   libraryId: number | null;
   seriesId: number | null;
   scheduledForUtc: string | null;
+  /**
+   * How many sends were folded into this entry (rate limit hits)
+   */
+  count: number;
   updatedUtc: string;
 }

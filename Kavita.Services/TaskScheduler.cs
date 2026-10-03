@@ -868,6 +868,7 @@ public class TaskScheduler : ITaskScheduler
             .Select(j => new UpcomingTaskDto
             {
                 TaskId = j.Id,
+                Cron = j.Cron,
                 NextRunUtc = DateTime.SpecifyKind(j.NextExecution!.Value, DateTimeKind.Utc),
             })
             .OrderBy(t => t.NextRunUtc)

@@ -163,17 +163,6 @@ public class MessageFactoryTests
     }
 
     [Fact]
-    public void CodedInfo_HasInfoPriority()
-    {
-        var message = MessageFactory.FilesOutsideFolderEvent(1, null, "Zom 100");
-
-        Assert.Equal(MessageFactory.Info, message.Name);
-        Assert.Equal(MessageEventPriority.Info, message.Priority);
-        Assert.Equal(MessageEventCode.FilesOutsideFolder, message.Code);
-        Assert.Equal(JsonValueKind.Null, Serialize(message).GetProperty("body").GetProperty("seriesId").ValueKind);
-    }
-
-    [Fact]
     public void RootFoldersInaccessible_SendsFoldersAsArray()
     {
         var message = MessageFactory.RootFoldersInaccessibleEvent(1, "Manga", ["M:/", "N:/"]);

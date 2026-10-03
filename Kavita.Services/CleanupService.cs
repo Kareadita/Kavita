@@ -43,7 +43,7 @@ public class CleanupService(
                 TaskScheduler.DefaultQueue, true))
         {
             logger.LogInformation("Cleanup put on hold as a media conversion in progress");
-            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            await eventHub.SendMessageAsync(MessageFactory.Info,
                 MessageFactory.CleanupOnHoldEvent(), ct: ct);
             return;
         }

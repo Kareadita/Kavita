@@ -7,15 +7,25 @@ export interface ActivityJob {
   id: string;
   correlationId: string | null;
   libraryId: number | null;
+  /**
+   * Every library the job has sent a frame for, in order. ScanLibraries runs every library under one job
+   */
+  libraryIds: number[];
   priority: MessageEventPriority;
   startedUtc: string;
   updatedUtc: string;
   /**
-   * Set when every step has ended, cleared if a step starts again
+   * Set once every step has stayed ended for a short grace, cleared if a step starts again
    */
   endedUtc: string | null;
   /**
    * By message name
    */
   steps: Record<string, ActivityStep>;
+  seriesAdded: number;
+  seriesRemoved: number;
+  /**
+   * False when this client missed the start of the job (opened mid-scan or refreshed), so the series counts are partial
+   */
+  seenFromStart: boolean;
 }

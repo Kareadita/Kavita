@@ -60,6 +60,7 @@ export enum KeyBindTarget {
   NavigateToSettings = 'NavigateToSettings',
   OpenSearch = 'OpenSearch',
   NavigateToScrobbling = 'NavigateToScrobbling',
+  OpenEventWidget = 'OpenEventWidget',
 
   ToggleFullScreen = 'ToggleFullScreen',
   BookmarkPage = 'BookmarkPage',

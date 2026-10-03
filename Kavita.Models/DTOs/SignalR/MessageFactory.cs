@@ -762,9 +762,9 @@ public static class MessageFactory
         const string title = "Cleanup";
         const string subtitle = "Cleanup put on hold as a media conversion in progress";
 
-        return CodedEvent(Error, MessageEventCode.CleanupOnHold, title, subtitle, new
+        return CodedEvent(Info, MessageEventCode.CleanupOnHold, title, subtitle, new
         {
-            Name = Error,
+            Name = Info,
             Title = title,
             SubTitle = subtitle,
         });

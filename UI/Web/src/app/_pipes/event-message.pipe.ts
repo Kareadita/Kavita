@@ -1,6 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import {TranslocoService} from '@jsverse/transloco';
-import {MessageEventCode} from '../_models/events/message-event-code';
+import {MessageEventCode} from '../_models/events/core/message-event-code';
 import {UtcToLocalTimePipe} from './utc-to-local-time.pipe';
 
 const PREFIX = 'event-message-pipe';

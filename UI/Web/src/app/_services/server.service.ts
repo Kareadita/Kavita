@@ -7,6 +7,7 @@ import {Job} from '../_models/job/job';
 import {KavitaMediaError} from '../admin/_models/media-error';
 import {TextResonse} from "../_types/text-response";
 import {map} from "rxjs/operators";
+import {ActivitySnapshot} from '../_models/activity/activity-snapshot';
 
 export enum TaskMethodNames {
   RunMetadataMappings = 'RunMetadataMappings'
@@ -69,6 +70,10 @@ export class ServerService {
 
   getRecurringJobs() {
     return this.http.get<Job[]>(this.baseUrl + 'server/jobs');
+  }
+
+  getActivity() {
+    return this.http.get<ActivitySnapshot>(this.baseUrl + 'server/activity');
   }
 
   convertMedia() {
