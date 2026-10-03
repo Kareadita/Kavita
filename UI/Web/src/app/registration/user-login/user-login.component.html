@@ -23,6 +23,15 @@
                 <app-validation-errors inputId="password" [control]="formGroup.password" />
               </div>
 
+              <div class="mb-3 locale-select">
+                <label for="login-locale" class="form-label visually-hidden">{{t('locale-label')}}</label>
+                <select id="login-locale" class="form-select" (change)="changeLocale($event)" [title]="t('locale-tooltip')">
+                  @for (opt of locales(); track opt.fileName) {
+                    <option [value]="opt.fileName" [selected]="opt.fileName === selectedLocale()">{{localeDisplayName(opt.fileName, opt.renderName)}}</option>
+                  }
+                </select>
+              </div>
+
               <div class="mb-3 forgot-password">
                 <a routerLink="/registration/reset-password">{{t('forgot-password')}}</a>
               </div>
