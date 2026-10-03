@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -409,6 +409,24 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                        // We are currently unable to retry chapter reads. See ScrobblingService#RetryScrobbleAsync:L1977
                        && scrobbleDetails?.ScrobbleEventType != ScrobbleEventType.ChapterRead,
         };
+    }
+
+    public async Task<KavitaPlusAuditEntryDto?> GetEntryAsync(long id, CancellationToken ct = default)
+    {
+        var raw = await context.KavitaPlusAuditLogs
+            .AsNoTracking()
+            .Where(e => e.Id == id)
+            .Select(e => new RawEntry(
+                e.Id, e.CreatedUtc, e.Category, e.EventType, e.Status,
+                e.SeriesId,
+                context.Series.Where(s => s.Id == e.SeriesId).Select(s => (int?)s.LibraryId).FirstOrDefault(),
+                context.Series.Where(s => s.Id == e.SeriesId).Select(s => s.Name).FirstOrDefault(),
+                e.SubjectType, e.SubjectId,
+                e.UserId, e.User != null ? e.User.UserName : null,
+                e.Payload, e.ErrorMessage, e.ScrobbleErrorId, e.HasRetried))
+            .FirstOrDefaultAsync(ct);
+
+        return raw == null ? null : MapToDto(raw);
     }
 
     public async Task MarkAsRetriedAsync(long id, CancellationToken ct = default)

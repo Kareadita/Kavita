@@ -68,6 +68,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
     /// <param name="ownedOnly"></param>
     /// <returns></returns>
     [HttpGet("all-series")]
+    [SeriesAccess]
     public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetCollectionsBySeries(int seriesId, bool ownedOnly = false)
     {
         var ct = HttpContext.RequestAborted;
@@ -202,6 +203,9 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         {
             return BadRequest(await localizationService.TranslateAsync(UserId, "collection-doesnt-exists"));
         }
+
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesIds, ct))
+            return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList(), false);
         foreach (var s in series)

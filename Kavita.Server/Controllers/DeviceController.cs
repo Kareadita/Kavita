@@ -129,7 +129,7 @@ public class DeviceController(
                 "started"), userId, ct);
         try
         {
-            var success = await deviceService.SendTo(dto.ChapterIds, dto.DeviceId, ct);
+            var success = await deviceService.SendTo(userId, dto.ChapterIds, dto.DeviceId, ct);
             if (success) return Ok();
         }
         catch (KavitaException ex)
@@ -165,6 +165,12 @@ public class DeviceController(
         if (!isEmailSetup)
             return BadRequest(await localizationService.TranslateAsync(userId, "send-to-kavita-email"));
 
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(userId, dto.SeriesId, ct))
+            return BadRequest(await localizationService.TranslateAsync(userId, "series-doesnt-exist"));
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Devices, ct);
+        if (user == null || user.Devices.All(d => d.Id != dto.DeviceId)) return BadRequest(await localizationService.TranslateAsync(userId, "send-to-unallowed"));
+
         await eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
             MessageFactory.SendingToDeviceEvent(await localizationService.TranslateAsync(userId, "send-to-device-status"),
                 "started"), userId, ct);
@@ -176,7 +182,7 @@ public class DeviceController(
         var chapterIds = series.Volumes.SelectMany(v => v.Chapters.Select(c => c.Id)).ToList();
         try
         {
-            var success = await deviceService.SendTo(chapterIds, dto.DeviceId, ct);
+            var success = await deviceService.SendTo(userId, chapterIds, dto.DeviceId, ct);
             if (success) return Ok();
         }
         catch (KavitaException ex)

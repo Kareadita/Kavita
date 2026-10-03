@@ -65,7 +65,6 @@ public class ReviewController(
     /// <param name="dto">chapterId must be set</param>
     /// <returns></returns>
     [HttpPost("chapter")]
-    [ChapterAccess]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReviewDto>> UpdateChapterReview(UpdateUserReviewDto dto)
     {

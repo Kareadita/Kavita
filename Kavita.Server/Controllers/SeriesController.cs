@@ -599,10 +599,14 @@ public class SeriesController(
     /// /// <param name="recommendedSeriesId"></param>
     /// <returns></returns>
     [KPlus]
+    [SeriesAccess]
     [HttpGet("external-series-detail")]
     public async Task<ActionResult<ExternalSeriesDetailDto>> GetExternalSeriesInfo(int seriesId, int? aniListId, long? malId, int? mangaBakaId, int? hardcoverId, int? recommendedSeriesId)
     {
         var ct = HttpContext.RequestAborted;
+        if (recommendedSeriesId is > 0 && !await unitOfWork.UserRepository.HasAccessToSeries(UserId, recommendedSeriesId.Value, ct))
+            return NotFound();
+
         var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}-{mangaBakaId ?? 0}-{recommendedSeriesId ?? 0}-{hardcoverId ?? 0}";
 
         ExternalSeriesDetailDto? ret;

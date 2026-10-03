@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -98,7 +98,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync(CancellationToken ct = default);
     Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int imageOffset, int userId, CancellationToken ct = default);
     Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId, CancellationToken ct = default);
-    Task<IList<AppUserBookmark>> GetAllBookmarksByIds(int seriesId, IList<int> bookmarkIds, CancellationToken ct = default);
+    Task<IList<AppUserBookmark>> GetAllBookmarksByIds(int userId, int seriesId, IList<int> bookmarkIds, CancellationToken ct = default);
     #endregion
 
     #region Preferences & Settings
@@ -116,6 +116,8 @@ public interface IUserRepository
     Task<bool> HasAccessToSeries(int userId, int seriesId, CancellationToken ct = default);
     Task<bool> HasAccessToVolume(int userId, int volumeId, CancellationToken ct = default);
     Task<bool> HasAccessToChapter(int userId, int chapterId, CancellationToken ct = default);
+    Task<bool> HasAccessToAllVolumes(int userId, IEnumerable<int> volumeIds, CancellationToken ct = default);
+    Task<bool> HasAccessToAllChapters(int userId, IEnumerable<int> chapterIds, CancellationToken ct = default);
     Task<bool> HasAccessToPerson(int userId, int personId, CancellationToken ct = default);
     Task<bool> HasAccessToReadingList(int userId, int readingListId, bool allowPromoted = true, CancellationToken ct = default);
     #endregion

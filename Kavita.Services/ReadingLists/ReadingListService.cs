@@ -315,7 +315,7 @@ public class ReadingListService(
     /// <param name="chapterIds"></param>
     /// <param name="readingList"></param>
     /// <returns>True if new chapters were added</returns>
-    public async Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds, ReadingList readingList)
+    public async Task<bool> AddChaptersToReadingList(IList<int> chapterIds, ReadingList readingList)
     {
         readingList.Items ??= new List<ReadingListItem>();
         var lastOrder = 0;
@@ -331,13 +331,14 @@ public class ReadingListService(
             .ToList();
 
         var index = readingList.Items.Count == 0 ? 0 : lastOrder + 1;
-        foreach (var chapter in chaptersForSeries.Where(chapter => !existingChapterExists.Contains(chapter.Id)))
+        var addedChapters = chaptersForSeries.Where(chapter => !existingChapterExists.Contains(chapter.Id)).ToList();
+        foreach (var chapter in addedChapters)
         {
-            readingList.Items.Add(new ReadingListItemBuilder(index, seriesId, chapter.VolumeId, chapter.Id).Build());
+            readingList.Items.Add(new ReadingListItemBuilder(index, chapter.Volume.SeriesId, chapter.VolumeId, chapter.Id).Build());
             index += 1;
         }
 
-        await CalculateReadingListAgeRating(readingList, [seriesId]);
+        await CalculateReadingListAgeRating(readingList);
 
         return index > lastOrder + 1;
     }

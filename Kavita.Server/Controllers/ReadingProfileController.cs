@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kavita.API.Database;
@@ -135,6 +135,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="seriesId"></param>
     /// <param name="deviceId">Defaults to currently active device</param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpPost("update-parent")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReadingProfileDto>> UpdateParentProfileForSeries(
@@ -251,6 +252,8 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     public async Task<IActionResult> BulkAddReadingProfile(BulkSetSeriesProfiles body)
     {
         var ct = HttpContext.RequestAborted;
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, body.SeriesIds, ct)) return NotFound();
+
         await readingProfileService.BulkSetSeriesProfiles(UserId, body.ProfileIds, body.SeriesIds, ct);
         return Ok();
     }

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.Reader;
@@ -25,10 +25,10 @@ public interface ICacheService
     void CleanupBookmarks(IEnumerable<int> seriesIds);
     string GetCachedPagePath(int chapterId, int page);
     string GetCachePath(int chapterId);
-    string GetBookmarkCachePath(int seriesId);
+    string GetBookmarkCachePath(int userId, int seriesId);
     IEnumerable<string> GetCachedPages(int chapterId);
     IEnumerable<FileDimensionDto> GetCachedFileDimensions(string cachePath);
-    string GetCachedBookmarkPagePath(int seriesId, int page);
+    string GetCachedBookmarkPagePath(int userId, int seriesId, int page);
     string GetCachedFile(Chapter chapter);
     string GetCachedFile(int chapterId, string firstFilePath);
     Task ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);

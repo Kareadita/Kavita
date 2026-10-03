@@ -282,6 +282,7 @@ public class DownloadController(
     public async Task<ActionResult> DownloadBookmarkPages(DownloadBookmarkDto downloadBookmarkDto)
     {
         var ct = HttpContext.RequestAborted;
+        if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest(await localizationService.TranslateAsync(UserId, "bookmarks-empty"));
         if (downloadBookmarkDto.Bookmarks.DistinctBy(b => b.SeriesId).Count() > 1)
             return BadRequest();
 
@@ -289,13 +290,11 @@ public class DownloadController(
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, seriesId, HttpContext.RequestAborted))
             return NotFound();
 
-        if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest(await localizationService.TranslateAsync(UserId, "bookmarks-empty"));
-
         var userId = UserId;
         var username = Username!;
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct);
 
-        var files = await bookmarkService.GetBookmarkFilesById(seriesId, downloadBookmarkDto.Bookmarks.Select(b => b.Id), ct);
+        var files = await bookmarkService.GetBookmarkFilesById(UserId, seriesId, downloadBookmarkDto.Bookmarks.Select(b => b.Id), ct);
 
         var filename = $"{series!.Name} - Bookmarks.zip";
 
