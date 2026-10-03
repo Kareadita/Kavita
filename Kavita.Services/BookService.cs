@@ -405,7 +405,7 @@ public partial class BookService(
             if (!imageFile.StartsWith("http"))
             {
                 // UrlEncode here to transform ../ into an escaped version, which avoids blocking on nginx
-                image.Attributes.Add(key, $"{apiBase}" + Uri.EscapeDataString(imageFile));
+                image.Attributes.Add(key, $"{apiBase}" + EncodeResourcePath(imageFile));
             }
             else
             {
@@ -416,6 +416,11 @@ public partial class BookService(
             parent.AddClass("kavita-scale-width-container");
             image.AddClass("kavita-scale-width");
         }
+    }
+
+    internal static string EncodeResourcePath(string resourcePath)
+    {
+        return Uri.EscapeDataString(Uri.UnescapeDataString(resourcePath));
     }
 
 
