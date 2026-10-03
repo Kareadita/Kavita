@@ -20,7 +20,7 @@
     </div>
     <div class="form-group mb-1">
       <label for="email">{{t('activate-email-label')}}</label>
-      <input id="email" type="email" class="form-control" [formField]="formGroup.email" autocomplete="off"
+      <input id="email" type="email" class="form-control" [formField]="formGroup.email" autocomplete="email"
              placeholder="you@domain.com" aria-describedby="email-validations" aria-details="email-help-block"
              [appFormField]="formGroup.email" />
       <div id="email-help-block" class="form-text">
