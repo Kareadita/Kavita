@@ -1327,19 +1327,7 @@
     },
     "events-widget": {
         "title-alt": "Atividade",
-        "dismiss-all": "Descartar Tudo",
-        "update-available": "Atualização disponível",
-        "downloading-item": "Baixando {{item}}",
-        "more-info": "Clique para mais informações",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Usuários online",
-        "active-events-title": "Eventos Ativos:",
-        "no-data": "Não há muita coisa por aqui",
-        "left-to-process": "Restante para Processar: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} downloads na Fila",
-        "reading-now": "{{num}} lendo agora",
-        "downloads-active": "{{count}} download(s) em andamento",
-        "not-connected": "Não conectado, tente atualizar"
+        "reading-now": "{{num}} lendo agora"
     },
     "shortcuts-modal": {
         "title": "Atalhos de Teclado",

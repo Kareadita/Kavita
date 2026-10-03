@@ -610,18 +610,7 @@
     },
     "events-widget": {
         "title-alt": "செய்கைப்பாடு",
-        "dismiss-all": "அனைத்தையும் நிராகரிக்கவும்",
-        "more-info": "மேலும் தகவலுக்கு சொடுக்கு செய்க",
-        "update-available": "புதுப்பிப்பு கிடைக்கிறது",
-        "downloading-item": "பதிவிறக்கம் {{item}}",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} பயனர்கள் ஆன்லைனில்",
-        "active-events-title": "செயலில் நிகழ்வுகள்:",
-        "no-data": "இங்கே அதிகம் நடக்கவில்லை",
-        "left-to-process": "இடமிருந்து செயல்முறை: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} வரிசையில் பதிவிறக்குகிறது",
-        "reading-now": "{{num}} இப்போது படிக்கிறேன்",
-        "downloads-active": "{{count}} பதிவிறக்கம்(கள்) நடந்து கொண்டிருக்கிறது"
+        "reading-now": "{{num}} இப்போது படிக்கிறேன்"
     },
     "shortcuts-modal": {
         "title": "விசைப்பலகை குறுக்குவழிகள்",

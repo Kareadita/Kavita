@@ -1076,17 +1076,7 @@
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
-        "close": "{{common.close}}",
         "title-alt": "Активность",
-        "dismiss-all": "Скрыть все",
-        "update-available": "Доступно обновление",
-        "downloading-item": "Загрузка",
-        "more-info": "Подробнее",
-        "users-online-count": "{{num}} Пользователей онлайн",
-        "active-events-title": "Текущие события:",
-        "no-data": "Здесь пока ничего не происходит",
-        "left-to-process": "Осталось обработать: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} загрузок в очереди",
         "reading-now": "{{num}} сейчас читают"
     },
     "shortcuts-modal": {

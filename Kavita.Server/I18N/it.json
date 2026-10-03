@@ -217,5 +217,9 @@
     "cbl-import-validation-types": "Solo file .cbl e .json sono permessi",
     "email.auth-key-expired.subject": "Kavita - Una o più chiavi di autenticazione sono scadute!",
     "email.auth-key-expired.header": "Una o più chiavi di autenticazione sono scadute!",
-    "oidc-managed": "Gli utenti gestiti tramite OIDC non possono essere modificati."
+    "oidc-managed": "Gli utenti gestiti tramite OIDC non possono essere modificati.",
+    "series-name-exists": "Esiste già una serie con questo nome in questa libreria",
+    "series-name-orphans-files": "Cambiare il nome dividerà dei file che sono attualmente uniti in questa serie",
+    "series-localized-name-exists": "Un'altra serie nella libreria utilizza già questo nome",
+    "series-localized-name-orphans-files": "Cambiare il nome localizzato dividerà i file che sono attualmente uniti in questa serie"
 }

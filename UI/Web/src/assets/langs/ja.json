@@ -1312,19 +1312,7 @@
     },
     "events-widget": {
         "title-alt": "活動内容",
-        "dismiss-all": "すべて閉じる",
-        "update-available": "最新情報",
-        "downloading-item": "{{item}} をダウンロードしています",
-        "more-info": "詳しくはこちら",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} 人のユーザーがオンラインです",
-        "active-events-title": "アクティブイベント:",
-        "no-data": "詳しくはこちら",
-        "left-to-process": "未処理: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "キュー内のダウンロード数 {{num}} 件",
-        "reading-now": "現在 {{num}} 人が読書中です",
-        "downloads-active": "{{count}} 件のダウンロードが進行中です",
-        "not-connected": "接続されていません。ページを更新してみてください"
+        "reading-now": "現在 {{num}} 人が読書中です"
     },
     "shortcuts-modal": {
         "title": "キーボードショートカット",
@@ -1509,7 +1497,8 @@
         "reading-profile-updated": "読書プロファイルを更新しました",
         "reading-profile-promoted": "読書プロファイルが昇格されました",
         "width-override-label": "幅の上書き",
-        "offset-only-double": "ページオフセットは、見開き表示でのみ使用できます"
+        "offset-only-double": "ページオフセットは、見開き表示でのみ使用できます",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-label}}"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1855,7 +1844,8 @@
         "import-fields": {
             "non-unique-fields": "フィールドマッピングに一意の ID がありません。インポートファイルを修正してください",
             "non-unique-age-ratings": "年齢制限のマッピングキーが一意ではありません。インポートファイルを修正してください"
-        }
+        },
+        "required-if-other-invalid": "{{other}} は無効です"
     },
     "metadata-builder": {
         "or": "以下のいずれかに一致",
@@ -3184,7 +3174,8 @@
     "favorite-authors": {
         "sub-title": "{{name}} の最も読まれている著者は {{author}} で、合計 {{count}} 回読まれています",
         "no-data": "{{common.no-data}}",
-        "title": "最も読まれている著者"
+        "title": "最も読まれている著者",
+        "chapter-count": "{{common.chapter-count}}"
     },
     "page-spread": {
         "sub-title": "{{username}} さんは、1 章あたり {{highestBucket}} ページ程度の本をよく読んでいます",
@@ -3224,7 +3215,7 @@
         "sub-title": "{{name}} が一番多く読んだジャンルは {{mostUsed}} です"
     },
     "reads-by-month": {
-        "sub-title": "{{username}} さんは、{{year}} 年 {{month}} 月に最も多く読み、{{reads}} 章を読みました",
+        "sub-title": "{{username}} さんは、{{year}} 年 {{month}} に最も多く読み、{{reads}} 章を読みました",
         "no-data": "{{common.no-data}}",
         "title": "月別総読書数"
     },
@@ -4403,5 +4394,24 @@
         "recurrent": "Recurrent",
         "incidental": "Incidental",
         "unweighted": "Unweighted"
+    },
+    "search-typeahead": {
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "volume-count": "{{count}} 巻",
+        "volume-count-one": "{{count}} 巻",
+        "chapter-count": "{{count}} 章",
+        "chapter-count-one": "{{count}} 章",
+        "results-available-alt": "{{typeahead.results-available-alt}}",
+        "no-results-alt": "{{typeahead.no-results-alt}}",
+        "search-series-alt": "シリーズ検索"
+    },
+    "locked-field": {
+        "field-locked-alt": "フィールドはロックされています"
+    },
+    "rate-and-review-series-modal": {
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "review-label": "{{review-modal.review-label}}"
     }
 }
