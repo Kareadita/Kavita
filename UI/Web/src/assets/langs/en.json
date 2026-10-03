@@ -19,7 +19,9 @@
         "password": "{{common.password}}",
         "forgot-password": "Forgot Password?",
         "submit": "Sign in",
-        "oidc": "OpenID Connect"
+        "oidc": "OpenID Connect",
+        "locale-label": "Language",
+        "locale-tooltip": "Choose the display language"
     },
 
     "oidc": {
@@ -1524,7 +1526,9 @@
         "email-tooltip": "Email does not need to be a real address, but provides access to forgot password. It is not sent outside the server unless Kavita emails you.",
         "password-label": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
-        "register": "Register"
+        "register": "Register",
+        "locale-label": "Language",
+        "locale-tooltip": "Choose the display language"
     },
 
     "series-detail": {
