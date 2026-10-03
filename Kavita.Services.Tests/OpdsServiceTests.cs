@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using System.Xml;
 using AutoMapper;
 using Hangfire;
 using Hangfire.InMemory;
@@ -38,6 +39,9 @@ namespace Kavita.Services.Tests;
 public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTest(testOutputHelper)
 {
     private readonly string _testFilePath = Path.Join(Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/OpdsService"), "test.zip");
+
+    private const string ValidEmoji = "\U0001F600";
+    private const string NulChar = "\u0000";
 
     #region Setup
 
@@ -1164,6 +1168,88 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var xml = opdsService.SerializeXml(null);
 
         Assert.Empty(xml);
+    }
+
+    [Fact]
+    public async Task SerializeXml_StripsNulFromTopLevelStringField()
+    {
+        var (unitOfWork, _, mapper) = await CreateDatabase();
+        var (opdsService, _) = SetupService(unitOfWork, mapper);
+
+        var feed = new Feed
+        {
+            Id = "test",
+            Title = $"Fine Cuts{NulChar}: The Art of European Film Editing",
+        };
+
+        var xml = opdsService.SerializeXml(feed);
+
+        Assert.DoesNotContain(NulChar, xml, StringComparison.Ordinal);
+        Assert.Contains("Fine Cuts", xml);
+        Assert.Contains("The Art of European Film Editing", xml);
+    }
+
+    [Fact]
+    public async Task SerializeXml_StripsNulFromStringInsideEnumerable()
+    {
+        var (unitOfWork, _, mapper) = await CreateDatabase();
+        var (opdsService, _) = SetupService(unitOfWork, mapper);
+
+        var feed = new Feed
+        {
+            Id = "test",
+            Title = "Library",
+            Entries =
+            [
+                new FeedEntry { Title = $"Entry One{NulChar}With Bad Char", Id = "1" },
+                new FeedEntry { Title = "Entry Two (clean)", Id = "2" },
+            ],
+        };
+
+        var xml = opdsService.SerializeXml(feed);
+
+        Assert.DoesNotContain(NulChar, xml, StringComparison.Ordinal);
+        Assert.Contains("Entry One", xml);
+        Assert.Contains("With Bad Char", xml);
+        Assert.Contains("Entry Two (clean)", xml);
+    }
+
+    [Fact]
+    public async Task SerializeXml_PreservesValidSurrogatePairEmoji()
+    {
+        var (unitOfWork, _, mapper) = await CreateDatabase();
+        var (opdsService, _) = SetupService(unitOfWork, mapper);
+
+        var feed = new Feed
+        {
+            Id = "test",
+            Title = $"Fine Cuts {ValidEmoji}",
+        };
+
+        var xml = opdsService.SerializeXml(feed);
+
+        Assert.Contains(ValidEmoji, xml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SerializeXml_PreservesValidEmojiInsideEnumerable()
+    {
+        var (unitOfWork, _, mapper) = await CreateDatabase();
+        var (opdsService, _) = SetupService(unitOfWork, mapper);
+
+        var feed = new Feed
+        {
+            Id = "test",
+            Title = "Library",
+            Entries =
+            [
+                new FeedEntry { Title = $"Entry {ValidEmoji}", Id = "1" },
+            ],
+        };
+
+        var xml = opdsService.SerializeXml(feed);
+
+        Assert.Contains(ValidEmoji, xml, StringComparison.Ordinal);
     }
 
     #endregion

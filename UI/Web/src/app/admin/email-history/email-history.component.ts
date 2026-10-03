@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {EmailHistory} from "../../_models/email-history";
 import {EmailService} from "../../_services/email.service";
@@ -12,7 +11,6 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
   selector: 'app-email-history',
   imports: [
     TranslocoDirective,
-    VirtualScrollerModule,
     UtcToLocalTimePipe,
     NgxDatatableModule,
     ResponsiveTableComponent,

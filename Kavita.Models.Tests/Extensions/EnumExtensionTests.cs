@@ -8,6 +8,7 @@ public class EnumExtensionTests
 
     [Theory]
     [InlineData("Early Childhood", AgeRating.EarlyChildhood, true)]
+    [InlineData("everyone-10+", AgeRating.Everyone10Plus, true)]
     [InlineData("M", AgeRating.Mature, true)]
     [InlineData("ThisIsNotAnAgeRating", default(AgeRating), false)]
     public void TryParse<TEnum>(string? value, TEnum expected, bool success) where TEnum : struct, Enum

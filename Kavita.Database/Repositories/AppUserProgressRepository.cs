@@ -192,6 +192,15 @@ public class AppUserProgressRepository(DataContext context, IMapper mapper) : IA
         return list.Count == 0 ? null : list.DefaultIfEmpty().Min();
     }
 
+    public async Task<DateTime?> GetFirstProgressForChapter(int chapterId, int userId, CancellationToken ct = default)
+    {
+        return await context.AppUserProgresses
+            .Where(p => p.AppUserId == userId && p.ChapterId == chapterId)
+            .OrderBy(p => p.CreatedUtc)
+            .Select(p => p.CreatedUtc)
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<DateTime?> GetFirstProgressForUser(int userId, CancellationToken ct = default)
     {
         return await context.AppUserProgresses

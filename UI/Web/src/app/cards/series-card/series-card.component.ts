@@ -76,7 +76,6 @@ export class SeriesCardComponent {
   });
 
   onDataChanged(entity: Series) {
-    console.log('series updated, ', entity);
     this.seriesSignal.set({...entity});
     this.dataChanged.emit(entity);
   }

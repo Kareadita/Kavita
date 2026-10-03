@@ -239,15 +239,13 @@
   </ng-template>
 
   <ng-template #seriesTemplate let-item>
-    @let normalizedSearchTerm = searchTerm().toLowerCase().trim();
-
     <div class="result-row clickable d-flex align-items-center gap-2" (click)="clickSeriesSearchResult(item)">
       <div class="thumb flex-shrink-0">
         <app-image class="search-result" width="32px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
       </div>
       <div class="body">
         <div class="title text-truncate">
-          @if (item.localizedName.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
+          @if (shouldShowLocalizedName(item)) {
             {{item.localizedName}}
           } @else {
             {{item.name}}
@@ -270,12 +268,20 @@
     @let normalizedSearchTerm = searchTerm().toLowerCase().trim();
 
     <div class="result-row clickable d-flex align-items-center gap-2" (click)="clickAnnotationSearchResult(item)">
+      <div class="thumb flex-shrink-0">
+        <app-image class="search-result" width="32px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
+      </div>
       <div class="body">
         @if (item.comment.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
           <!--We can't render the comment as it's json -->
           <quill-view [content]="item.context" />
         } @else {
-          <div class="title text-truncate">{{item.chapterTitle}}</div>
+          <div class="title text-truncate">{{item.seriesName}}</div>
+          @if (item.chapterTitle) {
+            <div class="subtitle d-flex align-items-center gap-1">
+              <span class="text-truncate">{{t('in-library', {name: item.chapterTitle})}}</span>
+            </div>
+          }
         }
       </div>
     </div>

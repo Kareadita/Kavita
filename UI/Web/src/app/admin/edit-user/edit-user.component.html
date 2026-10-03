@@ -84,7 +84,7 @@
       <button type="button" class="btn btn-secondary" (click)="close()">
         {{t('cancel')}}
       </button>
-      <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isLocked() || isSaving || !userForm().valid()">
+      <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isLocked() || isSaving() || !userForm().valid()">
         @if (isSaving()) {
           <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         }

@@ -1,4 +1,5 @@
 import {
+  AfterViewChecked,
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -13,7 +14,7 @@ import {
   OnInit,
   Renderer2,
   RendererStyleFlags2,
-  resource,
+  resource, SecurityContext,
   signal,
   Signal,
   viewChild,
@@ -25,6 +26,7 @@ import {ToastrService} from '@openng/ngx-toastr';
 import {firstValueFrom, forkJoin, fromEvent, merge, of, switchMap} from 'rxjs';
 import {catchError, debounceTime, distinctUntilChanged, filter, take, tap} from 'rxjs/operators';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { Tooltip } from 'bootstrap';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -137,7 +139,7 @@ const KEYBIND_TARGETS = [
     WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule],
   providers: [EpubReaderSettingsService, LayoutMeasurementService],
 })
-export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
+export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -778,6 +780,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       ).subscribe();
   }
 
+  ngAfterViewChecked() {
+    this.setupNoteRefs();
+  }
+
   private setupObservers() {
     this.layoutService.observeElement(
       this.bookContentElemRef().nativeElement,
@@ -788,6 +794,44 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readingSectionElemRef().nativeElement,
       'readingSection'
     );
+  }
+
+  private setupNoteRefs() {
+    const anchors = this.bookContainerElemRef().nativeElement
+      .querySelectorAll<HTMLAnchorElement>('a[epub\\:type="noteref"]');
+
+    anchors.forEach(a => {
+      if (a.dataset['tooltipReady']) return;
+      a.dataset['tooltipReady'] = '1';
+
+      const id = a.getAttribute('kavita-note-ref') ?? '';
+      if (!id) return;
+
+      const cssSelector = `#${CSS.escape(id.slice(1))}`;
+      const target = this.bookContainerElemRef().nativeElement.querySelector(cssSelector);
+      if (!target) return;
+
+      const clone = target.cloneNode(true) as HTMLElement;
+      clone.removeAttribute('id');
+      clone.classList.remove('visually-hidden');
+      // Epubs can have a lot of bad HTML
+      clone.querySelectorAll(cssSelector).forEach(el => {
+        el.removeAttribute('id');
+        el.classList.remove('visually-hidden');
+      });
+
+      const safeHtml = this.domSanitizer.sanitize(SecurityContext.HTML, clone.outerHTML);
+      if (!safeHtml) return;
+
+      new Tooltip(a, {
+        title: safeHtml,
+        html: true,
+        sanitize: false,
+        placement: 'top',
+        trigger: 'hover focus',
+        customClass: 'book-content'
+      });
+    });
   }
 
   /**
@@ -1202,11 +1246,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     links.forEach((link: any) => {
       link.addEventListener('click', (e: any) => {
         e.stopPropagation();
-        let targetElem = e.target;
-        if (e.target.nodeName !== 'A' && e.target.parentNode.nodeName === 'A') {
-          // Certain combos like <a><sup>text</sup></a> can cause the target to be the sup tag and not the anchor
-          targetElem = e.target.parentNode;
+
+        const href = link.getAttribute('href') ?? '';
+        if (href.startsWith('#')) {
+          e.preventDefault();
+          this.scrollTo(href);
+          return;
         }
+
+        const targetElem = e.target.closest?.('a[kavita-page]');
+        if (!targetElem) return;
+
         if (!targetElem.attributes.hasOwnProperty('kavita-page')) { return; }
         const page = parseInt(targetElem.attributes['kavita-page'].value, 10);
         if (this.adhocPageHistory.peek()?.page !== this.pageNum()) {

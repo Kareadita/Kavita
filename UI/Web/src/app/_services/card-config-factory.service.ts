@@ -115,8 +115,8 @@ export class CardConfigFactory {
       progressUpdateStrategy: {
         getMatchCriteria: (s) => ({ seriesId: s.id }),
         // Series cards don't contain chapter/volume details
-        // Signal that parent needs to refetch
-        applyUpdate: () => null
+        // Signal that parent needs to refetch. Return unmodified series so we don't get NPE's
+        applyUpdate: (s, _) => s
       }
     };
 

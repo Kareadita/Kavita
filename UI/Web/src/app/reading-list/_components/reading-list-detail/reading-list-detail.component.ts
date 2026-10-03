@@ -42,7 +42,6 @@ import {ImageComponent} from '../../../shared/image/image.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
@@ -85,7 +84,7 @@ import {disabled, form, FormField} from "@angular/forms/signals";
     LoadingComponent, DraggableOrderedListComponent,
     ReadingListItemComponent, NgClass, DecimalPipe, TranslocoDirective, ReactiveFormsModule,
     NgbNav, NgbNavContent, NgbNavLink, NgbTooltip,
-    RouterLink, VirtualScrollerModule, NgStyle, NgbNavOutlet, NgbNavItem,
+    RouterLink, NgStyle, NgbNavOutlet, NgbNavItem,
     PromotedIconComponent, DetailsTabComponent, TabTitlePipe, FormField]
 })
 export class ReadingListDetailComponent implements OnInit {

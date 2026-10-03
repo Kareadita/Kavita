@@ -345,9 +345,11 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, ct);
         if (user == null) return Unauthorized();
 
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(user.Id, markReadDto.SeriesId, ct))
+            return NotFound();
 
         var progressDictionary = await unitOfWork.AppUserProgressRepository
             .GetUserProgressForChaptersBySeries(UserId, markReadDto.SeriesId, HttpContext.RequestAborted);
@@ -364,7 +366,7 @@ public class ReaderController(ICacheService cacheService,
         if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-read-progress"));
 
         BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdateForSeries(user.Id, markReadDto.SeriesId, CancellationToken.None));
-        BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(markReadDto.SeriesId, user.Id));
+        BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(markReadDto.SeriesId, user.Id, CancellationToken.None));
 
         if (markReadDto.GenerateReadingSession)
         {
@@ -385,8 +387,12 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, ct);
         if (user == null) return Unauthorized();
+
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(user.Id, markReadDto.SeriesId, ct))
+            return NotFound();
+
         await readerService.MarkSeriesAsUnread(user, markReadDto.SeriesId, ct);
 
         if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-read-progress"));
@@ -405,15 +411,23 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkVolumeAsUnread(MarkVolumeReadDto markVolumeReadDto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, ct);
         if (user == null) return Unauthorized();
 
+        if (!await unitOfWork.UserRepository.HasAccessToVolume(user.Id, markVolumeReadDto.VolumeId, ct))
+            return NotFound();
+
+        var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(markVolumeReadDto.VolumeId, ct: ct);
+        if (volume == null) return NotFound();
+
+        var seriesId = volume.SeriesId;
+
         var chapters = await unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId, ct: ct);
-        await readerService.MarkChaptersAsUnread(user, markVolumeReadDto.SeriesId, chapters, ct);
+        await readerService.MarkChaptersAsUnread(user, seriesId, chapters, ct);
 
         if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-read-progress"));
 
-        BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdateForSeries(user.Id, markVolumeReadDto.SeriesId, CancellationToken.None));
+        BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdateForSeries(user.Id, seriesId, CancellationToken.None));
 
         return Ok();
     }
@@ -427,17 +441,25 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkVolumeAsRead(MarkVolumeReadDto markVolumeReadDto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct);
-
-        var chapters = await unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId, ct: ct);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, ct);
         if (user == null) return Unauthorized();
 
+        if (!await unitOfWork.UserRepository.HasAccessToVolume(user.Id, markVolumeReadDto.VolumeId, ct))
+            return NotFound();
+
+        var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(markVolumeReadDto.VolumeId, ct: ct);
+        if (volume == null) return NotFound();
+
+        var seriesId = volume.SeriesId;
+
+        var chapters = await unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId, ct: ct);
+
         var progressDictionary = await unitOfWork.AppUserProgressRepository
-            .GetUserProgressForChaptersByVolumes(UserId, markVolumeReadDto.SeriesId, [markVolumeReadDto.VolumeId], HttpContext.RequestAborted);
+            .GetUserProgressForChaptersByVolumes(UserId, seriesId, [markVolumeReadDto.VolumeId], HttpContext.RequestAborted);
 
         try
         {
-            await readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters, ct);
+            await readerService.MarkChaptersAsRead(user, seriesId, chapters, ct);
 
         }
         catch (KavitaException ex)
@@ -449,16 +471,16 @@ public class ReaderController(ICacheService cacheService,
         if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-read-progress"));
 
         await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-            MessageFactory.UserProgressUpdateEvent(user.Id, markVolumeReadDto.SeriesId,
+            MessageFactory.UserProgressUpdateEvent(user.Id, seriesId,
                 markVolumeReadDto.VolumeId, 0, chapters.Sum(c => c.Pages)), ct: ct);
 
         BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdateForVolume(user.Id, markVolumeReadDto.VolumeId, CancellationToken.None));
-        BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(markVolumeReadDto.SeriesId, user.Id, ct));
+        BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(seriesId, user.Id, ct));
 
         if (markVolumeReadDto.GenerateReadingSession)
         {
             BackgroundJob.Enqueue<IReadingSessionService>(s
-                => s.GenerateReadingSessionForChapters(UserId, markVolumeReadDto.SeriesId, progressDictionary, CancellationToken.None));
+                => s.GenerateReadingSessionForChapters(UserId, seriesId, progressDictionary, CancellationToken.None));
         }
 
         return Ok();
@@ -474,15 +496,17 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkMultipleAsRead(MarkVolumesReadDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, ct);
         if (user == null) return Unauthorized();
+
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(user.Id, dto.SeriesId, ct))
+            return NotFound();
+
         user.Progresses ??= [];
 
-        var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds, ct);
-        foreach (var chapterId in dto.ChapterIds)
-        {
-            chapterIds.Add(chapterId);
-        }
+        var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.SeriesId, dto.VolumeIds, ct);
+
+        chapterIds.AddRange(await unitOfWork.ChapterRepository.GetChapterIdsInSeries(dto.SeriesId, dto.ChapterIds, ct));
 
         chapterIds = chapterIds.Distinct().ToList();
 
@@ -517,13 +541,17 @@ public class ReaderController(ICacheService cacheService,
         var ct = HttpContext.RequestAborted;
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct);
         if (user == null) return Unauthorized();
-        user.Progresses ??= new List<AppUserProgress>();
 
-        var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds, ct);
-        foreach (var chapterId in dto.ChapterIds)
-        {
-            chapterIds.Add(chapterId);
-        }
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesId, ct))
+            return NotFound();
+
+        user.Progresses ??= [];
+
+        var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.SeriesId, dto.VolumeIds, ct);
+        chapterIds.AddRange(await unitOfWork.ChapterRepository.GetChapterIdsInSeries(dto.SeriesId, dto.ChapterIds, ct));
+
+        chapterIds = [.. chapterIds.Distinct()];
+
         var chapters = await unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds, ct: ct);
         await readerService.MarkChaptersAsUnread(user, dto.SeriesId, chapters.ToList(), ct);
 
@@ -547,7 +575,11 @@ public class ReaderController(ICacheService cacheService,
         var ct = HttpContext.RequestAborted;
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct);
         if (user == null) return Unauthorized();
-        user.Progresses ??= new List<AppUserProgress>();
+
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesIds, ct))
+            return NotFound();
+
+        user.Progresses ??= [];
 
         Dictionary<int, Dictionary<int, int>> progressDictionaries = [];
 
@@ -593,6 +625,10 @@ public class ReaderController(ICacheService cacheService,
         var ct = HttpContext.RequestAborted;
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct);
         if (user == null) return Unauthorized();
+
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesIds, ct))
+            return NotFound();
+
         user.Progresses ??= [];
 
         var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true, ct);

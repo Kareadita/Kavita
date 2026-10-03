@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using Kavita.Models.DTOs.Reader;
@@ -11,15 +12,37 @@ namespace Kavita.Services.Helpers;
 public static partial class AnnotationHelper
 {
     private const string UiXPathScope = "//BODY/DIV[1]"; // Div[1] is the div we inject reader contents into
+    private const string HighlightTagName = "app-epub-highlight";
+    private const string ElementTextSeparator = "\n\n";
+    private const int MaxCharacterReferenceLength = 32;
+
     /// <summary>
     /// Used to break out of inline elements when selecting start- and end-elements.
     /// If we don't do this; <p><em>foo</em></p> will have em selected as start and <see cref="GetElementsInRange"/>
     /// fails to select the correct elements
     /// </summary>
-    private static readonly HashSet<string> InlineTags = ["em", "strong", "i", "b", "span", "a", "cite"];
+    private static readonly HashSet<string> InlineTags = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "em", "strong", "i", "b", "span", "a", "cite", "sup", "sub", "small", "mark", "code", "kbd", "samp",
+        "var", "q", "abbr", "dfn", "u", "s", "del", "ins", "strike", "font", "big", "tt", "nobr", "ruby",
+        "rt", "rp", "bdi", "bdo", "time", "label",
+        // The reader captures xpaths against a DOM that already contains injected highlights
+        HighlightTagName
+    };
+
+    /// <summary>
+    /// Tags to fully ignore while splitting annotations
+    /// </summary>
+    private static readonly HashSet<string> NoWrapTags = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "script", "style"
+    };
 
     [GeneratedRegex("""^id\("([^"]+)"\)$""")]
     private static partial Regex IdXPathRegex();
+
+    [GeneratedRegex(@"\s+", RegexOptions.Compiled)]
+    private static partial Regex WhitespaceRegex();
 
 
     /// <summary>
@@ -45,10 +68,11 @@ public static partial class AnnotationHelper
                 var elem = FindElementByXPath(doc, xpath);
                 if (elem == null) continue;
 
-                var originalText = elem.InnerText;
+                var originalText = GetTextForHighlighting(elem);
+                var (decodedText, rawStarts) = DecodeWithMap(originalText);
 
                 // Calculate positions and sort by start position
-                var normalizedOriginalText = NormalizeWhitespace(originalText);
+                var normalizedOriginalText = NormalizeWhitespace(decodedText);
 
                 var sortedAnnotations = elementAnnotations
                     .Select(a => new
@@ -60,35 +84,12 @@ public static partial class AnnotationHelper
                     .OrderBy(a => a.StartPos)
                     .ToList();
 
-                elem.RemoveAllChildren();
-                var currentPos = 0;
-
                 foreach (var item in sortedAnnotations)
                 {
-                    var realStartPos = MapNormalizedPositionToOriginal(originalText, item.StartPos);
-                    var realEndPos = MapNormalizedPositionToOriginal(originalText, item.StartPos + item.Annotation.SelectedText.Length);
+                    var decodedStart = MapNormalizedPositionToText(decodedText, item.StartPos);
+                    var decodedEnd = MapNormalizedPositionToText(decodedText, item.StartPos + item.Annotation.SelectedText.Length);
 
-                    // Add text before highlight
-                    if (realStartPos > currentPos)
-                    {
-                        var beforeText = originalText.Substring(currentPos, realStartPos - currentPos);
-                        elem.AppendChild(HtmlNode.CreateNode(beforeText));
-                    }
-
-                    var selectedText = originalText.Substring(realStartPos, realEndPos - realStartPos);
-
-                    // Add highlight
-                    var highlightNode = HtmlNode.CreateNode(
-                        $"<app-epub-highlight id=\"epub-highlight-{item.Annotation.Id}\">{selectedText}</app-epub-highlight>");
-                    elem.AppendChild(highlightNode);
-
-                    currentPos = realEndPos;
-                }
-
-                // Add remaining text
-                if (currentPos < originalText.Length)
-                {
-                    elem.AppendChild(HtmlNode.CreateNode(originalText[currentPos..]));
+                    WrapTextRange(elem, rawStarts[decodedStart], rawStarts[decodedEnd], item.Annotation.Id, doc);
                 }
             }
             catch (Exception ex)
@@ -119,10 +120,11 @@ public static partial class AnnotationHelper
                 if (elementsInRange.Count == 0) continue;
 
                 // Build full text to find our selection
-                var fullText = string.Join("\n\n", elementsInRange.Select(e => e.InnerText));
+                var fullText = string.Join(ElementTextSeparator, elementsInRange.Select(GetTextForHighlighting));
+                var (decodedFullText, rawStarts) = DecodeWithMap(fullText);
 
                 // Normalize both texts for comparison
-                var normalizedFullText = NormalizeWhitespace(fullText);
+                var normalizedFullText = NormalizeWhitespace(decodedFullText);
                 var normalizedSelectedText = NormalizeWhitespace(annotation.SelectedText);
 
                 var selectionStartPos = normalizedFullText.IndexOf(normalizedSelectedText, StringComparison.Ordinal);
@@ -138,26 +140,22 @@ public static partial class AnnotationHelper
                 // Map positions back to elements using the original (non-normalized) text
                 var elementTextMappings = BuildElementTextMappings(elementsInRange);
 
-                // Convert normalized positions back to original text positions
-                var originalSelectionStart = MapNormalizedPositionToOriginal(fullText, selectionStartPos);
-                var originalSelectionEnd = MapNormalizedPositionToOriginal(fullText, selectionEndPos);
+                // Convert normalized positions back to raw text positions, which is the space the mappings describe
+                var originalSelectionStart = rawStarts[MapNormalizedPositionToText(decodedFullText, selectionStartPos)];
+                var originalSelectionEnd = rawStarts[MapNormalizedPositionToText(decodedFullText, selectionEndPos)];
 
                 // Process each element in the range
                 for (var i = 0; i < elementsInRange.Count; i++)
                 {
-                    var element = elementsInRange[i];
                     var mapping = elementTextMappings[i];
 
-                    var elementStart = mapping.StartPos;
-                    var elementEnd = mapping.EndPos;
-
                     // Determine what part of this element should be highlighted
-                    var highlightStart = Math.Max(originalSelectionStart - elementStart, 0);
-                    var highlightEnd = Math.Min(originalSelectionEnd - elementStart, mapping.TextLength);
+                    var highlightStart = Math.Max(originalSelectionStart - mapping.StartPos, 0);
+                    var highlightEnd = Math.Min(originalSelectionEnd - mapping.StartPos, mapping.TextLength);
 
                     if (highlightEnd <= highlightStart) continue; // No highlight in this element
 
-                    InjectHighlightInElement(element, highlightStart, highlightEnd, annotation.Id);
+                    WrapTextRange(elementsInRange[i], highlightStart, highlightEnd, annotation.Id, doc);
                 }
             }
             catch (Exception ex)
@@ -168,6 +166,158 @@ public static partial class AnnotationHelper
         }
     }
 
+    private static void WrapTextRange(HtmlNode root, int start, int end, int annotationId, HtmlDocument doc)
+    {
+        if (end <= start) return;
+
+        foreach (var (node, runStart, runLength) in BuildTextRuns(root))
+        {
+            if (runStart >= end) break;
+
+            var runEnd = runStart + runLength;
+            if (runEnd <= start) continue;
+
+            var parent = node.ParentNode;
+            if (parent == null) continue;
+
+            if (IsInsideHighlight(node)) continue;
+
+            var text = GetText(node);
+            var localStart = Math.Clamp(start - runStart, 0, runLength);
+            var localEnd = Math.Clamp(end - runStart, 0, runLength);
+            if (localEnd <= localStart) continue;
+
+            if (localStart > 0)
+            {
+                parent.InsertBefore(doc.CreateTextNode(text[..localStart]), node);
+            }
+
+            var highlight = doc.CreateElement(HighlightTagName);
+            highlight.SetAttributeValue("id", $"epub-highlight-{annotationId}");
+            highlight.SetAttributeValue("data-annotation-id", annotationId.ToString());
+            highlight.AppendChild(doc.CreateTextNode(text[localStart..localEnd]));
+            parent.InsertBefore(highlight, node);
+
+            if (localEnd < text.Length)
+            {
+                parent.InsertBefore(doc.CreateTextNode(text[localEnd..]), node);
+            }
+
+            parent.RemoveChild(node);
+        }
+    }
+
+    private static List<(HtmlNode Node, int Start, int Length)> BuildTextRuns(HtmlNode root)
+    {
+        var runs = new List<(HtmlNode, int, int)>();
+        var offset = 0;
+
+        foreach (var node in root.DescendantsAndSelf())
+        {
+            if (node.NodeType != HtmlNodeType.Text) continue;
+            if (IsInsideNoWrapElement(node, root)) continue;
+
+            var text = GetText(node);
+            if (text.Length == 0) continue;
+
+            runs.Add((node, offset, text.Length));
+            offset += text.Length;
+        }
+
+        return runs;
+    }
+
+    private static string GetTextForHighlighting(HtmlNode root)
+    {
+        return string.Concat(BuildTextRuns(root).Select(run => GetText(run.Node)));
+    }
+
+    private static string GetText(HtmlNode textNode)
+    {
+        return textNode is HtmlTextNode text ? text.Text : textNode.InnerText;
+    }
+
+    private static bool IsInsideNoWrapElement(HtmlNode node, HtmlNode root)
+    {
+        for (var parent = node.ParentNode; parent != null && parent != root; parent = parent.ParentNode)
+        {
+            if (parent.NodeType == HtmlNodeType.Element && NoWrapTags.Contains(parent.Name)) return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsInsideHighlight(HtmlNode node)
+    {
+        for (var parent = node.ParentNode; parent != null; parent = parent.ParentNode)
+        {
+            if (parent.NodeType == HtmlNodeType.Element &&
+                parent.Name.Equals(HighlightTagName, StringComparison.OrdinalIgnoreCase)) return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// <paramref name="raw"/> with its character references decoded, plus the raw offset each decoded character
+    /// starts at. Required to inject into `Spice & Wolf`
+    /// </summary>
+    private static (string Text, int[] RawStarts) DecodeWithMap(string raw)
+    {
+        var builder = new StringBuilder(raw.Length);
+        var rawStarts = new List<int>(raw.Length + 1);
+        var i = 0;
+
+        while (i < raw.Length)
+        {
+            var length = 1;
+            var decoded = raw[i].ToString();
+
+            if (raw[i] == '&')
+            {
+                var semicolon = raw.IndexOf(';', i + 1);
+                if (semicolon > i && semicolon - i <= MaxCharacterReferenceLength)
+                {
+                    var candidate = raw[i..(semicolon + 1)];
+                    var entity = HtmlEntity.DeEntitize(candidate);
+                    // DeEntitize hands back anything it doesn't recognise unchanged, so a difference means a reference
+                    if (entity.Length == 1 && !string.Equals(entity, candidate, StringComparison.Ordinal))
+                    {
+                        decoded = entity;
+                        length = candidate.Length;
+                    }
+                }
+            }
+
+            rawStarts.Add(i);
+            builder.Append(decoded);
+            i += length;
+        }
+
+        rawStarts.Add(i); // The boundary at the end of the text
+
+        return (builder.ToString(), [.. rawStarts]);
+    }
+
+    /// <summary>
+    /// Start offsets and lengths of each element's text within the joined text of the range.
+    /// </summary>
+    private static List<(int StartPos, int TextLength)> BuildElementTextMappings(List<HtmlNode> elements)
+    {
+        var mappings = new List<(int, int)>();
+        var currentPos = 0;
+
+        foreach (var element in elements)
+        {
+            var textLength = GetTextForHighlighting(element).Length;
+
+            mappings.Add((currentPos, textLength));
+            currentPos += textLength + ElementTextSeparator.Length;
+        }
+
+        return mappings;
+    }
+
     private static string NormalizeWhitespace(string text)
     {
         return WhitespaceRegex().Replace(text.Trim(), " ");
@@ -175,7 +325,7 @@ public static partial class AnnotationHelper
 
     private static HtmlNode? NormalizeToBlockElement(HtmlNode? node)
     {
-        while (node != null && InlineTags.Contains(node.Name.ToLower()))
+        while (node != null && InlineTags.Contains(node.Name))
         {
             node = node.ParentNode;
         }
@@ -183,41 +333,41 @@ public static partial class AnnotationHelper
         return node;
     }
 
-    private static int MapNormalizedPositionToOriginal(string originalText, int normalizedPosition)
+    private static int MapNormalizedPositionToText(string text, int normalizedPosition)
     {
-        var normalizedText = NormalizeWhitespace(originalText);
+        var normalizedText = NormalizeWhitespace(text);
 
-        if (normalizedPosition >= normalizedText.Length) return originalText.Length;
+        if (normalizedPosition >= normalizedText.Length) return text.Length;
 
         // Walk through both strings character by character to find the mapping
-        var originalPos = 0;
+        var pos = 0;
         var normalizedPos = 0;
 
-        while (originalPos < originalText.Length && char.IsWhiteSpace(originalText[originalPos]))
+        while (pos < text.Length && char.IsWhiteSpace(text[pos]))
         {
-            originalPos++;
+            pos++;
         }
 
-        while (originalPos < originalText.Length && normalizedPos < normalizedPosition)
+        while (pos < text.Length && normalizedPos < normalizedPosition)
         {
-            if (char.IsWhiteSpace(originalText[originalPos]))
+            if (char.IsWhiteSpace(text[pos]))
             {
-                // Skip consecutive whitespace in original
-                while (originalPos < originalText.Length && char.IsWhiteSpace(originalText[originalPos]))
+                // Skip consecutive whitespace in text
+                while (pos < text.Length && char.IsWhiteSpace(text[pos]))
                 {
-                    originalPos++;
+                    pos++;
                 }
             }
             else
             {
-                originalPos++;
+                pos++;
             }
 
             // This corresponds to one space in normalized text
             normalizedPos++;
         }
 
-        return originalPos;
+        return pos;
     }
 
     private static HtmlNode? FindElementByXPath(HtmlDocument doc, string xpath)
@@ -258,46 +408,4 @@ public static partial class AnnotationHelper
 
         return elements;
     }
-
-    private static List<(int StartPos, int EndPos, int TextLength)> BuildElementTextMappings(List<HtmlNode> elements)
-    {
-        var mappings = new List<(int StartPos, int EndPos, int TextLength)>();
-        var currentPos = 0;
-
-        foreach (var element in elements)
-        {
-            var textLength = element.InnerText.Length;
-            mappings.Add((currentPos, currentPos + textLength, textLength));
-            currentPos += textLength;
-        }
-
-        return mappings;
-    }
-
-    private static void InjectHighlightInElement(HtmlNode element, int startPos, int endPos, int annotationId)
-    {
-        var originalText = element.InnerText;
-        element.RemoveAllChildren();
-
-        // Add text before highlight
-        if (startPos > 0)
-        {
-            element.AppendChild(HtmlNode.CreateNode(originalText[..startPos]));
-        }
-
-        // Add highlight
-        var highlightText = originalText.Substring(startPos, endPos - startPos);
-        var highlightNode = HtmlNode.CreateNode(
-            $"<app-epub-highlight id=\"epub-highlight-{annotationId}\">{highlightText}</app-epub-highlight>");
-        element.AppendChild(highlightNode);
-
-        // Add text after highlight
-        if (endPos < originalText.Length)
-        {
-            element.AppendChild(HtmlNode.CreateNode(originalText[endPos..]));
-        }
-    }
-
-    [GeneratedRegex(@"\s+", RegexOptions.Compiled)]
-    private static partial Regex WhitespaceRegex();
 }

@@ -25,17 +25,16 @@ export class EpubHighlightService {
 
     for (let i = 0; i < highlightElems.length; i++) {
       const highlight = highlightElems[i];
-      const idAttr = highlight.getAttribute('id');
+      const idAttr = highlight.getAttribute('data-annotation-id') ?? highlight.getAttribute('id');
 
-      // Don't allow highlight injection unless the id is present
+      // Don't allow highlight injection unless we know which annotation it is
       if (!idAttr) continue;
-
 
       const annotationId = parseInt(idAttr.replace('epub-highlight-', ''), 10);
       const componentRef = container.createComponent<EpubHighlightComponent>(EpubHighlightComponent,
         {
           projectableNodes: [
-            [document.createTextNode(highlight.innerHTML)]
+            [document.createTextNode(highlight.textContent ?? '')]
           ]
         });
 

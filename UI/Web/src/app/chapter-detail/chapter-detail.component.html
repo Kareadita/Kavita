@@ -3,7 +3,7 @@
   @let seriesValue = series();
 
 
-  <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
+  <div [style.height]="ScrollingBlockHeight" class="main-container container-fluid" #scrollingBlock>
     @let readingProgressStatusValue = readingProgressStatus();
 
     @if (chapterValue && seriesValue) {
@@ -81,7 +81,12 @@
 
               <div class="col-auto ms-2k">
                 <div class="card-actions" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables [entity]="chapterValue" [actions]="chapterActions()" [labelBy]="series.name + ' ' + chapterValue.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn" />
+                  <app-card-actionables
+                    [entity]="chapterValue"
+                    [actions]="chapterActions()"
+                    (actionHandler)="handleChapterActions($event)"
+                    [labelBy]="series.name + ' ' + chapterValue.minNumber"
+                    iconClass="fa-ellipsis-h" btnClass="btn-actions btn" />
                 </div>
               </div>
 

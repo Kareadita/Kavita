@@ -113,18 +113,55 @@ public partial class BookService(
 
     public static string GetContentType(EpubContentType type)
     {
-        var contentType = type switch
+        return type switch
         {
+            EpubContentType.XHTML_1_1 => "application/xhtml+xml",
+            EpubContentType.DTBOOK => "application/x-dtbook+xml",
+            EpubContentType.DTBOOK_NCX => "application/x-dtbncx+xml",
+            EpubContentType.OEB1_DOCUMENT => "text/x-oeb1-document",
+            EpubContentType.XML => "application/xml",
+            EpubContentType.CSS => "text/css",
+            EpubContentType.OEB1_CSS => "text/x-oeb1-css",
+            EpubContentType.SCRIPT => "application/javascript",
             EpubContentType.IMAGE_GIF => "image/gif",
-            EpubContentType.IMAGE_PNG => "image/png",
             EpubContentType.IMAGE_JPEG => "image/jpeg",
-            EpubContentType.FONT_OPENTYPE => "font/otf",
-            EpubContentType.FONT_TRUETYPE => "font/ttf",
+            EpubContentType.IMAGE_PNG => "image/png",
             EpubContentType.IMAGE_SVG => "image/svg+xml",
+            EpubContentType.IMAGE_WEBP => "image/webp",
+            EpubContentType.IMAGE_BMP => "image/bmp",
+            EpubContentType.FONT_TRUETYPE => "font/ttf",
+            EpubContentType.FONT_OPENTYPE => "font/otf",
+            EpubContentType.FONT_SFNT => "font/sfnt",
+            EpubContentType.FONT_WOFF => "font/woff",
+            EpubContentType.FONT_WOFF2 => "font/woff2",
+            EpubContentType.SMIL => "application/smil+xml",
+            EpubContentType.AUDIO_MP3 => "audio/mpeg",
+            EpubContentType.AUDIO_MP4 => "audio/mp4",
+            EpubContentType.AUDIO_OGG => "audio/ogg",
+            EpubContentType.OTHER => "application/octet-stream",
             _ => "application/octet-stream"
         };
+    }
 
-        return contentType;
+    private static void UpdateEpubNoteRef(HtmlDocument document, HtmlNode anchor)
+    {
+        var href = anchor.GetAttributeValue("href", string.Empty);
+
+        anchor.Attributes.Add("kavita-note-ref", href);
+        anchor.Attributes.Remove("href");
+        anchor.Attributes.Add("href", "javascript:void(0)");
+
+        var nodeId = href.TrimStart('#');
+        if (string.IsNullOrEmpty(nodeId)) return;
+
+        // We need to select instead of GetElementbyId because epubs are bad html and a lot of books
+        // reuse the id
+        var candidates = document.DocumentNode
+            .SelectNodes($"//*[@id='{nodeId}']");
+        if (candidates == null) return;
+
+        foreach (var candidate in candidates)
+            candidate?.AddClass("visually-hidden");
     }
 
     private static void UpdateLinks(HtmlNode anchor, Dictionary<string, int> mappings, int currentPage)
@@ -134,6 +171,16 @@ public partial class BookService(
             .Split("#");
         // Some keys get uri encoded when parsed, so replace any of those characters with original
         var mappingKey = Uri.UnescapeDataString(hrefParts[0]);
+
+        // Is a href to something on the same page (#ID)
+        if (string.IsNullOrEmpty(mappingKey))
+        {
+            if (hrefParts.Length > 1 && !string.IsNullOrEmpty(hrefParts[1]))
+            {
+                anchor.Attributes.Add("kavita-part", hrefParts[1]);
+            }
+            return;
+        }
 
         if (!mappings.TryGetValue(mappingKey, out var mappedPage))
         {
@@ -196,11 +243,12 @@ public partial class BookService(
             if (!match.Success) continue;
 
             var importFile = match.Groups["Filename"].Value;
-            var key = CleanContentKeys(importFile); // Validate if CoalesceKey works well here
+            var key = CleanContentKeys(importFile);
             if (!key.Contains(prepend))
             {
                 key = prepend + key;
             }
+            key = CoalesceKeyForAnyFile(book, key);
             if (!book.Content.AllFiles.TryGetLocalFileRefByKey(key, out var bookFile) || bookFile == null) continue;
 
             var content = await bookFile.ReadContentAsBytesAsync();
@@ -212,7 +260,6 @@ public partial class BookService(
         EscapeCssImportReferences(ref stylesheetHtml, apiBase, prepend);
 
         EscapeFontFamilyReferences(ref stylesheetHtml, apiBase, prepend);
-
 
         // Check if there are any background images and rewrite those urls
         EscapeCssImageReferences(ref stylesheetHtml, apiBase, book);
@@ -255,7 +302,7 @@ public partial class BookService(
         {
             if (!match.Success) continue;
             var importFile = match.Groups["Filename"].Value;
-            stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
+            stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + NormalizePath(prepend + importFile));
         }
     }
 
@@ -265,7 +312,7 @@ public partial class BookService(
         {
             if (!match.Success) continue;
             var importFile = match.Groups["Filename"].Value;
-            stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
+            stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + NormalizePath(prepend + importFile));
         }
     }
 
@@ -428,6 +475,13 @@ public partial class BookService(
 
         foreach (var anchor in anchors)
         {
+            var epubType = anchor.GetAttributeValue("epub:type", string.Empty);
+            if (epubType.Equals("noteref"))
+            {
+                UpdateEpubNoteRef(doc, anchor);
+                continue;
+            }
+
             UpdateLinks(anchor, mappings, page);
         }
     }
@@ -1348,6 +1402,7 @@ public partial class BookService(
         CancellationToken ct = default)
     {
         using var book = await EpubReader.OpenBookAsync(bookFilePath, LenientBookReaderOptions);
+        if (book == null) throw new KavitaNotFoundException();
         var key = CoalesceKeyForAnyFile(book, requestedKey);
 
         if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key))
@@ -1547,7 +1602,6 @@ public partial class BookService(
         // Inject Annotations
         InjectAnnotations(doc, annotations);
 
-
         return PrepareFinalHtml(doc, body);
     }
 
@@ -1590,6 +1644,11 @@ public partial class BookService(
     {
         if (book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) return key;
 
+        if (book.Content.AllFiles.TryGetLocalFileRefByFilePath(key, out var fileRef) && fileRef is not null)
+        {
+            return fileRef.Key;
+        }
+
         var cleanedKey = CleanContentKeys(key);
         if (book.Content.AllFiles.ContainsLocalFileRefWithKey(cleanedKey)) return cleanedKey;
 
@@ -1602,6 +1661,23 @@ public partial class BookService(
         }
 
         return key;
+    }
+
+    private static string NormalizePath(string path)
+    {
+        var parts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var stack = new List<string>();
+        foreach (var part in parts)
+        {
+            if (part == ".") continue;
+            if (part == "..")
+            {
+                if (stack.Count > 0) stack.RemoveAt(stack.Count - 1);
+                continue;
+            }
+            stack.Add(part);
+        }
+        return string.Join('/', stack);
     }
 
     /// <summary>
