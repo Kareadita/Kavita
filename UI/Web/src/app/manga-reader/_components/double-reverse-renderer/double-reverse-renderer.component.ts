@@ -148,11 +148,6 @@ export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
       return false;
     }
 
-    if (this.mangaReaderService.isSecondLastImage(this.pageNum(), this.maxPages())) {
-      this.debugLog('Not rendering double as current page is last');
-      return false;
-    }
-
     if (this.mangaReaderService.isWidePage(this.pageNum() + 1) ) {
       this.debugLog('Not rendering double as next page is wide image');
       return false;
@@ -198,6 +193,9 @@ export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
 
         if (this.mangaReaderService.isSecondLastImage(pageNum, maxPages)) {
           this.debugLog('Moving forward 1 page as 2 pages left');
+          if (this.calculateShouldRenderDouble()) {
+            return 2;
+          }
           return 1;
         }
 
