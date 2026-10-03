@@ -279,6 +279,7 @@ public class ScrobblingController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("library-allows-scrobbling")]
     public async Task<ActionResult<bool>> LibraryAllowsScrobbling(int seriesId)
     {
@@ -291,6 +292,7 @@ public class ScrobblingController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpPost("add-hold")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> AddHold(int seriesId)
@@ -406,11 +408,11 @@ public class ScrobblingController(
     public async Task<ActionResult<bool>> RetryScrobble(KavitaPlusAuditEntryDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        if (!dto.UserId.HasValue) return Ok(false);
-        if (dto.UserId != UserId && !User.IsInRole(PolicyConstants.AdminRole)) return Ok(false);
+        var entry = await unitOfWork.KavitaPlusAuditRepository.GetEntryAsync(dto.Id, ct);
+        if (entry?.UserId == null) return Ok(false);
+        if (entry.UserId != UserId && !User.IsInRole(PolicyConstants.AdminRole)) return Ok(false);
 
-        // Locate the Scrobble event or replay the event
-        return Ok(await scrobblingService.RetryScrobbleAsync(UserId, dto, HttpContext.RequestAborted));
+        return Ok(await scrobblingService.RetryScrobbleAsync(entry, ct));
     }
 
     /// <summary>

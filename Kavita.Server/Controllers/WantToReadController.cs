@@ -75,6 +75,7 @@ public class WantToReadController(
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!,
             AppUserIncludes.WantToRead, ct);
         if (user == null) return Unauthorized();
+        if (!await unitOfWork.UserRepository.HasAccessToAllSeries(user.Id, dto.SeriesIds, ct)) return NotFound();
 
         var existingIds = user.WantToRead.Select(s => s.SeriesId).ToList();
         var idsToAdd = dto.SeriesIds.Except(existingIds);
@@ -113,6 +114,10 @@ public class WantToReadController(
             AppUserIncludes.WantToRead, ct);
         if (user == null) return Unauthorized();
 
+        var removedSeriesIds = user.WantToRead
+            .Where(s => dto.SeriesIds.Contains(s.SeriesId))
+            .Select(s => s.SeriesId)
+            .ToList();
         user.WantToRead = user.WantToRead
             .Where(s => !dto.SeriesIds.Contains(s.SeriesId))
             .ToList();
@@ -120,7 +125,7 @@ public class WantToReadController(
         if (!unitOfWork.HasChanges()) return Ok();
         if (await unitOfWork.CommitAsync(ct))
         {
-            foreach (var sId in dto.SeriesIds)
+            foreach (var sId in removedSeriesIds)
             {
                 BackgroundJob.Enqueue(() => scrobblingService.ScrobbleWantToReadUpdate(user.Id, sId, false, ct));
             }

@@ -204,6 +204,7 @@ public class PersonController(
     /// </summary>
     /// <param name="personId"></param>
     /// <returns></returns>
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [PersonAccess]
     [HttpPost("fetch-cover")]
     public async Task<ActionResult<string>> DownloadCoverImage([FromQuery] int personId)
@@ -287,6 +288,7 @@ public class PersonController(
     /// </summary>
     /// <param name="dto">alias check request</param>
     /// <returns></returns>
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("valid-alias")]
     public async Task<ActionResult<bool>> IsValidAlias(PersonAliasCheckDto dto)
     {

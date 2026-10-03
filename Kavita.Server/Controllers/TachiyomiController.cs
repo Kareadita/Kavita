@@ -3,6 +3,7 @@ using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.Models.DTOs;
+using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
@@ -23,6 +24,7 @@ public class TachiyomiController(
     /// <param name="seriesId"></param>
     /// <returns>TachiyomiChapterDto of latest chapter. Only Chapter number is used by consuming app. All other fields may be missing.</returns>
     [HttpGet("latest-chapter")]
+    [SeriesAccess]
     public async Task<ActionResult<TachiyomiChapterDto>> GetLatestChapter(int seriesId)
     {
         var ct = HttpContext.RequestAborted;
@@ -36,6 +38,7 @@ public class TachiyomiController(
     /// <remarks>This is built for Tachiyomi and is not expected to be called by any other place</remarks>
     /// <returns></returns>
     [HttpPost("mark-chapter-until-as-read")]
+    [SeriesAccess]
     public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(
         [FromQuery] int seriesId,
         [FromQuery] float chapterNumber,

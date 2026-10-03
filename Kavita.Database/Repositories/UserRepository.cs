@@ -176,11 +176,11 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
     /// <param name="bookmarkIds"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IList<AppUserBookmark>> GetAllBookmarksByIds(int seriesId, IList<int> bookmarkIds,
+    public async Task<IList<AppUserBookmark>> GetAllBookmarksByIds(int userId, int seriesId, IList<int> bookmarkIds,
         CancellationToken ct = default)
     {
         return await context.AppUserBookmark
-            .Where(b => bookmarkIds.Contains(b.Id) && b.SeriesId == seriesId)
+            .Where(b => b.AppUserId == userId && bookmarkIds.Contains(b.Id) && b.SeriesId == seriesId)
             .OrderBy(b => b.Created)
             .ToListAsync(ct);
     }
@@ -251,6 +251,52 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
             .AnyAsync(c => c.Id == chapterId, ct);
+    }
+
+    public async Task<bool> HasAccessToAllSeries(int userId, IEnumerable<int> seriesIds, CancellationToken ct = default)
+    {
+        var distinctIds = seriesIds.Distinct().ToList();
+        if (distinctIds.Count == 0) return true;
+
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
+        var accessibleCount = await context.Series
+            .Where(s => distinctIds.Contains(s.Id))
+            .Where(s => s.Library.AppUsers.Any(user => user.Id == userId))
+            .RestrictAgainstAgeRestriction(userRating)
+            .CountAsync(ct);
+
+        return accessibleCount == distinctIds.Count;
+    }
+
+    public async Task<bool> HasAccessToAllVolumes(int userId, IEnumerable<int> volumeIds, CancellationToken ct = default)
+    {
+        var distinctIds = volumeIds.Distinct().ToList();
+        if (distinctIds.Count == 0) return true;
+
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
+        var accessibleCount = await context.Volume
+            .Where(v => distinctIds.Contains(v.Id))
+            .Where(v => v.Series.Library.AppUsers.Any(user => user.Id == userId))
+            .Select(v => v.Series)
+            .RestrictAgainstAgeRestriction(userRating)
+            .CountAsync(ct);
+
+        return accessibleCount == distinctIds.Count;
+    }
+
+    public async Task<bool> HasAccessToAllChapters(int userId, IEnumerable<int> chapterIds, CancellationToken ct = default)
+    {
+        var distinctIds = chapterIds.Distinct().ToList();
+        if (distinctIds.Count == 0) return true;
+
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
+        var accessibleCount = await context.Chapter
+            .Where(c => distinctIds.Contains(c.Id))
+            .Where(c => c.Volume.Series.Library.AppUsers.Any(user => user.Id == userId))
+            .RestrictAgainstAgeRestriction(userRating)
+            .CountAsync(ct);
+
+        return accessibleCount == distinctIds.Count;
     }
 
     public async Task<bool> HasAccessToPerson(int userId, int personId, CancellationToken ct = default)

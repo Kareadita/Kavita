@@ -65,7 +65,6 @@ public class ReviewController(
     /// <param name="dto">chapterId must be set</param>
     /// <returns></returns>
     [HttpPost("chapter")]
-    [ChapterAccess]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReviewDto>> UpdateChapterReview(UpdateUserReviewDto dto)
     {
@@ -76,6 +75,9 @@ public class ReviewController(
         if (dto.ChapterId == null) return BadRequest();
 
         var chapterId = dto.ChapterId.Value;
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesId, ct) ||
+            await unitOfWork.ChapterRepository.GetSeriesIdForChapter(chapterId, ct) != dto.SeriesId)
+            return NotFound();
 
         var ratingBuilder = new ChapterRatingBuilder(await unitOfWork.UserRepository.GetUserChapterRatingAsync(user.Id, chapterId, ct));
 

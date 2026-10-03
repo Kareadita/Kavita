@@ -21,6 +21,7 @@ using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
+using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Services.Helpers;
 using Microsoft.AspNetCore.Authorization;
@@ -156,7 +157,7 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
     public async Task<ActionResult<IList<AgeRatingDto>>> GetAllAgeRatings(string? libraryIds)
     {
         var ct = HttpContext.RequestAborted;
-        var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
+        var ids = await GetRequestedUserLibraryIds(libraryIds, ct);
         if (ids is {Count: > 0})
         {
             return Ok(await unitOfWork.LibraryRepository.GetAllAgeRatingsDtosForLibrariesAsync(ids, ct));
@@ -177,10 +178,10 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
     /// <returns></returns>
     [HttpGet("publication-status")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = ["libraryIds"])]
-    public ActionResult<IList<AgeRatingDto>> GetAllPublicationStatus(string? libraryIds)
+    public async Task<ActionResult<IList<AgeRatingDto>>> GetAllPublicationStatus(string? libraryIds)
     {
         var ct = HttpContext.RequestAborted;
-        var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
+        var ids = await GetRequestedUserLibraryIds(libraryIds, ct);
         if (ids is {Count: > 0})
         {
             return Ok(unitOfWork.LibraryRepository.GetAllPublicationStatusesDtosForLibrariesAsync(ids));
@@ -204,8 +205,23 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
     public async Task<ActionResult<IList<LanguageDto>>> GetAllLanguages(string? libraryIds)
     {
         var ct = HttpContext.RequestAborted;
-        var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
+        var ids = await GetRequestedUserLibraryIds(libraryIds, ct);
+        if (ids.Count == 0)
+        {
+            ids = (await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(UserId, ct: ct)).ToList();
+            if (ids.Count == 0) return Ok(new List<LanguageDto>());
+        }
+
         return Ok(await unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids, ct));
+    }
+
+    private async Task<List<int>> GetRequestedUserLibraryIds(string? libraryIds, CancellationToken ct)
+    {
+        var requested = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
+        if (requested is not {Count: > 0}) return [];
+
+        var userLibraryIds = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(UserId, ct: ct);
+        return requested.Intersect(userLibraryIds).ToList();
     }
 
     /// <summary>
@@ -270,6 +286,7 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
     /// <param name="libraryType">Library Type</param>
     /// <returns></returns>
     [HttpGet("series-detail-plus")]
+    [SeriesAccess]
     public async Task<ActionResult<SeriesDetailPlusDto>> GetKavitaPlusSeriesDetailData(int seriesId, LibraryType libraryType)
     {
         var ct = HttpContext.RequestAborted;

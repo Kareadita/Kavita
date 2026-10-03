@@ -52,12 +52,16 @@ public class AnnotationService(
                 throw new KavitaException("invalid-payload");
             }
 
+            if (!await unitOfWork.UserRepository.HasAccessToChapter(userId, dto.ChapterId, ct))
+                throw new KavitaException("chapter-doesnt-exist");
+
             var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId, ct: ct) ?? throw new KavitaException("chapter-doesnt-exist");
+            var parentIds = await unitOfWork.ChapterRepository.GetParentIdsForChapter(dto.ChapterId, ct) ?? throw new KavitaException("chapter-doesnt-exist");
             var chapterTitle = string.Empty;
 
             try
             {
-                var toc = await bookService.GenerateTableOfContents(chapter);
+                var toc = await bookService.GenerateTableOfContents(chapter, ct);
                 var pageTocs = BookChapterItemHelper.GetTocForPage(toc, dto.PageNumber);
                 if (pageTocs.Count > 0)
                 {
@@ -74,9 +78,9 @@ public class AnnotationService(
                 XPath = dto.XPath,
                 EndingXPath = dto.EndingXPath,
                 ChapterId = dto.ChapterId,
-                SeriesId = dto.SeriesId,
-                VolumeId = dto.VolumeId,
-                LibraryId = dto.LibraryId,
+                SeriesId = parentIds.SeriesId,
+                VolumeId = parentIds.VolumeId,
+                LibraryId = parentIds.LibraryId,
                 HighlightCount = dto.HighlightCount,
                 SelectedText = dto.SelectedText,
                 Comment = dto.Comment,

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Common.Helpers;
@@ -21,6 +21,7 @@ public interface IKavitaPlusAuditRepository
     Task<KavitaPlusMyAuditStatsDto> GetMyStatsAsync(int userId, CancellationToken ct = default);
     Task<KavitaPlusAuditSeriesInfoDto> GetSeriesInfoAsync(
         int seriesId, int callingUserId, bool isAdmin, CancellationToken ct = default);
+    Task<KavitaPlusAuditEntryDto?> GetEntryAsync(long id, CancellationToken ct = default);
     Task MarkAsRetriedAsync(long id, CancellationToken ct = default);
 
 }

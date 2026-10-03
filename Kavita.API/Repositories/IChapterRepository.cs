@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -58,6 +58,7 @@ public interface IChapterRepository
     Task<ChapterDto?> GetFirstChapterForVolumeAsync(int volumeId, int userId, CancellationToken ct = default);
     Task<IList<ChapterDto>> GetChapterDtosAsync(IEnumerable<int> chapterIds, int userId, CancellationToken ct = default);
     Task<int?> GetSeriesIdForChapter(int chapterId, CancellationToken ct = default);
+    Task<(int VolumeId, int SeriesId, int LibraryId)?> GetParentIdsForChapter(int chapterId, CancellationToken ct = default);
 
     /// <summary>
     /// Fetches chapters matching by ComicVineId or MetronId, with Volume and Series included.

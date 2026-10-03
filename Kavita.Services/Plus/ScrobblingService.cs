@@ -1971,7 +1971,7 @@ public class ScrobblingService : IScrobblingService
     }
 
 
-    public async Task<bool> RetryScrobbleAsync(int authUserId, KavitaPlusAuditEntryDto auditEntry, CancellationToken ct = default)
+    public async Task<bool> RetryScrobbleAsync(KavitaPlusAuditEntryDto auditEntry, CancellationToken ct = default)
     {
         if (auditEntry.ScrobbleDetails == null) return false;
         if (auditEntry.Status != AuditStatus.Failure) return false;

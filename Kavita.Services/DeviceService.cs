@@ -97,14 +97,17 @@ public class DeviceService(
         return false;
     }
 
-    public async Task<bool> SendTo(IReadOnlyList<int> chapterIds, int deviceId, CancellationToken ct = default)
+    public async Task<bool> SendTo(int userId, IReadOnlyList<int> chapterIds, int deviceId, CancellationToken ct = default)
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         if (!settings.IsEmailSetupForSendToDevice())
             throw new KavitaException("send-to-kavita-email");
 
         var device = await unitOfWork.DeviceRepository.GetDeviceById(deviceId, ct);
-        if (device == null) throw new KavitaException("device-doesnt-exist");
+        if (device == null || device.AppUserId != userId) throw new KavitaException("device-doesnt-exist");
+
+        if (!await unitOfWork.UserRepository.HasAccessToAllChapters(userId, chapterIds, ct))
+            throw new KavitaException("chapter-doesnt-exist");
 
         var files = await unitOfWork.ChapterRepository.GetFilesForChaptersAsync(chapterIds, ct);
         if (files.Any(f => f.Format is not (MangaFormat.Epub or MangaFormat.Pdf)) && device.Platform == EmailDevicePlatform.Kindle)

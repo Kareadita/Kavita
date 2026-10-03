@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -555,6 +555,7 @@ public class OpdsController(
     /// <param name="seriesId"></param>
     /// <param name="volumeId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [VolumeAccess]
     [Produces("application/xml")]
     [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}")]
@@ -591,6 +592,8 @@ public class OpdsController(
     /// <param name="volumeId"></param>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [SeriesAccess]
+    [VolumeAccess]
     [ChapterAccess]
     [Produces("application/xml")]
     [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}")]
@@ -629,6 +632,8 @@ public class OpdsController(
     /// <param name="chapterId"></param>
     /// <param name="filename">Not used. Only for Chunky to allow download links</param>
     /// <returns></returns>
+    [SeriesAccess]
+    [VolumeAccess]
     [ChapterAccess]
     [Authorize(PolicyGroups.DownloadPolicy)]
     [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}")]
