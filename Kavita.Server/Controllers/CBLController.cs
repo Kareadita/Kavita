@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
+using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.ReadingLists;
 using Kavita.Common.Extensions;
@@ -304,6 +305,9 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     public async Task<ActionResult<RemapRuleDto>> CreateRemapRule([FromBody] CreateRemapRuleDto dto)
     {
         var ct = HttpContext.RequestAborted;
+        if (!await IsAccessibleRemapTarget(dto.SeriesId, dto.VolumeId, dto.ChapterId, ct))
+            return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
+
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, ct: ct);
         if (series == null) return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
@@ -410,6 +414,9 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         var rule = await unitOfWork.RemapRuleRepository.GetByIdAsync(id, ct);
         if (rule == null) return NotFound();
         if (rule.AppUserId != UserId) return Forbid();
+
+        if (!await IsAccessibleRemapTarget(dto.SeriesId ?? rule.SeriesId, dto.VolumeId, dto.ChapterId, ct))
+            return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
         if (dto.SeriesId.HasValue && dto.SeriesId.Value != rule.SeriesId)
         {
@@ -527,5 +534,21 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     private string GetCblManagerFolder(int userId)
     {
         return Path.Join(directoryService.TempDirectory, $"{userId}", "cbl-manager-download");
+    }
+
+    private async Task<bool> IsAccessibleRemapTarget(int seriesId, int? volumeId, int? chapterId, CancellationToken ct)
+    {
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, seriesId, ct)) return false;
+
+        if (volumeId.HasValue)
+        {
+            var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId.Value, VolumeIncludes.None, ct);
+            if (volume?.SeriesId != seriesId) return false;
+        }
+
+        if (chapterId.HasValue && await unitOfWork.ChapterRepository.GetSeriesIdForChapter(chapterId.Value, ct) != seriesId)
+            return false;
+
+        return true;
     }
 }

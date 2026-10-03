@@ -1,161 +1,296 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  OnInit,
+  signal,
+  untracked,
+  viewChild
+} from '@angular/core';
 import {NgbPopover} from '@ng-bootstrap/ng-bootstrap';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {NgStyle} from '@angular/common';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {RouterLink} from "@angular/router";
 import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session-close-event";
-import {VersionService} from "../../../_services/version.service";
 import {EVENTS, Message, MessageHubService} from "../../../_services/message-hub.service";
-import {DownloadService} from "../../../shared/_services/download.service";
-import {AccountService} from "../../../_services/account.service";
-import {ConfirmService} from "../../../shared/confirm.service";
 import {User} from "../../../_models/user/user";
-import {NotificationProgressEvent} from "../../../_models/events/notification-progress-event";
-import {InfoEvent} from "../../../_models/events/info-event";
-import {ErrorEvent} from "../../../_models/events/error-event";
-import {UpdateVersionEvent} from "../../../_models/events/update-version-event";
-import {ConfirmConfig} from "../../../shared/confirm-dialog/_models/confirm-config";
+import {LibraryService} from "../../../_services/library.service";
+import {EventTitlePipe} from "../../../_pipes/event-title.pipe";
+import {EventMessagePipe} from "../../../_pipes/event-message.pipe";
+import {EventActionPipe} from "../../../_pipes/event-action.pipe";
+import {ActivityAgePipe} from "../../../_pipes/activity-age.pipe";
+import {ActivityStoreService, isFinished, isStopped} from "../../../_services/activity-store.service";
+import {ActivitySnapshotService} from "../../../_services/activity-snapshot.service";
+import {EventsWidgetIconComponent} from "../events-widget-icon/events-widget-icon.component";
+import {ActivityJobRowComponent} from "../activity-job-row/activity-job-row.component";
+import {ActivityEntryRowComponent} from "../activity-entry-row/activity-entry-row.component";
+import {ActivityUpNextComponent} from "../activity-up-next/activity-up-next.component";
+import {ActivityRow} from "../../../_models/activity/activity-row";
+import {ActivityRowKind} from "../../../_models/activity/activity-row-kind";
+import {ActivityEntry} from "../../../_models/activity/activity-entry";
+import {ActivityJob} from "../../../_models/activity/activity-job";
+import {ActivityFilter} from "../../../_models/activity/activity-filter";
+import {ActivityProblemGroup, ActivityTimelineItem} from "../../../_models/activity/activity-timeline-item";
+import {MessageEventPriority} from "../../../_models/events/core/message-event-priority";
+import {DelayedScanCodes} from "../../../_models/activity/delayed-scan-codes";
+import {jobProgress} from "../../../_helpers/activity-job-progress";
+import {EventAction} from "../../../_models/events/event-action";
+import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
+import {KeyBindTarget} from "../../../_models/preferences/preferences";
+import {KeyBindService} from "../../../_services/key-bind.service";
+
+const AgeTickMs = 30_000;
 
 @Component({
   selector: 'app-nav-events-toggle',
   templateUrl: './events-widget.component.html',
   styleUrls: ['./events-widget.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbPopover, NgStyle, TranslocoDirective, RouterLink]
+  imports: [NgbPopover, TranslocoDirective, RouterLink, EventsWidgetIconComponent, ActivityJobRowComponent,
+    ActivityEntryRowComponent, ActivityUpNextComponent, EventActionPipe, ActivityAgePipe]
 })
 export class EventsWidgetComponent implements OnInit {
-  public readonly downloadService = inject(DownloadService);
-  public readonly messageHub = inject(MessageHubService);
-  private readonly versionService = inject(VersionService);
-  protected readonly accountService = inject(AccountService);
-  private readonly confirmService = inject(ConfirmService);
+  private readonly messageHub = inject(MessageHubService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly libraryService = inject(LibraryService);
+  protected readonly activityStore = inject(ActivityStoreService);
+  private readonly snapshotService = inject(ActivitySnapshotService);
+  private readonly translocoService = inject(TranslocoService);
+  private readonly keyBindService = inject(KeyBindService);
+  private readonly eventMessagePipe = new EventMessagePipe();
+  private readonly eventTitlePipe = new EventTitlePipe();
 
-  readonly user = input.required<User>();
+  readonly user = input.required<User>(); // TODO: Just get the user from AccountService
 
-  /** Progress events (Event Type: 'started', 'ended', 'updated' that have progress property) */
-  readonly progressEvents = signal<NotificationProgressEvent[]>([]);
-  readonly singleUpdates = signal<NotificationProgressEvent[]>([]);
-  readonly errors = signal<ErrorEvent[]>([]);
-  readonly infos = signal<InfoEvent[]>([]);
-  readonly activeReadingSessions = signal<Set<number>>(new Set());
+  private readonly popover = viewChild(NgbPopover);
+  private readonly toggleButton = viewChild<ElementRef<HTMLButtonElement>>('toggle');
 
-  readonly isConnected = this.messageHub.isConnectedSignal;
+  protected activeReadingSessions = signal<Set<number>>(new Set());
+  protected filter = signal(ActivityFilter.All);
+  protected isOpen = signal(false);
+  protected now = signal(Date.now());
+  protected openGroups = signal<Set<string>>(new Set());
+  /**
+   * Hub is false until the first connect, so a short blip or page load does not dim the icon
+   */
+  protected offline = signal(false);
+
+  private readonly isConnected = this.messageHub.isConnectedSignal;
+  protected readonly libraryNames = toSignal(this.libraryService.getLibraryNames());
+  protected readonly snapshot = this.snapshotService.snapshot;
+  private readonly libraryCount = computed(() => Object.keys(this.libraryNames() ?? {}).length);
+
+  private readonly entries = computed(() => this.activityStore.rows().filter(isEntry));
+  protected readonly pinned = computed(() => this.entries().filter(e => e.priority === MessageEventPriority.Action || e.scheduleLost));
+  protected readonly interruptedJobs = computed(() => this.activityStore.rows().filter(isStopped));
+  private readonly pinnedCount = computed(() => this.pinned().length + this.interruptedJobs().length);
+  protected readonly delayedEntries = computed(() => this.entries().filter(e => DelayedScanCodes.includes(e.code)));
 
   /**
-   * Does not include active reading sessions
+   * A delayed scan still waiting shows in Up next, and once its time has passed the scan's own job row says what happened
    */
-  readonly activeEvents = computed(() => {
-    return this.progressEvents().length
-      + this.singleUpdates().length
-      + this.errors().length
-      + this.infos().length;
+  private readonly timeline = computed<ActivityTimelineItem[]>(() => {
+    const scheduled = new Set(this.snapshot()?.scheduled.map(s => s.runAtUtc) ?? []);
+    const now = this.now();
+    const isSettled = (scheduledForUtc: string | null) => scheduledForUtc !== null
+      && (scheduled.has(scheduledForUtc) || Date.parse(scheduledForUtc) <= now);
+    const rows = this.activityStore.rows().filter(r => r.kind === ActivityRowKind.Job
+      ? !isStopped(r)
+      : r.priority !== MessageEventPriority.Action && r.priority !== MessageEventPriority.Silent && !r.scheduleLost
+        && !isSettled(r.scheduledForUtc));
+    return groupProblems(rows);
   });
 
-  /** Intercepts from Single Updates to show an extra indicator to the user */
-  readonly updateAvailable = signal(false);
+  protected readonly visibleTimeline = computed(() => this.timeline().filter(item => matchesFilter(item, this.filter())));
+  protected readonly attentionChipCount = computed(() => this.pinnedCount() + this.timeline().filter(isAttention).length);
+  protected readonly jobsChipCount = computed(() => this.activityStore.runningJobs().length);
+  protected readonly showPinned = computed(() => this.pinnedCount() > 0 && this.filter() !== ActivityFilter.Jobs);
+  protected readonly showUpNext = computed(() => this.snapshot() !== null && this.filter() !== ActivityFilter.Attention);
+  protected readonly hasFinished = computed(() => this.activityStore.rows().some(isFinished));
 
+  private readonly runningJobProgress = computed(() => this.activityStore.runningJobs().map(job => jobProgress(job, this.libraryCount())));
+  protected readonly runningProgress = computed(() => {
+    const determinate = this.runningJobProgress().filter(p => !p.indeterminate && p.value !== null).map(p => p.value!);
+    return determinate.length > 0 ? Math.min(...determinate) : null;
+  });
+  protected readonly indeterminate = computed(() => this.runningJobProgress().some(p => p.indeterminate));
+  protected readonly attentionCount = computed(() => this.interruptedJobs().length
+    + this.entries().filter(e => e.priority >= MessageEventPriority.Action || e.scheduleLost).length);
+  protected readonly hasError = computed(() => this.entries().some(e => e.priority === MessageEventPriority.Error));
+
+  // Re-runs the label once the language file loads, translate() alone is not reactive
+  private readonly translation = toSignal(this.translocoService.selectTranslation());
+
+  protected readonly buttonAltLabel = computed(() => {
+    this.translation();
+
+    const parts = [this.translocoService.translate('events-widget.title-alt')];
+
+    if (this.offline()) {
+      parts.push(this.translocoService.translate('events-widget.status-offline-alt'));
+    } else {
+      const count = this.attentionCount();
+      if (count > 0) {
+        parts.push(this.hasError()
+          ? this.translocoService.translate('events-widget.status-attention-error-alt', {count})
+          : this.translocoService.translate('events-widget.status-attention-alt', {count}));
+      }
+      const running = this.activityStore.runningJobs().length;
+      if (running > 0) {
+        parts.push(this.translocoService.translate('events-widget.status-running-alt', {count: running}));
+      }
+      const reading = this.activeReadingSessions().size;
+      if (reading > 0) {
+        parts.push(this.translocoService.translate('events-widget.reading-now', {num: reading}));
+      }
+    }
+
+    return parts.join(', ');
+  });
+
+  protected readonly announcement = computed(() => {
+    this.translation();
+
+    const entry = this.activityStore.announcement();
+    if (!entry) return '';
+    return entry.code
+      ? this.eventMessagePipe.transform(entry, 'label')
+      : this.eventTitlePipe.transform(entry, false, this.libraryNames());
+  });
+
+  private readonly snapshotKey = computed(() => `${this.activityStore.runningJobs().length}|${this.delayedEntries().length}`);
+
+  constructor() {
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      (e) => this.toggleButton()?.nativeElement?.click(),
+      [KeyBindTarget.OpenEventWidget],
+      {fireInEditable: true},
+    );
+
+    effect(onCleanup => {
+      if (this.isConnected() !== false) {
+        this.offline.set(false);
+        return;
+      }
+      // 10s matches the popover's server unreachable delay
+      const timer = setTimeout(() => this.offline.set(true), 10_000);
+      onCleanup(() => clearTimeout(timer));
+    });
+
+    effect(() => {
+      if (!this.isOpen()) return;
+      this.snapshotKey();
+      untracked(() => this.snapshotService.refresh());
+    });
+
+    effect(onCleanup => {
+      if (!this.isOpen()) return;
+      this.now.set(Date.now());
+      const timer = setInterval(() => this.now.set(Date.now()), AgeTickMs);
+      onCleanup(() => clearInterval(timer));
+    });
+  }
 
   ngOnInit(): void {
-    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: Message<any>) => {
-      if (event.event === EVENTS.NotificationProgress) {
-        this.processNotificationProgressEvent(event);
-      } else if (event.event === EVENTS.Error) {
-        this.errors.update(values => [...values, event.payload as ErrorEvent]);
-      } else if (event.event === EVENTS.Info) {
-        this.infos.update(values => [...values, event.payload as InfoEvent]);
-      } else if (event.event === EVENTS.ReadingSessionUpdate) {
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: Message<unknown>) => {
+      if (event.event === EVENTS.ReadingSessionUpdate) {
         const data = event.payload as ReadingSessionUpdateEvent;
         this.activeReadingSessions.update(set => new Set([...set, data.sessionId]));
       } else if (event.event === EVENTS.ReadingSessionClose) {
+        const data = event.payload as ReadingSessionUpdateEvent;
         this.activeReadingSessions.update(set => {
           const newSet = new Set(set);
-          newSet.delete(event.payload.sessionId);
+          newSet.delete(data.sessionId);
           return newSet;
         });
       }
     });
   }
 
-  processNotificationProgressEvent(event: Message<NotificationProgressEvent>) {
-    const message = event.payload as NotificationProgressEvent;
-    switch (event.payload.eventType) {
-      case 'single':
-        this.singleUpdates.update(values => [...values, message]);
-        if (event.payload.name === EVENTS.UpdateAvailable) {
-          this.updateAvailable.set(true);
-        }
-        break;
-      case 'started':
-      case 'updated':
-        this.progressEvents.update(data => this.mergeOrUpdate(data, message));
-        break;
-      case 'ended':
-        this.progressEvents.update(data => data.filter(m => m.name !== message.name));
-        break;
-      default:
-        break;
-    }
+  protected toggleGroup(id: string) {
+    this.openGroups.update(set => {
+      const next = new Set(set);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
   }
 
-  private mergeOrUpdate(data: NotificationProgressEvent[], message: NotificationProgressEvent) {
-    // Sometimes we can receive 2 started on long-running scans, so better to just treat as a merge then.
-    const index = data.findIndex(m => m.name === message.name);
-    if (index < 0) {
-      return [...data, message];
-    }
-    // Replace existing item immutably
-    const newData = [...data];
-    newData[index] = message;
-    return newData;
+  protected close() {
+    this.popover()?.close();
   }
 
-
-  handleUpdateAvailableClick(message: NotificationProgressEvent) {
-    this.versionService.showUpdateModal('update-available', { update: message.body as UpdateVersionEvent }, true);
+  // The popover is attached to body, so Tab from the button would skip it
+  protected onShown() {
+    this.isOpen.set(true);
+    document.querySelector<HTMLElement>('.nav-events .activity')?.focus();
   }
 
-  async seeMore(event: ErrorEvent | InfoEvent) {
-    const config = new ConfirmConfig();
-    if (event.name === EVENTS.Error) {
-      config.buttons = [
-        {text: 'Ok', type: 'secondary'},
-        {text: 'Dismiss', type: 'primary'}
-      ];
-    } else {
-      config.buttons = [
-        {text: 'Ok', type: 'primary'},
-      ];
-    }
-    config.header = event.title;
-    config.content = event.subTitle;
-    const result = await this.confirmService.alert(event.subTitle || event.title, config);
-    if (result) {
-      this.removeErrorOrInfo(event);
-    }
+  protected closeAndRefocus() {
+    this.close();
+    this.toggleButton()?.nativeElement.focus();
   }
 
-  clearAllErrorOrInfos() {
-    this.infos.set([]);
-    this.errors.set([]);
+  protected readonly ActivityFilter = ActivityFilter;
+  protected readonly ActivityRowKind = ActivityRowKind;
+  protected readonly EventAction = EventAction;
+  protected readonly SettingsTabId = SettingsTabId;
+}
+
+function isEntry(row: ActivityRow): row is ActivityEntry {
+  return row.kind === ActivityRowKind.Entry;
+}
+
+function isAttention(item: ActivityTimelineItem) {
+  if (item.kind === 'group') return true;
+  return item.kind === ActivityRowKind.Entry && item.priority >= MessageEventPriority.Info && !DelayedScanCodes.includes(item.code);
+}
+
+function matchesFilter(item: ActivityTimelineItem, filter: ActivityFilter) {
+  switch (filter) {
+    case ActivityFilter.All:
+      return true;
+    case ActivityFilter.Attention:
+      return isAttention(item);
+    case ActivityFilter.Jobs:
+      return item.kind === ActivityRowKind.Job || (item.kind === ActivityRowKind.Entry && DelayedScanCodes.includes(item.code));
+  }
+}
+
+function groupProblems(rows: ActivityRow[]): ActivityTimelineItem[] {
+  const multiLibraryJobs = new Set(rows
+    .filter((r): r is ActivityJob => r.kind === ActivityRowKind.Job && r.libraryIds.length > 1 && r.correlationId !== null)
+    .map(j => j.correlationId));
+
+  const byJob = new Map<string, ActivityEntry[]>();
+  for (const row of rows) {
+    if (row.kind !== ActivityRowKind.Entry || !row.correlationId || !multiLibraryJobs.has(row.correlationId) || !isAttention(row)) continue;
+    byJob.set(row.correlationId, [...(byJob.get(row.correlationId) ?? []), row]);
   }
 
-  removeErrorOrInfo(messageEvent: ErrorEvent | InfoEvent, event?: MouseEvent) {
-    if (event) {
-      event.stopPropagation();
-      event.preventDefault();
-    }
-    if (messageEvent.name === EVENTS.Info) {
-      this.infos.update(data => data.filter(m => m !== messageEvent));
-    } else {
-      this.errors.update(data => data.filter(m => m !== messageEvent));
-    }
-  }
+  const groups: ActivityProblemGroup[] = [];
+  const grouped = new Set<string>();
+  byJob.forEach((entries, correlationId) => {
+    const libraryCount = new Set(entries.map(e => e.libraryId).filter(id => id !== null)).size;
+    if (libraryCount < 2) return;
 
-  prettyPrintProgress(progress: number) {
-    return Math.trunc(progress * 100);
-  }
+    entries.forEach(e => grouped.add(e.id));
+    groups.push({
+      kind: 'group',
+      id: `group:${correlationId}`,
+      entries,
+      libraryCount,
+      updatedUtc: entries.map(e => e.updatedUtc).sort().at(-1)!,
+    });
+  });
 
-  protected readonly EVENTS = EVENTS;
+  if (groups.length === 0) return rows;
+
+  return [...rows.filter(r => !grouped.has(r.id)), ...groups]
+    .sort((a, b) => Date.parse(b.updatedUtc) - Date.parse(a.updatedUtc));
 }

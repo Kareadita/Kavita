@@ -91,7 +91,7 @@ public class ProcessSeries(
         var scanWatch = Stopwatch.StartNew();
         var seriesName = parsedInfos[0].Series;
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Updated, seriesName, args.LeftToProcess, args.TotalToProcess));
+            MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Updated, seriesName, args.LeftToProcess, args.TotalToProcess));
         logger.LogInformation("[ScannerService] Beginning series update on {SeriesName}, Forced: {ForceUpdate}", seriesName, args.ForceUpdate);
 
         // Check if there is a Series
@@ -212,8 +212,7 @@ public class ProcessSeries(
                     #pragma warning restore S6667
                     logger.LogDbUpdateConcurrencyException(ex);
                     await eventHub.SendMessageAsync(MessageFactory.Error,
-                        MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series.OriginalName}",
-                            ex.Message));
+                        MessageFactory.DbWriteFailedEvent(library.Id, series.Id > 0 ? series.Id : null, series.OriginalName, ex.Message));
                     return null;
                 }
                 catch (Exception ex)
@@ -224,8 +223,7 @@ public class ProcessSeries(
                         series.Name);
 
                     await eventHub.SendMessageAsync(MessageFactory.Error,
-                        MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series.OriginalName}",
-                            ex.Message));
+                        MessageFactory.DbWriteFailedEvent(library.Id, series.Id > 0 ? series.Id : null, series.OriginalName, ex.Message));
                     return null;
                 }
 
@@ -328,8 +326,7 @@ public class ProcessSeries(
             firstInfo.Series.Sanitize(), normalizedSeries.Sanitize(), library.Name.Sanitize(), seriesCollisions.Count);
 
         await eventHub.SendMessageAsync(MessageFactory.Error,
-            MessageFactory.ErrorEvent($"Series collision on \"{firstInfo.Series}\" in library {library.Name}",
-                explanation + remedy + htmlTable));
+            MessageFactory.SeriesCollisionEvent(library.Id, library.Name, firstInfo.Series, explanation + remedy + htmlTable));
     }
 
     /// <summary>
@@ -370,8 +367,7 @@ public class ProcessSeries(
             logger.LogCritical(
                 "Scan Series has files spread outside a main series folder. This has negative performance effects. Please ensure all series are under a single folder from library");
             await eventHub.SendMessageAsync(MessageFactory.Info,
-                MessageFactory.InfoEvent($"{series.Name} has files spread outside a single series folder",
-                    "This has negative performance effects. Please ensure all series are under a single folder from library"));
+                MessageFactory.FilesOutsideFolderEvent(library.Id, series.Id > 0 ? series.Id : null, series.Name));
         }
         else
         {

@@ -60,4 +60,7 @@ public enum KeyBindTarget
 
     [Description(nameof(NavigateHome))]
     NavigateHome = 18,
+
+    [Description(nameof(OpenEventWidget))]
+    OpenEventWidget = 19,
 }

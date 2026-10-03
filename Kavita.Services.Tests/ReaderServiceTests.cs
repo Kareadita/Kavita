@@ -114,7 +114,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         context.AppUser.Add(new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         });
 
         await context.SaveChangesAsync();
@@ -159,7 +160,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         context.AppUser.Add(new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         });
 
         await context.SaveChangesAsync();
@@ -1635,7 +1637,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         context.AppUser.Add(new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         });
 
         await context.SaveChangesAsync();
@@ -1682,7 +1685,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         context.AppUser.Add(new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         });
 
         await context.SaveChangesAsync();
@@ -1735,7 +1739,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         context.AppUser.Add(new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         });
 
         await context.SaveChangesAsync();
@@ -1823,7 +1828,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         context.AppUser.Add(new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         });
 
         await context.SaveChangesAsync();
@@ -1977,7 +1983,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         context.AppUser.Add(new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         });
 
         await context.SaveChangesAsync();
@@ -2093,7 +2100,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         var user = new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         };
         context.AppUser.Add(user);
 
@@ -2155,7 +2163,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         var user = new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         };
         context.AppUser.Add(user);
 
@@ -2217,7 +2226,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         context.AppUser.Add(new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         });
 
         await context.SaveChangesAsync();
@@ -2332,7 +2342,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         context.AppUser.Add(new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         });
 
         await context.SaveChangesAsync();
@@ -2538,7 +2549,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         context.AppUser.Add(new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         });
 
         await context.SaveChangesAsync();
@@ -2646,7 +2658,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         context.AppUser.Add(new AppUser()
         {
-            UserName = "majora2007"
+            UserName = "majora2007",
+            Libraries = [library]
         });
 
         await context.SaveChangesAsync();

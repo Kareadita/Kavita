@@ -59,6 +59,10 @@ public class RatingController(
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, updateRating.SeriesId, ct))
             return NotFound();
 
+        if (updateRating.ChapterId == null ||
+            await unitOfWork.ChapterRepository.GetSeriesIdForChapter(updateRating.ChapterId.Value, ct) != updateRating.SeriesId)
+            return NotFound();
+
         if (await ratingService.UpdateChapterRating(user, updateRating, ct))
         {
             return Ok();

@@ -116,6 +116,7 @@ const ReservedKeyBinds: KeyBind[] = [
 export const DefaultKeyBinds: Readonly<Record<KeyBindTarget, KeyBind[]>> = {
   [KeyBindTarget.NavigateToSettings]: [],
   [KeyBindTarget.OpenSearch]: [{control: true, key: KeyCode.KeyK}],
+  [KeyBindTarget.OpenEventWidget]: [],
   [KeyBindTarget.NavigateToScrobbling]: [],
   [KeyBindTarget.ToggleFullScreen]: [{key: KeyCode.KeyF}],
   [KeyBindTarget.BookmarkPage]: [{key: KeyCode.KeyB, control: true}],
@@ -151,6 +152,7 @@ export const KeyBindGroups: KeyBindGroup[] = [
     elements: [
       {target: KeyBindTarget.NavigateToSettings},
       {target: KeyBindTarget.OpenSearch},
+      {target: KeyBindTarget.OpenEventWidget},
       {target: KeyBindTarget.NavigateToScrobbling, kavitaPlus: true},
       {target: KeyBindTarget.Escape},
       {target: KeyBindTarget.NavigateHome},
@@ -428,7 +430,7 @@ export class KeyBindService {
    * @param keyBind
    */
   public isReservedKeyBind(keyBind: KeyBind) {
-    for (let reservedKeyBind of ReservedKeyBinds) {
+    for (const reservedKeyBind of ReservedKeyBinds) {
       if (this.areKeyBindsEqual(reservedKeyBind, keyBind)) {
         return true;
       }

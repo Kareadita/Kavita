@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.ReadingLists;
@@ -20,7 +20,7 @@ public interface IReadingListService
     Task<AppUser?> UserHasReadingListAccess(int readingListId, string username);
     Task<bool> DeleteReadingList(int readingListId, AppUser user);
     Task CalculateReadingListAgeRating(ReadingList readingList);
-    Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds, ReadingList readingList);
+    Task<bool> AddChaptersToReadingList(IList<int> chapterIds, ReadingList readingList);
 
     Task CalculateStartAndEndDates(ReadingList readingListWithItems);
     /// <summary>

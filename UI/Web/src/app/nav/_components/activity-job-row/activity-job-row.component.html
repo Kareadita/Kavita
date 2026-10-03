@@ -1,0 +1,114 @@
+<ng-container *transloco="let t; prefix: 'events-widget'">
+  @let current = job();
+  @let isEnded = ended();
+  @let value = progress();
+
+  @if (pinned()) {
+    <div class="pinned d-flex align-items-center gap-2">
+      <i class="fa-solid flex-shrink-0" [class.fa-power-off]="!failed()" [class.fa-triangle-exclamation]="failed()" aria-hidden="true"></i>
+      <div class="content flex-grow-1">
+        <div class="title">
+          @if (isMultiLibrary()) {
+            {{t('scanning-libraries-label')}}
+          } @else if (titleStep(); as step) {
+            {{step | eventTitle : false : libraryNames()}}
+          }
+        </div>
+        <div class="description">
+          @if (failed()) {
+            {{t('failed-label')}}
+          } @else {
+            {{t('interrupted-label')}}
+          }
+          @if (counter(); as count) {
+            <span class="mx-1 dot-separator"></span>{{t('progress-counter-label', count)}}
+          }
+        </div>
+      </div>
+      @if (canRescan()) {
+        <button type="button" class="btn btn-link link p-0 flex-shrink-0" (click)="rescan()">{{EventAction.Rescan | eventAction}}</button>
+      }
+      <button type="button" class="btn btn-icon dismiss d-flex align-items-center justify-content-center flex-shrink-0"
+              [attr.aria-label]="t('dismiss-alt')" (click)="dismissed.emit(current.id)">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
+  } @else {
+    <div class="row-job d-flex gap-3">
+      <div class="time flex-shrink-0">
+        @if (current.endedUtc) {
+          {{current.endedUtc | activityAge : now()}}
+        } @else {
+          {{t('now-label')}}
+        }
+      </div>
+
+      <div class="content flex-grow-1">
+        <div class="d-flex align-items-center gap-2">
+          @if (isEnded) {
+            <span class="dot flex-shrink-0" aria-hidden="true"></span>
+          }
+          <span class="title flex-grow-1">
+            @if (isMultiLibrary()) {
+              {{isEnded ? t('scanned-libraries-label', {count: current.libraryIds.length}) : t('scanning-libraries-label')}}
+            } @else if (titleStep(); as step) {
+              {{step | eventTitle : isEnded : libraryNames()}}
+            }
+          </span>
+          <span class="counter flex-shrink-0">
+            @if (current.endedUtc) {
+              @if (!endedAway()) {
+                {{current.startedUtc | activityDuration : current.endedUtc}}
+              }
+            } @else if (isMultiLibrary()) {
+              {{t('libraries-progress-label', {current: current.libraryIds.length, total: libraryCount()})}}
+            } @else if (counter(); as count) {
+              {{t('progress-counter-label', count)}}
+            } @else if (value.value !== null && !value.indeterminate) {
+              {{value.value | percent}}
+            }
+          </span>
+        </div>
+
+        @if (!isEnded) {
+          <div class="bars d-flex gap-1" aria-hidden="true">
+            @if (value.segments; as segments) {
+              @for (segment of segments; track $index) {
+                <div class="track" [style.flex-grow]="segment.weight">
+                  <div class="fill" [class.striped]="segment.indeterminate" [style.width.%]="segment.indeterminate ? 100 : segment.fill * 100"></div>
+                </div>
+              }
+            } @else {
+              <div class="track flex-grow-1">
+                <div class="fill" [class.striped]="value.indeterminate" [style.width.%]="value.indeterminate ? 100 : (value.value ?? 0) * 100"></div>
+              </div>
+            }
+          </div>
+
+          <div class="description" [title]="step()?.subTitle ?? ''">
+            @if (isMultiLibrary() && currentLibraryName()) {
+              {{currentLibraryName()}}<span class="mx-1 dot-separator"></span>
+            }
+            @if (finishingStep(); as finishing) {
+              {{finishing | eventTitle : false : libraryNames()}}
+            } @else if (finishingUp()) {
+              {{t('finishing-up-label')}}
+            } @else {
+              {{step()?.subTitle}}
+            }
+          </div>
+        } @else if (endedAway()) {
+          <div class="description">{{t('finished-while-away-label')}}</div>
+        } @else if (showSummary()) {
+          <div class="description">{{t('scan-summary-label', {added: current.seriesAdded, removed: current.seriesRemoved})}}</div>
+        }
+
+        @if (canOpenLibrary()) {
+          <div class="d-flex gap-3 mt-1">
+            <button type="button" class="btn btn-link link p-0" (click)="openLibrary()">{{EventAction.OpenLibrary | eventAction}}</button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</ng-container>

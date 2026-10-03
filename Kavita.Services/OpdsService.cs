@@ -656,6 +656,7 @@ public class OpdsService(
         var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId, ct);
         var namingContext = await LocalizedNamingContext.CreateAsync( namingService, localizationService, userId, libraryType);
 
+        // TODO: Missing localization
         var feed = CreateFeed($"{series.Name} - Volume {volume.Name}",
             $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix);
         SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}");

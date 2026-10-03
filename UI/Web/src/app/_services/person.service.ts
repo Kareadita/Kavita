@@ -62,9 +62,6 @@ export class PersonService {
     return this.httpClient.get<string>(this.baseUrl + 'person/coversdb-image?personId=' + personId, TextResonse);
   }
 
-  downloadCover(personId: number) {
-    return this.httpClient.post<string>(this.baseUrl + 'person/fetch-cover?personId=' + personId, {}, TextResonse);
-  }
 
   isValidAlias(personId: number, alias: string, name: string) {
     const req = {personId, name, alias}

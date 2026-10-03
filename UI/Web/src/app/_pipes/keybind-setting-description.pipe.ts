@@ -10,6 +10,8 @@ export class KeybindSettingDescriptionPipe implements PipeTransform {
   prefix = 'keybind-setting-description-pipe';
   transform(value: KeyBindTarget) {
     switch (value) {
+      case KeyBindTarget.OpenEventWidget:
+        return this.create('key-bind-title-open-event-widget', 'key-bind-tooltip-open-event-widget');
       case KeyBindTarget.NavigateToSettings:
         return this.create('key-bind-title-navigate-to-settings', 'key-bind-tooltip-navigate-to-settings');
       case KeyBindTarget.OpenSearch:

@@ -1802,9 +1802,10 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     public async Task RemoveFromOnDeckAsync(int seriesId, int userId, CancellationToken ct = default)
     {
         var existingEntry = await context.AppUserOnDeckRemoval
-            .Where(u => u.Id == userId && u.SeriesId == seriesId)
+            .Where(u => u.AppUserId == userId && u.SeriesId == seriesId)
             .AnyAsync(ct);
         if (existingEntry) return;
+
         context.AppUserOnDeckRemoval.Add(new AppUserOnDeckRemoval()
         {
             SeriesId = seriesId,

@@ -1,0 +1,57 @@
+<ng-container *transloco="let t; prefix: 'events-widget'">
+  @let actionList = actions();
+
+  @if (pinned()) {
+    <div class="pinned d-flex align-items-center gap-2">
+      <i class="fa-solid flex-shrink-0" [class]="pinnedIcon()" aria-hidden="true"></i>
+      <div class="content flex-grow-1">
+        <div class="title">{{label()}}</div>
+        @let pinnedText = description();
+        @if (pinnedText) {
+          <div class="description">{{pinnedText}}</div>
+        }
+      </div>
+      @for (action of actionList; track action) {
+        <button type="button" class="btn btn-link link p-0 flex-shrink-0" (click)="run(action)">{{action | eventAction}}</button>
+      }
+      <button type="button" class="btn btn-icon dismiss d-flex align-items-center justify-content-center flex-shrink-0"
+              [attr.aria-label]="t('dismiss-alt')" (click)="dismissed.emit(entry().id)">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
+  } @else {
+    <div class="row-entry d-flex gap-3">
+      <div class="time flex-shrink-0">{{entry().updatedUtc | activityAge : now()}}</div>
+      <div class="content flex-grow-1">
+        <div class="d-flex align-items-center gap-2">
+          @if (tone()) {
+            <span class="dot flex-shrink-0" [class]="tone()"></span>
+          }
+          <span class="title flex-grow-1">{{label()}}</span>
+          <button type="button" class="btn btn-icon dismiss d-flex align-items-center justify-content-center flex-shrink-0"
+                  [attr.aria-label]="t('dismiss-alt')" (click)="dismissed.emit(entry().id)">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        @let text = description();
+        @if (text) {
+          @if (expandable()) {
+            <button type="button" class="description expandable btn p-0 text-start" [class.clamped]="!expanded()"
+                    [attr.aria-expanded]="expanded()" (click)="expanded.set(!expanded())">{{text}}</button>
+          } @else {
+            <div class="description">{{text}}</div>
+          }
+        }
+
+        @if (actionList.length > 0) {
+          <div class="d-flex gap-3 mt-1">
+            @for (action of actionList; track action) {
+              <button type="button" class="btn btn-link link p-0" (click)="run(action)">{{action | eventAction}}</button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</ng-container>

@@ -186,8 +186,7 @@ public class WordCountAnalyzerService(
                         {
                             logger.LogError(ex, "There was an error reading an epub file for word count, series skipped");
                             await eventHub.SendMessageAsync(MessageFactory.Error,
-                                MessageFactory.ErrorEvent("There was an issue counting words on an epub",
-                                    $"{series.Name} - {file.FilePath}"));
+                                MessageFactory.WordCountFailedEvent(series.LibraryId, series.Id, series.Name, file.FilePath));
                             return;
                         }
 

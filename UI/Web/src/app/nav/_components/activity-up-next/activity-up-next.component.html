@@ -1,0 +1,51 @@
+<ng-container *transloco="let t; prefix: 'events-widget'">
+  @if (items().length > 0) {
+    <div class="header d-flex justify-content-between align-items-center">
+      <span class="caption text-uppercase fw-semibold">{{t('up-next-label')}}</span>
+      @if (hiddenCount() > 0) {
+        <button type="button" class="btn btn-link link p-0" [attr.aria-expanded]="expanded()" (click)="expanded.set(!expanded())">
+          {{expanded() ? t('show-less-label') : t('show-more-label', {count: hiddenCount()})}}
+        </button>
+      }
+    </div>
+
+    @for (item of visibleItems(); track item.id) {
+      <div class="item d-flex gap-3">
+        <div class="time flex-shrink-0">{{item.runAtUtc | utcToLocalTime : 'shortTime'}}</div>
+        <div class="content flex-grow-1">
+          @switch (item.kind) {
+            @case ('task') {
+              <div class="title">{{item.task.taskId | upcomingTaskName}}</div>
+              @if (item.frequency) {
+                <div class="description">{{item.frequency | cronFrequency}}</div>
+              }
+            }
+            @case ('scan') {
+              <div class="title">{{item.title}}</div>
+              <div class="description">{{t('scan-waiting-description')}}</div>
+            }
+            @case ('waiting') {
+              <div class="d-flex justify-content-between align-items-center gap-2">
+                <span class="title">{{t('scans-waiting-label', {count: item.count})}}</span>
+                <button type="button" class="btn btn-link link p-0 flex-shrink-0" [attr.aria-expanded]="waitingOpen()" (click)="waitingOpen.set(!waitingOpen())">
+                  {{waitingOpen() ? t('hide-label') : t('show-label')}}
+                </button>
+              </div>
+              <div class="description">{{t('scan-waiting-description')}}</div>
+              @if (waitingOpen()) {
+                <ul class="waiting list-unstyled mb-0">
+                  @for (name of item.names; track $index) {
+                    <li>{{name}}</li>
+                  }
+                  @if (item.rest > 0) {
+                    <li class="rest">{{t('and-more-label', {count: item.rest})}}</li>
+                  }
+                </ul>
+              }
+            }
+          }
+        </div>
+      </div>
+    }
+  }
+</ng-container>

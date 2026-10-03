@@ -193,13 +193,13 @@ public class BookmarkService(
         return true;
     }
 
-    public async Task<IEnumerable<string>> GetBookmarkFilesById(int seriesId, IEnumerable<int> bookmarkIds,
+    public async Task<IEnumerable<string>> GetBookmarkFilesById(int userId, int seriesId, IEnumerable<int> bookmarkIds,
         CancellationToken ct = default)
     {
         var bookmarkDirectory =
             (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory, ct)).Value;
 
-        var bookmarks = await unitOfWork.UserRepository.GetAllBookmarksByIds(seriesId, bookmarkIds.ToList(), ct);
+        var bookmarks = await unitOfWork.UserRepository.GetAllBookmarksByIds(userId, seriesId, bookmarkIds.ToList(), ct);
 
         return bookmarks
             .Select(b => Parser.NormalizePath(directoryService.FileSystem.Path.Join(bookmarkDirectory,

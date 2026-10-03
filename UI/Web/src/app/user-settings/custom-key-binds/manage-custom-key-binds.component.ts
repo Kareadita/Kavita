@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  DestroyRef, effect,
-  inject,
-  OnInit,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, OnInit, signal} from '@angular/core';
 import {DefaultKeyBinds, KeyBindGroups, KeyBindService, KeyCode,} from "../../_services/key-bind.service";
 import {KeyBind, KeyBindTarget, Preferences} from "../../_models/preferences/preferences";
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
@@ -15,7 +7,7 @@ import {
   SettingKeyBindPickerComponent
 } from "../../settings/_components/setting-key-bind-picker/setting-key-bind-picker.component";
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
-import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from "rxjs";
+import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap} from "rxjs";
 import {map} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
@@ -28,13 +20,17 @@ import {DOCUMENT} from "@angular/common";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {
   applyEach,
-  debounce, disabled,
-  form, FormField,
+  debounce,
+  disabled,
+  form,
+  FormField,
   PathKind,
   SchemaPath,
   SchemaPathTree,
-  validate, ValidationError
+  validate,
+  ValidationError
 } from "@angular/forms/signals";
+
 const MAX_KEYBINDS_PER_TARGET = 5;
 
 type FormModel = {
@@ -72,6 +68,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   protected formModel = signal<FormModel>({
     [KeyBindTarget.NavigateToSettings]: [],
     [KeyBindTarget.OpenSearch]: [],
+    [KeyBindTarget.OpenEventWidget]: [],
     [KeyBindTarget.NavigateToScrobbling]: [],
     [KeyBindTarget.ToggleFullScreen]: [],
     [KeyBindTarget.BookmarkPage]: [],

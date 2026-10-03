@@ -1,0 +1,64 @@
+:host {
+  display: block;
+}
+
+.header {
+  padding: 0.75rem 1rem 0.125rem;
+}
+
+.caption {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--event-widget-muted-text-color);
+}
+
+.item {
+  padding: 0.5rem 1rem;
+}
+
+.time {
+  width: 3.625rem;
+  padding-top: 0.125rem;
+  font-size: 0.75rem;
+  color: var(--event-widget-muted-text-color);
+}
+
+.content {
+  min-width: 0;
+}
+
+.title {
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.description {
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  color: var(--event-widget-muted-text-color);
+}
+
+.waiting {
+  margin-top: 0.375rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  background-color: var(--event-widget-inset-bg-color);
+
+  .rest {
+    color: var(--event-widget-muted-text-color);
+  }
+}
+
+.link {
+  font-size: 0.8125rem;
+  color: var(--event-widget-link-color);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--event-widget-link-hover-color);
+  }
+}

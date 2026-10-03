@@ -399,6 +399,16 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .ToListAsync(ct);
     }
 
+    public async Task<(int VolumeId, int SeriesId, int LibraryId)?> GetParentIdsForChapter(int chapterId, CancellationToken ct = default)
+    {
+        var ids = await context.Chapter
+            .Where(c => c.Id == chapterId)
+            .Select(c => new { c.VolumeId, c.Volume.SeriesId, c.Volume.Series.LibraryId })
+            .FirstOrDefaultAsync(ct);
+
+        return ids == null ? null : (ids.VolumeId, ids.SeriesId, ids.LibraryId);
+    }
+
     public async Task<int?> GetSeriesIdForChapter(int chapterId, CancellationToken ct = default)
     {
         return await context.Chapter

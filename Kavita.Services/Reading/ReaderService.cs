@@ -223,6 +223,14 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     public async Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId, bool saveToReadingSession = true,
         CancellationToken ct = default)
     {
+        if (!await unitOfWork.UserRepository.HasAccessToChapter(userId, progressDto.ChapterId, ct)) return false;
+
+        var parentIds = await unitOfWork.ChapterRepository.GetParentIdsForChapter(progressDto.ChapterId, ct);
+        if (parentIds == null) return false;
+        progressDto.VolumeId = parentIds.Value.VolumeId;
+        progressDto.SeriesId = parentIds.Value.SeriesId;
+        progressDto.LibraryId = parentIds.Value.LibraryId;
+
         // Don't let user save past total pages.
         var pageInfo = await CapPageToChapter(progressDto.ChapterId, progressDto.PageNum);
         progressDto.PageNum = pageInfo.Item1;

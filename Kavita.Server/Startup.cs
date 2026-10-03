@@ -74,6 +74,7 @@ public class Startup
 
         // Disable Hangfire Automatic Retry
         GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
+        GlobalJobFilters.Filters.Add(new JobCorrelationFilter());
     }
 
     // This method gets called by the runtime. Use this method to add services to the container.
@@ -396,11 +397,11 @@ public class Startup
         {
             try
             {
-                logger.LogInformation("Kavita - v{Version}", BuildInfo.Version);
+                logger.LogInformation("Kavita - v{Version}, boot {BootId}", BuildInfo.Version, BuildInfo.BootId);
             }
             catch (Exception)
             {
-                Console.WriteLine($"Kavita - v{BuildInfo.Version}");
+                Console.WriteLine($"Kavita - v{BuildInfo.Version}, boot {BuildInfo.BootId}");
             }
 
             _ = Task.Run(async () =>

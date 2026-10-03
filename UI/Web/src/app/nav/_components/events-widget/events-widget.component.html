@@ -2,134 +2,126 @@
 
   @let readingSessionCount = activeReadingSessions().size;
 
-  <button type="button" class="btn btn-icon"
-          [ngbPopover]="popContent" [title]="t('title-alt')"
-          placement="bottom" [popoverClass]="'nav-events'"
-          [autoClose]="'outside'">
-
-    @if (readingSessionCount > 1) {
-      <span class="me-2" [class.colored]="activeEvents() > 0 || updateAvailable() || readingSessionCount > 0">
-        {{readingSessionCount}}
-      </span>
-    }
-
-    <i aria-hidden="true" class="fa fa-wave-square nav" [class.colored]="activeEvents() > 0 || updateAvailable()"></i>
-
-    @if (errors().length > 0) {
-      <i aria-hidden="true" class="fa fa-circle-exclamation nav widget-button--indicator error"></i>
-    } @else if (infos().length > 0) {
-      <i aria-hidden="true" class="fa fa-circle-info nav widget-button--indicator info"></i>
-    } @else if (updateAvailable()) {
-      <i aria-hidden="true" class="fa fa-circle-arrow-up nav widget-button--indicator update"></i>
-    } @else if (activeEvents() > 0) {
-      <div class="nav widget-button--indicator spinner-border spinner-border-sm"></div>
-    }
+  <button #toggle type="button" class="btn btn-icon"
+          [ngbPopover]="popContent" [title]="t('title-alt')" [attr.aria-label]="buttonAltLabel()"
+          placement="bottom-end" [popoverClass]="'nav-events'"
+          [autoClose]="'outside'" container="body" (shown)="onShown()" (hidden)="isOpen.set(false)">
+    <app-events-widget-icon
+      [runningProgress]="runningProgress()"
+      [indeterminate]="indeterminate()"
+      [attentionCount]="attentionCount()"
+      [hasError]="hasError()"
+      [offline]="offline()"
+      [readingCount]="readingSessionCount" />
   </button>
 
+  <div class="visually-hidden" aria-live="polite">{{announcement()}}</div>
+
   <ng-template #popContent>
-    <ul class="list-group list-group-flush dark-menu">
-      @if (errors().length > 0 || infos().length > 0) {
-        <li class="list-group-item dark-menu-item clickable" (click)="clearAllErrorOrInfos()">
-          {{t('dismiss-all')}}
-        </li>
+    <div class="activity d-flex flex-column" tabindex="-1" role="dialog" [attr.aria-label]="t('title-alt')"
+         (keydown.escape)="closeAndRefocus()">
+      @if (offline()) {
+        <div class="offline d-flex align-items-center gap-2">
+          <i class="fa-solid fa-plug-circle-xmark" aria-hidden="true"></i>
+          <span class="flex-grow-1">{{t('server-unreachable-label')}}</span>
+        </div>
       }
 
-      <!-- Progress Events-->
-      @for (message of progressEvents(); track message.name + '_' + message.eventType) {
-        @if (message.progress === 'indeterminate' || message.progress === 'none') {
-          <li class="list-group-item dark-menu-item">
-            <div class="h6 mb-1">{{message.title}}</div>
-            @if (message.subTitle !== '') {
-              <div class="accent-text mb-1" [title]="message.subTitle">{{message.subTitle}}</div>
+      <div class="header d-flex flex-column gap-2">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">{{t('title-label')}}</span>
+          @if (hasFinished()) {
+            <button type="button" class="btn btn-link link p-0" (click)="activityStore.clearFinished()">{{t('clear-finished-label')}}</button>
+          }
+        </div>
+        <div class="d-flex flex-wrap gap-2" role="group" [attr.aria-label]="t('filter-group-alt')">
+          <button type="button" class="chip d-flex align-items-center gap-1" [class.active]="filter() === ActivityFilter.All"
+                  [attr.aria-pressed]="filter() === ActivityFilter.All" (click)="filter.set(ActivityFilter.All)">
+            {{t('filter-all-label')}}
+          </button>
+          <button type="button" class="chip d-flex align-items-center gap-1" [class.active]="filter() === ActivityFilter.Attention"
+                  [attr.aria-pressed]="filter() === ActivityFilter.Attention" (click)="filter.set(ActivityFilter.Attention)">
+            {{t('filter-attention-label')}}
+            @if (attentionChipCount() > 0) {
+              <span class="count">{{attentionChipCount()}}</span>
             }
-            @if (message.name === EVENTS.ScanProgress && message.body.leftToProcess > 0) {
-              <div class="accent-text mb-1" [title]="t('left-to-process', {leftToProcess: message.body.leftToProcess})">
-                {{t('left-to-process', {leftToProcess: message.body.leftToProcess, totalToProcess: message.body.totalToProcess})}}
-              </div>
+          </button>
+          <button type="button" class="chip d-flex align-items-center gap-1" [class.active]="filter() === ActivityFilter.Jobs"
+                  [attr.aria-pressed]="filter() === ActivityFilter.Jobs" (click)="filter.set(ActivityFilter.Jobs)">
+            {{t('filter-jobs-label')}}
+            @if (jobsChipCount() > 0) {
+              <span class="count">{{jobsChipCount()}}</span>
             }
-            <div class="progress-container row g-0 align-items-center">
-              @if (message.progress === 'indeterminate') {
-                <div class="progress" role="progressbar" style="height: 0.3125rem;">
-                  <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="body flex-grow-1">
+        @if (showPinned()) {
+          <div class="pinned d-flex flex-column gap-1">
+            @for (job of interruptedJobs(); track job.id) {
+              <app-activity-job-row [job]="job" [now]="now()" [libraryNames]="libraryNames()" [pinned]="true"
+                                    (dismissed)="activityStore.dismiss($event)" />
+            }
+            @for (entry of pinned(); track entry.id) {
+              <app-activity-entry-row [entry]="entry" [now]="now()" [libraryNames]="libraryNames()" [pinned]="true"
+                                      (dismissed)="activityStore.dismiss($event)" (navigated)="close()" />
+            }
+          </div>
+        }
+
+        <div class="timeline">
+          @for (item of visibleTimeline(); track item.id) {
+            @switch (item.kind) {
+              @case (ActivityRowKind.Job) {
+                <app-activity-job-row [job]="item" [now]="now()" [libraryNames]="libraryNames()" (navigated)="close()" />
               }
-            </div>
-          </li>
-        } @else {
-          <li class="list-group-item dark-menu-item">
-            <div class="h6 mb-1">{{message.title}}</div>
-            @if (message.subTitle !== '') {
-              <div class="accent-text mb-1" [title]="message.subTitle">{{message.subTitle}}</div>
+              @case (ActivityRowKind.Entry) {
+                <app-activity-entry-row [entry]="item" [now]="now()" [libraryNames]="libraryNames()"
+                                        (dismissed)="activityStore.dismiss($event)" (navigated)="close()" />
+              }
+              @case ('group') {
+                @let isGroupOpen = openGroups().has(item.id);
+                <div class="group d-flex gap-3">
+                  <div class="time flex-shrink-0">{{item.updatedUtc | activityAge : now()}}</div>
+                  <div class="d-flex align-items-center gap-2 flex-grow-1">
+                    <span class="dot flex-shrink-0"></span>
+                    <span class="flex-grow-1">{{t('problems-in-libraries-label', {count: item.libraryCount})}}</span>
+                    <button type="button" class="btn btn-link link p-0 flex-shrink-0" [attr.aria-expanded]="isGroupOpen" (click)="toggleGroup(item.id)">
+                      {{EventAction.Details | eventAction}}
+                    </button>
+                  </div>
+                </div>
+                @if (isGroupOpen) {
+                  <div class="group-entries">
+                    @for (entry of item.entries; track entry.id) {
+                      <app-activity-entry-row [entry]="entry" [now]="now()" [libraryNames]="libraryNames()"
+                                              (dismissed)="activityStore.dismiss($event)" (navigated)="close()" />
+                    }
+                  </div>
+                }
+              }
             }
-            <div class="progress-container row g-0 align-items-center">
-              <div class="col-2">{{prettyPrintProgress(message.body.progress) + '%'}}</div>
-              <div class="col-10 progress" role="progressbar" style="height: 0.3125rem;">
-                <div class="progress-bar"
-                     [ngStyle]="{'width': message.body.progress * 100 + '%'}"
-                     [attr.aria-valuenow]="message.body.progress * 100"
-                     aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-            @if (message.name === EVENTS.ScanProgress && message.body.leftToProcess > 0) {
-              <div class="accent-text mb-1" [title]="t('left-to-process', {leftToProcess: message.body.leftToProcess})">
-                {{t('left-to-process', {leftToProcess: message.body.leftToProcess, totalToProcess: message.body.totalToProcess})}}
-              </div>
+          } @empty {
+            @if (!showPinned()) {
+              <div class="empty text-center">{{filter() === ActivityFilter.All ? t('no-data-description') : t('filter-empty-label')}}</div>
             }
-          </li>
+          }
+        </div>
+
+        @if (showUpNext()) {
+          <app-activity-up-next [snapshot]="snapshot()!" [delayedEntries]="delayedEntries()" [libraryNames]="libraryNames()" />
         }
-      }
+      </div>
 
-      <!-- Single updates (Informational/Update available)-->
-      @for (singleUpdate of singleUpdates(); track singleUpdate) {
-        @if (singleUpdate.name === EVENTS.UpdateAvailable) {
-          <li class="list-group-item dark-menu-item update-available" (click)="handleUpdateAvailableClick(singleUpdate)">
-            <i class="fa fa-chevron-circle-up me-1" aria-hidden="true"></i>{{t('update-available')}}
-          </li>
-        } @else {
-          <li class="list-group-item dark-menu-item update-available">
-            <div>{{singleUpdate.title}}</div>
-            @if (singleUpdate.subTitle !== '') {
-              <div class="accent-text">{{singleUpdate.subTitle}}</div>
-            }
-          </li>
-        }
-      }
-
-      <!-- Errors -->
-      @for (error of errors(); track error) {
-        <li class="list-group-item dark-menu-item error" role="alert" (click)="seeMore(error)">
-          <div>
-            <div class="h6 mb-1"><i class="fa-solid fa-triangle-exclamation me-2" aria-hidden="true"></i>{{error.title}}</div>
-            <div class="accent-text mb-1">{{t('more-info')}}</div>
-          </div>
-          <button type="button" class="btn-close float-end" [attr.aria-label]="t('close')" (click)="removeErrorOrInfo(error, $event)"></button>
-        </li>
-      }
-
-      <!-- Infos -->
-      @for (info of infos(); track info) {
-        <li class="list-group-item dark-menu-item info" role="alert" (click)="seeMore(info)">
-          <div>
-            <div class="h6 mb-1"><i class="fa-solid fa-circle-info me-2" aria-hidden="true"></i>{{info.title}}</div>
-            <div class="accent-text mb-1">{{t('more-info')}}</div>
-          </div>
-          <button type="button" class="btn-close float-end" [attr.aria-label]="t('close')" (click)="removeErrorOrInfo(info, $event)"></button>
-        </li>
-      }
-
-      @if (readingSessionCount > 0) {
-        <li class="list-group-item dark-menu-item">
-          <a [routerLink]="['settings']" [fragment]="'admin-activity'">{{t('reading-now', {num: readingSessionCount})}}</a>
-        </li>
-      }
-
-      @if (!downloadService.hasActiveDownloads() && activeEvents() === 0 && readingSessionCount === 0) {
-        @if (isConnected()) {
-          <li class="list-group-item dark-menu-item">{{t('no-data')}}</li>
-        } @else {
-          <li class="list-group-item dark-menu-item">{{t('not-connected')}}</li>
-        }
-      }
-    </ul>
+      <div class="footer d-flex align-items-center gap-2">
+        <span class="flex-grow-1">
+          @if (readingSessionCount > 0) {
+            {{t('reading-now', {num: readingSessionCount})}}
+          }
+        </span>
+        <a class="link" [routerLink]="['/settings']" [fragment]="SettingsTabId.Activity" (click)="close()">{{t('view-activity-label')}}</a>
+      </div>
+    </div>
   </ng-template>
 </ng-container>

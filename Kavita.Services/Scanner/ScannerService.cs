@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Channels;
@@ -218,7 +217,7 @@ public class ScannerService(
             if (seriesDirs.Keys.Count == 0)
             {
                 logger.LogCritical("Scan Series has files spread outside a main series folder. Defaulting to library folder (this is expensive)");
-                await eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.InfoEvent($"{series.Name} is not organized well and scan series will be expensive!", "Scan Series has files spread outside a main series folder. Defaulting to library folder (this is expensive)"));
+                await eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.FilesOutsideFolderEvent(series.LibraryId, series.Id, series.Name));
                 seriesDirs = directoryService.FindHighestDirectoriesFromFiles(libraryPaths, files.Select(f => f.FilePath).ToList());
             }
 
@@ -228,7 +227,7 @@ public class ScannerService(
             if (!string.IsNullOrEmpty(folderPath) && libraryPaths.Contains(folderPath))
             {
                 logger.LogCritical("[ScannerSeries] {SeriesName} scan aborted. Files for series are not in a nested folder under library path. Correct this and rescan", series.Name);
-                await eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent($"{series.Name} scan aborted", "Files for series are not in a nested folder under library path. Correct this and rescan."));
+                await eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ScanSeriesNotNestedEvent(series.LibraryId, series.Id, series.Name));
                 return;
             }
         }
@@ -236,12 +235,12 @@ public class ScannerService(
         if (string.IsNullOrEmpty(folderPath))
         {
             logger.LogCritical("[ScannerSeries] Scan Series could not find a single, valid folder root for files");
-            await eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent($"{series.Name} scan aborted", "Scan Series could not find a single, valid folder root for files"));
+            await eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ScanSeriesNoRootEvent(series.LibraryId, series.Id, series.Name));
             return;
         }
 
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name, 1));
+            MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Started, series.Name, 1));
 
         logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var (scanElapsedTime, parsedSeries) = await ScanFiles(library, [folderPath],
@@ -278,7 +277,7 @@ public class ScannerService(
                  // I think we should just fail and tell user to fix their setup. This is extremely expensive for an edge case
                  logger.LogCritical("We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan");
                  await eventHub.SendMessageAsync(MessageFactory.Error,
-                     MessageFactory.ErrorEvent($"Error scanning {series.Name}", "We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan"));
+                     MessageFactory.ScanSeriesNoFilesEvent(series.LibraryId, series.Id, series.Name));
                  await unitOfWork.RollbackAsync();
                  return;
              }
@@ -293,12 +292,10 @@ public class ScannerService(
 
         var toProcessList = toProcess.Select(k => parsedSeries[k]).ToList();
         var totalCount = toProcessList.Count;
-        var current = 0;
+        var seriesLeftToProcess = totalCount;
 
         foreach (var pSeries in toProcessList)
         {
-            current++;
-
             using var scope = scopeFactory.CreateScope();
             var processSeries = scope.ServiceProvider.GetRequiredService<IProcessSeries>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -308,7 +305,7 @@ public class ScannerService(
             var processedSeriesId = await processSeries.ProcessSeriesAsync(settings, pSeries, new ProcessSeriesArgs
             {
                 Library = scopedLibrary,
-                LeftToProcess = totalCount - current,
+                LeftToProcess = seriesLeftToProcess,
                 TotalToProcess = totalCount,
                 ForceUpdate = bypassFolderOptimizationChecks,
             });
@@ -321,11 +318,13 @@ public class ScannerService(
                 await metadataService.GenerateCoversForSeries(serverSettings, scopedLibrary.Id, processedSeriesId.Value, bypassFolderOptimizationChecks, false);
                 await wordCountAnalyzerService.ScanSeries(scopedLibrary.Id, processedSeriesId.Value, bypassFolderOptimizationChecks);
             }
+
+            seriesLeftToProcess--;
         }
 
         // Tell UI that this series is done
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
+            MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Ended, series.Name));
 
         await metadataService.RemoveAbandonedMetadataKeys();
 
@@ -363,20 +362,21 @@ public class ScannerService(
             .Distinct()
             .ToList();
 
-        if (!await CheckMounts(library.Name, seriesFolderPaths))
+        if (!await CheckMounts(library.Id, library.Name, seriesFolderPaths))
         {
             logger.LogCritical(
                 "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return ScanCancelReason.FolderMount;
         }
 
-        if (!await CheckMounts(library.Name, libraryPaths))
+        if (!await CheckMounts(library.Id, library.Name, libraryPaths))
         {
             logger.LogCritical(
                 "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return ScanCancelReason.FolderMount;
         }
 
+        // TODO: Since this is never called, let's remove it
         // If all series Folder paths haven't been modified since last scan, abort (NOTE: This flow never happens as ScanSeries will always bypass)
         if (!bypassFolderChecks)
         {
@@ -392,8 +392,7 @@ public class ScannerService(
                         "[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan",
                         series.Name);
                     await eventHub.SendMessageAsync(MessageFactory.Info,
-                        MessageFactory.InfoEvent($"{series.Name} scan has no work to do",
-                            $"All folders have not been changed since last scan ({series.LastFolderScanned.ToString(CultureInfo.CurrentCulture)}). Scan will be aborted."));
+                        MessageFactory.ScanNoWorkEvent(series.LibraryId, series.Id, series.Name, series.LastFolderScanned));
                     return ScanCancelReason.NoChange;
                 }
             }
@@ -403,8 +402,7 @@ public class ScannerService(
                 logger.LogError(ex, "[ScannerService] Scan series for {SeriesName} found the folder path no longer exists",
                     series.Name);
                 await eventHub.SendMessageAsync(MessageFactory.Info,
-                    MessageFactory.ErrorEvent($"{series.Name} scan has no work to do",
-                        "The folder the series was in is missing. Delete series manually or perform a library scan."));
+                    MessageFactory.ScanSeriesFolderMissingEvent(series.LibraryId, series.Id, series.Name));
                 return ScanCancelReason.NoCancel;
             }
         }
@@ -443,19 +441,20 @@ public class ScannerService(
     /// <summary>
     /// Ensure that all library folders are mounted. In the case that any are empty or non-existent, emit an event to the UI via EventHub and return false
     /// </summary>
+    /// <param name="libraryId"></param>
     /// <param name="libraryName"></param>
     /// <param name="folders"></param>
     /// <returns></returns>
-    private async Task<bool> CheckMounts(string libraryName, IList<string> folders)
+    private async Task<bool> CheckMounts(int libraryId, string libraryName, IList<string> folders)
     {
         // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
         if (folders.Any(f => !directoryService.IsDriveMounted(f)))
         {
             logger.LogCritical("[ScannerService] Some of the root folders for library ({LibraryName} are not accessible. Please check that drives are connected and rescan. Scan will be aborted", libraryName);
+            var unmountedFolders = folders.Where(f => !directoryService.IsDriveMounted(f)).ToArray();
 
             await eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.ErrorEvent("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted",
-                    string.Join(", ", folders.Where(f => !directoryService.IsDriveMounted(f)))));
+                MessageFactory.RootFoldersInaccessibleEvent(libraryId, libraryName, unmountedFolders));
 
             return false;
         }
@@ -470,10 +469,7 @@ public class ScannerService(
                              "Scan has been aborted. " +
                              "Check that your mount is connected or change the library's root folder and rescan");
 
-            await eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent( $"Some of the root folders for the library, {libraryName}, are empty.",
-                "Either your mount has been disconnected or you are trying to delete all series in the library. " +
-                "Scan has been aborted. " +
-                "Check that your mount is connected or change the library's root folder and rescan"));
+            await eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.RootFoldersEmptyEvent(libraryId, libraryName));
 
             return false;
         }
@@ -522,7 +518,7 @@ public class ScannerService(
             LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
 
         var libraryFolderPaths = library!.Folders.Select(fp => fp.Path).ToList();
-        if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
+        if (!await CheckMounts(library.Id, library.Name, libraryFolderPaths)) return;
 
 
         // Validations are done, now we can start actual scan
@@ -578,7 +574,7 @@ public class ScannerService(
         }
 
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
+            MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Ended, string.Empty));
         await metadataService.RemoveAbandonedMetadataKeys();
 
         BackgroundJob.Enqueue(() => directoryService.ClearDirectory(directoryService.CacheDirectory));
@@ -791,8 +787,12 @@ public class ScannerService(
             channel.Writer.Complete();
         }
 
-        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(libraryName, ProgressEventType.Ended));
+        // Not an ended: ScanLibrary sends that after the commit. Progress 1 tells the widget covers and word count are what remain
+        if (totalSeriesToProcess > 0)
+        {
+            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.LibraryScanProgressEvent(libraryId, libraryName, ProgressEventType.Updated, string.Empty, 0, totalSeriesToProcess));
+        }
 
         logger.LogDebug("[ScannerService] Finished writing metadata for {Count} series in {Elapsed}ms", toProcess.Count, sw.ElapsedMilliseconds);
 

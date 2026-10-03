@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -138,7 +138,7 @@ public interface IScrobblingService
     [DisableConcurrentExecution(60 * 60 * 60)]
     Task CreateEventsFromExistingHistoryForSeries(int seriesId, CancellationToken ct = default);
     Task ClearEventsForSeries(int userId, int seriesId, CancellationToken ct = default);
-    Task<bool> RetryScrobbleAsync(int authUserId, KavitaPlusAuditEntryDto auditEntry, CancellationToken ct = default);
+    Task<bool> RetryScrobbleAsync(KavitaPlusAuditEntryDto auditEntry, CancellationToken ct = default);
 
     /// <summary>
     /// Sync local information for each scrobble provider for all suers

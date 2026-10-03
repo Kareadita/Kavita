@@ -122,6 +122,10 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + 'library/scan?libraryId=' + libraryId + '&force=' + force, {});
   }
 
+  scanAll(force = false) {
+    return this.httpClient.post(this.baseUrl + 'library/scan-all?force=' + force, {});
+  }
+
   scanMultipleLibraries(libraryIds: Array<number>, force = false) {
     return this.httpClient.post(this.baseUrl + 'library/scan-multiple', {ids: libraryIds, force: force});
   }
