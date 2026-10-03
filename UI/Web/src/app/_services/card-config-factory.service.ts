@@ -102,7 +102,11 @@ export class CardConfigFactory {
       progressFunc: (s) => ({ pages: s.pages, pagesRead: s.pagesRead }),
 
       formatBadgeFunc: (s) => s.format,
-      countFunc: () => 0,
+      // Fall back to chapterCount whenever there are no real Volumes
+      countFunc: (s) => {
+        if (!this.accountService.userPreferences()?.showSeriesItemCount) return 0;
+        return s.volumeCount > 0 ? s.volumeCount : s.chapterCount;
+      },
       showErrorFunc: (s) => s.pages === 0,
       ariaLabelFunc: (s) => s.name,
 
