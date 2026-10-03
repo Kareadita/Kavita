@@ -18,6 +18,7 @@ import {LayoutMode} from '../../_models/layout-mode';
 import {FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART} from '../../_models/reader-enums';
 import {ReaderSetting} from '../../_models/reader-setting';
 import {ImageRenderer} from '../../_models/renderer';
+import { ImageZoomDirective } from '../../../_directives/image-zoom.directive';
 import {MangaReaderService} from '../../_service/manga-reader.service';
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
@@ -32,7 +33,7 @@ const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRigh
     templateUrl: './canvas-renderer.component.html',
     styleUrls: ['./canvas-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SafeStylePipe]
+    imports: [SafeStylePipe, ImageZoomDirective]
 })
 export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRenderer {
   private readonly destroyRef = inject(DestroyRef);

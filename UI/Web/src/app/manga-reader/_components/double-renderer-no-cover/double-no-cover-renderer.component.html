@@ -1,7 +1,8 @@
 @if (isValid()) {
   <div class="image-container {{imageFitClass()}} {{layoutClass()}} {{emulateBookClass()}}"
       [class.center-double]="shouldRenderDouble()"
-      [style.filter]="darkness() | safeStyle">
+      [style.filter]="darkness() | safeStyle"
+      appImageZoom [zoomResetKey]="currentImage" [zoomResetMode]="imageFitClass()">
 
     @if (currentImage) {
       <img alt=" "
