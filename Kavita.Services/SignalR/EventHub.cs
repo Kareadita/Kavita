@@ -98,15 +98,15 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
     /// Sends a message directly to a user if they are connected
     /// </summary>
     /// <param name="method"></param>
-    /// <param name="messageDto"></param>
+    /// <param name="message"></param>
     /// <param name="userId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task SendMessageToAsync(string method, SignalRMessageDto messageDto, int userId, CancellationToken ct = default)
+    public async Task SendMessageToAsync(string method, SignalRMessageDto message, int userId, CancellationToken ct = default)
     {
-        StampCorrelationId(messageDto);
+        StampCorrelationId(message);
 
-        await messageHub.Clients.Users([userId + string.Empty]).SendAsync(method, messageDto, cancellationToken: ct);
+        await messageHub.Clients.Users([userId + string.Empty]).SendAsync(method, message, cancellationToken: ct);
     }
 
 }

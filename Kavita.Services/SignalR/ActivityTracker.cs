@@ -34,7 +34,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
     {
     }
 
-    private sealed record Row(SignalRMessageDto MessageDto, DateTimeOffset FirstSeen, DateTimeOffset LastSeen);
+    private sealed record Row(SignalRMessageDto message, DateTimeOffset FirstSeen, DateTimeOffset LastSeen);
 
     private sealed class JobHistory(DateTime startedUtc)
     {
@@ -47,33 +47,33 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
         public int SeriesRemoved { get; set; }
     }
 
-    public void Record(string method, SignalRMessageDto messageDto)
+    public void Record(string method, SignalRMessageDto message)
     {
         switch (method)
         {
             case MessageFactory.NotificationProgress:
-                RecordProgress(messageDto);
+                RecordProgress(message);
                 break;
             case MessageFactory.SeriesAdded:
             case MessageFactory.SeriesRemoved:
-                CountSeries(method, messageDto.CorrelationId);
+                CountSeries(method, message.CorrelationId);
                 break;
             default:
-                if (EntryMethods.Contains(method)) RecordEntry(messageDto);
+                if (EntryMethods.Contains(method)) RecordEntry(message);
                 break;
         }
     }
 
-    private void RecordProgress(SignalRMessageDto messageDto)
+    private void RecordProgress(SignalRMessageDto message)
     {
-        if (messageDto.Progress == ProgressType.None) return;
+        if (message.Progress == ProgressType.None) return;
 
-        RecordHistory(messageDto);
+        RecordHistory(message);
 
         // One job sends several progress names (FileScan, ScanProgress, CoverUpdate), each ends on its own
-        var key = $"{messageDto.Name}|{messageDto.CorrelationId}";
+        var key = $"{message.Name}|{message.CorrelationId}";
 
-        if (messageDto.EventType == ProgressEventType.Ended)
+        if (message.EventType == ProgressEventType.Ended)
         {
             _rows.TryRemove(key, out _);
             return;
@@ -81,8 +81,8 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
 
         var now = timeProvider.GetUtcNow();
         _rows.AddOrUpdate(key,
-            _ => new Row(messageDto, now, now),
-            (_, existing) => existing with { MessageDto = messageDto, LastSeen = now });
+            _ => new Row(message, now, now),
+            (_, existing) => existing with { message = message, LastSeen = now });
 
         if (_rows.Count > MaxRows) EvictOldest();
     }
@@ -103,7 +103,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
 
         return _rows.Values
             .OrderBy(r => r.FirstSeen)
-            .Select(r => r.MessageDto)
+            .Select(r => r.message)
             .ToList();
     }
 
@@ -139,33 +139,33 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
         }
     }
 
-    private void RecordHistory(SignalRMessageDto messageDto)
+    private void RecordHistory(SignalRMessageDto message)
     {
-        if (string.IsNullOrEmpty(messageDto.CorrelationId)) return;
+        if (string.IsNullOrEmpty(message.CorrelationId)) return;
 
         lock (_historyLock)
         {
-            if (!_jobs.TryGetValue(messageDto.CorrelationId, out var job))
+            if (!_jobs.TryGetValue(message.CorrelationId, out var job))
             {
                 // An ended for a job never seen (or already pruned) has nothing to close
-                if (messageDto.EventType == ProgressEventType.Ended) return;
+                if (message.EventType == ProgressEventType.Ended) return;
 
-                job = new JobHistory(messageDto.EventTimeUtc);
-                _jobs[messageDto.CorrelationId] = job;
+                job = new JobHistory(message.EventTimeUtc);
+                _jobs[message.CorrelationId] = job;
             }
 
-            job.LastEventUtc = messageDto.EventTimeUtc;
+            job.LastEventUtc = message.EventTimeUtc;
             job.LastSeen = timeProvider.GetUtcNow();
 
-            if (messageDto.EventType == ProgressEventType.Ended)
+            if (message.EventType == ProgressEventType.Ended)
             {
-                job.Ended.Add(messageDto.Name);
+                job.Ended.Add(message.Name);
             }
             else
             {
                 // CoverUpdate starts again for every series, so a step can reopen
-                job.Ended.Remove(messageDto.Name);
-                job.Steps[messageDto.Name] = messageDto;
+                job.Ended.Remove(message.Name);
+                job.Steps[message.Name] = message;
             }
 
             if (_jobs.Count > MaxRecentJobs) _jobs.Remove(_jobs.MinBy(j => j.Value.LastSeen).Key);
@@ -185,11 +185,11 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
         }
     }
 
-    private void RecordEntry(SignalRMessageDto messageDto)
+    private void RecordEntry(SignalRMessageDto message)
     {
         lock (_historyLock)
         {
-            _entries.Add((messageDto, timeProvider.GetUtcNow()));
+            _entries.Add((message, timeProvider.GetUtcNow()));
             if (_entries.Count > MaxRecentEntries) _entries.RemoveAt(0);
         }
     }
@@ -208,7 +208,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
 
     private static bool IsAlive(Row row, IReadOnlySet<string> processingJobIds, DateTimeOffset staleBefore)
     {
-        var jobId = JobIdOf(row.MessageDto.CorrelationId);
+        var jobId = JobIdOf(row.message.CorrelationId);
         return jobId == null ? row.LastSeen >= staleBefore : processingJobIds.Contains(jobId);
     }
 

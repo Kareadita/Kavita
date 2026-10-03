@@ -10,8 +10,8 @@ public class MessageFactoryTests
     // Same shape SignalR's JSON hub protocol writes: camelCase, enums as numbers, NaN rejected
     private static readonly JsonSerializerOptions HubJson = new(JsonSerializerDefaults.Web);
 
-    private static JsonElement Serialize(SignalRMessageDto messageDto) =>
-        JsonSerializer.SerializeToElement(messageDto, HubJson);
+    private static JsonElement Serialize(SignalRMessageDto message) =>
+        JsonSerializer.SerializeToElement(message, HubJson);
 
     public static TheoryData<SignalRMessageDto, MessageEventPriority> PriorityCases => new()
     {
@@ -28,9 +28,9 @@ public class MessageFactoryTests
 
     [Theory]
     [MemberData(nameof(PriorityCases))]
-    public void Factory_SetsPriority(SignalRMessageDto messageDto, MessageEventPriority expected)
+    public void Factory_SetsPriority(SignalRMessageDto message, MessageEventPriority expected)
     {
-        Assert.Equal(expected, messageDto.Priority);
+        Assert.Equal(expected, message.Priority);
     }
 
     [Fact]
@@ -76,9 +76,9 @@ public class MessageFactoryTests
 
     [Theory]
     [MemberData(nameof(SingleCases))]
-    public void OneOffEvents_SerializeAsSingle(SignalRMessageDto messageDto)
+    public void OneOffEvents_SerializeAsSingle(SignalRMessageDto message)
     {
-        Assert.Equal("single", Serialize(messageDto).GetProperty("eventType").GetString());
+        Assert.Equal("single", Serialize(message).GetProperty("eventType").GetString());
     }
 
     [Fact]

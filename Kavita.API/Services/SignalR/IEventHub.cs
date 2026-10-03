@@ -10,5 +10,5 @@ namespace Kavita.API.Services.SignalR;
 public interface IEventHub
 {
     Task SendMessageAsync(string method, SignalRMessageDto message, bool onlyAdmins = true, CancellationToken ct = default);
-    Task SendMessageToAsync(string method, SignalRMessageDto messageDto, int userId, CancellationToken ct = default);
+    Task SendMessageToAsync(string method, SignalRMessageDto message, int userId, CancellationToken ct = default);
 }

@@ -8,7 +8,7 @@ namespace Kavita.API.Services.SignalR;
 /// </summary>
 public interface IActivityTracker
 {
-    void Record(string method, SignalRMessageDto messageDto);
+    void Record(string method, SignalRMessageDto message);
 
     /// <summary>
     /// Latest message per job, oldest first. Rows whose Hangfire job is no longer in <paramref name="processingJobIds"/> are dropped,

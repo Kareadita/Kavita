@@ -19,9 +19,9 @@ public class ProgressThrottleTests
     private readonly ProgressThrottle _throttle = new(NullLogger<ProgressThrottle>.Instance, TimeProvider.System, Interval);
     private readonly ConcurrentQueue<SignalRMessageDto> _sent = new();
 
-    private Task Send(SignalRMessageDto messageDto) => _throttle.SendAsync(messageDto, () =>
+    private Task Send(SignalRMessageDto message) => _throttle.SendAsync(message, () =>
     {
-        _sent.Enqueue(messageDto);
+        _sent.Enqueue(message);
         return Task.CompletedTask;
     });
 
