@@ -55,8 +55,8 @@ export class ThemeService {
   public themes$ = this.themesSource.asObservable();
   public themes = toSignal(this.themes$);
 
-  private darkModeSource = new ReplaySubject<boolean>(1);
-  public isDarkMode$ = this.darkModeSource.asObservable();
+  // Track in its own signal so effects only run when the name changes
+  private readonly currentThemeName = computed(() => this.accountService.currentUser()?.preferences.theme.name ?? this.defaultTheme);
 
   /**
    * Maintain a cache of themes. SignalR will inform us if we need to refresh cache
@@ -97,15 +97,8 @@ export class ThemeService {
     });
 
     effect(() => {
-      this.accountService.userId(); // Change detector
-
-      // We only want to refresh the theme when the user changes, not the user object (token refresh)
-      const user = untracked(this.accountService.currentUser);
-      if (user?.preferences && user?.preferences.theme) {
-        this.setTheme(user.preferences.theme.name);
-      } else {
-        this.setTheme(this.defaultTheme);
-      }
+      const themeName = this.currentThemeName();
+      this.setTheme(themeName);
     });
   }
 
@@ -249,12 +242,10 @@ export class ThemeService {
           this.injectStyleNode(theme, content);
           this.updateMetaTags();
           this.currentThemeSource.next(theme);
-          this.darkModeSource.next(this.isDarkTheme());
         });
       } else {
         this.updateMetaTags();
         this.currentThemeSource.next(theme);
-        this.darkModeSource.next(this.isDarkTheme());
       }
     } else {
       // Only time themes isn't already loaded is on first load

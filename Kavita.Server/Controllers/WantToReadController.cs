@@ -75,7 +75,7 @@ public class WantToReadController(
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!,
             AppUserIncludes.WantToRead, ct);
         if (user == null) return Unauthorized();
-        if (!await unitOfWork.UserRepository.HasAccessToAllSeries(user.Id, dto.SeriesIds, ct)) return NotFound();
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(user.Id, dto.SeriesIds, ct)) return NotFound();
 
         var existingIds = user.WantToRead.Select(s => s.SeriesId).ToList();
         var idsToAdd = dto.SeriesIds.Except(existingIds);

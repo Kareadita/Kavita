@@ -3,7 +3,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {MemberService} from "../../_services/member.service";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
-import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {UserTokenInfo} from "../../_models/kavitaplus/user-token-info";
 import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
@@ -20,7 +19,6 @@ import {NULL_DATE} from "../../_pipes/date-year-range.pipe";
     TranslocoDirective,
     DefaultValuePipe,
     UtcToLocalTimePipe,
-    VirtualScrollerModule,
     NgxDatatableModule,
     ResponsiveTableComponent,
     ScrobbleProviderNamePipe,

@@ -63,11 +63,17 @@ export class EpubHighlightComponent {
   });
 
 
-  viewAnnotation() {
+  viewAnnotation(event: Event) {
     // Don't view annotation if a drawer is already open
     if (this.epubMenuService.isDrawerOpen()) return;
 
+    if (this.hasOwnAction(event.target)) return;
+
     this.epubMenuService.openViewAnnotationDrawer(this.annotation()!, false, (_) => {});
+  }
+
+  private hasOwnAction(target: EventTarget | null): boolean {
+    return target instanceof Element && target.closest('a[href]') !== null;
   }
 
 }

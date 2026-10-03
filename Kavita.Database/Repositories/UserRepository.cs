@@ -211,6 +211,19 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .AnyAsync(library => library.AppUsers.Any(user => user.Id == userId) && library.Id == libraryId, ct);
     }
 
+    public async Task<bool> HasAccessToSeries(int userId, IEnumerable<int> seriesIds, CancellationToken ct = default)
+    {
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
+
+        var accessibleCount = await context.Series
+            .Where(s => seriesIds.Contains(s.Id))
+            .Where(s => s.Library.AppUsers.Any(user => user.Id == userId))
+            .RestrictAgainstAgeRestriction(userRating)
+            .CountAsync(ct);
+
+        return accessibleCount == seriesIds.Distinct().Count();
+    }
+
     /// <summary>
     /// Does the user have library and age restriction access to a given series
     /// </summary>
@@ -251,21 +264,6 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
             .AnyAsync(c => c.Id == chapterId, ct);
-    }
-
-    public async Task<bool> HasAccessToAllSeries(int userId, IEnumerable<int> seriesIds, CancellationToken ct = default)
-    {
-        var distinctIds = seriesIds.Distinct().ToList();
-        if (distinctIds.Count == 0) return true;
-
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
-        var accessibleCount = await context.Series
-            .Where(s => distinctIds.Contains(s.Id))
-            .Where(s => s.Library.AppUsers.Any(user => user.Id == userId))
-            .RestrictAgainstAgeRestriction(userRating)
-            .CountAsync(ct);
-
-        return accessibleCount == distinctIds.Count;
     }
 
     public async Task<bool> HasAccessToAllVolumes(int userId, IEnumerable<int> volumeIds, CancellationToken ct = default)

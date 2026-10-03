@@ -112,10 +112,10 @@ public interface IUserRepository
 
     #region Permissions
     Task<bool> HasAccessToLibrary(int userId, int libraryId, CancellationToken ct = default);
+    Task<bool> HasAccessToSeries(int userId, IEnumerable<int> seriesIds, CancellationToken ct = default);
     Task<bool> HasAccessToSeries(int userId, int seriesId, CancellationToken ct = default);
     Task<bool> HasAccessToVolume(int userId, int volumeId, CancellationToken ct = default);
     Task<bool> HasAccessToChapter(int userId, int chapterId, CancellationToken ct = default);
-    Task<bool> HasAccessToAllSeries(int userId, IEnumerable<int> seriesIds, CancellationToken ct = default);
     Task<bool> HasAccessToAllVolumes(int userId, IEnumerable<int> volumeIds, CancellationToken ct = default);
     Task<bool> HasAccessToAllChapters(int userId, IEnumerable<int> chapterIds, CancellationToken ct = default);
     Task<bool> HasAccessToPerson(int userId, int personId, CancellationToken ct = default);

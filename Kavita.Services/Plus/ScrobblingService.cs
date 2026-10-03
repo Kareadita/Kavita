@@ -1226,27 +1226,44 @@ public class ScrobblingService : IScrobblingService
 
     private async Task ProcessReadEvents(ScrobbleSyncContext ctx, CancellationToken ct)
     {
-        await ProcessEvents(ctx.ReadEvents, ctx, async evt => new ScrobbleV3Dto
+        await ProcessEvents(ctx.ReadEvents, ctx, async evt =>
         {
-            Provider = evt.ScrobbleProvider,
-            AuthenticationToken = null,
-            Format = evt.Format,
-            AniListId = evt.AniListId,
-            MalId = (int?)evt.MalId,
-            MangabakaId = evt.MangabakaId,
-            HardcoverId = evt.HardcoverId,
-            ScrobbleEventType = evt.ScrobbleEventType,
-            ChapterNumber = evt.ChapterNumber,
-            VolumeNumber = (int?)evt.VolumeNumber,
-            PercentRead = (int?)evt.Progress,
-            TotalReadCountForSeries = ((await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(evt.SeriesId, evt.AppUserId, ct: ct))!).TotalReads,
-            SeriesName = evt.Series.Name,
-            ScrobbleDateUtc = evt.LastModifiedUtc,
-            Year = evt.Series.Metadata.ReleaseYear,
-            StartedReadingDateUtc = await _unitOfWork.AppUserProgressRepository.GetFirstProgressForSeries(evt.SeriesId,
-                evt.AppUser.Id, ct),
-            LatestReadingDateUtc = await _unitOfWork.AppUserProgressRepository.GetLatestProgressForSeries(evt.SeriesId,
-                evt.AppUser.Id, ct),
+            DateTime? startedReadingDateUtc;
+            DateTime? latestReadingDateUtc;
+            if (evt.ChapterId is null)
+            {
+                startedReadingDateUtc = await _unitOfWork.AppUserProgressRepository.GetFirstProgressForSeries(evt.SeriesId, evt.AppUser.Id, ct);
+                latestReadingDateUtc = await _unitOfWork.AppUserProgressRepository.GetLatestProgressForSeries(evt.SeriesId, evt.AppUser.Id, ct);
+            }
+            else
+            {
+                var chapterId = evt.ChapterId.Value;
+                startedReadingDateUtc = await _unitOfWork.AppUserProgressRepository.GetFirstProgressForChapter(chapterId, evt.AppUser.Id, ct);
+                latestReadingDateUtc = await _unitOfWork.AppUserProgressRepository.GetLatestProgressForChapter(chapterId, evt.AppUser.Id, ct);
+            }
+
+            return new ScrobbleV3Dto
+            {
+                Provider = evt.ScrobbleProvider,
+                AuthenticationToken = null,
+                Format = evt.Format,
+                AniListId = evt.AniListId,
+                MalId = (int?)evt.MalId,
+                MangabakaId = evt.MangabakaId,
+                HardcoverId = evt.HardcoverId,
+                ScrobbleEventType = evt.ScrobbleEventType,
+                ChapterNumber = evt.ChapterNumber,
+                VolumeNumber = (int?)evt.VolumeNumber,
+                PercentRead = (int?)evt.Progress,
+                TotalReadCountForSeries =
+                    ((await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(evt.SeriesId, evt.AppUserId, ct: ct))!)
+                    .TotalReads,
+                SeriesName = evt.Series.Name,
+                ScrobbleDateUtc = evt.LastModifiedUtc,
+                Year = evt.Series.Metadata.ReleaseYear,
+                StartedReadingDateUtc = startedReadingDateUtc,
+                LatestReadingDateUtc = latestReadingDateUtc,
+            };
         }, ct);
     }
 

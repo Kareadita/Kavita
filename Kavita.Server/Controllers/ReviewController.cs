@@ -75,9 +75,12 @@ public class ReviewController(
         if (dto.ChapterId == null) return BadRequest();
 
         var chapterId = dto.ChapterId.Value;
-        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesId, ct) ||
-            await unitOfWork.ChapterRepository.GetSeriesIdForChapter(chapterId, ct) != dto.SeriesId)
+
+        if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, chapterId, ct))
             return NotFound();
+
+        var seriesId = await unitOfWork.ChapterRepository.GetSeriesIdForChapter(chapterId, ct);
+        if (seriesId != dto.SeriesId) return BadRequest();
 
         var ratingBuilder = new ChapterRatingBuilder(await unitOfWork.UserRepository.GetUserChapterRatingAsync(user.Id, chapterId, ct));
 

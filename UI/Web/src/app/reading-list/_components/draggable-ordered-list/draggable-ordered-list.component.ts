@@ -11,7 +11,7 @@ import {
   TemplateRef,
   TrackByFunction
 } from '@angular/core';
-import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
+import {VirtualScrollerComponent} from '@kareadita/ngx-virtual-scroller';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {BulkSelectionEntityDataSource, BulkSelectionService} from "../../../cards/bulk-selection.service";
@@ -33,7 +33,7 @@ export interface ItemRemoveEvent {
   templateUrl: './draggable-ordered-list.component.html',
   styleUrls: ['./draggable-ordered-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [VirtualScrollerModule, NgTemplateOutlet, CdkDropList, CdkDrag,
+  imports: [VirtualScrollerComponent, NgTemplateOutlet, CdkDropList, CdkDrag,
     CdkDragHandle, TranslocoDirective, NgClass]
 })
 export class DraggableOrderedListComponent {

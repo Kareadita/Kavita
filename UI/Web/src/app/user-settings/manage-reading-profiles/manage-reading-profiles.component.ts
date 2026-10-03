@@ -24,7 +24,7 @@ import {
 } from "../../_models/preferences/reading-profiles";
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
-import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
+import {VirtualScrollerComponent} from "@kareadita/ngx-virtual-scroller";
 import {debounceTime, distinctUntilChanged, map, tap} from "rxjs/operators";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {BookPageLayoutMode} from "../../_models/readers/book-page-layout-mode";
@@ -86,7 +86,7 @@ import {
   imports: [
     TranslocoDirective,
     NgTemplateOutlet,
-    VirtualScrollerModule,
+    VirtualScrollerComponent,
     SentenceCasePipe,
     BookPageLayoutModePipe,
     LayoutModePipe,

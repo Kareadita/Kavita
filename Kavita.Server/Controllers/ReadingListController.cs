@@ -368,7 +368,7 @@ public class ReadingListController(
             !await unitOfWork.UserRepository.HasAccessToAllChapters(UserId, dto.ChapterIds, ct))
             return BadRequest(await localizationService.TranslateAsync(UserId, "chapter-doesnt-exist"));
 
-        var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds, ct);
+        var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.SeriesId, dto.VolumeIds, ct);
         foreach (var chapterId in dto.ChapterIds)
         {
             chapterIds.Add(chapterId);
@@ -417,7 +417,7 @@ public class ReadingListController(
         var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
         if (readingList == null) return BadRequest(await localizationService.TranslateAsync(UserId, "reading-list-doesnt-exist"));
 
-        if (!await unitOfWork.UserRepository.HasAccessToAllSeries(UserId, dto.SeriesIds, ct))
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesIds, ct))
             return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
         var ids = await unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(dto.SeriesIds.ToArray(), ct);

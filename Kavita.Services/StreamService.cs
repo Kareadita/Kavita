@@ -133,7 +133,7 @@ public class StreamService(
         CancellationToken ct = default)
     {
         var streams = await unitOfWork.UserRepository.GetDashboardStreamsByIds(dto.Ids, ct);
-        foreach (var stream in streams)
+        foreach (var stream in streams.Where(s => s.AppUserId == userId))
         {
             stream.Visible = dto.Visibility;
             unitOfWork.UserRepository.Update(stream);
@@ -242,6 +242,9 @@ public class StreamService(
         var stream = await unitOfWork.UserRepository.GetSideNavStream(dto.Id, ct);
         if (stream == null)
             throw new KavitaException(await localizationService.TranslateAsync(userId, "sidenav-stream-doesnt-exist"));
+
+        if (stream.AppUserId != userId)
+            throw new UnauthorizedAccessException();
 
         stream.Visible = dto.Visible;
 

@@ -168,17 +168,19 @@ export class MatchSeriesModalComponent implements OnInit {
       takeUntilDestroyed()
     ).subscribe(() => this.search());
 
-    effect(() => {
-      const provider = this.formGroup.provider().value();
-      if (provider === this.lastProvider) return;
-      this.lastProvider = provider;
+    toObservable(this.formGroup.provider().value).pipe(
+      skip(1),
+      takeUntilDestroyed(),
+      tap(provider => {
+        if (provider === this.lastProvider) return;
 
-      untracked(() => {
+        this.lastProvider = provider;
+
         this.selectedItem.set(null);
         this.selectedEdition.set(null);
         this.search();
-      });
-    });
+      })
+    ).subscribe();
   }
 
   ngOnInit() {

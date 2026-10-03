@@ -252,7 +252,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     public async Task<IActionResult> BulkAddReadingProfile(BulkSetSeriesProfiles body)
     {
         var ct = HttpContext.RequestAborted;
-        if (!await unitOfWork.UserRepository.HasAccessToAllSeries(UserId, body.SeriesIds, ct)) return NotFound();
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, body.SeriesIds, ct)) return NotFound();
 
         await readingProfileService.BulkSetSeriesProfiles(UserId, body.ProfileIds, body.SeriesIds, ct);
         return Ok();

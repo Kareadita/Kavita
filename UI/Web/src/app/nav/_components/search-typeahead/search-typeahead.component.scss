@@ -212,6 +212,12 @@ ul ul {
     border-radius: 0 !important;
 }
 
+@media only screen and (max-width: 650px) {
+  ul ul {
+    width: 100vw;
+  }
+}
+
 
 .result-row {
   padding: 0.375rem 0.25rem;

@@ -101,6 +101,20 @@ export class CollectionDetailComponent implements AfterContentChecked {
   collectionId = input(0, {transform: numberAttribute});
   collectionTag = getWritableResolvedData(this.route, 'collection');
   summary = computed(() => (this.collectionTag()?.summary ?? '').replace(/\n/g, '<br>'));
+  collectedSeries = computed(() => {
+    const collectionTag = this.collectionTag();
+    if (collectionTag.source === ScrobbleProvider.Kavita) return null;
+
+    if (!collectionTag.missingSeriesFromSource) return collectionTag.totalSourceCount;
+
+    // This is not the most pretty, but it saves us needing to add a new field. And is deterministic
+    const missingSeries = collectionTag.missingSeriesFromSource
+      .split('<br/>')
+      .filter(s => s.length > 0)
+      .length;
+
+    return collectionTag.totalSourceCount - missingSeries;
+  });
 
   readonly user = this.accountService.currentUser;
 

@@ -385,7 +385,6 @@ public class Startup
         {
             endpoints.MapControllers();
             endpoints.MapHub<MessageHub>("hubs/messages");
-            endpoints.MapHub<LogHub>("hubs/logs");
             if (env.IsDevelopment())
             {
                 endpoints.MapHangfireDashboard();

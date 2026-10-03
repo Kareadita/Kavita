@@ -3,13 +3,13 @@ import {Annotation} from "../../book-reader/_models/annotations/annotation";
 import {
   AnnotationCardComponent
 } from "../../book-reader/_components/_annotations/annotation-card/annotation-card.component";
-import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
+import {VirtualScrollerComponent} from "@kareadita/ngx-virtual-scroller";
 
 @Component({
   selector: 'app-annotations-tab',
   imports: [
     AnnotationCardComponent,
-    VirtualScrollerModule
+    VirtualScrollerComponent
   ],
   templateUrl: './annotations-tab.component.html',
   styleUrl: './annotations-tab.component.scss',

@@ -22,10 +22,10 @@
     } @else if (data.length === 0) {
       {{t('no-data')}}
     } @else {
-      <virtual-scroller #scroll [items]="data" [childHeight]="2"
-                        [parentScroll]="scroll.window" [bufferAmount]="10" [compareItems]="compareReviews">
+      <virtual-scroller #scroll [items]="data" [enableUnequalChildrenSizes]="true"
+                        [modifyOverflowStyleOfParentScroll]="false" [parentScroll]="companionBar" [bufferAmount]="10" [compareItems]="compareReviews">
         @for (review of scroll.viewPortItems; let index = $index; track trackByReview(index, review)) {
-          <div class="col-md-12">
+          <div class="col-md-12 review-row">
             <app-review-list-item [review]="review" />
             <div class="setting-section-break"></div>
           </div>
