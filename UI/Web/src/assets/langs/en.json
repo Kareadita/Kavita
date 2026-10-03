@@ -3097,7 +3097,12 @@
         "libraries-progress-label": "{{current}} of {{total}}",
         "scans-waiting-label": "Library scans waiting: {{count}}",
         "and-more-label": "and {{count}} more",
-        "problems-in-libraries-label": "Libraries with problems: {{count}}"
+        "problems-in-libraries-label": "Libraries with problems: {{count}}",
+
+        "status-offline-alt": "Server unreachable",
+        "status-attention-alt": "Needs attention: {{count}}",
+        "status-attention-error-alt": "Needs attention: {{count}}, including errors",
+        "status-running-alt": "Jobs running: {{count}}"
     },
 
     "event-title-pipe": {

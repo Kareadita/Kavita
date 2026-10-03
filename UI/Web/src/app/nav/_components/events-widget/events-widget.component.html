@@ -3,27 +3,16 @@
   @let readingSessionCount = activeReadingSessions().size;
 
   <button type="button" class="btn btn-icon"
-          [ngbPopover]="popContent" [title]="t('title-alt')"
+          [ngbPopover]="popContent" [title]="t('title-alt')" [attr.aria-label]="buttonAltLabel()"
           placement="bottom" [popoverClass]="'nav-events'"
           [autoClose]="'outside'">
-
-    @if (readingSessionCount > 1) {
-      <span class="me-2" [class.colored]="activeEvents() > 0 || updateAvailable() || readingSessionCount > 0">
-        {{readingSessionCount}}
-      </span>
-    }
-
-    <i aria-hidden="true" class="fa fa-wave-square nav" [class.colored]="activeEvents() > 0 || updateAvailable()"></i>
-
-    @if (errors().length > 0) {
-      <i aria-hidden="true" class="fa fa-circle-exclamation nav widget-button--indicator error"></i>
-    } @else if (infos().length > 0) {
-      <i aria-hidden="true" class="fa fa-circle-info nav widget-button--indicator info"></i>
-    } @else if (updateAvailable()) {
-      <i aria-hidden="true" class="fa fa-circle-arrow-up nav widget-button--indicator update"></i>
-    } @else if (activeEvents() > 0) {
-      <div class="nav widget-button--indicator spinner-border spinner-border-sm"></div>
-    }
+    <app-events-widget-icon
+      [runningProgress]="runningProgress()"
+      [indeterminate]="indeterminate()"
+      [attentionCount]="attentionCount()"
+      [hasError]="hasError()"
+      [offline]="offline()"
+      [readingCount]="readingSessionCount" />
   </button>
 
   <ng-template #popContent>

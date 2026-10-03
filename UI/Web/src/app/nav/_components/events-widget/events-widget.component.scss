@@ -14,26 +14,6 @@
     border-bottom-color: transparent;
 }
 
-.colored {
-  color: var(--event-widget-activity-bg-color) !important;
-}
-
-.widget-button--indicator {
-  position: absolute;
-  top: 1.5rem;
-  color: var(--event-widget-activity-bg-color);
-
-  &.error {
-    color: var(--event-widget-error-bg-color) !important;
-  }
-  &.info {
-    color: var(--event-widget-info-bg-color) !important;
-  }
-  &.update {
-    color: var(--event-widget-update-bg-color) !important;
-  }
-}
-
 ::ng-deep .nav-events {
 
     .popover-body {

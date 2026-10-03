@@ -448,6 +448,18 @@
   --event-widget-error-bg-color: var(--error-color);
   --event-widget-update-bg-color: var(--primary-color);
   --event-widget-activity-bg-color: var(--primary-color);
+  --event-widget-idle-icon-color: var(--event-widget-text-color);
+  --event-widget-running-icon-color: var(--primary-color);
+  --event-widget-offline-icon-color: color-mix(in srgb, var(--event-widget-text-color) 35%, transparent);
+  --event-widget-offline-slash-color: var(--warning-color);
+  --event-widget-ring-progress-color: var(--primary-color);
+  --event-widget-ring-track-color: color-mix(in srgb, var(--event-widget-text-color) 12%, transparent);
+  --event-widget-attention-badge-bg-color: var(--warning-color);
+  --event-widget-attention-badge-text-color: var(--btn-warning-text-color);
+  --event-widget-error-badge-bg-color: var(--error-color);
+  --event-widget-error-badge-text-color: var(--navbar-text-color);
+  --event-widget-badge-border-color: var(--navbar-bg-color);
+  --event-widget-reading-text-color: var(--primary-color);
 
   /* Search */
   --search-result-text-lite-color: initial;

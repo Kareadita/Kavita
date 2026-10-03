@@ -1,8 +1,18 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  OnInit,
+  signal
+} from '@angular/core';
 import {NgbPopover} from '@ng-bootstrap/ng-bootstrap';
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {NgStyle} from '@angular/common';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {RouterLink} from "@angular/router";
 import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session-close-event";
 import {VersionService} from "../../../_services/version.service";
@@ -18,13 +28,15 @@ import {UpdateVersionEvent} from "../../../_models/events/update-version-event";
 import {ConfirmConfig} from "../../../shared/confirm-dialog/_models/confirm-config";
 import {LibraryService} from "../../../_services/library.service";
 import {EventTitlePipe} from "../../../_pipes/event-title.pipe";
+import {ActivityStoreService} from "../../../_services/activity-store.service";
+import {EventsWidgetIconComponent} from "../events-widget-icon/events-widget-icon.component";
 
 @Component({
   selector: 'app-nav-events-toggle',
   templateUrl: './events-widget.component.html',
   styleUrls: ['./events-widget.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbPopover, NgStyle, TranslocoDirective, RouterLink, EventTitlePipe]
+  imports: [NgbPopover, NgStyle, TranslocoDirective, RouterLink, EventTitlePipe, EventsWidgetIconComponent]
 })
 export class EventsWidgetComponent implements OnInit {
   public readonly downloadService = inject(DownloadService);
@@ -34,8 +46,10 @@ export class EventsWidgetComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly libraryService = inject(LibraryService);
+  private readonly activityStore = inject(ActivityStoreService);
+  private readonly translocoService = inject(TranslocoService);
 
-  readonly user = input.required<User>();
+  readonly user = input.required<User>(); // TODO: Just get the user from AccountService
 
   /** Progress events (Event Type: 'started', 'ended', 'updated' that have progress property) */
   readonly progressEvents = signal<NotificationProgressEvent[]>([]);
@@ -59,6 +73,70 @@ export class EventsWidgetComponent implements OnInit {
 
   /** Intercepts from Single Updates to show an extra indicator to the user */
   readonly updateAvailable = signal(false);
+
+  /**
+   * Hub is false until the first connect, so a short blip or page load does not dim the icon
+   */
+  protected offline = signal(false);
+
+  /**
+   * Latest step that has not ended, per running job
+   */
+  private readonly activeSteps = computed(() => this.activityStore.runningJobs()
+    .map(job => Object.values(job.steps)
+      .filter(step => step.eventType !== 'ended')
+      .sort((a, b) => Date.parse(b.updatedUtc) - Date.parse(a.updatedUtc))[0])
+    .filter(step => step !== undefined));
+
+  protected readonly runningProgress = computed(() => {
+    const determinate = this.activeSteps().map(s => s.progress).filter((p): p is number => p !== null);
+    return determinate.length > 0 ? Math.min(...determinate) : null;
+  });
+  protected readonly indeterminate = computed(() => this.activeSteps().some(s => s.progress === null));
+  protected readonly attentionCount = computed(() => this.errors().length + this.infos().length + (this.updateAvailable() ? 1 : 0));
+  protected readonly hasError = computed(() => this.errors().length > 0);
+
+  // Re-runs the label once the language file loads, translate() alone is not reactive
+  private readonly translation = toSignal(this.translocoService.selectTranslation());
+
+  protected readonly buttonAltLabel = computed(() => {
+    this.translation();
+
+    const parts = [this.translocoService.translate('events-widget.title-alt')];
+
+    if (this.offline()) {
+      parts.push(this.translocoService.translate('events-widget.status-offline-alt'));
+    } else {
+      const count = this.attentionCount();
+      if (count > 0) {
+        parts.push(this.hasError()
+          ? this.translocoService.translate('events-widget.status-attention-error-alt', {count})
+          : this.translocoService.translate('events-widget.status-attention-alt', {count}));
+      }
+      const running = this.activeSteps().length;
+      if (running > 0) {
+        parts.push(this.translocoService.translate('events-widget.status-running-alt', {count: running}));
+      }
+      const reading = this.activeReadingSessions().size;
+      if (reading > 0) {
+        parts.push(this.translocoService.translate('events-widget.reading-now', {num: reading}));
+      }
+    }
+
+    return parts.join(', ');
+  });
+
+  constructor() {
+    effect(onCleanup => {
+      if (this.isConnected() !== false) {
+        this.offline.set(false);
+        return;
+      }
+      // 10s matches the popover's server unreachable delay
+      const timer = setTimeout(() => this.offline.set(true), 10_000);
+      onCleanup(() => clearTimeout(timer));
+    });
+  }
 
 
   ngOnInit(): void {
