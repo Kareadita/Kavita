@@ -5,7 +5,7 @@
 
   @if (pinned()) {
     <div class="pinned d-flex align-items-center gap-2">
-      <i class="fa-solid fa-power-off flex-shrink-0" aria-hidden="true"></i>
+      <i class="fa-solid flex-shrink-0" [class.fa-power-off]="!failed()" [class.fa-triangle-exclamation]="failed()" aria-hidden="true"></i>
       <div class="content flex-grow-1">
         <div class="title">
           @if (isMultiLibrary()) {
@@ -15,7 +15,11 @@
           }
         </div>
         <div class="description">
-          {{t('interrupted-label')}}
+          @if (failed()) {
+            {{t('failed-label')}}
+          } @else {
+            {{t('interrupted-label')}}
+          }
           @if (counter(); as count) {
             <span class="mx-1 dot-separator"></span>{{t('progress-counter-label', count)}}
           }

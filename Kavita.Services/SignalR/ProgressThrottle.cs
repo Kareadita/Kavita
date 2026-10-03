@@ -12,8 +12,11 @@ public sealed class ProgressThrottle(ILogger<ProgressThrottle> logger, TimeProvi
     : IProgressThrottle
 {
     private static readonly TimeSpan DefaultInterval = TimeSpan.FromMilliseconds(250);
+    public static readonly TimeSpan StaleAfter = TimeSpan.FromMinutes(10);
 
     private readonly ConcurrentDictionary<string, JobState> _jobs = new();
+
+    internal int TrackedCount => _jobs.Count;
 
     public ProgressThrottle(ILogger<ProgressThrottle> logger) : this(logger, TimeProvider.System, DefaultInterval)
     {
@@ -31,7 +34,12 @@ public sealed class ProgressThrottle(ILogger<ProgressThrottle> logger, TimeProvi
     public async Task SendAsync(SignalRMessageDto message, Func<Task> send)
     {
         var key = $"{message.Name}|{message.CorrelationId}";
-        var job = _jobs.GetOrAdd(key, _ => new JobState());
+        if (!_jobs.TryGetValue(key, out var job))
+        {
+            // A job that throws never sends ended, so its state is only cleaned up here
+            EvictStale();
+            job = _jobs.GetOrAdd(key, _ => new JobState());
+        }
 
         TimeSpan flushIn;
         await job.Gate.WaitAsync();
@@ -66,6 +74,15 @@ public sealed class ProgressThrottle(ILogger<ProgressThrottle> logger, TimeProvi
         }
 
         _ = FlushAsync(job, flushIn);
+    }
+
+    private void EvictStale()
+    {
+        var staleBefore = timeProvider.GetUtcNow() - StaleAfter;
+        foreach (var (key, job) in _jobs)
+        {
+            if (job.LastSent < staleBefore && !job.FlushScheduled) _jobs.TryRemove(key, out _);
+        }
     }
 
     private async Task FlushAsync(JobState job, TimeSpan delay)

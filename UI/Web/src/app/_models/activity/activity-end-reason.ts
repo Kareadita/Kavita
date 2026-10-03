@@ -4,4 +4,8 @@ export enum ActivityEndReason {
    */
   Away = 'away',
   Restart = 'restart',
+  /**
+   * The server lists the job as no longer running, but not every step sent ended
+   */
+  Failed = 'failed',
 }

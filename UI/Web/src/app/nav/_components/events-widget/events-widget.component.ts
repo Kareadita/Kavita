@@ -24,7 +24,7 @@ import {EventTitlePipe} from "../../../_pipes/event-title.pipe";
 import {EventMessagePipe} from "../../../_pipes/event-message.pipe";
 import {EventActionPipe} from "../../../_pipes/event-action.pipe";
 import {ActivityAgePipe} from "../../../_pipes/activity-age.pipe";
-import {ActivityStoreService, isFinished} from "../../../_services/activity-store.service";
+import {ActivityStoreService, isFinished, isStopped} from "../../../_services/activity-store.service";
 import {ActivitySnapshotService} from "../../../_services/activity-snapshot.service";
 import {EventsWidgetIconComponent} from "../events-widget-icon/events-widget-icon.component";
 import {ActivityJobRowComponent} from "../activity-job-row/activity-job-row.component";
@@ -38,7 +38,6 @@ import {ActivityFilter} from "../../../_models/activity/activity-filter";
 import {ActivityProblemGroup, ActivityTimelineItem} from "../../../_models/activity/activity-timeline-item";
 import {MessageEventPriority} from "../../../_models/events/core/message-event-priority";
 import {DelayedScanCodes} from "../../../_models/activity/delayed-scan-codes";
-import {ActivityEndReason} from "../../../_models/activity/activity-end-reason";
 import {jobProgress} from "../../../_helpers/activity-job-progress";
 import {EventAction} from "../../../_models/events/event-action";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
@@ -88,7 +87,7 @@ export class EventsWidgetComponent implements OnInit {
 
   private readonly entries = computed(() => this.activityStore.rows().filter(isEntry));
   protected readonly pinned = computed(() => this.entries().filter(e => e.priority === MessageEventPriority.Action || e.scheduleLost));
-  protected readonly interruptedJobs = computed(() => this.activityStore.rows().filter(isInterrupted));
+  protected readonly interruptedJobs = computed(() => this.activityStore.rows().filter(isStopped));
   private readonly pinnedCount = computed(() => this.pinned().length + this.interruptedJobs().length);
   protected readonly delayedEntries = computed(() => this.entries().filter(e => DelayedScanCodes.includes(e.code)));
 
@@ -101,7 +100,7 @@ export class EventsWidgetComponent implements OnInit {
     const isSettled = (scheduledForUtc: string | null) => scheduledForUtc !== null
       && (scheduled.has(scheduledForUtc) || Date.parse(scheduledForUtc) <= now);
     const rows = this.activityStore.rows().filter(r => r.kind === ActivityRowKind.Job
-      ? r.endReason !== ActivityEndReason.Restart
+      ? !isStopped(r)
       : r.priority !== MessageEventPriority.Action && r.priority !== MessageEventPriority.Silent && !r.scheduleLost
         && !isSettled(r.scheduledForUtc));
     return groupProblems(rows);
@@ -245,10 +244,6 @@ export class EventsWidgetComponent implements OnInit {
 
 function isEntry(row: ActivityRow): row is ActivityEntry {
   return row.kind === ActivityRowKind.Entry;
-}
-
-function isInterrupted(row: ActivityRow): row is ActivityJob {
-  return row.kind === ActivityRowKind.Job && row.endReason === ActivityEndReason.Restart;
 }
 
 function isAttention(item: ActivityTimelineItem) {

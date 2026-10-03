@@ -104,6 +104,22 @@ public class ProgressThrottleTests
     }
 
     [Fact]
+    public async Task JobThatNeverEnds_IsEvictedOnceStale()
+    {
+        var clock = new ManualTimeProvider();
+        var throttle = new ProgressThrottle(NullLogger<ProgressThrottle>.Instance, clock, Interval);
+        Task Send(SignalRMessageDto m) => throttle.SendAsync(m, () => Task.CompletedTask);
+
+        await Send(Folder(1, ProgressEventType.Started, code: null));
+        Assert.Equal(1, throttle.TrackedCount);
+
+        clock.Advance(ProgressThrottle.StaleAfter + TimeSpan.FromSeconds(1));
+        await Send(MessageFactory.BackupDatabaseProgressEvent(0f, "Starting"));
+
+        Assert.Equal(1, throttle.TrackedCount);
+    }
+
+    [Fact]
     public async Task UpdatesSpacedOut_AreAllSent()
     {
         for (var i = 1; i <= 3; i++)

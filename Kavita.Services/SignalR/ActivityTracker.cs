@@ -22,7 +22,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
     public static readonly TimeSpan RecentWindow = TimeSpan.FromHours(24);
 
     private static readonly HashSet<string> EntryMethods =
-        [MessageFactory.Info, MessageFactory.Error, MessageFactory.ExternalMatchRateLimitError];
+        [MessageFactory.Info, MessageFactory.Error, MessageFactory.ExternalMatchRateLimitError, MessageFactory.UpdateAvailable];
 
     private readonly ConcurrentDictionary<string, Row> _rows = new();
     /// <summary>Locks any history activity around _jobs</summary>

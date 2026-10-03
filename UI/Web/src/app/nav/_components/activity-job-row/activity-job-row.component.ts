@@ -41,6 +41,7 @@ export class ActivityJobRowComponent {
 
   protected readonly ended = computed(() => this.job().endedUtc !== null);
   protected readonly endedAway = computed(() => this.job().endReason === ActivityEndReason.Away);
+  protected readonly failed = computed(() => this.job().endReason === ActivityEndReason.Failed);
   protected readonly isScan = computed(() => isScanJob(this.job()));
   protected readonly isMultiLibrary = computed(() => isMultiLibraryJob(this.job()));
   protected readonly libraryCount = computed(() => Math.max(Object.keys(this.libraryNames() ?? {}).length, this.job().libraryIds.length));

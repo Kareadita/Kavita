@@ -122,13 +122,9 @@ export class ActivityStoreService {
         break;
       case EVENTS.Info:
       case EVENTS.Error:
-        if (message.meta) this.addEntry({...message.meta, body: message.payload});
-        break;
       case EVENTS.UpdateAvailable:
-        if (message.meta) this.addEntry({...message.meta, body: message.payload}, `entry:${message.event}|${stringOf(bodyField(message.payload, 'updateVersion'))}`);
-        break;
       case EVENTS.ScrobblingKeyExpired:
-        if (message.meta) this.addEntry({...message.meta, body: message.payload}, `entry:${message.event}|${numberOf(bodyField(message.payload, 'provider'))}`);
+        if (message.meta) this.addEntry({...message.meta, body: message.payload});
         break;
       case EVENTS.ExternalMatchRateLimitError:
         if (message.meta) this.addRateLimit({...message.meta, body: message.payload});
@@ -271,7 +267,7 @@ export class ActivityStoreService {
     this.finishTimers.delete(id);
   }
 
-  private addEntry(message: SignalRMessage, id = `entry:${message.name}|${message.code ?? message.title}|${message.eventTimeUtc}`, announce = true) {
+  private addEntry(message: SignalRMessage, id = entryIdOf(message), announce = true) {
     if (this.dismissed.some(d => d.id === id) || this._rows().some(r => r.id === id)) return;
 
     const entry: ActivityEntry = {
@@ -370,7 +366,7 @@ export class ActivityStoreService {
       startedUtc: job?.startedUtc ?? toUtc(recent.startedUtc),
       updatedUtc: endedUtc,
       endedUtc,
-      endReason: recent.completed ? null : ActivityEndReason.Away,
+      endReason: recent.completed ? null : ActivityEndReason.Failed,
       steps: {...job?.steps, ...steps},
       seriesAdded: recent.seriesAdded,
       seriesRemoved: recent.seriesRemoved,
@@ -501,6 +497,20 @@ function isOneOff(message: SignalRMessage) {
   return message.progress !== 'determinate' && message.progress !== 'indeterminate';
 }
 
+/**
+ * Live and replayed copies of an entry share this id, so a dismissal holds across reconnects
+ */
+function entryIdOf(message: SignalRMessage) {
+  switch (message.name) {
+    case EVENTS.UpdateAvailable:
+      return `entry:${message.name}|${stringOf(bodyField(message.body, 'updateVersion'))}`;
+    case EVENTS.ScrobblingKeyExpired:
+      return `entry:${message.name}|${numberOf(bodyField(message.body, 'provider'))}`;
+    default:
+      return `entry:${message.name}|${message.code ?? message.title}|${message.eventTimeUtc}`;
+  }
+}
+
 function jobIdOf(message: SignalRMessage) {
   if (message.correlationId) return `job:${message.correlationId}`;
   return `job:${message.name}|${numberOf(bodyField(message.body, 'libraryId')) ?? ''}`;
@@ -592,10 +602,15 @@ function isLostSchedule(entry: ActivityEntry, startedMs: number) {
 }
 
 /**
- * A job stopped by a restart still needs a Rescan, so Clear finished leaves it
+ * A stopped job still needs a Rescan, so Clear finished leaves it
  */
-export function isFinished(row: ActivityRow) {
-  return row.kind === ActivityRowKind.Job && row.endedUtc !== null && row.endReason !== ActivityEndReason.Restart;
+export function isFinished(row: ActivityRow): boolean {
+  return row.kind === ActivityRowKind.Job && row.endedUtc !== null && !isStopped(row);
+}
+
+export function isStopped(row: ActivityRow): row is ActivityJob {
+  return row.kind === ActivityRowKind.Job
+    && (row.endReason === ActivityEndReason.Restart || row.endReason === ActivityEndReason.Failed);
 }
 
 function isRunning(row: ActivityRow) {

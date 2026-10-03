@@ -3069,6 +3069,7 @@
         "finished-while-away-label": "Finished while you were away",
         "finishing-up-label": "Finishing up",
         "interrupted-label": "Stopped by a server restart",
+        "failed-label": "Stopped before finishing",
         "schedule-lost-label": "Was set for {{time}}, lost in a server restart",
         "progress-counter-label": "{{current}} / {{total}}",
         "up-next-label": "Up next",

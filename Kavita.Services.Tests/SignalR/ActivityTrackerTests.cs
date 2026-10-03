@@ -203,15 +203,16 @@ public class ActivityTrackerTests
     }
 
     [Fact]
-    public void Entries_OnlyInfoErrorAndRateLimit_NewestFirst()
+    public void Entries_OnlyAdminBroadcasts_NewestFirst()
     {
         _tracker.Record(MessageFactory.Info, MessageFactory.InfoEvent("First", ""));
+        _tracker.Record(MessageFactory.ScrobblingKeyExpired, MessageFactory.InfoEvent("Key", ""));
         _tracker.Record(MessageFactory.UpdateAvailable, MessageFactory.InfoEvent("Update", ""));
         _tracker.Record(MessageFactory.Error, MessageFactory.ErrorEvent("Second", ""));
 
         var entries = _tracker.GetRecentEntries();
 
-        Assert.Equal(["Second", "First"], entries.Select(e => e.Title));
+        Assert.Equal(["Second", "Update", "First"], entries.Select(e => e.Title));
     }
 
     [Fact]
