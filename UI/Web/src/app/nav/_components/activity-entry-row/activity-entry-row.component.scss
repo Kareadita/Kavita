@@ -9,8 +9,12 @@
 .pinned {
   font-size: 0.8125rem;
 
-  .fa-key {
+  .fa-key, .fa-clock-rotate-left {
     color: var(--event-widget-action-icon-color);
+  }
+
+  .title {
+    font-size: 0.8125rem;
   }
 
   .fa-circle-arrow-up {

@@ -1,7 +1,9 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, output} from '@angular/core';
 import {PercentPipe} from '@angular/common';
 import {Router} from '@angular/router';
-import {TranslocoDirective} from '@jsverse/transloco';
+import {translate, TranslocoDirective} from '@jsverse/transloco';
+import {ToastrService} from '@openng/ngx-toastr';
+import {Observable} from 'rxjs';
 import {ActivityJob} from '../../../_models/activity/activity-job';
 import {ActivityStep} from '../../../_models/activity/activity-step';
 import {currentStep, isFinishingStep, isMultiLibraryJob, isScanJob, jobProgress, titleStep} from '../../../_helpers/activity-job-progress';
@@ -10,6 +12,8 @@ import {EventActionPipe} from '../../../_pipes/event-action.pipe';
 import {ActivityAgePipe} from '../../../_pipes/activity-age.pipe';
 import {ActivityDurationPipe} from '../../../_pipes/activity-duration.pipe';
 import {EventAction} from '../../../_models/events/event-action';
+import {ActivityEndReason} from '../../../_models/activity/activity-end-reason';
+import {LibraryService} from '../../../_services/library.service';
 
 interface StepCounter {
   current: number;
@@ -25,13 +29,18 @@ interface StepCounter {
 })
 export class ActivityJobRowComponent {
   private readonly router = inject(Router);
+  private readonly libraryService = inject(LibraryService);
+  private readonly toastr = inject(ToastrService);
 
   readonly job = input.required<ActivityJob>();
   readonly now = input.required<number>();
   readonly libraryNames = input<Record<number, string>>();
+  readonly pinned = input(false);
   readonly navigated = output<void>();
+  readonly dismissed = output<string>();
 
   protected readonly ended = computed(() => this.job().endedUtc !== null);
+  protected readonly endedAway = computed(() => this.job().endReason === ActivityEndReason.Away);
   protected readonly isScan = computed(() => isScanJob(this.job()));
   protected readonly isMultiLibrary = computed(() => isMultiLibraryJob(this.job()));
   protected readonly libraryCount = computed(() => Math.max(Object.keys(this.libraryNames() ?? {}).length, this.job().libraryIds.length));
@@ -52,10 +61,31 @@ export class ActivityJobRowComponent {
 
   protected readonly showSummary = computed(() => this.ended() && this.isScan() && this.job().seenFromStart);
   protected readonly canOpenLibrary = computed(() => this.ended() && this.isScan() && !this.isMultiLibrary() && this.job().libraryId !== null);
+  protected readonly canRescan = computed(() => this.isScan() && (this.isMultiLibrary() || this.job().libraryId !== null));
 
   protected openLibrary() {
     this.router.navigate(['library', this.job().libraryId]);
     this.navigated.emit();
+  }
+
+  protected rescan() {
+    const job = this.job();
+    const libraryId = job.libraryId!;
+
+    let request: Observable<unknown>;
+    let toast: string;
+    if (this.isMultiLibrary()) {
+      request = this.libraryService.scanAll();
+      toast = translate('toasts.scan-all-queued');
+    } else {
+      request = this.libraryService.scan(libraryId);
+      toast = translate('toasts.scan-queued', {name: this.libraryNames()?.[libraryId] ?? ''});
+    }
+
+    request.subscribe(() => {
+      this.toastr.info(toast);
+      this.dismissed.emit(job.id);
+    });
   }
 
   protected readonly EventAction = EventAction;

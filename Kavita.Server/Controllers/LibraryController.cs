@@ -276,6 +276,7 @@ public class LibraryController(
     [HttpGet("jump-bar")]
     public ActionResult<IEnumerable<JumpKeyDto>> GetJumpBar(int libraryId)
     {
+        // TODO: Not used by UI
         var ct = HttpContext.RequestAborted;
         return Ok(unitOfWork.LibraryRepository.GetJumpBarAsync(libraryId, ct));
     }
@@ -289,6 +290,7 @@ public class LibraryController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<MemberDto>> UpdateUserLibraries(UpdateLibraryForUserDto updateLibraryForUserDto)
     {
+        // TODO: This isn't used by UI
         var ct = HttpContext.RequestAborted;
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(updateLibraryForUserDto.Username, AppUserIncludes.SideNavStreams, ct);
         if (user == null) return BadRequest(await localizationService.TranslateAsync(UserId, "user-doesnt-exist"));

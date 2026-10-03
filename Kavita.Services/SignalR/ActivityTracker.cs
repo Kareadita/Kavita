@@ -2,17 +2,33 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Kavita.API.Services.SignalR;
 using Kavita.Models.DTOs.SignalR;
 
 namespace Kavita.Services.SignalR;
 
+/// <summary>
+/// This provides the EventWidget with the replayability and active/up-next jobs.
+/// </summary>
+/// <remarks>This is singleton and called by many threads - ensure everything is thread-safe</remarks>
+/// <param name="timeProvider"></param>
 public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracker
 {
     public const int MaxRows = 50;
+    public const int MaxRecentJobs = 100;
+    public const int MaxRecentEntries = 200;
     public static readonly TimeSpan NoJobStaleAfter = TimeSpan.FromMinutes(10);
+    public static readonly TimeSpan RecentWindow = TimeSpan.FromHours(24);
+
+    private static readonly HashSet<string> EntryMethods =
+        [MessageFactory.Info, MessageFactory.Error, MessageFactory.ExternalMatchRateLimitError];
 
     private readonly ConcurrentDictionary<string, Row> _rows = new();
+    /// <summary>Locks any history activity around _jobs</summary>
+    private readonly Lock _historyLock = new();
+    private readonly Dictionary<string, JobHistory> _jobs = new();
+    private readonly List<(SignalRMessageDto Message, DateTimeOffset Seen)> _entries = [];
 
     public ActivityTracker() : this(TimeProvider.System)
     {
@@ -20,9 +36,39 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
 
     private sealed record Row(SignalRMessageDto MessageDto, DateTimeOffset FirstSeen, DateTimeOffset LastSeen);
 
-    public void Record(SignalRMessageDto messageDto)
+    private sealed class JobHistory(DateTime startedUtc)
+    {
+        public DateTime StartedUtc { get; } = startedUtc;
+        public DateTime LastEventUtc { get; set; } = startedUtc;
+        public DateTimeOffset LastSeen { get; set; }
+        public Dictionary<string, SignalRMessageDto> Steps { get; } = new();
+        public HashSet<string> Ended { get; } = [];
+        public int SeriesAdded { get; set; }
+        public int SeriesRemoved { get; set; }
+    }
+
+    public void Record(string method, SignalRMessageDto messageDto)
+    {
+        switch (method)
+        {
+            case MessageFactory.NotificationProgress:
+                RecordProgress(messageDto);
+                break;
+            case MessageFactory.SeriesAdded:
+            case MessageFactory.SeriesRemoved:
+                CountSeries(method, messageDto.CorrelationId);
+                break;
+            default:
+                if (EntryMethods.Contains(method)) RecordEntry(messageDto);
+                break;
+        }
+    }
+
+    private void RecordProgress(SignalRMessageDto messageDto)
     {
         if (messageDto.Progress == ProgressType.None) return;
+
+        RecordHistory(messageDto);
 
         // One job sends several progress names (FileScan, ScanProgress, CoverUpdate), each ends on its own
         var key = $"{messageDto.Name}|{messageDto.CorrelationId}";
@@ -59,6 +105,105 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
             .OrderBy(r => r.FirstSeen)
             .Select(r => r.MessageDto)
             .ToList();
+    }
+
+    public IList<RecentJobDto> GetRecentJobs(IReadOnlySet<string> processingJobIds)
+    {
+        lock (_historyLock)
+        {
+            PruneHistory();
+
+            return _jobs
+                .Where(j => !processingJobIds.Contains(JobIdOf(j.Key) ?? string.Empty))
+                .OrderByDescending(j => j.Value.LastEventUtc)
+                .Select(j => new RecentJobDto
+                {
+                    CorrelationId = j.Key,
+                    StartedUtc = j.Value.StartedUtc,
+                    EndedUtc = j.Value.LastEventUtc,
+                    Steps = j.Value.Steps.Values.ToList(),
+                    Completed = j.Value.Steps.Keys.All(j.Value.Ended.Contains),
+                    SeriesAdded = j.Value.SeriesAdded,
+                    SeriesRemoved = j.Value.SeriesRemoved,
+                })
+                .ToList();
+        }
+    }
+
+    public IList<SignalRMessageDto> GetRecentEntries()
+    {
+        lock (_historyLock)
+        {
+            PruneHistory();
+            return _entries.Select(e => e.Message).Reverse().ToList();
+        }
+    }
+
+    private void RecordHistory(SignalRMessageDto messageDto)
+    {
+        if (string.IsNullOrEmpty(messageDto.CorrelationId)) return;
+
+        lock (_historyLock)
+        {
+            if (!_jobs.TryGetValue(messageDto.CorrelationId, out var job))
+            {
+                // An ended for a job never seen (or already pruned) has nothing to close
+                if (messageDto.EventType == ProgressEventType.Ended) return;
+
+                job = new JobHistory(messageDto.EventTimeUtc);
+                _jobs[messageDto.CorrelationId] = job;
+            }
+
+            job.LastEventUtc = messageDto.EventTimeUtc;
+            job.LastSeen = timeProvider.GetUtcNow();
+
+            if (messageDto.EventType == ProgressEventType.Ended)
+            {
+                job.Ended.Add(messageDto.Name);
+            }
+            else
+            {
+                // CoverUpdate starts again for every series, so a step can reopen
+                job.Ended.Remove(messageDto.Name);
+                job.Steps[messageDto.Name] = messageDto;
+            }
+
+            if (_jobs.Count > MaxRecentJobs) _jobs.Remove(_jobs.MinBy(j => j.Value.LastSeen).Key);
+        }
+    }
+
+    private void CountSeries(string method, string? correlationId)
+    {
+        if (string.IsNullOrEmpty(correlationId)) return;
+
+        lock (_historyLock)
+        {
+            if (!_jobs.TryGetValue(correlationId, out var job)) return;
+
+            if (method == MessageFactory.SeriesAdded) job.SeriesAdded++;
+            else job.SeriesRemoved++;
+        }
+    }
+
+    private void RecordEntry(SignalRMessageDto messageDto)
+    {
+        lock (_historyLock)
+        {
+            _entries.Add((messageDto, timeProvider.GetUtcNow()));
+            if (_entries.Count > MaxRecentEntries) _entries.RemoveAt(0);
+        }
+    }
+
+    private void PruneHistory()
+    {
+        var cutoff = timeProvider.GetUtcNow() - RecentWindow;
+
+        foreach (var key in _jobs.Where(j => j.Value.LastSeen < cutoff).Select(j => j.Key).ToList())
+        {
+            _jobs.Remove(key);
+        }
+
+        _entries.RemoveAll(e => e.Seen < cutoff);
     }
 
     private static bool IsAlive(Row row, IReadOnlySet<string> processingJobIds, DateTimeOffset staleBefore)

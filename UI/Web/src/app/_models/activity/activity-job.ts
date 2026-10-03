@@ -1,6 +1,7 @@
 import {ActivityRowKind} from './activity-row-kind';
 import {ActivityStep} from './activity-step';
 import {MessageEventPriority} from '../events/core/message-event-priority';
+import {ActivityEndReason} from './activity-end-reason';
 
 export interface ActivityJob {
   kind: ActivityRowKind.Job;
@@ -18,6 +19,10 @@ export interface ActivityJob {
    * Set once every step has stayed ended for a short grace, cleared if a step starts again
    */
   endedUtc: string | null;
+  /**
+   * Set when the snapshot, not an ended frame, closed the job
+   */
+  endReason: ActivityEndReason | null;
   /**
    * By message name
    */

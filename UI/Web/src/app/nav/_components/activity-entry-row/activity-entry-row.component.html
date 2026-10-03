@@ -3,8 +3,14 @@
 
   @if (pinned()) {
     <div class="pinned d-flex align-items-center gap-2">
-      <i class="fa-solid flex-shrink-0" [class.fa-key]="!isUpdate()" [class.fa-circle-arrow-up]="isUpdate()" aria-hidden="true"></i>
-      <span class="title flex-grow-1">{{label()}}</span>
+      <i class="fa-solid flex-shrink-0" [class]="pinnedIcon()" aria-hidden="true"></i>
+      <div class="content flex-grow-1">
+        <div class="title">{{label()}}</div>
+        @let pinnedText = description();
+        @if (pinnedText) {
+          <div class="description">{{pinnedText}}</div>
+        }
+      </div>
       @for (action of actionList; track action) {
         <button type="button" class="btn btn-link link p-0 flex-shrink-0" (click)="run(action)">{{action | eventAction}}</button>
       }

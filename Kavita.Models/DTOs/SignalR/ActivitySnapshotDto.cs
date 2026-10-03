@@ -17,4 +17,12 @@ public sealed record ActivitySnapshotDto
     public IList<ScheduledScanDto> Scheduled { get; init; } = [];
     public int ScheduledTotal { get; init; }
     public IList<UpcomingTaskDto> Upcoming { get; init; } = [];
+    /// <summary>
+    /// Jobs that finished in the last 24 hours, newest first. In memory, so empty after a restart
+    /// </summary>
+    public IList<RecentJobDto> RecentJobs { get; init; } = [];
+    /// <summary>
+    /// Info, Error and rate limit messages from the last 24 hours, newest first
+    /// </summary>
+    public IList<SignalRMessageDto> RecentEntries { get; init; } = [];
 }

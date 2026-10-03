@@ -4417,6 +4417,7 @@
         "failed-to-import": "Failed to import {{name}}",
         "no-pages": "There are no pages. Kavita was not able to read this archive.",
         "scan-queued": "Scan queued for {{name}}",
+        "scan-all-queued": "Scan queued for all libraries",
         "server-settings-updated": "Server settings updated",
         "reset-ip-address": "IP Addresses Reset",
         "reset-base-url": "Base Url Reset",

@@ -16,6 +16,10 @@ export interface ActivityEntry {
   seriesId: number | null;
   scheduledForUtc: string | null;
   /**
+   * A delayed scan whose Hangfire job was lost when the server restarted (in-memory storage)
+   */
+  scheduleLost: boolean;
+  /**
    * How many sends were folded into this entry (rate limit hits)
    */
   count: number;

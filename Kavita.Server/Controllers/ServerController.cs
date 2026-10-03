@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -241,15 +241,18 @@ public class ServerController(
     public ActionResult<ActivitySnapshotDto> GetActivity()
     {
         var (scheduled, scheduledTotal) = TaskScheduler.GetScheduledScans(20);
+        var processingJobIds = TaskScheduler.GetProcessingJobIds();
 
         return Ok(new ActivitySnapshotDto
         {
             BootId = BuildInfo.BootId,
             StartedUtc = BuildInfo.StartedUtc,
-            Running = activityTracker.GetRunning(TaskScheduler.GetProcessingJobIds()),
+            Running = activityTracker.GetRunning(processingJobIds),
             Scheduled = scheduled,
             ScheduledTotal = scheduledTotal,
             Upcoming = TaskScheduler.GetUpcomingTasks(),
+            RecentJobs = activityTracker.GetRecentJobs(processingJobIds),
+            RecentEntries = activityTracker.GetRecentEntries(),
         });
     }
 

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,9 +28,10 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
             users = await FilterClientsIfNeeded(users, message, ct);
         }
 
+        activityTracker.Record(method, message);
+
         if (method == MessageFactory.NotificationProgress)
         {
-            activityTracker.Record(message);
             await progressThrottle.SendAsync(message, () => users.SendAsync(method, message, cancellationToken: ct));
             return;
         }

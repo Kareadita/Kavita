@@ -1,20 +1,35 @@
-import {inject, Injectable, signal} from '@angular/core';
+import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {catchError, EMPTY, map, Subject, switchMap} from 'rxjs';
 import {ServerService} from './server.service';
-import {ActivitySnapshot} from '../_models/activity/activity-snapshot';
+import {ActivitySnapshotResult} from '../_models/activity/activity-snapshot-result';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ActivitySnapshotService {
   private readonly serverService = inject(ServerService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  private _snapshot = signal<ActivitySnapshot | null>(null);
-  readonly snapshot = this._snapshot.asReadonly();
+  private readonly requests = new Subject<void>();
+  private _result = signal<ActivitySnapshotResult | null>(null);
+  readonly result = this._result.asReadonly();
+  readonly snapshot = computed(() => this._result()?.snapshot ?? null);
+
+  constructor() {
+    this.requests.pipe(
+      switchMap(() => {
+        const requestedAtMs = Date.now();
+        return this.serverService.getActivity().pipe(
+          map(snapshot => ({snapshot, requestedAtMs})),
+          catchError(() => EMPTY),
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(result => this._result.set(result));
+  }
 
   refresh() {
-    this.serverService.getActivity().subscribe({
-      next: snapshot => this._snapshot.set(snapshot),
-      error: () => {},
-    });
+    this.requests.next();
   }
 }

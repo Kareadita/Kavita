@@ -24,7 +24,7 @@ import {EventTitlePipe} from "../../../_pipes/event-title.pipe";
 import {EventMessagePipe} from "../../../_pipes/event-message.pipe";
 import {EventActionPipe} from "../../../_pipes/event-action.pipe";
 import {ActivityAgePipe} from "../../../_pipes/activity-age.pipe";
-import {ActivityStoreService} from "../../../_services/activity-store.service";
+import {ActivityStoreService, isFinished} from "../../../_services/activity-store.service";
 import {ActivitySnapshotService} from "../../../_services/activity-snapshot.service";
 import {EventsWidgetIconComponent} from "../events-widget-icon/events-widget-icon.component";
 import {ActivityJobRowComponent} from "../activity-job-row/activity-job-row.component";
@@ -37,7 +37,8 @@ import {ActivityJob} from "../../../_models/activity/activity-job";
 import {ActivityFilter} from "../../../_models/activity/activity-filter";
 import {ActivityProblemGroup, ActivityTimelineItem} from "../../../_models/activity/activity-timeline-item";
 import {MessageEventPriority} from "../../../_models/events/core/message-event-priority";
-import {MessageEventCode} from "../../../_models/events/core/message-event-code";
+import {DelayedScanCodes} from "../../../_models/activity/delayed-scan-codes";
+import {ActivityEndReason} from "../../../_models/activity/activity-end-reason";
 import {jobProgress} from "../../../_helpers/activity-job-progress";
 import {EventAction} from "../../../_models/events/event-action";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
@@ -45,12 +46,6 @@ import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {KeyBindService} from "../../../_services/key-bind.service";
 
 const AgeTickMs = 30_000;
-
-const DelayedCodes: (MessageEventCode | null)[] = [
-  MessageEventCode.ScanLibrariesDelayed,
-  MessageEventCode.ScanLibraryDelayed,
-  MessageEventCode.ScanSeriesDelayed,
-];
 
 @Component({
   selector: 'app-nav-events-toggle',
@@ -92,26 +87,32 @@ export class EventsWidgetComponent implements OnInit {
   private readonly libraryCount = computed(() => Object.keys(this.libraryNames() ?? {}).length);
 
   private readonly entries = computed(() => this.activityStore.rows().filter(isEntry));
-  protected readonly pinned = computed(() => this.entries().filter(e => e.priority === MessageEventPriority.Action));
-  protected readonly delayedEntries = computed(() => this.entries().filter(e => DelayedCodes.includes(e.code)));
+  protected readonly pinned = computed(() => this.entries().filter(e => e.priority === MessageEventPriority.Action || e.scheduleLost));
+  protected readonly interruptedJobs = computed(() => this.activityStore.rows().filter(isInterrupted));
+  private readonly pinnedCount = computed(() => this.pinned().length + this.interruptedJobs().length);
+  protected readonly delayedEntries = computed(() => this.entries().filter(e => DelayedScanCodes.includes(e.code)));
 
   /**
-   * A delayed scan still waiting shows in Up next, so its Info is hidden here until the scan runs
+   * A delayed scan still waiting shows in Up next, and once its time has passed the scan's own job row says what happened
    */
   private readonly timeline = computed<ActivityTimelineItem[]>(() => {
     const scheduled = new Set(this.snapshot()?.scheduled.map(s => s.runAtUtc) ?? []);
+    const now = this.now();
+    const isSettled = (scheduledForUtc: string | null) => scheduledForUtc !== null
+      && (scheduled.has(scheduledForUtc) || Date.parse(scheduledForUtc) <= now);
     const rows = this.activityStore.rows().filter(r => r.kind === ActivityRowKind.Job
-      || (r.priority !== MessageEventPriority.Action && r.priority !== MessageEventPriority.Silent
-        && !(r.scheduledForUtc !== null && scheduled.has(r.scheduledForUtc))));
+      ? r.endReason !== ActivityEndReason.Restart
+      : r.priority !== MessageEventPriority.Action && r.priority !== MessageEventPriority.Silent && !r.scheduleLost
+        && !isSettled(r.scheduledForUtc));
     return groupProblems(rows);
   });
 
   protected readonly visibleTimeline = computed(() => this.timeline().filter(item => matchesFilter(item, this.filter())));
-  protected readonly attentionChipCount = computed(() => this.pinned().length + this.timeline().filter(isAttention).length);
+  protected readonly attentionChipCount = computed(() => this.pinnedCount() + this.timeline().filter(isAttention).length);
   protected readonly jobsChipCount = computed(() => this.activityStore.runningJobs().length);
-  protected readonly showPinned = computed(() => this.pinned().length > 0 && this.filter() !== ActivityFilter.Jobs);
+  protected readonly showPinned = computed(() => this.pinnedCount() > 0 && this.filter() !== ActivityFilter.Jobs);
   protected readonly showUpNext = computed(() => this.snapshot() !== null && this.filter() !== ActivityFilter.Attention);
-  protected readonly hasFinished = computed(() => this.activityStore.rows().some(r => r.kind === ActivityRowKind.Job && r.endedUtc !== null));
+  protected readonly hasFinished = computed(() => this.activityStore.rows().some(isFinished));
 
   private readonly runningJobProgress = computed(() => this.activityStore.runningJobs().map(job => jobProgress(job, this.libraryCount())));
   protected readonly runningProgress = computed(() => {
@@ -119,7 +120,8 @@ export class EventsWidgetComponent implements OnInit {
     return determinate.length > 0 ? Math.min(...determinate) : null;
   });
   protected readonly indeterminate = computed(() => this.runningJobProgress().some(p => p.indeterminate));
-  protected readonly attentionCount = computed(() => this.entries().filter(e => e.priority >= MessageEventPriority.Action).length);
+  protected readonly attentionCount = computed(() => this.interruptedJobs().length
+    + this.entries().filter(e => e.priority >= MessageEventPriority.Action || e.scheduleLost).length);
   protected readonly hasError = computed(() => this.entries().some(e => e.priority === MessageEventPriority.Error));
 
   // Re-runs the label once the language file loads, translate() alone is not reactive
@@ -245,9 +247,13 @@ function isEntry(row: ActivityRow): row is ActivityEntry {
   return row.kind === ActivityRowKind.Entry;
 }
 
+function isInterrupted(row: ActivityRow): row is ActivityJob {
+  return row.kind === ActivityRowKind.Job && row.endReason === ActivityEndReason.Restart;
+}
+
 function isAttention(item: ActivityTimelineItem) {
   if (item.kind === 'group') return true;
-  return item.kind === ActivityRowKind.Entry && item.priority >= MessageEventPriority.Info && !DelayedCodes.includes(item.code);
+  return item.kind === ActivityRowKind.Entry && item.priority >= MessageEventPriority.Info && !DelayedScanCodes.includes(item.code);
 }
 
 function matchesFilter(item: ActivityTimelineItem, filter: ActivityFilter) {
@@ -257,7 +263,7 @@ function matchesFilter(item: ActivityTimelineItem, filter: ActivityFilter) {
     case ActivityFilter.Attention:
       return isAttention(item);
     case ActivityFilter.Jobs:
-      return item.kind === ActivityRowKind.Job || (item.kind === ActivityRowKind.Entry && DelayedCodes.includes(item.code));
+      return item.kind === ActivityRowKind.Job || (item.kind === ActivityRowKind.Entry && DelayedScanCodes.includes(item.code));
   }
 }
 

@@ -59,6 +59,10 @@
       <div class="body flex-grow-1">
         @if (showPinned()) {
           <div class="pinned d-flex flex-column gap-1">
+            @for (job of interruptedJobs(); track job.id) {
+              <app-activity-job-row [job]="job" [now]="now()" [libraryNames]="libraryNames()" [pinned]="true"
+                                    (dismissed)="activityStore.dismiss($event)" />
+            }
             @for (entry of pinned(); track entry.id) {
               <app-activity-entry-row [entry]="entry" [now]="now()" [libraryNames]="libraryNames()" [pinned]="true"
                                       (dismissed)="activityStore.dismiss($event)" (navigated)="close()" />

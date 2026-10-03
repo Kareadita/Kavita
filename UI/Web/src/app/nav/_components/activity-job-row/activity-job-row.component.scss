@@ -6,6 +6,29 @@
   padding: 0.5rem 1rem;
 }
 
+.pinned {
+  font-size: 0.8125rem;
+
+  .fa-power-off {
+    color: var(--event-widget-action-icon-color);
+  }
+
+  .title {
+    font-size: 0.8125rem;
+  }
+}
+
+.dismiss {
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 0.75rem;
+  color: var(--event-widget-muted-text-color);
+
+  &:hover {
+    color: var(--event-widget-text-color);
+  }
+}
+
 .time {
   width: 2.5rem;
   padding-top: 0.125rem;
