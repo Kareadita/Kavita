@@ -1316,19 +1316,7 @@
     },
     "events-widget": {
         "title-alt": "Aktivität",
-        "dismiss-all": "Alle ausblenden",
-        "update-available": "Update verfügbar",
-        "downloading-item": "{{item}} wird heruntergeladen",
-        "more-info": "Klicken Sie für weitere Informationen",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Benutzer online",
-        "active-events-title": "Aktive Ereignisse:",
-        "no-data": "Hier ist nicht viel los",
-        "left-to-process": "Noch zu bearbeiten: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} Downloads in der Warteschlange",
-        "reading-now": "{{num}} lesen gerade",
-        "downloads-active": "{{count}} Download(s) aktiv",
-        "not-connected": "Keine Verbindung, bitte aktualisieren"
+        "reading-now": "{{num}} lesen gerade"
     },
     "shortcuts-modal": {
         "title": "Tastenkürzel",

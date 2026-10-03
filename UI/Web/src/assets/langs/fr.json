@@ -1316,19 +1316,7 @@
     },
     "events-widget": {
         "title-alt": "Activité",
-        "dismiss-all": "Rejeter tout",
-        "update-available": "Mise à jour disponible",
-        "downloading-item": "Téléchargement de {{item}}",
-        "more-info": "Cliquez pour plus d'informations",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Utilisateurs en ligne",
-        "active-events-title": "Événements actifs :",
-        "no-data": "Il ne se passe pas grand-chose ici",
-        "left-to-process": "Reste à traiter : {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} téléchargements dans la file d'attente",
-        "reading-now": "{{num}} en cours de lecture",
-        "downloads-active": "{{count}} téléchargement(s) en cours",
-        "not-connected": "Non connecté, essayez d'actualiser"
+        "reading-now": "{{num}} en cours de lecture"
     },
     "shortcuts-modal": {
         "title": "Raccourcis clavier",

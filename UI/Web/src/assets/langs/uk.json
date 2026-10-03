@@ -1025,17 +1025,7 @@
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
-        "close": "{{common.close}}",
         "title-alt": "Активність",
-        "dismiss-all": "Відхилити все",
-        "update-available": "Доступне оновлення",
-        "downloading-item": "Завантаження {{item}}",
-        "more-info": "Натисніть, щоб отримати більше інформації",
-        "users-online-count": "{{num}} Користувачі онлайн",
-        "active-events-title": "Активні події:",
-        "no-data": "Тут небагато чого відбувається",
-        "left-to-process": "Залишилося обробити: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} завантажень у черзі",
         "reading-now": "{{num}} читає зараз"
     },
     "shortcuts-modal": {

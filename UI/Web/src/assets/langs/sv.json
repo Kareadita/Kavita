@@ -1012,17 +1012,7 @@
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Användare online",
-        "active-events-title": "Aktiva Händelser:",
-        "update-available": "Uppdatering tillgänglig",
         "title-alt": "Aktivitet",
-        "downloading-item": "Laddar ner {{item}}",
-        "dismiss-all": "Avvisa alla",
-        "more-info": "Klicka för mer information",
-        "download-in-queue": "{{num}} nedladdningar i Kö",
-        "no-data": "Här händer inte mycket",
-        "left-to-process": "Återstår att bearbeta: {{leftToProcess}} / {{totalToProcess}}",
         "reading-now": "{{num}} läser nu"
     },
     "shortcuts-modal": {

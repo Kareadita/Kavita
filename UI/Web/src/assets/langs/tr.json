@@ -724,9 +724,6 @@
         "edit-label": "Düzenleme Modu",
         "no-data": "Hiçbir şey eklenmedi"
     },
-    "events-widget": {
-        "close": "{{common.close}}"
-    },
     "shortcuts-modal": {
         "close": "{{common.close}}",
         "double-click": "çift tık",

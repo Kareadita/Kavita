@@ -1235,17 +1235,7 @@
         "date-range-title": "Rozsah dátumov"
     },
     "events-widget": {
-        "title-alt": "Aktivita",
-        "dismiss-all": "Odmietnuť všetko",
-        "update-available": "Aktualizácia je dostupná",
-        "downloading-item": "Sťahuje sa {{item}}",
-        "more-info": "Kliknite pre viac informácií",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Používateľov online",
-        "active-events-title": "Aktívne udalosti:",
-        "no-data": "Moc sa tu toho nedeje",
-        "left-to-process": "Zostáva spracovať: {{leftToProcess}}",
-        "download-in-queue": "Počet stiahnutí v poradí: {{num}}"
+        "title-alt": "Aktivita"
     },
     "shortcuts-modal": {
         "title": "Klávesové skratky",

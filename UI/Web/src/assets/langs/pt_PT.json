@@ -458,20 +458,8 @@
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
-        "downloads-active": "{{count}} descarga(s) em andamento",
         "title-alt": "Atividade",
-        "dismiss-all": "Descartar Todos",
-        "update-available": "Atualização disponível",
-        "downloading-item": "A descarregar {{item}}",
-        "more-info": "Clique para ver mais informação",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Utilizadores ligados",
-        "active-events-title": "Eventos Ativos:",
-        "no-data": "Nada para ver aqui",
-        "left-to-process": "Por Processar: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} downloads em espera",
-        "reading-now": "{{num}} a ler agora",
-        "not-connected": "Sem ligação, tente atualizar"
+        "reading-now": "{{num}} a ler agora"
     },
     "download-queue-drawer": {
         "title": "Downloads",

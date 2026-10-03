@@ -1142,17 +1142,7 @@
         "characters-title": "{{metadata-fields.characters-title}}"
     },
     "events-widget": {
-        "title-alt": "Attività",
-        "dismiss-all": "Ignora tutto",
-        "update-available": "Aggiornamento disponibile",
-        "downloading-item": "Download di {{item}}",
-        "more-info": "Fare clic per ulteriori informazioni",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Utenti online",
-        "active-events-title": "Eventi Attivi:",
-        "no-data": "Non succede molto qui",
-        "download-in-queue": "{{num}} download in Coda",
-        "left-to-process": "Da elaborare: {{leftToProcess}}"
+        "title-alt": "Attività"
     },
     "shortcuts-modal": {
         "title": "Scorciatoie Tastiera",

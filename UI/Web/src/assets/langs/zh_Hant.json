@@ -1167,17 +1167,7 @@
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
-        "close": "{{common.close}}",
-        "left-to-process": "待處理：{{leftToProcess}}／{{totalToProcess}}",
-        "download-in-queue": "{{num}} 個下載在排隊中",
-        "active-events-title": "活躍事件：",
         "title-alt": "活動紀錄",
-        "dismiss-all": "忽略全部",
-        "downloading-item": "正在下載 {{item}}",
-        "users-online-count": "{{num}} 位使用者在線",
-        "no-data": "沒有任何內容",
-        "update-available": "有可用的更新",
-        "more-info": "點擊以獲取更多資訊",
         "reading-now": "目前有 {{num}} 人正在閱讀"
     },
     "shortcuts-modal": {
