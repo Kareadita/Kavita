@@ -65,22 +65,79 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         Assert.Equal(before, await LastFolderScanned(context, libraryId));
     }
 
-    [Fact(Skip = "Fails until S5: a Specials folder beside volume folders is never read")]
+    private static readonly string[] SpecialsBesideVolumes =
+    [
+        "Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+        "Spice and Wolf/Specials/Spice and Wolf SP01.cbz",
+    ];
+
+    [Fact]
     public async Task SpecialsBesideVolumeFolders_AreAdded()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (_, libraryId) = await ScanOnce(unitOfWork, "Specials Beside Volumes - Manga",
-        [
-            "Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0001.cbz",
-            "Spice and Wolf/Specials/Spice and Wolf SP01.cbz",
-        ]);
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Specials Beside Volumes - Manga", SpecialsBesideVolumes);
 
-        var files = await context.MangaFile
-            .Where(f => f.Chapter.Volume.Series.LibraryId == libraryId)
+        var series = await context.Series.AsNoTracking().SingleAsync(s => s.LibraryId == libraryId);
+        Assert.Equal("Spice and Wolf", series.Name);
+        Assert.Equal(["Spice and Wolf SP01.cbz", "Spice and Wolf Vol. 1 Ch. 0001.cbz"], await SeriesFileNames(context, series.Id));
+    }
+
+    [Fact]
+    public async Task SpecialsBesideVolumeFolders_NoChange_SecondScanProcessesNothing()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Specials Beside Volumes NoChange - Manga", SpecialsBesideVolumes);
+
+        var before = await LastFolderScanned(context, libraryId);
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Equal(before, await LastFolderScanned(context, libraryId));
+    }
+
+    [Fact]
+    public async Task SpecialsBesideVolumeFolders_VolumeFolderChanged_KeepsSpecials()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Specials Beside Volumes Volume Changed - Manga", SpecialsBesideVolumes);
+
+        var root = await LibraryRoot(context, libraryId);
+        await scannerHelper.Scaffold(root, ["Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0002.cbz"]);
+        Directory.SetLastWriteTime(Path.Join(root, "Spice and Wolf", "Spice and Wolf Vol. 1"), DateTime.Now.AddSeconds(2));
+        await scanner.ScanLibrary(libraryId);
+
+        var seriesId = await context.Series.Where(s => s.LibraryId == libraryId).Select(s => s.Id).SingleAsync();
+        Assert.Equal(
+            ["Spice and Wolf SP01.cbz", "Spice and Wolf Vol. 1 Ch. 0001.cbz", "Spice and Wolf Vol. 1 Ch. 0002.cbz"],
+            await SeriesFileNames(context, seriesId));
+    }
+
+    [Fact]
+    public async Task SpecialsBesideVolumeFolders_SpecialAdded_IsRead()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Specials Beside Volumes Special Added - Manga", SpecialsBesideVolumes);
+
+        var root = await LibraryRoot(context, libraryId);
+        await scannerHelper.Scaffold(root, ["Spice and Wolf/Specials/Spice and Wolf SP02.cbz"]);
+        Directory.SetLastWriteTime(Path.Join(root, "Spice and Wolf", "Specials"), DateTime.Now.AddSeconds(2));
+        await scanner.ScanLibrary(libraryId);
+
+        var seriesId = await context.Series.Where(s => s.LibraryId == libraryId).Select(s => s.Id).SingleAsync();
+        Assert.Equal(
+            ["Spice and Wolf SP01.cbz", "Spice and Wolf SP02.cbz", "Spice and Wolf Vol. 1 Ch. 0001.cbz"],
+            await SeriesFileNames(context, seriesId));
+    }
+
+    private static async Task<List<string>> SeriesFileNames(DataContext context, int seriesId)
+    {
+        var paths = await context.MangaFile
+            .Where(f => f.Chapter.Volume.SeriesId == seriesId)
             .Select(f => f.FilePath)
             .ToListAsync();
 
-        Assert.Contains(files, f => f.EndsWith("Spice and Wolf SP01.cbz"));
+        return paths.Select(Path.GetFileName).Order().ToList()!;
     }
 
     /// <summary>

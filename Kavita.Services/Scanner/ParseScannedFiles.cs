@@ -108,25 +108,45 @@ public partial class ParseScannedFiles
                     MessageEventCode.ScanListingFolders, i + 1, total));
             timings.Events.Stop();
 
-            // Subfolders were already read, so only the loose files at this level are left
+            // Subfolders were already read, so only the loose files at this level and its Specials folders are left
             if (processedDirs.Any(d => d.StartsWith(directory + Path.AltDirectorySeparatorChar) || d.Equals(directory)))
             {
                 timings.ParentCount++;
                 timings.ParentChangeCheck.Start();
 
+                var specials = skippedSpecials.Where(s => IsDirectChild(s, directory)).ToList();
                 var looseFileOwners = forceCheck ? [] : SeriesWithFilesIn(seriesPaths, directory);
-                var looseFilesUnchanged = looseFileOwners.Count > 0 &&
-                    IsUnchangedSince(looseFileOwners, _directoryService.GetLastWriteTime(directory, SearchOption.TopDirectoryOnly));
+                var specialsOwners = specials.Select(s => forceCheck ? [] : SeriesWithFilesIn(seriesPaths, s)).ToList();
+                var allOwners = looseFileOwners.Concat(specialsOwners.SelectMany(o => o)).Distinct().ToList();
+
+                var writeTimes = specials.Select(s => _directoryService.GetLastWriteTime(s)).ToList();
+                var looseFilesWritten = _directoryService.GetLastWriteTime(directory, SearchOption.TopDirectoryOnly);
+                // MaxValue also means no files at this level, which is only a change when some were known here
+                if (looseFileOwners.Count > 0 || looseFilesWritten != DateTime.MaxValue)
+                {
+                    writeTimes.Add(looseFilesWritten);
+                }
+
+                var unchanged = allOwners.Count > 0 && IsUnchangedSince(allOwners, writeTimes.Max());
                 timings.ParentChangeCheck.Stop();
 
                 timings.ParentSurfaceFiles.Start();
-                if (looseFilesUnchanged)
+                if (unchanged)
                 {
-                    HandleUnchangedFolder(result, folderPath, directory, looseFileOwners, true);
+                    if (looseFileOwners.Count > 0)
+                    {
+                        HandleUnchangedFolder(result, folderPath, directory, looseFileOwners, true);
+                    }
+
+                    for (var j = 0; j < specials.Count; j++)
+                    {
+                        if (specialsOwners[j].Count == 0) continue;
+                        HandleUnchangedFolder(result, folderPath, specials[j], specialsOwners[j], false);
+                    }
                 }
                 else
                 {
-                    CheckSurfaceFiles(result, directory, folderPath, fileExtensions, matcher);
+                    ReadSurfaceAndSpecialsFiles(result, directory, specials, folderPath, fileExtensions, matcher);
                 }
                 timings.ParentSurfaceFiles.Stop();
                 continue;
@@ -264,16 +284,26 @@ public partial class ParseScannedFiles
     }
 
     /// <summary>
-    /// Reads the files directly in the directory and adds them to the result
+    /// Reads the files directly in the directory and everything in the given Specials folders.
+    /// They share one result so the files are parsed with the directory as root, else the series would be named "Specials"
     /// </summary>
-    private void CheckSurfaceFiles(List<ScanResult> result, string directory, string folderPath, string fileExtensions, GlobMatcher matcher)
+    private void ReadSurfaceAndSpecialsFiles(List<ScanResult> result, string directory, IList<string> specials,
+        string folderPath, string fileExtensions, GlobMatcher matcher)
     {
-        var files = _directoryService.ScanFiles(directory, fileExtensions, matcher, SearchOption.TopDirectoryOnly);
+        var files = _directoryService.ScanFiles(directory, fileExtensions, matcher, SearchOption.TopDirectoryOnly)
+            .Concat(specials.SelectMany(s => _directoryService.ScanFiles(s, fileExtensions, matcher)))
+            .ToList();
         if (files.Count == 0)
         {
             return;
         }
         result.Add(CreateScanResult(directory, folderPath, true, files));
+    }
+
+    private static bool IsDirectChild(string folder, string parent)
+    {
+        var lastSlash = folder.LastIndexOf('/');
+        return lastSlash > 0 && folder.AsSpan(0, lastSlash).Equals(parent, StringComparison.Ordinal);
     }
 
     /// <summary>
