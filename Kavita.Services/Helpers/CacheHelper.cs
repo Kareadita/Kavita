@@ -20,7 +20,7 @@ public class CacheHelper : ICacheHelper
     /// </summary>
     /// <remarks>If a cover image is locked but the underlying file has been deleted, this will allow regenerating. </remarks>
     /// <param name="coverPath">This should just be the filename, no path information</param>
-    /// <param name="firstFile"></param>
+    /// <param name="firstFile">Null for entities without their own file (Volume, Series): only a missing cover or forceUpdate updates them</param>
     /// <param name="chapterCreated">When the chapter was created (Not Used)</param>
     /// <param name="forceUpdate">If the user has told us to force the refresh</param>
     /// <param name="isCoverLocked">If cover has been locked by user. This will force false</param>
@@ -32,7 +32,7 @@ public class CacheHelper : ICacheHelper
         var fileExists = !string.IsNullOrEmpty(coverPath) && _fileService.Exists(coverPath);
         if (isCoverLocked && fileExists) return false;
         if (forceUpdate) return true;
-        if (firstFile == null) return true;
+        if (firstFile == null) return !fileExists;
         return (_fileService.HasFileBeenModifiedSince(firstFile.FilePath, firstFile.LastModified)) || !fileExists;
     }
 
