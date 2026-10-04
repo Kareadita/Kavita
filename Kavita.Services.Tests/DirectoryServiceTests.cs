@@ -141,6 +141,27 @@ public class DirectoryServiceTests: AbstractFsTest
 
         Assert.Equal(11, files.Length);
     }
+
+    [Fact]
+    public void GetFilesWithCertainExtensions_DifferentPatternsOnSameFolder_EachUsesItsOwn()
+    {
+        const string testDirectory = "/manga/";
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddFile($"{testDirectory}Vol 01.cbz", new MockFileData(""));
+        fileSystem.AddFile($"{testDirectory}Vol 02.CBZ", new MockFileData(""));
+        fileSystem.AddFile($"{testDirectory}cover.jpg", new MockFileData(""));
+        fileSystem.AddFile($"{testDirectory}book.epub", new MockFileData(""));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+        for (var round = 0; round < 2; round++)
+        {
+            Assert.Equal(2, ds.GetFilesWithCertainExtensions(testDirectory, Parser.ArchiveFileExtensions).Count());
+            Assert.Single(ds.GetFilesWithCertainExtensions(testDirectory, Parser.ImageFileExtensions));
+            Assert.Single(ds.GetFilesWithCertainExtensions(testDirectory, Parser.EpubFileExtension));
+            Assert.Equal(4, ds.GetFilesWithCertainExtensions(testDirectory).Count());
+        }
+    }
     #endregion
 
     #region GetFiles

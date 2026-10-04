@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -43,6 +44,7 @@ public class DirectoryService : IDirectoryService
         MatchOptions, Parser.RegexTimeout);
     private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
         MatchOptions, Parser.RegexTimeout);
+    private static readonly ConcurrentDictionary<string, Regex> ExtensionPatternCache = new();
 
     public DirectoryService(ILogger<DirectoryService> logger, IFileSystem fileSystem)
     {
@@ -97,10 +99,8 @@ public class DirectoryService : IDirectoryService
         if (!FileSystem.Directory.Exists(path))
             yield break;
 
-        // Compile the regex pattern for faster repeated matching
-        var reSearchPattern = new Regex(searchPatternExpression,
-            RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            Parser.RegexTimeout);
+        var reSearchPattern = ExtensionPatternCache.GetOrAdd(searchPatternExpression,
+            pattern => new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled, Parser.RegexTimeout));
 
         // Enumerate files in the directory and apply filters
         foreach (var file in FileSystem.Directory.EnumerateFiles(path, "*", searchOption))
