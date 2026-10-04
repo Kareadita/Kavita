@@ -502,7 +502,7 @@ public partial class ParseScannedFiles
     }
 
     /// <summary>
-    /// This will process series by folder groups. This is used solely by ScanSeries
+    /// This will process series by folder groups. This is used by ScanSeries and ScanLibrary
     /// </summary>
     /// <param name="library">This should have the FileTypes included</param>
     /// <param name="folders"></param>
@@ -586,7 +586,7 @@ public partial class ParseScannedFiles
 
         // Now transform and add to processedScannedSeries AFTER everything is processed
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.F: Generate Sort Order for Series and Finalize", library.Name);
-        GenerateProcessedScannedSeries(scannedSeries, scanResults, processedScannedSeries);
+        GenerateProcessedScannedSeries(scannedSeries, processedScannedSeries);
 
         return walkResults;
     }
@@ -648,15 +648,14 @@ public partial class ParseScannedFiles
     /// Processes and generates the final results for processedScannedSeries after updating sort order.
     /// </summary>
     /// <param name="scannedSeries">A concurrent dictionary of tracked series and their parsed infos</param>
-    /// <param name="scanResults">List of all scan results, used to determine if any series has changed</param>
     /// <param name="processedScannedSeries">A thread-safe concurrent bag of processed series results</param>
-    private void GenerateProcessedScannedSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, IList<ScanResult> scanResults, ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
+    private void GenerateProcessedScannedSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
     {
         // First, update the sort order for all series
         UpdateSeriesSortOrder(scannedSeries);
 
         // Now, generate the final processed scanned series results
-        CreateFinalSeriesResults(scannedSeries, scanResults, processedScannedSeries);
+        CreateFinalSeriesResults(scannedSeries, processedScannedSeries);
     }
 
     /// <summary>
@@ -684,10 +683,9 @@ public partial class ParseScannedFiles
     /// Generates the final processed scanned series results after processing the sort order.
     /// </summary>
     /// <param name="scannedSeries">A concurrent dictionary of tracked series and their parsed infos</param>
-    /// <param name="scanResults">List of all scan results, used to determine if any series has changed</param>
     /// <param name="processedScannedSeries">The list where processed results will be added</param>
     private static void CreateFinalSeriesResults(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries,
-        IList<ScanResult> scanResults, ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
+        ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
     {
         foreach (var series in scannedSeries.Keys)
         {
@@ -695,7 +693,7 @@ public partial class ParseScannedFiles
 
             processedScannedSeries.Add(new ScannedSeriesResult
             {
-                HasChanged = scanResults.Any(sr => sr.HasChanged),  // Combine HasChanged flag across all scanResults
+                HasChanged = scannedSeries[series].Exists(info => !string.IsNullOrEmpty(info.Filename)),
                 ParsedSeries = series,
                 ParsedInfos = scannedSeries[series]
             });

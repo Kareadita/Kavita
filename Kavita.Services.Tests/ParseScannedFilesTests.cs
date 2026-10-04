@@ -466,6 +466,46 @@ public class ParseScannedFilesTests: AbstractDbTest
     }
 
     [Fact]
+    public async Task ScanLibrariesForSeries_OneSeriesChanged_OnlyThatSeriesHasChanged()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = await Setup(unitOfWork);
+
+        const string testcase = "Subfolder always scanning fix publisher layout - Comic.json";
+        var library = await scannerHelper.GenerateScannerData(testcase, new Dictionary<string, ComicInfo>());
+        var testDirectoryPath = library.Folders.First().Path;
+
+        unitOfWork.LibraryRepository.Update(library);
+        await unitOfWork.CommitAsync();
+
+        var fs = new FileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>(),
+            Substitute.For<IMediaErrorService>());
+
+        var scanner = scannerHelper.CreateServices(ds, fs);
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Equal(4, postLib.Series.Count);
+
+        await Task.Delay(1100); // Ensure at least one second has passed since library scan
+
+        var executionerDir = Path.Join(Path.Join(testDirectoryPath, "YenPress"), "The Executioner and Her Way of Life");
+        File.Copy(Path.Join(executionerDir, "The Executioner and Her Way of Life Vol. 1.cbz"),
+            Path.Join(executionerDir, "The Executioner and Her Way of Life Vol. 2.cbz"));
+
+        var res = await psf.ScanLibrariesForSeries(postLib, [testDirectoryPath], true,
+            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id));
+
+        Assert.Equal(4, res.Count);
+        var changed = Assert.Single(res, r => r.HasChanged);
+        Assert.Equal("The Executioner and Her Way of Life", changed.ParsedSeries.Name);
+    }
+
+    [Fact]
     public async Task SubFoldersNoSubFolders_SkipAll()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
