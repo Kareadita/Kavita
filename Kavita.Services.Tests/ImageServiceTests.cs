@@ -155,6 +155,44 @@ public class ImageServiceTests
         Assert.True(true);
     }
 
+    [Theory]
+    [InlineData("blue-2.png")]
+    [InlineData("blue.jpg")]
+    [InlineData("green-red.png")]
+    [InlineData("green.png")]
+    [InlineData("lightblue-2.png")]
+    [InlineData("lightblue.png")]
+    [InlineData("pink.png")]
+    [InlineData("yellow-blue.png")]
+    public void CalculateColorScape_SameImage_SameColorsEveryTime(string fileName)
+    {
+        var imagePath = Path.Join(_testDirectoryColorScapes, fileName);
+
+        var results = Enumerable.Range(0, 10)
+            .Select(_ => ImageService.CalculateColorScape(imagePath))
+            .Select(c => $"{c.Primary} {c.Secondary}")
+            .Distinct()
+            .ToList();
+
+        Assert.Single(results);
+    }
+
+    [Theory]
+    [InlineData("blue-2.png", "#0C212C #2B5C75")]
+    [InlineData("blue.jpg", "#72D2D2 #514E55")]
+    [InlineData("green-red.png", "#D84D18 #557245")]
+    [InlineData("green.png", "#519487 #B3AC97")]
+    [InlineData("lightblue-2.png", "#3D2A40 #B68784")]
+    [InlineData("lightblue.png", "#D67C72 #6F98BF")]
+    [InlineData("pink.png", "#A6404A #C9726F")]
+    [InlineData("yellow-blue.png", "#E4AD28 #54535E")]
+    public void CalculateColorScape_KnownImage_ExactColors(string fileName, string expected)
+    {
+        var colors = ImageService.CalculateColorScape(Path.Join(_testDirectoryColorScapes, fileName));
+
+        Assert.Equal(expected, $"{colors.Primary} {colors.Secondary}");
+    }
+
     private static void GenerateColorImage(string hexColor, string outputPath)
     {
         var (r, g, b) = ImageService.HexToRgb(hexColor);
