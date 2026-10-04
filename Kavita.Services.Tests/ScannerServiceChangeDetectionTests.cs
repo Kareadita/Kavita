@@ -9,7 +9,9 @@ using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
 using Kavita.Services.Scanner;
 using Kavita.Services.Tests.Helpers;
+using System.IO.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit.Abstractions;
 
 namespace Kavita.Services.Tests;
@@ -128,6 +130,81 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         Assert.Equal(
             ["Spice and Wolf SP01.cbz", "Spice and Wolf SP02.cbz", "Spice and Wolf Vol. 1 Ch. 0001.cbz"],
             await SeriesFileNames(context, seriesId));
+    }
+
+    private static readonly string[] TwoSeries =
+    [
+        "Accel World/Accel World Vol. 1.cbz",
+        "Berserk/Berserk Vol. 1/Berserk Vol. 1 Ch. 0001.cbz",
+        "Berserk/Berserk Vol. 2/Berserk Vol. 2 Ch. 0002.cbz",
+    ];
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ScanLibrary_UnreadableSeriesFolder_ScansTheRestAndKeepsIt(bool forceUpdate)
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var (_, libraryId) = await ScanOnce(unitOfWork, $"Unreadable Series Folder {forceUpdate} - Manga", TwoSeries);
+        var root = await LibraryRoot(context, libraryId);
+
+        await scannerHelper.Scaffold(root, ["Accel World/Accel World Vol. 2.cbz"]);
+        Directory.SetLastWriteTime(Path.Join(root, "Accel World"), DateTime.Now.AddSeconds(2));
+        await ScannerWithUnreadable(unitOfWork, Path.Join(root, "Berserk")).ScanLibrary(libraryId, forceUpdate);
+
+        Assert.Equal(["Accel World Vol. 1.cbz", "Accel World Vol. 2.cbz"],
+            await SeriesFileNames(context, await SeriesId(context, libraryId, "Accel World")));
+        Assert.Equal(["Berserk Vol. 1 Ch. 0001.cbz", "Berserk Vol. 2 Ch. 0002.cbz"],
+            await SeriesFileNames(context, await SeriesId(context, libraryId, "Berserk")));
+    }
+
+    [Fact]
+    public async Task ScanLibrary_UnreadableVolumeFolder_SeriesProcessedKeepsThatVolume()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Unreadable Volume Folder - Manga", TwoSeries);
+        var root = await LibraryRoot(context, libraryId);
+
+        await scannerHelper.Scaffold(root, ["Berserk/Berserk Vol. 1/Berserk Vol. 1 Ch. 0003.cbz"]);
+        Directory.SetLastWriteTime(Path.Join(root, "Berserk", "Berserk Vol. 1"), DateTime.Now.AddSeconds(2));
+        await ScannerWithUnreadable(unitOfWork, Path.Join(root, "Berserk", "Berserk Vol. 2")).ScanLibrary(libraryId);
+
+        Assert.Equal(["Berserk Vol. 1 Ch. 0001.cbz", "Berserk Vol. 1 Ch. 0003.cbz", "Berserk Vol. 2 Ch. 0002.cbz"],
+            await SeriesFileNames(context, await SeriesId(context, libraryId, "Berserk")));
+    }
+
+    [Fact]
+    public async Task ScanLibrary_UnreadableLibraryRoot_RemovesNothing()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Unreadable Library Root - Manga", TwoSeries);
+        var root = await LibraryRoot(context, libraryId);
+
+        try
+        {
+            await ScannerWithUnreadable(unitOfWork, root).ScanLibrary(libraryId);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Aborting is fine, deleting is not
+        }
+
+        Assert.Equal(2, await context.Series.CountAsync(s => s.LibraryId == libraryId));
+        Assert.Equal(3, await context.MangaFile.CountAsync(f => f.Chapter.Volume.Series.LibraryId == libraryId));
+    }
+
+    private ScannerService ScannerWithUnreadable(IUnitOfWork unitOfWork, params string[] folders)
+    {
+        var fs = UnreadableFolders.Wrap(new FileSystem(), folders);
+        return new ScannerHelper(unitOfWork, testOutputHelper)
+            .CreateServices(new DirectoryService(NullLogger<DirectoryService>.Instance, fs), fs);
+    }
+
+    private static Task<int> SeriesId(DataContext context, int libraryId, string name)
+    {
+        return context.Series.Where(s => s.LibraryId == libraryId && s.Name == name).Select(s => s.Id).SingleAsync();
     }
 
     private static async Task<List<string>> SeriesFileNames(DataContext context, int seriesId)

@@ -108,79 +108,92 @@ public partial class ParseScannedFiles
                     MessageEventCode.ScanListingFolders, i + 1, total));
             timings.Events.Stop();
 
-            // Subfolders were already read, so only the loose files at this level and its Specials folders are left
-            if (processedDirs.Any(d => d.StartsWith(directory + Path.AltDirectorySeparatorChar) || d.Equals(directory)))
+            var isParent = processedDirs.Any(d => d.StartsWith(directory + Path.AltDirectorySeparatorChar) || d.Equals(directory));
+            try
             {
-                timings.ParentCount++;
-                timings.ParentChangeCheck.Start();
-
-                var specials = skippedSpecials.Where(s => IsDirectChild(s, directory)).ToList();
-                var looseFileOwners = forceCheck ? [] : SeriesWithFilesIn(seriesPaths, directory);
-                var specialsOwners = specials.Select(s => forceCheck ? [] : SeriesWithFilesIn(seriesPaths, s)).ToList();
-                var allOwners = looseFileOwners.Concat(specialsOwners.SelectMany(o => o)).Distinct().ToList();
-
-                var writeTimes = specials.Select(s => _directoryService.GetLastWriteTime(s)).ToList();
-                var looseFilesWritten = _directoryService.GetLastWriteTime(directory, SearchOption.TopDirectoryOnly);
-                // MaxValue also means no files at this level, which is only a change when some were known here
-                if (looseFileOwners.Count > 0 || looseFilesWritten != DateTime.MaxValue)
+                // Subfolders were already read, so only the loose files at this level and its Specials folders are left
+                if (isParent)
                 {
-                    writeTimes.Add(looseFilesWritten);
+                    timings.ParentCount++;
+                    timings.ParentChangeCheck.Start();
+
+                    var specials = skippedSpecials.Where(s => IsDirectChild(s, directory)).ToList();
+                    var looseFileOwners = forceCheck ? [] : SeriesWithFilesIn(seriesPaths, directory);
+                    var specialsOwners = specials.Select(s => forceCheck ? [] : SeriesWithFilesIn(seriesPaths, s)).ToList();
+                    var allOwners = looseFileOwners.Concat(specialsOwners.SelectMany(o => o)).Distinct().ToList();
+
+                    var writeTimes = specials.Select(s => _directoryService.GetLastWriteTime(s)).ToList();
+                    var looseFilesWritten = _directoryService.GetLastWriteTime(directory, SearchOption.TopDirectoryOnly);
+                    // MaxValue also means no files at this level, which is only a change when some were known here
+                    if (looseFileOwners.Count > 0 || looseFilesWritten != DateTime.MaxValue)
+                    {
+                        writeTimes.Add(looseFilesWritten);
+                    }
+
+                    var unchanged = allOwners.Count > 0 && IsUnchangedSince(allOwners, writeTimes.Max());
+                    timings.ParentChangeCheck.Stop();
+
+                    timings.ParentSurfaceFiles.Start();
+                    if (unchanged)
+                    {
+                        if (looseFileOwners.Count > 0)
+                        {
+                            HandleUnchangedFolder(result, folderPath, directory, looseFileOwners, true);
+                        }
+
+                        for (var j = 0; j < specials.Count; j++)
+                        {
+                            if (specialsOwners[j].Count == 0) continue;
+                            HandleUnchangedFolder(result, folderPath, specials[j], specialsOwners[j], false);
+                        }
+                    }
+                    else
+                    {
+                        ReadSurfaceAndSpecialsFiles(result, directory, specials, folderPath, fileExtensions, matcher);
+                    }
+                    timings.ParentSurfaceFiles.Stop();
+                    continue;
                 }
 
-                var unchanged = allOwners.Count > 0 && IsUnchangedSince(allOwners, writeTimes.Max());
-                timings.ParentChangeCheck.Stop();
-
-                timings.ParentSurfaceFiles.Start();
-                if (unchanged)
+                // Skip directories ending with "Specials", let the parent handle it
+                if (directory.EndsWith("Specials", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (looseFileOwners.Count > 0)
-                    {
-                        HandleUnchangedFolder(result, folderPath, directory, looseFileOwners, true);
-                    }
+                    _logger.LogDebug("Skipping {Directory} as it ends with 'Specials'", directory);
+                    skippedSpecials.Add(directory);
+                    continue;
+                }
 
-                    for (var j = 0; j < specials.Count; j++)
-                    {
-                        if (specialsOwners[j].Count == 0) continue;
-                        HandleUnchangedFolder(result, folderPath, specials[j], specialsOwners[j], false);
-                    }
+                // A full scan also reads the Specials folders skipped below this one
+                var owners = forceCheck
+                    ? []
+                    : skippedSpecials
+                        .Where(s => s.IsInsideFolder(directory))
+                        .Prepend(directory)
+                        .SelectMany(f => SeriesWithFilesIn(seriesPaths, f))
+                        .Distinct()
+                        .ToList();
+
+                if (owners.Count > 0 && IsUnchangedSince(owners, _directoryService.GetLastWriteTime(directory)))
+                {
+                    HandleUnchangedFolder(result, folderPath, directory, owners, false);
                 }
                 else
                 {
-                    ReadSurfaceAndSpecialsFiles(result, directory, specials, folderPath, fileExtensions, matcher);
+                    PerformFullScan(result, directory, folderPath, fileExtensions, matcher);
                 }
+
+                processedDirs.Add(directory);
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+            {
+                timings.ParentChangeCheck.Stop();
                 timings.ParentSurfaceFiles.Stop();
-                continue;
+                _logger.LogWarning(ex, "[ScannerService] Could not read {Directory}, keeping its series as they are for this scan", directory);
+                KeepUnreadableFolder(result, folderPath, directory, isParent, skippedSpecials, seriesPaths);
+                if (!isParent) processedDirs.Add(directory);
             }
-
-            // Skip directories ending with "Specials", let the parent handle it
-            if (directory.EndsWith("Specials", StringComparison.OrdinalIgnoreCase))
-            {
-                _logger.LogDebug("Skipping {Directory} as it ends with 'Specials'", directory);
-                skippedSpecials.Add(directory);
-                continue;
-            }
-
-            // A full scan also reads the Specials folders skipped below this one
-            var owners = forceCheck
-                ? []
-                : skippedSpecials
-                    .Where(s => s.IsInsideFolder(directory))
-                    .Prepend(directory)
-                    .SelectMany(f => SeriesWithFilesIn(seriesPaths, f))
-                    .Distinct()
-                    .ToList();
-
-            if (owners.Count > 0 && IsUnchangedSince(owners, _directoryService.GetLastWriteTime(directory)))
-            {
-                HandleUnchangedFolder(result, folderPath, directory, owners, false);
-            }
-            else
-            {
-                PerformFullScan(result, directory, folderPath, fileExtensions, matcher);
-            }
-
-            processedDirs.Add(directory);
         }
+
 
         _logger.LogDebug("[ScannerService] Walked {DirectoryCount} folders in {ElapsedMs}ms, {ParentCount} parent checks took {ChangeCheckMs}ms + {SurfaceFilesMs}ms loose files, events {EventsMs}ms",
             total, loopSw.ElapsedMilliseconds, timings.ParentCount,
@@ -188,6 +201,42 @@ public partial class ParseScannedFiles
             timings.Events.ElapsedMilliseconds);
 
         return result;
+    }
+
+    /// <summary>
+    /// Placeholders for every series with files in a folder that could not be read, so none of them are removed (due to lack of forced check).
+    /// A parent's subfolders were already read, so it only covers its own loose files and its Specials folders
+    /// </summary>
+    private void KeepUnreadableFolder(List<ScanResult> result, string folderPath, string directory, bool isParent,
+        IEnumerable<string> skippedSpecials, IDictionary<string, IList<SeriesModified>> seriesPaths)
+    {
+        if (!isParent)
+        {
+            var owners = seriesPaths.Values
+                .SelectMany(s => s)
+                .Distinct()
+                .Where(s => s.FileFolders.Any(f => f.IsSameOrInsideFolder(directory)))
+                .ToList();
+
+            if (owners.Count > 0)
+            {
+                HandleUnchangedFolder(result, folderPath, directory, owners, false);
+            }
+
+            return;
+        }
+
+        var looseFileOwners = SeriesWithFilesIn(seriesPaths, directory);
+        if (looseFileOwners.Count > 0) HandleUnchangedFolder(result, folderPath, directory, looseFileOwners, true);
+
+        foreach (var special in skippedSpecials.Where(s => IsDirectChild(s, directory)))
+        {
+            var specialOwners = SeriesWithFilesIn(seriesPaths, special);
+            if (specialOwners.Count > 0)
+            {
+                HandleUnchangedFolder(result, folderPath, special, specialOwners, false);
+            }
+        }
     }
 
     private sealed class DirectoryScanTimings

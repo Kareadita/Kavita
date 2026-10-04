@@ -6,6 +6,7 @@ using System.Text;
 using Kavita.Common.Helpers;
 using Kavita.Database.Tests;
 using Kavita.Services.Scanner;
+using Kavita.Services.Tests.Helpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit.Abstractions;
@@ -1094,6 +1095,33 @@ public class DirectoryServiceTests: AbstractFsTest
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         Assert.Equal(2, ds.GetAllDirectories(fileSystem.Path.Join(testDirectory, "folder 1")).Count());
+    }
+
+    [Fact]
+    public void GetAllDirectories_UnreadableSubfolder_KeepsItAndSkipsItsChildren()
+    {
+        const string testDirectory = "C:/manga/base/";
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "A", "A1"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "B", "B1"));
+
+        var ds = new DirectoryService(_logger,
+            UnreadableFolders.Wrap(fileSystem, fileSystem.Path.Join(testDirectory, "B")));
+
+        var directories = ds.GetAllDirectories(testDirectory).Select(Parser.NormalizePath).Order().ToList();
+        Assert.Equal(["C:/manga/base/A", "C:/manga/base/A/A1", "C:/manga/base/B"], directories);
+    }
+
+    [Fact]
+    public void GetAllDirectories_UnreadableRoot_Throws()
+    {
+        const string testDirectory = "C:/manga/base/";
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "A"));
+
+        var ds = new DirectoryService(_logger, UnreadableFolders.Wrap(fileSystem, testDirectory));
+
+        Assert.Throws<UnauthorizedAccessException>(() => ds.GetAllDirectories(testDirectory).ToList());
     }
 
     #endregion
