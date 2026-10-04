@@ -524,7 +524,7 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
         // Batgirl Vol.2000 #57 (December, 2004)
         new Regex(
-            @"^(?<Series>.+?)(?:\s|_)(v|vol|tome|t)\.?(\s|_)?(?<Volume>\d+)",
+            @"^(?<Series>.+?)(?:\s|_)(v|vol|volume|tome|t)\.?(\s|_)?(?<Volume>\d+)",
             MatchOptions, RegexTimeout),
         // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
         new Regex(
