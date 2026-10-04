@@ -1871,6 +1871,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
 
             if (string.IsNullOrEmpty(series.LowestFolderPath) || series.FolderPath.Equals(series.LowestFolderPath)) continue;
+            if (!series.LibraryRoots.Any(series.LowestFolderPath.IsInsideFolder)) continue;
             if (!map.TryGetValue(series.LowestFolderPath, out var value2))
             {
                 map.Add(series.LowestFolderPath, new List<SeriesModified>()

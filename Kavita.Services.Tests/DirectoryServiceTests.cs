@@ -745,6 +745,14 @@ public class DirectoryServiceTests: AbstractFsTest
         Assert.Equal(expected, actual);
     }
 
+    [Fact]
+    public void FindHighestDirectoriesFromFiles_SiblingOfLibraryRoot_ReturnsEmpty()
+    {
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
+
+        Assert.Empty(ds.FindHighestDirectoriesFromFiles(["B:/Fiction"], ["B:/Fiction2/Author/Book.epub"]));
+    }
+
     #endregion
 
     #region FindLowestDirectoriesFromFiles
@@ -795,6 +803,22 @@ public class DirectoryServiceTests: AbstractFsTest
 
         var actual = ds.FindLowestDirectoriesFromFiles(rootDirectories, files);
         Assert.Equal(expectedDirectory, actual);
+    }
+
+    [Theory]
+    [InlineData(new [] {@"M:\"},
+        new [] {"M:/Higurashi When They Cry/Vol 01.cbz", "M:/Higurashi Yen Press/Vol 02.cbz"})]
+    [InlineData(new [] {"M:/"},
+        new [] {"M:/Higurashi When They Cry/Vol 01.cbz", "M:/Higurashi Yen Press/Vol 02.cbz"})]
+    [InlineData(new [] {"/"},
+        new [] {"/Higurashi When They Cry/Vol 01.cbz", "/Higurashi Yen Press/Vol 02.cbz"})]
+    [InlineData(new [] {"B:/Fiction"},
+        new [] {"B:/Fiction2/Author/Book.epub"})]
+    public void FindLowestDirectoriesFromFiles_RootOrOutsideLibrary_ReturnsNull(string[] rootDirectories, string[] files)
+    {
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
+
+        Assert.Null(ds.FindLowestDirectoriesFromFiles(rootDirectories, files));
     }
 
     #endregion

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kavita.API.Database;
@@ -213,6 +214,144 @@ public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper) : Abstrac
 
         Assert.Single(removed);
         Assert.Equal("Batman", removed.First().Name);
+    }
+
+    #endregion
+
+    #region Folder lookups
+
+    private static Series SeriesInFolder(string name, string? folderPath, string? lowestFolderPath)
+    {
+        var series = new SeriesBuilder(name).WithFormat(MangaFormat.Archive).Build();
+        series.FolderPath = folderPath;
+        series.LowestFolderPath = lowestFolderPath;
+        return series;
+    }
+
+    private static async Task<Library> AddLibrary(IUnitOfWork unitOfWork, string root, params Series[] series)
+    {
+        var builder = new LibraryBuilder("Folder Lookups", LibraryType.Manga)
+            .WithFolderPath(new FolderPathBuilder(root).Build());
+        foreach (var s in series)
+        {
+            builder.WithSeries(s);
+        }
+
+        var library = builder.Build();
+        unitOfWork.LibraryRepository.Add(library);
+        await unitOfWork.CommitAsync();
+        return library;
+    }
+
+    [Fact]
+    public async Task GetFolderPathMapAsync_KeysFolderPathAndLowestFolderPath()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var library = await AddLibrary(unitOfWork, "M:/",
+            SeriesInFolder("Accel World", "M:/Accel World", "M:/Accel World"),
+            SeriesInFolder("Higurashi Arc 1", "M:/Higurashi", "M:/Higurashi/Arc 1"),
+            SeriesInFolder("Higurashi Arc 2", "M:/Higurashi", "M:/Higurashi/Arc 2"),
+            SeriesInFolder("No Folder", null, null));
+
+        var map = await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id);
+
+        Assert.Equal(["M:/Accel World", "M:/Higurashi", "M:/Higurashi/Arc 1", "M:/Higurashi/Arc 2"], map.Keys.Order());
+        Assert.Single(map["M:/Accel World"]);
+        Assert.Equal(["Higurashi Arc 1", "Higurashi Arc 2"], map["M:/Higurashi"].Select(s => s.SeriesName).Order());
+    }
+
+    [Fact]
+    public async Task GetFolderPathMapAsync_IgnoresLowestFolderPathOutsideLibrary()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var library = await AddLibrary(unitOfWork, "M:/",
+            SeriesInFolder("Higurashi Arc 1", "M:/Higurashi When They Cry", "M:"));
+
+        var map = await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id);
+
+        Assert.Equal(["M:/Higurashi When They Cry"], map.Keys);
+    }
+
+    [Fact]
+    public async Task GetSeriesThatContainsLowestFolderPathAsync_FileInOwnFolder()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        await AddLibrary(unitOfWork, "M:/",
+            SeriesInFolder("Accel World", "M:/Accel World", "M:/Accel World"),
+            SeriesInFolder("Accel World Dural", "M:/Accel World  Dural - Magisa Garden", "M:/Accel World  Dural - Magisa Garden"));
+
+        var series = await unitOfWork.SeriesRepository.GetSeriesThatContainsLowestFolderPathAsync("M:/Accel World/Accel World v01.cbz");
+
+        Assert.NotNull(series);
+        Assert.Equal("Accel World", series.Name);
+    }
+
+    [Fact(Skip = "Fails until S3: LIKE 'M:/Accel World%' also matches the sibling, so SingleOrDefault throws")]
+    public async Task GetSeriesThatContainsLowestFolderPathAsync_SiblingPrefix()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        await AddLibrary(unitOfWork, "M:/",
+            SeriesInFolder("Accel World", "M:/Accel World", "M:/Accel World"),
+            SeriesInFolder("Accel World Dural", "M:/Accel World  Dural - Magisa Garden", "M:/Accel World  Dural - Magisa Garden"));
+
+        var series = await unitOfWork.SeriesRepository.GetSeriesThatContainsLowestFolderPathAsync(
+            "M:/Accel World  Dural - Magisa Garden/Accel World Dural v01.cbz");
+
+        Assert.NotNull(series);
+        Assert.Equal("Accel World Dural", series.Name);
+    }
+
+    [Fact(Skip = "Fails until S3: '_' in LowestFolderPath is a LIKE wildcard")]
+    public async Task GetSeriesThatContainsLowestFolderPathAsync_UnderscoreIsLiteral()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        await AddLibrary(unitOfWork, "M:/", SeriesInFolder("Foo Bar", "M:/Foo_Bar", "M:/Foo_Bar"));
+
+        var series = await unitOfWork.SeriesRepository.GetSeriesThatContainsLowestFolderPathAsync("M:/FooXBar/FooXBar v01.cbz");
+
+        Assert.Null(series);
+    }
+
+    /// <summary>
+    /// ScanFolder catches this and falls back to a library scan
+    /// </summary>
+    [Fact]
+    public async Task GetSeriesThatContainsLowestFolderPathAsync_SharedFolder_Throws()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        await AddLibrary(unitOfWork, "M:/",
+            SeriesInFolder("Twilight Princess", "M:/The Legend of Zelda", "M:/The Legend of Zelda"),
+            SeriesInFolder("Ocarina of Time", "M:/The Legend of Zelda", "M:/The Legend of Zelda"));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            unitOfWork.SeriesRepository.GetSeriesThatContainsLowestFolderPathAsync("M:/The Legend of Zelda/new.cbz"));
+    }
+
+    [Fact]
+    public async Task GetSeriesByFolderPathAsync_MatchesFolderPathOrLowestFolderPath()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        await AddLibrary(unitOfWork, "M:/",
+            SeriesInFolder("Higurashi Arc 1", "M:/Higurashi", "M:/Higurashi/Arc 1"));
+
+        Assert.Equal("Higurashi Arc 1", (await unitOfWork.SeriesRepository.GetSeriesByFolderPathAsync("M:/Higurashi"))?.Name);
+        Assert.Equal("Higurashi Arc 1", (await unitOfWork.SeriesRepository.GetSeriesByFolderPathAsync(@"M:\Higurashi\Arc 1"))?.Name);
+        Assert.Null(await unitOfWork.SeriesRepository.GetSeriesByFolderPathAsync("M:/Higurashi/Arc 2"));
+    }
+
+    /// <summary>
+    /// Every series under a publisher folder shares its FolderPath. ScanFolder catches this and falls back to a library scan
+    /// </summary>
+    [Fact]
+    public async Task GetSeriesByFolderPathAsync_SharedPublisherFolder_Throws()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        await AddLibrary(unitOfWork, "B:/",
+            SeriesInFolder("Easy Menu", "B:/Other/Cooking", "B:/Other/Cooking/Easy Menu"),
+            SeriesInFolder("Salt Fat Acid Heat", "B:/Other/Cooking", "B:/Other/Cooking/Salt Fat Acid Heat"));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            unitOfWork.SeriesRepository.GetSeriesByFolderPathAsync("B:/Other/Cooking"));
     }
 
     #endregion

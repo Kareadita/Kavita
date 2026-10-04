@@ -372,7 +372,7 @@ public class ProcessSeries(
         else
         {
             // Don't save FolderPath if it's a library Folder
-            if (!library.Folders.Select(f => f.Path).Contains(seriesDirs.Keys.First()))
+            if (libraryFolders.Any(seriesDirs.Keys.First().IsInsideFolder))
             {
                 // BUG: FolderPath can be a level higher than it needs to be. I'm not sure why it's like this, but I thought it should be one level lower.
                 // I think it's like this because higher level is checked or not checked. But i think we can do both
@@ -382,11 +382,19 @@ public class ProcessSeries(
         }
 
         var lowestFolder = directoryService.FindLowestDirectoriesFromFiles(libraryFolders, seriesFiles);
-        if (!string.IsNullOrEmpty(lowestFolder))
+        if (lowestFolder == series.LowestFolderPath) return;
+
+        if (lowestFolder == null)
         {
-            series.LowestFolderPath = lowestFolder;
-            logger.LogDebug("Updating {Series} LowestFolderPath to {FolderPath}", series.Name, series.LowestFolderPath);
+            logger.LogDebug("Clearing {Series} LowestFolderPath {FolderPath}, its files share no folder below the library root",
+                series.Name, series.LowestFolderPath);
         }
+        else
+        {
+            logger.LogDebug("Updating {Series} LowestFolderPath to {FolderPath}", series.Name, lowestFolder);
+        }
+
+        series.LowestFolderPath = lowestFolder;
     }
 
 

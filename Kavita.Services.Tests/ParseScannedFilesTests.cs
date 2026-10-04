@@ -8,6 +8,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
 using Kavita.Database.Tests;
+using Kavita.Models.Builders;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
@@ -364,8 +365,7 @@ public class ParseScannedFilesTests: AbstractDbTest
 
     #endregion
 
-    // TODO: Add back in (removed for Hotfix v0.8.5.x)
-    //[Fact]
+    [Fact(Skip = "Fails until S4: 4 folders report a change instead of 2. folderMap.Count of 6 changes with D1")]
     public async Task HasSeriesFolderNotChangedSinceLastScan_AllSeriesFoldersHaveChanges()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
@@ -467,8 +467,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         Assert.Equal(1, changes);
     }
 
-    // TODO: Add back in (removed for Hotfix v0.8.5.x)
-    //[Fact]
+    [Fact(Skip = "Fails until S4: volume subfolders are not folder map keys, so they always report a change")]
     public async Task SubFoldersNoSubFolders_SkipAll()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
@@ -598,6 +597,35 @@ public class ParseScannedFilesTests: AbstractDbTest
             await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id), postLib);
         var changes = res.Count(sc => sc.HasChanged);
         Assert.Equal(2, changes);
+    }
+
+    [Fact]
+    public async Task HasSeriesFolderNotChangedSinceLastScan_LowestFolderPathIsDriveRoot_DoesNotWalkIt()
+    {
+        var ds = Substitute.For<IDirectoryService>();
+        ds.ScanFiles(default!, default!).ReturnsForAnyArgs([]);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>(), Substitute.For<IMediaErrorService>());
+
+        var library = new LibraryBuilder("Manga").WithFolderPath(new FolderPathBuilder("M:/").Build()).Build();
+        var seriesPaths = new Dictionary<string, IList<SeriesModified>>
+        {
+            ["M:/Higurashi When They Cry"] =
+            [
+                new SeriesModified
+                {
+                    SeriesName = "Higurashi When They Cry",
+                    FolderPath = "M:/Higurashi When They Cry",
+                    LowestFolderPath = "M:",
+                    LastScanned = DateTime.Now,
+                    LibraryRoots = ["M:/"],
+                },
+            ],
+        };
+
+        await psf.ScanFiles("M:/Higurashi When They Cry", false, seriesPaths, library);
+
+        ds.DidNotReceiveWithAnyArgs().GetLastWriteTime(default!);
     }
 
     [Fact]

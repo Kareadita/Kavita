@@ -554,7 +554,7 @@ public class DirectoryService : IDirectoryService
             if (stopLookingForDirectories) break;
             foreach (var file in filePaths.Select(Parser.NormalizePath))
             {
-                if (!file.Contains(folder)) continue;
+                if (!file.IsInsideFolder(folder)) continue;
 
                 var parts = GetFoldersTillRoot(folder, file).ToList();
                 if (parts.Count == 0)
@@ -593,8 +593,7 @@ public class DirectoryService : IDirectoryService
         {
             foreach (var file in normalizedFilePaths)
             {
-                // If the file path contains the folder path, get its directory
-                if (!file.Contains(normalizedFolder)) continue;
+                if (!file.IsInsideFolder(normalizedFolder)) continue;
 
                 var lowestPath = Path.GetDirectoryName(file);
                 if (!string.IsNullOrEmpty(lowestPath))
@@ -612,8 +611,7 @@ public class DirectoryService : IDirectoryService
         // Now find the deepest common directory among all paths
         var commonPath = dirs.Aggregate(GetDeepestCommonPath); // Use new method to get deepest path
 
-        // Return the common path if it exists and is not one of the root directories
-        return libraryFolders.Any(folder => commonPath == Parser.NormalizePath(folder)) ? null : commonPath;
+        return libraryFolders.Any(commonPath.IsInsideFolder) ? commonPath : null;
     }
 
     public static string GetDeepestCommonPath(string path1, string path2)

@@ -148,7 +148,10 @@ public class ScannerService(
 
         var libraries = (await unitOfWork.LibraryRepository.GetLibraryDtosAsync()).ToList();
         var libraryFolders = libraries.SelectMany(l => l.Folders);
-        var libraryFolder = libraryFolders.Select(Parser.NormalizePath).FirstOrDefault(f => f.Contains(parentDirectory));
+        var libraryFolder = libraryFolders
+            .Select(Parser.NormalizePath)
+            .Where(folder.IsSameOrInsideFolder)
+            .MaxBy(f => f.Length);
 
         if (string.IsNullOrEmpty(libraryFolder))
         {
@@ -207,10 +210,14 @@ public class ScannerService(
         }
 
         // TODO: We need to refactor this to handle the path changes better
-        var folderPath = series.LowestFolderPath ?? series.FolderPath;
-        if (string.IsNullOrEmpty(folderPath) || !directoryService.Exists(folderPath))
+        List<string> folderPaths = [];
+        if (!string.IsNullOrEmpty(series.LowestFolderPath) && directoryService.Exists(series.LowestFolderPath))
         {
-            // We don't care if it's multiple due to new scan loop enforcing all in one root directory
+            folderPaths.Add(series.LowestFolderPath);
+        }
+        else
+        {
+            // Without a LowestFolderPath the files can sit in several top level folders, and FolderPath is only the first
             var files = await unitOfWork.SeriesRepository.GetFilesForSeriesAsync(seriesId);
             var seriesDirs = directoryService.FindHighestDirectoriesFromFiles(libraryPaths,
                 files.Select(f => f.FilePath).ToList());
@@ -218,13 +225,16 @@ public class ScannerService(
             {
                 logger.LogCritical("Scan Series has files spread outside a main series folder. Defaulting to library folder (this is expensive)");
                 await eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.FilesOutsideFolderEvent(series.LibraryId, series.Id, series.Name));
-                seriesDirs = directoryService.FindHighestDirectoriesFromFiles(libraryPaths, files.Select(f => f.FilePath).ToList());
             }
 
-            folderPath = seriesDirs.Keys.FirstOrDefault();
+            folderPaths.AddRange(seriesDirs.Keys);
+            if (folderPaths.Count == 0 && !string.IsNullOrEmpty(series.FolderPath) && directoryService.Exists(series.FolderPath))
+            {
+                folderPaths.Add(series.FolderPath);
+            }
 
             // We should check if folderPath is a library folder path and if so, return early and tell user to correct their setup.
-            if (!string.IsNullOrEmpty(folderPath) && libraryPaths.Contains(folderPath))
+            if (folderPaths.Exists(f => !libraryPaths.Any(f.IsInsideFolder)))
             {
                 logger.LogCritical("[ScannerSeries] {SeriesName} scan aborted. Files for series are not in a nested folder under library path. Correct this and rescan", series.Name);
                 await eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ScanSeriesNotNestedEvent(series.LibraryId, series.Id, series.Name));
@@ -232,7 +242,7 @@ public class ScannerService(
             }
         }
 
-        if (string.IsNullOrEmpty(folderPath))
+        if (folderPaths.Count == 0)
         {
             logger.LogCritical("[ScannerSeries] Scan Series could not find a single, valid folder root for files");
             await eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ScanSeriesNoRootEvent(series.LibraryId, series.Id, series.Name));
@@ -243,7 +253,7 @@ public class ScannerService(
             MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Started, series.Name, 1));
 
         logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var (scanElapsedTime, parsedSeries) = await ScanFiles(library, [folderPath],
+        var (scanElapsedTime, parsedSeries) = await ScanFiles(library, folderPaths,
             false, true);
 
         logger.LogInformation("ScanFiles for {Series} took {Time} milliseconds", series.Name, scanElapsedTime);
@@ -256,7 +266,7 @@ public class ScannerService(
         {
              var seriesFiles = (await unitOfWork.SeriesRepository.GetFilesForSeriesAsync(series.Id));
              if (!string.IsNullOrEmpty(series.FolderPath) &&
-                 !seriesFiles.Where(f => f.FilePath.Contains(series.FolderPath)).Any(m => File.Exists(m.FilePath)))
+                 !seriesFiles.Where(f => f.FilePath.IsInsideFolder(series.FolderPath)).Any(m => File.Exists(m.FilePath)))
              {
                  try
                  {
@@ -336,18 +346,24 @@ public class ScannerService(
     {
         // Why does this only grab things that have changed?
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-        foreach (var series in seenSeries.Where(s => s.ParsedInfos.Count > 0)) // && s.HasChanged
-        {
-            var parsedFiles = series.ParsedInfos;
-            series.ParsedSeries.HasChanged = series.HasChanged;
 
-            if (series.HasChanged)
+        // A series read from two folders arrives once per folder, and ParsedSeries compares by reference
+        var seriesAcrossFolders = seenSeries
+            .Where(s => s.ParsedInfos.Count > 0) // && s.HasChanged
+            .GroupBy(s => (s.ParsedSeries.NormalizedName, s.ParsedSeries.Format));
+
+        foreach (var series in seriesAcrossFolders)
+        {
+            var key = series.First().ParsedSeries;
+            key.HasChanged = series.Any(s => s.HasChanged);
+
+            if (key.HasChanged)
             {
-                parsedSeries.Add(series.ParsedSeries, parsedFiles);
+                parsedSeries.Add(key, [.. series.SelectMany(s => s.ParsedInfos)]);
             }
             else
             {
-                parsedSeries.Add(series.ParsedSeries, []);
+                parsedSeries.Add(key, []);
             }
         }
 

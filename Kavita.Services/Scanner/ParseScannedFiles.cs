@@ -193,7 +193,13 @@ public partial class ParseScannedFiles
 
         foreach (var series in seriesList)
         {
-            var lastWriteTime = _directoryService.GetLastWriteTime(series.LowestFolderPath!).Truncate(TimeSpan.TicksPerSecond);
+            // Null stays "changed" (FolderPath alone misses a deleted sibling folder), and a stored M: would walk the whole share
+            if (string.IsNullOrEmpty(series.LowestFolderPath) || !series.LibraryRoots.Any(series.LowestFolderPath.IsInsideFolder))
+            {
+                return false;
+            }
+
+            var lastWriteTime = _directoryService.GetLastWriteTime(series.LowestFolderPath).Truncate(TimeSpan.TicksPerSecond);
             var seriesLastScanned = series.LastScanned.Truncate(TimeSpan.TicksPerSecond);
             if (seriesLastScanned < lastWriteTime)
             {
@@ -282,8 +288,7 @@ public partial class ParseScannedFiles
     {
         var normalizedPath = Parser.NormalizePath(folderPath);
         var libraryRoot =
-            library.Folders.FirstOrDefault(f =>
-                normalizedPath.Contains(Parser.NormalizePath(f.Path)))?.Path ??
+            library.Folders.FirstOrDefault(f => normalizedPath.IsSameOrInsideFolder(f.Path))?.Path ??
             folderPath;
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,

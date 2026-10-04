@@ -28,6 +28,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Kavita.API\Kavita.API.csproj" />
+      <ProjectReference Include="..\Kavita.Database.Tests\Kavita.Database.Tests.csproj" />
       <ProjectReference Include="..\Kavita.Server\Kavita.Server.csproj" />
     </ItemGroup>
 

@@ -8,6 +8,7 @@ using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
+using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -274,7 +275,7 @@ public class LibraryWatcher : ILibraryWatcher
         _logger.LogTrace("[LibraryWatcher] ProcessChange completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
     }
 
-    private string GetFolder(string filePath, IEnumerable<string> libraryFolders)
+    internal string GetFolder(string filePath, IEnumerable<string> libraryFolders)
     {
         // TODO: I can optimize this to avoid a library scan and instead do a Series Scan by finding the series that has a lowestFolderPath higher or equal to the filePath
 
@@ -282,9 +283,10 @@ public class LibraryWatcher : ILibraryWatcher
         _logger.LogTrace("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);
         if (string.IsNullOrEmpty(parentDirectory)) return string.Empty;
 
-        // We need to find the library this creation belongs to
-        // Multiple libraries can point to the same base folder. In this case, we need use FirstOrDefault
-        var libraryFolder = libraryFolders.FirstOrDefault(f => parentDirectory.Contains(f));
+        // Library roots can nest (B:/ and B:/Fiction), so take the deepest one holding the change
+        var libraryFolder = libraryFolders
+            .Where(parentDirectory.IsSameOrInsideFolder)
+            .MaxBy(f => f.Length);
         _logger.LogTrace("[LibraryWatcher] Library Folder: {LibraryFolder}", libraryFolder);
         if (string.IsNullOrEmpty(libraryFolder)) return string.Empty;
 
