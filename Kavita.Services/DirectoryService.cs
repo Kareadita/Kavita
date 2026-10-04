@@ -669,8 +669,16 @@ public class DirectoryService : IDirectoryService
         var foundDirs = GetDirectories(folderPath, matcher);
         foreach (var foundDir in foundDirs)
         {
+            // Kept even when unreadable, the scanner needs it to keep the series inside
             directories.Add(foundDir);
-            directories.AddRange(GetAllDirectories(foundDir, matcher));
+            try
+            {
+                directories.AddRange(GetAllDirectories(foundDir, matcher));
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+            {
+                _logger.LogWarning(ex, "Could not list the folders inside {Folder}, skipping them", foundDir);
+            }
         }
 
         return directories;
