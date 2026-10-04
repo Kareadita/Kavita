@@ -50,7 +50,7 @@ internal sealed record ProcessParserInfosArgs
     /// Folders the scanner skipped because nothing in them changed. Their files are known to still be on disk,
     /// but nothing about them was read this scan.
     /// </summary>
-    public IReadOnlyCollection<string> UnchangedFolders { get; init; } = [];
+    public IReadOnlyCollection<UnchangedFolder> UnchangedFolders { get; init; } = [];
     public bool ForceUpdate { get; init; }
 }
 
@@ -64,6 +64,19 @@ internal sealed record UpdateChapterComicInfoArgs
 }
 
 internal sealed record TemporaryPerson(string Name, string NormalizedName);
+
+/// <param name="Path">Normalized folder</param>
+/// <param name="IsShallow">Covers only files directly in the folder</param>
+internal readonly record struct UnchangedFolder(string Path, bool IsShallow)
+{
+    public bool Contains(string filePath)
+    {
+        var prefix = Path.TrimEnd('/') + '/';
+        if (!filePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return false;
+
+        return !IsShallow || filePath.IndexOf('/', prefix.Length) < 0;
+    }
+}
 
 /// <summary>
 /// All code needed to Update a Series from a Scan action
@@ -132,10 +145,12 @@ public class ProcessSeries(
 
             var fileInfos = parsedInfos.Where(info => string.IsNullOrEmpty(info.UnchangedFolderPath)).ToList();
             var unchangedFolders = parsedInfos
-                .Select(info => info.UnchangedFolderPath)
-                .Where(path => !string.IsNullOrEmpty(path))
+                .Where(info => !string.IsNullOrEmpty(info.UnchangedFolderPath))
+                .Select(info => new UnchangedFolder(info.UnchangedFolderPath, info.UnchangedFolderIsShallow))
                 .Distinct()
                 .ToList();
+            // Skipped folders were not read, so their files may carry the LocalizedSeries or SeriesSort
+            var hasReadAllFiles = unchangedFolders.Count == 0;
 
             await ProcessParserInfos(new ProcessParserInfosArgs
             {
@@ -160,7 +175,7 @@ public class ProcessSeries(
 
             // parsedInfos[0] is not the first volume or chapter. We need to find it
             var localizedSeries = parsedInfos.Select(p => p.LocalizedSeries).FirstOrDefault(p => !string.IsNullOrEmpty(p));
-            if (!series.LocalizedNameLocked)
+            if (!series.LocalizedNameLocked && (localizedSeries != null || hasReadAllFiles))
             {
                 series.LocalizedName = localizedSeries ?? string.Empty;
                 series.NormalizedLocalizedName = series.LocalizedName.ToNormalized();
@@ -184,13 +199,13 @@ public class ProcessSeries(
                 series.SortName = sortName;
             }
 
-            if (!series.SortNameLocked)
+            if (!series.SortNameLocked && !string.IsNullOrEmpty(firstParsedInfo.SeriesSort))
+            {
+                series.SortName = firstParsedInfo.SeriesSort;
+            }
+            else if (!series.SortNameLocked && hasReadAllFiles)
             {
                 series.SortName = sortName;
-                if (!string.IsNullOrEmpty(firstParsedInfo.SeriesSort))
-                {
-                    series.SortName = firstParsedInfo.SeriesSort;
-                }
             }
 
             await UpdateSeriesFolderPath(
@@ -847,7 +862,7 @@ public class ProcessSeries(
     /// Files belonging to folders the scanner skipped this scan. Nothing read them, so their entities must be kept.
     /// </summary>
     private static IEnumerable<MangaFile> GetFilesInUnchangedFolders(Series series,
-        IReadOnlyCollection<string> unchangedFolders)
+        IReadOnlyCollection<UnchangedFolder> unchangedFolders)
     {
         return series.Volumes
             .SelectMany(v => v.Chapters)
@@ -859,9 +874,9 @@ public class ProcessSeries(
     /// Whether the file lives under a folder the scanner skipped. Such a file was never looked at this scan, so it
     /// must not be treated as missing from disk.
     /// </summary>
-    private static bool IsInUnchangedFolder(MangaFile file, IReadOnlyCollection<string> unchangedFolders)
+    private static bool IsInUnchangedFolder(MangaFile file, IReadOnlyCollection<UnchangedFolder> unchangedFolders)
     {
-        return unchangedFolders.Any(folder => file.FilePath.StartsWith(folder + Path.AltDirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
+        return unchangedFolders.Any(folder => folder.Contains(file.FilePath));
     }
 
     private Volume FindOrCreateVolume(ProcessParserInfosArgs args, ParserInfo info)

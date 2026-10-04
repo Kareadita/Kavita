@@ -50,6 +50,10 @@ public class ParserInfo
     /// Set if the file is skipped because of no changes
     /// </summary>
     public string UnchangedFolderPath { get; set; } = string.Empty;
+    /// <summary>
+    /// The unchanged folder covers only files directly in it, not its subfolders
+    /// </summary>
+    public bool UnchangedFolderIsShallow { get; set; }
 
     /// <summary>
     /// <see cref="MangaFormat"/> that represents the type of the file

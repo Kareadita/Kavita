@@ -92,6 +92,7 @@ public partial class ParseScannedFiles
             .ToList();
 
         var processedDirs = new HashSet<string>();
+        var skippedSpecials = new List<string>();
         var total = allDirectories.Count;
         var timings = new DirectoryScanTimings();
         var loopSw = Stopwatch.StartNew();
@@ -107,18 +108,26 @@ public partial class ParseScannedFiles
                     MessageEventCode.ScanListingFolders, i + 1, total));
             timings.Events.Stop();
 
-            // Don't process any folders where we've already scanned everything below
+            // Subfolders were already read, so only the loose files at this level are left
             if (processedDirs.Any(d => d.StartsWith(directory + Path.AltDirectorySeparatorChar) || d.Equals(directory)))
             {
                 timings.ParentCount++;
                 timings.ParentChangeCheck.Start();
-                var hasChanged = !HasSeriesFolderNotChangedSinceLastScan(library, seriesPaths, directory, forceCheck);
+
+                var looseFileOwners = forceCheck ? [] : SeriesWithFilesIn(seriesPaths, directory);
+                var looseFilesUnchanged = looseFileOwners.Count > 0 &&
+                    IsUnchangedSince(looseFileOwners, _directoryService.GetLastWriteTime(directory, SearchOption.TopDirectoryOnly));
                 timings.ParentChangeCheck.Stop();
 
-                // Skip this directory as we've already processed a parent unless there are loose files at that directory
-                // and they have changes
                 timings.ParentSurfaceFiles.Start();
-                CheckSurfaceFiles(result, directory, folderPath, fileExtensions, matcher, hasChanged);
+                if (looseFilesUnchanged)
+                {
+                    HandleUnchangedFolder(result, folderPath, directory, looseFileOwners, true);
+                }
+                else
+                {
+                    CheckSurfaceFiles(result, directory, folderPath, fileExtensions, matcher);
+                }
                 timings.ParentSurfaceFiles.Stop();
                 continue;
             }
@@ -126,14 +135,24 @@ public partial class ParseScannedFiles
             // Skip directories ending with "Specials", let the parent handle it
             if (directory.EndsWith("Specials", StringComparison.OrdinalIgnoreCase))
             {
-                // Log or handle that we are skipping this directory
                 _logger.LogDebug("Skipping {Directory} as it ends with 'Specials'", directory);
+                skippedSpecials.Add(directory);
                 continue;
             }
 
-            if (HasSeriesFolderNotChangedSinceLastScan(library, seriesPaths, directory, forceCheck))
+            // A full scan also reads the Specials folders skipped below this one
+            var owners = forceCheck
+                ? []
+                : skippedSpecials
+                    .Where(s => s.IsInsideFolder(directory))
+                    .Prepend(directory)
+                    .SelectMany(f => SeriesWithFilesIn(seriesPaths, f))
+                    .Distinct()
+                    .ToList();
+
+            if (owners.Count > 0 && IsUnchangedSince(owners, _directoryService.GetLastWriteTime(directory)))
             {
-                HandleUnchangedFolder(result, folderPath, directory);
+                HandleUnchangedFolder(result, folderPath, directory, owners, false);
             }
             else
             {
@@ -159,37 +178,36 @@ public partial class ParseScannedFiles
         public readonly Stopwatch Events = new();
     }
 
+    private static List<SeriesModified> SeriesWithFilesIn(IDictionary<string, IList<SeriesModified>> seriesPaths, string folder)
+    {
+        return seriesPaths.TryGetValue(folder, out var seriesList)
+            ? seriesList.Where(s => s.FileFolders.Contains(folder)).ToList()
+            : [];
+    }
+
     /// <summary>
-    /// Checks against all folder paths on file if the last scanned is >= the directory's last write time, down to the second
+    /// True when nothing was written after the oldest last scan among the series, down to the second
     /// </summary>
-    /// <param name="library"></param>
+    private static bool IsUnchangedSince(IEnumerable<SeriesModified> series, DateTime lastWriteTime)
+    {
+        var truncatedWriteTime = lastWriteTime.Truncate(TimeSpan.TicksPerSecond);
+        return series.All(s => s.LastScanned.Truncate(TimeSpan.TicksPerSecond) >= truncatedWriteTime);
+    }
+
+    /// <summary>
+    /// Checks against all folder paths on file if the last scanned is >= the directory's last write time, down to the second.
+    /// Used when a whole series folder is scanned in one go
+    /// </summary>
     /// <param name="seriesPaths"></param>
     /// <param name="directory">This should be normalized</param>
     /// <param name="forceCheck"></param>
     /// <returns></returns>
-    private bool HasSeriesFolderNotChangedSinceLastScan(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
+    private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
     {
-        // Reverting code from: https://github.com/Kareadita/Kavita/pull/3619/files#diff-0625df477047ab9d8e97a900201f2f29b2dc0599ba58eb75cfbbd073a9f3c72f
-        // This is to be able to release hotfix and tackle this in appropriate time
-
-        // With the bottom-up approach, this can report a false positive where a nested folder will get scanned even though a parent is the series
-        // This can't really be avoided. This is more likely to happen on Image chapter folder library layouts.
         if (forceCheck || !seriesPaths.TryGetValue(directory, out var seriesList))
         {
             return false;
         }
-
-        // if (forceCheck)
-        // {
-        //     return false;
-        // }
-
-        // TryGetSeriesList falls back to parent folders to match to seriesList
-        // var seriesList = TryGetSeriesList(library, seriesPaths, directory);
-        // if (seriesList == null)
-        // {
-        //     return false;
-        // }
 
         foreach (var series in seriesList)
         {
@@ -210,35 +228,11 @@ public partial class ParseScannedFiles
         return true;
     }
 
-    private IList<SeriesModified>? TryGetSeriesList(Library library, IDictionary<string, IList<SeriesModified>> seriesPaths, string directory)
-    {
-        if (seriesPaths.Count == 0)
-        {
-            return null;
-        }
-
-        if (string.IsNullOrEmpty(directory))
-        {
-            return null;
-        }
-
-        if (library.Folders.Any(fp => fp.Path.Equals(directory)))
-        {
-            return null;
-        }
-
-        if (seriesPaths.TryGetValue(directory, out var seriesList))
-        {
-            return seriesList;
-        }
-
-        return TryGetSeriesList(library, seriesPaths, _directoryService.GetParentDirectoryName(directory));
-    }
-
     /// <summary>
     /// Handles directories that haven't changed since the last scan.
     /// </summary>
-    private void HandleUnchangedFolder(List<ScanResult> result, string folderPath, string directory)
+    private void HandleUnchangedFolder(List<ScanResult> result, string folderPath, string directory,
+        IList<SeriesModified> owners, bool isShallow)
     {
         if (result.Exists(r => r.Folder == directory))
         {
@@ -247,7 +241,10 @@ public partial class ParseScannedFiles
         else
         {
             _logger.LogDebug("[ProcessFiles] Skipping {Directory} as it hasn't changed since last scan", directory);
-            result.Add(CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty));
+            var unchanged = CreateScanResult(directory, folderPath, false, ArraySegment<string>.Empty);
+            unchanged.UnchangedSeries = owners;
+            unchanged.IsShallow = isShallow;
+            result.Add(unchanged);
         }
     }
 
@@ -266,17 +263,15 @@ public partial class ParseScannedFiles
     }
 
     /// <summary>
-    /// Performs a full scan of the directory and adds it to the result.
+    /// Reads the files directly in the directory and adds them to the result
     /// </summary>
-    private void CheckSurfaceFiles(List<ScanResult> result, string directory, string folderPath, string fileExtensions, GlobMatcher matcher, bool hasChanged)
+    private void CheckSurfaceFiles(List<ScanResult> result, string directory, string folderPath, string fileExtensions, GlobMatcher matcher)
     {
         var files = _directoryService.ScanFiles(directory, fileExtensions, matcher, SearchOption.TopDirectoryOnly);
         if (files.Count == 0)
         {
             return;
         }
-        // Revert of https://github.com/Kareadita/Kavita/pull/3629/files#diff-0625df477047ab9d8e97a900201f2f29b2dc0599ba58eb75cfbbd073a9f3c72f
-        // for Hotfix v0.8.5.x
         result.Add(CreateScanResult(directory, folderPath, true, files));
     }
 
@@ -295,9 +290,11 @@ public partial class ParseScannedFiles
             MessageFactory.FileScanProgressEvent(normalizedPath, library.Id, library.Name, ProgressEventType.Updated,
                 MessageEventCode.ScanListingFolders, 1, 1));
 
-        if (HasSeriesFolderNotChangedSinceLastScan(library, seriesPaths, normalizedPath, forceCheck))
+        if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
         {
-            result.Add(CreateScanResult(folderPath, libraryRoot, false, ArraySegment<string>.Empty));
+            var unchanged = CreateScanResult(folderPath, libraryRoot, false, ArraySegment<string>.Empty);
+            unchanged.UnchangedSeries = seriesPaths[normalizedPath];
+            result.Add(unchanged);
         }
         else
         {
@@ -522,18 +519,24 @@ public partial class ParseScannedFiles
 
         _logger.LogDebug("[ScannerService] Library {LibraryName} Step 1.A: Process {FolderCount} folders", library.Name, folders.Count);
         var processedScannedSeries = new ConcurrentBag<ScannedSeriesResult>();
+        var unchangedFolders = new List<ScanResult>();
+        var placeholderOwners = new Dictionary<ParserInfo, SeriesModified>(ReferenceEqualityComparer.Instance);
 
         foreach (var folder in folders)
         {
             try
             {
-                await ScanAndParseFolder(folder, library, isLibraryScan, seriesPaths, processedScannedSeries, forceCheck);
+                var scanResults = await ScanAndParseFolder(folder, library, isLibraryScan, seriesPaths,
+                    processedScannedSeries, placeholderOwners, forceCheck);
+                unchangedFolders.AddRange(scanResults.Where(r => !r.HasChanged));
             }
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "[ScannerService] The directory '{FolderPath}' does not exist", folder);
             }
         }
+
+        FlagSeriesWithMissingFiles(processedScannedSeries, folders, seriesPaths, unchangedFolders, placeholderOwners);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent("File Scan Done", library.Id, library.Name, ProgressEventType.Ended));
@@ -549,13 +552,17 @@ public partial class ParseScannedFiles
     /// <param name="isLibraryScan"></param>
     /// <param name="seriesPaths"></param>
     /// <param name="processedScannedSeries"></param>
+    /// <param name="placeholderOwners">Filled with the series each placeholder was made for</param>
     /// <param name="forceCheck"></param>
-    private async Task ScanAndParseFolder(string folderPath, Library library,
+    /// <returns>Every folder result of the walk</returns>
+    private async Task<IList<ScanResult>> ScanAndParseFolder(string folderPath, Library library,
         bool isLibraryScan, IDictionary<string, IList<SeriesModified>> seriesPaths,
-        ConcurrentBag<ScannedSeriesResult> processedScannedSeries, bool forceCheck)
+        ConcurrentBag<ScannedSeriesResult> processedScannedSeries,
+        Dictionary<ParserInfo, SeriesModified> placeholderOwners, bool forceCheck)
     {
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.B: Scan files in {Folder}", library.Name, folderPath);
         var scanResults = await ScanFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck);
+        var walkResults = scanResults;
 
         // Aggregate the scanned series across all scanResults
         var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
@@ -563,7 +570,7 @@ public partial class ParseScannedFiles
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.C: Process files in {Folder}", library.Name, folderPath);
         for (var i = 0; i < scanResults.Count; i++)
         {
-            await ParseFiles(scanResults[i], seriesPaths, library, i + 1, scanResults.Count);
+            await ParseFiles(scanResults[i], placeholderOwners, library, i + 1, scanResults.Count);
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -580,6 +587,61 @@ public partial class ParseScannedFiles
         // Now transform and add to processedScannedSeries AFTER everything is processed
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.F: Generate Sort Order for Series and Finalize", library.Name);
         GenerateProcessedScannedSeries(scannedSeries, scanResults, processedScannedSeries);
+
+        return walkResults;
+    }
+
+    /// <summary>
+    /// A series whose known files sit in a folder that was neither read nor skipped as unchanged lost files there
+    /// (folder deleted or emptied). It has only placeholders, so it is marked to be processed anyway
+    /// </summary>
+    private static void FlagSeriesWithMissingFiles(IEnumerable<ScannedSeriesResult> processedScannedSeries,
+        IList<string> scannedFolders, IDictionary<string, IList<SeriesModified>> seriesPaths,
+        IList<ScanResult> unchangedFolders, Dictionary<ParserInfo, SeriesModified> placeholderOwners)
+    {
+        if (placeholderOwners.Count == 0) return;
+
+        var roots = scannedFolders.Select(Parser.NormalizePath).ToList();
+        var shallow = unchangedFolders.Where(r => r.IsShallow).Select(r => r.Folder.TrimEnd('/')).ToHashSet();
+        var recursive = unchangedFolders.Where(r => !r.IsShallow).Select(r => r.Folder.TrimEnd('/')).ToHashSet();
+
+        var seriesWithMissingFiles = seriesPaths.Values
+            .SelectMany(s => s)
+            .Distinct()
+            .Where(s => s.FileFolders.Any(f => roots.Exists(f.IsSameOrInsideFolder) && !IsCovered(f)))
+            .ToHashSet();
+
+        if (seriesWithMissingFiles.Count == 0) return;
+
+        foreach (var result in processedScannedSeries)
+        {
+            var hasMissingFiles = result.ParsedInfos.Any(info =>
+                placeholderOwners.TryGetValue(info, out var owner) && seriesWithMissingFiles.Contains(owner));
+            if (!hasMissingFiles) continue;
+
+            result.HasMissingFiles = true;
+            result.HasChanged = true;
+        }
+
+        return;
+
+        bool IsCovered(string folder)
+        {
+            if (shallow.Contains(folder)) return true;
+
+            for (var current = folder; !string.IsNullOrEmpty(current); current = ParentOf(current))
+            {
+                if (recursive.Contains(current)) return true;
+            }
+
+            return false;
+        }
+
+        static string ParentOf(string folder)
+        {
+            var lastSlash = folder.LastIndexOf('/');
+            return lastSlash <= 0 ? string.Empty : folder[..lastSlash];
+        }
     }
 
     /// <summary>
@@ -770,9 +832,9 @@ public partial class ParseScannedFiles
     /// For a given ScanResult, sets the ParserInfos on the result
     /// </summary>
     /// <param name="result"></param>
-    /// <param name="seriesPaths"></param>
+    /// <param name="placeholderOwners"></param>
     /// <param name="library"></param>
-    private async Task ParseFiles(ScanResult result, IDictionary<string, IList<SeriesModified>> seriesPaths, Library library,
+    private async Task ParseFiles(ScanResult result, Dictionary<ParserInfo, SeriesModified> placeholderOwners, Library library,
         int current, int total)
     {
         var normalizedFolder = Parser.NormalizePath(result.Folder);
@@ -780,14 +842,20 @@ public partial class ParseScannedFiles
         // If folder hasn't changed, generate fake ParserInfos
         if (!result.HasChanged)
         {
-            result.ParserInfos = seriesPaths[normalizedFolder]
-                .Select(fp => new ParserInfo { Series = fp.SeriesName, Format = fp.Format, UnchangedFolderPath = normalizedFolder })
+            result.ParserInfos = result.UnchangedSeries
+                .Select(fp =>
+                {
+                    var placeholder = new ParserInfo
+                    {
+                        Series = fp.SeriesName,
+                        Format = fp.Format,
+                        UnchangedFolderPath = normalizedFolder,
+                        UnchangedFolderIsShallow = result.IsShallow,
+                    };
+                    placeholderOwners[placeholder] = fp;
+                    return placeholder;
+                })
                 .ToList();
-
-            // // We are certain TryGetSeriesList will return a valid result here, if the series wasn't present yet. It will have been changed.
-            // result.ParserInfos = TryGetSeriesList(library, seriesPaths, normalizedFolder)!
-            // .Select(fp => new ParserInfo { Series = fp.SeriesName, Format = fp.Format })
-            // .ToList();
 
             _logger.LogDebug("[ScannerService] Skipped File Scan for {Folder} as it hasn't changed", normalizedFolder);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,

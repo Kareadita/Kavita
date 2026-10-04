@@ -753,12 +753,16 @@ public class DirectoryService : IDirectoryService
     /// </summary>
     /// <remarks>If the folder is empty or non-existent, this will return MaxValue for a DateTime</remarks>
     /// <param name="folderPath"></param>
+    /// <param name="searchOption">TopDirectoryOnly checks the folder and the files directly in it</param>
     /// <returns>Max Last Write Time</returns>
-    public DateTime GetLastWriteTime(string folderPath)
+    public DateTime GetLastWriteTime(string folderPath, SearchOption searchOption = SearchOption.AllDirectories)
     {
         if (!FileSystem.Directory.Exists(folderPath)) return DateTime.MaxValue;
 
-        var fileEntries = FileSystem.Directory.GetFileSystemEntries(folderPath, "*.*", SearchOption.AllDirectories);
+        // A subfolder's own time changes with its contents, so the top level looks at files only
+        var fileEntries = searchOption == SearchOption.AllDirectories
+            ? FileSystem.Directory.GetFileSystemEntries(folderPath, "*.*", SearchOption.AllDirectories)
+            : FileSystem.Directory.GetFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly);
         if (fileEntries.Length == 0) return DateTime.MaxValue;
 
         // Find the max last write time of the files

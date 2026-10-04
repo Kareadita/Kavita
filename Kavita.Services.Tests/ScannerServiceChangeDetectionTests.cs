@@ -1,4 +1,5 @@
 using Kavita.API.Database;
+using Kavita.Common.Extensions;
 using Kavita.Database;
 using Kavita.Database.Tests;
 using Kavita.Models.Entities;
@@ -45,7 +46,7 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         Assert.Equal(before, await LastFolderScanned(context, libraryId));
     }
 
-    [Fact(Skip = "Fails until S4: volume subfolders are not folder map keys, so each one is fully scanned")]
+    [Fact]
     public async Task NoChange_VolumeFolders_SecondScanProcessesNothing()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
@@ -196,11 +197,174 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         Assert.Null(series.LowestFolderPath);
     }
 
+    /// <summary>
+    /// The series is processed with placeholders only, so nothing read from a file this scan
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_DeletedVolumeFolderOnly_KeepsNamesReadFromFiles()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var comicInfo = new ComicInfo
+        {
+            Series = "Spice and Wolf",
+            LocalizedSeries = "Ookami to Koushinryou",
+            SeriesSort = "Wolf, Spice and",
+        };
+        var library = await scannerHelper.GenerateScannerData("Deleted Volume Keeps Names - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz",
+        ], new Dictionary<string, ComicInfo>
+        {
+            ["Spice and Wolf Vol. 1 Ch. 0001.cbz"] = comicInfo,
+            ["Spice and Wolf Vol. 2 Ch. 0003.cbz"] = comicInfo,
+        });
+        var root = library.Folders.First().Path;
+        Backdate(root);
+
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var before = await context.Series.AsNoTracking().SingleAsync(s => s.LibraryId == library.Id);
+        Assert.Equal("Ookami to Koushinryou", before.LocalizedName);
+        Assert.Equal("Wolf, Spice and", before.SortName);
+
+        Directory.Delete(Path.Join(root, "Spice and Wolf", "Spice and Wolf Vol. 2"), true);
+        await scanner.ScanLibrary(library.Id);
+
+        var after = await context.Series.AsNoTracking()
+            .Include(s => s.Volumes)
+            .SingleAsync(s => s.LibraryId == library.Id);
+        Assert.Single(after.Volumes);
+        Assert.Equal(before.LocalizedName, after.LocalizedName);
+        Assert.Equal(before.SortName, after.SortName);
+    }
+
+    /// <summary>
+    /// Placeholders and parsed files must land in one series even when the user renamed it
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_RenamedSeries_NewChapterKeepsUnchangedVolume()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Renamed Series New Chapter - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz",
+        ]);
+
+        const string customName = "Spice & Wolf (Custom)";
+        await context.Series
+            .Where(s => s.LibraryId == libraryId)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(x => x.Name, customName)
+                .SetProperty(x => x.NormalizedName, customName.ToNormalized()));
+        context.ChangeTracker.Clear();
+
+        var root = await LibraryRoot(context, libraryId);
+        await scannerHelper.Scaffold(root, ["Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0004.cbz"]);
+        Directory.SetLastWriteTime(Path.Join(root, "Spice and Wolf", "Spice and Wolf Vol. 2"), DateTime.Now.AddSeconds(2));
+
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Single(await context.Series.AsNoTracking().Where(s => s.LibraryId == libraryId).ToListAsync());
+        var files = await context.MangaFile
+            .Where(f => f.Chapter.Volume.Series.LibraryId == libraryId)
+            .Select(f => Path.GetFileName(f.FilePath))
+            .ToListAsync();
+        Assert.Equal(
+            ["Spice and Wolf Vol. 1 Ch. 0001.cbz", "Spice and Wolf Vol. 2 Ch. 0003.cbz", "Spice and Wolf Vol. 2 Ch. 0004.cbz"],
+            files.Order());
+    }
+
+    private const string LocalizedFolderFile = "Ookami to Koushinryou/Ookami to Koushinryou v03.cbz";
+
+    /// <summary>
+    /// Higurashi Atonement Arc shape: the first folder's ComicInfo names a LocalizedSeries, and the second folder's files
+    /// parse to that name. They only merge while the first folder is read
+    /// </summary>
+    private async Task<(ScannerService Scanner, int LibraryId, int SeriesId, string Root)> SeriesJoinedByLocalizedName(
+        IUnitOfWork unitOfWork, DataContext context, string testcase)
+    {
+        var comicInfo = new ComicInfo { Series = "Spice and Wolf", LocalizedSeries = "Ookami to Koushinryou" };
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, testcase,
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0002.cbz",
+            LocalizedFolderFile,
+        ], new Dictionary<string, ComicInfo>
+        {
+            ["Spice and Wolf Vol. 1 Ch. 0001.cbz"] = comicInfo,
+            ["Spice and Wolf Vol. 2 Ch. 0002.cbz"] = comicInfo,
+        });
+
+        var series = await context.Series.AsNoTracking().SingleAsync(s => s.LibraryId == libraryId);
+        Assert.Equal("Ookami to Koushinryou", series.LocalizedName);
+        Assert.Equal(3, await SeriesFileCount(context, series.Id));
+        return (scanner, libraryId, series.Id, await LibraryRoot(context, libraryId));
+    }
+
+    private static Task<int> SeriesFileCount(DataContext context, int seriesId)
+    {
+        return context.MangaFile.CountAsync(f => f.Chapter.Volume.SeriesId == seriesId);
+    }
+
+    [Fact]
+    public async Task ScanSeries_FolderJoinedByLocalizedName_KeepsItsFiles()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, _, seriesId, _) = await SeriesJoinedByLocalizedName(unitOfWork, context, "Localized Join ScanSeries - Manga");
+
+        await scanner.ScanSeries(seriesId);
+
+        Assert.Equal(3, await SeriesFileCount(context, seriesId));
+    }
+
+    [Fact]
+    public async Task ScanLibrary_OnlyLocalizedNameFolderChanged_KeepsOtherFolders()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var (scanner, libraryId, seriesId, root) = await SeriesJoinedByLocalizedName(unitOfWork, context, "Localized Join Library B - Manga");
+
+        await scannerHelper.Scaffold(root, ["Ookami to Koushinryou/Ookami to Koushinryou v04.cbz"]);
+        Directory.SetLastWriteTime(Path.Join(root, "Ookami to Koushinryou"), DateTime.Now.AddSeconds(2));
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Equal(4, await SeriesFileCount(context, seriesId));
+        Assert.Single(await context.Series.AsNoTracking().Where(s => s.LibraryId == libraryId).ToListAsync());
+        var series = await context.Series.AsNoTracking().SingleAsync(s => s.Id == seriesId);
+        Assert.Equal("Ookami to Koushinryou", series.LocalizedName);
+
+        // The next scan must still merge, so the name has to survive the scan above
+        await scannerHelper.Scaffold(root, ["Ookami to Koushinryou/Ookami to Koushinryou v05.cbz"]);
+        Directory.SetLastWriteTime(Path.Join(root, "Ookami to Koushinryou"), DateTime.Now.AddSeconds(4));
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Equal(5, await SeriesFileCount(context, seriesId));
+    }
+
+    [Fact]
+    public async Task ScanLibrary_OnlyNameFolderChanged_KeepsLocalizedNameFolder()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var (scanner, libraryId, seriesId, root) = await SeriesJoinedByLocalizedName(unitOfWork, context, "Localized Join Library A - Manga");
+
+        await scannerHelper.Scaffold(root, ["Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz"]);
+        Directory.SetLastWriteTime(Path.Join(root, "Spice and Wolf", "Spice and Wolf Vol. 2"), DateTime.Now.AddSeconds(2));
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Equal(4, await SeriesFileCount(context, seriesId));
+    }
+
     private async Task<(ScannerService Scanner, int LibraryId)> ScanOnce(IUnitOfWork unitOfWork,
-        string testcase, string[] files)
+        string testcase, string[] files, Dictionary<string, ComicInfo>? comicInfos = null)
     {
         var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
-        var library = await scannerHelper.GenerateScannerData(testcase, [.. files], new Dictionary<string, ComicInfo>());
+        var library = await scannerHelper.GenerateScannerData(testcase, [.. files], comicInfos ?? new Dictionary<string, ComicInfo>());
         Backdate(library.Folders.First().Path);
 
         var scanner = scannerHelper.CreateServices();

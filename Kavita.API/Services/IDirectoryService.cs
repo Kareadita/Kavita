@@ -78,5 +78,5 @@ public interface IDirectoryService
     IEnumerable<string> GetAllDirectories(string folderPath, GlobMatcher? matcher = null);
     string GetParentDirectoryName(string fileOrFolder);
     IList<string> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null, SearchOption searchOption = SearchOption.AllDirectories);
-    DateTime GetLastWriteTime(string folderPath);
+    DateTime GetLastWriteTime(string folderPath, SearchOption searchOption = SearchOption.AllDirectories);
 }

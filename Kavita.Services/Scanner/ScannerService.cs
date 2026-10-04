@@ -18,6 +18,7 @@ using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Parser;
 using Kavita.Services.Helpers;
 using Kavita.Services.Plus;
@@ -103,24 +104,7 @@ public class ScannerService(
     /// <param name="abortOnNoSeriesMatch"></param>
     public async Task ScanFolder(string folder, string originalPath, bool abortOnNoSeriesMatch = false)
     {
-        Series? series = null;
-        try
-        {
-            series = await unitOfWork.SeriesRepository.GetSeriesThatContainsLowestFolderPathAsync(originalPath,
-                         SeriesIncludes.Library) ??
-                     await unitOfWork.SeriesRepository.GetSeriesByFolderPathAsync(originalPath, SeriesIncludes.Library) ??
-                     await unitOfWork.SeriesRepository.GetSeriesByFolderPathAsync(folder, SeriesIncludes.Library);
-        }
-        catch (InvalidOperationException ex)
-        {
-            if (ex.Message.Equals("Sequence contains more than one element."))
-            {
-                // Removing stack trace from logs as it freaks users out, and it does not contain useful information
-                #pragma warning disable S6667
-                logger.LogCritical("[ScannerService] Multiple series map to this folder or folder is at library root. Library scan will be used for ScanFolder");
-                #pragma warning restore S6667
-            }
-        }
+        var series = await FindSeriesForFolder(folder, originalPath);
 
         if (series != null)
         {
@@ -170,6 +154,36 @@ public class ScannerService(
             }
             BackgroundJob.Schedule(() => ScanLibrary(library.Id, false, true), TimeSpan.FromMinutes(1));
         }
+    }
+
+    /// <summary>
+    /// The one series that owns the changed path. Null when there is none, or when several could own it and only a
+    /// library scan would pick up a new series beside them
+    /// </summary>
+    internal async Task<Series?> FindSeriesForFolder(string folder, string originalPath)
+    {
+        var path = string.IsNullOrEmpty(originalPath) ? folder : originalPath;
+
+        var byLowestFolder = await unitOfWork.SeriesRepository.GetSeriesThatContainsLowestFolderPathAsync(path, SeriesIncludes.Library);
+        if (byLowestFolder.Count == 1) return byLowestFolder[0];
+
+        if (byLowestFolder.Count > 1)
+        {
+            logger.LogInformation("[ScannerService] {Count} series share the folder of {Path}. Library scan will be used for ScanFolder",
+                byLowestFolder.Count, path);
+            return null;
+        }
+
+        // Every series under a publisher folder has it as FolderPath, and ScanSeries would drop a new series beside them
+        var byFolder = await unitOfWork.SeriesRepository.GetSeriesByFolderPathAsync(folder, SeriesIncludes.Library);
+        if (byFolder.Count == 1 && string.IsNullOrEmpty(byFolder[0].LowestFolderPath)) return byFolder[0];
+
+        if (byFolder.Count > 0)
+        {
+            logger.LogInformation("[ScannerService] {Path} is not inside a single series folder. Library scan will be used for ScanFolder", path);
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -296,6 +310,7 @@ public class ScannerService(
         // At this point, parsedSeries will have at least one key then we can perform the update. If it still doesn't, just return and don't do anything
         // Don't allow any processing on files that aren't part of this series
         var toProcess = parsedSeries.Keys.Where(key =>
+            key.ExistingSeriesId == series.Id ||
             key.NormalizedName.Equals(series.NormalizedName) ||
             key.NormalizedName.Equals(series.NormalizedOriginalName))
             .ToList();
@@ -342,20 +357,34 @@ public class ScannerService(
         BackgroundJob.Enqueue(() => directoryService.ClearDirectory(directoryService.CacheDirectory));
     }
 
-    private static Dictionary<ParsedSeries, IList<ParserInfo>> TrackFoundSeriesAndFiles(IList<ScannedSeriesResult> seenSeries)
+    private static Dictionary<ParsedSeries, IList<ParserInfo>> TrackFoundSeriesAndFiles(IList<ScannedSeriesResult> seenSeries,
+        IList<SeriesNameMatch> existingSeries)
     {
-        // Why does this only grab things that have changed?
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
-        // A series read from two folders arrives once per folder, and ParsedSeries compares by reference
+        var existingByName = existingSeries
+            .SelectMany(s => new[] { s.NormalizedName, s.NormalizedLocalizedName, s.NormalizedOriginalName }
+                .Where(name => !string.IsNullOrEmpty(name))
+                .Distinct()
+                .Select(name => (Name: name, Series: s)))
+            .ToLookup(x => x.Name, x => x.Series);
+
+        // One series can arrive under several names (once per folder, or a folder named after its LocalizedName).
+        // Processed apart, each group deletes the files the other one read
         var seriesAcrossFolders = seenSeries
-            .Where(s => s.ParsedInfos.Count > 0) // && s.HasChanged
-            .GroupBy(s => (s.ParsedSeries.NormalizedName, s.ParsedSeries.Format));
+            .Where(s => s.ParsedInfos.Count > 0)
+            .Select(s => (Result: s, SeriesId: FindExistingSeriesId(s, existingByName)))
+            .GroupBy(s => s.SeriesId != null
+                ? (s.SeriesId, string.Empty, MangaFormat.Unknown)
+                : ((int?) null, s.Result.ParsedSeries.NormalizedName, s.Result.ParsedSeries.Format),
+                s => s.Result);
 
         foreach (var series in seriesAcrossFolders)
         {
             var key = series.First().ParsedSeries;
+            key.ExistingSeriesId = series.Key.Item1;
             key.HasChanged = series.Any(s => s.HasChanged);
+            key.HasMissingFiles = series.Any(s => s.HasMissingFiles);
 
             if (key.HasChanged)
             {
@@ -368,6 +397,24 @@ public class ScannerService(
         }
 
         return parsedSeries;
+    }
+
+    private static int? FindExistingSeriesId(ScannedSeriesResult result, ILookup<string, SeriesNameMatch> existingByName)
+    {
+        var names = result.ParsedInfos
+            .Select(info => info.LocalizedSeries?.ToNormalized())
+            .Prepend(result.ParsedSeries.NormalizedName)
+            .Where(name => !string.IsNullOrEmpty(name))
+            .Distinct();
+
+        var ids = names
+            .SelectMany(name => existingByName[name!])
+            .Where(s => s.Format == result.ParsedSeries.Format || s.Format == MangaFormat.Unknown)
+            .Select(s => s.Id)
+            .Distinct()
+            .ToList();
+
+        return ids.Count == 1 ? ids[0] : null;
     }
 
     private async Task<ScanCancelReason> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series, bool bypassFolderChecks = false)
@@ -430,7 +477,7 @@ public class ScannerService(
     private void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Series series)
     {
         var keysToRemove = parsedSeries.Keys
-            .Where(key => !SeriesHelper.FindSeries(series, key))
+            .Where(key => key.ExistingSeriesId != series.Id && !SeriesHelper.FindSeries(series, key))
             .ToList();
 
         foreach (var key in keysToRemove)
@@ -643,7 +690,7 @@ public class ScannerService(
                 continue;
             }
 
-            if (series.Value.Any(info => !string.IsNullOrEmpty(info.Filename)))
+            if (series.Key.HasMissingFiles || series.Value.Any(info => !string.IsNullOrEmpty(info.Filename)))
             {
                 toProcess[series.Key] = series.Value.Where(info => !string.IsNullOrEmpty(info.Filename) || !string.IsNullOrEmpty(info.UnchangedFolderPath)).ToList();
             }
@@ -837,7 +884,8 @@ public class ScannerService(
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 
-        var parsedSeries = TrackFoundSeriesAndFiles(processedSeries);
+        var parsedSeries = TrackFoundSeriesAndFiles(processedSeries,
+            await unitOfWork.SeriesRepository.GetSeriesNameMatchesAsync(library.Id));
 
         return Tuple.Create(scanElapsedTime, parsedSeries);
     }

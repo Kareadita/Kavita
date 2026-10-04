@@ -365,7 +365,7 @@ public class ParseScannedFilesTests: AbstractDbTest
 
     #endregion
 
-    [Fact(Skip = "Fails until S4: 4 folders report a change instead of 2. folderMap.Count of 6 changes with D1")]
+    [Fact]
     public async Task HasSeriesFolderNotChangedSinceLastScan_AllSeriesFoldersHaveChanges()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
@@ -403,22 +403,20 @@ public class ParseScannedFilesTests: AbstractDbTest
 
         await Task.Delay(1100); // Ensure at least one second has passed since library scan
 
-        // Add a new chapter to a volume of the series, and scan. Validate that only, and all directories of this
-        // series are marked as HasChanged
+        // Add a new chapter to a volume of the series, and scan. Only the folder that got the file is read again
         var executionerCopyDir = Path.Join(Path.Join(testDirectoryPath, "The Executioner and Her Way of Life"),
                "The Executioner and Her Way of Life Vol. 1");
         File.Copy(Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 1 Ch. 0001.cbz"),
             Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 1 Ch. 0002.cbz"));
 
-        // 4 series, of which 2 have volumes as directories
+        // 4 series folders plus the 6 volume folders that hold the files
         var folderMap = await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id);
-        Assert.Equal(6, folderMap.Count);
+        Assert.Equal(10, folderMap.Count);
 
         var res = await psf.ScanFiles(testDirectoryPath, true, folderMap, postLib);
         var changes = res.Where(sc => sc.HasChanged).ToList();
-        Assert.Equal(2, changes.Count);
-        // Only volumes of The Executioner and Her Way of Life should be marked as HasChanged (Spice and Wolf also has 2 volumes dirs)
-        Assert.Equal(2, changes.Count(sc => sc.Folder.Contains("The Executioner and Her Way of Life")));
+        var change = Assert.Single(changes);
+        Assert.EndsWith("The Executioner and Her Way of Life Vol. 1", change.Folder);
     }
 
     [Fact]
@@ -467,7 +465,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         Assert.Equal(1, changes);
     }
 
-    [Fact(Skip = "Fails until S4: volume subfolders are not folder map keys, so they always report a change")]
+    [Fact]
     public async Task SubFoldersNoSubFolders_SkipAll()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();

@@ -137,6 +137,77 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
             ExpectedVolumes = [("1", 1)],
         },
 
+        // The volume folder stays but loses its only file
+        new ScanMutationCase
+        {
+            Name = "EmptyVolumeFolder",
+            Initial =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz",
+            ],
+            Removed = ["Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz"],
+            ExpectedFiles = ["Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0001.cbz"],
+            ExpectedVolumes = [("1", 1)],
+        },
+
+        // The unchanged loose file at the series root must not shield the volume folder below it
+        new ScanMutationCase
+        {
+            Name = "RemoveFileFromVolumeBesideUnchangedLooseFile",
+            Initial =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0004.cbz",
+            ],
+            Removed = ["Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0004.cbz"],
+            ExpectedFiles =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz",
+            ],
+            ExpectedVolumes = [("1", 1), ("2", 1)],
+        },
+
+        // The Specials folder is read through its series folder, whose own write time does not change
+        new ScanMutationCase
+        {
+            Name = "AddSpecialBesideLooseFiles",
+            Initial =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Spice and Wolf/Specials/Spice and Wolf SP01.cbz",
+            ],
+            Added = ["Spice and Wolf/Specials/Spice and Wolf SP02.cbz"],
+            ExpectedFiles =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Spice and Wolf/Specials/Spice and Wolf SP01.cbz",
+                "Spice and Wolf/Specials/Spice and Wolf SP02.cbz",
+            ],
+            ExpectedVolumes = [("1", 1), ("100000", 2)],
+        },
+
+        // Same series in two top folders, only the second one changes
+        new ScanMutationCase
+        {
+            Name = "AddFileInSecondTopFolder",
+            Initial =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Spice and Wolf Extras/Spice and Wolf Vol. 2.cbz",
+            ],
+            Added = ["Spice and Wolf Extras/Spice and Wolf Vol. 3.cbz"],
+            ExpectedFiles =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Spice and Wolf Extras/Spice and Wolf Vol. 2.cbz",
+                "Spice and Wolf Extras/Spice and Wolf Vol. 3.cbz",
+            ],
+            ExpectedVolumes = [("1", 1), ("2", 1), ("3", 1)],
+        },
+
         new ScanMutationCase
         {
             Name = "RenameFileInPlaceKeepingVolumeAndChapter",
