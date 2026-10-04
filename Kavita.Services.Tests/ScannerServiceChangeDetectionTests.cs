@@ -1,9 +1,12 @@
 using Kavita.API.Database;
+using Kavita.API.Services;
 using Kavita.Common.Extensions;
 using Kavita.Database;
 using Kavita.Database.Tests;
 using Kavita.Models.Entities;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
+using Kavita.Models.Parser;
 using Kavita.Services.Scanner;
 using Kavita.Services.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -221,7 +224,7 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
             ["Spice and Wolf Vol. 2 Ch. 0003.cbz"] = comicInfo,
         });
         var root = library.Folders.First().Path;
-        Backdate(root);
+        ScannerHelper.Backdate(root, TimeSpan.FromHours(1));
 
         var scanner = scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
@@ -277,6 +280,51 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         Assert.Equal(
             ["Spice and Wolf Vol. 1 Ch. 0001.cbz", "Spice and Wolf Vol. 2 Ch. 0003.cbz", "Spice and Wolf Vol. 2 Ch. 0004.cbz"],
             files.Order());
+    }
+
+    [Fact]
+    public async Task ScanLibrary_FileAddedWhileScanning_IsReadOnNextScan()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var library = await scannerHelper.GenerateScannerData("File Added While Scanning - Manga",
+            ["Spice and Wolf/Spice and Wolf Vol. 1.cbz"], new Dictionary<string, ComicInfo>());
+        var seriesFolder = Path.Join(library.Folders.First().Path, "Spice and Wolf");
+        ScannerHelper.Backdate(library.Folders.First().Path, TimeSpan.FromHours(1));
+
+        var scanner = scannerHelper.CreateServices(wrapScanReader: reader => new RunOnFirstParse(reader, () =>
+        {
+            var added = Path.Join(seriesFolder, "Spice and Wolf Vol. 2.cbz");
+            File.Copy(Path.Join(seriesFolder, "Spice and Wolf Vol. 1.cbz"), added);
+            File.SetLastWriteTime(added, DateTime.Now);
+        }));
+
+        await scanner.ScanLibrary(library.Id);
+        var seriesId = await context.Series.Where(s => s.LibraryId == library.Id).Select(s => s.Id).SingleAsync();
+        Assert.Equal(1, await SeriesFileCount(context, seriesId));
+
+        await scanner.ScanLibrary(library.Id);
+        Assert.Equal(2, await SeriesFileCount(context, seriesId));
+    }
+
+    private sealed class RunOnFirstParse(IReadingItemService inner, Action onFirstParse) : IReadingItemService
+    {
+        private int _fired;
+
+        public int GetNumberOfPages(string filePath, MangaFormat format) => inner.GetNumberOfPages(filePath, format);
+
+        public string GetCoverImage(string filePath, string fileName, MangaFormat format, EncodeFormat encodeFormat,
+            CoverImageSize size = CoverImageSize.Default) =>
+            inner.GetCoverImage(filePath, fileName, format, encodeFormat, size);
+
+        public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1) =>
+            inner.Extract(fileFilePath, targetDirectory, format, imageCount);
+
+        public ParserInfo? ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+        {
+            if (Interlocked.Exchange(ref _fired, 1) == 0) onFirstParse();
+            return inner.ParseFile(path, rootPath, libraryRoot, type, enableMetadata);
+        }
     }
 
     private const string LocalizedFolderFile = "Ookami to Koushinryou/Ookami to Koushinryou v03.cbz";
@@ -365,31 +413,12 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     {
         var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
         var library = await scannerHelper.GenerateScannerData(testcase, [.. files], comicInfos ?? new Dictionary<string, ComicInfo>());
-        Backdate(library.Folders.First().Path);
+        ScannerHelper.Backdate(library.Folders.First().Path, TimeSpan.FromHours(1));
 
         var scanner = scannerHelper.CreateServices();
         await scanner.ScanLibrary(library.Id);
 
         return (scanner, library.Id);
-    }
-
-    /// <summary>
-    /// Pushes every write time well before the first scan, so a second scan in the same second still reads as unchanged
-    /// </summary>
-    private static void Backdate(string root)
-    {
-        var past = DateTime.Now.AddHours(-1);
-        foreach (var file in Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories))
-        {
-            File.SetLastWriteTime(file, past);
-        }
-
-        foreach (var directory in Directory.EnumerateDirectories(root, "*", SearchOption.AllDirectories))
-        {
-            Directory.SetLastWriteTime(directory, past);
-        }
-
-        Directory.SetLastWriteTime(root, past);
     }
 
     private static Task<Dictionary<int, DateTime>> LastFolderScanned(DataContext context, int libraryId)

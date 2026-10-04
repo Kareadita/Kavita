@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
@@ -12,6 +13,10 @@ public sealed record ProcessSeriesArgs
     public required int TotalToProcess { get; init; }
     public required int LeftToProcess { get; init; }
     public bool ForceUpdate { get; init; } = false;
+    /// <summary>
+    /// Taken before the walk, stored as the series' LastFolderScanned
+    /// </summary>
+    public required DateTime ScanStarted { get; init; }
 }
 
 public interface IProcessSeries

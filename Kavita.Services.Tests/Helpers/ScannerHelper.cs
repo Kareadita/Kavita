@@ -35,6 +35,8 @@ public class ScannerHelper
     private readonly string _imagePath = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/1x1.png");
     private static readonly string[] ComicInfoExtensions = [".cbz", ".cbr", ".zip", ".rar"];
     private static readonly string[] EpubExtensions = [".epub"];
+    // Must stay under the 2 minutes that the ScanAllAfterAdd tests rewind LastFolderScanned by
+    private static readonly TimeSpan GeneratedDataAge = TimeSpan.FromSeconds(10);
 
     public ScannerHelper(IUnitOfWork unitOfWork, ITestOutputHelper testOutputHelper)
     {
@@ -45,12 +47,14 @@ public class ScannerHelper
     public async Task<Library> GenerateScannerData(string testcase, Dictionary<string, ComicInfo>? comicInfos = null)
     {
         var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase), comicInfos);
+        Backdate(testDirectoryPath, GeneratedDataAge);
         return await GenerateScannerData(Path.GetFileNameWithoutExtension(testcase), testDirectoryPath);
     }
 
     public async Task<Library> GenerateScannerData(string testcase, List<string> filePaths, Dictionary<string, ComicInfo>? comicInfos = null)
     {
         var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase), filePaths, comicInfos);
+        Backdate(testDirectoryPath, GeneratedDataAge);
         return await GenerateScannerData(testcase, testDirectoryPath);
     }
 
@@ -73,6 +77,25 @@ public class ScannerHelper
         return library;
     }
 
+    /// <summary>
+    /// Sets every file and folder under root to <c>now() - age</c>
+    /// </summary>
+    public static void Backdate(string root, TimeSpan age)
+    {
+        var past = DateTime.Now - age;
+        foreach (var file in Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories))
+        {
+            File.SetLastWriteTime(file, past);
+        }
+
+        foreach (var directory in Directory.EnumerateDirectories(root, "*", SearchOption.AllDirectories))
+        {
+            Directory.SetLastWriteTime(directory, past);
+        }
+
+        Directory.SetLastWriteTime(root, past);
+    }
+
     public Task UpdateTestData(string testcase, Dictionary<string, ComicInfo>? comicInfos = null)
     {
         return GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase), comicInfos);
@@ -83,7 +106,9 @@ public class ScannerHelper
         return GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase), filePaths, comicInfos);
     }
 
-    public ScannerService CreateServices(DirectoryService? ds = null, IFileSystem? fs = null)
+    /// <param name="wrapScanReader">Replaces the reader used while walking and parsing, ProcessSeries keeps the real one</param>
+    public ScannerService CreateServices(DirectoryService? ds = null, IFileSystem? fs = null,
+        Func<IReadingItemService, IReadingItemService>? wrapScanReader = null)
     {
         fs ??= new FileSystem();
         ds ??= new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
@@ -118,7 +143,7 @@ public class ScannerHelper
         var scanner = new ScannerService(_unitOfWork, Substitute.For<ILogger<ScannerService>>(),
             Substitute.For<IMetadataService>(),
             Substitute.For<ICacheService>(), Substitute.For<IEventHub>(), ds,
-            readingItemService, scopeFactory, Substitute.For<IWordCountAnalyzerService>(),
+            wrapScanReader?.Invoke(readingItemService) ?? readingItemService, scopeFactory, Substitute.For<IWordCountAnalyzerService>(),
             Substitute.For<IMediaErrorService>());
         return scanner;
     }

@@ -186,16 +186,17 @@ public partial class ParseScannedFiles
     }
 
     /// <summary>
-    /// True when nothing was written after the oldest last scan among the series, down to the second
+    /// True when every series' last scan started in a later second than the last write.
+    /// Same second counts as changed, the write may have landed after the folder was read
     /// </summary>
     private static bool IsUnchangedSince(IEnumerable<SeriesModified> series, DateTime lastWriteTime)
     {
         var truncatedWriteTime = lastWriteTime.Truncate(TimeSpan.TicksPerSecond);
-        return series.All(s => s.LastScanned.Truncate(TimeSpan.TicksPerSecond) >= truncatedWriteTime);
+        return series.All(s => s.LastScanned.Truncate(TimeSpan.TicksPerSecond) > truncatedWriteTime);
     }
 
     /// <summary>
-    /// Checks against all folder paths on file if the last scanned is >= the directory's last write time, down to the second.
+    /// Checks against all folder paths on file if the last scanned is in a later second than the directory's last write time.
     /// Used when a whole series folder is scanned in one go
     /// </summary>
     /// <param name="seriesPaths"></param>
@@ -219,7 +220,7 @@ public partial class ParseScannedFiles
 
             var lastWriteTime = _directoryService.GetLastWriteTime(series.LowestFolderPath).Truncate(TimeSpan.TicksPerSecond);
             var seriesLastScanned = series.LastScanned.Truncate(TimeSpan.TicksPerSecond);
-            if (seriesLastScanned < lastWriteTime)
+            if (seriesLastScanned <= lastWriteTime)
             {
                 return false;
             }

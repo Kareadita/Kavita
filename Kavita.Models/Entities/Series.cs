@@ -170,10 +170,10 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     public int LibraryId { get; set; }
 
 
-    public void UpdateLastFolderScanned()
+    public void UpdateLastFolderScanned(DateTime scannedAt)
     {
-        LastFolderScanned = DateTime.Now;
-        LastFolderScannedUtc = DateTime.UtcNow;
+        LastFolderScanned = scannedAt;
+        LastFolderScannedUtc = scannedAt.ToUniversalTime();
     }
 
     public void UpdateLastChapterAdded()

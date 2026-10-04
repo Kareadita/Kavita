@@ -267,6 +267,7 @@ public class ScannerService(
             MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Started, series.Name, 1));
 
         logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
+        var scanStarted = DateTime.Now;
         var (scanElapsedTime, parsedSeries) = await ScanFiles(library, folderPaths,
             false, true);
 
@@ -333,6 +334,7 @@ public class ScannerService(
                 LeftToProcess = seriesLeftToProcess,
                 TotalToProcess = totalCount,
                 ForceUpdate = bypassFolderOptimizationChecks,
+                ScanStarted = scanStarted,
             });
 
             if (processedSeriesId != null)
@@ -601,12 +603,13 @@ public class ScannerService(
 
 
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 1: Scan & Parse Files", library.Name);
+        var scanStarted = DateTime.Now;
         var (scanElapsedTime, parsedSeries) = await ScanFiles(library, libraryFolderPaths,
             shouldUseLibraryScan, forceUpdate);
 
         // We need to remove any keys where there is no actual parser info
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 2: Process and Update Database", library.Name);
-        var totalFiles = await ProcessParsedSeries(forceUpdate, parsedSeries, library, scanElapsedTime);
+        var totalFiles = await ProcessParsedSeries(forceUpdate, parsedSeries, library, scanElapsedTime, scanStarted);
 
         UpdateLastScanned(library);
         unitOfWork.LibraryRepository.Update(library);
@@ -674,7 +677,8 @@ public class ScannerService(
         }
     }
 
-    private async Task<int> ProcessParsedSeries(bool forceUpdate, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Library library, long scanElapsedTime)
+    private async Task<int> ProcessParsedSeries(bool forceUpdate, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Library library,
+        long scanElapsedTime, DateTime scanStarted)
     {
         // Iterate over the dictionary and remove only the ParserInfos that don't need processing
         var toProcess = new Dictionary<ParsedSeries, IList<ParserInfo>>();
@@ -725,7 +729,7 @@ public class ScannerService(
 
         logger.LogInformation("[ScannerService] Found {SeriesCount} Series that need processing in {Time} ms", toProcess.Count, scanSw.ElapsedMilliseconds + scanElapsedTime);
 
-        var totalFiles = await ProcessParserInfo(settings, toProcess.Values.ToList(), library, forceUpdate);
+        var totalFiles = await ProcessParserInfo(settings, toProcess.Values.ToList(), library, forceUpdate, scanStarted);
 
         logger.LogInformation("[ScannerService] Finished scan in {ScanAndUpdateTime} milliseconds.", scanSw.ElapsedMilliseconds + scanElapsedTime);
 
@@ -739,14 +743,16 @@ public class ScannerService(
     /// <param name="toProcess"></param>
     /// <param name="library"></param>
     /// <param name="forceUpdate"></param>
+    /// <param name="scanStarted"></param>
     /// <returns>Total amount of processed files</returns>
-    private async Task<int> ProcessParserInfo(MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, Library library, bool forceUpdate)
+    private async Task<int> ProcessParserInfo(MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, Library library,
+        bool forceUpdate, DateTime scanStarted)
     {
         var channel = Channel.CreateUnbounded<int>();
 
         var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
-        var dbTask = Task.Run(async () => await DbMetadataTask(channel, settings, toProcess, library.Id, library.Name, forceUpdate));
+        var dbTask = Task.Run(async () => await DbMetadataTask(channel, settings, toProcess, library.Id, library.Name, forceUpdate, scanStarted));
 
         var amountOfProcessors = Environment.ProcessorCount;
         var usingCount = Math.Max(1, amountOfProcessors / 2);
@@ -805,9 +811,10 @@ public class ScannerService(
     /// <param name="libraryId"></param>
     /// <param name="libraryName"></param>
     /// <param name="forceUpdate"></param>
+    /// <param name="scanStarted"></param>
     /// <returns>The total amount of processed files</returns>
     private async Task<long> DbMetadataTask(Channel<int> channel, MetadataSettingsDto settings,
-        IList<IList<ParserInfo>> toProcess, int libraryId, string libraryName, bool forceUpdate)
+        IList<IList<ParserInfo>> toProcess, int libraryId, string libraryName, bool forceUpdate, DateTime scanStarted)
     {
         var totalFiles = 0;
         var seriesLeftToProcess = toProcess.Count;
@@ -835,6 +842,7 @@ public class ScannerService(
                     LeftToProcess = seriesLeftToProcess,
                     TotalToProcess = totalSeriesToProcess,
                     ForceUpdate = forceUpdate,
+                    ScanStarted = scanStarted,
                 });
 
                 if (seriesId != null)

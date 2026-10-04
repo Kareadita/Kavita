@@ -212,7 +212,7 @@ public class ProcessSeries(
                 [.. fileInfos.Select(info => info.FullFilePath), .. GetFilesInUnchangedFolders(series, unchangedFolders).Select(f => f.FilePath)],
                 library, series);
 
-            series.UpdateLastFolderScanned();
+            series.UpdateLastFolderScanned(args.ScanStarted);
 
             if (unitOfWork.HasChanges())
             {
