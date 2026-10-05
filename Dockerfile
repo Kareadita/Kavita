@@ -7,10 +7,7 @@ ARG TARGETPLATFORM
 #Move the output files to where they need to be
 RUN mkdir /files
 COPY _output/*.tar.gz /files/
-COPY copy_runtime.sh /copy_runtime.sh
 
-RUN chmod +x /copy_runtime.sh
-ARG TARGETPLATFORM
 RUN set -eux; \
     case "$TARGETPLATFORM" in \
       "linux/amd64")   RID=linux-x64   ;; \
