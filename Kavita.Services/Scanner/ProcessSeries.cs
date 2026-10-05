@@ -11,7 +11,6 @@ using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
-using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.ReadingLists;
@@ -62,6 +61,10 @@ internal sealed record UpdateChapterComicInfoArgs
     public required ComicInfo? ComicInfo { get; init; }
     public required Dictionary<string, Person> DatabasePeople { get; init; }
     public bool ForceUpdate { get; init; } = false;
+    /// <summary>
+    /// The file the ComicInfo came from is new or was read again this pass
+    /// </summary>
+    public bool FileChanged { get; init; }
 }
 
 internal sealed record TemporaryPerson(string Name, string NormalizedName);
@@ -87,7 +90,6 @@ public class ProcessSeries(
     ILogger<ProcessSeries> logger,
     IEventHub eventHub,
     IDirectoryService directoryService,
-    ICacheHelper cacheHelper,
     IReadingItemService readingItemService,
     IFileService fileService,
     IReadingListService readingListService,
@@ -776,9 +778,9 @@ public class ProcessSeries(
                 chapter.Volume = volume;
             }
 
-            var mangaFile = AddOrUpdateFileForChapter(chapter, parsedInfo, args.ForceUpdate);
+            var (mangaFile, fileChanged) = AddOrUpdateFileForChapter(chapter, parsedInfo, args.ForceUpdate);
 
-            await UpdateChapter(args, chapter, parsedInfo);
+            await UpdateChapter(args, chapter, parsedInfo, fileChanged);
 
             // UpdateChapters may commit, we track the entities and collect the ids later
             foundVolumes.Add(volume);
@@ -977,7 +979,7 @@ public class ProcessSeries(
         return chapter;
     }
 
-    private async Task UpdateChapter(ProcessParserInfosArgs args, Chapter chapter, ParserInfo info)
+    private async Task UpdateChapter(ProcessParserInfosArgs args, Chapter chapter, ParserInfo info, bool fileChanged)
     {
         chapter.UpdateFrom(info);
 
@@ -1016,6 +1018,7 @@ public class ProcessSeries(
                 ComicInfo = info.ComicInfo,
                 DatabasePeople = args.DatabasePeople,
                 ForceUpdate = args.ForceUpdate,
+                FileChanged = fileChanged,
             });
         }
         catch (Exception ex)
@@ -1050,19 +1053,18 @@ public class ProcessSeries(
         }
     }
 
-    private MangaFile AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
+    private (MangaFile File, bool Changed) AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
     {
         chapter.Files ??= [];
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
         var fileInfo = directoryService.FileSystem.FileInfo.New(info.FullFilePath);
         if (existingFile != null)
         {
-            // TODO: I wonder if we can simplify this force check.
             existingFile.Format = info.Format;
 
             if (!forceUpdate && existingFile.Pages != 0 && !HasFileChanged(existingFile, fileInfo))
             {
-                return existingFile;
+                return (existingFile, false);
             }
 
             existingFile.Pages = readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
@@ -1073,8 +1075,7 @@ public class ProcessSeries(
             existingFile.FileLastWriteTimeUtc = fileInfo.LastWriteTimeUtc;
             existingFile.KoreaderHash = KoreaderHelper.HashContents(existingFile.FilePath);
 
-            // We skip updating DB here with last modified time so that metadata refresh can do it
-            return existingFile;
+            return (existingFile, true);
         }
 
         var file = new MangaFileBuilder(info.FullFilePath, info.Format, readingItemService.GetNumberOfPages(info.FullFilePath, info.Format))
@@ -1084,7 +1085,7 @@ public class ProcessSeries(
             .Build();
         chapter.Files.Add(file);
 
-        return file;
+        return (file, true);
     }
 
     /// <summary>
@@ -1103,10 +1104,7 @@ public class ProcessSeries(
         var comicInfo = args.ComicInfo;
         var chapter = args.Chapter;
 
-        if (comicInfo == null) return;
-        var firstFile = chapter.Files.MinBy(x => x.Chapter);
-        if (firstFile == null ||
-            cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, args.ForceUpdate, firstFile)) return;
+        if (comicInfo == null || !(args.ForceUpdate || args.FileChanged)) return;
 
         var sw = Stopwatch.StartNew();
 

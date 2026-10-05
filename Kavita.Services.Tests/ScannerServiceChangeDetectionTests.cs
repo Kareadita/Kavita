@@ -129,11 +129,11 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         await using (var archive = await ZipFile.OpenAsync(volume2, ZipArchiveMode.Update))
         {
             using var page = new MemoryStream();
-            await using (var source = archive.Entries.First(e => e.Name.EndsWith(".png")).Open())
+            await using (var source = await archive.Entries.First(e => e.Name.EndsWith(".png")).OpenAsync())
             {
                 await source.CopyToAsync(page);
             }
-            await using var target = archive.CreateEntry("2.png").Open();
+            await using var target = await archive.CreateEntry("2.png").OpenAsync();
             await target.WriteAsync(page.ToArray());
         }
         File.SetLastWriteTimeUtc(volume2, DateTime.UtcNow.AddYears(-4));
@@ -148,6 +148,42 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         var afterReRead = await LastFolderScanned(context, libraryId);
         await scanner.ScanLibrary(libraryId);
         Assert.Equal(afterReRead, await LastFolderScanned(context, libraryId));
+    }
+
+    [Fact]
+    public async Task CopyOverWithOlderTime_NewComicInfoIsApplied()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var comicInfos = new Dictionary<string, ComicInfo>
+        {
+            {"Spice and Wolf Vol. 1.cbz", new ComicInfo {Series = "Spice and Wolf", Volume = "1"}},
+            {"Spice and Wolf Vol. 2.cbz", new ComicInfo {Series = "Spice and Wolf", Volume = "2", Title = "Old Title"}},
+        };
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Copy Over ComicInfo - Manga", TwoVolumes, comicInfos);
+
+        var root = await LibraryRoot(context, libraryId);
+        var volume2 = Path.Join(root, "Spice and Wolf", "Spice and Wolf Vol. 2.cbz");
+        using (var archive = ZipFile.Open(volume2, ZipArchiveMode.Update))
+        {
+            var entry = archive.GetEntry("ComicInfo.xml")!;
+            string xml;
+            using (var reader = new StreamReader(entry.Open()))
+            {
+                xml = await reader.ReadToEndAsync();
+            }
+            entry.Delete();
+            await using var writer = new StreamWriter(archive.CreateEntry("ComicInfo.xml").Open());
+            await writer.WriteAsync(xml.Replace("Old Title", "A Much Longer New Title"));
+        }
+        File.SetLastWriteTimeUtc(volume2, DateTime.UtcNow.AddYears(-4));
+
+        await scanner.ScanLibrary(libraryId);
+
+        var titleName = await context.Chapter.AsNoTracking()
+            .Where(c => c.Files.Any(f => f.FilePath == Parser.NormalizePath(volume2)))
+            .Select(c => c.TitleName)
+            .SingleAsync();
+        Assert.Equal("A Much Longer New Title", titleName);
     }
 
     [Fact]

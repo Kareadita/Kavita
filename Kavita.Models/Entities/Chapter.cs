@@ -48,6 +48,10 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKP
     public string SecondaryColor { get; set; }
     public bool CoverImageLocked { get; set; }
     /// <summary>
+    /// The first file's write time when <see cref="CoverImage"/> was made from it. Null until the first cover pass after v0.9.2
+    /// </summary>
+    public DateTime? CoverFileWriteTimeUtc { get; set; }
+    /// <summary>
     /// Total number of pages in all MangaFiles
     /// </summary>
     public int Pages { get; set; }

@@ -1,6 +1,5 @@
 ﻿
 using System;
-using System.IO;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 
@@ -39,10 +38,8 @@ public class MangaFile : IEntityDate
     public string? Extension { get; set; }
     /// <inheritdoc cref="IEntityDate.Created"/>
     public DateTime Created { get; set; }
-    /// <summary>
-    /// Last time underlying file was modified
-    /// </summary>
-    /// <remarks>This gets updated anytime the file is scanned</remarks>
+    /// <inheritdoc cref="IEntityDate.LastModified"/>
+    /// <remarks>DataContext sets this to the save time. For the file's own write time see <see cref="FileLastWriteTimeUtc"/></remarks>
     public DateTime LastModified { get; set; }
 
     public DateTime CreatedUtc { get; set; }
@@ -61,22 +58,16 @@ public class MangaFile : IEntityDate
     /// </summary>
     public DateTime LastFileAnalysis { get; set; }
     public DateTime LastFileAnalysisUtc { get; set; }
+    /// <summary>
+    /// The file's write time when its words were last counted. Null until the first analysis after v0.9.2
+    /// </summary>
+    public DateTime? AnalyzedFileWriteTimeUtc { get; set; }
 
 
     // Relationship Mapping
     public Chapter Chapter { get; set; } = null!;
     public int ChapterId { get; set; }
 
-
-    /// <summary>
-    /// Updates the Last Modified time of the underlying file to the LastWriteTime
-    /// </summary>
-    public void UpdateLastModified()
-    {
-        if (FilePath == null) return;
-        LastModified = File.GetLastWriteTime(FilePath);
-        LastModifiedUtc = File.GetLastWriteTimeUtc(FilePath);
-    }
 
     public void UpdateLastFileAnalysis()
     {

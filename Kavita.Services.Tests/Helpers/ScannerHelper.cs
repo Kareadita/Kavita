@@ -6,7 +6,6 @@ using System.Xml;
 using System.Xml.Serialization;
 using Kavita.API.Database;
 using Kavita.API.Services;
-using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Metadata;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.ReadingLists;
@@ -123,7 +122,7 @@ public class ScannerHelper
 
         var processSeries = new ProcessSeries(_unitOfWork, Substitute.For<ILogger<ProcessSeries>>(),
             Substitute.For<IEventHub>(),
-            ds, Substitute.For<ICacheHelper>(), readingItemService, new FileService(fs),
+            ds, readingItemService, new FileService(fs),
             Substitute.For<IReadingListService>(),
             Substitute.For<IExternalMetadataService>());
 

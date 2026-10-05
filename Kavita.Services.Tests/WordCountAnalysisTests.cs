@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+﻿using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Plus;
@@ -14,6 +15,7 @@ using Kavita.Services.Helpers;
 using Kavita.Services.Metadata;
 using Kavita.Services.Reading;
 using Kavita.Services.Scanner;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit.Abstractions;
@@ -71,7 +73,8 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var cacheService = new CacheHelper(new FileService());
         var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
-            Substitute.For<IEventHub>(), cacheService, Substitute.For<IMediaErrorService>());
+            Substitute.For<IEventHub>(), cacheService, Substitute.For<IMediaErrorService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()));
 
 
         await service.ScanSeries(1, 1);
@@ -125,7 +128,8 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var cacheService = new CacheHelper(new FileService());
         var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
-            Substitute.For<IEventHub>(), cacheService, Substitute.For<IMediaErrorService>());
+            Substitute.For<IEventHub>(), cacheService, Substitute.For<IMediaErrorService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()));
         await service.ScanSeries(1, 1);
 
         var chapter2 = new ChapterBuilder("2")
@@ -171,6 +175,63 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
         Assert.Equal(MinHoursToRead, chapter2.MinHoursToRead);
         Assert.Equal(AvgHoursToRead, chapter2.AvgHoursToRead);
         Assert.Equal(MaxHoursToRead, chapter2.MaxHoursToRead);
+    }
+
+    private async Task<(WordCountAnalyzerService Service, Kavita.Database.DataContext Context, string File)> AnalyzeCopyOnce()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var folder = Path.Join(Path.GetTempPath(), "kavita-wordcount-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(folder);
+        var file = Path.Join(folder, "book.epub");
+        File.Copy(Path.Join(_testDirectory, "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub"), file);
+        File.SetLastWriteTimeUtc(file, new DateTime(2024, 1, 1, 12, 0, 0, DateTimeKind.Utc));
+
+        var series = new SeriesBuilder("Test Series")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder("").WithFile(new MangaFileBuilder(file, MangaFormat.Epub).Build()).Build())
+                .Build())
+            .Build();
+        context.Library.Add(new LibraryBuilder("Test", LibraryType.Book).WithSeries(series).Build());
+        await context.SaveChangesAsync();
+
+        var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
+            Substitute.For<IEventHub>(), new CacheHelper(new FileService()), Substitute.For<IMediaErrorService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()));
+        await service.ScanSeries(1, 1, forceUpdate: false);
+
+        return (service, context, file);
+    }
+
+    [Fact]
+    public async Task FileReplacedWithOlderTime_IsCountedAgain()
+    {
+        var (service, context, file) = await AnalyzeCopyOnce();
+        var olderTime = new DateTime(2020, 6, 1, 8, 0, 0, DateTimeKind.Utc);
+        File.SetLastWriteTimeUtc(file, olderTime);
+
+        await service.ScanSeries(1, 1, forceUpdate: false);
+
+        var stored = await context.MangaFile.AsNoTracking().SingleAsync();
+        Assert.Equal(olderTime, stored.AnalyzedFileWriteTimeUtc);
+    }
+
+    [Fact]
+    public async Task NoStoredAnalyzedTime_CountsOnceThenQuiet()
+    {
+        var (service, context, file) = await AnalyzeCopyOnce();
+        await context.MangaFile.ExecuteUpdateAsync(s => s.SetProperty(f => f.AnalyzedFileWriteTimeUtc, (DateTime?) null));
+        context.ChangeTracker.Clear();
+        var firstAnalysis = (await context.MangaFile.AsNoTracking().SingleAsync()).LastFileAnalysisUtc;
+
+        await service.ScanSeries(1, 1, forceUpdate: false);
+        var recounted = await context.MangaFile.AsNoTracking().SingleAsync();
+        await service.ScanSeries(1, 1, forceUpdate: false);
+        var quiet = await context.MangaFile.AsNoTracking().SingleAsync();
+
+        Assert.NotEqual(firstAnalysis, recounted.LastFileAnalysisUtc);
+        Assert.Equal(File.GetLastWriteTimeUtc(file), recounted.AnalyzedFileWriteTimeUtc);
+        Assert.Equal(recounted.LastFileAnalysisUtc, quiet.LastFileAnalysisUtc);
     }
 
 

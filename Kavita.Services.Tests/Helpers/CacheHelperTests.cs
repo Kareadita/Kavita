@@ -1,8 +1,6 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
 using Kavita.API.Services.Helpers;
 using Kavita.Database.Tests;
-using Kavita.Models.Entities.Enums;
-using Kavita.Services.Builders;
 using Kavita.Services.Helpers;
 
 namespace Kavita.Services.Tests.Helpers;
@@ -51,227 +49,22 @@ public class CacheHelperTests: AbstractFsTest
         Assert.True(_cacheHelper.CoverImageExists(Path.Join(TestCoverImageDirectory, TestCoverArchive)));
     }
 
-    [Fact]
-    public void ShouldUpdateCoverImage_OnFirstRun()
+    [Theory]
+    [InlineData(false, false, false, false)]
+    [InlineData(true, false, false, true)]
+    [InlineData(false, true, false, true)]
+    [InlineData(true, true, true, false)]
+    [InlineData(false, true, true, false)]
+    public void ShouldUpdateCoverImage_CoverExists(bool sourceChanged, bool forceUpdate, bool isCoverLocked, bool expected)
     {
-
-        var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
-            .WithLastModified(DateTime.Now)
-            .Build();
-        Assert.True(_cacheHelper.ShouldUpdateCoverImage(null, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, false));
+        Assert.Equal(expected, _cacheHelper.ShouldUpdateCoverImage(_testCoverPath, sourceChanged, forceUpdate, isCoverLocked));
     }
 
-    [Fact]
-    public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetNotLocked()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ShouldUpdateCoverImage_CoverMissing_UpdatesEvenWhenLocked(bool isCoverLocked)
     {
-        // Represents first run
-        var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
-            .WithLastModified(DateTime.Now)
-            .Build();
-        Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, false));
+        Assert.True(_cacheHelper.ShouldUpdateCoverImage(Path.Join(TestCoverImageDirectory, "missing.jpg"), false, false, isCoverLocked));
     }
-
-    [Fact]
-    public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetNotLocked_2()
-    {
-        // Represents first run
-        var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
-            .WithLastModified(DateTime.Now)
-            .Build();
-        Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now,
-            false, false));
-    }
-
-    [Fact]
-    public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetLocked()
-    {
-        // Represents first run
-        var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
-            .WithLastModified(DateTime.Now)
-            .Build();
-        Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, true));
-    }
-
-    [Fact]
-    public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetLocked_Modified()
-    {
-        // Represents first run
-        var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
-            .WithLastModified(DateTime.Now)
-            .Build();
-        Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, true));
-    }
-
-    [Fact]
-    public void ShouldUpdateCoverImage_CoverImageSetAndReplaced_Modified()
-    {
-        var filesystemFile = new MockFileData("")
-        {
-            LastWriteTime = DateTimeOffset.Now
-        };
-        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
-        {
-            { Path.Join(TestCoverImageDirectory, TestCoverArchive), filesystemFile },
-            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), filesystemFile }
-        });
-
-        var fileService = new FileService(fileSystem);
-        var cacheHelper = new CacheHelper(fileService);
-
-        var created = DateTime.Now.Subtract(TimeSpan.FromHours(1));
-        var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
-            .WithLastModified(DateTime.Now.Subtract(TimeSpan.FromMinutes(1)))
-            .Build();
-
-        Assert.True(cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, created,
-            false, false));
-    }
-
-    [Fact]
-    public void HasFileNotChangedSinceCreationOrLastScan_NotChangedSinceCreated()
-    {
-        var now = DateTimeOffset.Now;
-        var filesystemFile = new MockFileData("")
-        {
-            LastWriteTime =now,
-        };
-        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
-        {
-            { Path.Join(TestCoverImageDirectory, TestCoverArchive), filesystemFile },
-            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), filesystemFile }
-        });
-
-        var fileService = new FileService(fileSystem);
-        var cacheHelper = new CacheHelper(fileService);
-
-        var chapter = new ChapterBuilder("1")
-            .WithLastModified(now.DateTime)
-            .WithCreated(now.DateTime)
-            .Build();
-
-        var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
-            .WithLastModified(now.DateTime)
-            .Build();
-        Assert.True(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
-    }
-
-    [Fact]
-    public void HasFileNotChangedSinceCreationOrLastScan_NotChangedSinceLastModified()
-    {
-        var now = DateTimeOffset.Now;
-        var filesystemFile = new MockFileData("")
-        {
-            LastWriteTime = now,
-        };
-        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
-        {
-            { Path.Join(TestCoverImageDirectory, TestCoverArchive), filesystemFile },
-            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), filesystemFile }
-        });
-
-        var fileService = new FileService(fileSystem);
-        var cacheHelper = new CacheHelper(fileService);
-
-        var chapter = new ChapterBuilder("1")
-            .WithLastModified(now.DateTime)
-            .WithCreated(now.DateTime)
-            .Build();
-
-        var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
-            .WithLastModified(now.DateTime)
-            .Build();
-
-        Assert.True(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
-    }
-
-    [Fact]
-    public void HasFileNotChangedSinceCreationOrLastScan_NotChangedSinceLastModified_ForceUpdate()
-    {
-        var now = DateTimeOffset.Now;
-        var filesystemFile = new MockFileData("")
-        {
-            LastWriteTime = now.DateTime,
-        };
-        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
-        {
-            { Path.Join(TestCoverImageDirectory, TestCoverArchive), filesystemFile },
-            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), filesystemFile }
-        });
-
-        var fileService = new FileService(fileSystem);
-        var cacheHelper = new CacheHelper(fileService);
-
-        var chapter = new ChapterBuilder("1")
-            .WithLastModified(now.DateTime)
-            .WithCreated(now.DateTime)
-            .Build();
-
-        var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
-            .WithLastModified(now.DateTime)
-            .Build();
-        Assert.False(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, true, file));
-    }
-
-    [Fact]
-    public void IsFileUnmodifiedSinceCreationOrLastScan_ModifiedSinceLastScan()
-    {
-        var now = DateTimeOffset.Now;
-        var filesystemFile = new MockFileData("")
-        {
-            LastWriteTime = now.DateTime,
-            CreationTime = now.DateTime
-        };
-        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
-        {
-            { Path.Join(TestCoverImageDirectory, TestCoverArchive), filesystemFile },
-            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), filesystemFile }
-        });
-
-        var fileService = new FileService(fileSystem);
-        var cacheHelper = new CacheHelper(fileService);
-
-        var chapter = new ChapterBuilder("1")
-            .WithLastModified(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))
-            .WithCreated(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))
-            .Build();
-
-        var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
-            .WithLastModified(now.DateTime)
-            .Build();
-        Assert.False(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
-    }
-
-    [Fact]
-    public void HasFileNotChangedSinceCreationOrLastScan_ModifiedSinceLastScan_ButLastModifiedSame()
-    {
-        var now = DateTimeOffset.Now;
-        var filesystemFile = new MockFileData("")
-        {
-            LastWriteTime =now.DateTime
-        };
-        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
-        {
-            { Path.Join(TestCoverImageDirectory, TestCoverArchive), filesystemFile },
-            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), filesystemFile }
-        });
-
-        var fileService = new FileService(fileSystem);
-        var cacheHelper = new CacheHelper(fileService);
-
-        var chapter = new ChapterBuilder("1")
-            .WithLastModified(DateTime.Now)
-            .WithCreated(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))
-            .Build();
-
-        var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
-            .WithLastModified(now.DateTime)
-            .Build();
-
-        Assert.False(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
-    }
-
 }

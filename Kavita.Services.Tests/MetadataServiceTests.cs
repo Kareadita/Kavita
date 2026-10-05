@@ -24,8 +24,7 @@ public class MetadataServiceTests(ITestOutputHelper outputHelper) : AbstractDbTe
     private static readonly DateTime FileTime = new(2024, 1, 1, 12, 0, 0);
 
     /// <summary>
-    /// Real files in a temp folder: MangaFile.UpdateLastModified reads System.IO directly, so a mock file system
-    /// would make every chapter look modified on the second pass
+    /// Real files in a temp folder: the cover check reads the source file's write time from disk
     /// </summary>
     private sealed class Harness(
         IUnitOfWork unitOfWork,
@@ -230,6 +229,109 @@ public class MetadataServiceTests(ITestOutputHelper outputHelper) : AbstractDbTe
         var after = await h.Load(seriesId);
         Assert.StartsWith("custom", after.CoverImage);
         Assert.StartsWith("custom", after.Volumes[0].CoverImage);
+    }
+
+    [Fact]
+    public async Task GenerateCoversForSeries_SourceReplacedWithOlderTime_CoverRegenerated()
+    {
+        using var h = await Setup();
+        var file = h.File("v1.cbz");
+        var seriesId = await AddSeries(h, new VolumeBuilder("1").WithChapter(new ChapterBuilder("1").WithFile(file).Build()).Build());
+        await h.Generate(seriesId);
+        var olderTime = new DateTime(2020, 6, 1, 8, 0, 0, DateTimeKind.Utc);
+        File.SetLastWriteTimeUtc(file.FilePath, olderTime);
+        h.ClearCalls();
+
+        await h.Generate(seriesId);
+
+        h.ReadingItemService.ReceivedWithAnyArgs(1).GetCoverImage(default!, default!, default, default, default);
+        var chapter = (await h.Load(seriesId)).Volumes[0].Chapters[0];
+        Assert.Equal(olderTime, chapter.CoverFileWriteTimeUtc);
+    }
+
+    [Fact]
+    public async Task GenerateCoversForSeries_NoStoredSourceTime_RegeneratesOnceThenQuiet()
+    {
+        using var h = await Setup();
+        var file = h.File("v1.cbz");
+        var seriesId = await AddSeries(h, new VolumeBuilder("1").WithChapter(new ChapterBuilder("1").WithFile(file).Build()).Build());
+        await h.Generate(seriesId);
+        await h.Context.Chapter.ExecuteUpdateAsync(s => s.SetProperty(c => c.CoverFileWriteTimeUtc, (DateTime?) null));
+        h.ClearCalls();
+
+        await h.Generate(seriesId);
+        await h.Generate(seriesId);
+
+        h.ReadingItemService.ReceivedWithAnyArgs(1).GetCoverImage(default!, default!, default, default, default);
+        var chapter = (await h.Load(seriesId)).Volumes[0].Chapters[0];
+        Assert.Equal(File.GetLastWriteTimeUtc(file.FilePath), chapter.CoverFileWriteTimeUtc);
+    }
+
+    [Fact]
+    public async Task GenerateCoversForSeries_NoStoredSourceTime_SourceReplacedWithOlderTime_CoverRegenerated()
+    {
+        using var h = await Setup();
+        var file = h.File("v1.cbz");
+        var seriesId = await AddSeries(h, new VolumeBuilder("1").WithChapter(new ChapterBuilder("1").WithFile(file).Build()).Build());
+        await h.Generate(seriesId);
+        await h.Context.Chapter.ExecuteUpdateAsync(s => s.SetProperty(c => c.CoverFileWriteTimeUtc, (DateTime?) null));
+        await File.WriteAllBytesAsync(file.FilePath, [1, 2, 3]);
+        File.SetLastWriteTimeUtc(file.FilePath, new DateTime(2020, 6, 1, 8, 0, 0, DateTimeKind.Utc));
+        h.ClearCalls();
+
+        await h.Generate(seriesId);
+
+        h.ReadingItemService.ReceivedWithAnyArgs(1).GetCoverImage(default!, default!, default, default, default);
+    }
+
+    [Fact]
+    public async Task CoverBackfillThenWordCountRecountInSameScope_KeepsCoverStamp()
+    {
+        using var h = await Setup();
+        var file = h.File("v1.cbz");
+        var seriesId = await AddSeries(h, new VolumeBuilder("1").WithChapter(new ChapterBuilder("1").WithFile(file).Build()).Build());
+        await h.Generate(seriesId);
+        await h.Context.Chapter.ExecuteUpdateAsync(s => s.SetProperty(c => c.CoverFileWriteTimeUtc, (DateTime?) null));
+        var wordCount = new Kavita.Services.Metadata.WordCountAnalyzerService(
+            Substitute.For<ILogger<Kavita.Services.Metadata.WordCountAnalyzerService>>(), h.UnitOfWork,
+            Substitute.For<IEventHub>(), new CacheHelper(new FileService()), Substitute.For<IMediaErrorService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()));
+
+        h.Context.ChangeTracker.Clear();
+        await h.Service.GenerateCoversForSeries(h.Settings, 1, seriesId, forceUpdate: false, forceColorScape: false);
+        await wordCount.ScanSeries(1, seriesId, forceUpdate: false);
+
+        Assert.NotNull((await h.Load(seriesId)).Volumes[0].Chapters[0].CoverFileWriteTimeUtc);
+    }
+
+    [Fact]
+    public async Task GenerateCoversForSeries_LockedChapterCover_SourceChanged_KeptUntilUnlocked()
+    {
+        using var h = await Setup();
+        var file = h.File("v1.cbz");
+        var seriesId = await AddSeries(h, new VolumeBuilder("1").WithChapter(new ChapterBuilder("1").WithFile(file).Build()).Build());
+        await h.Generate(seriesId);
+
+        var series = await h.Load(seriesId);
+        var stamp = series.Volumes[0].Chapters[0].CoverFileWriteTimeUtc;
+        series.Volumes[0].Chapters[0].CoverImage = AddCustomCover(h);
+        series.Volumes[0].Chapters[0].CoverImageLocked = true;
+        await h.Context.SaveChangesAsync();
+        File.SetLastWriteTimeUtc(file.FilePath, new DateTime(2020, 6, 1, 8, 0, 0, DateTimeKind.Utc));
+        h.ClearCalls();
+
+        await h.Generate(seriesId);
+
+        h.ReadingItemService.DidNotReceiveWithAnyArgs().GetCoverImage(default!, default!, default, default, default);
+        var locked = (await h.Load(seriesId)).Volumes[0].Chapters[0];
+        Assert.StartsWith("custom", locked.CoverImage);
+        Assert.Equal(stamp, locked.CoverFileWriteTimeUtc);
+
+        locked.CoverImageLocked = false;
+        await h.Context.SaveChangesAsync();
+        await h.Generate(seriesId);
+
+        h.ReadingItemService.ReceivedWithAnyArgs(1).GetCoverImage(default!, default!, default, default, default);
     }
 
     private static string AddCustomCover(Harness h)
