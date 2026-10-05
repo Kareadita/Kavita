@@ -7,6 +7,7 @@ using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
+using Kavita.Common.Helpers;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.Entities.Enums;
@@ -638,7 +639,7 @@ public class ParseScannedFilesTests: AbstractDbTest
     }
 
     [Fact]
-    public async Task HasSeriesFolderNotChangedSinceLastScan_LowestFolderPathIsDriveRoot_DoesNotWalkIt()
+    public async Task ScanSingleDirectory_LowestFolderPathIsDriveRoot_ListsOnlySeriesFolder()
     {
         var ds = Substitute.For<IDirectoryService>();
         ds.ScanFiles(default!, default!).ReturnsForAnyArgs([]);
@@ -661,9 +662,11 @@ public class ParseScannedFilesTests: AbstractDbTest
             ],
         };
 
-        await psf.ScanFiles("M:/Higurashi When They Cry", false, seriesPaths, library);
+        var result = await psf.ScanFiles("M:/Higurashi When They Cry", false, seriesPaths, library);
 
-        ds.DidNotReceiveWithAnyArgs().GetLastWriteTime(default!);
+        Assert.True(Assert.Single(result).HasChanged);
+        ds.Received(1).ScanFiles(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<GlobMatcher?>(), Arg.Any<SearchOption>());
+        ds.Received(1).ScanFiles("M:/Higurashi When They Cry", Arg.Any<string>(), Arg.Any<GlobMatcher?>(), Arg.Any<SearchOption>());
     }
 
     [Fact]

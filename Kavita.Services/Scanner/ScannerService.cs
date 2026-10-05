@@ -216,14 +216,13 @@ public class ScannerService(
         if (library == null) return;
 
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
-        if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel)
+        if (await ShouldScanSeries(seriesId, library, libraryPaths) != ScanCancelReason.NoCancel)
         {
             BackgroundJob.Enqueue(() => metadataService.GenerateCoversForSeries(serverSettings, series.LibraryId, seriesId, false, false));
             BackgroundJob.Enqueue(() => wordCountAnalyzerService.ScanSeries(library.Id, seriesId, bypassFolderOptimizationChecks));
             return;
         }
 
-        // TODO: We need to refactor this to handle the path changes better
         List<string> folderPaths = [];
         if (!string.IsNullOrEmpty(series.LowestFolderPath) && directoryService.Exists(series.LowestFolderPath))
         {
@@ -419,7 +418,7 @@ public class ScannerService(
         return ids.Count == 1 ? ids[0] : null;
     }
 
-    private async Task<ScanCancelReason> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series, bool bypassFolderChecks = false)
+    private async Task<ScanCancelReason> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths)
     {
         var seriesFolderPaths = (await unitOfWork.SeriesRepository.GetFilesForSeriesAsync(seriesId))
             .Select(f => directoryService.FileSystem.FileInfo.New(f.FilePath).Directory?.FullName ?? string.Empty)
@@ -440,38 +439,6 @@ public class ScannerService(
                 "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return ScanCancelReason.FolderMount;
         }
-
-        // TODO: Since this is never called, let's remove it
-        // If all series Folder paths haven't been modified since last scan, abort (NOTE: This flow never happens as ScanSeries will always bypass)
-        if (!bypassFolderChecks)
-        {
-
-            var allFolders = seriesFolderPaths.SelectMany(path => directoryService.GetDirectories(path)).ToList();
-            allFolders.AddRange(seriesFolderPaths);
-
-            try
-            {
-                if (allFolders.TrueForAll(folder => directoryService.GetLastWriteTime(folder) <= series.LastFolderScanned))
-                {
-                    logger.LogInformation(
-                        "[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan",
-                        series.Name);
-                    await eventHub.SendMessageAsync(MessageFactory.Info,
-                        MessageFactory.ScanNoWorkEvent(series.LibraryId, series.Id, series.Name, series.LastFolderScanned));
-                    return ScanCancelReason.NoChange;
-                }
-            }
-            catch (IOException ex)
-            {
-                // If there is an exception it means that the folder doesn't exist. So we should delete the series
-                logger.LogError(ex, "[ScannerService] Scan series for {SeriesName} found the folder path no longer exists",
-                    series.Name);
-                await eventHub.SendMessageAsync(MessageFactory.Info,
-                    MessageFactory.ScanSeriesFolderMissingEvent(series.LibraryId, series.Id, series.Name));
-                return ScanCancelReason.NoCancel;
-            }
-        }
-
 
         return ScanCancelReason.NoCancel;
     }
@@ -889,6 +856,7 @@ public class ScannerService(
 
         var processedSeries = await scanner.ScanLibrariesForSeries(library, dirs,
             isLibraryScan, await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id), forceChecks);
+        await unitOfWork.MangaFileRepository.SetFileLastWriteTimesAsync(scanner.WriteTimesToBackfill);
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 

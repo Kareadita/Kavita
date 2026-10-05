@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,5 +30,23 @@ public class MangaFileRepository(DataContext context) : IMangaFileRepository
         return await context.MangaFile
             .FirstOrDefaultAsync(f => f.KoreaderHash != null &&
                                     f.KoreaderHash.Equals(hash.ToUpper()), ct);
+    }
+
+    /// <summary>
+    /// Writes the file's own write time without loading the rows. Bypasses the save interceptor on purpose: on MangaFile,
+    /// LastModified is the write time cover and page checks last ran against, and stamping it with now would hide a pending regen
+    /// </summary>
+    public async Task SetFileLastWriteTimesAsync(IReadOnlyDictionary<int, DateTime> writeTimesByFileId, CancellationToken ct = default)
+    {
+        if (writeTimesByFileId.Count == 0) return;
+
+        await using var tx = await context.Database.BeginTransactionAsync(ct);
+        foreach (var (id, writeTime) in writeTimesByFileId)
+        {
+            await context.MangaFile
+                .Where(f => f.Id == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(f => f.FileLastWriteTimeUtc, writeTime), ct);
+        }
+        await tx.CommitAsync(ct);
     }
 }

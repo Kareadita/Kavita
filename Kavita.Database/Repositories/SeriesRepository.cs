@@ -1861,25 +1861,28 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             })
             .ToListAsync(ct);
 
-        var filePaths = await context.MangaFile
+        var files = await context.MangaFile
             .Where(f => f.Chapter.Volume.Series.LibraryId == libraryId)
-            .Select(f => new { f.Chapter.Volume.SeriesId, f.FilePath })
+            .Select(f => new { f.Id, f.Chapter.Volume.SeriesId, f.FilePath, f.Bytes, f.FileLastWriteTimeUtc })
             .AsNoTracking()
             .ToListAsync(ct);
 
-        var fileFoldersBySeries = filePaths
+        var filesBySeries = files
             .GroupBy(f => f.SeriesId)
-            .ToDictionary(g => g.Key, g => g.Select(f => ParentFolder(f.FilePath)).ToHashSet());
+            .ToDictionary(g => g.Key, g => g
+                .Select(f => new KnownFile(f.Id, f.FilePath.NormalizePath(), f.Bytes, f.FileLastWriteTimeUtc))
+                .GroupBy(f => ParentFolder(f.Path))
+                .ToDictionary(folder => folder.Key, IReadOnlyList<KnownFile> (folder) => folder.ToList()));
 
         var map = new Dictionary<string, IList<SeriesModified>>();
         foreach (var (id, series) in info.Select(s => (s.Id, s.Modified)))
         {
             if (string.IsNullOrEmpty(series.FolderPath)) continue;
 
-            var fileFolders = fileFoldersBySeries.GetValueOrDefault(id) ?? [];
-            series.FileFolders = fileFolders;
+            var filesByFolder = filesBySeries.GetValueOrDefault(id) ?? new Dictionary<string, IReadOnlyList<KnownFile>>();
+            series.FilesByFolder = filesByFolder;
 
-            var keys = new HashSet<string>(fileFolders) { series.FolderPath };
+            var keys = new HashSet<string>(filesByFolder.Keys) { series.FolderPath };
             if (!string.IsNullOrEmpty(series.LowestFolderPath) && series.LibraryRoots.Any(series.LowestFolderPath.IsInsideFolder))
             {
                 keys.Add(series.LowestFolderPath);
@@ -1900,11 +1903,10 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return map;
     }
 
-    private static string ParentFolder(string filePath)
+    private static string ParentFolder(string normalizedPath)
     {
-        var normalized = filePath.NormalizePath();
-        var lastSlash = normalized.LastIndexOf('/');
-        return lastSlash < 0 ? normalized : normalized[..lastSlash];
+        var lastSlash = normalizedPath.LastIndexOf('/');
+        return lastSlash < 0 ? normalizedPath : normalizedPath[..lastSlash];
     }
 
     /// <summary>

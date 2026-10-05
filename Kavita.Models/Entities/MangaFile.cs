@@ -47,6 +47,14 @@ public class MangaFile : IEntityDate
 
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
+    /// <summary>
+    /// The file's own write time when it was last read. Null until the first scan after this column was added
+    /// </summary>
+    /// <remarks>
+    /// Not <see cref="LastModifiedUtc"/>: DataContext overwrites that with the save time.
+    /// Added in v0.9.2. Once every install has scanned since then, the null fallback in the scanner can be removed
+    /// </remarks>
+    public DateTime? FileLastWriteTimeUtc { get; set; }
 
     /// <summary>
     /// Last time file analysis ran on this file

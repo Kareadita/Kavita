@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -1059,9 +1060,7 @@ public class ProcessSeries(
             // TODO: I wonder if we can simplify this force check.
             existingFile.Format = info.Format;
 
-            if (!forceUpdate &&
-                !fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) &&
-                existingFile.Pages != 0)
+            if (!forceUpdate && existingFile.Pages != 0 && !HasFileChanged(existingFile, fileInfo))
             {
                 return existingFile;
             }
@@ -1071,6 +1070,7 @@ public class ProcessSeries(
             existingFile.FileName = Parser.RemoveExtensionIfSupported(existingFile.FilePath);
             existingFile.FilePath = Parser.NormalizePath(existingFile.FilePath);
             existingFile.Bytes = fileInfo.Length;
+            existingFile.FileLastWriteTimeUtc = fileInfo.LastWriteTimeUtc;
             existingFile.KoreaderHash = KoreaderHelper.HashContents(existingFile.FilePath);
 
             // We skip updating DB here with last modified time so that metadata refresh can do it
@@ -1085,6 +1085,17 @@ public class ProcessSeries(
         chapter.Files.Add(file);
 
         return file;
+    }
+
+    /// <summary>
+    /// Same rule as <see cref="FolderChangeCheck"/>, so a folder it flags is not skipped here
+    /// </summary>
+    private bool HasFileChanged(MangaFile file, IFileInfo fileInfo)
+    {
+        if (file.Bytes != fileInfo.Length) return true;
+        if (file.FileLastWriteTimeUtc == null) return fileService.HasFileBeenModifiedSince(file.FilePath, file.LastModified);
+
+        return !FolderChangeCheck.IsSameWriteTime(file.FileLastWriteTimeUtc.Value, fileInfo.LastWriteTimeUtc);
     }
 
     private async Task UpdateChapterFromComicInfo(UpdateChapterComicInfoArgs args)

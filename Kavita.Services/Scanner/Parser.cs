@@ -1139,6 +1139,16 @@ public static partial class Parser
     }
 
     /// <summary>
+    /// Cover images are skipped by the parsers and never become a file of the series, except in Image libraries
+    /// </summary>
+    /// <param name="filename">Filename with extension</param>
+    /// <param name="type">Library type</param>
+    public static bool IsSkippedCoverImage(string filename, LibraryType type)
+    {
+        return type != LibraryType.Image && IsCoverImage(filename);
+    }
+
+    /// <summary>
     /// Validates that a Path doesn't start with certain blacklisted folders, like __MACOSX, @Recently-Snapshot, etc. and that if a full path, the filename
     /// doesn't start with ._, which is a metadata file on MACOSX.
     /// </summary>

@@ -10,6 +10,7 @@ using Kavita.Models.Parser;
 using Kavita.Services.Scanner;
 using Kavita.Services.Tests.Helpers;
 using System.IO.Abstractions;
+using System.IO.Compression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit.Abstractions;
@@ -65,6 +66,178 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         await scanner.ScanLibrary(libraryId);
 
         Assert.Equal(before, await LastFolderScanned(context, libraryId));
+    }
+
+    [Fact]
+    public async Task Scan_StoresEachFilesOwnWriteTime()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Stores Write Time - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+            "Spice and Wolf/Spice and Wolf Vol. 2.cbz",
+        ]);
+        await AssertStoredWriteTimesMatchDisk(context, libraryId);
+
+        var root = await LibraryRoot(context, libraryId);
+        File.SetLastWriteTimeUtc(Path.Join(root, "Spice and Wolf", "Spice and Wolf Vol. 2.cbz"), DateTime.UtcNow.AddMinutes(5));
+        await scanner.ScanLibrary(libraryId);
+
+        await AssertStoredWriteTimesMatchDisk(context, libraryId);
+    }
+
+    private static readonly string[] TwoVolumes =
+    [
+        "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+        "Spice and Wolf/Spice and Wolf Vol. 2.cbz",
+    ];
+
+    [Fact]
+    public async Task CopyOverWithOlderTimeAndOtherSize_IsPickedUp()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Copy Over Older - Manga", TwoVolumes);
+        var before = await LastFolderScanned(context, libraryId);
+
+        var root = await LibraryRoot(context, libraryId);
+        var seriesFolder = Path.Join(root, "Spice and Wolf");
+        var folderTime = Directory.GetLastWriteTimeUtc(seriesFolder);
+        var volume2 = Path.Join(seriesFolder, "Spice and Wolf Vol. 2.cbz");
+        await File.WriteAllBytesAsync(volume2, new byte[1200]);
+        File.SetLastWriteTimeUtc(volume2, DateTime.UtcNow.AddYears(-4));
+        Directory.SetLastWriteTimeUtc(seriesFolder, folderTime);
+
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.NotEqual(before, await LastFolderScanned(context, libraryId));
+    }
+
+    private static readonly Dictionary<string, ComicInfo> TwoVolumeComicInfos = new()
+    {
+        {"Spice and Wolf Vol. 1.cbz", new ComicInfo {Series = "Spice and Wolf", Volume = "1"}},
+        {"Spice and Wolf Vol. 2.cbz", new ComicInfo {Series = "Spice and Wolf", Volume = "2"}},
+    };
+
+    [Fact]
+    public async Task CopyOverWithOlderTimeAndMorePages_IsReReadOnceThenQuiet()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Copy Over Re-Read - Manga", TwoVolumes, TwoVolumeComicInfos);
+
+        var root = await LibraryRoot(context, libraryId);
+        var volume2 = Path.Join(root, "Spice and Wolf", "Spice and Wolf Vol. 2.cbz");
+        await using (var archive = await ZipFile.OpenAsync(volume2, ZipArchiveMode.Update))
+        {
+            using var page = new MemoryStream();
+            await using (var source = archive.Entries.First(e => e.Name.EndsWith(".png")).Open())
+            {
+                await source.CopyToAsync(page);
+            }
+            await using var target = archive.CreateEntry("2.png").Open();
+            await target.WriteAsync(page.ToArray());
+        }
+        File.SetLastWriteTimeUtc(volume2, DateTime.UtcNow.AddYears(-4));
+
+        await scanner.ScanLibrary(libraryId);
+
+        var file = await context.MangaFile.AsNoTracking().SingleAsync(f => f.FilePath == Parser.NormalizePath(volume2));
+        Assert.Equal(2, file.Pages);
+        Assert.Equal(new FileInfo(volume2).Length, file.Bytes);
+        await AssertStoredWriteTimesMatchDisk(context, libraryId);
+
+        var afterReRead = await LastFolderScanned(context, libraryId);
+        await scanner.ScanLibrary(libraryId);
+        Assert.Equal(afterReRead, await LastFolderScanned(context, libraryId));
+    }
+
+    [Fact]
+    public async Task SameFileWithOlderTime_IsReReadOnceThenQuiet()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Older Time Re-Read - Manga", TwoVolumes, TwoVolumeComicInfos);
+
+        var root = await LibraryRoot(context, libraryId);
+        File.SetLastWriteTimeUtc(Path.Join(root, "Spice and Wolf", "Spice and Wolf Vol. 2.cbz"), DateTime.UtcNow.AddYears(-4));
+
+        await scanner.ScanLibrary(libraryId);
+        await AssertStoredWriteTimesMatchDisk(context, libraryId);
+
+        var afterReRead = await LastFolderScanned(context, libraryId);
+        await scanner.ScanLibrary(libraryId);
+        Assert.Equal(afterReRead, await LastFolderScanned(context, libraryId));
+    }
+
+    [Fact]
+    public async Task NewFileWithOldTime_IsPickedUp()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "New File Old Time - Manga", TwoVolumes);
+
+        var root = await LibraryRoot(context, libraryId);
+        var seriesFolder = Path.Join(root, "Spice and Wolf");
+        var folderTime = Directory.GetLastWriteTimeUtc(seriesFolder);
+        await scannerHelper.Scaffold(root, ["Spice and Wolf/Spice and Wolf Vol. 3.cbz"]);
+        File.SetLastWriteTimeUtc(Path.Join(seriesFolder, "Spice and Wolf Vol. 3.cbz"), DateTime.UtcNow.AddYears(-5));
+        Directory.SetLastWriteTimeUtc(seriesFolder, folderTime);
+
+        await scanner.ScanLibrary(libraryId);
+
+        var seriesId = await SeriesId(context, libraryId, "Spice and Wolf");
+        Assert.Equal(3, await SeriesFileCount(context, seriesId));
+    }
+
+    [Fact]
+    public async Task NoStoredWriteTimes_SecondScanProcessesNothingAndFillsThem()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Backfill Write Times - Manga", TwoVolumes);
+        await context.MangaFile
+            .Where(f => f.Chapter.Volume.Series.LibraryId == libraryId)
+            .ExecuteUpdateAsync(s => s.SetProperty(f => f.FileLastWriteTimeUtc, (DateTime?) null));
+        var before = await LastFolderScanned(context, libraryId);
+
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Equal(before, await LastFolderScanned(context, libraryId));
+        await AssertStoredWriteTimesMatchDisk(context, libraryId);
+    }
+
+    [Fact]
+    public async Task NonLibraryFileInFolder_SecondScanProcessesNothing()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Non Library File - Manga", TwoVolumes);
+        var root = await LibraryRoot(context, libraryId);
+        await File.WriteAllTextAsync(Path.Join(root, "Spice and Wolf", "notes.txt"), "not a volume");
+        var before = await LastFolderScanned(context, libraryId);
+
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Equal(before, await LastFolderScanned(context, libraryId));
+    }
+
+    [Fact]
+    public async Task CoverImageInSeriesFolder_SecondScanProcessesNothing()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Cover Image - Manga", [.. TwoVolumes, "Spice and Wolf/cover.jpg"]);
+        var before = await LastFolderScanned(context, libraryId);
+
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Equal(before, await LastFolderScanned(context, libraryId));
+    }
+
+    private static async Task AssertStoredWriteTimesMatchDisk(DataContext context, int libraryId)
+    {
+        var files = await context.MangaFile.AsNoTracking()
+            .Where(f => f.Chapter.Volume.Series.LibraryId == libraryId)
+            .Select(f => new { f.FilePath, f.FileLastWriteTimeUtc })
+            .ToListAsync();
+
+        Assert.Equal(2, files.Count);
+        Assert.All(files, f => Assert.Equal(File.GetLastWriteTimeUtc(f.FilePath), f.FileLastWriteTimeUtc));
     }
 
     private static readonly string[] SpecialsBesideVolumes =

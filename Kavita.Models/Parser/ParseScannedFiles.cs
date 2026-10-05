@@ -98,7 +98,8 @@ public class SeriesModified
     public MangaFormat Format { get; set; }
     public IEnumerable<string> LibraryRoots { get; set; } = ArraySegment<string>.Empty;
     /// <summary>
-    /// Every folder that directly holds a file of the series
+    /// The series' files, keyed by the folder that directly holds them
     /// </summary>
-    public IReadOnlySet<string> FileFolders { get; set; } = new HashSet<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<KnownFile>> FilesByFolder { get; set; } =
+        new Dictionary<string, IReadOnlyList<KnownFile>>();
 }

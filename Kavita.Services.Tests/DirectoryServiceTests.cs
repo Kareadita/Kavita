@@ -1102,6 +1102,93 @@ public class DirectoryServiceTests: AbstractFsTest
 
     #endregion
 
+    #region ScanFiles stamps
+
+    private static MockFileSystem CreateStampLibrary()
+    {
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory("C:/Data/");
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData("12345"));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData("1"));
+        fileSystem.AddFile("C:/Data/Accel World/cover.jpg.txt", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/._Accel World v1.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/@eaDir/Accel World v1.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Extras/Accel World Extra.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v3.pdf", new MockFileData(string.Empty));
+        return fileSystem;
+    }
+
+    [Theory]
+    [InlineData(SearchOption.AllDirectories, new[] {"Accel World SP01.cbz", "Accel World v1.cbz", "Accel World v2.cbz"})]
+    [InlineData(SearchOption.TopDirectoryOnly, new[] {"Accel World v1.cbz", "Accel World v2.cbz"})]
+    public void ScanFiles_SkipsExcludedFoldersAndFiles(SearchOption searchOption, string[] expected)
+    {
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateStampLibrary());
+        var matcher = new GlobMatcher();
+        matcher.AddExclude("Extras/");
+        matcher.AddExclude("*.pdf");
+
+        var actual = ds.ScanFiles("C:/Data/Accel World", Parser.SupportedExtensions, matcher, searchOption)
+            .Select(s => Path.GetFileName(s.Path))
+            .Order();
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public void ScanFiles_ReturnsSizeAndWriteTime()
+    {
+        var fileSystem = CreateStampLibrary();
+        var written = new DateTime(2022, 4, 28, 20, 12, 21, DateTimeKind.Utc);
+        fileSystem.File.SetLastWriteTimeUtc("C:/Data/Accel World/Accel World v1.cbz", written);
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+        var stamp = ds.ScanFiles("C:/Data/Accel World", Parser.SupportedExtensions, null, SearchOption.TopDirectoryOnly)
+            .Single(s => s.Path.EndsWith("v1.cbz"));
+
+        Assert.Equal("C:/Data/Accel World/Accel World v1.cbz", Parser.NormalizePath(stamp.Path));
+        Assert.Equal(5, stamp.Bytes);
+        Assert.Equal(written, stamp.LastWriteTimeUtc);
+    }
+
+    [Fact]
+    public void ScanFiles_MissingFolder_ReturnsEmpty()
+    {
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateStampLibrary());
+
+        Assert.Empty(ds.ScanFiles("C:/Data/Missing", Parser.SupportedExtensions));
+    }
+
+    [Fact]
+    public void ScanFiles_RealDisk_MatchesPerFileCalls()
+    {
+        var root = Path.Join(Path.GetTempPath(), "kavita-stamps-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            Directory.CreateDirectory(Path.Join(root, "Specials"));
+            File.WriteAllBytes(Path.Join(root, "Series v01.cbz"), new byte[1000]);
+            File.WriteAllBytes(Path.Join(root, "Specials", "Series SP01.cbz"), new byte[1200]);
+            File.SetLastWriteTimeUtc(Path.Join(root, "Series v01.cbz"), new DateTime(2020, 12, 8, 23, 23, 21, DateTimeKind.Utc));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new System.IO.Abstractions.FileSystem());
+            var stamps = ds.ScanFiles(root, Parser.SupportedExtensions);
+
+            Assert.Equal(2, stamps.Count);
+            foreach (var stamp in stamps)
+            {
+                Assert.Equal(new FileInfo(stamp.Path).Length, stamp.Bytes);
+                Assert.Equal(File.GetLastWriteTimeUtc(stamp.Path), stamp.LastWriteTimeUtc);
+            }
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    #endregion
+
     #region GetAllDirectories
 
     [Fact]
@@ -1180,22 +1267,6 @@ public class DirectoryServiceTests: AbstractFsTest
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         Assert.Equal(expected, ds.GetParentDirectoryName(path));
-    }
-
-    #endregion
-
-    #region GetLastWriteTime
-
-    [Fact]
-    public void GetLastWriteTime_ShouldReturnMaxTime_IfNoFiles()
-    {
-        const string dir = "C:/manga/";
-        var filesystem = new MockFileSystem();
-        filesystem.AddDirectory("C:/");
-        filesystem.AddDirectory(dir);
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-
-        Assert.Equal(DateTime.MaxValue, ds.GetLastWriteTime(dir));
     }
 
     #endregion

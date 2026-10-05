@@ -9,6 +9,7 @@ using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Parser;
+using Kavita.Services.Builders;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -259,6 +260,7 @@ public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper) : Abstrac
         Assert.Single(map["M:/Accel World"]);
         Assert.Equal(["Higurashi Arc 1", "Higurashi Arc 2"], map["M:/Higurashi"].Select(s => s.SeriesName).Order());
     }
+
 
     [Fact]
     public async Task GetFolderPathMapAsync_IgnoresLowestFolderPathOutsideLibrary()

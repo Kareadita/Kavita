@@ -34,6 +34,12 @@ public partial class ParseScannedFiles
     private readonly IMediaErrorService _mediaErrorService;
 
     /// <summary>
+    /// File id to the write time from the listing, for files in unchanged folders that have none stored yet
+    /// </summary>
+    /// <remarks>v0.9.2 added this, after one full stable, this can be removed as one scan will backfill times</remarks>
+    public Dictionary<int, DateTime> WriteTimesToBackfill { get; } = new();
+
+    /// <summary>
     /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
     /// Each instance is separate from other threads, allowing for no cross over.
     /// </summary>
@@ -122,15 +128,12 @@ public partial class ParseScannedFiles
                     var specialsOwners = specials.Select(s => forceCheck ? [] : SeriesWithFilesIn(seriesPaths, s)).ToList();
                     var allOwners = looseFileOwners.Concat(specialsOwners.SelectMany(o => o)).Distinct().ToList();
 
-                    var writeTimes = specials.Select(s => _directoryService.GetLastWriteTime(s)).ToList();
-                    var looseFilesWritten = _directoryService.GetLastWriteTime(directory, SearchOption.TopDirectoryOnly);
-                    // MaxValue also means no files at this level, which is only a change when some were known here
-                    if (looseFileOwners.Count > 0 || looseFilesWritten != DateTime.MaxValue)
-                    {
-                        writeTimes.Add(looseFilesWritten);
-                    }
+                    var onDisk = ListLibraryFiles(directory, fileExtensions, matcher, library.Type, SearchOption.TopDirectoryOnly)
+                        .Concat(specials.SelectMany(s => ListLibraryFiles(s, fileExtensions, matcher, library.Type)))
+                        .ToList();
 
-                    var unchanged = allOwners.Count > 0 && IsUnchangedSince(allOwners, writeTimes.Max());
+                    var unchanged = allOwners.Count > 0 && FolderChangeCheck.IsUnchanged(onDisk, allOwners,
+                        folder => folder == directory || specials.Exists(folder.IsSameOrInsideFolder), WriteTimesToBackfill);
                     timings.ParentChangeCheck.Stop();
 
                     timings.ParentSurfaceFiles.Start();
@@ -149,7 +152,7 @@ public partial class ParseScannedFiles
                     }
                     else
                     {
-                        ReadSurfaceAndSpecialsFiles(result, directory, specials, folderPath, fileExtensions, matcher);
+                        AddSurfaceAndSpecialsFiles(result, directory, folderPath, onDisk);
                     }
                     timings.ParentSurfaceFiles.Stop();
                     continue;
@@ -173,13 +176,15 @@ public partial class ParseScannedFiles
                         .Distinct()
                         .ToList();
 
-                if (owners.Count > 0 && IsUnchangedSince(owners, _directoryService.GetLastWriteTime(directory)))
+                var onDiskBelow = ListLibraryFiles(directory, fileExtensions, matcher, library.Type);
+                if (owners.Count > 0 && FolderChangeCheck.IsUnchanged(onDiskBelow, owners,
+                        folder => folder.IsSameOrInsideFolder(directory), WriteTimesToBackfill))
                 {
                     HandleUnchangedFolder(result, folderPath, directory, owners, false);
                 }
                 else
                 {
-                    PerformFullScan(result, directory, folderPath, fileExtensions, matcher);
+                    AddChangedFolder(result, directory, folderPath, onDiskBelow);
                 }
 
                 processedDirs.Add(directory);
@@ -212,12 +217,7 @@ public partial class ParseScannedFiles
     {
         if (!isParent)
         {
-            var owners = seriesPaths.Values
-                .SelectMany(s => s)
-                .Distinct()
-                .Where(s => s.FileFolders.Any(f => f.IsSameOrInsideFolder(directory)))
-                .ToList();
-
+            var owners = SeriesWithFilesInside(seriesPaths, directory);
             if (owners.Count > 0)
             {
                 HandleUnchangedFolder(result, folderPath, directory, owners, false);
@@ -250,52 +250,41 @@ public partial class ParseScannedFiles
     private static List<SeriesModified> SeriesWithFilesIn(IDictionary<string, IList<SeriesModified>> seriesPaths, string folder)
     {
         return seriesPaths.TryGetValue(folder, out var seriesList)
-            ? seriesList.Where(s => s.FileFolders.Contains(folder)).ToList()
+            ? seriesList.Where(s => s.FilesByFolder.ContainsKey(folder)).ToList()
             : [];
     }
 
     /// <summary>
-    /// True when every series' last scan started in a later second than the last write.
-    /// Same second counts as changed, the write may have landed after the folder was read
+    /// Files the parsers would turn into series files. Anything else would make the folder look changed on every scan
     /// </summary>
-    private static bool IsUnchangedSince(IEnumerable<SeriesModified> series, DateTime lastWriteTime)
+    private List<FileStamp> ListLibraryFiles(string directory, string fileExtensions, GlobMatcher matcher, LibraryType type,
+        SearchOption searchOption = SearchOption.AllDirectories)
     {
-        var truncatedWriteTime = lastWriteTime.Truncate(TimeSpan.TicksPerSecond);
-        return series.All(s => s.LastScanned.Truncate(TimeSpan.TicksPerSecond) > truncatedWriteTime);
+        return _directoryService.ScanFiles(directory, fileExtensions, matcher, searchOption)
+            .Where(f => !Parser.IsSkippedCoverImage(Path.GetFileName(f.Path), type))
+            .ToList();
     }
 
-    /// <summary>
-    /// Checks against all folder paths on file if the last scanned is in a later second than the directory's last write time.
-    /// Used when a whole series folder is scanned in one go
-    /// </summary>
-    /// <param name="seriesPaths"></param>
+    private static List<SeriesModified> SeriesWithFilesInside(IDictionary<string, IList<SeriesModified>> seriesPaths, string folder)
+    {
+        return seriesPaths.Values
+            .SelectMany(s => s)
+            .Distinct()
+            .Where(s => s.FilesByFolder.Keys.Any(f => f.IsSameOrInsideFolder(folder)))
+            .ToList();
+    }
+
     /// <param name="directory">This should be normalized</param>
-    /// <param name="forceCheck"></param>
-    /// <returns></returns>
-    private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
+    private static bool CanCompareSeriesFolder(IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
     {
         if (forceCheck || !seriesPaths.TryGetValue(directory, out var seriesList))
         {
             return false;
         }
 
-        foreach (var series in seriesList)
-        {
-            // Null stays "changed" (FolderPath alone misses a deleted sibling folder), and a stored M: would walk the whole share
-            if (string.IsNullOrEmpty(series.LowestFolderPath) || !series.LibraryRoots.Any(series.LowestFolderPath.IsInsideFolder))
-            {
-                return false;
-            }
-
-            var lastWriteTime = _directoryService.GetLastWriteTime(series.LowestFolderPath).Truncate(TimeSpan.TicksPerSecond);
-            var seriesLastScanned = series.LastScanned.Truncate(TimeSpan.TicksPerSecond);
-            if (seriesLastScanned <= lastWriteTime)
-            {
-                return false;
-            }
-        }
-
-        return true;
+        // Null stays "changed" (FolderPath alone misses a deleted sibling folder)
+        return seriesList.All(series => !string.IsNullOrEmpty(series.LowestFolderPath) &&
+                                        series.LibraryRoots.Any(series.LowestFolderPath.IsInsideFolder));
     }
 
     /// <summary>
@@ -318,13 +307,10 @@ public partial class ParseScannedFiles
         }
     }
 
-    /// <summary>
-    /// Performs a full scan of the directory and adds it to the result.
-    /// </summary>
-    private void PerformFullScan(List<ScanResult> result, string directory, string folderPath, string fileExtensions, GlobMatcher matcher)
+    private void AddChangedFolder(List<ScanResult> result, string directory, string folderPath, IEnumerable<FileStamp> onDisk)
     {
         _logger.LogDebug("[ProcessFiles] Performing full scan on {Directory}", directory);
-        var files = _directoryService.ScanFiles(directory, fileExtensions, matcher);
+        var files = onDisk.Select(f => f.Path).ToList();
         if (files.Count == 0)
         {
             _logger.LogDebug("[ProcessFiles] Empty directory: {Directory}. Keeping empty will cause Kavita to scan this each time", directory);
@@ -336,12 +322,10 @@ public partial class ParseScannedFiles
     /// Reads the files directly in the directory and everything in the given Specials folders.
     /// They share one result so the files are parsed with the directory as root, else the series would be named "Specials"
     /// </summary>
-    private void ReadSurfaceAndSpecialsFiles(List<ScanResult> result, string directory, IList<string> specials,
-        string folderPath, string fileExtensions, GlobMatcher matcher)
+    private static void AddSurfaceAndSpecialsFiles(List<ScanResult> result, string directory, string folderPath,
+        IEnumerable<FileStamp> onDisk)
     {
-        var files = _directoryService.ScanFiles(directory, fileExtensions, matcher, SearchOption.TopDirectoryOnly)
-            .Concat(specials.SelectMany(s => _directoryService.ScanFiles(s, fileExtensions, matcher)))
-            .ToList();
+        var files = onDisk.Select(f => f.Path).ToList();
         if (files.Count == 0)
         {
             return;
@@ -370,7 +354,15 @@ public partial class ParseScannedFiles
             MessageFactory.FileScanProgressEvent(normalizedPath, library.Id, library.Name, ProgressEventType.Updated,
                 MessageEventCode.ScanListingFolders, 1, 1));
 
-        if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
+        var onDisk = ListLibraryFiles(folderPath, fileExtensions, matcher, library.Type);
+
+        // Every series with files inside, so a folder shared by several series does not see the others' files as new
+        var owners = CanCompareSeriesFolder(seriesPaths, normalizedPath, forceCheck)
+            ? SeriesWithFilesInside(seriesPaths, normalizedPath)
+            : [];
+
+        if (owners.Count > 0 && FolderChangeCheck.IsUnchanged(onDisk, owners,
+                folder => folder.IsSameOrInsideFolder(normalizedPath), WriteTimesToBackfill))
         {
             var unchanged = CreateScanResult(folderPath, libraryRoot, false, ArraySegment<string>.Empty);
             unchanged.UnchangedSeries = seriesPaths[normalizedPath];
@@ -378,8 +370,7 @@ public partial class ParseScannedFiles
         }
         else
         {
-            result.Add(CreateScanResult(folderPath, libraryRoot, true,
-                _directoryService.ScanFiles(folderPath, fileExtensions, matcher)));
+            result.Add(CreateScanResult(folderPath, libraryRoot, true, onDisk.Select(f => f.Path).ToList()));
         }
 
         return result;
@@ -688,7 +679,7 @@ public partial class ParseScannedFiles
         var seriesWithMissingFiles = seriesPaths.Values
             .SelectMany(s => s)
             .Distinct()
-            .Where(s => s.FileFolders.Any(f => roots.Exists(f.IsSameOrInsideFolder) && !IsCovered(f)))
+            .Where(s => s.FilesByFolder.Keys.Any(f => roots.Exists(f.IsSameOrInsideFolder) && !IsCovered(f)))
             .ToHashSet();
 
         if (seriesWithMissingFiles.Count == 0) return;
