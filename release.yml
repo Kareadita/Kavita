@@ -35,6 +35,7 @@ BuildServer:
     Canary: ["linux-x64", "linux-arm64", "linux-arm"]
   RenameFiles:
     - { From: "Kavita.Server", To: "Kavita"}
+    - { From: "Kavita.Server.exe", To: "Kavita.exe" }
   CopyFiles:
     - { From: "INSTALL.txt", To: "README.txt" }
     - { From: "LICENSE", To: "LICENSE.txt" }
@@ -54,7 +55,7 @@ Docker:
 
 NotifyDiscord:
   Message: "<@939225459156217917> <@939225350775406643>  A new nightly build has been released for docker."
-  ReleaseTypes: [Canary]
+  ReleaseTypes: [Nightly]
 
 CreateGitHubRelease:
   Disabled: true
