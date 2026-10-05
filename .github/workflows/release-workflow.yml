@@ -1,9 +1,9 @@
-name: Stable Workflow
+name: Release Workflow
 
 on:
   pull_request:
     types: [closed]
-    branches: ["develop"]
+    branches: ["develop", "canary"]
   workflow_dispatch:
 
 jobs:

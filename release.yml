@@ -4,7 +4,7 @@ CsprojPath: "Kavita.Common/Kavita.Common.csproj"
 
 VersionBump:
   ComponentToBump: Revision
-  ReleaseTypes: [Nightly]
+  ReleaseTypes: [Nightly, Canary]
 
 GenerateOpenApi:
   SwashbuckleVersionSource: "Kavita.Services/Kavita.Services.csproj"
@@ -15,7 +15,6 @@ FlushGitChanges:
   Files:
     - "Kavita.Common/Kavita.Common.csproj"
     - "openapi.json"
-  ReleaseTypes: [Nightly]
 
 BuildFrontend:
   BuildScript: "build"
@@ -33,6 +32,7 @@ BuildServer:
   Rids:
     Stable: ["linux-x64", "linux-arm64", "linux-arm", "linux-musl-x64", "win-x64", "win-x86", "osx-arm64", "osx-x64"]
     Nightly: ["linux-x64", "linux-arm64", "linux-arm"]
+    Canary: ["linux-x64", "linux-arm64", "linux-arm"]
   RenameFiles:
     - { From: "Kavita.Server", To: "Kavita"}
   CopyFiles:
@@ -48,11 +48,13 @@ Docker:
     - "ghcr.io/kareadita/kavita"
     - "jvmilazz0/kavita"
   Tags:
-    Nightly: ["nightly", "nightly-{Version}"]
     Stable: ["latest", "{Version}", "nightly", "nightly-{Version}"]
+    Nightly: ["nightly", "nightly-{Version}"]
+    Canary: ["canary", "canary-{Version}"]
 
 NotifyDiscord:
   Message: "<@939225459156217917> <@939225350775406643>  A new nightly build has been released for docker."
+  ReleaseTypes: [Canary]
 
 CreateGitHubRelease:
   Disabled: true

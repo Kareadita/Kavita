@@ -2,7 +2,7 @@
 
 on:
   workflow_run:
-    workflows: ["Nightly Workflow"]
+    workflows: ["Release Workflow"]
     types: [completed]
     branches: [develop]
   workflow_dispatch:
