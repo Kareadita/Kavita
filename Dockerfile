@@ -1,6 +1,5 @@
 #This Dockerfile creates a build for all architectures
 
-#Image that copies in the files and passes them to the main image
 FROM ubuntu:noble AS copytask
 
 ARG TARGETPLATFORM
@@ -8,19 +7,21 @@ ARG TARGETPLATFORM
 #Move the output files to where they need to be
 RUN mkdir /files
 COPY _output/*.tar.gz /files/
-COPY UI/Web/dist/browser /files/wwwroot
 COPY copy_runtime.sh /copy_runtime.sh
 
 RUN chmod +x /copy_runtime.sh
-RUN /copy_runtime.sh
-RUN chmod +x /Kavita/Kavita
+ARG TARGETPLATFORM
+RUN set -eux; \
+    case "$TARGETPLATFORM" in \
+      "linux/amd64")   RID=linux-x64   ;; \
+      "linux/arm64")   RID=linux-arm64 ;; \
+      "linux/arm/v7")  RID=linux-arm   ;; \
+      *) echo "Unsupported platform: $TARGETPLATFORM" >&2; exit 1 ;; \
+    esac; \
+    tar xzf "/files/kavita-${RID}.tar.gz" -C /
 
 #Production image
 FROM ubuntu:noble
-
-COPY --from=copytask /Kavita /kavita
-COPY --from=copytask /files/wwwroot /kavita/wwwroot
-COPY Kavita.Server/config/appsettings.json /tmp/config/appsettings.json
 
 #Installs program dependencies
 ENV DEBIAN_FRONTEND=noninteractive
@@ -28,6 +29,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
   && apt-get install -y libicu-dev libgdiplus curl tzdata libjemalloc2 \
   && rm -rf /var/lib/apt/lists/*
+
+COPY --from=copytask /Kavita /kavita
+COPY Kavita.Server/config/appsettings.json /tmp/config/appsettings.json
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
