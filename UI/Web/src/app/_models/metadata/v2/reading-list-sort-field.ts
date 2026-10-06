@@ -1,3 +1,5 @@
+import {allEnums} from "../../../_helpers/enum";
+
 export enum ReadingListSortField {
   Title = 1,
   ReleaseYearStart = 2,
@@ -5,6 +7,4 @@ export enum ReadingListSortField {
   ItemCount = 4
 }
 
-export const allReadingListSortFields = Object.keys(ReadingListSortField)
-  .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
-  .map(key => parseInt(key, 10)) as ReadingListSortField[];
+export const allReadingListSortFields = allEnums(ReadingListSortField);

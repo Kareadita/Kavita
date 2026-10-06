@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kavita.Models.Builders;
@@ -93,8 +94,14 @@ public class MediaErrorRepositoryTests(ITestOutputHelper outputHelper) : Abstrac
         context.MediaError.AddRange(rows);
         await context.SaveChangesAsync();
 
+        var filesByFolder = new Dictionary<string, IList<string>>
+        {
+            [Murderbot] = [$"{Murderbot}/All Systems Red.epub", $"{Murderbot}/Fugitive Telemetry.epub", $"{Murderbot}/Not Saved This Scan.epub"],
+            ["B:/Fiction/Shared"] = ["B:/Fiction/Shared/Novella.epub", "B:/Fiction/Shared/Other.epub", "B:/Fiction/Shared/Broken.epub"],
+            ["B:/Fiction/Empty"] = ["B:/Fiction/Empty/Broken.epub"],
+        };
         await unitOfWork.MediaErrorRepository.AssignScannerErrorsToSeriesAsync(books.Id,
-            rows.Select(r => r.FilePath).Where(p => !p.Contains("Not Saved")).ToList());
+            rows.Select(r => r.FilePath).Where(p => !p.Contains("Not Saved")).ToList(), filesByFolder);
         await unitOfWork.CommitAsync();
 
         var seriesByPath = await context.MediaError.AsNoTracking().ToDictionaryAsync(m => m.FilePath, m => m.SeriesId);

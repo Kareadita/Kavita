@@ -1,4 +1,5 @@
 ﻿using System;
+using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.DTOs.MediaErrors;
 
@@ -20,6 +21,13 @@ public sealed record MediaErrorDto
     /// Exception message
     /// </summary>
     public string Details { get; set; }
-
+    public MediaErrorProducer Producer { get; set; }
+    public MediaErrorReason Reason { get; set; }
+    public int? SeriesId { get; set; }
+    public int? LibraryId { get; set; }
+    /// <summary>
+    /// Last time the file failed
+    /// </summary>
+    public DateTime LastSeenUtc { get; set; }
     public DateTime CreatedUtc { get; set; }
 }

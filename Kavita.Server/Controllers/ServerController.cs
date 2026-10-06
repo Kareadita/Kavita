@@ -104,6 +104,7 @@ public class ServerController(
     /// </summary>
     /// <returns></returns>
     [HttpPost("analyze-files")]
+    [Obsolete("This will be removed in v0.9.3 - Only needed to be ran once when upgrading to v0.7.0")]
     public async Task<ActionResult> AnalyzeFiles()
     {
         logger.LogInformation("{UserName} is performing file analysis from admin dashboard", Username!);

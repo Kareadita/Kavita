@@ -62,7 +62,6 @@ public class ScannerService(
     IReadingItemService readingItemService,
     IServiceScopeFactory scopeFactory,
     IWordCountAnalyzerService wordCountAnalyzerService,
-    IMediaErrorService mediaErrorService,
     IMapper mapper)
     : IScannerService
 {
@@ -766,11 +765,11 @@ public class ScannerService(
         await foreach (var seriesId in channel.Reader.ReadAllAsync())
         {
             using var scope = scopeFactory.CreateScope();
-            var metadataService = scope.ServiceProvider.GetRequiredService<IMetadataService>();
-            var wordCountAnalyzerService = scope.ServiceProvider.GetRequiredService<IWordCountAnalyzerService>();
+            var metadataServiceScoped = scope.ServiceProvider.GetRequiredService<IMetadataService>();
+            var wordCountAnalyzerServiceScoped = scope.ServiceProvider.GetRequiredService<IWordCountAnalyzerService>();
 
-            await metadataService.GenerateCoversForSeries(serverSettings, libraryId, seriesId, false, false);
-            await wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate);
+            await metadataServiceScoped.GenerateCoversForSeries(serverSettings, libraryId, seriesId, false, false);
+            await wordCountAnalyzerServiceScoped.ScanSeries(libraryId, seriesId, forceUpdate);
         }
 
         return sw.ElapsedMilliseconds;
@@ -860,14 +859,17 @@ public class ScannerService(
     private async Task<(long ElapsedMs, Dictionary<ParsedSeries, IList<ParserInfo>> ParsedSeries, SavedScanIssues SavedIssues)> ScanFiles(
         Library library, IList<string> dirs, bool isLibraryScan, bool forceChecks = false, int? seriesId = null)
     {
-        var scanner = new ParseScannedFiles(logger, directoryService, readingItemService, eventHub, mediaErrorService);
+        var scanner = new ParseScannedFiles(logger, directoryService, readingItemService, eventHub);
         var scanWatch = Stopwatch.StartNew();
 
         var processedSeries = await scanner.ScanLibrariesForSeries(library, dirs,
             isLibraryScan, await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id), forceChecks,
             await unitOfWork.MediaErrorRepository.GetFailedFilesAsync(library.Id));
+
         await unitOfWork.MangaFileRepository.SetFileLastWriteTimesAsync(scanner.WriteTimesToBackfill);
+
         var savedIssues = await SaveScanIssuesAsync(library, scanner, seriesId);
+        await RemoveChangedProducerErrorsAsync(library, scanner);
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 
@@ -930,18 +932,45 @@ public class ScannerService(
             await unitOfWork.CommitAsync();
         }
 
-        return new SavedScanIssues(newCount, issues.Select(i => i.Path).ToList());
+        return new SavedScanIssues(newCount, issues.Select(i => i.Path).ToList(), scanner.FilesInIssueFolders);
+    }
+
+    /// <summary>
+    /// Removes the reader, cover and word count rows of files this scan listed with a new size or write time, or no longer listed
+    /// </summary>
+    private async Task RemoveChangedProducerErrorsAsync(Library library, ParseScannedFiles scanner)
+    {
+        if (scanner.ReadFolders.Count == 0) return;
+
+        var rows = await unitOfWork.MediaErrorRepository.GetProducerErrorsAsync(library.Id);
+        var changed = rows.Where(r => IsChangedOrGone(r, scanner)).ToList();
+        if (changed.Count == 0) return;
+
+        unitOfWork.MediaErrorRepository.Remove(changed);
+        await unitOfWork.CommitAsync();
+    }
+
+    private static bool IsChangedOrGone(MediaError row, ParseScannedFiles scanner)
+    {
+        if (scanner.ReadFiles.TryGetValue(row.FilePath, out var stamp))
+        {
+            return row.Bytes != stamp.Bytes || row.FileLastWriteTimeUtc is not { } writeTime ||
+                   !FolderChangeCheck.IsSameWriteTime(writeTime, stamp.LastWriteTimeUtc);
+        }
+
+        return scanner.ReadFolders.Contains(row.FilePath.FolderOf());
     }
 
     /// <param name="NewCount">Files that could not be read with a new issue: first seen, or a new reason or stamp</param>
-    private sealed record SavedScanIssues(int NewCount, IList<string> Paths);
+    /// <param name="FilesByFolder">Every file listed directly in each folder with an issue</param>
+    private sealed record SavedScanIssues(int NewCount, IList<string> Paths, IReadOnlyDictionary<string, IList<string>> FilesByFolder);
 
     /// <summary>
     /// Runs once the series are saved, so a row next to a series created this scan gets that series
     /// </summary>
     private async Task<ScanIssueSummaryDto> ReportScanIssuesAsync(Library library, SavedScanIssues savedIssues)
     {
-        await unitOfWork.MediaErrorRepository.AssignScannerErrorsToSeriesAsync(library.Id, savedIssues.Paths);
+        await unitOfWork.MediaErrorRepository.AssignScannerErrorsToSeriesAsync(library.Id, savedIssues.Paths, savedIssues.FilesByFolder);
         await unitOfWork.CommitAsync();
 
         var summary = new ScanIssueSummaryDto(

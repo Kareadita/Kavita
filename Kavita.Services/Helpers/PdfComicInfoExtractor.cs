@@ -21,7 +21,7 @@ namespace Kavita.Services.Helpers;
 /// <summary>
 /// Translate PDF metadata (See PdfMetadataExtractor.cs) into ComicInfo structure.
 /// </summary>
-public class PdfComicInfoExtractor(ILogger<IBookService> logger, IMediaErrorService mediaErrorService)
+public class PdfComicInfoExtractor(ILogger<IBookService> logger)
 {
     private readonly string[] _pdfDateFormats = [ // PDF Spec 7.9.4
             "D:yyyyMMddHHmmsszzz:", "D:yyyyMMddHHmmss+", "D:yyyyMMddHHmmss",

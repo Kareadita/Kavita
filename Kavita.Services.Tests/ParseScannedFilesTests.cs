@@ -204,8 +204,7 @@ public class ParseScannedFilesTests: AbstractDbTest
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
 
         var library =
@@ -254,8 +253,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var fileSystem = CreateTestFilesystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
         var directoriesSeen = new HashSet<string>();
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
@@ -278,8 +276,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var fileSystem = CreateTestFilesystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes);
@@ -317,8 +314,7 @@ public class ParseScannedFilesTests: AbstractDbTest
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes);
@@ -350,8 +346,7 @@ public class ParseScannedFilesTests: AbstractDbTest
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes);
@@ -384,8 +379,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var fs = new FileSystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
         var scanner = scannerHelper.CreateServices(ds, fs);
         await scanner.ScanLibrary(library.Id);
@@ -438,8 +432,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var fs = new FileSystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
         var scanner = scannerHelper.CreateServices(ds, fs);
         await scanner.ScanLibrary(library.Id);
@@ -483,8 +476,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var fs = new FileSystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
         var scanner = scannerHelper.CreateServices(ds, fs);
         await scanner.ScanLibrary(library.Id);
@@ -524,8 +516,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var fs = new FileSystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
         var scanner = scannerHelper.CreateServices(ds, fs);
         await scanner.ScanLibrary(library.Id);
@@ -564,8 +555,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var fs = new FileSystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
         var scanner = scannerHelper.CreateServices(ds, fs);
         await scanner.ScanLibrary(library.Id);
@@ -610,8 +600,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var fs = new FileSystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            new MockReadingItemService(ds, Substitute.For<IBookService>()), Substitute.For<IEventHub>());
 
         var scanner = scannerHelper.CreateServices(ds, fs);
         await scanner.ScanLibrary(library.Id);
@@ -645,7 +634,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var ds = Substitute.For<IDirectoryService>();
         ds.ScanFiles(default!, default!).ReturnsForAnyArgs([]);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>(), Substitute.For<IMediaErrorService>());
+            Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>());
 
         var library = new LibraryBuilder("Manga").WithFolderPath(new FolderPathBuilder("M:/").Build()).Build();
         var seriesPaths = new Dictionary<string, IList<SeriesModified>>
@@ -699,8 +688,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries = [];
 
         var psd = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), Substitute.For<IDirectoryService>(),
-            Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>());
 
         psd.TrackSeriesAcrossScanResults(scanResults, scannedSeries);
 
@@ -731,8 +719,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries = [];
 
         var psd = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), Substitute.For<IDirectoryService>(),
-            Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>(),
-            Substitute.For<IMediaErrorService>());
+            Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>());
 
         psd.TrackSeriesAcrossScanResults(scanResults, scannedSeries);
 
@@ -811,7 +798,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var readingItemService = new ConcurrencyTrackingReadingItemService(ds, Substitute.For<IBookService>());
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            readingItemService, Substitute.For<IEventHub>(), Substitute.For<IMediaErrorService>());
+            readingItemService, Substitute.For<IEventHub>());
 
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes);
@@ -845,7 +832,7 @@ public class ParseScannedFilesTests: AbstractDbTest
     private static ParseScannedFiles FailedFileScanner(IDirectoryService ds, IReadingItemService? reader = null)
     {
         return new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            reader ?? Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>(), Substitute.For<IMediaErrorService>());
+            reader ?? Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>());
     }
 
     private static IDirectoryService ListingOf(params FileStamp[] files)

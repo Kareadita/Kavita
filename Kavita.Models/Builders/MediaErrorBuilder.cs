@@ -13,6 +13,7 @@ public class MediaErrorBuilder(string filePath): IEntityBuilder<MediaError>
         FilePath = filePath.NormalizePath(),
         Extension = Path.GetExtension(filePath).Replace(".", string.Empty).ToUpperInvariant(),
         LastSeenUtc = DateTime.UtcNow,
+        Comment = string.Empty,
     };
 
     public MediaError Build() => _mediaError;
@@ -26,6 +27,12 @@ public class MediaErrorBuilder(string filePath): IEntityBuilder<MediaError>
     public MediaErrorBuilder WithProducer(MediaErrorProducer producer)
     {
         _mediaError.Producer = producer;
+        return this;
+    }
+
+    public MediaErrorBuilder WithReason(MediaErrorReason reason)
+    {
+        _mediaError.Reason = reason;
         return this;
     }
 

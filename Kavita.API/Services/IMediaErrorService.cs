@@ -7,8 +7,8 @@ namespace Kavita.API.Services;
 
 public interface IMediaErrorService
 {
-    void ReportMediaIssue(string filename, MediaErrorProducer producer, string errorMessage, string details);
-    void ReportMediaIssue(string filename, MediaErrorProducer producer, string errorMessage, Exception ex);
-    Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, string details, CancellationToken ct = default);
-    Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, Exception ex, CancellationToken ct = default);
+    void ReportMediaIssue(string filePath, MediaErrorProducer producer, MediaErrorReason reason, string details);
+    void ReportMediaIssue(string filePath, MediaErrorProducer producer, MediaErrorReason reason, Exception ex);
+    Task ReportMediaIssueAsync(string filePath, MediaErrorProducer producer, MediaErrorReason reason, string details, CancellationToken ct = default);
+    Task ReportMediaIssueAsync(string filePath, MediaErrorProducer producer, MediaErrorReason reason, Exception ex, CancellationToken ct = default);
 }

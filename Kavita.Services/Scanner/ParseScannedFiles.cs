@@ -31,7 +31,6 @@ public partial class ParseScannedFiles
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly IEventHub _eventHub;
-    private readonly IMediaErrorService _mediaErrorService;
 
     /// <summary>
     /// File id to the write time from the listing, for files in unchanged folders that have none stored yet
@@ -40,7 +39,10 @@ public partial class ParseScannedFiles
     public Dictionary<int, DateTime> WriteTimesToBackfill { get; } = new();
 
     private readonly Dictionary<string, ScanIssue> _issues = new();
+    private readonly Dictionary<string, IList<string>> _filesInIssueFolders = new();
     private readonly HashSet<string> _failedFilesInReadFolders = [];
+    private readonly Dictionary<string, FileStamp> _readFiles = new();
+    private readonly HashSet<string> _readFolders = [];
 
     /// <summary>
     /// Issues with files that were read this scan, at most one per path
@@ -48,9 +50,24 @@ public partial class ParseScannedFiles
     public IReadOnlyCollection<ScanIssue> Issues => _issues.Values;
 
     /// <summary>
+    /// For each folder with an issue, the normalized paths of every file listed directly in it
+    /// </summary>
+    public IReadOnlyDictionary<string, IList<string>> FilesInIssueFolders => _filesInIssueFolders;
+
+    /// <summary>
     /// Earlier failures in folders that were read this scan, whose file is gone or has no issue anymore
     /// </summary>
     public IEnumerable<string> ResolvedFailedFiles => _failedFilesInReadFolders.Where(path => !_issues.ContainsKey(path));
+
+    /// <summary>
+    /// Every file listed in a folder that was read this scan, by normalized path
+    /// </summary>
+    public IReadOnlyDictionary<string, FileStamp> ReadFiles => _readFiles;
+
+    /// <summary>
+    /// Folders whose listing was read this scan. A file in one of these and not in <see cref="ReadFiles"/> is gone
+    /// </summary>
+    public IReadOnlySet<string> ReadFolders => _readFolders;
 
     /// <summary>
     /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
@@ -60,15 +77,13 @@ public partial class ParseScannedFiles
     /// <param name="directoryService">Directory Service</param>
     /// <param name="readingItemService">ReadingItemService Service for extracting information on a number of formats</param>
     /// <param name="eventHub">For firing off SignalR events</param>
-    /// <param name="mediaErrorService"></param>
     public ParseScannedFiles(ILogger logger, IDirectoryService directoryService,
-        IReadingItemService readingItemService, IEventHub eventHub, IMediaErrorService mediaErrorService)
+        IReadingItemService readingItemService, IEventHub eventHub)
     {
         _logger = logger;
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _eventHub = eventHub;
-        _mediaErrorService = mediaErrorService;
     }
 
     /// <summary>
@@ -680,6 +695,8 @@ public partial class ParseScannedFiles
         var scanResults = await ScanFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck, failedFiles);
         var walkResults = scanResults;
 
+        AddReadFiles(walkResults);
+
         // Aggregate the scanned series across all scanResults
         var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
 
@@ -708,6 +725,20 @@ public partial class ParseScannedFiles
         return walkResults;
     }
 
+    private void AddReadFiles(IList<ScanResult> walkResults)
+    {
+        foreach (var result in walkResults.Where(r => r.HasChanged))
+        {
+            _readFolders.Add(Parser.NormalizePath(result.Folder));
+            foreach (var stamp in result.Files)
+            {
+                var path = Parser.NormalizePath(stamp.Path);
+                _readFiles.TryAdd(path, stamp);
+                _readFolders.Add(path.FolderOf());
+            }
+        }
+    }
+
     /// <summary>
     /// Records the files <see cref="TrackSeries"/> turned away, with the stamp from the listing that read them.
     /// This replaces a metadata issue recorded for the same file while parsing
@@ -725,14 +756,19 @@ public partial class ParseScannedFiles
         foreach (var (info, issue) in rejected)
         {
             if (!stamps.TryGetValue(info.FullFilePath, out var stamp)) continue;
-            AddIssue(stamp, issue);
+            AddIssue(stamp, issue, stamps.Values);
         }
     }
 
-    private void AddIssue(FileStamp stamp, ParseIssue issue)
+    /// <param name="listing">Files listed with the one that has the issue</param>
+    private void AddIssue(FileStamp stamp, ParseIssue issue, IEnumerable<FileStamp> listing)
     {
         var scanIssue = ScanIssue.From(stamp, issue);
         _issues[scanIssue.Path] = scanIssue;
+
+        var folder = scanIssue.Path.FolderOf();
+        if (_filesInIssueFolders.ContainsKey(folder)) return;
+        _filesInIssueFolders[folder] = listing.Select(f => Parser.NormalizePath(f.Path)).Where(p => p.FolderOf() == folder).ToList();
     }
 
     /// <summary>
@@ -1053,7 +1089,7 @@ public partial class ParseScannedFiles
         for (var i = 0; i < fileCount; i++)
         {
             if (parsed[i].Info != null) infos.Add(parsed[i].Info!);
-            if (parsed[i].Issue != null) AddIssue(files[i], parsed[i].Issue!);
+            if (parsed[i].Issue != null) AddIssue(files[i], parsed[i].Issue!, files);
         }
 
         result.ParserInfos = infos;

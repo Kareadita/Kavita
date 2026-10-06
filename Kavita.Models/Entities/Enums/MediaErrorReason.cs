@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace Kavita.Models.Entities.Enums;
@@ -12,11 +13,9 @@ public enum MediaErrorReason
     NoSeriesName = 2,
     [Description("Unreadable Archive")]
     UnreadableArchive = 3,
-    [Description("Unsupported Format")]
-    UnsupportedFormat = 4,
     [Description("Corrupt Epub")]
     CorruptEpub = 5,
-    [Description("No Paged")]
+    [Description("No Pages")]
     NoPages = 6,
     [Description("Cover Failed")]
     CoverFailed = 7,
@@ -35,5 +34,5 @@ public static class MediaErrorReasons
     /// <summary>
     /// The scanner still imported a file with one of these, so it is not a file that "could not be read"
     /// </summary>
-    public static readonly MediaErrorReason[] Imported = [MediaErrorReason.MetadataUnreadable, MediaErrorReason.EpubNotStrict];
+    public static readonly HashSet<MediaErrorReason> Imported = [MediaErrorReason.MetadataUnreadable, MediaErrorReason.EpubNotStrict];
 }

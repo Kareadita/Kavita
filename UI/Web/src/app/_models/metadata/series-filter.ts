@@ -1,5 +1,6 @@
 import {MangaFormat} from "../manga-format";
 import {FilterV2} from "./v2/filter-v2";
+import {allEnums} from "../../_helpers/enum";
 
 export interface FilterItem<T> {
     title: string;
@@ -28,9 +29,7 @@ export enum SeriesSortField {
   UnreadChapterCount = 11,
 }
 
-export const allSeriesSortFields = Object.keys(SeriesSortField)
-    .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
-    .map(key => parseInt(key, 10)) as SeriesSortField[];
+export const allSeriesSortFields = allEnums(SeriesSortField);
 
 export const mangaFormatFilters = [
     {

@@ -53,7 +53,7 @@ public partial class BookService(
     private const string BookApiUrl = "book-resources?apiKey={0}&file=";
     public const string BookReaderBodyScope = "//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]";
 
-    private readonly PdfComicInfoExtractor _pdfComicInfoExtractor = new(logger, mediaErrorService);
+    private readonly PdfComicInfoExtractor _pdfComicInfoExtractor = new(logger);
 
     /// <summary>
     /// Setup the most lenient book parsing options possible as people have some really bad epubs
@@ -536,7 +536,7 @@ public partial class BookService(
                 {
                     logger.LogError(ex, "There was an error reading css file for inlining likely due to a key mismatch in metadata");
                     await mediaErrorService.ReportMediaIssueAsync(book.FilePath ?? string.Empty, MediaErrorProducer.BookService,
-                        "There was an error reading css file for inlining likely due to a key mismatch in metadata", ex, ct);
+                        MediaErrorReason.CorruptEpub, ex, ct);
                 }
             }
         }
@@ -956,8 +956,7 @@ public partial class BookService(
         catch (Exception ex)
         {
             logger.LogWarning(ex, "[BookService] There was an exception getting number of pages, defaulting to 0");
-            mediaErrorService.ReportMediaIssue(filePath, MediaErrorProducer.BookService,
-                "There was an exception getting number of pages, defaulting to 0", ex);
+            mediaErrorService.ReportMediaIssue(filePath, MediaErrorProducer.BookService, MediaErrorReason.NoPages, ex);
         }
 
         return 0;
@@ -1858,7 +1857,7 @@ public partial class BookService(
         {
             logger.LogError(ex, "There was an issue reading one of the pages for {Book}", book.FilePath);
             await mediaErrorService.ReportMediaIssueAsync(book.FilePath ?? string.Empty, MediaErrorProducer.BookService,
-                "There was an issue reading one of the pages for", ex, ct);
+                MediaErrorReason.CorruptEpub, ex, ct);
         }
 
         throw new KavitaException("epub-html-missing");
@@ -1899,8 +1898,7 @@ public partial class BookService(
         catch (Exception ex)
         {
             logger.LogWarning(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
-            mediaErrorService.ReportMediaIssue(fileFilePath, MediaErrorProducer.BookService,
-                "There was a critical error and prevented thumbnail generation", ex);
+            mediaErrorService.ReportMediaIssue(fileFilePath, MediaErrorProducer.BookService, MediaErrorReason.CoverFailed, ex);
         }
 
         return string.Empty;
@@ -1947,8 +1945,7 @@ public partial class BookService(
             logger.LogWarning(ex,
                 "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image",
                 fileFilePath);
-            mediaErrorService.ReportMediaIssue(fileFilePath, MediaErrorProducer.BookService,
-                "There was a critical error and prevented thumbnail generation", ex);
+            mediaErrorService.ReportMediaIssue(fileFilePath, MediaErrorProducer.BookService, MediaErrorReason.CoverFailed, ex);
         }
 
         return string.Empty;

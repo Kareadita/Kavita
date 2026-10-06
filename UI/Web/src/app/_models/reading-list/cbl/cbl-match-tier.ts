@@ -1,3 +1,5 @@
+import {allEnums} from "../../../_helpers/enum";
+
 export enum CblMatchTier {
   RemapRule = 0,
   ExternalId = 1,
@@ -10,6 +12,4 @@ export enum CblMatchTier {
   Unmatched = -1
 }
 
-export const allCblMatchTiers = Object.keys(CblMatchTier)
-  .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
-  .map(key => parseInt(key, 10)) as CblMatchTier[];
+export const allCblMatchTiers = allEnums(CblMatchTier);

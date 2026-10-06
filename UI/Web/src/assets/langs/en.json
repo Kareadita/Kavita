@@ -2295,7 +2295,8 @@
         "file-header": "File",
         "comment-header": "Comment",
         "created-header": "Created",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "reason-label": "Reason"
     },
 
     "manage-email-settings": {
@@ -4849,6 +4850,26 @@
         "excluded-libraries-tooltip": "Libraries to skip",
         "queued-title": "Queued re run",
         "queued-description": "Processing will kick of shortly, please be patient."
+    },
+
+    "media-error-producer-pipe": {
+        "book-service": "Book Service",
+        "archive-service": "Archive Service",
+        "scanner": "Scanner"
+    },
+
+    "media-error-reason-pipe": {
+        "unknown": "Unknown error occurred",
+        "parse-failed": "",
+        "no-series-name": "No series name could be determined",
+        "unreadable-archive": "Archive could not be opened",
+        "corrupt-epub": "Epub has metadata (opf) issues",
+        "no-pages": "No pages could be parsed",
+        "cover-failed": "Failed to parse cover image",
+        "word-count-failed": "Failed to count words",
+        "io-error": "I/O Error",
+        "metadata-unreadable": "Could not parse embedded metadata",
+        "epub-not-strict": ""
     },
 
     "validation": {

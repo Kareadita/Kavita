@@ -4,6 +4,7 @@ using Kavita.API.Services;
 using Kavita.Common.Extensions;
 using Kavita.Database;
 using Kavita.Database.Tests;
+using Kavita.Models.Builders;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
@@ -889,6 +890,41 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
 
         var row = await context.MediaError.AsNoTracking().SingleAsync();
         Assert.Equal(seriesId, row.SeriesId);
+    }
+
+    [Fact]
+    public async Task ProducerRows_InAReadFolder_GoWhenTheFileChangedOrIsGone()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, _, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Producer Rows - Manga",
+            OneBrokenVolume, []);
+        var seriesFolder = Parser.NormalizePath(Path.Join(root, "Spice and Wolf"));
+
+        MediaError ProducerRow(string path, long bytes, DateTime writeTime)
+        {
+            var row = new MediaErrorBuilder(path).WithProducer(MediaErrorProducer.ArchiveService)
+                .WithReason(MediaErrorReason.CoverFailed).WithDetails("details").Build();
+            row.LibraryId = libraryId;
+            row.Bytes = bytes;
+            row.FileLastWriteTimeUtc = writeTime;
+            return row;
+        }
+
+        var unchanged = $"{seriesFolder}/Spice and Wolf Vol. 1.cbz";
+        var changed = $"{seriesFolder}/{BrokenVolume}";
+        var gone = $"{seriesFolder}/Spice and Wolf Vol. 3.cbz";
+        var notRead = Parser.NormalizePath(Path.Join(root, "Not Read", "Other.cbz"));
+        context.MediaError.AddRange(
+            ProducerRow(unchanged, new FileInfo(unchanged).Length, File.GetLastWriteTimeUtc(unchanged)),
+            ProducerRow(changed, new FileInfo(changed).Length + 1, File.GetLastWriteTimeUtc(changed)),
+            ProducerRow(gone, 100, DateTime.UtcNow),
+            ProducerRow(notRead, 100, DateTime.UtcNow));
+        await context.SaveChangesAsync();
+
+        await scanner.ScanLibrary(libraryId, true);
+
+        var paths = await context.MediaError.AsNoTracking().Select(m => m.FilePath).ToListAsync();
+        Assert.Equal([notRead, unchanged], paths.Order());
     }
 
     private sealed class FailNamedFiles(IReadingItemService inner, ISet<string> failing) : IReadingItemService

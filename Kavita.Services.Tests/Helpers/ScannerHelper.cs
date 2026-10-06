@@ -117,8 +117,7 @@ public class ScannerHelper
         var archiveService = new ArchiveService(Substitute.For<ILogger<ArchiveService>>(), ds,
             Substitute.For<IImageService>(), Substitute.For<IMediaErrorService>());
         var readingItemService = new ReadingItemService(archiveService, Substitute.For<IBookService>(),
-            Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>(),
-            Substitute.For<IMediaErrorService>());
+            Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>());
 
 
 
@@ -145,7 +144,7 @@ public class ScannerHelper
             Substitute.For<IMetadataService>(),
             Substitute.For<ICacheService>(), Substitute.For<IEventHub>(), ds,
             wrapScanReader?.Invoke(readingItemService) ?? readingItemService, scopeFactory, Substitute.For<IWordCountAnalyzerService>(),
-            Substitute.For<IMediaErrorService>(), CreateMapper());
+            CreateMapper());
         return scanner;
     }
 

@@ -1,16 +1,24 @@
 <ng-container *transloco="let t; prefix: 'manage-media-issues'">
   <p>{{t('description-part-1')}} <a rel="noopener noreferrer" target="_blank" [href]="WikiLink.MediaIssues">{{t('description-part-2')}}</a></p>
 
+  <!--Filter input + dropdowns (library, last scene date picker (from stats), reason)-->
   <div class="row g-0 justify-content-between align-items-end mb-3">
     <div class="col">
       <app-filter-field [(query)]="filterQuery" [label]="t('filter-label')" />
     </div>
     <div class="col-auto ms-2">
-      <button class="btn btn-primary" type="button" (click)="clear()">{{t('clear-alerts')}}</button>
+
+      <label for="reason-code" class="visually-hidden">{{t('reason-label')}}</label>
+      <app-setting-select [inputId]="'reason-code'" [options]="allMediaErrorReasons" [formField]="formGroup.reason">
+        <ng-template #template let-p>
+          {{ p | mediaErrorReason }}
+        </ng-template>
+      </app-setting-select>
+
     </div>
   </div>
 
-  @let filteredRows = filteredData();
+  @let filteredRows = filteredData2();
   <app-responsive-table [rows]="filteredRows" [trackByFn]="trackBy">
     <ng-template #tableTemplate>
       <ngx-datatable

@@ -1,3 +1,5 @@
+import {allEnums} from "../../../_helpers/enum";
+
 export enum PersonFilterField {
   Role = 1,
   Name = 2,
@@ -7,7 +9,5 @@ export enum PersonFilterField {
 }
 
 
-export const allPersonFilterFields = Object.keys(PersonFilterField)
-  .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
-  .map(key => parseInt(key, 10)) as PersonFilterField[];
+export const allPersonFilterFields = allEnums(PersonFilterField);
 

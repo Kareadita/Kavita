@@ -259,7 +259,7 @@ public class WordCountAnalyzerService(
         {
             logger.LogError(ex, "Error when counting words in epub {EpubPath}", filePath);
             await mediaErrorService.ReportMediaIssueAsync(filePath, MediaErrorProducer.BookService,
-                $"Invalid Epub Metadata, {bookFile.FilePath} does not exist", ex.Message);
+                MediaErrorReason.WordCountFailed, $"{bookFile.FilePath}: {ParseIssues.Describe(ex)}");
             return 0;
         }
     }
