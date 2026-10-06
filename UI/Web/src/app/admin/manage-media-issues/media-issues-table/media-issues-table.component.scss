@@ -1,0 +1,5 @@
+.details {
+  border-left: 1px solid var(--error-color);
+  background-color: color-mix(in srgb, var(--error-color) 8%, transparent);
+  white-space: pre-wrap;
+}

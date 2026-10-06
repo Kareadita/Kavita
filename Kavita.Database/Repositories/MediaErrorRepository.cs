@@ -36,14 +36,6 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
             .ToListAsync(ct);
     }
 
-    public Task<bool> ExistsAsync(MediaError error, CancellationToken ct = default)
-    {
-        return context.MediaError.AnyAsync(m => m.FilePath.Equals(error.FilePath)
-                                                 && m.Comment.Equals(error.Comment)
-                                                 && m.Details.Equals(error.Details), ct
-        );
-    }
-
     public async Task DeleteAll(CancellationToken ct = default)
     {
         await context.MediaError.ExecuteDeleteAsync(ct);
@@ -161,6 +153,13 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
             .ProjectTo<ScanIssueSummaryItemDto>(mapper.ConfigurationProvider)
             .AsNoTracking()
             .ToListAsync(ct);
+    }
+
+    public async Task SetDimissStateAsync(List<int> errorIds, bool dismissState, CancellationToken ct = default)
+    {
+        await context.MediaError
+            .Where(m => errorIds.Contains(m.Id))
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsDismissed, dismissState), cancellationToken: ct);
     }
 
     private IQueryable<MediaError> GetUnreadableFiles(int libraryId)

@@ -1,0 +1,166 @@
+<ng-container *transloco="let t; prefix: 'media-issues-table'">
+  @let selected = selectedIds();
+  @let isDismissed = dismissed();
+  @let prefix = idPrefix();
+
+  <div class="d-flex justify-content-end mb-2">
+    <button class="btn btn-sm btn-outline-primary" [disabled]="selected.length === 0" (click)="apply(selected)">
+      @if (isDismissed) {
+        <i class="fa-solid fa-rotate-left me-1" aria-hidden="true"></i>{{t('restore-selected', {count: selected.length})}}
+      } @else {
+        <i class="fa-solid fa-eye-slash me-1" aria-hidden="true"></i>{{t('dismiss-selected', {count: selected.length})}}
+      }
+    </button>
+  </div>
+
+  <ng-template #selectAllCheckbox let-id>
+    <div class="form-check">
+      <input [id]="id" type="checkbox" class="form-check-input"
+             [checked]="rows().length > 0 && tracker.allSelected()" [indeterminate]="tracker.hasSomeSelected()"
+             (change)="toggleAll()">
+      <label [for]="id" class="form-check-label visually-hidden">{{t('select-all-alt')}}</label>
+    </div>
+  </ng-template>
+
+  <ng-template #rowCheckbox let-item>
+    <div class="form-check">
+      <input [id]="prefix + '-select-' + item.id" type="checkbox" class="form-check-input"
+             [checked]="tracker.isSelected(item)" (change)="tracker.toggle(item)">
+      <label [for]="prefix + '-select-' + item.id" class="form-check-label visually-hidden">
+        {{t('select-alt', {file: fileName(item.filePath)})}}
+      </label>
+    </div>
+  </ng-template>
+
+  <ng-template #fileCell let-item>
+    <div class="text-break fw-semibold">{{fileName(item.filePath)}}</div>
+    <div class="text-break small text-muted">{{folder(item.filePath)}}</div>
+    @if (item.details) {
+      @let expanded = expandedIds().has(item.id);
+      <button class="btn btn-link btn-sm p-0" type="button" (click)="toggleDetails(item.id)"
+              [attr.aria-expanded]="expanded" [attr.aria-controls]="prefix + '-details-' + item.id">
+        {{expanded ? t('hide-details') : t('show-details')}}
+      </button>
+      @if (expanded) {
+        <div [id]="prefix + '-details-' + item.id" class="details small mt-1 p-2">
+          <div class="text-break">{{item.details}}</div>
+          <div class="text-muted mt-1">{{t('first-seen-label', {date: item.createdUtc | utcToLocalTime | defaultDate})}}</div>
+        </div>
+      }
+    }
+  </ng-template>
+
+  <ng-template #seriesCell let-item>
+    @if (item.seriesId && item.libraryId) {
+      <a [routerLink]="['/library', item.libraryId, 'series', item.seriesId]">{{item.seriesName}}</a>
+    } @else {
+      <span class="text-muted">{{t('no-series')}}</span>
+    }
+    @if (item.libraryName) {
+      <div class="small text-muted">{{item.libraryName}}</div>
+    }
+  </ng-template>
+
+  <ng-template #reasonCell let-item>
+    <div>{{item.reason | mediaErrorReason}}</div>
+    <div class="small text-muted">{{item.producer | mediaErrorProducer}}</div>
+  </ng-template>
+
+  <ng-template #actionButton let-item>
+    <button class="btn btn-sm btn-outline-secondary" type="button" (click)="apply([item.id])">
+      {{isDismissed ? t('restore') : t('dismiss')}}
+    </button>
+  </ng-template>
+
+  <app-responsive-table [rows]="rows()" [trackByFn]="trackBy">
+    <ng-template #tableTemplate>
+      <ngx-datatable
+        class="bootstrap"
+        [rows]="rows()"
+        [columnMode]="'flex'"
+        rowHeight="auto"
+        [footerHeight]="50"
+        [limit]="15"
+      >
+        <ngx-datatable-column [flexGrow]="0.3" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>
+            <ng-container [ngTemplateOutlet]="selectAllCheckbox" [ngTemplateOutletContext]="{$implicit: prefix + '-select-all'}" />
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            <ng-container [ngTemplateOutlet]="rowCheckbox" [ngTemplateOutletContext]="{$implicit: item}" />
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="filePath" [flexGrow]="3" [sortable]="true" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('file-header')}}</ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            <ng-container [ngTemplateOutlet]="fileCell" [ngTemplateOutletContext]="{$implicit: item}" />
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="seriesName" [flexGrow]="1.5" [sortable]="true" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('series-header')}}</ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            <ng-container [ngTemplateOutlet]="seriesCell" [ngTemplateOutletContext]="{$implicit: item}" />
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="reason" [flexGrow]="1.5" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('reason-header')}}</ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            <ng-container [ngTemplateOutlet]="reasonCell" [ngTemplateOutletContext]="{$implicit: item}" />
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="lastSeenUtc" [flexGrow]="1" [sortable]="true" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('last-seen-header')}}</ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.lastSeenUtc | utcToLocalTime | defaultDate}}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column [flexGrow]="0.8" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('actions-header')}}</ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            <ng-container [ngTemplateOutlet]="actionButton" [ngTemplateOutletContext]="{$implicit: item}" />
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </ng-template>
+
+    <div cardHeader class="card mb-3">
+      <div class="card-body py-2">
+        <ng-container [ngTemplateOutlet]="selectAllCheckbox" [ngTemplateOutletContext]="{$implicit: prefix + '-select-all-cards'}" />
+      </div>
+    </div>
+
+    <ng-template #cardTemplate let-item>
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex align-items-start gap-2 mb-2">
+            <ng-container [ngTemplateOutlet]="rowCheckbox" [ngTemplateOutletContext]="{$implicit: item}" />
+            <div class="flex-fill">
+              <ng-container [ngTemplateOutlet]="fileCell" [ngTemplateOutletContext]="{$implicit: item}" />
+            </div>
+            <ng-container [ngTemplateOutlet]="actionButton" [ngTemplateOutletContext]="{$implicit: item}" />
+          </div>
+
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="text-muted small">{{t('series-header')}}</div>
+              <ng-container [ngTemplateOutlet]="seriesCell" [ngTemplateOutletContext]="{$implicit: item}" />
+            </div>
+            <div class="col-6">
+              <div class="text-muted small">{{t('reason-header')}}</div>
+              <ng-container [ngTemplateOutlet]="reasonCell" [ngTemplateOutletContext]="{$implicit: item}" />
+            </div>
+            <div class="col-12">
+              <div class="text-muted small">{{t('last-seen-header')}}</div>
+              <div>{{item.lastSeenUtc | utcToLocalTime | defaultDate}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </app-responsive-table>
+</ng-container>

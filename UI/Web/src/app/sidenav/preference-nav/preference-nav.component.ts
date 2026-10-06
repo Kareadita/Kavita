@@ -216,7 +216,7 @@ export class PreferenceNavComponent implements AfterViewInit {
         if (!isAdmin) return of(-1);
         return this.serverService.getMediaErrors().pipe(
           takeUntilDestroyed(this.destroyRef),
-          map(d => d.length),
+          map(d => d.filter(d2 => !d2.isDismissed).length),
           shareReplay({ bufferSize: 1, refCount: true })
         );
       })

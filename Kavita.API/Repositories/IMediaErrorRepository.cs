@@ -13,7 +13,6 @@ public interface IMediaErrorRepository
     void Attach(MediaError error);
     void Remove(IList<MediaError> errors);
     Task<IEnumerable<MediaErrorDto>> GetAllErrorDtosAsync(CancellationToken ct = default);
-    Task<bool> ExistsAsync(MediaError error, CancellationToken ct = default);
     Task DeleteAll(CancellationToken ct = default);
     /// <summary>
     /// The row a producer other than the scanner wrote for this file and reason, tracked
@@ -48,4 +47,6 @@ public interface IMediaErrorRepository
     /// <inheritdoc cref="GetUnreadableFileCountAsync"/>
     /// <remarks>Most recently seen first</remarks>
     Task<List<ScanIssueSummaryItemDto>> GetUnreadableFilesAsync(int libraryId, int take, CancellationToken ct = default);
+
+    Task SetDimissStateAsync(List<int> errorIds, bool dismissState, CancellationToken ct = default);
 }

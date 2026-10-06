@@ -270,6 +270,34 @@ public class ServerController(
     }
 
     /// <summary>
+    /// Dismiss one or more media error
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <returns></returns>
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpPost("media-errors/dismiss")]
+    public async Task<ActionResult> DismissMediaErrors(List<int> ids)
+    {
+        var ct = HttpContext.RequestAborted;
+        await unitOfWork.MediaErrorRepository.SetDimissStateAsync(ids, true, ct);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Undismiss one or more media error
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <returns></returns>
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpPost("media-errors/undismiss")]
+    public async Task<ActionResult> UndismissMediaErrors(List<int> ids)
+    {
+        var ct = HttpContext.RequestAborted;
+        await unitOfWork.MediaErrorRepository.SetDimissStateAsync(ids, false, ct);
+        return Ok();
+    }
+
+    /// <summary>
     /// Deletes all media errors
     /// </summary>
     /// <returns></returns>

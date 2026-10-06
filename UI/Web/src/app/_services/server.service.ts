@@ -92,6 +92,14 @@ export class ServerService {
     return this.http.post(this.baseUrl + 'server/clear-media-alerts', {});
   }
 
+  dismissMediaErrors(ids: number[]) {
+    return this.http.post(this.baseUrl + 'server/media-errors/dismiss', ids);
+  }
+
+  undismissMediaErrors(ids: number[]) {
+    return this.http.post(this.baseUrl + 'server/media-errors/undismiss', ids);
+  }
+
   isTaskRunning(methodName: string, queue?: string) {
     const url = `${this.baseUrl}server/is-task-running?methodName=${methodName}` + (!!queue ? `&queue=${queue}` : '');
 
