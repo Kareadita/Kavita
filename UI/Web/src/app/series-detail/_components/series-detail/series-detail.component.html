@@ -32,7 +32,12 @@
                   <span class="visually-hidden">{{t('loading')}}</span>
                 </div>
               }
-              </span>
+
+              @if(showMediaIssueWarning()) {
+                <i class="fa-solid fa-triangle-exclamation warning" role="button" [ngbTooltip]="t('media-error-warning')" placement="bottom" (click)="showMediaErrors()"></i>
+              }
+
+            </span>
 
           </h4>
           <div class="subtitle  mt-2 mb-2">

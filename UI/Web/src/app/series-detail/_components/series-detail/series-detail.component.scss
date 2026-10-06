@@ -1,5 +1,9 @@
 @use '../../../../series-detail-common';
 
+.warning {
+  color: var(--warning-color);
+}
+
 .to-read-counter {
   position: absolute;
   top: 0.9375rem;

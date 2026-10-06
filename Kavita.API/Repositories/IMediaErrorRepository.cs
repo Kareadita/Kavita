@@ -48,5 +48,6 @@ public interface IMediaErrorRepository
     /// <remarks>Most recently seen first</remarks>
     Task<List<ScanIssueSummaryItemDto>> GetUnreadableFilesAsync(int libraryId, int take, CancellationToken ct = default);
 
-    Task SetDimissStateAsync(List<int> errorIds, bool dismissState, CancellationToken ct = default);
+    Task SetDismissStateAsync(List<int> errorIds, bool dismissState, CancellationToken ct = default);
+    Task<List<MediaErrorDto>> GetErrorDtosForSeriesAsync(int seriesId, CancellationToken ct);
 }

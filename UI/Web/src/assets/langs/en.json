@@ -1563,7 +1563,9 @@
         "off": "{{reader-settings.off}}",
         "loading": "{{common.loading}}",
         "read-count-tooltip": "Total Reads",
-        "kavitaplus-audit-alt": "Kavita+ Activity"
+        "kavitaplus-audit-alt": "Kavita+ Activity",
+        "media-error-warning": "There are problem files associated",
+        "media-errors-title": "One or more files were not parsed or has errors:"
     },
 
     "kavitaplus-tooltip": {

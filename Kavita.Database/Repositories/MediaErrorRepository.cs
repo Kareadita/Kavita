@@ -32,7 +32,6 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
         return await context.MediaError
             .OrderByDescending(m => m.LastSeenUtc)
             .ProjectTo<MediaErrorDto>(mapper.ConfigurationProvider)
-            .AsNoTracking()
             .ToListAsync(ct);
     }
 
@@ -155,11 +154,21 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
             .ToListAsync(ct);
     }
 
-    public async Task SetDimissStateAsync(List<int> errorIds, bool dismissState, CancellationToken ct = default)
+    public async Task SetDismissStateAsync(List<int> errorIds, bool dismissState, CancellationToken ct = default)
     {
         await context.MediaError
             .Where(m => errorIds.Contains(m.Id))
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsDismissed, dismissState), cancellationToken: ct);
+    }
+
+    public async Task<List<MediaErrorDto>> GetErrorDtosForSeriesAsync(int seriesId, CancellationToken ct)
+    {
+        return await context.MediaError
+            .Where(m => m.SeriesId == seriesId)
+            .OrderByDescending(m => m.LastSeenUtc)
+            .ProjectTo<MediaErrorDto>(mapper.ConfigurationProvider)
+            .AsNoTracking()
+            .ToListAsync(ct);
     }
 
     private IQueryable<MediaError> GetUnreadableFiles(int libraryId)

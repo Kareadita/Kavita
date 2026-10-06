@@ -20,6 +20,7 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.Stats;
 using Kavita.Models.DTOs.Update;
 using Kavita.Models.Entities.Enums;
+using Kavita.Server.Attributes;
 using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -279,7 +280,7 @@ public class ServerController(
     public async Task<ActionResult> DismissMediaErrors(List<int> ids)
     {
         var ct = HttpContext.RequestAborted;
-        await unitOfWork.MediaErrorRepository.SetDimissStateAsync(ids, true, ct);
+        await unitOfWork.MediaErrorRepository.SetDismissStateAsync(ids, true, ct);
         return Ok();
     }
 
@@ -293,8 +294,22 @@ public class ServerController(
     public async Task<ActionResult> UndismissMediaErrors(List<int> ids)
     {
         var ct = HttpContext.RequestAborted;
-        await unitOfWork.MediaErrorRepository.SetDimissStateAsync(ids, false, ct);
+        await unitOfWork.MediaErrorRepository.SetDismissStateAsync(ids, false, ct);
         return Ok();
+    }
+
+    /// <summary>
+    /// Get the media errors for a given series
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("media-errors-for-series")]
+    [SeriesAccess]
+    public async Task<ActionResult<List<MediaErrorDto>>> GetMediaErrorsForSeries(int seriesId)
+    {
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.MediaErrorRepository.GetErrorDtosForSeriesAsync(seriesId, ct));
     }
 
     /// <summary>

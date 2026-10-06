@@ -1,4 +1,4 @@
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, httpResource} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {environment} from '../../environments/environment';
 import {ServerInfoSlim} from '../admin/_models/server-info';
@@ -101,10 +101,14 @@ export class ServerService {
   }
 
   isTaskRunning(methodName: string, queue?: string) {
-    const url = `${this.baseUrl}server/is-task-running?methodName=${methodName}` + (!!queue ? `&queue=${queue}` : '');
+    const url = `${this.baseUrl}server/is-task-running?methodName=${methodName}` + (queue ? `&queue=${queue}` : '');
 
     return this.http.get(url, { responseType: 'text' }).pipe(
       map(response => response === 'true')
     );
+  }
+
+  hasMediaErrorsResource(seriesId: () => number) {
+    return httpResource<KavitaMediaError[]>(() => this.baseUrl + `server/media-errors-for-series?seriesId=${seriesId()}`).asReadonly();
   }
 }
