@@ -862,10 +862,16 @@ public class ScannerService(
         var scanner = new ParseScannedFiles(logger, directoryService, readingItemService, eventHub);
         var scanWatch = Stopwatch.StartNew();
 
-        var processedSeries = await scanner.ScanLibrariesForSeries(library, dirs,
-            isLibraryScan, await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id), forceChecks,
-            await unitOfWork.MediaErrorRepository.GetFailedFilesAsync(library.Id));
+        // TODO: Refactor the ScanFiles into a ScanFileResult record
 
+        var folderMap = await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id);
+        var problemFiles = await unitOfWork.MediaErrorRepository.GetFailedFilesAsync(library.Id);
+
+        var processedSeries = await scanner.ScanLibrariesForSeries(library, dirs,
+            isLibraryScan, folderMap, forceChecks,
+            problemFiles);
+
+        // This is the one time backfill we must do in v0.9.2 to ensure all files have FileLastWriteTime which is critical to the new Change Detection work
         await unitOfWork.MangaFileRepository.SetFileLastWriteTimesAsync(scanner.WriteTimesToBackfill);
 
         var savedIssues = await SaveScanIssuesAsync(library, scanner, seriesId);
@@ -889,50 +895,51 @@ public class ScannerService(
         var resolved = scanner.ResolvedFailedFiles.ToHashSet();
         var newCount = 0;
 
-        if (issues.Count > 0 || resolved.Count > 0)
+        if (issues.Count <= 0 && resolved.Count <= 0)
+            return new SavedScanIssues(newCount, [], scanner.FilesInIssueFolders);
+
+        var paths = issues.Select(i => i.Path).ToList();
+
+        var rows = await unitOfWork.MediaErrorRepository.GetScannerErrorsAsync(library.Id, paths.Concat(resolved).ToList());
+        var rowsByPath = rows.GroupBy(r => r.FilePath)
+            .ToDictionary(g => g.Key, g => g.First());
+        var toRemove = rows
+            .Where(r => resolved.Contains(r.FilePath) || rowsByPath[r.FilePath] != r)
+            .ToList();
+
+        foreach (var issue in issues)
         {
-            var rows = await unitOfWork.MediaErrorRepository.GetScannerErrorsAsync(library.Id,
-                issues.Select(i => i.Path).Concat(resolved).ToList());
-            var rowsByPath = rows.GroupBy(r => r.FilePath)
-                .ToDictionary(g => g.Key, g => g.First());
-            var toRemove = rows
-                .Where(r => resolved.Contains(r.FilePath) || rowsByPath[r.FilePath] != r)
-                .ToList();
-
-            foreach (var issue in issues)
+            if (!rowsByPath.TryGetValue(issue.Path, out var row))
             {
-                if (!rowsByPath.TryGetValue(issue.Path, out var row))
-                {
-                    row = mapper.Map<MediaError>(issue);
-                    row.LibraryId = library.Id;
-                    row.SeriesId = seriesId;
-                    unitOfWork.MediaErrorRepository.Attach(row);
+                row = mapper.Map<MediaError>(issue);
+                row.LibraryId = library.Id;
+                row.SeriesId = seriesId;
+                unitOfWork.MediaErrorRepository.Attach(row);
 
-                    if (!MediaErrorReasons.Imported.Contains(issue.Reason))
-                    {
-                        newCount++;
-                    }
-                    continue;
-                }
-
-                var isSameFailure = row.Reason == issue.Reason && row.Bytes == issue.Bytes &&
-                                    row.FileLastWriteTimeUtc is { } writeTime &&
-                                    FolderChangeCheck.IsSameWriteTime(writeTime, issue.LastWriteTimeUtc);
-                mapper.Map(issue, row);
-                if (isSameFailure) continue;
-
-                row.IsDismissed = false;
                 if (!MediaErrorReasons.Imported.Contains(issue.Reason))
                 {
                     newCount++;
                 }
+                continue;
             }
 
-            unitOfWork.MediaErrorRepository.Remove(toRemove);
-            await unitOfWork.CommitAsync();
+            var isSameFailure = row.Reason == issue.Reason && row.Bytes == issue.Bytes &&
+                                row.FileLastWriteTimeUtc is { } writeTime &&
+                                FolderChangeCheck.IsSameWriteTime(writeTime, issue.LastWriteTimeUtc);
+            mapper.Map(issue, row);
+            if (isSameFailure) continue;
+
+            row.IsDismissed = false;
+            if (!MediaErrorReasons.Imported.Contains(issue.Reason))
+            {
+                newCount++;
+            }
         }
 
-        return new SavedScanIssues(newCount, issues.Select(i => i.Path).ToList(), scanner.FilesInIssueFolders);
+        unitOfWork.MediaErrorRepository.Remove(toRemove);
+        await unitOfWork.CommitAsync();
+
+        return new SavedScanIssues(newCount, paths, scanner.FilesInIssueFolders);
     }
 
     /// <summary>

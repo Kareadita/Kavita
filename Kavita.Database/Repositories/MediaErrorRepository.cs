@@ -30,8 +30,7 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
     public async Task<IEnumerable<MediaErrorDto>> GetAllErrorDtosAsync(CancellationToken ct = default)
     {
         return await context.MediaError
-            .Where(m => !m.IsDismissed)
-            .OrderByDescending(m => m.Created)
+            .OrderByDescending(m => m.LastSeenUtc)
             .ProjectTo<MediaErrorDto>(mapper.ConfigurationProvider)
             .AsNoTracking()
             .ToListAsync(ct);
@@ -100,6 +99,13 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
             .ToListAsync(ct);
     }
 
+    /// <summary>
+    /// Finds the series id by looking at neighboring files and attach to the Scan Issues. If <see cref="MediaErrorReasons.Imported"/>, then will do a direct lookup instead.
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <param name="filePaths"></param>
+    /// <param name="filesByFolder"></param>
+    /// <param name="ct"></param>
     public async Task AssignScannerErrorsToSeriesAsync(int libraryId, IList<string> filePaths,
         IReadOnlyDictionary<string, IList<string>> filesByFolder, CancellationToken ct = default)
     {
@@ -111,19 +117,32 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
             .ToListAsync(ct);
         if (unassigned.Count == 0) return;
 
-        var neighbours = unassigned
+        // Most rows are files that failed to parse and have no MangaFile, so the other files in their folder are looked up too
+        var paths = unassigned
             .Select(m => m.FilePath.FolderOf())
             .Distinct()
             .SelectMany(folder => filesByFolder.GetValueOrDefault(folder) ?? [])
+            .Concat(unassigned.Select(m => m.FilePath))
+            .Distinct()
             .ToList();
+
         var seriesByFile = await context.MangaFile
-            .Where(f => f.Chapter.Volume.Series.LibraryId == libraryId && neighbours.Contains(f.FilePath))
+            .Where(f => f.Chapter.Volume.Series.LibraryId == libraryId && paths.Contains(f.FilePath))
             .Select(f => new { f.FilePath, f.Chapter.Volume.SeriesId })
             .ToListAsync(ct);
+        var seriesByPath = seriesByFile
+            .GroupBy(f => f.FilePath)
+            .ToDictionary(g => g.Key, g => g.First().SeriesId);
         var seriesByFolder = seriesByFile.ToLookup(f => f.FilePath.FolderOf(), f => f.SeriesId);
 
         foreach (var row in unassigned)
         {
+            if (seriesByPath.TryGetValue(row.FilePath, out var ownSeriesId))
+            {
+                row.SeriesId = ownSeriesId;
+                continue;
+            }
+
             var seriesIds = seriesByFolder[row.FilePath.FolderOf()].Distinct().ToList();
             if (seriesIds.Count == 1) row.SeriesId = seriesIds[0];
         }

@@ -36,7 +36,7 @@ public interface IMediaErrorRepository
     /// </summary>
     Task<List<MediaError>> GetScannerErrorsAsync(int libraryId, IList<string> filePaths, CancellationToken ct = default);
     /// <summary>
-    /// Gives each of these scanner rows with no series the only series with files in the same folder. Does not commit
+    /// Gives each of these scanner rows with no series the series of its own file, else the only series with files in the same folder. Does not commit
     /// </summary>
     /// <param name="filesByFolder">Every file listed directly in each row's folder</param>
     Task AssignScannerErrorsToSeriesAsync(int libraryId, IList<string> filePaths,

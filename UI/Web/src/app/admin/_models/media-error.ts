@@ -1,21 +1,23 @@
 import {allEnums} from "../../_helpers/enum";
 
 export interface KavitaMediaError {
+  id: number;
   /** Format Type (RAR, ZIP, 7Zip, Epub, PDF) */
   extension: string;
   /** Full Filepath to the file that has some issue */
   filePath: string;
-  /** Developer defined string */
-  comment: string;
   /** Exception message */
   details: string;
   createdUtc: string;
   libraryId?: number;
+  libraryName?: string;
   seriesId?: number;
+  seriesName?: string;
   /** Last time the file failed */
   lastSeenUtc: string;
   producer: MediaErrorProducer;
   reason: MediaErrorReason;
+  isDismissed: boolean;
 }
 
 export enum MediaErrorProducer {
@@ -39,4 +41,3 @@ export enum MediaErrorReason {
 }
 
 export const allMediaErrorReasons = allEnums(MediaErrorReason);
-export const allMediaErrorProducer = allEnums(MediaErrorProducer);

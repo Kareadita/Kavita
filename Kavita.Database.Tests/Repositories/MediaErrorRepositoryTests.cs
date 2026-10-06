@@ -71,7 +71,7 @@ public class MediaErrorRepositoryTests(ITestOutputHelper outputHelper) : Abstrac
     }
 
     [Fact]
-    public async Task AssignScannerErrorsToSeriesAsync_GivesTheOnlySeriesInTheFolder()
+    public async Task AssignScannerErrorsToSeriesAsync_GivesTheFilesOwnSeriesElseTheOnlySeriesInTheFolder()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
 
@@ -88,6 +88,7 @@ public class MediaErrorRepositoryTests(ITestOutputHelper outputHelper) : Abstrac
             Row($"{Murderbot}/Fugitive Telemetry.epub", books.Id),
             Row($"{Murderbot}/Not Saved This Scan.epub", books.Id),
             Row("B:/Fiction/Shared/Broken.epub", books.Id),
+            Row("B:/Fiction/Shared/Novella.epub", books.Id, reason: MediaErrorReason.EpubNotStrict),
             Row("B:/Fiction/Empty/Broken.epub", books.Id),
             Row($"{Murderbot}/Reader Failure.epub", books.Id, producer: MediaErrorProducer.BookService),
         };
@@ -108,8 +109,38 @@ public class MediaErrorRepositoryTests(ITestOutputHelper outputHelper) : Abstrac
         Assert.Equal(murderbot.Id, seriesByPath[$"{Murderbot}/Fugitive Telemetry.epub"]);
         Assert.Null(seriesByPath[$"{Murderbot}/Not Saved This Scan.epub"]);
         Assert.Null(seriesByPath["B:/Fiction/Shared/Broken.epub"]);
+        Assert.Equal(novella.Id, seriesByPath["B:/Fiction/Shared/Novella.epub"]);
         Assert.Null(seriesByPath["B:/Fiction/Empty/Broken.epub"]);
         Assert.Null(seriesByPath[$"{Murderbot}/Reader Failure.epub"]);
+    }
+
+    [Fact]
+    public async Task GetAllErrorDtosAsync_IncludesDismissedWithLibraryAndSeriesNames()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+
+        var murderbot = SeriesWithFile("The Murderbot Diaries", $"{Murderbot}/All Systems Red.epub");
+        var books = new LibraryBuilder("Books").WithSeries(murderbot).Build();
+        context.Library.Add(books);
+        await context.SaveChangesAsync();
+
+        var withSeries = Row($"{Murderbot}/Fugitive Telemetry.epub", books.Id);
+        withSeries.SeriesId = murderbot.Id;
+        context.MediaError.AddRange(
+            withSeries,
+            Row($"{Murderbot}/Dismissed.epub", books.Id, isDismissed: true),
+            Row("Orphan.epub", null));
+        await context.SaveChangesAsync();
+
+        var dtos = (await unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync()).ToDictionary(d => d.FilePath);
+
+        Assert.Equal(3, dtos.Count);
+        Assert.Equal(("Books", "The Murderbot Diaries", false),
+            (dtos[$"{Murderbot}/Fugitive Telemetry.epub"].LibraryName, dtos[$"{Murderbot}/Fugitive Telemetry.epub"].SeriesName,
+                dtos[$"{Murderbot}/Fugitive Telemetry.epub"].IsDismissed));
+        Assert.True(dtos[$"{Murderbot}/Dismissed.epub"].IsDismissed);
+        Assert.Null(dtos["Orphan.epub"].LibraryName);
+        Assert.True(dtos.Values.All(d => d.Id > 0));
     }
 
     [Fact]
