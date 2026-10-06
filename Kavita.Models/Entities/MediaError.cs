@@ -1,7 +1,9 @@
 ﻿using System;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.Entities;
+#nullable enable
 
 /// <summary>
 /// Represents issues found during scanning or interacting with media. For example) Can't open file, corrupt media, missing content in epub.
@@ -25,6 +27,22 @@ public class MediaError : IEntityDate
     /// Exception message
     /// </summary>
     public string Details { get; set; }
+    public long? Bytes { get; set; }
+    /// <summary>
+    /// Set when the scanner recorded the file. The scanner treats its rows as known files while the size and write time match
+    /// </summary>
+    public int? LibraryId { get; set; }
+    public Library? Library { get; set; }
+    public DateTime? FileLastWriteTimeUtc { get; set; }
+    public int? SeriesId { get; set; }
+    public Series? Series { get; set; }
+    public MediaErrorProducer Producer { get; set; }
+    public MediaErrorReason Reason { get; set; }
+    /// <summary>
+    /// Last time the file failed. <see cref="LastModifiedUtc"/> also moves on a dismiss
+    /// </summary>
+    public DateTime LastSeenUtc { get; set; }
+    public bool IsDismissed { get; set; }
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }

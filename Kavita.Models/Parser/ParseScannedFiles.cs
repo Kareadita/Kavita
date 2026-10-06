@@ -41,7 +41,7 @@ public class ScanResult
     /// <summary>
     /// A list of files in the Folder. Empty if HasChanged = false
     /// </summary>
-    public IList<string> Files { get; set; }
+    public IList<FileStamp> Files { get; set; }
     /// <summary>
     /// A nested folder from Library Root (at any level)
     /// </summary>

@@ -10,6 +10,7 @@ using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
@@ -84,9 +85,9 @@ public class MockReadingItemService : IReadingItemService
         return null;
     }
 
-    public ParserInfo? ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+    public ParseFileResult ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
     {
-        return Parse(path, rootPath, libraryRoot, type, enableMetadata);
+        return new ParseFileResult(Parse(path, rootPath, libraryRoot, type, enableMetadata));
     }
 }
 
@@ -760,7 +761,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             _inner = new MockReadingItemService(directoryService, bookService);
         }
 
-        public ParserInfo? ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+        public ParseFileResult ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
         {
             Interlocked.Increment(ref _totalCalls);
             var running = Interlocked.Increment(ref _current);
@@ -829,6 +830,260 @@ public class ParseScannedFilesTests: AbstractDbTest
         var expectedMax = Math.Max(1, Environment.ProcessorCount / 2);
         Assert.True(readingItemService.MaxObservedConcurrency <= expectedMax,
             $"Observed parse concurrency {readingItemService.MaxObservedConcurrency} exceeded the cap {expectedMax}");
+    }
+
+    #endregion
+
+    #region Failed Files
+
+    private const string MurderbotFolder = "B:/Fiction/Martha Wells/The Murderbot Diaries";
+    private static readonly DateTime FailedWriteTime = new(2026, 10, 5, 12, 0, 0, DateTimeKind.Utc);
+    private static readonly FileStamp Broken = new($"{MurderbotFolder}/Fugitive Telemetry.epub", 100, FailedWriteTime);
+    private static readonly FileStamp Readable = new($"{MurderbotFolder}/All Systems Red.epub", 200, FailedWriteTime);
+    private static readonly ParseIssue CorruptEpub = new(MediaErrorReason.CorruptEpub, "broken", "details");
+
+    private static ParseScannedFiles FailedFileScanner(IDirectoryService ds, IReadingItemService? reader = null)
+    {
+        return new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            reader ?? Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>(), Substitute.For<IMediaErrorService>());
+    }
+
+    private static IDirectoryService ListingOf(params FileStamp[] files)
+    {
+        var ds = Substitute.For<IDirectoryService>();
+        ds.GetAllDirectories(default!).ReturnsForAnyArgs([MurderbotFolder]);
+        ds.ScanFiles(default!, default!).ReturnsForAnyArgs(files);
+        return ds;
+    }
+
+    private static IReadingItemService ReaderReturning(Func<string, ParseFileResult> resultForPath)
+    {
+        var reader = Substitute.For<IReadingItemService>();
+        reader.ParseFile(default!, default!, default!, default, default).ReturnsForAnyArgs(ci => resultForPath(ci.ArgAt<string>(0)));
+        return reader;
+    }
+
+    private static ParserInfo MurderbotInfo(FileStamp file, string series = "The Murderbot Diaries")
+    {
+        return new ParserInfo
+        {
+            Series = series,
+            Filename = Path.GetFileName(file.Path),
+            FullFilePath = file.Path,
+            Format = MangaFormat.Epub,
+            Volumes = Parser.LooseLeafVolume,
+            Chapters = Parser.DefaultChapter,
+        };
+    }
+
+    private static Library BooksLibrary()
+    {
+        return new LibraryBuilder("Books", LibraryType.Book).WithFolderPath(new FolderPathBuilder("B:/Fiction").Build()).Build();
+    }
+
+    private static FailedFile AsFailedFile(FileStamp stamp) => new(stamp.Path, stamp.Bytes, stamp.LastWriteTimeUtc);
+
+    private static SeriesModified Owner(string name, params FileStamp[] files)
+    {
+        return new SeriesModified
+        {
+            SeriesName = name,
+            FolderPath = MurderbotFolder,
+            LowestFolderPath = MurderbotFolder,
+            LastScanned = DateTime.Now,
+            LibraryRoots = ["B:/Fiction"],
+            FilesByFolder = new Dictionary<string, IReadOnlyList<KnownFile>>
+            {
+                [MurderbotFolder] = files.Select((f, i) => new KnownFile(i + 1, f.Path, f.Bytes, f.LastWriteTimeUtc)).ToList(),
+            },
+        };
+    }
+
+    private static Dictionary<string, IList<SeriesModified>> FolderOwnedBy(params SeriesModified[] owners)
+    {
+        return new Dictionary<string, IList<SeriesModified>> { [MurderbotFolder] = owners.ToList() };
+    }
+
+    private static Dictionary<string, IList<SeriesModified>> MurderbotOwnsReadable()
+    {
+        return FolderOwnedBy(Owner("The Murderbot Diaries", Readable));
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public async Task ScanFiles_FolderWithOnlyAFailedFile_IsSkippedUnlessForced(bool forceCheck, bool expectedChanged)
+    {
+        var psf = FailedFileScanner(ListingOf(Broken));
+
+        var result = await psf.ScanFiles("B:/Fiction", true, new Dictionary<string, IList<SeriesModified>>(), BooksLibrary(),
+            forceCheck, [AsFailedFile(Broken)]);
+
+        Assert.Equal(expectedChanged, Assert.Single(result).HasChanged);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public async Task ScanFiles_SeriesFolderWithAFailedFile_IsSkippedWhileTheRowMatches(bool hasRow, bool expectedChanged)
+    {
+        var psf = FailedFileScanner(ListingOf(Readable, Broken));
+
+        var result = await psf.ScanFiles(MurderbotFolder, false, MurderbotOwnsReadable(), BooksLibrary(),
+            failedFiles: hasRow ? [AsFailedFile(Broken)] : []);
+
+        Assert.Equal(expectedChanged, Assert.Single(result).HasChanged);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task ScanFiles_LooseFailedFileInParentFolder_IsSkippedWhileTheRowMatches(bool hasRow)
+    {
+        const string author = "B:/Fiction/Martha Wells";
+        var loose = new FileStamp($"{author}/Compulsory.epub", 300, FailedWriteTime);
+        var ds = Substitute.For<IDirectoryService>();
+        ds.GetAllDirectories(default!).ReturnsForAnyArgs([author, MurderbotFolder]);
+        ds.ScanFiles(MurderbotFolder, Arg.Any<string>(), Arg.Any<GlobMatcher?>(), Arg.Any<SearchOption>()).Returns([Readable]);
+        ds.ScanFiles(author, Arg.Any<string>(), Arg.Any<GlobMatcher?>(), SearchOption.TopDirectoryOnly).Returns([loose]);
+        var psf = FailedFileScanner(ds);
+
+        var result = await psf.ScanFiles("B:/Fiction", true, new Dictionary<string, IList<SeriesModified>>(), BooksLibrary(),
+            failedFiles: hasRow ? [AsFailedFile(loose)] : []);
+
+        var authorResult = result.SingleOrDefault(r => r.Folder == author);
+        if (hasRow)
+        {
+            Assert.Null(authorResult);
+        }
+        else
+        {
+            Assert.Contains(loose, authorResult!.Files);
+        }
+    }
+
+    [Fact]
+    public async Task ScanFiles_SeriesFolderNotInMap_FailedFileDoesNotSkipIt()
+    {
+        var psf = FailedFileScanner(ListingOf(Broken));
+
+        var result = await psf.ScanFiles(MurderbotFolder, false, new Dictionary<string, IList<SeriesModified>>(), BooksLibrary(),
+            failedFiles: [AsFailedFile(Broken)]);
+
+        Assert.True(Assert.Single(result).HasChanged);
+    }
+
+    [Theory]
+    [InlineData(3)]
+    [InlineData(120)]
+    public async Task ScanLibrariesForSeries_FailedParse_IsCollectedWithItsStamp(int fileCount)
+    {
+        var files = Enumerable.Range(0, fileCount)
+            .Select(i => new FileStamp($@"B:\Fiction\Martha Wells\The Murderbot Diaries\Book {i}.epub", 100 + i, FailedWriteTime.AddMinutes(i)))
+            .ToArray();
+        var failing = files.Where((_, i) => i % 2 == 1).ToList();
+        var failingPaths = failing.Select(f => f.Path).ToHashSet();
+        var reader = ReaderReturning(path => failingPaths.Contains(path) ? ParseFileResult.Failed(CorruptEpub) : new ParseFileResult(null));
+        var psf = FailedFileScanner(ListingOf(files), reader);
+
+        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>());
+
+        var expected = failing
+            .Select(f => new ScanIssue(f.Path.Replace('\\', '/'), f.Bytes, f.LastWriteTimeUtc, CorruptEpub.Reason, CorruptEpub.Comment, CorruptEpub.Details))
+            .ToList();
+        Assert.Equal(expected, psf.Issues);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("[&/")]
+    public async Task ScanLibrariesForSeries_NoUsableSeriesName_IsCollectedWithItsStamp(string series)
+    {
+        var reader = ReaderReturning(_ => new ParseFileResult(MurderbotInfo(Broken, series)));
+        var psf = FailedFileScanner(ListingOf(Broken), reader);
+
+        var result = await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>());
+
+        Assert.Empty(result);
+        var issue = Assert.Single(psf.Issues);
+        Assert.Equal((Broken.Path, Broken.Bytes, Broken.LastWriteTimeUtc), (issue.Path, issue.Bytes, issue.LastWriteTimeUtc));
+        Assert.Equal(MediaErrorReason.NoSeriesName, issue.Reason);
+    }
+
+    [Fact]
+    public async Task ScanLibrariesForSeries_ImportedFileWithAnIssue_IsKeptWithTheIssue()
+    {
+        var notStrict = new ParseIssue(MediaErrorReason.EpubNotStrict, "lenient", "navigation file is not a valid XHTML file");
+        var reader = ReaderReturning(_ => new ParseFileResult(MurderbotInfo(Broken), notStrict));
+        var psf = FailedFileScanner(ListingOf(Broken), reader);
+
+        var result = await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>());
+
+        Assert.Single(result);
+        Assert.Equal(MediaErrorReason.EpubNotStrict, Assert.Single(psf.Issues).Reason);
+    }
+
+    [Fact]
+    public async Task ScanLibrariesForSeries_RejectedFile_ReplacesItsMetadataIssue()
+    {
+        var unreadable = new ParseIssue(MediaErrorReason.MetadataUnreadable, "metadata", "details");
+        var reader = ReaderReturning(_ => new ParseFileResult(MurderbotInfo(Broken, "[&/"), unreadable));
+        var psf = FailedFileScanner(ListingOf(Broken), reader);
+
+        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>());
+
+        Assert.Equal(MediaErrorReason.NoSeriesName, Assert.Single(psf.Issues).Reason);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ScanLibrariesForSeries_FailedFileThatParsesNow_IsResolved(bool forceCheck)
+    {
+        var replaced = Broken with { Bytes = Broken.Bytes + 1 };
+        var reader = ReaderReturning(_ => new ParseFileResult(MurderbotInfo(replaced)));
+        var psf = FailedFileScanner(ListingOf(replaced), reader);
+
+        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>(),
+            forceCheck, [AsFailedFile(Broken)]);
+
+        Assert.Empty(psf.Issues);
+        Assert.Equal([Broken.Path], psf.ResolvedFailedFiles);
+    }
+
+    [Fact]
+    public async Task ScanLibrariesForSeries_FailedFileDeleted_IsResolved()
+    {
+        var psf = FailedFileScanner(ListingOf(Readable), ReaderReturning(_ => new ParseFileResult(MurderbotInfo(Readable))));
+
+        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, MurderbotOwnsReadable(), false, [AsFailedFile(Broken)]);
+
+        Assert.Equal([Broken.Path], psf.ResolvedFailedFiles);
+    }
+
+    [Fact]
+    public async Task ScanLibrariesForSeries_FailedFileStillFailing_IsNotResolved()
+    {
+        var replaced = Broken with { Bytes = Broken.Bytes + 1 };
+        var psf = FailedFileScanner(ListingOf(replaced), ReaderReturning(_ => ParseFileResult.Failed(CorruptEpub)));
+
+        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>(),
+            false, [AsFailedFile(Broken)]);
+
+        Assert.Empty(psf.ResolvedFailedFiles);
+        Assert.Equal(replaced.Bytes, Assert.Single(psf.Issues).Bytes);
+    }
+
+    [Fact]
+    public async Task ScanLibrariesForSeries_UnchangedFolder_KeepsItsFailedFile()
+    {
+        var psf = FailedFileScanner(ListingOf(Broken));
+
+        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>(),
+            false, [AsFailedFile(Broken)]);
+
+        Assert.Empty(psf.Issues);
+        Assert.Empty(psf.ResolvedFailedFiles);
     }
 
     #endregion

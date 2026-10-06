@@ -113,24 +113,11 @@ public class PdfComicInfoExtractor(ILogger<IBookService> logger, IMediaErrorServ
         return info;
     }
 
+    /// <exception cref="Exception">The PDF metadata cannot be read, for example an encrypted PDF</exception>
     public ComicInfo? GetComicInfo(string filePath)
     {
-        try
-        {
-            using var extractor = new PdfMetadataExtractor(logger, filePath);
+        using var extractor = new PdfMetadataExtractor(logger, filePath);
 
-            return GetComicInfoFromMetadata(extractor.GetMetadata(), filePath);
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "[GetComicInfo] There was an exception parsing PDF metadata for {File}", filePath);
-            mediaErrorService.ReportMediaIssue(filePath, MediaErrorProducer.BookService,
-                ex.Message == "Encryption not supported"
-                    ? "Encrypted PDFs are not supported"
-                    : "There was an exception parsing PDF metadata", ex);
-        }
-
-
-        return null;
+        return GetComicInfoFromMetadata(extractor.GetMetadata(), filePath);
     }
 }

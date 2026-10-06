@@ -35,7 +35,12 @@ public class FolderChangeCheckTests
 
     private static bool IsUnchanged(IList<FileStamp> onDisk, SeriesModified owner, Dictionary<int, DateTime>? backfill = null)
     {
-        return FolderChangeCheck.IsUnchanged(onDisk, [owner], f => f == Folder, backfill ?? new Dictionary<int, DateTime>());
+        return FolderChangeCheck.IsUnchanged(onDisk, [owner], [], f => f == Folder, backfill ?? new Dictionary<int, DateTime>());
+    }
+
+    private static bool IsUnchanged(IList<FileStamp> onDisk, IList<SeriesModified> owners, params FailedFile[] failed)
+    {
+        return FolderChangeCheck.IsUnchanged(onDisk, owners, failed, f => f == Folder, new Dictionary<int, DateTime>());
     }
 
     [Fact]
@@ -171,14 +176,65 @@ public class FolderChangeCheckTests
         var arc2 = Owner(LastScanned, new KnownFile(2, V02, 1000, Written));
 
         Assert.True(FolderChangeCheck.IsUnchanged([new FileStamp(V01, 1000, Written), new FileStamp(V02, 1000, Written)],
-            [arc1, arc2], f => f == Folder, new Dictionary<int, DateTime>()));
+            [arc1, arc2], [], f => f == Folder, new Dictionary<int, DateTime>()));
         Assert.False(FolderChangeCheck.IsUnchanged([new FileStamp(V01, 1000, Written), new FileStamp(V02, 1000, Written)],
-            [arc1], f => f == Folder, new Dictionary<int, DateTime>()));
+            [arc1], [], f => f == Folder, new Dictionary<int, DateTime>()));
     }
 
     [Fact]
     public void EmptyFolder_WithNoKnownFiles_Unchanged()
     {
         Assert.True(IsUnchanged([], Owner(LastScanned)));
+    }
+
+    private const string Broken = Folder + "/March Story v03.cbz";
+
+    [Fact]
+    public void FailedFile_SameSizeAndTime_IsKnown()
+    {
+        Assert.True(IsUnchanged([new FileStamp(V01, 1000, Written), new FileStamp(Broken, 500, Written)],
+            [Owner(LastScanned, new KnownFile(1, V01, 1000, Written))], new FailedFile(Broken, 500, Written)));
+    }
+
+    [Fact]
+    public void FailedFile_OtherSize_Changed()
+    {
+        Assert.False(IsUnchanged([new FileStamp(V01, 1000, Written), new FileStamp(Broken, 501, Written)],
+            [Owner(LastScanned, new KnownFile(1, V01, 1000, Written))], new FailedFile(Broken, 500, Written)));
+    }
+
+    [Fact]
+    public void FailedFile_OtherTime_Changed()
+    {
+        Assert.False(IsUnchanged([new FileStamp(V01, 1000, Written), new FileStamp(Broken, 500, Written.AddDays(1))],
+            [Owner(LastScanned, new KnownFile(1, V01, 1000, Written))], new FailedFile(Broken, 500, Written)));
+    }
+
+    [Fact]
+    public void FailedFile_Deleted_Changed()
+    {
+        Assert.False(IsUnchanged([new FileStamp(V01, 1000, Written)],
+            [Owner(LastScanned, new KnownFile(1, V01, 1000, Written))], new FailedFile(Broken, 500, Written)));
+    }
+
+    [Fact]
+    public void FailedFile_OutsideScope_IsIgnored()
+    {
+        Assert.True(IsUnchanged([new FileStamp(V01, 1000, Written)],
+            [Owner(LastScanned, new KnownFile(1, V01, 1000, Written))],
+            new FailedFile("M:/March Story/Extras/March Story SP01.cbz", 500, Written)));
+    }
+
+    [Fact]
+    public void OnlyFailedFiles_NoOwner_Unchanged()
+    {
+        Assert.True(IsUnchanged([new FileStamp(Broken, 500, Written)], [], new FailedFile(Broken, 500, Written)));
+    }
+
+    [Fact]
+    public void StaleFailedRowForStoredFile_StoredFileWins()
+    {
+        Assert.True(IsUnchanged([new FileStamp(V01, 1000, Written), new FileStamp(V02, 1000, Written)],
+            [StoredOwner()], new FailedFile(V02, 500, Written.AddDays(-30))));
     }
 }

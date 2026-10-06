@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common.Extensions;
@@ -663,7 +664,7 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1) =>
             inner.Extract(fileFilePath, targetDirectory, format, imageCount);
 
-        public ParserInfo? ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+        public ParseFileResult ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
         {
             if (Interlocked.Exchange(ref _fired, 1) == 0) onFirstParse();
             return inner.ParseFile(path, rootPath, libraryRoot, type, enableMetadata);
@@ -750,6 +751,186 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
 
         Assert.Equal(4, await SeriesFileCount(context, seriesId));
     }
+
+    #region Failed Files
+
+    private const string BrokenVolume = "Spice and Wolf Vol. 2.cbz";
+
+    private static readonly string[] OneBrokenVolume =
+    [
+        "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+        $"Spice and Wolf/{BrokenVolume}",
+    ];
+
+    [Fact]
+    public async Task FailedFile_RowHasItsStampAndSeries_SecondScanReadsNothing()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, reader, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Failed File - Manga",
+            OneBrokenVolume, [BrokenVolume]);
+
+        var brokenPath = Parser.NormalizePath(Path.Join(root, "Spice and Wolf", BrokenVolume));
+        var row = await context.MediaError.AsNoTracking().SingleAsync();
+        Assert.Equal((brokenPath, (int?) libraryId, MediaErrorProducer.Scanner, MediaErrorReason.CorruptEpub),
+            (row.FilePath, row.LibraryId, row.Producer, row.Reason));
+        Assert.Equal(new FileInfo(brokenPath).Length, row.Bytes);
+        Assert.True(FolderChangeCheck.IsSameWriteTime(row.FileLastWriteTimeUtc!.Value, File.GetLastWriteTimeUtc(brokenPath)));
+        Assert.Equal(await SeriesId(context, libraryId, "Spice and Wolf"), row.SeriesId);
+
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Empty(reader.Parsed);
+        Assert.Equal(1, await context.MediaError.CountAsync());
+    }
+
+    [Fact]
+    public async Task FailedFileDeleted_RowGoes_NextScanReadsNothing()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, reader, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Failed File Deleted - Manga",
+            OneBrokenVolume, [BrokenVolume]);
+
+        File.Delete(Path.Join(root, "Spice and Wolf", BrokenVolume));
+        await scanner.ScanLibrary(libraryId);
+        Assert.Empty(await context.MediaError.ToListAsync());
+
+        reader.Parsed.Clear();
+        await scanner.ScanLibrary(libraryId);
+        Assert.Empty(reader.Parsed);
+    }
+
+    [Fact]
+    public async Task FailedFileReplacedByValidFileWithOlderTime_IsImportedAndRowGoes()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var failing = new HashSet<string> { BrokenVolume };
+        var (scanner, _, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Failed File Replaced - Manga",
+            OneBrokenVolume, failing);
+
+        var seriesFolder = Path.Join(root, "Spice and Wolf");
+        var broken = Path.Join(seriesFolder, BrokenVolume);
+        File.Copy(Path.Join(seriesFolder, "Spice and Wolf Vol. 1.cbz"), broken, true);
+        File.SetLastWriteTimeUtc(broken, DateTime.UtcNow.AddYears(-4));
+        failing.Clear();
+
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Equal(2, await SeriesFileCount(context, await SeriesId(context, libraryId, "Spice and Wolf")));
+        Assert.Empty(await context.MediaError.ToListAsync());
+    }
+
+    [Fact]
+    public async Task FailedFile_ForcedScanReadsItAgain()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, reader, libraryId, _) = await ScanOnceWithFailing(unitOfWork, context, "Failed File Forced - Manga",
+            OneBrokenVolume, [BrokenVolume]);
+
+        await scanner.ScanLibrary(libraryId, true);
+
+        Assert.Contains(BrokenVolume, reader.Parsed);
+        Assert.Equal(1, await context.MediaError.CountAsync());
+    }
+
+    [Fact]
+    public async Task FolderWhereEveryFileFails_SecondScanReadsNothing()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, reader, libraryId, _) = await ScanOnceWithFailing(unitOfWork, context, "Every File Fails - Manga",
+            ["Murderbot/Murderbot Vol. 1.cbz", "Murderbot/Murderbot Vol. 2.cbz"], ["Murderbot Vol. 1.cbz", "Murderbot Vol. 2.cbz"]);
+        Assert.Equal(2, await context.MediaError.CountAsync());
+
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Empty(reader.Parsed);
+    }
+
+    [Fact]
+    public async Task DismissedFailedFile_StaysDismissedUntilTheFileChanges()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, _, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Failed File Dismissed - Manga",
+            OneBrokenVolume, [BrokenVolume]);
+        var row = await context.MediaError.SingleAsync();
+        row.IsDismissed = true;
+        await context.SaveChangesAsync();
+
+        await scanner.ScanLibrary(libraryId, true);
+        Assert.True((await context.MediaError.AsNoTracking().SingleAsync()).IsDismissed);
+
+        await File.WriteAllBytesAsync(Path.Join(root, "Spice and Wolf", BrokenVolume), new byte[1200]);
+        await scanner.ScanLibrary(libraryId);
+        Assert.False((await context.MediaError.AsNoTracking().SingleAsync()).IsDismissed);
+    }
+
+    [Fact]
+    public async Task UnreadableFolder_KeepsItsFailedFileRows()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, _, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Failed File Unreadable - Manga",
+            TwoSeries, ["Berserk Vol. 2 Ch. 0002.cbz"]);
+
+        await ScannerWithUnreadable(unitOfWork, Path.Join(root, "Berserk")).ScanLibrary(libraryId);
+
+        Assert.Equal(1, await context.MediaError.CountAsync());
+    }
+
+    [Fact]
+    public async Task ScanSeries_FailedFileBelongsToTheScannedSeries()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var failing = new HashSet<string>();
+        var (scanner, _, libraryId, _) = await ScanOnceWithFailing(unitOfWork, context, "Failed File Scan Series - Manga",
+            OneBrokenVolume, failing);
+        var seriesId = await SeriesId(context, libraryId, "Spice and Wolf");
+
+        failing.Add(BrokenVolume);
+        await scanner.ScanSeries(seriesId);
+
+        var row = await context.MediaError.AsNoTracking().SingleAsync();
+        Assert.Equal(seriesId, row.SeriesId);
+    }
+
+    private sealed class FailNamedFiles(IReadingItemService inner, ISet<string> failing) : IReadingItemService
+    {
+        public ConcurrentQueue<string> Parsed { get; } = new();
+
+        public int GetNumberOfPages(string filePath, MangaFormat format) => inner.GetNumberOfPages(filePath, format);
+
+        public string GetCoverImage(string filePath, string fileName, MangaFormat format, EncodeFormat encodeFormat,
+            CoverImageSize size = CoverImageSize.Default) =>
+            inner.GetCoverImage(filePath, fileName, format, encodeFormat, size);
+
+        public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1) =>
+            inner.Extract(fileFilePath, targetDirectory, format, imageCount);
+
+        public ParseFileResult ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+        {
+            var name = Path.GetFileName(path);
+            Parsed.Enqueue(name);
+            return failing.Contains(name)
+                ? ParseFileResult.Failed(new ParseIssue(MediaErrorReason.CorruptEpub, "broken", "details"))
+                : inner.ParseFile(path, rootPath, libraryRoot, type, enableMetadata);
+        }
+    }
+
+    /// <param name="failing">File names the scan reader fails on, read on every parse so a test can change it between scans</param>
+    private async Task<(ScannerService Scanner, FailNamedFiles Reader, int LibraryId, string Root)> ScanOnceWithFailing(
+        IUnitOfWork unitOfWork, DataContext context, string testcase, string[] files, HashSet<string> failing)
+    {
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var library = await scannerHelper.GenerateScannerData(testcase, [.. files], new Dictionary<string, ComicInfo>());
+        ScannerHelper.Backdate(library.Folders.First().Path, TimeSpan.FromHours(1));
+
+        FailNamedFiles? reader = null;
+        var scanner = scannerHelper.CreateServices(wrapScanReader: inner => reader = new FailNamedFiles(inner, failing));
+        await scanner.ScanLibrary(library.Id);
+        reader!.Parsed.Clear();
+
+        return (scanner, reader, library.Id, await LibraryRoot(context, library.Id));
+    }
+
+    #endregion
 
     private async Task<(ScannerService Scanner, int LibraryId)> ScanOnce(IUnitOfWork unitOfWork,
         string testcase, string[] files, Dictionary<string, ComicInfo>? comicInfos = null)

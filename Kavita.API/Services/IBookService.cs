@@ -14,7 +14,10 @@ public interface IBookService
 {
     int GetNumberOfPages(string filePath);
     string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
-    ComicInfo? GetComicInfo(string filePath);
+    /// <param name="strictOpenError">Set when an epub only opened with lenient parsing, why the strict open failed</param>
+    /// <exception cref="System.Exception">The file or its metadata cannot be read</exception>
+    ComicInfo? GetComicInfo(string filePath, out string? strictOpenError);
+    /// <exception cref="System.Exception">The epub cannot be opened</exception>
     ParserInfo? ParseInfo(string filePath);
 
     /// <summary>

@@ -54,4 +54,28 @@ public class PathExtensionsTests
     }
 
     #endregion
+
+    #region FolderOf
+
+    [Theory]
+    [InlineData("B:/Fiction/Martha Wells/The Murderbot Diaries/Fugitive Telemetry.epub", "B:/Fiction/Martha Wells/The Murderbot Diaries")]
+    [InlineData("M:/a.epub", "M:")]
+    [InlineData("/manga/a.cbz", "/manga")]
+    [InlineData("/a.cbz", "/")]
+    [InlineData("a.cbz", "")]
+    public void FolderOf_Test(string path, string expected)
+    {
+        Assert.Equal(expected, path.FolderOf());
+    }
+
+    [Theory]
+    [InlineData("M:/a.epub", "M:/")]
+    [InlineData("/a.cbz", "/")]
+    [InlineData("/manga/a.cbz", "/manga")]
+    public void FolderOf_IsInItsOwnFolder(string path, string folder)
+    {
+        Assert.True(path.FolderOf().IsSameOrInsideFolder(folder));
+    }
+
+    #endregion
 }

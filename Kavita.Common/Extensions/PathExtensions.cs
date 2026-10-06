@@ -39,6 +39,20 @@ public static class PathExtensions
                || trimmedPath.StartsWith(trimmedFolder + '/', StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// The folder that directly holds a file, from a normalized path. <c>/a.cbz</c> gives <c>/</c>, a bare file name gives an empty string
+    /// </summary>
+    public static string FolderOf(this string path)
+    {
+        var lastSlash = path.LastIndexOf('/');
+        return lastSlash switch
+        {
+            < 0 => string.Empty,
+            0 => "/",
+            _ => path[..lastSlash],
+        };
+    }
+
     // A Linux root "/" trims to "", which makes "/" the prefix every absolute path starts with
     private static string TrimmedPath(string path) => path.NormalizePath().TrimEnd('/');
 }

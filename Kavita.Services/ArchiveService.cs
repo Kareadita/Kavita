@@ -450,8 +450,7 @@ public class ArchiveService(
         catch (Exception ex)
         {
             logger.LogWarning(ex, "[GetComicInfo] There was an exception when reading archive stream: {Filepath}", archivePath);
-            mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
-                "This archive cannot be read or not supported", ex);
+            throw;
         }
 
         return null;

@@ -41,6 +41,7 @@ using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Parser;
 
 namespace Kavita.Models.AutoMapper;
 
@@ -68,6 +69,19 @@ public class AutoMapperProfiles : Profile
         CreateMap<AgeRating, AgeRatingDto>();
         CreateMap<PublicationStatus, PublicationStatusDto>();
         CreateMap<MediaError, MediaErrorDto>();
+        CreateMap<MediaError, FailedFile>()
+            .ForCtorParam(nameof(FailedFile.Path), opt => opt.MapFrom(src => src.FilePath))
+            .ForCtorParam(nameof(FailedFile.Bytes), opt => opt.MapFrom(src => src.Bytes!.Value))
+            .ForCtorParam(nameof(FailedFile.LastWriteTimeUtc), opt => opt.MapFrom(src => src.FileLastWriteTimeUtc!.Value));
+        CreateMap<MediaError, ScanIssueSummaryItemDto>()
+            .ForCtorParam(nameof(ScanIssueSummaryItemDto.SeriesName), opt => opt.MapFrom(src => src.Series != null ? src.Series.Name : null));
+        CreateMap<ScanIssue, MediaError>()
+            .ForMember(dest => dest.FilePath, opt => opt.MapFrom(src => src.Path))
+            .ForMember(dest => dest.FileLastWriteTimeUtc, opt => opt.MapFrom(src => src.LastWriteTimeUtc))
+            .ForMember(dest => dest.Extension,
+                opt => opt.MapFrom(src => System.IO.Path.GetExtension(src.Path).Replace(".", string.Empty).ToUpperInvariant()))
+            .ForMember(dest => dest.Producer, opt => opt.MapFrom(_ => MediaErrorProducer.Scanner))
+            .ForMember(dest => dest.LastSeenUtc, opt => opt.MapFrom(_ => DateTime.UtcNow));
         CreateMap<AppUserExternalSource, ExternalSourceDto>();
         CreateMap<ScrobbleHold, ScrobbleHoldDto>()
             .ForMember(dest => dest.LibraryId,

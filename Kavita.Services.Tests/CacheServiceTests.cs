@@ -47,7 +47,7 @@ internal class MockReadingItemServiceForCacheService : IReadingItemService
         throw new System.NotImplementedException();
     }
 
-    public ParserInfo ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true)
+    public ParseFileResult ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true)
     {
         throw new System.NotImplementedException();
     }

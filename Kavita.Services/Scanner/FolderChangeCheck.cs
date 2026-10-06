@@ -11,7 +11,8 @@ namespace Kavita.Services.Scanner;
 /// </summary>
 public static class FolderChangeCheck
 {
-    private readonly record struct OwnedFile(KnownFile File, DateTime OwnerLastScanned);
+    /// <param name="OwnerLastScanned">Null for a failed file, which has no scan time to guard against</param>
+    private readonly record struct OwnedFile(KnownFile File, DateTime? OwnerLastScanned);
 
     /// <summary>
     /// True when the listing has exactly the known files, each with the stored size and write time (to the second),
@@ -19,9 +20,10 @@ public static class FolderChangeCheck
     /// </summary>
     /// <param name="onDisk">The folder listing</param>
     /// <param name="owners">Series with files in the folder</param>
+    /// <param name="failedFiles">Files that failed on an earlier scan, known while their size and write time match</param>
     /// <param name="isInScope">Which of the owners' folders the listing covers</param>
     /// <param name="writeTimesToBackfill">Gets (file id, listing time) for each file with no stored write time, only when unchanged</param>
-    public static bool IsUnchanged(IList<FileStamp> onDisk, IEnumerable<SeriesModified> owners,
+    public static bool IsUnchanged(IList<FileStamp> onDisk, IEnumerable<SeriesModified> owners, IEnumerable<FailedFile> failedFiles,
         Func<string, bool> isInScope, IDictionary<int, DateTime> writeTimesToBackfill)
     {
         var known = new Dictionary<string, OwnedFile>();
@@ -31,6 +33,13 @@ public static class FolderChangeCheck
             {
                 known.TryAdd(file.Path, new OwnedFile(file, owner.LastScanned));
             }
+        }
+
+        // Add failed files after the owners, so a stored file wins over a stale failure row for the same path
+        // Without this, size match would always fail and we'd have to eat a rescan of each folder that has a failed file
+        foreach (var failed in failedFiles.Where(f => isInScope(f.Path.FolderOf())))
+        {
+            known.TryAdd(failed.Path, new OwnedFile(new KnownFile(0, failed.Path, failed.Bytes, failed.LastWriteTimeUtc), null));
         }
 
         // First Check: File counts match
@@ -46,7 +55,7 @@ public static class FolderChangeCheck
             if (!IsSameWriteTime(stored, stamp.LastWriteTimeUtc)) return false; // Third Check: LastWriteTime check
 
             // A time in the same second as the scan can hide a same-size rewrite later in that second
-            if (!IsWrittenBeforeScan(stamp.LastWriteTimeUtc, owned.OwnerLastScanned)) return false;
+            if (owned.OwnerLastScanned is { } lastScanned && !IsWrittenBeforeScan(stamp.LastWriteTimeUtc, lastScanned)) return false;
 
             if (owned.File.LastWriteTimeUtc == null)
             {

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using AutoMapper;
 using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -15,6 +16,7 @@ using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
+using Kavita.Models.DTOs.MediaErrors;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
@@ -60,7 +62,8 @@ public class ScannerService(
     IReadingItemService readingItemService,
     IServiceScopeFactory scopeFactory,
     IWordCountAnalyzerService wordCountAnalyzerService,
-    IMediaErrorService mediaErrorService)
+    IMediaErrorService mediaErrorService,
+    IMapper mapper)
     : IScannerService
 {
     public const string Name = "ScannerService";
@@ -267,8 +270,8 @@ public class ScannerService(
 
         logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var scanStarted = DateTime.Now;
-        var (scanElapsedTime, parsedSeries) = await ScanFiles(library, folderPaths,
-            false, true);
+        var (scanElapsedTime, parsedSeries, savedIssues) = await ScanFiles(library, folderPaths,
+            false, true, series.Id);
 
         logger.LogInformation("ScanFiles for {Series} took {Time} milliseconds", series.Name, scanElapsedTime);
 
@@ -338,15 +341,17 @@ public class ScannerService(
 
             if (processedSeriesId != null)
             {
-                var metadataService = scope.ServiceProvider.GetRequiredService<IMetadataService>();
-                var wordCountAnalyzerService = scope.ServiceProvider.GetRequiredService<IWordCountAnalyzerService>();
+                var metadataServiceScoped = scope.ServiceProvider.GetRequiredService<IMetadataService>();
+                var wordCountAnalyzerServiceScoped = scope.ServiceProvider.GetRequiredService<IWordCountAnalyzerService>();
 
-                await metadataService.GenerateCoversForSeries(serverSettings, scopedLibrary.Id, processedSeriesId.Value, bypassFolderOptimizationChecks, false);
-                await wordCountAnalyzerService.ScanSeries(scopedLibrary.Id, processedSeriesId.Value, bypassFolderOptimizationChecks);
+                await metadataServiceScoped.GenerateCoversForSeries(serverSettings, scopedLibrary.Id, processedSeriesId.Value, bypassFolderOptimizationChecks, false);
+                await wordCountAnalyzerServiceScoped.ScanSeries(scopedLibrary.Id, processedSeriesId.Value, bypassFolderOptimizationChecks);
             }
 
             seriesLeftToProcess--;
         }
+
+        await ReportScanIssuesAsync(library, savedIssues);
 
         // Tell UI that this series is done
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -571,7 +576,7 @@ public class ScannerService(
 
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 1: Scan & Parse Files", library.Name);
         var scanStarted = DateTime.Now;
-        var (scanElapsedTime, parsedSeries) = await ScanFiles(library, libraryFolderPaths,
+        var (scanElapsedTime, parsedSeries, savedIssues) = await ScanFiles(library, libraryFolderPaths,
             shouldUseLibraryScan, forceUpdate);
 
         // We need to remove any keys where there is no actual parser info
@@ -605,6 +610,8 @@ public class ScannerService(
             logger.LogCritical(
                 "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
         }
+
+        await ReportScanIssuesAsync(library, savedIssues);
 
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Ended, string.Empty));
@@ -848,22 +855,112 @@ public class ScannerService(
         library.UpdateLastScanned(time);
     }
 
-    private async Task<Tuple<long, Dictionary<ParsedSeries, IList<ParserInfo>>>> ScanFiles(Library library, IList<string> dirs,
-        bool isLibraryScan, bool forceChecks = false)
+    /// <param name="seriesId">Set by a series scan, every issue found belongs to that series</param>
+    /// <returns>How long the walk took, the parsed series, and the issues saved</returns>
+    private async Task<(long ElapsedMs, Dictionary<ParsedSeries, IList<ParserInfo>> ParsedSeries, SavedScanIssues SavedIssues)> ScanFiles(
+        Library library, IList<string> dirs, bool isLibraryScan, bool forceChecks = false, int? seriesId = null)
     {
         var scanner = new ParseScannedFiles(logger, directoryService, readingItemService, eventHub, mediaErrorService);
         var scanWatch = Stopwatch.StartNew();
 
         var processedSeries = await scanner.ScanLibrariesForSeries(library, dirs,
-            isLibraryScan, await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id), forceChecks);
+            isLibraryScan, await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id), forceChecks,
+            await unitOfWork.MediaErrorRepository.GetFailedFilesAsync(library.Id));
         await unitOfWork.MangaFileRepository.SetFileLastWriteTimesAsync(scanner.WriteTimesToBackfill);
+        var savedIssues = await SaveScanIssuesAsync(library, scanner, seriesId);
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 
         var parsedSeries = TrackFoundSeriesAndFiles(processedSeries,
             await unitOfWork.SeriesRepository.GetSeriesNameMatchesAsync(library.Id));
 
-        return Tuple.Create(scanElapsedTime, parsedSeries);
+        return (scanElapsedTime, parsedSeries, savedIssues);
+    }
+
+    /// <summary>
+    /// Saves one row per file with an issue and removes the rows of files that were read again without one, or are gone
+    /// </summary>
+    /// <param name="seriesId">Set by a series scan, new rows belong to that series</param>
+    private async Task<SavedScanIssues> SaveScanIssuesAsync(Library library, ParseScannedFiles scanner, int? seriesId)
+    {
+        var issues = scanner.Issues;
+        var resolved = scanner.ResolvedFailedFiles.ToHashSet();
+        var newCount = 0;
+
+        if (issues.Count > 0 || resolved.Count > 0)
+        {
+            var rows = await unitOfWork.MediaErrorRepository.GetScannerErrorsAsync(library.Id,
+                issues.Select(i => i.Path).Concat(resolved).ToList());
+            var rowsByPath = rows.GroupBy(r => r.FilePath)
+                .ToDictionary(g => g.Key, g => g.First());
+            var toRemove = rows
+                .Where(r => resolved.Contains(r.FilePath) || rowsByPath[r.FilePath] != r)
+                .ToList();
+
+            foreach (var issue in issues)
+            {
+                if (!rowsByPath.TryGetValue(issue.Path, out var row))
+                {
+                    row = mapper.Map<MediaError>(issue);
+                    row.LibraryId = library.Id;
+                    row.SeriesId = seriesId;
+                    unitOfWork.MediaErrorRepository.Attach(row);
+
+                    if (!MediaErrorReasons.Imported.Contains(issue.Reason))
+                    {
+                        newCount++;
+                    }
+                    continue;
+                }
+
+                var isSameFailure = row.Reason == issue.Reason && row.Bytes == issue.Bytes &&
+                                    row.FileLastWriteTimeUtc is { } writeTime &&
+                                    FolderChangeCheck.IsSameWriteTime(writeTime, issue.LastWriteTimeUtc);
+                mapper.Map(issue, row);
+                if (isSameFailure) continue;
+
+                row.IsDismissed = false;
+                if (!MediaErrorReasons.Imported.Contains(issue.Reason))
+                {
+                    newCount++;
+                }
+            }
+
+            unitOfWork.MediaErrorRepository.Remove(toRemove);
+            await unitOfWork.CommitAsync();
+        }
+
+        return new SavedScanIssues(newCount, issues.Select(i => i.Path).ToList());
+    }
+
+    /// <param name="NewCount">Files that could not be read with a new issue: first seen, or a new reason or stamp</param>
+    private sealed record SavedScanIssues(int NewCount, IList<string> Paths);
+
+    /// <summary>
+    /// Runs once the series are saved, so a row next to a series created this scan gets that series
+    /// </summary>
+    private async Task<ScanIssueSummaryDto> ReportScanIssuesAsync(Library library, SavedScanIssues savedIssues)
+    {
+        await unitOfWork.MediaErrorRepository.AssignScannerErrorsToSeriesAsync(library.Id, savedIssues.Paths);
+        await unitOfWork.CommitAsync();
+
+        var summary = new ScanIssueSummaryDto(
+            await unitOfWork.MediaErrorRepository.GetUnreadableFileCountAsync(library.Id),
+            savedIssues.NewCount,
+            await unitOfWork.MediaErrorRepository.GetUnreadableFilesAsync(library.Id, ScanIssueSummaryDto.MaxIssues));
+        LogUnreadableFiles(library, summary);
+
+        return summary;
+    }
+
+    private void LogUnreadableFiles(Library library, ScanIssueSummaryDto summary)
+    {
+        if (summary.Count == 0) return;
+
+        var paths = string.Join(", ", summary.Issues.Select(i => i.FilePath));
+        var more = summary.Count > summary.Issues.Count ? $" and {summary.Count - summary.Issues.Count} more" : string.Empty;
+        logger.LogWarning("[ScannerService] {Count} file(s) in {LibraryName} could not be read: {Paths}{More}",
+            summary.Count, library.Name, paths, more);
     }
 
     /// <summary>

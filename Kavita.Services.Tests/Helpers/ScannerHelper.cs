@@ -1,4 +1,6 @@
-﻿using System.IO.Abstractions;
+﻿using AutoMapper;
+using Kavita.Models.AutoMapper;
+using System.IO.Abstractions;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
@@ -143,7 +145,7 @@ public class ScannerHelper
             Substitute.For<IMetadataService>(),
             Substitute.For<ICacheService>(), Substitute.For<IEventHub>(), ds,
             wrapScanReader?.Invoke(readingItemService) ?? readingItemService, scopeFactory, Substitute.For<IWordCountAnalyzerService>(),
-            Substitute.For<IMediaErrorService>());
+            Substitute.For<IMediaErrorService>(), CreateMapper());
         return scanner;
     }
 
@@ -432,4 +434,8 @@ public class ScannerHelper
             .Replace("'", "&apos;");
     }
 
+    private static IMapper CreateMapper()
+    {
+        return new MapperConfiguration(cfg => cfg.AddMaps(typeof(AutoMapperProfiles).Assembly)).CreateMapper();
+    }
 }

@@ -35,6 +35,7 @@ public class MediaErrorService(IUnitOfWork unitOfWork) : IMediaErrorService
         string details, CancellationToken ct = default)
     {
         var error = new MediaErrorBuilder(filename)
+            .WithProducer(producer)
             .WithComment(errorMessage)
             .WithDetails(details)
             .Build();
