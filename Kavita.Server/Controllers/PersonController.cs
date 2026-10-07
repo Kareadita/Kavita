@@ -244,7 +244,7 @@ public class PersonController(
         if (src == null) return BadRequest();
 
         await personService.MergePeopleAsync(src, dst, ct);
-        await eventHub.SendMessageAsync(MessageFactory.PersonMerged, MessageFactory.PersonMergedMessage(dst, src), ct: ct);
+        await eventHub.SendMessageAsync(MessageFactory.PersonMerged, MessageFactory.PersonMergedEvent(dst, src), ct: ct);
 
         return Ok(mapper.Map<PersonDto>(dst));
     }

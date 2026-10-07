@@ -45,6 +45,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
         public HashSet<string> Ended { get; } = [];
         public int SeriesAdded { get; set; }
         public int SeriesRemoved { get; set; }
+        public int TotalSeriesProcessed { get; set; }
     }
 
     public void Record(string method, SignalRMessageDto message)
@@ -159,6 +160,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
 
             if (message.EventType == ProgressEventType.Ended)
             {
+                // TODO: Get final payload on Ended event
                 job.Ended.Add(message.Name);
             }
             else

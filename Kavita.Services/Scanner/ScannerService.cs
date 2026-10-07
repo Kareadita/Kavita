@@ -327,7 +327,8 @@ public class ScannerService(
             var processSeries = scope.ServiceProvider.GetRequiredService<IProcessSeries>();
             var unitOfWorkScoped = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            var scopedLibrary = (await unitOfWorkScoped.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
+            var scopedLibrary = (await unitOfWorkScoped.LibraryRepository.GetLibraryForIdAsync(library.Id,
+                LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
 
             var processedSeriesId = await processSeries.ProcessSeriesAsync(settings, pSeries, new ProcessSeriesArgs
             {
@@ -348,9 +349,12 @@ public class ScannerService(
             }
 
             seriesLeftToProcess--;
+
+
         }
 
         await ReportScanIssuesAsync(library, savedIssues);
+
 
         // Tell UI that this series is done
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,

@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {HubConnection, HubConnectionBuilder} from '@microsoft/signalr';
 import {BehaviorSubject, ReplaySubject} from 'rxjs';
 import {environment} from '../../environments/environment';
-import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
 import {User} from '../_models/user/user';
 import {SignalRMessage} from '../_models/events/core/signalr-message';
 import {MessageMeta} from '../_models/events/core/message-meta';
@@ -241,21 +240,6 @@ export class MessageHubService {
 
   public readonly isConnectedSignal = toSignal(this.isConnectedSource);
 
-  constructor() {}
-
-  /**
-   * Tests that an event is of the type passed
-   * @param event
-   * @param eventType
-   * @returns
-   */
-  public isEventType(event: Message<any>, eventType: EVENTS) {
-    if (event.event == EVENTS.NotificationProgress) {
-      const notification = event.payload as NotificationProgressEvent;
-      return notification.eventType.toLowerCase() == eventType.toLowerCase();
-    }
-    return event.event === eventType;
-  }
 
   createHubConnection(user: User) {
     this.hubConnection = new HubConnectionBuilder()
