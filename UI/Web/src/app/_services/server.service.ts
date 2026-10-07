@@ -108,7 +108,19 @@ export class ServerService {
     );
   }
 
-  hasMediaErrorsResource(seriesId: () => number) {
-    return httpResource<KavitaMediaError[]>(() => this.baseUrl + `server/media-errors-for-series?seriesId=${seriesId()}`).asReadonly();
+  /**  *
+   * @param seriesId - undefined when not an admin
+   */
+  hasMediaErrorsResource(seriesId: () => number | undefined) {
+    return httpResource<KavitaMediaError[]>(() => {
+      const id = seriesId();
+
+      // If the id is undefined, return undefined to skip the HTTP request
+      if (id === undefined) {
+        return undefined;
+      }
+
+      return this.baseUrl + `server/media-errors-for-series?seriesId=${id}`;
+    }).asReadonly();
   }
 }

@@ -1565,7 +1565,7 @@
         "read-count-tooltip": "Total Reads",
         "kavitaplus-audit-alt": "Kavita+ Activity",
         "media-error-warning": "There are problem files associated",
-        "media-errors-title": "One or more files were not parsed or has errors:"
+        "media-errors-title": "One or more files were not parsed or have errors:"
     },
 
     "kavitaplus-tooltip": {

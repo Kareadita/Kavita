@@ -34,7 +34,9 @@
               }
 
               @if(showMediaIssueWarning()) {
-                <i class="fa-solid fa-triangle-exclamation warning" role="button" [ngbTooltip]="t('media-error-warning')" placement="bottom" (click)="showMediaErrors()"></i>
+                <button type="button" class="btn btn-link p-0 warning" [attr.aria-label]="t('media-error-warning')" [ngbTooltip]="t('media-error-warning')" placement="bottom" (click)="showMediaErrors()">
+                  <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                </button>
               }
 
             </span>

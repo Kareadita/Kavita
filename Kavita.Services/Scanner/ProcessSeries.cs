@@ -255,10 +255,6 @@ public class ProcessSeries(
 
                 if (seriesAdded)
                 {
-                    // See if any recommendations can link up to the series and pre-fetch external metadata for the series
-                    // BackgroundJob.Enqueue(() =>
-                    //     _externalMetadataService.FetchSeriesMetadata(series.Id, series.Library.Type));
-
                     await eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
                 }
@@ -280,9 +276,6 @@ public class ProcessSeries(
         {
             // I think we can spawn this in a background job? Do we need to enqueue on a specific queue?
             // All changes to series after this should be page count etc
-            /*BackgroundJob.Enqueue<IExternalMetadataService>(s
-                => s.TryMatchAndLoadMetadataForSeries(series.Id, series.Library.Type, MetadataFetchTrigger.SeriesAdded));*/
-
             await externalMetadataService.TryMatchAndLoadMetadataForSeries(series.Id, series.Library.Type,
                 MetadataFetchTrigger.SeriesAdded);
         }
@@ -295,8 +288,6 @@ public class ProcessSeries(
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
     {
-        // BUG: This is wrong most of the time, need to figure a better way to narrow in on the issue for the user
-
         // Re-run the same lookup args that GetFullSeriesByAnyName used so the report reflects the real collision set.
         var seriesCollisions = await unitOfWork.SeriesRepository.GetAllSeriesByAnyNameAsync(
             firstInfo.Series, firstInfo.LocalizedSeries, library.Id, firstInfo.Format);

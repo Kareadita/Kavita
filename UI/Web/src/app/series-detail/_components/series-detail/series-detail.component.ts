@@ -380,16 +380,16 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   loadPageSource = new ReplaySubject<boolean>(1);
   loadPage$ = this.loadPageSource.asObservable();
 
-  private readonly mediaErrorResource = this.serverService.hasMediaErrorsResource(() => this.seriesId());
+  private readonly mediaErrorResource = this.serverService.hasMediaErrorsResource(() =>
+    this.accountService.hasAdminRole() ? this.seriesId() : undefined
+  );
+
   readonly showMediaIssueWarning = computed(() => {
-    if (!this.mediaErrorResource.hasValue() || !this.accountService.hasAdminRole()) return false;
-
-    return this.mediaErrorResource.value().length > 0;
+    const errors = this.mediaErrorResource.value() ?? [];
+    return errors.length > 0;
   });
-  readonly mediaErrors = computed(() => {
-    const hasMediaIssues = this.showMediaIssueWarning();
-    if (!hasMediaIssues) return [];
 
+  readonly mediaErrors = computed(() => {
     return this.mediaErrorResource.value() ?? [];
   });
 

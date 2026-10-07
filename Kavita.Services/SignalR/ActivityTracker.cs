@@ -34,7 +34,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
     {
     }
 
-    private sealed record Row(SignalRMessageDto message, DateTimeOffset FirstSeen, DateTimeOffset LastSeen);
+    private sealed record Row(SignalRMessageDto Message, DateTimeOffset FirstSeen, DateTimeOffset LastSeen);
 
     private sealed class JobHistory(DateTime startedUtc)
     {
@@ -82,7 +82,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
         var now = timeProvider.GetUtcNow();
         _rows.AddOrUpdate(key,
             _ => new Row(message, now, now),
-            (_, existing) => existing with { message = message, LastSeen = now });
+            (_, existing) => existing with { Message = message, LastSeen = now });
 
         if (_rows.Count > MaxRows) EvictOldest();
     }
@@ -103,7 +103,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
 
         return _rows.Values
             .OrderBy(r => r.FirstSeen)
-            .Select(r => r.message)
+            .Select(r => r.Message)
             .ToList();
     }
 
@@ -208,7 +208,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
 
     private static bool IsAlive(Row row, IReadOnlySet<string> processingJobIds, DateTimeOffset staleBefore)
     {
-        var jobId = JobIdOf(row.message.CorrelationId);
+        var jobId = JobIdOf(row.Message.CorrelationId);
         return jobId == null ? row.LastSeen >= staleBefore : processingJobIds.Contains(jobId);
     }
 

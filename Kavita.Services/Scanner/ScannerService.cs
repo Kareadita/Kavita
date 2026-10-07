@@ -325,9 +325,9 @@ public class ScannerService(
         {
             using var scope = scopeFactory.CreateScope();
             var processSeries = scope.ServiceProvider.GetRequiredService<IProcessSeries>();
-            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            var unitOfWorkScoped = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            var scopedLibrary = (await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
+            var scopedLibrary = (await unitOfWorkScoped.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
 
             var processedSeriesId = await processSeries.ProcessSeriesAsync(settings, pSeries, new ProcessSeriesArgs
             {

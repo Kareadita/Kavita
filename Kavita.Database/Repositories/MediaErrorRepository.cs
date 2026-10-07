@@ -164,7 +164,7 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
     public async Task<List<MediaErrorDto>> GetErrorDtosForSeriesAsync(int seriesId, CancellationToken ct)
     {
         return await context.MediaError
-            .Where(m => m.SeriesId == seriesId)
+            .Where(m => m.SeriesId == seriesId && !m.IsDismissed)
             .OrderByDescending(m => m.LastSeenUtc)
             .ProjectTo<MediaErrorDto>(mapper.ConfigurationProvider)
             .AsNoTracking()
