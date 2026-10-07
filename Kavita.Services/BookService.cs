@@ -624,6 +624,35 @@ public partial class BookService(
          identifier.Scheme.Equals("URL", StringComparison.InvariantCultureIgnoreCase)) ||
         identifier.Identifier.StartsWith("url:");
 
+    private const string TagSubjectPrefix = "tag:";
+
+    /// <summary>
+    /// Splits epub dc:subject values into Genres and Tags. Subjects prefixed with "tag:" become Tags (prefix removed), everything else is a Genre.
+    /// </summary>
+    internal static (List<string> Genres, List<string> Tags) SplitSubjects(IEnumerable<string?> subjects)
+    {
+        var genres = new List<string>();
+        var tags = new List<string>();
+
+        foreach (var subject in subjects)
+        {
+            if (string.IsNullOrWhiteSpace(subject)) continue;
+
+            var cleaned = subject.Trim().ToLower();
+            if (cleaned.StartsWith(TagSubjectPrefix, StringComparison.Ordinal))
+            {
+                var tag = cleaned[TagSubjectPrefix.Length..].Trim();
+                if (!string.IsNullOrEmpty(tag)) tags.Add(tag);
+            }
+            else
+            {
+                genres.Add(cleaned);
+            }
+        }
+
+        return (genres, tags);
+    }
+
     private void TryApplyIsbn(EpubMetadataIdentifier identifier, ComicInfo info, string filePath)
     {
         var isbn = identifier.Identifier
@@ -650,6 +679,9 @@ public partial class BookService(
 
         var (year, month, day) = GetPublicationDate(publicationDate);
 
+        var (genres, tags) = SplitSubjects(
+            epubBook?.Schema.Package.Metadata.Subjects.Select(s => s.Subject) ?? []);
+
         var summary = epubBook?.Schema.Package.Metadata.Descriptions.FirstOrDefault();
         var info = new ComicInfo
         {
@@ -659,8 +691,8 @@ public partial class BookService(
             Day = day,
             Year = year,
             Title = epubBook?.Title ?? string.Empty,
-            Genre = string.Join(",",
-                epubBook?.Schema.Package.Metadata.Subjects.Select(s => s.Subject.ToLower().Trim()) ?? []),
+            Genre = string.Join(",", genres),
+            Tags = string.Join(",", tags),
             LanguageISO = ValidateLanguage(epubBook?.Schema.Package.Metadata.Languages
                 .Select(l => l.Language)
                 .FirstOrDefault())

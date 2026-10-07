@@ -46,6 +46,49 @@ public class BookServiceTests
         Assert.Equal("genre1, genre2", comicInfo.Genre);
     }
 
+    [Fact]
+    public void SplitSubjects_PlainSubjects_AreGenres()
+    {
+        var (genres, tags) = BookService.SplitSubjects(["Fantasy", " Sci-Fi "]);
+
+        Assert.Equal(["fantasy", "sci-fi"], genres);
+        Assert.Empty(tags);
+    }
+
+    [Theory]
+    [InlineData("tag:favorite")]
+    [InlineData("Tag:Favorite")]
+    [InlineData("TAG: favorite ")]
+    public void SplitSubjects_TagPrefix_IsTagWithPrefixRemoved(string subject)
+    {
+        var (genres, tags) = BookService.SplitSubjects([subject]);
+
+        Assert.Empty(genres);
+        Assert.Equal(["favorite"], tags);
+    }
+
+    [Theory]
+    [InlineData("tag:")]
+    [InlineData("tag:   ")]
+    [InlineData("")]
+    [InlineData(null)]
+    public void SplitSubjects_EmptyValues_AreDropped(string? subject)
+    {
+        var (genres, tags) = BookService.SplitSubjects([subject]);
+
+        Assert.Empty(genres);
+        Assert.Empty(tags);
+    }
+
+    [Fact]
+    public void SplitSubjects_MixedSubjects_AreSplit()
+    {
+        var (genres, tags) = BookService.SplitSubjects(["Fantasy", "tag:favorite", "Adventure", "tag:to-read"]);
+
+        Assert.Equal(["fantasy", "adventure"], genres);
+        Assert.Equal(["favorite", "to-read"], tags);
+    }
+
     /// <summary>
     /// This tests an edge case where there is bad metadata
     /// </summary>
