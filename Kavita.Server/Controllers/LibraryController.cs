@@ -606,7 +606,7 @@ public class LibraryController(
             foreach (var seriesId in seriesIds)
             {
                 await eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
-                    MessageFactory.SeriesRemovedEvent(seriesId, string.Empty, libraryId), false, ct);
+                    MessageFactory.SeriesRemovedEvent(seriesId, libraryId), false, ct);
             }
 
             await eventHub.SendMessageAsync(MessageFactory.LibraryModified,

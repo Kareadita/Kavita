@@ -262,13 +262,13 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessageDto SeriesRemovedEvent(int seriesId, string seriesName, int libraryId)
+    public static SignalRMessageDto SeriesRemovedEvent(int seriesId, int libraryId)
     {
         return new SignalRMessageDto()
         {
             Name = SeriesRemoved,
             Priority = MessageEventPriority.Silent,
-            Body = new SeriesRemovedEventBody(libraryId, seriesId, seriesName)
+            Body = new SeriesRemovedEventBody(libraryId, seriesId)
         };
     }
 

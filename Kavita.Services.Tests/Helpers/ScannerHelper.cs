@@ -114,6 +114,8 @@ public class ScannerHelper
         fs ??= new FileSystem();
         ds ??= new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
 
+        eventHub ??= Substitute.For<IEventHub>();
+
         var archiveService = new ArchiveService(Substitute.For<ILogger<ArchiveService>>(), ds,
             Substitute.For<IImageService>(), Substitute.For<IMediaErrorService>());
         var readingItemService = new ReadingItemService(archiveService, Substitute.For<IBookService>(),
@@ -122,7 +124,7 @@ public class ScannerHelper
 
 
         var processSeries = new ProcessSeries(_unitOfWork, Substitute.For<ILogger<ProcessSeries>>(),
-            Substitute.For<IEventHub>(),
+            eventHub,
             ds, readingItemService, new FileService(fs),
             Substitute.For<IReadingListService>(),
             Substitute.For<IExternalMetadataService>());
@@ -142,7 +144,7 @@ public class ScannerHelper
 
         var scanner = new ScannerService(_unitOfWork, Substitute.For<ILogger<ScannerService>>(),
             Substitute.For<IMetadataService>(),
-            Substitute.For<ICacheService>(), eventHub ?? Substitute.For<IEventHub>(), ds,
+            Substitute.For<ICacheService>(), eventHub, ds,
             wrapScanReader?.Invoke(readingItemService) ?? readingItemService, scopeFactory, Substitute.For<IWordCountAnalyzerService>(),
             CreateMapper());
         return scanner;

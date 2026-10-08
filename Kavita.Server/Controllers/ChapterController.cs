@@ -97,7 +97,7 @@ public class ChapterController(
         if (needToRemoveSeries)
         {
             await eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
-                MessageFactory.SeriesRemovedEvent(series!.Id, series.Name, series.LibraryId), false, ct);
+                MessageFactory.SeriesRemovedEvent(series!.Id, series.LibraryId), false, ct);
         }
 
         return Ok(true);

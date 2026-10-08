@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
@@ -124,5 +126,40 @@ public class EventHubTests
 
         await _filtered.Received(1).SendCoreAsync(MessageFactory.SeriesAdded, Arg.Any<object?[]>(), Arg.Any<CancellationToken>());
         await _all.DidNotReceiveWithAnyArgs().SendCoreAsync(default!, default!, default);
+    }
+
+    [Fact]
+    public async Task SeriesRemoved_DeletedSeries_GoesToUsersOfTheLibrary()
+    {
+        _unitOfWork.UserRepository.HasAccessToSeries(2, 3, Arg.Any<CancellationToken>()).Returns(false);
+        _unitOfWork.UserRepository.HasAccessToLibrary(2, 7, Arg.Any<CancellationToken>()).Returns(true);
+
+        await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved, MessageFactory.SeriesRemovedEvent(3, 7), false);
+
+        _clients.Received(1).Users(Arg.Is<IReadOnlyList<string>>(ids => ids.OrderBy(i => i).SequenceEqual(new[] { "1", "2" })));
+    }
+
+    [Fact]
+    public async Task SeriesRemoved_UserWithoutLibraryAccess_DoesNotGetIt()
+    {
+        await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved, MessageFactory.SeriesRemovedEvent(3, 7), false);
+
+        _clients.Received(1).Users(Arg.Is<IReadOnlyList<string>>(ids => ids.SequenceEqual(new[] { "1" })));
+    }
+
+    [Theory]
+    [InlineData(MessageFactory.SeriesAdded)]
+    [InlineData(MessageFactory.ScanSeries)]
+    public async Task SeriesEvents_UserRestrictedFromSeries_DoesNotGetIt(string method)
+    {
+        _unitOfWork.UserRepository.HasAccessToSeries(2, 3, Arg.Any<CancellationToken>()).Returns(false);
+        _unitOfWork.UserRepository.HasAccessToLibrary(2, 7, Arg.Any<CancellationToken>()).Returns(true);
+        var message = method == MessageFactory.SeriesAdded
+            ? MessageFactory.SeriesAddedEvent(3, "Restricted Title", 7)
+            : MessageFactory.ScanSeriesEvent(7, 3, "Restricted Title");
+
+        await _eventHub.SendMessageAsync(method, message, false);
+
+        _clients.Received(1).Users(Arg.Is<IReadOnlyList<string>>(ids => ids.SequenceEqual(new[] { "1" })));
     }
 }

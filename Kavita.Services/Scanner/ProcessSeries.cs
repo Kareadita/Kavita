@@ -288,7 +288,7 @@ public class ProcessSeries(
         }
 
         await eventHub.SendMessageAsync(MessageFactory.ScanSeries,
-            MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name));
+            MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false);
 
         return new ProcessSeriesResult(series.Id, seriesAdded,
             chapterChanges.Added, chapterChanges.Updated, chapterChanges.Removed);

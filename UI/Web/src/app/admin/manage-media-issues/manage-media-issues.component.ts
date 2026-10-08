@@ -1,11 +1,12 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, output, signal} from '@angular/core';
-import {filter, Observable} from 'rxjs';
+import {filter, map, Observable} from 'rxjs';
 import {allMediaErrorReasons, KavitaMediaError, MediaErrorReason} from '../_models/media-error';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
 import {ServerService} from "../../_services/server.service";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
 import {FilterFieldComponent} from "../../shared/_components/filter-field/filter-field.component";
 import {matchesQuery} from "../../_helpers/filtered";
 import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
@@ -87,7 +88,9 @@ export class ManageMediaIssuesComponent implements OnInit {
   ngOnInit(): void {
     this.loadData();
     this.messageHub.messages$.pipe(
-      filter(m => m.event === EVENTS.ScanSeries),
+      filter(m => m.event === EVENTS.NotificationProgress),
+      map(m => m.payload as NotificationProgressEvent),
+      filter(evt => evt.name === EVENTS.ScanProgress && evt.eventType === 'ended'),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(() => this.loadData());
   }
