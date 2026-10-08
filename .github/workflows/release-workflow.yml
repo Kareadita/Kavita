@@ -6,6 +6,12 @@ on:
     branches: ["develop", "canary"]
   workflow_dispatch:
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: read
+  packages: write
+
 jobs:
   run-release-tool:
     if: github.repository == 'Kareadita/Kavita' && github.event.pull_request.merged == true
