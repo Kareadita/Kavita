@@ -292,7 +292,7 @@ public class ScannerService(
                      unitOfWork.SeriesRepository.Remove(series);
                      await CommitAndSend(1, sw, scanElapsedTime, series);
                      await eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
-                         MessageFactory.SeriesRemovedEvent(seriesId, string.Empty, series.LibraryId), false);
+                         MessageFactory.SeriesRemovedEvent(seriesId, series.LibraryId), false);
                      tally.SeriesRemoved++;
                  }
                  catch (Exception ex)
@@ -594,7 +594,10 @@ public class ScannerService(
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 3: Save Library", library.Name);
         if (await unitOfWork.CommitAsync())
         {
-            if (tally.TotalFiles == 0)
+            logger.LogDebug("[ScannerService] Library {LibraryName} Step 5: Remove Deleted Series", library.Name);
+            tally.SeriesRemoved += await RemoveSeriesNotFound(parsedSeries, library);
+
+            if (!tally.HasChanges)
             {
                 logger.LogInformation(
                     "[ScannerService] Finished library scan of {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}. There were no changes",
@@ -603,12 +606,11 @@ public class ScannerService(
             else
             {
                 logger.LogInformation(
-                    "[ScannerService] Finished library scan of {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                    tally.TotalFiles, parsedSeries.Count, sw.ElapsedMilliseconds, library.Name);
+                    "[ScannerService] Finished library scan of {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}: " +
+                    "{SeriesAdded} series added, {SeriesRemoved} removed, {ChaptersAdded} chapters added, {ChaptersUpdated} updated, {ChaptersRemoved} removed",
+                    tally.TotalFiles, parsedSeries.Count, sw.ElapsedMilliseconds, library.Name,
+                    tally.SeriesAdded, tally.SeriesRemoved, tally.ChaptersAdded, tally.ChaptersUpdated, tally.ChaptersRemoved);
             }
-
-            logger.LogDebug("[ScannerService] Library {LibraryName} Step 5: Remove Deleted Series", library.Name);
-            tally.SeriesRemoved += await RemoveSeriesNotFound(parsedSeries, library);
         }
         else
         {
@@ -644,7 +646,7 @@ public class ScannerService(
             {
                 await eventHub.SendMessageAsync(
                     MessageFactory.SeriesRemoved,
-                    MessageFactory.SeriesRemovedEvent(series.Id, series.Name, series.LibraryId),
+                    MessageFactory.SeriesRemovedEvent(series.Id, series.LibraryId),
                     false
                 );
             }
@@ -984,6 +986,7 @@ public class ScannerService(
         public int ChaptersAdded { get; private set; }
         public int ChaptersUpdated { get; private set; }
         public int ChaptersRemoved { get; private set; }
+        public bool HasChanges => SeriesAdded + SeriesRemoved + ChaptersAdded + ChaptersUpdated + ChaptersRemoved > 0;
 
         public void Add(ProcessSeriesResult result)
         {

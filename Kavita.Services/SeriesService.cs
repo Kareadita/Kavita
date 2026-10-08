@@ -511,7 +511,7 @@ public class SeriesService(
             foreach (var s in series)
             {
                 await eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
-                    MessageFactory.SeriesRemovedEvent(s.Id, s.Name, s.LibraryId), false, ct);
+                    MessageFactory.SeriesRemovedEvent(s.Id, s.LibraryId), false, ct);
             }
 
             await unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters(ct);

@@ -10,8 +10,8 @@ import {
   viewChild
 } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
-import {filter, Observable, ReplaySubject, Subject, switchMap} from 'rxjs';
-import {debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
+import {asyncScheduler, filter, Observable, Subject, switchMap} from 'rxjs';
+import {map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CarouselReelComponent, NextPageLoader} from '../../carousel/_components/carousel-reel/carousel-reel.component';
 import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
@@ -72,6 +72,7 @@ function mapPaginatedResult<T, U>(fn: (t: T) => U) {
   });
 }
 
+const dashboardReloadEvents: string[] = [EVENTS.DashboardUpdate, EVENTS.SeriesAdded, EVENTS.SeriesRemoved, EVENTS.ScanSeries];
 
 @Component({
   selector: 'app-dashboard',
@@ -112,7 +113,6 @@ export class DashboardComponent {
   streams: Array<DashboardStream> = [];
   genre: Genre | undefined;
   refreshStreams$ = new Subject<void>();
-  refreshStreamsFromDashboardUpdate$ = new Subject<void>();
 
   streamCount: number = 0;
   streamsLoaded: number = 0;
@@ -127,40 +127,23 @@ export class DashboardComponent {
   protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
   protected readonly readingListConfig = computed(() => this.cardConfigFactory.forReadingList({titleRef: this.titleTemplateRef(), overrides: {allowSelection: false, actionableFunc: () => []}}));
 
-
-  /**
-   * We use this Replay subject to slow the amount of times we reload the UI
-   */
-  private loadRecentlyAdded$: ReplaySubject<void> = new ReplaySubject<void>();
   protected readonly StreamType = StreamType;
   protected readonly StreamId = StreamId;
 
   constructor() {
     this.loadDashboard();
 
-    this.refreshStreamsFromDashboardUpdate$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(1000),
-      tap(() => this.loadDashboard()))
-      .subscribe();
+    // Trailing so the last event of a scan's burst still reloads
+    this.refreshStreams$.pipe(
+      throttleTime(10_000, asyncScheduler, {leading: true, trailing: true}),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(() => this.loadDashboard());
 
-    this.refreshStreams$.pipe(takeUntilDestroyed(this.destroyRef), throttleTime(10_000),
-        tap(() => this.loadDashboard()))
-        .subscribe();
-
-
-    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
-      // TODO: Make the event have a stream Id so I can refresh just that stream
-      if (res.event === EVENTS.DashboardUpdate) {
-        this.refreshStreamsFromDashboardUpdate$.next();
-      } else if (res.event === EVENTS.SeriesAdded) {
-        this.refreshStreams$.next();
-      } else if (res.event === EVENTS.SeriesRemoved) {
-        this.refreshStreams$.next();
-      } else if (res.event === EVENTS.ScanSeries) {
-        // We don't have events for when series are updated, but we do get events when a scan update occurs. Refresh recentlyAdded at that time.
-        this.loadRecentlyAdded$.next();
-        this.refreshStreams$.next();
-      }
-    });
+    // TODO: Make the event have a stream Id so I can refresh just that stream
+    this.messageHub.messages$.pipe(
+      filter(res => dashboardReloadEvents.includes(res.event)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(() => this.refreshStreams$.next());
 
     if (this.licenseService.hasActiveLicense()) {
       this.scrobblingService.checkExpiredTokens()

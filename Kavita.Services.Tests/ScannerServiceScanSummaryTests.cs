@@ -23,12 +23,12 @@ public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) 
 
     private readonly IEventHub _eventHub = Substitute.For<IEventHub>();
 
-    private async Task<(ScannerService Scanner, int LibraryId, string Root)> ScanOnce(string testcase)
+    private async Task<(ScannerService Scanner, int LibraryId, string Root)> ScanOnce(string testcase, List<string>? files = null)
     {
         var (unitOfWork, _, _) = await CreateDatabase();
         var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
 
-        var library = await scannerHelper.GenerateScannerData($"{testcase} - Manga", Files, new Dictionary<string, ComicInfo>());
+        var library = await scannerHelper.GenerateScannerData($"{testcase} - Manga", files ?? Files, new Dictionary<string, ComicInfo>());
         var scanner = scannerHelper.CreateServices(eventHub: _eventHub);
         await scanner.ScanLibrary(library.Id);
 
@@ -44,6 +44,17 @@ public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) 
             .Select(m => m.Body)
             .OfType<LibraryScanEndedEventBody>()
             .Last();
+    }
+
+    /// <returns>The onlyAdmins argument of each ScanSeries send</returns>
+    private List<bool> ScanSeriesSends()
+    {
+        return _eventHub.ReceivedCalls()
+            .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
+            .Select(c => c.GetArguments())
+            .Where(args => (string) args[0]! == MessageFactory.ScanSeries)
+            .Select(args => (bool) args[2]!)
+            .ToList();
     }
 
     // The scanner skips a folder whose write time matches the last scan to the second
@@ -108,5 +119,40 @@ public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) 
         Assert.Equal(0, summary.ChaptersAdded);
         Assert.Equal(0, summary.ChaptersUpdated);
         Assert.Equal(1, summary.ChaptersRemoved);
+    }
+
+    [Fact]
+    public async Task RescanAfterSeriesFolderDeleted_CountsSeriesRemoved()
+    {
+        // A second series keeps the root from being empty, an empty root aborts the scan
+        var (scanner, libraryId, root) = await ScanOnce(nameof(RescanAfterSeriesFolderDeleted_CountsSeriesRemoved),
+            [..Files, "Accel World/Accel World v01.cbz"]);
+
+        Directory.Delete(Path.Combine(root, "Spice and Wolf"), true);
+        Directory.SetLastWriteTime(root, DateTime.Now.AddSeconds(2));
+        await scanner.ScanLibrary(libraryId);
+
+        var summary = LastSummary();
+        Assert.Equal(1, summary.SeriesRemoved);
+        Assert.Equal(0, summary.ChaptersAdded);
+    }
+
+    [Fact]
+    public async Task FirstScan_SendsScanSeriesToReaders()
+    {
+        await ScanOnce(nameof(FirstScan_SendsScanSeriesToReaders));
+
+        Assert.Equal([false], ScanSeriesSends());
+    }
+
+    [Fact]
+    public async Task ForcedRescan_WithNoDiskChange_SendsScanSeriesToReaders()
+    {
+        var (scanner, libraryId, _) = await ScanOnce(nameof(ForcedRescan_WithNoDiskChange_SendsScanSeriesToReaders));
+        _eventHub.ClearReceivedCalls();
+
+        await scanner.ScanLibrary(libraryId, forceUpdate: true);
+
+        Assert.Equal([false], ScanSeriesSends());
     }
 }
