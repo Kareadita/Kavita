@@ -62,3 +62,6 @@ CreateGitHubRelease:
   ReleaseTypes: [Stable]
   AssetPath: "_output/"
 
+GitHubComments:
+  ReleaseComponent: Build
+  ReleaseTypes: [Nightly]
