@@ -8,7 +8,7 @@ on:
 
 jobs:
   run-release-tool:
-    if: github.event.pull_request.merged == true
+    if: github.repository == 'Kareadita/Kavita' && github.event.pull_request.merged == true
     uses: Kareadita/GitHubActions/.github/workflows/release-tools.base.yml@main
     secrets: inherit
     with:
