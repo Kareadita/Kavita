@@ -4,7 +4,6 @@ on:
   pull_request_target:
     types: [closed]
     branches: ["develop", "canary"]
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,7 +15,9 @@ jobs:
   run-release-tool:
     if: github.repository == 'Kareadita/Kavita' && github.event.pull_request.merged == true
     uses: Kareadita/GitHubActions/.github/workflows/release-tools.base.yml@main
-    secrets: inherit
+    secrets:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
     with:
       config-path: release.yaml
       dockerhub-username: "jvmilazz0"
