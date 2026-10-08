@@ -1,5 +1,5 @@
 namespace Kavita.Models.DTOs.SignalR.Bodies;
 
-public record SiteThemeProgressEventBody(string ThemeName);
-public record SiteThemeUpdatedEventBody(string ThemeName);
-public record BookThemeProgressEventBody(string ThemeName);
+public sealed record SiteThemeProgressEventBody(string ThemeName);
+public sealed record SiteThemeUpdatedEventBody(string ThemeName);
+public sealed record BookThemeProgressEventBody(string ThemeName);

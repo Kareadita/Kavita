@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Kavita.Models.DTOs.SignalR.Bodies;
 
 namespace Kavita.Models.DTOs.SignalR;
 
@@ -16,6 +17,8 @@ public sealed record RecentJobDto
     /// False when the job stopped without every step sending ended (it threw)
     /// </summary>
     public bool Completed { get; init; }
-    public int SeriesAdded { get; init; }
-    public int SeriesRemoved { get; init; }
+    /// <summary>
+    /// One per library scan that finished in this job
+    /// </summary>
+    public IList<LibraryScanEndedEventBody> ScanSummaries { get; init; } = [];
 }

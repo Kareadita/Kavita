@@ -14,10 +14,16 @@ import {ActivityDurationPipe} from '../../../_pipes/activity-duration.pipe';
 import {EventAction} from '../../../_models/events/event-action';
 import {ActivityEndReason} from '../../../_models/activity/activity-end-reason';
 import {LibraryService} from '../../../_services/library.service';
+import {LibraryScanSummary} from '../../../_models/activity/library-scan-summary';
 
 interface StepCounter {
   current: number;
   total: number;
+}
+
+interface SummaryPart {
+  key: string;
+  params: Record<string, number>;
 }
 
 @Component({
@@ -61,7 +67,8 @@ export class ActivityJobRowComponent {
     return libraryId === undefined ? '' : (this.libraryNames()?.[libraryId] ?? '');
   });
 
-  protected readonly showSummary = computed(() => this.ended() && this.isScan() && this.job().seenFromStart);
+  protected readonly summaryParts = computed(() => summaryPartsOf(this.job().scanSummaries));
+  protected readonly showSummary = computed(() => this.ended() && this.isScan() && this.job().scanSummaries.length > 0);
   protected readonly canOpenLibrary = computed(() => this.ended() && this.isScan() && !this.isMultiLibrary() && this.job().libraryId !== null);
   protected readonly canRescan = computed(() => this.isScan() && (this.isMultiLibrary() || this.job().libraryId !== null));
 
@@ -91,6 +98,30 @@ export class ActivityJobRowComponent {
   }
 
   protected readonly EventAction = EventAction;
+}
+
+function summaryPartsOf(summaries: LibraryScanSummary[]): SummaryPart[] {
+  const sum = (field: keyof Omit<LibraryScanSummary, 'libraryId' | 'libraryName'>) => summaries.reduce((total, s) => total + s[field], 0);
+
+  const changes: SummaryPart[] = [
+    {key: 'scan-series-added-label', params: {count: sum('seriesAdded')}},
+    {key: 'scan-series-removed-label', params: {count: sum('seriesRemoved')}},
+    {key: 'scan-chapters-added-label', params: {count: sum('chaptersAdded')}},
+    {key: 'scan-chapters-updated-label', params: {count: sum('chaptersUpdated')}},
+    {key: 'scan-chapters-removed-label', params: {count: sum('chaptersRemoved')}},
+  ].filter(p => p.params.count > 0);
+
+  const parts = changes.length > 0 ? changes : [{key: 'scan-no-changes-label', params: {}}];
+
+  const problemFiles = sum('problemFiles');
+  const newProblemFiles = sum('newProblemFiles');
+  if (newProblemFiles > 0) {
+    parts.push({key: 'scan-problem-files-new-label', params: {count: problemFiles, new: newProblemFiles}});
+  } else if (problemFiles > 0) {
+    parts.push({key: 'scan-problem-files-label', params: {count: problemFiles}});
+  }
+
+  return parts;
 }
 
 function counterOf(step: ActivityStep | undefined): StepCounter | null {

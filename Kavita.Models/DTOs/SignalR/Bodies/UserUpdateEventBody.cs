@@ -1,3 +1,3 @@
 namespace Kavita.Models.DTOs.SignalR.Bodies;
 
-public record UserUpdateEventBody(int UserId, string UserName);
+public sealed record UserUpdateEventBody(int UserId, string UserName);

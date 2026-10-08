@@ -1,3 +1,3 @@
 namespace Kavita.Models.DTOs.SignalR.Bodies;
 
-public record LibraryModifiedEventBody(int LibraryId, string Action);
+public sealed record LibraryModifiedEventBody(int LibraryId, string Action);

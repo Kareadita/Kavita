@@ -1,4 +1,4 @@
 namespace Kavita.Models.DTOs.SignalR.Bodies;
 
-public record DashboardUpdateEventBody(int UserId);
-public record SideNavUpdateEventBody(int UserId);
+public sealed record DashboardUpdateEventBody(int UserId);
+public sealed record SideNavUpdateEventBody(int UserId);

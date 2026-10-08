@@ -109,7 +109,7 @@ public class ScannerHelper
 
     /// <param name="wrapScanReader">Replaces the reader used while walking and parsing, ProcessSeries keeps the real one</param>
     public ScannerService CreateServices(DirectoryService? ds = null, IFileSystem? fs = null,
-        Func<IReadingItemService, IReadingItemService>? wrapScanReader = null)
+        Func<IReadingItemService, IReadingItemService>? wrapScanReader = null, IEventHub? eventHub = null)
     {
         fs ??= new FileSystem();
         ds ??= new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
@@ -142,7 +142,7 @@ public class ScannerHelper
 
         var scanner = new ScannerService(_unitOfWork, Substitute.For<ILogger<ScannerService>>(),
             Substitute.For<IMetadataService>(),
-            Substitute.For<ICacheService>(), Substitute.For<IEventHub>(), ds,
+            Substitute.For<ICacheService>(), eventHub ?? Substitute.For<IEventHub>(), ds,
             wrapScanReader?.Invoke(readingItemService) ?? readingItemService, scopeFactory, Substitute.For<IWordCountAnalyzerService>(),
             CreateMapper());
         return scanner;

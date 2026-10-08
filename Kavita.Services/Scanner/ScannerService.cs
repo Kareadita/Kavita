@@ -19,6 +19,7 @@ using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.MediaErrors;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.DTOs.SignalR.Bodies;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Parser;
@@ -277,6 +278,8 @@ public class ScannerService(
         // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
         RemoveParsedInfosNotForSeries(parsedSeries, series);
 
+        var tally = new ScanTally();
+
         // If nothing was found, first validate any of the files still exist. If they don't then we have a deletion and can skip the rest of the logic flow
         if (parsedSeries.Count == 0)
         {
@@ -290,6 +293,7 @@ public class ScannerService(
                      await CommitAndSend(1, sw, scanElapsedTime, series);
                      await eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
                          MessageFactory.SeriesRemovedEvent(seriesId, string.Empty, series.LibraryId), false);
+                     tally.SeriesRemoved++;
                  }
                  catch (Exception ex)
                  {
@@ -330,7 +334,7 @@ public class ScannerService(
             var scopedLibrary = (await unitOfWorkScoped.LibraryRepository.GetLibraryForIdAsync(library.Id,
                 LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
 
-            var processedSeriesId = await processSeries.ProcessSeriesAsync(settings, pSeries, new ProcessSeriesArgs
+            var result = await processSeries.ProcessSeriesAsync(settings, pSeries, new ProcessSeriesArgs
             {
                 Library = scopedLibrary,
                 LeftToProcess = seriesLeftToProcess,
@@ -338,27 +342,25 @@ public class ScannerService(
                 ForceUpdate = bypassFolderOptimizationChecks,
                 ScanStarted = scanStarted,
             });
+            tally.Add(result);
 
-            if (processedSeriesId != null)
+            if (result.SeriesId != null)
             {
                 var metadataServiceScoped = scope.ServiceProvider.GetRequiredService<IMetadataService>();
                 var wordCountAnalyzerServiceScoped = scope.ServiceProvider.GetRequiredService<IWordCountAnalyzerService>();
 
-                await metadataServiceScoped.GenerateCoversForSeries(serverSettings, scopedLibrary.Id, processedSeriesId.Value, bypassFolderOptimizationChecks, false);
-                await wordCountAnalyzerServiceScoped.ScanSeries(scopedLibrary.Id, processedSeriesId.Value, bypassFolderOptimizationChecks);
+                await metadataServiceScoped.GenerateCoversForSeries(serverSettings, scopedLibrary.Id, result.SeriesId.Value, bypassFolderOptimizationChecks, false);
+                await wordCountAnalyzerServiceScoped.ScanSeries(scopedLibrary.Id, result.SeriesId.Value, bypassFolderOptimizationChecks);
             }
 
             seriesLeftToProcess--;
-
-
         }
 
-        await ReportScanIssuesAsync(library, savedIssues);
-
+        var issues = await ReportScanIssuesAsync(library, savedIssues);
 
         // Tell UI that this series is done
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Ended, series.Name));
+            MessageFactory.LibraryScanEndedEvent(tally.ToEventBody(library, issues), series.Name));
 
         await metadataService.RemoveAbandonedMetadataKeys();
 
@@ -584,7 +586,7 @@ public class ScannerService(
 
         // We need to remove any keys where there is no actual parser info
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 2: Process and Update Database", library.Name);
-        var totalFiles = await ProcessParsedSeries(forceUpdate, parsedSeries, library, scanElapsedTime, scanStarted);
+        var tally = await ProcessParsedSeries(forceUpdate, parsedSeries, library, scanElapsedTime, scanStarted);
 
         UpdateLastScanned(library);
         unitOfWork.LibraryRepository.Update(library);
@@ -592,7 +594,7 @@ public class ScannerService(
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 3: Save Library", library.Name);
         if (await unitOfWork.CommitAsync())
         {
-            if (totalFiles == 0)
+            if (tally.TotalFiles == 0)
             {
                 logger.LogInformation(
                     "[ScannerService] Finished library scan of {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}. There were no changes",
@@ -602,11 +604,11 @@ public class ScannerService(
             {
                 logger.LogInformation(
                     "[ScannerService] Finished library scan of {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                    totalFiles, parsedSeries.Count, sw.ElapsedMilliseconds, library.Name);
+                    tally.TotalFiles, parsedSeries.Count, sw.ElapsedMilliseconds, library.Name);
             }
 
             logger.LogDebug("[ScannerService] Library {LibraryName} Step 5: Remove Deleted Series", library.Name);
-            await RemoveSeriesNotFound(parsedSeries, library);
+            tally.SeriesRemoved += await RemoveSeriesNotFound(parsedSeries, library);
         }
         else
         {
@@ -614,16 +616,17 @@ public class ScannerService(
                 "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
         }
 
-        await ReportScanIssuesAsync(library, savedIssues);
+        var issues = await ReportScanIssuesAsync(library, savedIssues);
 
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Ended, string.Empty));
+            MessageFactory.LibraryScanEndedEvent(tally.ToEventBody(library, issues)));
         await metadataService.RemoveAbandonedMetadataKeys();
 
         BackgroundJob.Enqueue(() => directoryService.ClearDirectory(directoryService.CacheDirectory));
     }
 
-    private async Task RemoveSeriesNotFound(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Library library)
+    /// <returns>How many series were removed</returns>
+    private async Task<int> RemoveSeriesNotFound(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Library library)
     {
         try
         {
@@ -647,14 +650,16 @@ public class ScannerService(
             }
 
             logger.LogDebug("[ScannerService] Series removal process completed");
+            return removedSeries.Count;
         }
         catch (Exception ex)
         {
             logger.LogCritical(ex, "[ScannerService] Error during series cleanup. Please check logs and rescan");
+            return 0;
         }
     }
 
-    private async Task<int> ProcessParsedSeries(bool forceUpdate, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Library library,
+    private async Task<ScanTally> ProcessParsedSeries(bool forceUpdate, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Library library,
         long scanElapsedTime, DateTime scanStarted)
     {
         // Iterate over the dictionary and remove only the ParserInfos that don't need processing
@@ -706,11 +711,11 @@ public class ScannerService(
 
         logger.LogInformation("[ScannerService] Found {SeriesCount} Series that need processing in {Time} ms", toProcess.Count, scanSw.ElapsedMilliseconds + scanElapsedTime);
 
-        var totalFiles = await ProcessParserInfo(settings, toProcess.Values.ToList(), library, forceUpdate, scanStarted);
+        var tally = await ProcessParserInfo(settings, toProcess.Values.ToList(), library, forceUpdate, scanStarted);
 
         logger.LogInformation("[ScannerService] Finished scan in {ScanAndUpdateTime} milliseconds.", scanSw.ElapsedMilliseconds + scanElapsedTime);
 
-        return totalFiles;
+        return tally;
     }
 
     /// <summary>
@@ -721,8 +726,7 @@ public class ScannerService(
     /// <param name="library"></param>
     /// <param name="forceUpdate"></param>
     /// <param name="scanStarted"></param>
-    /// <returns>Total amount of processed files</returns>
-    private async Task<int> ProcessParserInfo(MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, Library library,
+    private async Task<ScanTally> ProcessParserInfo(MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, Library library,
         bool forceUpdate, DateTime scanStarted)
     {
         var channel = Channel.CreateUnbounded<int>();
@@ -742,16 +746,14 @@ public class ScannerService(
             tasks.Add(Task.Run(async () => await ExtraWorkTask(channel, serverSettings, library.Id, forceUpdate)));
         }
 
-        tasks.Add(dbTask);
-
-        await Task.WhenAll(tasks);
+        await Task.WhenAll(tasks.Append<Task>(dbTask));
 
         var totalIoTime = tasks.Select(t => t.Result).Sum();
         var avgTimePerThread = totalIoTime / usingCount;
         logger.LogDebug("[ScannerService] Spend {Elapsed}ms processing covers & word count, {Average}ms per thread",
             totalIoTime, avgTimePerThread);
 
-        return (int) dbTask.Result;
+        return dbTask.Result;
     }
 
     /// <summary>
@@ -789,11 +791,10 @@ public class ScannerService(
     /// <param name="libraryName"></param>
     /// <param name="forceUpdate"></param>
     /// <param name="scanStarted"></param>
-    /// <returns>The total amount of processed files</returns>
-    private async Task<long> DbMetadataTask(Channel<int> channel, MetadataSettingsDto settings,
+    private async Task<ScanTally> DbMetadataTask(Channel<int> channel, MetadataSettingsDto settings,
         IList<IList<ParserInfo>> toProcess, int libraryId, string libraryName, bool forceUpdate, DateTime scanStarted)
     {
-        var totalFiles = 0;
+        var tally = new ScanTally();
         var seriesLeftToProcess = toProcess.Count;
         var totalSeriesToProcess = toProcess.Count;
         var sw = Stopwatch.StartNew();
@@ -803,7 +804,7 @@ public class ScannerService(
             foreach (var pSeries in toProcess)
             {
                 // Placeholders for skipped folders aren't files
-                totalFiles += pSeries.Count(info => string.IsNullOrEmpty(info.UnchangedFolderPath));
+                tally.TotalFiles += pSeries.Count(info => string.IsNullOrEmpty(info.UnchangedFolderPath));
 
                 using var scope = scopeFactory.CreateScope();
                 var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -813,7 +814,7 @@ public class ScannerService(
                 var library = (await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId,
                     LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
 
-                var seriesId = await processSeries.ProcessSeriesAsync(settings, pSeries, new ProcessSeriesArgs
+                var result = await processSeries.ProcessSeriesAsync(settings, pSeries, new ProcessSeriesArgs
                 {
                     Library = library,
                     LeftToProcess = seriesLeftToProcess,
@@ -821,10 +822,11 @@ public class ScannerService(
                     ForceUpdate = forceUpdate,
                     ScanStarted = scanStarted,
                 });
+                tally.Add(result);
 
-                if (seriesId != null)
+                if (result.SeriesId != null)
                 {
-                    await channel.Writer.WriteAsync(seriesId.Value);
+                    await channel.Writer.WriteAsync(result.SeriesId.Value);
                 }
 
                 seriesLeftToProcess--;
@@ -844,7 +846,7 @@ public class ScannerService(
 
         logger.LogDebug("[ScannerService] Finished writing metadata for {Count} series in {Elapsed}ms", toProcess.Count, sw.ElapsedMilliseconds);
 
-        return totalFiles;
+        return tally;
     }
 
     private static void UpdateLastScanned(Library library)
@@ -860,7 +862,7 @@ public class ScannerService(
 
     /// <param name="seriesId">Set by a series scan, every issue found belongs to that series</param>
     /// <returns>How long the walk took, the parsed series, and the issues saved</returns>
-    private async Task<(long ElapsedMs, Dictionary<ParsedSeries, IList<ParserInfo>> ParsedSeries, SavedScanIssues SavedIssues)> ScanFiles(
+    private async Task<ScanFilesResult> ScanFiles(
         Library library, IList<string> dirs, bool isLibraryScan, bool forceChecks = false, int? seriesId = null)
     {
         var scanner = new ParseScannedFiles(logger, directoryService, readingItemService, eventHub);
@@ -886,7 +888,7 @@ public class ScannerService(
         var parsedSeries = TrackFoundSeriesAndFiles(processedSeries,
             await unitOfWork.SeriesRepository.GetSeriesNameMatchesAsync(library.Id));
 
-        return (scanElapsedTime, parsedSeries, savedIssues);
+        return new ScanFilesResult(scanElapsedTime, parsedSeries, savedIssues);
     }
 
     /// <summary>
@@ -974,6 +976,33 @@ public class ScannerService(
 
     /// <param name="NewCount">Files that could not be read with a new issue: first seen, or a new reason or stamp</param>
     /// <param name="FilesByFolder">Every file listed directly in each folder with an issue</param>
+    private sealed class ScanTally
+    {
+        public int TotalFiles { get; set; }
+        public int SeriesAdded { get; private set; }
+        public int SeriesRemoved { get; set; }
+        public int ChaptersAdded { get; private set; }
+        public int ChaptersUpdated { get; private set; }
+        public int ChaptersRemoved { get; private set; }
+
+        public void Add(ProcessSeriesResult result)
+        {
+            if (result.SeriesAdded)
+            {
+                SeriesAdded++;
+            }
+            ChaptersAdded += result.ChaptersAdded;
+            ChaptersUpdated += result.ChaptersUpdated;
+            ChaptersRemoved += result.ChaptersRemoved;
+        }
+
+        public LibraryScanEndedEventBody ToEventBody(Library library, ScanIssueSummaryDto issues) =>
+            new(library.Id, library.Name, SeriesAdded, SeriesRemoved, ChaptersAdded, ChaptersUpdated, ChaptersRemoved,
+                issues.Count, issues.NewCount);
+    }
+
+    private sealed record ScanFilesResult(long ElapsedMs, Dictionary<ParsedSeries, IList<ParserInfo>> ParsedSeries, SavedScanIssues SavedIssues);
+
     private sealed record SavedScanIssues(int NewCount, IList<string> Paths, IReadOnlyDictionary<string, IList<string>> FilesByFolder);
 
     /// <summary>

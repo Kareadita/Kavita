@@ -1,5 +1,5 @@
 namespace Kavita.Models.DTOs.SignalR.Bodies;
 
-public record ReadingListUpdatedEventBody(int Id);
-public record SeriesUpdatedEventBody(int Id);
-public record ExternalMetadataUpdateEventBody(int SeriesId);
+public sealed record ReadingListUpdatedEventBody(int Id);
+public sealed record SeriesUpdatedEventBody(int Id);
+public sealed record ExternalMetadataUpdateEventBody(int SeriesId);

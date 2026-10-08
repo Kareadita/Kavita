@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.DTOs.SignalR.Bodies;
 using Kavita.Models.DTOs.Update;
 using Kavita.Models.Entities.Enums;
 
@@ -171,6 +172,19 @@ public class MessageFactoryTests
         Assert.Equal(4, fileScan.GetProperty("libraryId").GetInt32());
         Assert.Equal("Manga", fileScan.GetProperty("libraryName").GetString());
         Assert.Equal(4, libraryScan.GetProperty("libraryId").GetInt32());
+    }
+
+
+    [Fact]
+    public void LibraryScanEnded_IsATrackedScanProgressEnded()
+    {
+        var message = MessageFactory.LibraryScanEndedEvent(new LibraryScanEndedEventBody(4, "Manga", 1, 0, 12, 3, 1, 2, 1));
+        var json = Serialize(message);
+
+        Assert.Equal(MessageFactory.LibraryScanProgressEvent(4, "Manga", ProgressEventType.Updated).Name, message.Name);
+        Assert.Equal("ended", json.GetProperty("eventType").GetString());
+        Assert.Equal(ProgressType.Indeterminate, message.Progress);
+        Assert.Equal(12, json.GetProperty("body").GetProperty("chaptersAdded").GetInt32());
     }
 
     [Fact]

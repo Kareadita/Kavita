@@ -1,4 +1,4 @@
 namespace Kavita.Models.DTOs.SignalR.Bodies;
 
-public record BackupDatabaseProgressEventBody(float Progress);
-public record CleanupProgressEventBody(float Progress);
+public sealed record BackupDatabaseProgressEventBody(float Progress);
+public sealed record CleanupProgressEventBody(float Progress);

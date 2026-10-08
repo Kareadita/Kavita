@@ -100,7 +100,14 @@
         } @else if (endedAway()) {
           <div class="description">{{t('finished-while-away-label')}}</div>
         } @else if (showSummary()) {
-          <div class="description">{{t('scan-summary-label', {added: current.seriesAdded, removed: current.seriesRemoved})}}</div>
+          <div class="description">
+            @for (part of summaryParts(); track part.key) {
+              @if (!$first) {
+                <span class="mx-1 dot-separator"></span>
+              }
+              {{t(part.key, part.params)}}
+            }
+          </div>
         }
 
         @if (canOpenLibrary()) {

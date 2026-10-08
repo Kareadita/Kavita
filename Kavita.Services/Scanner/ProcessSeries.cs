@@ -69,6 +69,12 @@ internal sealed record UpdateChapterComicInfoArgs
 
 internal sealed record TemporaryPerson(string Name, string NormalizedName);
 
+internal readonly record struct ChapterChanges(int Added, int Updated, int Removed);
+
+/// <param name="Changed">The file was read again</param>
+/// <param name="ChangedOnDisk">Same as Changed, minus reads that only happened because of a forced scan or a 0 page retry</param>
+internal readonly record struct UpdateChapterResult(MangaFile File, bool Changed, bool ChangedOnDisk);
+
 /// <param name="Path">Normalized folder</param>
 /// <param name="IsShallow">Covers only files directly in the folder</param>
 internal readonly record struct UnchangedFolder(string Path, bool IsShallow)
@@ -97,9 +103,9 @@ public class ProcessSeries(
     : IProcessSeries
 {
 
-    public async Task<int?> ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, ProcessSeriesArgs args)
+    public async Task<ProcessSeriesResult> ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, ProcessSeriesArgs args)
     {
-        if (!parsedInfos.Any()) return null;
+        if (!parsedInfos.Any()) return ProcessSeriesResult.NotSaved;
 
         var library = args.Library;
 
@@ -124,7 +130,7 @@ public class ProcessSeries(
         catch (Exception ex)
         {
             await ReportDuplicateSeriesLookup(library, firstInfo, ex);
-            return null;
+            return ProcessSeriesResult.NotSaved;
         }
 
         if (series == null)
@@ -138,6 +144,7 @@ public class ProcessSeries(
 
         if (series.LibraryId == 0) series.LibraryId = library.Id;
 
+        ChapterChanges chapterChanges;
         try
         {
             logger.LogInformation("[ScannerService] Processing series {SeriesName} with {Count} files", series.OriginalName, parsedInfos.Count);
@@ -155,7 +162,7 @@ public class ProcessSeries(
             // Skipped folders were not read, so their files may carry the LocalizedSeries or SeriesSort
             var hasReadAllFiles = unchangedFolders.Count == 0;
 
-            await ProcessParserInfos(new ProcessParserInfosArgs
+            chapterChanges = await ProcessParserInfos(new ProcessParserInfosArgs
             {
                 Settings = settings,
                 Series = series,
@@ -231,7 +238,7 @@ public class ProcessSeries(
                     logger.LogDbUpdateConcurrencyException(ex);
                     await eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.DbWriteFailedEvent(library.Id, series.Id > 0 ? series.Id : null, series.OriginalName, ex.Message));
-                    return null;
+                    return ProcessSeriesResult.NotSaved;
                 }
                 catch (Exception ex)
                 {
@@ -242,7 +249,7 @@ public class ProcessSeries(
 
                     await eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.DbWriteFailedEvent(library.Id, series.Id > 0 ? series.Id : null, series.OriginalName, ex.Message));
-                    return null;
+                    return ProcessSeriesResult.NotSaved;
                 }
 
 
@@ -269,7 +276,7 @@ public class ProcessSeries(
         catch (Exception ex)
         {
             logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
-            return null;
+            return ProcessSeriesResult.NotSaved;
         }
 
         if (seriesAdded && library.AllowMetadataMatching)
@@ -283,7 +290,8 @@ public class ProcessSeries(
         await eventHub.SendMessageAsync(MessageFactory.ScanSeries,
             MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name));
 
-        return series.Id;
+        return new ProcessSeriesResult(series.Id, seriesAdded,
+            chapterChanges.Added, chapterChanges.Updated, chapterChanges.Removed);
     }
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
@@ -742,11 +750,13 @@ public class ProcessSeries(
         }
     }
 
-    private async Task ProcessParserInfos(ProcessParserInfosArgs args)
+    private async Task<ChapterChanges> ProcessParserInfos(ProcessParserInfosArgs args)
     {
         var foundVolumes = new HashSet<Volume>();
         var foundChapters = new HashSet<Chapter>();
         var foundMangaFiles = new HashSet<MangaFile>();
+        var addedChapters = new HashSet<Chapter>();
+        var changedChapters = new HashSet<Chapter>();
 
         var unverifiedFileIds = GetFilesInUnchangedFolders(args.Series, args.UnchangedFolders)
             .Select(f => f.Id)
@@ -757,7 +767,10 @@ public class ProcessSeries(
             var volume = FindOrCreateVolume(args, parsedInfo);
             var chapter = FindOrCreateChapter(args, parsedInfo);
 
-
+            if (chapter.Id == 0)
+            {
+                addedChapters.Add(chapter);
+            }
 
             if (chapter.VolumeId == 0 || chapter.VolumeId != volume.Id)
             {
@@ -769,14 +782,18 @@ public class ProcessSeries(
                 chapter.Volume = volume;
             }
 
-            var (mangaFile, fileChanged) = AddOrUpdateFileForChapter(chapter, parsedInfo, args.ForceUpdate);
+            var fileResult = AddOrUpdateFileForChapter(chapter, parsedInfo, args.ForceUpdate);
 
-            await UpdateChapter(args, chapter, parsedInfo, fileChanged);
+            await UpdateChapter(args, chapter, parsedInfo, fileResult.Changed);
+            if (fileResult.ChangedOnDisk)
+            {
+                changedChapters.Add(chapter);
+            }
 
             // UpdateChapters may commit, we track the entities and collect the ids later
             foundVolumes.Add(volume);
             foundChapters.Add(chapter);
-            foundMangaFiles.Add(mangaFile);
+            foundMangaFiles.Add(fileResult.File);
         }
 
         var mangaFileIds = foundMangaFiles.Select(m => m.Id).ToHashSet();
@@ -784,7 +801,7 @@ public class ProcessSeries(
         var chapterIds = foundChapters.Select(c => c.Id).ToHashSet();
 
         // Remove volumes and chapter that did not match any files on disk
-        RemoveUnmappedEntities(args.Series, volumeIds, chapterIds, unverifiedFileIds);
+        var removedChapters = RemoveUnmappedEntities(args.Series, volumeIds, chapterIds, unverifiedFileIds);
 
         // Update page count once all pages have been processed
         foreach (var volume in args.Series.Volumes)
@@ -797,9 +814,11 @@ public class ProcessSeries(
 
             volume.Pages = volume.Chapters.Sum(chapter => chapter.Pages);
         }
+
+        return new ChapterChanges(addedChapters.Count, changedChapters.Except(addedChapters).Count(), removedChapters);
     }
 
-    private void RemoveUnmappedEntities(Series series, HashSet<int> foundVolumes, HashSet<int> foundChapters,
+    private int RemoveUnmappedEntities(Series series, HashSet<int> foundVolumes, HashSet<int> foundChapters,
         HashSet<int> unverifiedFileIds)
     {
         var unmappedVolumes = series.Volumes
@@ -823,7 +842,7 @@ public class ProcessSeries(
         if (unmappedVolumes.Count == 0 && unmappedChapters.Count == 0)
         {
             logger.LogTrace("No volumes, chapters, or files to delete for {SeriesId}", series.Id);
-            return;
+            return 0;
         }
 
         if (unmappedVolumes.Count > 0)
@@ -847,7 +866,7 @@ public class ProcessSeries(
             }
         }
 
-        return;
+        return unmappedChapters.Count;
 
         bool HasUnverifiedFile(IEnumerable<MangaFile> files) => files.Any(f => unverifiedFileIds.Contains(f.Id));
     }
@@ -1044,7 +1063,7 @@ public class ProcessSeries(
         }
     }
 
-    private (MangaFile File, bool Changed) AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
+    private UpdateChapterResult AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
     {
         chapter.Files ??= [];
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
@@ -1053,9 +1072,10 @@ public class ProcessSeries(
         {
             existingFile.Format = info.Format;
 
-            if (!forceUpdate && existingFile.Pages != 0 && !HasFileChanged(existingFile, fileInfo))
+            var changedOnDisk = HasFileChanged(existingFile, fileInfo);
+            if (!forceUpdate && existingFile.Pages != 0 && !changedOnDisk)
             {
-                return (existingFile, false);
+                return new UpdateChapterResult(existingFile, false, false);
             }
 
             existingFile.Pages = readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
@@ -1066,7 +1086,7 @@ public class ProcessSeries(
             existingFile.FileLastWriteTimeUtc = fileInfo.LastWriteTimeUtc;
             existingFile.KoreaderHash = KoreaderHelper.HashContents(existingFile.FilePath);
 
-            return (existingFile, true);
+            return new UpdateChapterResult(existingFile, true, changedOnDisk);
         }
 
         var file = new MangaFileBuilder(info.FullFilePath, info.Format, readingItemService.GetNumberOfPages(info.FullFilePath, info.Format))
@@ -1076,7 +1096,7 @@ public class ProcessSeries(
             .Build();
         chapter.Files.Add(file);
 
-        return (file, true);
+        return new UpdateChapterResult(file, true, true);
     }
 
     /// <summary>

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using Kavita.API.Services.SignalR;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.DTOs.SignalR.Bodies;
 
 namespace Kavita.Services.SignalR;
 
@@ -43,25 +44,19 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
         public DateTimeOffset LastSeen { get; set; }
         public Dictionary<string, SignalRMessageDto> Steps { get; } = new();
         public HashSet<string> Ended { get; } = [];
-        public int SeriesAdded { get; set; }
-        public int SeriesRemoved { get; set; }
-        public int TotalSeriesProcessed { get; set; }
+        /// <summary>By library, ScanLibraries runs every library under one job</summary>
+        public Dictionary<int, LibraryScanEndedEventBody> ScanSummaries { get; } = new();
     }
 
     public void Record(string method, SignalRMessageDto message)
     {
-        switch (method)
+        if (method == MessageFactory.NotificationProgress)
         {
-            case MessageFactory.NotificationProgress:
-                RecordProgress(message);
-                break;
-            case MessageFactory.SeriesAdded:
-            case MessageFactory.SeriesRemoved:
-                CountSeries(method, message.CorrelationId);
-                break;
-            default:
-                if (EntryMethods.Contains(method)) RecordEntry(message);
-                break;
+            RecordProgress(message);
+        }
+        else if (EntryMethods.Contains(method))
+        {
+            RecordEntry(message);
         }
     }
 
@@ -124,8 +119,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
                     EndedUtc = j.Value.LastEventUtc,
                     Steps = j.Value.Steps.Values.ToList(),
                     Completed = j.Value.Steps.Keys.All(j.Value.Ended.Contains),
-                    SeriesAdded = j.Value.SeriesAdded,
-                    SeriesRemoved = j.Value.SeriesRemoved,
+                    ScanSummaries = j.Value.ScanSummaries.Values.ToList(),
                 })
                 .ToList();
         }
@@ -160,8 +154,11 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
 
             if (message.EventType == ProgressEventType.Ended)
             {
-                // TODO: Get final payload on Ended event
                 job.Ended.Add(message.Name);
+                if (message.Body is LibraryScanEndedEventBody summary)
+                {
+                    job.ScanSummaries[summary.LibraryId] = summary;
+                }
             }
             else
             {
@@ -170,20 +167,10 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
                 job.Steps[message.Name] = message;
             }
 
-            if (_jobs.Count > MaxRecentJobs) _jobs.Remove(_jobs.MinBy(j => j.Value.LastSeen).Key);
-        }
-    }
-
-    private void CountSeries(string method, string? correlationId)
-    {
-        if (string.IsNullOrEmpty(correlationId)) return;
-
-        lock (_historyLock)
-        {
-            if (!_jobs.TryGetValue(correlationId, out var job)) return;
-
-            if (method == MessageFactory.SeriesAdded) job.SeriesAdded++;
-            else job.SeriesRemoved++;
+            if (_jobs.Count > MaxRecentJobs)
+            {
+                _jobs.Remove(_jobs.MinBy(j => j.Value.LastSeen).Key);
+            }
         }
     }
 

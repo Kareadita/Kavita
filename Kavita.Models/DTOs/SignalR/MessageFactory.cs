@@ -786,15 +786,8 @@ public static class MessageFactory
             SubTitle = folderPath,
             EventType = eventType,
             Progress = hasProgress ? ProgressType.Determinate : ProgressType.Indeterminate,
-            Body = new FileScanProgressEventBody(libraryId, current, total)
-            {
-                Title = $"Scanning {libraryName}",
-                Subtitle = folderPath,
-                Filename = folderPath,
-                LibraryName = libraryName,
-                EventTime = DateTime.Now,
-                Progress = hasProgress ? Math.Clamp(current!.Value / (float) total!.Value, 0f, 1f) : null,
-            }
+            Body = new FileScanProgressEventBody(libraryId, libraryName, current, total,
+                hasProgress ? Math.Clamp(current!.Value / (float) total!.Value, 0f, 1f) : null)
         };
     }
 
@@ -846,9 +839,27 @@ public static class MessageFactory
             Body = new LibraryScanProgressEventBody(libraryId, progress, leftToProcess, totalToProcess)
             {
                 SeriesName = seriesName,
-                LibraryId = libraryId,
                 LibraryName = libraryName,
             }
+        };
+    }
+
+    /// <summary>
+    /// Closes the <see cref="ScanProgress"/> step of a library or series scan with what the scan changed
+    /// </summary>
+    public static SignalRMessageDto LibraryScanEndedEvent(LibraryScanEndedEventBody summary, string seriesName = "")
+    {
+        return new SignalRMessageDto()
+        {
+            Name = ScanProgress,
+            Priority = MessageEventPriority.Activity,
+            Code = MessageEventCode.ScanProcessingSeries,
+            Title = $"Processing {seriesName}",
+            SubTitle = seriesName,
+            EventType = ProgressEventType.Ended,
+            // Must not be None: ActivityTracker skips None progress messages and the UI turns them into standalone entries
+            Progress = ProgressType.Indeterminate,
+            Body = summary
         };
     }
 

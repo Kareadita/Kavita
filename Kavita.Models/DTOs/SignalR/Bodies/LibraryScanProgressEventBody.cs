@@ -1,6 +1,6 @@
 namespace Kavita.Models.DTOs.SignalR.Bodies;
 
-public record LibraryScanProgressEventBody(int LibraryId, float? Progress, int? LeftToProgress, int? TotalProgress)
+public sealed record LibraryScanProgressEventBody(int LibraryId, float? Progress, int? LeftToProcess, int? TotalToProcess)
 {
     public string LibraryName { get; set; }
     /// <summary>

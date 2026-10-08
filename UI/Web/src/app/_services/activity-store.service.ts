@@ -16,6 +16,7 @@ import {ActivitySnapshotResult} from '../_models/activity/activity-snapshot-resu
 import {DelayedScanCodes} from '../_models/activity/delayed-scan-codes';
 import {ActivitySnapshotService} from './activity-snapshot.service';
 import {RecentJob} from '../_models/activity/recent-job';
+import {LibraryScanSummary} from '../_models/activity/library-scan-summary';
 
 const RowTtlMs = 24 * 60 * 60 * 1000;
 const MaxRows = 100;
@@ -129,23 +130,7 @@ export class ActivityStoreService {
       case EVENTS.ExternalMatchRateLimitError:
         if (message.meta) this.addRateLimit({...message.meta, body: message.payload});
         break;
-      case EVENTS.SeriesAdded:
-        this.countSeries(message.meta?.correlationId, 'seriesAdded');
-        break;
-      case EVENTS.SeriesRemoved:
-        this.countSeries(message.meta?.correlationId, 'seriesRemoved');
-        break;
     }
-  }
-
-  private countSeries(correlationId: string | null | undefined, field: 'seriesAdded' | 'seriesRemoved') {
-    if (!correlationId) return;
-
-    const job = this.findJob(`job:${correlationId}`);
-    if (!job) return;
-
-    this._rows.update(rows => rows.map(r => r === job ? {...job, [field]: job[field] + 1} : r));
-    this.scheduleWrite();
   }
 
   private addRateLimit(message: SignalRMessage, announce = true) {
@@ -212,9 +197,15 @@ export class ActivityStoreService {
     const job = this.findJob(id);
     const previous = job?.steps[message.name];
     const isEnded = message.eventType === 'ended';
+    const summary = isEnded ? scanSummaryOf(message) : null;
 
     // An ended never creates or reopens a job (a scan with no changes sends ScanProgress ended with no prior step)
-    if (isEnded && (!previous || previous.eventType === 'ended')) return;
+    if (isEnded && (!previous || previous.eventType === 'ended')) {
+      if (job && summary) {
+        this.addScanSummary(job, summary);
+      }
+      return;
+    }
     if (!isEnded) this.dismissed = this.dismissed.filter(d => d.id !== id);
 
     const updatedUtc = toUtc(message.eventTimeUtc);
@@ -235,8 +226,7 @@ export class ActivityStoreService {
       endedUtc: null,
       endReason: null,
       steps,
-      seriesAdded: job?.seriesAdded ?? 0,
-      seriesRemoved: job?.seriesRemoved ?? 0,
+      scanSummaries: withScanSummary(job?.scanSummaries ?? [], summary),
       seenFromStart: job?.seenFromStart ?? (live && message.eventType === 'started'),
     };
 
@@ -248,6 +238,12 @@ export class ActivityStoreService {
     } else {
       this.cancelFinish(id);
     }
+  }
+
+  private addScanSummary(job: ActivityJob, summary: LibraryScanSummary) {
+    const next: ActivityJob = {...job, scanSummaries: withScanSummary(job.scanSummaries, summary)};
+    this._rows.update(rows => rows.map(r => r === job ? next : r));
+    this.scheduleWrite();
   }
 
   private scheduleFinish(id: string) {
@@ -368,8 +364,7 @@ export class ActivityStoreService {
       endedUtc,
       endReason: recent.completed ? null : ActivityEndReason.Failed,
       steps: {...job?.steps, ...steps},
-      seriesAdded: recent.seriesAdded,
-      seriesRemoved: recent.seriesRemoved,
+      scanSummaries: recent.scanSummaries,
       seenFromStart: true,
     };
 
@@ -539,6 +534,15 @@ function stepOf(message: SignalRMessage, previous: ActivityStep | undefined): Ac
   };
 }
 
+function scanSummaryOf(message: SignalRMessage) {
+  if (message.name !== EVENTS.ScanProgress || numberOf(bodyField(message.body, 'chaptersAdded')) === null) return null;
+  return message.body as LibraryScanSummary;
+}
+
+function withScanSummary(summaries: LibraryScanSummary[], summary: LibraryScanSummary | null) {
+  return summary === null ? summaries : [...summaries.filter(s => s.libraryId !== summary.libraryId), summary];
+}
+
 function withLibrary(libraryIds: number[], libraryId: number | null) {
   return libraryId === null || libraryIds.includes(libraryId) ? libraryIds : [...libraryIds, libraryId];
 }
@@ -574,8 +578,8 @@ function allStepsEnded(job: ActivityJob) {
 }
 
 /**
- * Fills fields added after the row was stored. A job that was mid-scan when the page unloaded missed frames, so its
- * series counts are partial, and one that was waiting out the finish grace is finished
+ * Fills fields added after the row was stored. A job that was mid-scan when the page unloaded missed frames, and one
+ * that was waiting out the finish grace is finished
  */
 function restoreRow(row: ActivityRow): ActivityRow {
   if (row.kind === ActivityRowKind.Entry) return {...row, count: row.count ?? 1, scheduleLost: row.scheduleLost ?? false};
@@ -583,8 +587,7 @@ function restoreRow(row: ActivityRow): ActivityRow {
   const job: ActivityJob = {
     ...row,
     libraryIds: row.libraryIds ?? (row.libraryId === null ? [] : [row.libraryId]),
-    seriesAdded: row.seriesAdded ?? 0,
-    seriesRemoved: row.seriesRemoved ?? 0,
+    scanSummaries: row.scanSummaries ?? [],
     endReason: row.endReason ?? null,
     seenFromStart: row.endedUtc !== null && (row.seenFromStart ?? false),
   };

@@ -1,3 +1,3 @@
 namespace Kavita.Models.DTOs.SignalR.Bodies;
 
-public record UserProgressUpdateEventBody(int UserId, int SeriesId, int VolumeId, int ChapterId, int PagesRead);
+public sealed record UserProgressUpdateEventBody(int UserId, int SeriesId, int VolumeId, int ChapterId, int PagesRead);
