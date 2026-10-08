@@ -11,7 +11,10 @@
 
     @for (item of visibleItems(); track item.id) {
       <div class="item d-flex gap-3">
-        <div class="time flex-shrink-0">{{item.runAtUtc | utcToLocalTime : 'shortTime'}}</div>
+        <div class="time flex-shrink-0">
+          <!--TODO: When cron is weekly, we need more context here like Mon 02:00-->
+          {{item.runAtUtc | utcToLocalTime : 'shortTime'}}
+        </div>
         <div class="content flex-grow-1">
           @switch (item.kind) {
             @case ('task') {

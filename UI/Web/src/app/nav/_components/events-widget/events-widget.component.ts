@@ -6,7 +6,6 @@ import {
   effect,
   ElementRef,
   inject,
-  input,
   OnInit,
   signal,
   untracked,
@@ -18,7 +17,6 @@ import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {RouterLink} from "@angular/router";
 import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session-close-event";
 import {EVENTS, Message, MessageHubService} from "../../../_services/message-hub.service";
-import {User} from "../../../_models/user/user";
 import {LibraryService} from "../../../_services/library.service";
 import {EventTitlePipe} from "../../../_pipes/event-title.pipe";
 import {EventMessagePipe} from "../../../_pipes/event-message.pipe";
@@ -43,6 +41,7 @@ import {EventAction} from "../../../_models/events/event-action";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {KeyBindService} from "../../../_services/key-bind.service";
+import {AccountService} from "../../../_services/account.service";
 
 const AgeTickMs = 30_000;
 
@@ -62,14 +61,14 @@ export class EventsWidgetComponent implements OnInit {
   private readonly snapshotService = inject(ActivitySnapshotService);
   private readonly translocoService = inject(TranslocoService);
   private readonly keyBindService = inject(KeyBindService);
+  private readonly accountService = inject(AccountService);
   private readonly eventMessagePipe = new EventMessagePipe();
   private readonly eventTitlePipe = new EventTitlePipe();
-
-  readonly user = input.required<User>(); // TODO: Just get the user from AccountService
 
   private readonly popover = viewChild(NgbPopover);
   private readonly toggleButton = viewChild<ElementRef<HTMLButtonElement>>('toggle');
 
+  protected readonly user = this.accountService.currentUser;
   protected activeReadingSessions = signal<Set<number>>(new Set());
   protected filter = signal(ActivityFilter.All);
   protected isOpen = signal(false);
