@@ -174,6 +174,19 @@ public class MessageFactoryTests
         Assert.Equal(4, libraryScan.GetProperty("libraryId").GetInt32());
     }
 
+    [Fact]
+    public void LibraryScanProgress_SeriesScan_SerializesForTheWidget()
+    {
+        var seriesScan = Serialize(MessageFactory.LibraryScanProgressEvent(4, "Manga", ProgressEventType.Updated, "One Piece", 1, 1,
+            new SeriesScanTarget(21, "One Piece"))).GetProperty("body").GetProperty("seriesScan");
+        var libraryScan = Serialize(MessageFactory.LibraryScanProgressEvent(4, "Manga", ProgressEventType.Updated, "One Piece", 1, 2))
+            .GetProperty("body").GetProperty("seriesScan");
+
+        Assert.Equal(21, seriesScan.GetProperty("seriesId").GetInt32());
+        Assert.Equal("One Piece", seriesScan.GetProperty("seriesName").GetString());
+        Assert.Equal(JsonValueKind.Null, libraryScan.ValueKind);
+    }
+
 
     [Fact]
     public void LibraryScanEnded_IsATrackedScanProgressEnded()

@@ -57,6 +57,28 @@ public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) 
             .ToList();
     }
 
+    private List<LibraryScanProgressEventBody> ScanProgressBodies()
+    {
+        return _eventHub.ReceivedCalls()
+            .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
+            .Select(c => c.GetArguments()[1])
+            .OfType<SignalRMessageDto>()
+            .Select(m => m.Body)
+            .OfType<LibraryScanProgressEventBody>()
+            .ToList();
+    }
+
+    private ScanSeriesEventBody LastScannedSeries()
+    {
+        return _eventHub.ReceivedCalls()
+            .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
+            .Select(c => c.GetArguments()[1])
+            .OfType<SignalRMessageDto>()
+            .Select(m => m.Body)
+            .OfType<ScanSeriesEventBody>()
+            .Last();
+    }
+
     // The scanner skips a folder whose write time matches the last scan to the second
     private static void TouchFolder(string root)
     {
@@ -154,5 +176,31 @@ public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) 
         await scanner.ScanLibrary(libraryId, forceUpdate: true);
 
         Assert.Equal([false], ScanSeriesSends());
+    }
+
+    [Fact]
+    public async Task LibraryScan_ProgressHasNoSeriesScan()
+    {
+        await ScanOnce(nameof(LibraryScan_ProgressHasNoSeriesScan));
+
+        var bodies = ScanProgressBodies();
+
+        Assert.NotEmpty(bodies);
+        Assert.All(bodies, b => Assert.Null(b.SeriesScan));
+    }
+
+    [Fact]
+    public async Task ScanSeries_EveryProgressFrameCarriesTheSeries()
+    {
+        var (scanner, _, _) = await ScanOnce(nameof(ScanSeries_EveryProgressFrameCarriesTheSeries));
+        var scanned = LastScannedSeries();
+        _eventHub.ClearReceivedCalls();
+
+        await scanner.ScanSeries(scanned.SeriesId);
+
+        var bodies = ScanProgressBodies();
+
+        Assert.True(bodies.Count >= 2, "Expected the started frame and at least one per-series update");
+        Assert.All(bodies, b => Assert.Equal(new SeriesScanTarget(scanned.SeriesId, "Spice and Wolf"), b.SeriesScan));
     }
 }

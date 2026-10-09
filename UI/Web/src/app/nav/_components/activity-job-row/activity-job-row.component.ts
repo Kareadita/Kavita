@@ -15,6 +15,9 @@ import {EventAction} from '../../../_models/events/event-action';
 import {ActivityEndReason} from '../../../_models/activity/activity-end-reason';
 import {LibraryService} from '../../../_services/library.service';
 import {LibraryScanSummary} from '../../../_models/activity/library-scan-summary';
+import {SeriesService} from '../../../_services/series.service';
+import {EVENTS} from '../../../_services/message-hub.service';
+import {SeriesScanTarget} from '../../../_models/events/bodies/series-scan-target';
 
 interface StepCounter {
   current: number;
@@ -36,6 +39,7 @@ interface SummaryPart {
 export class ActivityJobRowComponent {
   private readonly router = inject(Router);
   private readonly libraryService = inject(LibraryService);
+  private readonly seriesService = inject(SeriesService);
   private readonly toastr = inject(ToastrService);
 
   readonly job = input.required<ActivityJob>();
@@ -55,12 +59,29 @@ export class ActivityJobRowComponent {
   protected readonly titleStep = computed(() => titleStep(this.job()));
   protected readonly step = computed(() => currentStep(this.job()));
   protected readonly counter = computed(() => counterOf(this.step()));
+  protected readonly seriesScan = computed(() => {
+    if (this.job().scanSummaries.some(s => s.seriesRemoved > 0)) return null;
+    return seriesScanOf(this.titleStep());
+  });
 
   protected readonly finishingStep = computed(() => {
     const step = this.step();
     return this.isScan() && step && isFinishingStep(step) ? step : null;
   });
   protected readonly finishingUp = computed(() => isProcessingDone(this.step()));
+  protected readonly seriesFinishingLabel = computed(() => {
+    const step = this.finishingStep();
+    if (!step || !this.seriesScan()) return null;
+
+    switch (step.name) {
+      case EVENTS.CoverUpdateProgress:
+        return translate('events-widget.refreshing-covers-label');
+      case EVENTS.WordCountAnalyzerProgress:
+        return translate('events-widget.counting-words-label');
+      default:
+        return null;
+    }
+  });
 
   protected readonly currentLibraryName = computed(() => {
     const libraryId = this.job().libraryIds.at(-1);
@@ -69,21 +90,30 @@ export class ActivityJobRowComponent {
 
   protected readonly summaryParts = computed(() => summaryPartsOf(this.job().scanSummaries));
   protected readonly showSummary = computed(() => this.ended() && this.isScan() && this.job().scanSummaries.length > 0);
-  protected readonly canOpenLibrary = computed(() => this.ended() && this.isScan() && !this.isMultiLibrary() && this.job().libraryId !== null);
+  protected readonly canOpen = computed(() => this.ended() && this.isScan() && !this.isMultiLibrary() && this.job().libraryId !== null);
   protected readonly canRescan = computed(() => this.isScan() && (this.isMultiLibrary() || this.job().libraryId !== null));
 
-  protected openLibrary() {
-    this.router.navigate(['library', this.job().libraryId]);
+  protected open() {
+    const seriesScan = this.seriesScan();
+    if (seriesScan) {
+      this.router.navigate(['library', this.job().libraryId, 'series', seriesScan.seriesId]);
+    } else {
+      this.router.navigate(['library', this.job().libraryId]);
+    }
     this.navigated.emit();
   }
 
   protected rescan() {
     const job = this.job();
     const libraryId = job.libraryId!;
+    const seriesScan = this.seriesScan();
 
     let request: Observable<unknown>;
     let toast: string;
-    if (this.isMultiLibrary()) {
+    if (seriesScan) {
+      request = this.seriesService.scan(libraryId, seriesScan.seriesId);
+      toast = translate('toasts.scan-queued', {name: seriesScan.seriesName});
+    } else if (this.isMultiLibrary()) {
       request = this.libraryService.scanAll();
       toast = translate('toasts.scan-all-queued');
     } else {
@@ -122,6 +152,10 @@ function summaryPartsOf(summaries: LibraryScanSummary[]): SummaryPart[] {
   }
 
   return parts;
+}
+
+function seriesScanOf(step: ActivityStep | undefined): SeriesScanTarget | null {
+  return (step?.body as {seriesScan?: SeriesScanTarget | null} | null)?.seriesScan ?? null;
 }
 
 function counterOf(step: ActivityStep | undefined): StepCounter | null {

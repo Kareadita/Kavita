@@ -820,9 +820,10 @@ public static class MessageFactory
     /// <param name="seriesName"></param>
     /// <param name="leftToProcess"></param>
     /// <param name="totalToProcess"></param>
+    /// <param name="seriesScan">Set when the job is a ScanSeries</param>
     /// <returns></returns>
     public static SignalRMessageDto LibraryScanProgressEvent(int libraryId, string libraryName, string eventType,
-        string seriesName = "", int? leftToProcess = null, int? totalToProcess = null)
+        string seriesName = "", int? leftToProcess = null, int? totalToProcess = null, SeriesScanTarget? seriesScan = null)
     {
         var hasProgress = totalToProcess.HasValue && leftToProcess.HasValue;
         var progress = hasProgress ? (totalToProcess - leftToProcess) / (float) totalToProcess!.Value : null;
@@ -840,6 +841,7 @@ public static class MessageFactory
             {
                 SeriesName = seriesName,
                 LibraryName = libraryName,
+                SeriesScan = seriesScan,
             }
         };
     }

@@ -265,8 +265,9 @@ public class ScannerService(
             return;
         }
 
+        var seriesScan = new SeriesScanTarget(series.Id, series.Name);
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Started, series.Name, 1));
+            MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Started, series.Name, 1, seriesScan: seriesScan));
 
         logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var scanStarted = DateTime.Now;
@@ -341,6 +342,7 @@ public class ScannerService(
                 TotalToProcess = totalCount,
                 ForceUpdate = bypassFolderOptimizationChecks,
                 ScanStarted = scanStarted,
+                SeriesScan = seriesScan,
             });
             tally.Add(result);
 

@@ -89,7 +89,9 @@
             @if (isMultiLibrary() && currentLibraryName()) {
               {{currentLibraryName()}}<span class="mx-1 dot-separator"></span>
             }
-            @if (finishingStep(); as finishing) {
+            @if (seriesFinishingLabel(); as label) {
+              {{label}}
+            } @else if (finishingStep(); as finishing) {
               {{finishing | eventTitle : false : libraryNames()}}
             } @else if (finishingUp()) {
               {{t('finishing-up-label')}}
@@ -110,9 +112,9 @@
           </div>
         }
 
-        @if (canOpenLibrary()) {
+        @if (canOpen()) {
           <div class="d-flex gap-3 mt-1">
-            <button type="button" class="btn btn-link link p-0" (click)="openLibrary()">{{EventAction.OpenLibrary | eventAction}}</button>
+            <button type="button" class="btn btn-link link p-0" (click)="open()">{{(seriesScan() ? EventAction.OpenSeries : EventAction.OpenLibrary) | eventAction}}</button>
           </div>
         }
       </div>

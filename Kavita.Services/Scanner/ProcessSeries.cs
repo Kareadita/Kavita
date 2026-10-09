@@ -113,7 +113,7 @@ public class ProcessSeries(
         var scanWatch = Stopwatch.StartNew();
         var seriesName = parsedInfos[0].Series;
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Updated, seriesName, args.LeftToProcess, args.TotalToProcess));
+            MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Updated, seriesName, args.LeftToProcess, args.TotalToProcess, args.SeriesScan));
         logger.LogInformation("[ScannerService] Beginning series update on {SeriesName}, Forced: {ForceUpdate}", seriesName, args.ForceUpdate);
 
         // Check if there is a Series

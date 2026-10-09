@@ -3100,6 +3100,8 @@
         "scan-problem-files-new-label": "Problem files: {{count}} ({{new}} new)",
         "finished-while-away-label": "Finished while you were away",
         "finishing-up-label": "Finishing up",
+        "refreshing-covers-label": "Refreshing covers",
+        "counting-words-label": "Counting words",
         "interrupted-label": "Stopped by a server restart",
         "failed-label": "Stopped before finishing",
         "schedule-lost-label": "Was set for {{time}}, lost in a server restart",
@@ -3132,6 +3134,8 @@
     "event-title-pipe": {
         "scan-progress": "Scanning {{libraryName}}",
         "scan-done": "Scanned {{libraryName}}",
+        "scan-series-progress": "Scanning {{seriesName}}",
+        "scan-series-done": "Scanned {{seriesName}}",
         "backup-database-progress": "Backing up database",
         "cleanup-progress": "Cleaning up",
         "cover-update-progress": "Refreshing covers: {{libraryName}}",

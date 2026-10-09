@@ -3,6 +3,7 @@ import {TranslocoService} from '@jsverse/transloco';
 import {EVENTS} from '../_services/message-hub.service';
 import {ScrobbleProvider} from '../_services/scrobbling.service';
 import {ScrobbleProviderNamePipe} from './scrobble-provider-name.pipe';
+import {SeriesScanTarget} from '../_models/events/bodies/series-scan-target';
 
 const PREFIX = 'event-title-pipe';
 
@@ -20,6 +21,7 @@ type TitleBody = Partial<{
   themeName: string;
   updateVersion: string;
   provider: ScrobbleProvider;
+  seriesScan: SeriesScanTarget | null;
 }>;
 
 /**
@@ -43,11 +45,18 @@ export class EventTitlePipe implements PipeTransform {
 
     switch (source.name as EVENTS) {
       case EVENTS.FileScanProgress:
-      case EVENTS.ScanProgress:
+      case EVENTS.ScanProgress: {
+        const seriesName = body.seriesScan?.seriesName;
+        if (seriesName) {
+          return ended
+            ? this.translocoService.translate(`${PREFIX}.scan-series-done`, {seriesName})
+            : this.translocoService.translate(`${PREFIX}.scan-series-progress`, {seriesName});
+        }
         if (!libraryName) return source.title;
         return ended
           ? this.translocoService.translate(`${PREFIX}.scan-done`, {libraryName})
           : this.translocoService.translate(`${PREFIX}.scan-progress`, {libraryName});
+      }
       case EVENTS.CoverUpdateProgress:
         if (!libraryName) return source.title;
         return this.translocoService.translate(`${PREFIX}.cover-update-progress`, {libraryName});

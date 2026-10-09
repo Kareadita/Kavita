@@ -1,4 +1,5 @@
 namespace Kavita.Models.DTOs.SignalR.Bodies;
+#nullable enable
 
 public sealed record LibraryScanProgressEventBody(int LibraryId, float? Progress, int? LeftToProcess, int? TotalToProcess)
 {
@@ -7,4 +8,8 @@ public sealed record LibraryScanProgressEventBody(int LibraryId, float? Progress
     /// Can be empty when not applicable
     /// </summary>
     public string SeriesName { get; set; }
+    /// <summary>
+    /// Set on every frame of a ScanSeries job, null on a library scan
+    /// </summary>
+    public SeriesScanTarget? SeriesScan { get; set; }
 }

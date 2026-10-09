@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
+using Kavita.Models.DTOs.SignalR.Bodies;
 using Kavita.Models.Entities;
 using Kavita.Models.Parser;
 
@@ -17,6 +18,10 @@ public sealed record ProcessSeriesArgs
     /// Taken before the walk, stored as the series' LastFolderScanned
     /// </summary>
     public required DateTime ScanStarted { get; init; }
+    /// <summary>
+    /// Null on a library scan
+    /// </summary>
+    public SeriesScanTarget? SeriesScan { get; init; }
 }
 
 /// <param name="SeriesId">Null when nothing was saved</param>
