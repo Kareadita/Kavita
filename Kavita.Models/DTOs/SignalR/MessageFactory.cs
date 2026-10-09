@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.Account;
@@ -212,6 +213,12 @@ public static class MessageFactory
     /// Progress event send after a batch completes
     /// </summary>
     public const string RerunMetadataMappingsProgress = nameof(RerunMetadataMappingsProgress);
+    /// <summary>
+    /// Delayed scans were moved or removed after a scan ended
+    /// </summary>
+    public const string ScanRescheduled = nameof(ScanRescheduled);
+
+    private const string ScanQueuedSubtitle = "Another scan is running. Scans run one at a time, in the order they were asked for.";
 
 
     public static SignalRMessageDto DashboardUpdateEvent(int userId)
@@ -622,17 +629,16 @@ public static class MessageFactory
         });
     }
 
-    /// <param name="scheduledForUtc">Pass the same value given to Hangfire, the UI matches it to the scheduled job</param>
+    /// <param name="scheduledForUtc">Pass the same value given to Hangfire. A later retime can move the job, ScanRescheduled carries the new time</param>
     public static SignalRMessageDto ScanLibrariesDelayedEvent(DateTime scheduledForUtc)
     {
-        const string title = "Scan libraries task delayed";
-        var subtitle = $"A scan was ongoing during processing of the scan libraries task. Task has been rescheduled for 3 hours: {scheduledForUtc.ToLocalTime()}";
+        const string title = "Scan all libraries queued";
 
-        return CodedEvent(Info, MessageEventCode.ScanLibrariesDelayed, title, subtitle, new
+        return CodedEvent(Info, MessageEventCode.ScanLibrariesDelayed, title, ScanQueuedSubtitle, new
         {
             Name = Info,
             Title = title,
-            SubTitle = subtitle,
+            SubTitle = ScanQueuedSubtitle,
             ScheduledForUtc = scheduledForUtc,
         });
     }
@@ -640,14 +646,13 @@ public static class MessageFactory
     /// <inheritdoc cref="ScanLibrariesDelayedEvent"/>
     public static SignalRMessageDto ScanLibraryDelayedEvent(int libraryId, string libraryName, DateTime scheduledForUtc)
     {
-        const string title = "Scan library task delayed";
-        var subtitle = $"A scan was ongoing during processing of the {libraryName} scan task. Task has been rescheduled for 3 hours: {scheduledForUtc.ToLocalTime()}";
+        var title = $"Scan {libraryName} queued";
 
-        return CodedEvent(Info, MessageEventCode.ScanLibraryDelayed, title, subtitle, new
+        return CodedEvent(Info, MessageEventCode.ScanLibraryDelayed, title, ScanQueuedSubtitle, new
         {
             Name = Info,
             Title = title,
-            SubTitle = subtitle,
+            SubTitle = ScanQueuedSubtitle,
             LibraryId = libraryId,
             LibraryName = libraryName,
             ScheduledForUtc = scheduledForUtc,
@@ -657,19 +662,33 @@ public static class MessageFactory
     /// <inheritdoc cref="ScanLibrariesDelayedEvent"/>
     public static SignalRMessageDto ScanSeriesDelayedEvent(int libraryId, int seriesId, string seriesName, DateTime scheduledForUtc)
     {
-        var title = $"Scan series task delayed: {seriesName}";
-        var subtitle = $"A scan was ongoing during processing of the scan series task. Task has been rescheduled for 10 minutes: {scheduledForUtc.ToLocalTime()}";
+        var title = $"Scan {seriesName} queued";
 
-        return CodedEvent(Info, MessageEventCode.ScanSeriesDelayed, title, subtitle, new
+        return CodedEvent(Info, MessageEventCode.ScanSeriesDelayed, title, ScanQueuedSubtitle, new
         {
             Name = Info,
             Title = title,
-            SubTitle = subtitle,
+            SubTitle = ScanQueuedSubtitle,
             LibraryId = libraryId,
             SeriesId = seriesId,
             SeriesName = seriesName,
             ScheduledForUtc = scheduledForUtc,
         });
+    }
+
+    /// <summary>This runs after we reschedule scanner jobs to inform event widget</summary>
+    /// <param name="scans">Every delayed scan after the retime, in run order</param>
+    public static SignalRMessageDto ScanRescheduledEvent(IList<ScheduledScanDto> scans)
+    {
+        return new SignalRMessageDto()
+        {
+            Name = ScanRescheduled,
+            Priority = MessageEventPriority.Silent,
+            Title = "Scans rescheduled",
+            Progress = ProgressType.None,
+            EventType = ProgressEventType.Single,
+            Body = new ScanRescheduledEventBodyDto(scans)
+        };
     }
 
     public static SignalRMessageDto BackupFolderUnwritableEvent(string folder)

@@ -17,6 +17,8 @@ import {DelayedScanCodes} from '../_models/activity/delayed-scan-codes';
 import {ActivitySnapshotService} from './activity-snapshot.service';
 import {RecentJob} from '../_models/activity/recent-job';
 import {LibraryScanSummary} from '../_models/activity/library-scan-summary';
+import {ScanRescheduledBody} from '../_models/events/bodies/scan-rescheduled-body';
+import {isDelayedEntryFor} from '../_helpers/delayed-scan';
 
 const RowTtlMs = 24 * 60 * 60 * 1000;
 const MaxRows = 100;
@@ -130,7 +132,34 @@ export class ActivityStoreService {
       case EVENTS.ExternalMatchRateLimitError:
         if (message.meta) this.addRateLimit({...message.meta, body: message.payload});
         break;
+      case EVENTS.ScanRescheduled:
+        this.applyReschedule(message.payload as ScanRescheduledBody);
+        break;
     }
+  }
+
+  /**
+   * Without this, a restart would pin a scan that already ran early as lost, its entry still holding the old time
+   */
+  private applyReschedule({scans}: ScanRescheduledBody) {
+    const now = Date.now();
+    const changed = new Map<string, ActivityEntry>();
+
+    for (const row of this._rows()) {
+      if (row.kind !== ActivityRowKind.Entry || row.scheduledForUtc === null || Date.parse(row.scheduledForUtc) <= now) continue;
+
+      const scan = scans.find(s => isDelayedEntryFor(row, s));
+      if (scan && scan.runAtUtc !== row.scheduledForUtc) {
+        changed.set(row.id, {...row, scheduledForUtc: scan.runAtUtc});
+      }
+    }
+
+    if (changed.size > 0) {
+      this._rows.update(rows => rows.map(r => changed.get(r.id) ?? r));
+      this.scheduleWrite();
+    }
+
+    this.snapshotService.refresh();
   }
 
   private addRateLimit(message: SignalRMessage, announce = true) {

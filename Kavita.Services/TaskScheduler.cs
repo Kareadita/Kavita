@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
+using Hangfire.States;
 using Hangfire.Storage;
 using Hangfire.Storage.Monitoring;
 using Kavita.API.Database;
@@ -87,6 +88,8 @@ public class TaskScheduler : ITaskScheduler
     public static readonly ImmutableArray<string> ScanTasks =
         ["ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"];
     private static readonly ImmutableArray<string> NonCronOptions = ["disabled", "daily", "weekly"];
+    private static readonly ImmutableArray<string> DelayedScanMethods = [nameof(ScanLibraries), nameof(ScanLibrary), nameof(ScanSeries)];
+    private static readonly Lock RetimeLock = new();
 
     private static readonly Random Rnd = new Random();
 
@@ -529,7 +532,6 @@ public class TaskScheduler : ITaskScheduler
         }
         if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
         {
-            // BUG: This can end up triggering a ton of scan series calls (but i haven't seen in practice)
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None);
             if (series == null)
             {
@@ -537,8 +539,8 @@ public class TaskScheduler : ITaskScheduler
                 return;
             }
 
-            _logger.LogInformation("A Scan is already running, rescheduling ScanSeries in 10 minutes");
-            var runAt = DateTimeOffset.UtcNow.AddMinutes(10);
+            _logger.LogInformation("A Scan is already running, rescheduling ScanSeries in 3 hours");
+            var runAt = DateTimeOffset.UtcNow.AddHours(3);
             await _eventHub.SendMessageAsync(MessageFactory.Info,
                 MessageFactory.ScanSeriesDelayedEvent(libraryId, seriesId, series.Name, runAt.UtcDateTime));
 
@@ -548,6 +550,38 @@ public class TaskScheduler : ITaskScheduler
 
         _logger.LogInformation("Enqueuing series scan for: {SeriesId}", seriesId);
         BackgroundJob.Enqueue(() => _scannerService.ScanSeries(seriesId, forceUpdate));
+    }
+
+    public async Task RetimeDelayedScans()
+    {
+        RetimePlan plan;
+        lock (RetimeLock)
+        {
+            plan = DelayedScanRetime.Plan(GetDelayedScanJobs(), DateTime.UtcNow);
+            // fromState: a job that started running since the read must not be pushed back into Scheduled
+            foreach (var jobId in plan.Deletes)
+            {
+                BackgroundJob.Delete(jobId, ScheduledState.StateName);
+            }
+            foreach (var move in plan.Moves)
+            {
+                BackgroundJob.Reschedule(move.JobId, new DateTimeOffset(move.RunAtUtc), ScheduledState.StateName);
+            }
+        }
+
+        if (plan.IsEmpty)
+        {
+            _logger.LogDebug("No delayed scans to retime");
+            return;
+        }
+
+        var (scans, _) = GetScheduledScans(int.MaxValue);
+        var next = scans.FirstOrDefault();
+        _logger.LogInformation(
+            "Retimed {Moved} delayed scans, removed {Removed} duplicates, next: job {JobId} (library {LibraryId}, series {SeriesId}) at {RunAtUtc}",
+            plan.Moves.Count, plan.Deletes.Count, next?.JobId, next?.LibraryId, next?.SeriesId, next?.RunAtUtc);
+
+        await _eventHub.SendMessageAsync(MessageFactory.ScanRescheduled, MessageFactory.ScanRescheduledEvent(scans));
     }
 
     /// <summary>
@@ -789,7 +823,7 @@ public class TaskScheduler : ITaskScheduler
     public static bool RunningAnyTasksByMethod(IEnumerable<string> classNames, string queue = DefaultQueue)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
-        var ret = enqueuedJobs.Exists(j => !j.Value.InEnqueuedState &&
+        var ret = enqueuedJobs.Exists(j => j.Value.InEnqueuedState &&
                                      classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
         if (ret) return true;
 
@@ -830,28 +864,40 @@ public class TaskScheduler : ITaskScheduler
     /// </summary>
     public static (IList<ScheduledScanDto> Scans, int Total) GetScheduledScans(int take)
     {
-        var scans = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue)
-            .Where(j => j.Value.Job?.Method.DeclaringType == typeof(TaskScheduler))
-            .Select(j => ToScheduledScan(j.Key, j.Value))
-            .Where(s => s != null)
-            .Select(s => s!)
-            .OrderBy(s => s.RunAtUtc)
+        var scans = GetDelayedScanJobs()
+            .OrderBy(j => j.RunAtUtc)
+            .ThenBy(j => j.CreatedAtUtc)
+            .Select(ToScheduledScan)
             .ToList();
 
         return (scans.Take(take).ToList(), scans.Count);
     }
 
-    private static ScheduledScanDto? ToScheduledScan(string jobId, ScheduledJobDto job)
+    private static List<DelayedScanJob> GetDelayedScanJobs()
     {
-        var args = job.Job.Args;
-        var runAtUtc = DateTime.SpecifyKind(job.EnqueueAt, DateTimeKind.Utc);
+        var monitoring = JobStorage.Current.GetMonitoringApi();
+        return monitoring.ScheduledJobs(0, int.MaxValue)
+            .Where(j => j.Value.Job?.Method.DeclaringType == typeof(TaskScheduler)
+                        && DelayedScanMethods.Contains(j.Value.Job.Method.Name))
+            .Select(j =>
+            {
+                var runAtUtc = DateTime.SpecifyKind(j.Value.EnqueueAt, DateTimeKind.Utc);
+                var createdAt = monitoring.JobDetails(j.Key)?.CreatedAt;
+                var createdAtUtc = createdAt.HasValue ? DateTime.SpecifyKind(createdAt.Value, DateTimeKind.Utc) : runAtUtc;
+                return new DelayedScanJob(j.Key, j.Value.Job.Method.Name, j.Value.Job.Args.ToList(), createdAtUtc, runAtUtc);
+            })
+            .ToList();
+    }
 
-        return job.Job.Method.Name switch
+    private static ScheduledScanDto ToScheduledScan(DelayedScanJob job)
+    {
+        var args = job.Args;
+
+        return job.Method switch
         {
-            nameof(ScanLibraries) => new ScheduledScanDto { JobId = jobId, RunAtUtc = runAtUtc },
-            nameof(ScanLibrary) => new ScheduledScanDto { JobId = jobId, LibraryId = (int) args[0], RunAtUtc = runAtUtc },
-            nameof(ScanSeries) => new ScheduledScanDto { JobId = jobId, LibraryId = (int) args[0], SeriesId = (int) args[1], RunAtUtc = runAtUtc },
-            _ => null,
+            nameof(ScanLibrary) => new ScheduledScanDto { JobId = job.JobId, LibraryId = (int) args[0]!, RunAtUtc = job.RunAtUtc },
+            nameof(ScanSeries) => new ScheduledScanDto { JobId = job.JobId, LibraryId = (int) args[0]!, SeriesId = (int) args[1]!, RunAtUtc = job.RunAtUtc },
+            _ => new ScheduledScanDto { JobId = job.JobId, RunAtUtc = job.RunAtUtc },
         };
     }
 

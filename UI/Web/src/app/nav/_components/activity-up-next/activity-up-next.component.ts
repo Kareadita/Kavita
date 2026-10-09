@@ -7,6 +7,7 @@ import {UpcomingTask} from '../../../_models/activity/upcoming-task';
 import {UtcToLocalTimePipe} from '../../../_pipes/utc-to-local-time.pipe';
 import {UpcomingTaskNamePipe} from '../../../_pipes/upcoming-task-name.pipe';
 import {CronFrequencyPipe} from '../../../_pipes/cron-frequency.pipe';
+import {isDelayedEntryFor} from '../../../_helpers/delayed-scan';
 
 const CollapsedCount = 2;
 const WaitingGroupAt = 4;
@@ -14,7 +15,7 @@ const WaitingNamesShown = 5;
 
 type UpNextItem =
   | {kind: 'task'; id: string; runAtUtc: string; task: UpcomingTask; frequency: CronFrequency | null}
-  | {kind: 'scan'; id: string; runAtUtc: string; title: string}
+  | {kind: 'scan'; id: string; runAtUtc: string; title: string; queued: boolean}
   | {kind: 'waiting'; id: string; runAtUtc: string; count: number; names: string[]; rest: number};
 
 type CronFrequency = 'daily' | 'weekly';
@@ -41,18 +42,7 @@ export class ActivityUpNextComponent {
 
   protected readonly items = computed<UpNextItem[]>(() => {
     const snapshot = this.snapshot();
-    const scans = snapshot.scheduled;
-
-    const scanItems: UpNextItem[] = snapshot.scheduledTotal >= WaitingGroupAt && scans.length > 0
-      ? [{
-        kind: 'waiting',
-        id: 'waiting',
-        runAtUtc: scans[0].runAtUtc,
-        count: snapshot.scheduledTotal,
-        names: scans.slice(0, WaitingNamesShown).map(s => this.scanTitle(s)),
-        rest: snapshot.scheduledTotal - Math.min(scans.length, WaitingNamesShown),
-      }]
-      : scans.map(s => ({kind: 'scan', id: `scan:${s.jobId}`, runAtUtc: s.runAtUtc, title: this.scanTitle(s)}));
+    const scanItems = this.scanItems(snapshot.scheduled, snapshot.scheduledTotal);
 
     const taskItems: UpNextItem[] = snapshot.upcoming.map(task => ({
       kind: 'task',
@@ -68,8 +58,35 @@ export class ActivityUpNextComponent {
   protected readonly visibleItems = computed(() => this.expanded() ? this.items() : this.items().slice(0, CollapsedCount));
   protected readonly hiddenCount = computed(() => Math.max(0, this.items().length - CollapsedCount));
 
+  /**
+   * One row per scan, or a single collapsible group once WaitingGroupAt scans are waiting
+   */
+  private scanItems(scans: ScheduledScan[], total: number): UpNextItem[] {
+    if (scans.length === 0) return [];
+
+    if (total < WaitingGroupAt) {
+      return scans.map((scan, index) => ({
+        kind: 'scan',
+        id: `scan:${scan.jobId}`,
+        runAtUtc: scan.runAtUtc,
+        title: this.scanTitle(scan),
+        queued: index > 0,
+      }));
+    }
+
+    const shown = scans.slice(0, WaitingNamesShown);
+    return [{
+      kind: 'waiting',
+      id: 'waiting',
+      runAtUtc: scans[0].runAtUtc,
+      count: total,
+      names: shown.map(scan => this.scanTitle(scan)),
+      rest: total - shown.length,
+    }];
+  }
+
   private scanTitle(scan: ScheduledScan) {
-    const body = (this.delayedEntries().find(e => e.scheduledForUtc === scan.runAtUtc)?.body ?? {}) as ScheduledBody;
+    const body = (this.delayedEntries().find(e => isDelayedEntryFor(e, scan))?.body ?? {}) as ScheduledBody;
     const libraryName = body.libraryName || (scan.libraryId !== null ? this.libraryNames()?.[scan.libraryId] : undefined);
 
     if (scan.libraryId === null) return translate('events-widget.scan-libraries-scheduled');

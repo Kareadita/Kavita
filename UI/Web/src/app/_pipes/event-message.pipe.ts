@@ -1,7 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import {TranslocoService} from '@jsverse/transloco';
 import {MessageEventCode} from '../_models/events/core/message-event-code';
-import {UtcToLocalTimePipe} from './utc-to-local-time.pipe';
 
 const PREFIX = 'event-message-pipe';
 
@@ -21,7 +20,6 @@ type MessageBody = Partial<{
   folder: string;
   path: string;
   filePath: string;
-  scheduledForUtc: string;
 }>;
 
 type Params = Record<string, string | undefined>;
@@ -36,7 +34,6 @@ type Params = Record<string, string | undefined>;
 })
 export class EventMessagePipe implements PipeTransform {
   private readonly translocoService = inject(TranslocoService);
-  private readonly utcToLocalTimePipe = new UtcToLocalTimePipe();
 
   transform(source: EventMessageSource, part: EventMessagePart): string {
     const body = (source.body ?? {}) as MessageBody;
@@ -90,7 +87,6 @@ export class EventMessagePipe implements PipeTransform {
 
   private description(source: EventMessageSource, body: MessageBody): string {
     const fallback = source.subTitle;
-    const time = body.scheduledForUtc ? this.utcToLocalTimePipe.transform(body.scheduledForUtc, 'shortTime') : undefined;
 
     switch (source.code) {
       case MessageEventCode.RootFoldersInaccessible:
@@ -117,7 +113,7 @@ export class EventMessagePipe implements PipeTransform {
       case MessageEventCode.ScanLibrariesDelayed:
       case MessageEventCode.ScanLibraryDelayed:
       case MessageEventCode.ScanSeriesDelayed:
-        return this.translate(`${PREFIX}.scan-delayed-description`, {time}, fallback);
+        return this.translate(`${PREFIX}.scan-delayed-description`, {}, fallback);
       case MessageEventCode.BackupFolderUnwritable:
         return this.translate(`${PREFIX}.backup-folder-unwritable-description`, {folder: body.folder}, fallback);
       case MessageEventCode.BackupExists:

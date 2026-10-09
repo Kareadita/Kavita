@@ -36,6 +36,7 @@ import {ActivityFilter} from "../../../_models/activity/activity-filter";
 import {ActivityProblemGroup, ActivityTimelineItem} from "../../../_models/activity/activity-timeline-item";
 import {MessageEventPriority} from "../../../_models/events/core/message-event-priority";
 import {DelayedScanCodes} from "../../../_models/activity/delayed-scan-codes";
+import {isDelayedEntryFor} from "../../../_helpers/delayed-scan";
 import {jobProgress} from "../../../_helpers/activity-job-progress";
 import {EventAction} from "../../../_models/events/event-action";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
@@ -94,14 +95,14 @@ export class EventsWidgetComponent implements OnInit {
    * A delayed scan still waiting shows in Up next, and once its time has passed the scan's own job row says what happened
    */
   private readonly timeline = computed<ActivityTimelineItem[]>(() => {
-    const scheduled = new Set(this.snapshot()?.scheduled.map(s => s.runAtUtc) ?? []);
+    const scheduled = this.snapshot()?.scheduled ?? [];
     const now = this.now();
-    const isSettled = (scheduledForUtc: string | null) => scheduledForUtc !== null
-      && (scheduled.has(scheduledForUtc) || Date.parse(scheduledForUtc) <= now);
+    const isSettled = (entry: ActivityEntry) => entry.scheduledForUtc !== null
+      && (scheduled.some(s => isDelayedEntryFor(entry, s)) || Date.parse(entry.scheduledForUtc) <= now);
     const rows = this.activityStore.rows().filter(r => r.kind === ActivityRowKind.Job
       ? !isStopped(r)
       : r.priority !== MessageEventPriority.Action && r.priority !== MessageEventPriority.Silent && !r.scheduleLost
-        && !isSettled(r.scheduledForUtc));
+        && !isSettled(r));
     return groupProblems(rows);
   });
 

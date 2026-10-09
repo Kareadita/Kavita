@@ -166,6 +166,10 @@ export enum EVENTS {
    * Progress event send after a batch completes
    */
   RerunMetadataMappingsProgress = 'RerunMetadataMappingsProgress',
+  /**
+   * Delayed scans were moved or removed after a scan ended. Admins only
+   */
+  ScanRescheduled = 'ScanRescheduled',
 }
 
 export interface Message<T> {
@@ -207,6 +211,7 @@ const bodyPayloadEvents = [
   EVENTS.ScrobbleProviderUpdated,
   EVENTS.LicenseInfoUpdate,
   EVENTS.ExternalMetadataUpdate,
+  EVENTS.ScanRescheduled,
 ];
 
 const envelopePayloadEvents = [

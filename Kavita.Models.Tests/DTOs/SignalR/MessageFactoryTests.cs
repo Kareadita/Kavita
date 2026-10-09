@@ -25,6 +25,7 @@ public class MessageFactoryTests
         { MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), MessageEventPriority.Action },
         { MessageFactory.SeriesAddedEvent(1, "One Piece", 1), MessageEventPriority.Silent },
         { MessageFactory.LibraryModifiedEvent(1, "update"), MessageEventPriority.Silent },
+        { MessageFactory.ScanRescheduledEvent([]), MessageEventPriority.Silent },
     };
 
     [Theory]
@@ -259,6 +260,29 @@ public class MessageFactoryTests
         Assert.Equal(1, body.GetProperty("libraryId").GetInt32());
         Assert.Equal(42, body.GetProperty("seriesId").GetInt32());
         Assert.Equal("Frieren", body.GetProperty("seriesName").GetString());
+    }
+
+    [Fact]
+    public void ScanRescheduled_CarriesScans()
+    {
+        var runAt = new DateTime(2026, 10, 9, 10, 31, 0, DateTimeKind.Utc);
+        var scans = new List<ScheduledScanDto>
+        {
+            new() { JobId = "41", LibraryId = 3, RunAtUtc = runAt },
+            new() { JobId = "44", LibraryId = 1, SeriesId = 812, RunAtUtc = runAt.AddHours(3) },
+        };
+
+        var message = MessageFactory.ScanRescheduledEvent(scans);
+        var json = Serialize(message);
+        var body = json.GetProperty("body").GetProperty("scans");
+
+        Assert.Equal(MessageFactory.ScanRescheduled, message.Name);
+        Assert.Equal(2, body.GetArrayLength());
+        Assert.Equal("41", body[0].GetProperty("jobId").GetString());
+        Assert.Equal(runAt, body[0].GetProperty("runAtUtc").GetDateTime());
+        Assert.Equal(JsonValueKind.Null, body[0].GetProperty("seriesId").ValueKind);
+        Assert.Equal(812, body[1].GetProperty("seriesId").GetInt32());
+        Assert.DoesNotContain("Name", json.GetProperty("body").GetRawText(), StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

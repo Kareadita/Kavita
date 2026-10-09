@@ -13,7 +13,11 @@
       <div class="item d-flex gap-3">
         <div class="time flex-shrink-0">
           <!--TODO: When cron is weekly, we need more context here like Mon 02:00-->
-          {{item.runAtUtc | utcToLocalTime : 'shortTime'}}
+          @if (item.kind === 'scan' && item.queued) {
+            {{t('scan-queued-label')}}
+          } @else {
+            {{item.runAtUtc | utcToLocalTime : 'shortTime'}}
+          }
         </div>
         <div class="content flex-grow-1">
           @switch (item.kind) {

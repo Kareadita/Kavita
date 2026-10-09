@@ -18,6 +18,10 @@ public interface ITaskScheduler
     void RefreshMetadata(int libraryId, bool forceUpdate = true, bool forceColorscape = true);
     Task RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false);
     Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
+    /// <summary>
+    /// Runs the delayed scan asked for first in a minute, moves the rest three hours after it, and drops duplicates
+    /// </summary>
+    Task RetimeDelayedScans();
     void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void CancelStatsTasks();
     Task RunStatCollection();

@@ -377,9 +377,9 @@ public class LibraryController(
     /// <returns></returns>
     [HttpPost("scan-all")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public ActionResult ScanAll(bool force = false)
+    public async Task<ActionResult> ScanAll(bool force = false)
     {
-        taskScheduler.ScanLibraries(force);
+        await taskScheduler.ScanLibraries(force);
         return Ok();
     }
 

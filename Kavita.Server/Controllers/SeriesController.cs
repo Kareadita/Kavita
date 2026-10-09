@@ -420,9 +420,9 @@ public class SeriesController(
     /// <returns></returns>
     [HttpPost("scan")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public ActionResult ScanSeries(RefreshSeriesDto refreshSeriesDto)
+    public async Task<ActionResult> ScanSeries(RefreshSeriesDto refreshSeriesDto)
     {
-        taskScheduler.ScanSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, true);
+        await taskScheduler.ScanSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, true);
         return Ok();
     }
 
