@@ -1,0 +1,31 @@
+CsprojPath: "Kavita.Common/Kavita.Common.csproj"
+
+ParseReleaseTypes:
+  HeadRef: "release/stable" # Trick the tool into thinking this is a stable release
+  BranchRequirements:
+    Stable:
+      StartWiths: "" #Always stable
+
+BuildFrontend:
+  BuildScript: "build"
+  Path: "UI/Web"
+  OutputPath: "dist/browser/"
+  CopyTo: "Kavita.Server/wwwroot"
+  AllowLegacyPeerDeps: true
+  FullReplace: true
+
+BuildServer:
+  AppName: "Kavita"
+  CsprojPath: "Kavita.Server/Kavita.Server.csproj"
+  SlnPath: "Kavita.sln"
+  OutputPath: "_output/"
+  Rids:
+    Stable: ["linux-x64", "linux-arm64", "linux-arm", "linux-musl-x64", "win-x64", "win-x86", "osx-arm64", "osx-x64"]
+  RenameFiles:
+    - { From: "Kavita.Server", To: "Kavita"}
+    - { From: "Kavita.Server.exe", To: "Kavita.exe" }
+  CopyFiles:
+    - { From: "INSTALL.txt", To: "README.txt" }
+    - { From: "LICENSE", To: "LICENSE.txt" }
+    - { From: "Kavita.Server/config/appsettings.json", To: "config/appsettings-init.json"}
+  DeletePaths: ["BuildHost-net472", "BuildHost-netcore", "bin", "config/cache-long"]
