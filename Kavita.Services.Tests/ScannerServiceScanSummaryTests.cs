@@ -35,14 +35,14 @@ public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) 
         return (scanner, library.Id, library.Folders.First().Path);
     }
 
-    private LibraryScanEndedEventBody LastSummary()
+    private LibraryScanEndedEventBodyDto LastSummary()
     {
         return _eventHub.ReceivedCalls()
             .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
             .Select(c => c.GetArguments()[1])
             .OfType<SignalRMessageDto>()
             .Select(m => m.Body)
-            .OfType<LibraryScanEndedEventBody>()
+            .OfType<LibraryScanEndedEventBodyDto>()
             .Last();
     }
 
@@ -57,25 +57,25 @@ public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) 
             .ToList();
     }
 
-    private List<LibraryScanProgressEventBody> ScanProgressBodies()
+    private List<LibraryScanProgressEventBodyDto> ScanProgressBodies()
     {
         return _eventHub.ReceivedCalls()
             .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
             .Select(c => c.GetArguments()[1])
             .OfType<SignalRMessageDto>()
             .Select(m => m.Body)
-            .OfType<LibraryScanProgressEventBody>()
+            .OfType<LibraryScanProgressEventBodyDto>()
             .ToList();
     }
 
-    private ScanSeriesEventBody LastScannedSeries()
+    private ScanSeriesEventBodyDto LastScannedSeries()
     {
         return _eventHub.ReceivedCalls()
             .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
             .Select(c => c.GetArguments()[1])
             .OfType<SignalRMessageDto>()
             .Select(m => m.Body)
-            .OfType<ScanSeriesEventBody>()
+            .OfType<ScanSeriesEventBodyDto>()
             .Last();
     }
 
@@ -201,6 +201,6 @@ public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) 
         var bodies = ScanProgressBodies();
 
         Assert.True(bodies.Count >= 2, "Expected the started frame and at least one per-series update");
-        Assert.All(bodies, b => Assert.Equal(new SeriesScanTarget(scanned.SeriesId, "Spice and Wolf"), b.SeriesScan));
+        Assert.All(bodies, b => Assert.Equal(new SeriesScanTargetDto(scanned.SeriesId, "Spice and Wolf"), b.SeriesScan));
     }
 }

@@ -132,7 +132,7 @@ public class ActivityTrackerTests
     private static SignalRMessageDto ScanEnded(int libraryId = 1, int chaptersAdded = 12)
     {
         var message = MessageFactory.LibraryScanEndedEvent(
-            new LibraryScanEndedEventBody(libraryId, "Manga", 2, 0, chaptersAdded, 3, 1, 4, 1));
+            new LibraryScanEndedEventBodyDto(libraryId, "Manga", 2, 0, chaptersAdded, 3, 1, 4, 1));
         message.CorrelationId = CorrelationId;
         return message;
     }

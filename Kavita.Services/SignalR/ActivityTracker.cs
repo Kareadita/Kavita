@@ -45,7 +45,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
         public Dictionary<string, SignalRMessageDto> Steps { get; } = new();
         public HashSet<string> Ended { get; } = [];
         /// <summary>By library, ScanLibraries runs every library under one job</summary>
-        public Dictionary<int, LibraryScanEndedEventBody> ScanSummaries { get; } = new();
+        public Dictionary<int, LibraryScanEndedEventBodyDto> ScanSummaries { get; } = new();
     }
 
     public void Record(string method, SignalRMessageDto message)
@@ -155,7 +155,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
             if (message.EventType == ProgressEventType.Ended)
             {
                 job.Ended.Add(message.Name);
-                if (message.Body is LibraryScanEndedEventBody summary)
+                if (message.Body is LibraryScanEndedEventBodyDto summary)
                 {
                     job.ScanSummaries[summary.LibraryId] = summary;
                 }

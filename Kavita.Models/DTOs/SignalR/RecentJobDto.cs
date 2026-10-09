@@ -20,5 +20,5 @@ public sealed record RecentJobDto
     /// <summary>
     /// One per library scan that finished in this job
     /// </summary>
-    public IList<LibraryScanEndedEventBody> ScanSummaries { get; init; } = [];
+    public IList<LibraryScanEndedEventBodyDto> ScanSummaries { get; init; } = [];
 }

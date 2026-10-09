@@ -223,7 +223,7 @@ public static class MessageFactory
             Title = "Dashboard Update",
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
-            Body = new DashboardUpdateEventBody(userId)
+            Body = new DashboardUpdateEventBodyDto(userId)
         };
     }
 
@@ -236,7 +236,7 @@ public static class MessageFactory
             Title = "SideNav Update",
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
-            Body = new SideNavUpdateEventBody(userId)
+            Body = new SideNavUpdateEventBodyDto(userId)
         };
     }
 
@@ -248,7 +248,7 @@ public static class MessageFactory
             Name = ScanSeries,
             Priority = MessageEventPriority.Silent,
             EventType = ProgressEventType.Single,
-            Body = new ScanSeriesEventBody(libraryId, seriesId, seriesName)
+            Body = new ScanSeriesEventBodyDto(libraryId, seriesId, seriesName)
         };
     }
 
@@ -258,7 +258,7 @@ public static class MessageFactory
         {
             Name = SeriesAdded,
             Priority = MessageEventPriority.Silent,
-            Body = new SeriesAddedEventBody(libraryId, seriesId, seriesName)
+            Body = new SeriesAddedEventBodyDto(libraryId, seriesId, seriesName)
         };
     }
 
@@ -268,7 +268,7 @@ public static class MessageFactory
         {
             Name = SeriesRemoved,
             Priority = MessageEventPriority.Silent,
-            Body = new SeriesRemovedEventBody(libraryId, seriesId)
+            Body = new SeriesRemovedEventBodyDto(libraryId, seriesId)
         };
     }
 
@@ -278,7 +278,7 @@ public static class MessageFactory
         {
             Name = ChapterRemoved,
             Priority = MessageEventPriority.Silent,
-            Body = new ChapterRemovedEventBody(seriesId, chapterId)
+            Body = new ChapterRemovedEventBodyDto(seriesId, chapterId)
         };
     }
 
@@ -288,7 +288,7 @@ public static class MessageFactory
         {
             Name = ChapterUpdated,
             Priority = MessageEventPriority.Silent,
-            Body = new ChapterUpdatedEventBody(seriesId, chapterId)
+            Body = new ChapterUpdatedEventBodyDto(seriesId, chapterId)
         };
     }
 
@@ -298,7 +298,7 @@ public static class MessageFactory
         {
             Name = VolumeRemoved,
             Priority = MessageEventPriority.Silent,
-            Body = new VolumeRemovedEventBody(seriesId, volumeId)
+            Body = new VolumeRemovedEventBodyDto(seriesId, volumeId)
         };
     }
 
@@ -313,7 +313,7 @@ public static class MessageFactory
             SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Determinate,
-            Body = new WordCountAnalyzerProgressEventBody(libraryId, progress, DateTime.Now)
+            Body = new WordCountAnalyzerProgressEventBodyDto(libraryId, progress, DateTime.Now)
         };
     }
 
@@ -328,7 +328,7 @@ public static class MessageFactory
             SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Determinate,
-            Body = new CoverUpdateProgressEventBody(libraryId, progress, DateTime.Now)
+            Body = new CoverUpdateProgressEventBodyDto(libraryId, progress, DateTime.Now)
         };
     }
 
@@ -347,7 +347,7 @@ public static class MessageFactory
                 _ => "updated"
             },
             Progress = ProgressType.Determinate,
-            Body = new BackupDatabaseProgressEventBody(progress)
+            Body = new BackupDatabaseProgressEventBodyDto(progress)
         };
     }
     public static SignalRMessageDto CleanupProgressEvent(float progress, string subtitle = "")
@@ -365,7 +365,7 @@ public static class MessageFactory
                 _ => "updated"
             },
             Progress = ProgressType.Determinate,
-            Body = new CleanupProgressEventBody(progress)
+            Body = new CleanupProgressEventBodyDto(progress)
         };
     }
 
@@ -395,7 +395,7 @@ public static class MessageFactory
             SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Indeterminate,
-            Body = new SendingToDeviceEventBody()
+            Body = new SendingToDeviceEventBodyDto()
         };
     }
 
@@ -408,7 +408,7 @@ public static class MessageFactory
             Priority = MessageEventPriority.Silent,
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
-            Body = new CollectionUpdatedEventBody(collectionId)
+            Body = new CollectionUpdatedEventBodyDto(collectionId)
         };
     }
 
@@ -423,7 +423,7 @@ public static class MessageFactory
             SubTitle = subtitle,
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
-            Body = new ErrorEventBody(Error, title, subtitle)
+            Body = new ErrorEventBodyDto(Error, title, subtitle)
         };
     }
 
@@ -437,7 +437,7 @@ public static class MessageFactory
             SubTitle = subtitle,
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
-            Body = new InfoEventBody(Info, title, subtitle)
+            Body = new InfoEventBodyDto(Info, title, subtitle)
         };
     }
 
@@ -741,7 +741,7 @@ public static class MessageFactory
             Title = "Library modified",
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
-            Body = new LibraryModifiedEventBody(libraryId, action)
+            Body = new LibraryModifiedEventBodyDto(libraryId, action)
         };
     }
 
@@ -756,7 +756,7 @@ public static class MessageFactory
             SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Determinate,
-            Body = new DownloadProgressEventBody(username, downloadName, progress, correlationId)
+            Body = new DownloadProgressEventBodyDto(username, downloadName, progress, correlationId)
         };
     }
 
@@ -786,7 +786,7 @@ public static class MessageFactory
             SubTitle = folderPath,
             EventType = eventType,
             Progress = hasProgress ? ProgressType.Determinate : ProgressType.Indeterminate,
-            Body = new FileScanProgressEventBody(libraryId, libraryName, current, total,
+            Body = new FileScanProgressEventBodyDto(libraryId, libraryName, current, total,
                 hasProgress ? Math.Clamp(current!.Value / (float) total!.Value, 0f, 1f) : null)
         };
     }
@@ -807,7 +807,7 @@ public static class MessageFactory
             SubTitle = seriesName,
             EventType = eventType,
             Progress = ProgressType.Determinate,
-            Body = new SmartCollectionProgressEventBody(collectionName, progress, DateTime.Now)
+            Body = new SmartCollectionProgressEventBodyDto(collectionName, progress, DateTime.Now)
         };
     }
 
@@ -823,7 +823,7 @@ public static class MessageFactory
     /// <param name="seriesScan">Set when the job is a ScanSeries</param>
     /// <returns></returns>
     public static SignalRMessageDto LibraryScanProgressEvent(int libraryId, string libraryName, string eventType,
-        string seriesName = "", int? leftToProcess = null, int? totalToProcess = null, SeriesScanTarget? seriesScan = null)
+        string seriesName = "", int? leftToProcess = null, int? totalToProcess = null, SeriesScanTargetDto? seriesScan = null)
     {
         var hasProgress = totalToProcess.HasValue && leftToProcess.HasValue;
         var progress = hasProgress ? (totalToProcess - leftToProcess) / (float) totalToProcess!.Value : null;
@@ -837,7 +837,7 @@ public static class MessageFactory
             SubTitle = seriesName,
             EventType = eventType,
             Progress = hasProgress ?  ProgressType.Determinate : ProgressType.Indeterminate,
-            Body = new LibraryScanProgressEventBody(libraryId, progress, leftToProcess, totalToProcess)
+            Body = new LibraryScanProgressEventBodyDto(libraryId, progress, leftToProcess, totalToProcess)
             {
                 SeriesName = seriesName,
                 LibraryName = libraryName,
@@ -849,7 +849,7 @@ public static class MessageFactory
     /// <summary>
     /// Closes the <see cref="ScanProgress"/> step of a library or series scan with what the scan changed
     /// </summary>
-    public static SignalRMessageDto LibraryScanEndedEvent(LibraryScanEndedEventBody summary, string seriesName = "")
+    public static SignalRMessageDto LibraryScanEndedEvent(LibraryScanEndedEventBodyDto summary, string seriesName = "")
     {
         return new SignalRMessageDto()
         {
@@ -873,7 +873,7 @@ public static class MessageFactory
             Priority = MessageEventPriority.Silent,
             Title = "Updating Cover",
             Progress = ProgressType.None,
-            Body = new CoverUpdateEventBody(id, entityType)
+            Body = new CoverUpdateEventBodyDto(id, entityType)
         };
     }
 
@@ -885,7 +885,7 @@ public static class MessageFactory
             Priority = MessageEventPriority.Silent,
             Title = "Updating User Progress",
             Progress = ProgressType.None,
-            Body = new UserProgressUpdateEventBody(userId, seriesId, volumeId, chapterId, pagesRead)
+            Body = new UserProgressUpdateEventBodyDto(userId, seriesId, volumeId, chapterId, pagesRead)
         };
     }
 
@@ -899,7 +899,7 @@ public static class MessageFactory
             SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Indeterminate,
-            Body = new SiteThemeProgressEventBody(themeName)
+            Body = new SiteThemeProgressEventBodyDto(themeName)
         };
     }
 
@@ -916,7 +916,7 @@ public static class MessageFactory
             Priority = MessageEventPriority.Silent,
             Title = "SiteTheme Update",
             Progress = ProgressType.None,
-            Body = new SiteThemeUpdatedEventBody(themeName)
+            Body = new SiteThemeUpdatedEventBodyDto(themeName)
         };
     }
 
@@ -930,7 +930,7 @@ public static class MessageFactory
             SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Indeterminate,
-            Body = new BookThemeProgressEventBody(themeName)
+            Body = new BookThemeProgressEventBodyDto(themeName)
         };
     }
 
@@ -942,7 +942,7 @@ public static class MessageFactory
             Priority = MessageEventPriority.Silent,
             Title = "User Update",
             Progress = ProgressType.None,
-            Body = new UserUpdateEventBody(userId, userName)
+            Body = new UserUpdateEventBodyDto(userId, userName)
         };
     }
 
@@ -956,7 +956,7 @@ public static class MessageFactory
             SubTitle = string.Empty,
             EventType = eventType,
             Progress = ProgressType.Determinate,
-            Body = new ConvertBookmarksProgressEventBody(progress, DateTime.Now)
+            Body = new ConvertBookmarksProgressEventBodyDto(progress, DateTime.Now)
         };
     }
 
@@ -970,7 +970,7 @@ public static class MessageFactory
             SubTitle = string.Empty,
             EventType = eventType,
             Progress = ProgressType.Determinate,
-            Body = new ConvertCoverProgressEventBody(progress, DateTime.Now)
+            Body = new ConvertCoverProgressEventBodyDto(progress, DateTime.Now)
         };
     }
 
@@ -984,7 +984,7 @@ public static class MessageFactory
             SubTitle = provider + " expired. Please re-generate on User Account page.",
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
-            Body = new ScrobblingKeyExpiredEventBody(provider)
+            Body = new ScrobblingKeyExpiredEventBodyDto(provider)
         };
     }
 
@@ -994,7 +994,7 @@ public static class MessageFactory
         {
             Name = PersonMerged,
             Priority = MessageEventPriority.Silent,
-            Body = new PersonMergedEventBody(src.Id, dst.Name)
+            Body = new PersonMergedEventBodyDto(src.Id, dst.Name)
         };
     }
 
@@ -1004,7 +1004,7 @@ public static class MessageFactory
         {
             Name = ExternalMatchRateLimitError,
             Priority = MessageEventPriority.Error,
-            Body = new ExternalMatchRateLimitErrorEventBody(seriesId, seriesName)
+            Body = new ExternalMatchRateLimitErrorEventBodyDto(seriesId, seriesName)
         };
     }
 
@@ -1014,7 +1014,7 @@ public static class MessageFactory
         {
             Name = AnnotationUpdate,
             Priority = MessageEventPriority.Silent,
-            Body = new AnnotationUpdateEventBody(dto)
+            Body = new AnnotationUpdateEventBodyDto(dto)
         };
     }
 
@@ -1024,7 +1024,7 @@ public static class MessageFactory
         {
             Name = ReadingSessionUpdate,
             Priority = MessageEventPriority.Silent,
-            Body = new ReadingSessionUpdateEventBody(userId, sessionId)
+            Body = new ReadingSessionUpdateEventBodyDto(userId, sessionId)
         };
     }
 
@@ -1034,7 +1034,7 @@ public static class MessageFactory
         {
             Name = ReadingSessionClose,
             Priority = MessageEventPriority.Silent,
-            Body = new ReadingSessionCloseEventBody(userId, sessionId)
+            Body = new ReadingSessionCloseEventBodyDto(userId, sessionId)
         };
     }
 
@@ -1044,7 +1044,7 @@ public static class MessageFactory
         {
             Name = AuthKeyUpdate,
             Priority = MessageEventPriority.Silent,
-            Body = new AuthKeyUpdatedEventBody(authKey)
+            Body = new AuthKeyUpdatedEventBodyDto(authKey)
         };
     }
 
@@ -1054,7 +1054,7 @@ public static class MessageFactory
         {
             Name = AuthKeyDeleted,
             Priority = MessageEventPriority.Silent,
-            Body = new AuthKeyDeletedEventBody(id)
+            Body = new AuthKeyDeletedEventBodyDto(id)
         };
     }
 
@@ -1064,7 +1064,7 @@ public static class MessageFactory
         {
             Name = ReadingListUpdated,
             Priority = MessageEventPriority.Silent,
-            Body = new ReadingListUpdatedEventBody(id)
+            Body = new ReadingListUpdatedEventBodyDto(id)
         };
     }
 
@@ -1074,7 +1074,7 @@ public static class MessageFactory
         {
             Name = SeriesUpdated,
             Priority = MessageEventPriority.Silent,
-            Body = new SeriesUpdatedEventBody(seriesId)
+            Body = new SeriesUpdatedEventBodyDto(seriesId)
         };
     }
 
@@ -1084,7 +1084,7 @@ public static class MessageFactory
         {
             Name = ScrobbleProviderUpdated,
             Priority = MessageEventPriority.Silent,
-            Body = new ScrobbleProviderUpdatedEventBody(provider)
+            Body = new ScrobbleProviderUpdatedEventBodyDto(provider)
         };
     }
 
@@ -1103,7 +1103,7 @@ public static class MessageFactory
         {
             Name = ExternalMetadataUpdate,
             Priority = MessageEventPriority.Silent,
-            Body = new ExternalMetadataUpdateEventBody(seriesId)
+            Body = new ExternalMetadataUpdateEventBodyDto(seriesId)
         };
     }
 
@@ -1116,7 +1116,7 @@ public static class MessageFactory
             Title = "Rerun Metadata Mappings",
             Progress = ProgressType.Determinate,
             EventType = progressEventType,
-            Body = new ReRunMappingsProgressEventBody(progress)
+            Body = new ReRunMappingsProgressEventBodyDto(progress)
         };
     }
 }

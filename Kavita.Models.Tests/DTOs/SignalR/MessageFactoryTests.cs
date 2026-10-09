@@ -178,7 +178,7 @@ public class MessageFactoryTests
     public void LibraryScanProgress_SeriesScan_SerializesForTheWidget()
     {
         var seriesScan = Serialize(MessageFactory.LibraryScanProgressEvent(4, "Manga", ProgressEventType.Updated, "One Piece", 1, 1,
-            new SeriesScanTarget(21, "One Piece"))).GetProperty("body").GetProperty("seriesScan");
+            new SeriesScanTargetDto(21, "One Piece"))).GetProperty("body").GetProperty("seriesScan");
         var libraryScan = Serialize(MessageFactory.LibraryScanProgressEvent(4, "Manga", ProgressEventType.Updated, "One Piece", 1, 2))
             .GetProperty("body").GetProperty("seriesScan");
 
@@ -191,7 +191,7 @@ public class MessageFactoryTests
     [Fact]
     public void LibraryScanEnded_IsATrackedScanProgressEnded()
     {
-        var message = MessageFactory.LibraryScanEndedEvent(new LibraryScanEndedEventBody(4, "Manga", 1, 0, 12, 3, 1, 2, 1));
+        var message = MessageFactory.LibraryScanEndedEvent(new LibraryScanEndedEventBodyDto(4, "Manga", 1, 0, 12, 3, 1, 2, 1));
         var json = Serialize(message);
 
         Assert.Equal(MessageFactory.LibraryScanProgressEvent(4, "Manga", ProgressEventType.Updated).Name, message.Name);

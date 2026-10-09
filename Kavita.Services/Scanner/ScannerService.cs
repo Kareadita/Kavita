@@ -265,7 +265,7 @@ public class ScannerService(
             return;
         }
 
-        var seriesScan = new SeriesScanTarget(series.Id, series.Name);
+        var seriesScan = new SeriesScanTargetDto(series.Id, series.Name);
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Started, series.Name, 1, seriesScan: seriesScan));
 
@@ -1001,7 +1001,7 @@ public class ScannerService(
             ChaptersRemoved += result.ChaptersRemoved;
         }
 
-        public LibraryScanEndedEventBody ToEventBody(Library library, ScanIssueSummaryDto issues) =>
+        public LibraryScanEndedEventBodyDto ToEventBody(Library library, ScanIssueSummaryDto issues) =>
             new(library.Id, library.Name, SeriesAdded, SeriesRemoved, ChaptersAdded, ChaptersUpdated, ChaptersRemoved,
                 issues.Count, issues.NewCount);
     }

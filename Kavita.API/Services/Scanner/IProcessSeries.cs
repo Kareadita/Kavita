@@ -21,7 +21,7 @@ public sealed record ProcessSeriesArgs
     /// <summary>
     /// Null on a library scan
     /// </summary>
-    public SeriesScanTarget? SeriesScan { get; init; }
+    public SeriesScanTargetDto? SeriesScan { get; init; }
 }
 
 /// <param name="SeriesId">Null when nothing was saved</param>
