@@ -15,12 +15,10 @@ function generateChecksum(str, algorithm, encoding) {
 const result = {};
 
 // Generate directory if it doesn't exist
-const distFolderPath = './dist/';
 const browserFolderPath = './dist/browser/';
 if (!fs.existsSync(browserFolderPath)) {
     console.log('Creating ./dist/browser folder');
-    fs.mkdirSync(distFolderPath, 0o744);
-    fs.mkdirSync(browserFolderPath, 0o744);
+    fs.mkdirSync(browserFolderPath, { recursive: true, mode: 0o744 });
 }
 
 // Remove file if it exists
