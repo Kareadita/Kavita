@@ -30,7 +30,9 @@ BuildServer:
   SlnPath: "Kavita.sln"
   OutputPath: "_output/"
   Rids:
-    Stable: ["linux-x64", "linux-arm64", "linux-arm", "linux-musl-x64", "win-x64", "win-x86", "osx-arm64", "osx-x64"]
+    # We do not create releases so there is no need for the GA to build all of them
+    #Stable: ["linux-x64", "linux-arm64", "linux-arm", "linux-musl-x64", "win-x64", "win-x86", "osx-arm64", "osx-x64"]
+    Stable: ["linux-x64", "linux-arm64", "linux-arm"]
     Nightly: ["linux-x64", "linux-arm64", "linux-arm"]
     Canary: ["linux-x64", "linux-arm64", "linux-arm"]
   RenameFiles:
