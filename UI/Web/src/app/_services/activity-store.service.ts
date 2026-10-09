@@ -146,7 +146,7 @@ export class ActivityStoreService {
     const changed = new Map<string, ActivityEntry>();
 
     for (const row of this._rows()) {
-      if (row.kind !== ActivityRowKind.Entry || row.scheduledForUtc === null || Date.parse(row.scheduledForUtc) <= now) continue;
+      if (row.kind !== ActivityRowKind.Entry || row.scheduleLost || row.scheduledForUtc === null || Date.parse(row.scheduledForUtc) <= now) continue;
 
       const scan = scans.find(s => isDelayedEntryFor(row, s));
       if (scan && scan.runAtUtc !== row.scheduledForUtc) {
