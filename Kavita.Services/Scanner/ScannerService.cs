@@ -467,15 +467,14 @@ public class ScannerService(
 
         if (!await CheckMounts(library.Id, library.Name, seriesFolderPaths))
         {
-            logger.LogCritical(
-                "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+            logger.LogWarning("[ScannerService] Scan of series {SeriesId} aborted, one of its folders failed the mount check", seriesId);
             return ScanCancelReason.FolderMount;
         }
 
         if (!await CheckMounts(library.Id, library.Name, libraryPaths))
         {
-            logger.LogCritical(
-                "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+            logger.LogWarning("[ScannerService] Scan of series {SeriesId} aborted, a root folder of {LibraryName} failed the mount check",
+                seriesId, library.Name);
             return ScanCancelReason.FolderMount;
         }
 
