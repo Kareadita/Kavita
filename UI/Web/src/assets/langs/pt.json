@@ -912,13 +912,7 @@
         "open-external": "Abrir Externo"
     },
     "manage-media-issues": {
-        "description-part-1": "Esta tabela contém problemas encontrados durante o processo de análise ou leitura dos seus ficheiros. Pode limpá-la a qualquer momento e usar a funcionalidade Analisar Biblioteca para fazer uma nova análise. Uma lista dos erros mais comuns, e o seu significado, pode ser encontrado na ",
-        "description-part-2": "wiki.",
         "filter-label": "{{common.filter}}",
-        "clear-alerts": "Limpar Alertas",
-        "file-header": "Ficheiro",
-        "comment-header": "Comentário",
-        "created-header": "Criado",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -1316,19 +1310,7 @@
     },
     "events-widget": {
         "title-alt": "Atividade",
-        "dismiss-all": "Descartar Todos",
-        "update-available": "Atualização disponível",
-        "downloading-item": "A descarregar {{item}}",
-        "more-info": "Clique para ver mais informação",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Utilizadores ligados",
-        "active-events-title": "Eventos Ativos:",
-        "no-data": "Nada para ver aqui",
-        "left-to-process": "Por Processar: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} downloads em espera",
-        "reading-now": "{{num}} a ler agora",
-        "downloads-active": "{{count}} descarga(s) em andamento",
-        "not-connected": "Sem ligação, tente atualizar"
+        "reading-now": "{{num}} a ler agora"
     },
     "shortcuts-modal": {
         "title": "Atalhos de Teclado",

@@ -861,13 +861,7 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "description-part-2": "wiki.",
-        "clear-alerts": "Vymazať upozornenia",
-        "comment-header": "Komentár",
-        "created-header": "Vytvorené",
-        "no-data": "{{common.no-data}}",
-        "file-header": "Súbor",
-        "description-part-1": "Táto tabuľka obsahuje problémy zistené počas skenovania alebo čítania vašich médií. Môžete ju kedykoľvek vymazať a na vykonanie analýzy použiť Library (Force) Scan (vynútené skenovanie). Zoznam niektorých bežných chýb a ich význam nájdete na stránke "
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "description": "Aby ste mohli používať niektoré funkcie Kavity, ako je Zabudnuté heslo a Odoslať do zariadenia, musí byť nastavený poskytovateľ e-mailu. Ostatné funkcie, ako zabudnuté heslo, vyžadujú zásah správcu bez nastavenia e-mailu.",
@@ -1235,17 +1229,7 @@
         "date-range-title": "Rozsah dátumov"
     },
     "events-widget": {
-        "title-alt": "Aktivita",
-        "dismiss-all": "Odmietnuť všetko",
-        "update-available": "Aktualizácia je dostupná",
-        "downloading-item": "Sťahuje sa {{item}}",
-        "more-info": "Kliknite pre viac informácií",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Používateľov online",
-        "active-events-title": "Aktívne udalosti:",
-        "no-data": "Moc sa tu toho nedeje",
-        "left-to-process": "Zostáva spracovať: {{leftToProcess}}",
-        "download-in-queue": "Počet stiahnutí v poradí: {{num}}"
+        "title-alt": "Aktivita"
     },
     "shortcuts-modal": {
         "title": "Klávesové skratky",

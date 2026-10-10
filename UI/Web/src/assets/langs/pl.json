@@ -898,13 +898,7 @@
         "open-external": "Otwórz zewnętrzny"
     },
     "manage-media-issues": {
-        "description-part-1": "Ta tabela zawiera wszystkie błędy wykryte podczas skanowania twoich mediów. Możesz w każdej chwili ją wyczyścić u użyć Wymuszonego Skanowania aby przeprowadzić analizę. Listę niektórych typowych błędów i ich znaczenie można znaleźć na ",
-        "description-part-2": "wiki.",
         "filter-label": "{{common.filter}}",
-        "clear-alerts": "Wyczyść alerty",
-        "file-header": "Plik",
-        "comment-header": "Komentarz",
-        "created-header": "Utworzono",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -1295,18 +1289,7 @@
     },
     "events-widget": {
         "title-alt": "Aktywność",
-        "dismiss-all": "Odrzuć wszystko",
-        "update-available": "Aktualizacja dostępna",
-        "downloading-item": "Pobieram {{item}}",
-        "more-info": "Kliknij, aby uzyskać więcej informacji",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Użytkowników online",
-        "active-events-title": "Aktywne wydarzenia:",
-        "no-data": "Niewiele się tu dzieje",
-        "left-to-process": "Pozostało do przetworzenia: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} pobrań w kolejce",
-        "reading-now": "{{num}} czyta teraz",
-        "downloads-active": "{{count}} pobrań w toku"
+        "reading-now": "{{num}} czyta teraz"
     },
     "shortcuts-modal": {
         "title": "Skróty klawiszowe",

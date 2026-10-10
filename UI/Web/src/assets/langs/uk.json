@@ -672,12 +672,6 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "description-part-1": "У цій таблиці наведено проблеми, виявлені під час сканування або читання медіафайлів. Ви можете очистити її будь-коли та скористатися скануванням бібліотеки (примусово) для виконання аналізу. Список деяких поширених помилок та їх значення можна знайти на ",
-        "description-part-2": "вікі.",
-        "clear-alerts": "Очистити сповіщення",
-        "file-header": "Файл",
-        "comment-header": "Коментар",
-        "created-header": "Створено",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -1025,17 +1019,7 @@
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
-        "close": "{{common.close}}",
         "title-alt": "Активність",
-        "dismiss-all": "Відхилити все",
-        "update-available": "Доступне оновлення",
-        "downloading-item": "Завантаження {{item}}",
-        "more-info": "Натисніть, щоб отримати більше інформації",
-        "users-online-count": "{{num}} Користувачі онлайн",
-        "active-events-title": "Активні події:",
-        "no-data": "Тут небагато чого відбувається",
-        "left-to-process": "Залишилося обробити: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} завантажень у черзі",
         "reading-now": "{{num}} читає зараз"
     },
     "shortcuts-modal": {

@@ -128,7 +128,8 @@
         "embed-progress-indicator-label": "Indicateur intégré de progression",
         "embed-progress-indicator-tooltip": "Indicateur intégré de progression dans le Titre",
         "include-continue-from-label": "Inclure Continuer à partir de",
-        "include-continue-from-tooltip": "Insère un élément \"Continuer depuis X\" dans les champs OPDS pour éviter d'avoir à chercher votre dernier point de lecture (simule le bouton \"Reprendre\" de Kavita)"
+        "include-continue-from-tooltip": "Insère un élément \"Continuer depuis X\" dans les champs OPDS pour éviter d'avoir à chercher votre dernier point de lecture (simule le bouton \"Reprendre\" de Kavita)",
+        "ondeck-progress-days-label": "Dernière progression sur le pont (jours)"
     },
     "user-holds": {
         "title": "Séries en attente de synchronisation",
@@ -912,13 +913,7 @@
         "open-external": "Ouvrir à l'extérieur"
     },
     "manage-media-issues": {
-        "description-part-1": "Ce tableau contient des problèmes détectés lors de l'analyse ou de la lecture de vos médias. Vous pouvez l'effacer à tout moment et utiliser Library (Force) Scan pour effectuer l'analyse. Une liste des erreurs les plus courantes et de leur signification est disponible sur le ",
-        "description-part-2": "wiki.",
         "filter-label": "{{common.filter}}",
-        "clear-alerts": "Supprimer les alertes",
-        "file-header": "Fichier",
-        "comment-header": "Commentaire",
-        "created-header": "Créé",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -1316,19 +1311,7 @@
     },
     "events-widget": {
         "title-alt": "Activité",
-        "dismiss-all": "Rejeter tout",
-        "update-available": "Mise à jour disponible",
-        "downloading-item": "Téléchargement de {{item}}",
-        "more-info": "Cliquez pour plus d'informations",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Utilisateurs en ligne",
-        "active-events-title": "Événements actifs :",
-        "no-data": "Il ne se passe pas grand-chose ici",
-        "left-to-process": "Reste à traiter : {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} téléchargements dans la file d'attente",
-        "reading-now": "{{num}} en cours de lecture",
-        "downloads-active": "{{count}} téléchargement(s) en cours",
-        "not-connected": "Non connecté, essayez d'actualiser"
+        "reading-now": "{{num}} en cours de lecture"
     },
     "shortcuts-modal": {
         "title": "Raccourcis clavier",
@@ -3105,7 +3088,8 @@
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "never": "Jamais"
+        "never": "Jamais",
+        "duplicate-name-validation": "Le nom de la clé d'authentification doit être unique"
     },
     "server-activity": {
         "no-data": "Rien à voir ici"

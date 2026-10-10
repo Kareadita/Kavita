@@ -923,13 +923,7 @@
         "open-external": "외부 열기"
     },
     "manage-media-issues": {
-        "description-part-1": "이 표에는 미디어를 스캔하거나 읽는 동안 발견된 문제가 포함되어 있습니다. 언제든지 삭제하고 라이브러리(강제) 스캔을 사용하여 분석을 수행할 수 있습니다. 몇 가지 일반적인 오류 목록과 그 의미는 다음에서 확인할 수 있습니다. ",
-        "description-part-2": "위키.",
         "filter-label": "{{common.filter}}",
-        "clear-alerts": "알림 지우기",
-        "file-header": "파일",
-        "comment-header": "댓글",
-        "created-header": "생성됨",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -1327,19 +1321,7 @@
     },
     "events-widget": {
         "title-alt": "활동",
-        "dismiss-all": "모두 제거",
-        "update-available": "업데이트 사용 가능",
-        "downloading-item": "다운로드 중 {{item}}",
-        "more-info": "자세한 내용을 보려면 클릭하십시오",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} 사용자 온라인",
-        "active-events-title": "활성 이벤트:",
-        "no-data": "아무것도 없습니다",
-        "left-to-process": "처리할 남은 항목: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "대기열에서 {{num}} 다운로드",
-        "reading-now": "{{num}}명이 읽는 중",
-        "downloads-active": "{{count}}개 다운로드 진행 중",
-        "not-connected": "연결되지 않았습니다. 새로 고침을 시도해 보세요"
+        "reading-now": "{{num}}명이 읽는 중"
     },
     "shortcuts-modal": {
         "title": "키보드 단축키",
@@ -1540,7 +1522,8 @@
         "reading-profile-updated": "읽기 프로필 업데이트 완료",
         "reading-profile-promoted": "읽기 프로필 생성 완료",
         "page-offset-label": "페이지 오프셋",
-        "offset-only-double": "페이지 오프셋은 양면 표시에서만 사용할 수 있습니다"
+        "offset-only-double": "페이지 오프셋은 양면 표시에서만 사용할 수 있습니다",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-label}}"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1677,7 +1660,7 @@
         "volume-num": "{{common.volume-num}}",
         "highest-count-tooltip": "시리즈의 모든 ComicInfo에서 가장 높은 카운트를 찾았습니다",
         "max-issue-tooltip": "시리즈의 모든 ComicInfo에서 최대 호(이슈) 또는 권(볼륨) 필드",
-        "loose-leaf-volume": "조판되지 않은 장",
+        "loose-leaf-volume": "미분류 화",
         "specials-volume": "스페셜",
         "release-year-validation": "{{validation.year-validation}}",
         "volumes-title": "{{tab.volumes-tab}}",
@@ -1886,7 +1869,8 @@
         "font-manual-upload": "수동 업로드로 폰트 생성 과정에서 문제가 발생했습니다",
         "font-already-in-use": "같은 이름의 폰트가 이미 존재합니다",
         "upload-too-large": "이 파일은 업로드가 너무 크며 작은 이미지를 선택하고 다시 시도합니다.",
-        "invalid-form": "입력한 항목에 오류가 있습니다"
+        "invalid-form": "입력한 항목에 오류가 있습니다",
+        "required-if-other-invalid": "{{other}}은(는) 유효하지 않습니다"
     },
     "metadata-builder": {
         "or": "다음 중 하나와 일치",
@@ -1951,7 +1935,8 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "api-key-tooltip": "호스트가 OIDC를 사용할 때 자동 로그인이 필요하지 않습니다"
+        "api-key-tooltip": "호스트가 OIDC를 사용하는 경우 자동 로그인에 API 키가 필요하지 않습니다",
+        "confirm-delete": "{{name}} 외부 소스를 삭제하시겠습니까?"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -2408,7 +2393,7 @@
         "volume-num-shorthand": "{{num}} 권",
         "no-data": "데이터 없음",
         "chapter-count": "{{num}} 챕터",
-        "issue-count": "{{num}} 권",
+        "issue-count": "{{num}}호",
         "unknown": "알수없음",
         "libraries": "라이브러리",
         "confirm": "확인",
@@ -3137,7 +3122,9 @@
         "key-bind-title-last-page": "마지막 페이지",
         "key-bind-tooltip-last-page": "마지막 페이지로 이동",
         "key-bind-tooltip-navigate-home": "Kavita 내 어디서나 대시보드로 이동",
-        "key-bind-title-navigate-home": "홈으로 이동"
+        "key-bind-title-navigate-home": "홈으로 이동",
+        "key-bind-title-open-event-widget": "이벤트 위젯 열기",
+        "key-bind-tooltip-open-event-widget": "이벤트 위젯 팝오버 열기"
     },
     "manage-auth-keys": {
         "auth-keys-title": "인증키 관리",
@@ -3291,7 +3278,8 @@
     "favorite-authors": {
         "title": "가장 많이 읽은 작가",
         "sub-title": "{{name}}가 가장 많이 읽은 작가는 {{author}}이며, 총 {{count}}화 읽었습니다",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "chapter-count": "{{common.chapter-count}}"
     },
     "page-spread": {
         "title": "챕터별 페이지 수",
@@ -3594,7 +3582,7 @@
         "all-series-missing": "모든 시리즈 없음",
         "empty-file": "빈 파일",
         "series-collision": "다수 시리즈 일치",
-        "all-chapter-missing": "모든 권 없음",
+        "all-chapter-missing": "모든 화 없음",
         "success": "성공",
         "invalid-file": "유효하지 않은 파일"
     },
@@ -4431,6 +4419,29 @@
         "search-alt": "검색어 입력…",
         "tags": "태그",
         "reading-lists": "독서 목록",
-        "collections": "컬렉션"
+        "collections": "컬렉션",
+        "person-aka-status": "별칭과 일치",
+        "no-data": "결과 없음",
+        "search-for": "{{term}} 검색",
+        "in-library": "{{name}}에서",
+        "volume-count": "{{count}}권",
+        "volume-count-one": "{{count}}권",
+        "chapter-count": "{{count}}화",
+        "chapter-count-one": "{{count}}화",
+        "search-config-alt": "검색 설정",
+        "search-config-title": "검색 설정",
+        "results-available-alt": "{{typeahead.results-available-alt}}",
+        "no-results-alt": "{{typeahead.no-results-alt}}",
+        "search-series-alt": "시리즈 검색"
+    },
+    "locked-field": {
+        "field-locked-alt": "필드가 잠겨 있습니다"
+    },
+    "rate-and-review-series-modal": {
+        "title": "평점 & 리뷰: {{seriesName}}",
+        "description": "이 시리즈에 대한 평점과 리뷰를 남겨주세요.",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "review-label": "{{review-modal.review-label}}"
     }
 }

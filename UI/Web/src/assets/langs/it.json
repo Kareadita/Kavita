@@ -780,13 +780,7 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "description-part-2": "wiki.",
-        "comment-header": "Commenti",
-        "file-header": "File",
-        "created-header": "Creato",
-        "no-data": "{{common.no-data}}",
-        "description-part-1": "Questa tabella contiene i problemi riscontrati durante la scansione o la lettura del tuo supporto. Puoi cancellarla in qualsiasi momento e usare Library (Force) Scan per eseguire l'analisi. Un elenco di alcuni errori comuni e il loro significato può essere trovato su ",
-        "clear-alerts": "Cancella Avvisi"
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "description": "Per utilizzare alcune funzioni di Kavita come Invia a Dispositivo è necessario configurare un provider di posta elettronica. Altre funzioni come Password dimenticata richiedono l'intervento dell'amministratore senza la configurazione della posta elettronica.",
@@ -1142,17 +1136,7 @@
         "characters-title": "{{metadata-fields.characters-title}}"
     },
     "events-widget": {
-        "title-alt": "Attività",
-        "dismiss-all": "Ignora tutto",
-        "update-available": "Aggiornamento disponibile",
-        "downloading-item": "Download di {{item}}",
-        "more-info": "Fare clic per ulteriori informazioni",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Utenti online",
-        "active-events-title": "Eventi Attivi:",
-        "no-data": "Non succede molto qui",
-        "download-in-queue": "{{num}} download in Coda",
-        "left-to-process": "Da elaborare: {{leftToProcess}}"
+        "title-alt": "Attività"
     },
     "shortcuts-modal": {
         "title": "Scorciatoie Tastiera",

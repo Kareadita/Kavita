@@ -128,7 +128,11 @@
         "prompt-for-rereads-after-label": "Výzva k opětovnému přečtení",
         "prompt-for-rereads-after-tooltip": "Zobrazit výzvu k opětovnému přečtení, pokud nedošlo k žádnému pokroku od X dnů. 0 zcela deaktivuje výzvu.",
         "social-share-profile-label": "Sdílet profil",
-        "social-share-profile-tooltip": "Povolit sdílení informací o vaší čtenářské aktivitě s ostatními členy serveru"
+        "social-share-profile-tooltip": "Povolit sdílení informací o vaší čtenářské aktivitě s ostatními členy serveru",
+        "ondeck-progress-days-label": "Na řadě – Poslední pokrok (dny)",
+        "ondeck-progress-days-tooltip": "Počet dní od posledního pokroku kdy se odebralo něco „Na řadě“.",
+        "ondeck-update-days-label": "Na řadě Poslední kapitola Zbývá (dny)",
+        "ondeck-update-days-tooltip": "Počet dní od zveřejnění poslední kapitoly, do které se započítává i „Na řadě“."
     },
     "user-holds": {
         "title": "Scrobble drží",
@@ -269,7 +273,14 @@
         "loading": "{{common.loading}}",
         "add-item": "Přidat {{item}}…",
         "no-data": "{{common.no-data}}",
-        "add-custom-item": ", zadejte pro přidání vlastní položky"
+        "add-custom-item": ", zadejte pro přidání vlastní položky",
+        "toggle-lock-alt": "Zamknout pole",
+        "remove-alt": "Odstranit {{title}}",
+        "remove-item-alt": "Odstranit položku",
+        "clear-selections-alt": "Vymazat veškerý výběr",
+        "selected-items-alt": "Vybrané položky",
+        "results-available-alt": "K dispozici je {{count}} výsledků",
+        "no-results-alt": "Žádné výsledky k dispozici"
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
@@ -884,12 +895,6 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "clear-alerts": "Vymazat upozornění",
-        "description-part-2": "wiki.",
-        "description-part-1": "Tato tabulka obsahuje problémy zjištěné při skenování nebo čtení médií. Můžete ji kdykoli vymazat a použít (vynucený) sken knihovny k provedení analýzy. Seznam některých běžných chyb a jejich význam najdete na stránce ",
-        "file-header": "Soubor",
-        "comment-header": "Komentář",
-        "created-header": "Vytvořeno",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -1251,20 +1256,48 @@
         "filter-label": "{{common.filter}}"
     },
     "events-widget": {
-        "close": "{{common.close}}",
-        "dismiss-all": "Odmítnout vše",
-        "update-available": "K dispozici je aktualizace",
-        "downloading-item": "Stahuji {{item}}",
         "title-alt": "Aktivita",
-        "more-info": "Klikněte pro více informací",
-        "users-online-count": "{{num}} aktivních uživatelů",
-        "no-data": "Tady se toho moc neděje",
-        "left-to-process": "Zbývá zpracovat: {{leftToProcess}} / {{totalToProcess}}",
-        "active-events-title": "Aktivní události:",
-        "download-in-queue": "{{num}} stahování ve frontě",
         "reading-now": "{{num}} právě čte",
-        "downloads-active": "{{count}} stahování probíhá",
-        "not-connected": "Není připojeno, zkuste stránku obnovit"
+        "filter-all-label": "Vše",
+        "filter-attention-label": "Vyžaduje pozornost",
+        "filter-jobs-label": "Úlohy",
+        "clear-finished-label": "Vymazat dokončené",
+        "dismiss-alt": "Skrýt",
+        "now-label": "teď",
+        "no-data-description": "Nic neběží a nic tě nepotřebuje.",
+        "filter-empty-label": "Zatím tu nic není.",
+        "server-unreachable-label": "Nelze se připojit k serveru. Zkouším znovu...",
+        "view-activity-label": "Zobrazit aktivitu",
+        "restoring-alt": "Obnovení činnosti z doby před aktualizací",
+        "finished-while-away-label": "Dokončeno, zatímco jsi byl/a pryč",
+        "finishing-up-label": "Dokončuji",
+        "interrupted-label": "Zastaveno kvůli restartu serveru",
+        "failed-label": "Zastaveno před dokončením",
+        "schedule-lost-label": "Bylo nastaveno na {{time}}, ztratilo se při restartu serveru",
+        "progress-counter-label": "{{current}} / {{total}}",
+        "up-next-label": "Následuje",
+        "show-more-label": "Zobrazit dalších {{count}}",
+        "show-less-label": "Zobrazit méně",
+        "scanning-libraries-label": "Skenuji knihovny",
+        "libraries-progress-label": "{{current}} z {{total}}",
+        "scans-waiting-label": "Čekající skeny z knihovny: {{count}}",
+        "and-more-label": "a dalších {{count}}",
+        "problems-in-libraries-label": "Knihovny s problémy: {{count}}",
+        "status-offline-alt": "Server není dostupný",
+        "status-attention-alt": "Vyžaduje pozornost: {{count}}",
+        "status-attention-error-alt": "Vyžaduje pozornost: {{count}}, včetně chyb",
+        "status-running-alt": "Spuštěné úlohy: {{count}}",
+        "title-label": "Aktivita",
+        "filter-group-alt": "Filtrovat aktivity",
+        "scanned-libraries-label": "Naskenované knihovny: {{count}}",
+        "rate-limit-description": "Nenalezeno: {{count}}. Zkuste to znovu za pár minut.",
+        "scan-scheduled": "Naskenovat {{libraryName}}",
+        "scan-libraries-scheduled": "Skenovat všechny knihovny",
+        "scan-series-scheduled": "Naskenovat {{seriesName}}",
+        "scan-series-in-library-scheduled": "Naskenovat sérii v {{libraryName}}",
+        "scan-waiting-description": "Probíhal další sken",
+        "show-label": "Zobrazit",
+        "hide-label": "Schovat"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}",
@@ -1429,7 +1462,8 @@
         "reading-profile-updated": "Profil čtení aktualizován",
         "reading-profile-promoted": "Profil čtení propagován",
         "page-offset-label": "Odsazení stránky",
-        "offset-only-double": "Posun stránky lze použít pouze u dvojitého rozvržení"
+        "offset-only-double": "Posun stránky lze použít pouze u dvojitého rozvržení",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-label}}"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1741,7 +1775,8 @@
         "host-label": "Hostitel",
         "name-label": "Název",
         "api-key-label": "Klíč API",
-        "api-key-tooltip": "Pokud hostitel používá OIDC, není nutné automatické přihlášení"
+        "api-key-tooltip": "Pokud hostitel používá OIDC, není nutné automatické přihlášení",
+        "confirm-delete": "Opravdu chcete odstranit {{name}} jako externí zdroj?"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -1941,7 +1976,7 @@
         "loading-alt": "Načítání výsledků",
         "empty-title": "Vyhledat shodu",
         "empty-description": "Zkuste zadat název série nebo vložte přímý odkaz z AniList, MAL, MangaBaka, CBR nebo Hardcover.",
-        "no-results-title": "Nebyly nalezeny žádné výsledky",
+        "no-results-title": "Nebyly nalezeny žádné párování",
         "no-results-description": "Pro „{{ query }}“ nebyly nalezeny žádné výsledky. Zkuste zadat kratší dotaz, název v latince nebo přímé ID.",
         "dont-match-active-title": "Funkce párování není povolena",
         "dont-match-active-description": "U této série je deaktivováno přiřazování a scrobblování v rámci služby Kavita+.",
@@ -2118,7 +2153,8 @@
         "font-manual-upload": "Při ručním nahrávání písma došlo k problému",
         "font-already-in-use": "Písmo s tímto názvem již existuje",
         "upload-too-large": "Soubor je pro nahrání příliš velký, vyberte menší obrázek a zkuste to znovu.",
-        "invalid-form": "Formulář, který se pokoušíte odeslat, obsahuje chyby"
+        "invalid-form": "Formulář, který se pokoušíte odeslat, obsahuje chyby",
+        "required-if-other-invalid": "{{other}} je neplatný"
     },
     "cover-image-size": {
         "xlarge": "Extra velké (1265x1795)",
@@ -2407,7 +2443,8 @@
         "tokens-expired": "Vypršela platnost jednoho nebo více připojovacích tokenů. Funkce scrobblování a synchronizace jsou pozastaveny, dokud je znovu nevygenerujete v aplikaci Kavita+ > Připojení",
         "confirm-rerun-backfill": "Pro {{provider}} jste již alespoň jednou vygenerovali události scrobblování. Doplnění starších údajů může způsobit zpoždění scrobblování událostí z nedávné doby. Opravdu chcete pokračovat?",
         "change-email-success": "Na vaši novou adresu byl odeslán potvrzovací odkaz. Kliknutím na něj změnu dokončete.",
-        "change-email-error": "Vaši e-mailovou adresu se nám nepodařilo změnit. Zkuste to prosím znovu, nebo pokud se tento problém opakuje, obraťte se na podporu."
+        "change-email-error": "Vaši e-mailovou adresu se nám nepodařilo změnit. Zkuste to prosím znovu, nebo pokud se tento problém opakuje, obraťte se na podporu.",
+        "scan-all-queued": "Skenování zařazeno do fronty pro všechny knihovny"
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",
@@ -3126,7 +3163,9 @@
         "key-bind-title-last-page": "Poslední stránka",
         "key-bind-tooltip-last-page": "Přejít na poslední stránku",
         "key-bind-title-navigate-home": "Přejít na úvodní stránku",
-        "key-bind-tooltip-navigate-home": "Přejděte na řídicí panel z libovolného místa v aplikaci Kavita"
+        "key-bind-tooltip-navigate-home": "Přejděte na řídicí panel z libovolného místa v aplikaci Kavita",
+        "key-bind-title-open-event-widget": "Otevřít widget události",
+        "key-bind-tooltip-open-event-widget": "Otevře vyskakovací okno s widgetem události"
     },
     "manage-auth-keys": {
         "auth-keys-title": "Správa autorizačních klíčů",
@@ -3160,7 +3199,8 @@
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "never": "Nikdy"
+        "never": "Nikdy",
+        "duplicate-name-validation": "Název autentizačního klíče musí být jedinečný"
     },
     "review-list-item": {
         "by-label": "K",
@@ -3279,7 +3319,8 @@
     "favorite-authors": {
         "title": "Nejčtenější autoři",
         "sub-title": "Nejčtenějším autorem {{name}} je {{author}}, s celkovým počtem {{count}} přečtení",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "chapter-count": "{{common.chapter-count}}"
     },
     "page-spread": {
         "title": "Kapitoly podle počtu stránek",
@@ -4403,5 +4444,124 @@
         "recurrent": "Opakující se",
         "incidental": "Vedlejší",
         "unweighted": "Nevážené"
+    },
+    "search-typeahead": {
+        "files": "Soubory",
+        "chapters": "Kapitoly",
+        "people": "Lidé",
+        "annotations": "{{tabs.annotations-tab}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "libraries": "{{common.libraries}}",
+        "series": "Série",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "include-extras": "Zahrnout kapitoly a soubory",
+        "search-alt": "Hledat…",
+        "person-aka-status": "Odpovídá aliasu",
+        "no-data": "Nebyly nalezeny žádné výsledky",
+        "search-for": "Vyhledat {{term}}",
+        "in-library": "v {{name}}",
+        "volume-count": "{{count}} svaz",
+        "volume-count-one": "{{count}} svz",
+        "chapter-count": "{{count}} kapitol",
+        "chapter-count-one": "{{count}} kapitola",
+        "search-config-alt": "Možnosti vyhledávání",
+        "search-config-title": "Možnosti Vyhledávání",
+        "results-available-alt": "{{typeahead.results-available-alt}}",
+        "no-results-alt": "{{typeahead.no-results-alt}}",
+        "search-series-alt": "Vyhledat série",
+        "tags": "Značky",
+        "reading-lists": "Seznamy četby",
+        "collections": "Kolekce"
+    },
+    "locked-field": {
+        "field-locked-alt": "Pole je uzamčeno"
+    },
+    "rate-and-review-series-modal": {
+        "title": "Ohodnoťte a napište recenzi: {{seriesName}}",
+        "description": "Ohodnoťte sérii a napište k ní recenzi.",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "review-label": "{{review-modal.review-label}}"
+    },
+    "event-title-pipe": {
+        "scan-progress": "Skenuji {{libraryName}}",
+        "scan-done": "Naskenováno {{libraryName}}",
+        "backup-database-progress": "Zálohuji databázi",
+        "cleanup-progress": "Čistím",
+        "cover-update-progress": "Aktualizuji obálky: {{libraryName}}",
+        "word-count-analyzer-progress": "Počítám slova: {{libraryName}}",
+        "convert-bookmarks-progress": "Převádím záložky",
+        "convert-covers-progress": "Převádím obálky",
+        "smart-collection-sync": "Synchronizuji {{collectionName}}",
+        "rerun-metadata-mappings-progress": "Opětovné použití mapování metadat",
+        "sending-to-device": "Odesílám soubory do zařízení",
+        "download-progress": "Připravuji {{downloadName}}",
+        "site-theme-progress": "Zpracovávám téma {{themeName}}",
+        "book-theme-progress": "Zpracovávám téma knihy {{themeName}}",
+        "update-available": "Kavita {{version}} je dostupná",
+        "scrobbling-key-expired": "Vypršela platnost připojení {{provider}}",
+        "external-match-rate-limit": "Byl dosažen limit počtu požadavků pro Kavita+"
+    },
+    "event-message-pipe": {
+        "root-folders-inaccessible-label": "K složkám knihovny nelze získat přístup",
+        "root-folders-inaccessible-description": "Zkontrolujte, zda jsou tyto disky připojeny, a poté proveďte nové vyhledávání: {{folders}}",
+        "root-folders-empty-label": "Skenování {{libraryName}} bylo přerušeno",
+        "root-folders-empty-description": "Některé kořenové složky jsou prázdné. Zkontrolujte, zda je připojeno úložiště, nebo změňte kořenovou složku a poté proveďte nové vyhledávání.",
+        "series-collision-label": "Kolize série na „{{seriesName}}“ v {{libraryName}}",
+        "series-collision-description": "Tyto dvě složky patří do stejné série. Otevřete podrobnosti a podívejte se na soubory.",
+        "files-outside-folder-label": "{{seriesName}} obsahuje soubory mimo svou složku",
+        "files-outside-folder-description": "To zpomaluje skenování. Uchovávejte všechny soubory z jedné série v jedné složce.",
+        "scan-series-no-root-label": "{{seriesName}} – skenování bylo přerušeno",
+        "scan-series-no-root-description": "Žádná složka neobsahuje všechny soubory této série. Zkontrolujte strukturu složek a poté proveďte nové skenování.",
+        "scan-series-not-nested-label": "Skenování {{seriesName}} bylo přerušeno",
+        "scan-series-not-nested-description": "Soubory série se nenacházejí ve složce v cestě ke knihovně. Přesuňte je do nějaké složky a poté proveďte nové vyhledávání.",
+        "scan-series-no-files-label": "Pro {{seriesName}} nebyly nalezeny žádné soubory",
+        "scan-series-no-files-description": "Soubory měly být k dispozici, ale žádné nebyly nalezeny. Zkontrolujte názvy souborů nebo umístěte sérii do samostatné složky.",
+        "scan-series-folder-missing-label": "Chybí složka {{seriesName}}",
+        "scan-series-folder-missing-description": "Odstraňte sérii nebo prohledejte knihovnu.",
+        "scan-no-work-label": "{{seriesName}} nemá co skenovat",
+        "scan-no-work-description": "Od posledního skenování nedošlo ke změnám v žádných složkách.",
+        "db-write-failed-label": "Nelze uložit {{seriesName}}",
+        "scan-libraries-delayed-label": "Přeskenování všech knihoven bylo přeplánováno",
+        "scan-library-delayed-label": "Skenování {{libraryName}} bylo přeplánováno",
+        "scan-series-delayed-label": "Skenování {{seriesName}} bylo přesunuto",
+        "scan-delayed-description": "Spustí se v {{time}}. Právě probíhal další sken.",
+        "backup-folder-unwritable-label": "Zálohování se nezdařilo",
+        "backup-folder-unwritable-description": "Nelze zapisovat do {{folder}}.",
+        "backup-exists-label": "{{event-message-pipe.backup-folder-unwritable-label}}",
+        "backup-exists-description": "{{path}} již existuje.",
+        "cleanup-on-hold-label": "Úklid odložen",
+        "cleanup-on-hold-description": "Právě probíhá konverze médií. Po ní se spustí úklid.",
+        "word-count-failed-label": "Nepodařilo se spočítat počet slov v {{seriesName}}",
+        "word-count-failed-description": "Nelze přečíst soubor {{filePath}}."
+    },
+    "event-action-pipe": {
+        "reconnect": "Znovu se připojit",
+        "whats-new": "Co je nového",
+        "remind-later": "Připomeň mi to zítra",
+        "open-library": "Otevřít knihovnu",
+        "open-series": "Otevřít sérii",
+        "open-matching": "Otevřít párování",
+        "rescan": "Přeskenovat",
+        "scan-now": "Skenovat nyní",
+        "details": "Podrobnosti"
+    },
+    "activity-age-pipe": {
+        "now": "nyní",
+        "minutes": "{{value}}m",
+        "hours": "{{value}}h"
+    },
+    "activity-duration-pipe": {
+        "seconds": "{{seconds}}s",
+        "minutes": "{{minutes}}m {{seconds}}s",
+        "hours": "{{hours}}h {{minutes}}m"
+    },
+    "upcoming-task-name-pipe": {
+        "scan-libraries": "Skenovat všechny knihovny",
+        "cleanup": "Úklid",
+        "sync-cbl": "Synchronizovat seznamy čtení",
+        "backup": "Záloha"
     }
 }
