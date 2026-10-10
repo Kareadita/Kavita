@@ -17,7 +17,7 @@ FlushGitChanges:
     - "openapi.json"
 
 BuildFrontend:
-  BuildScript: "build"
+  BuildScript: "prod"
   Path: "UI/Web"
   OutputPath: "dist/browser/"
   CopyTo: "Kavita.Server/wwwroot"
@@ -56,7 +56,7 @@ Docker:
     Canary: ["canary", "canary-{Version}"]
 
 NotifyDiscord:
-  Message: "<@939225459156217917> <@939225350775406643>  A new nightly build has been released for docker."
+  Message: "<&939225459156217917> <&939225350775406643>  A new nightly build has been released for docker."
   ReleaseTypes: [Nightly]
 
 CreateGitHubRelease:
