@@ -53,11 +53,17 @@ public static class ScanJobExtensions
     }
 
     /// <summary>
-    /// A scan of this library, or of every library, is queued or reading files
+    /// A scan of this library, of every library, or of one of its series is queued or reading files
     /// </summary>
-    public static bool IsLibraryInUse(this IEnumerable<ScanJob> jobs, int libraryId)
+    /// <param name="seriesIds">The library's series, a <see cref="ScannerService.ScanSeries"/> job does not carry its library</param>
+    public static bool IsLibraryInUse(this IEnumerable<ScanJob> jobs, int libraryId, IReadOnlyCollection<int> seriesIds)
     {
-        return jobs.Any(j => !j.IsRequest && j.Target.Covers(ScanTarget.Library(libraryId)));
+        return jobs
+            .Where(j => !j.IsRequest)
+            .Select(j => j.Target)
+            .Any(t => t.SeriesId is { } seriesId
+                ? seriesIds.Contains(seriesId)
+                : t.LibraryId is null || t.LibraryId == libraryId);
     }
 
     /// <summary>

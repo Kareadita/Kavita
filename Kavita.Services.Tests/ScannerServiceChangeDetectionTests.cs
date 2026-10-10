@@ -391,25 +391,34 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     }
 
     [Fact]
-    public async Task ScanLibrary_UnreadableLibraryRoot_RemovesNothing()
+    public async Task ScanLibrary_UnreadableLibraryRoot_AbortsAndReportsIt()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var (_, libraryId) = await ScanOnce(unitOfWork, "Unreadable Library Root - Manga", TwoSeries);
         var root = await LibraryRoot(context, libraryId);
+        var eventHub = Substitute.For<IEventHub>();
         // A scan that went ahead without reading the root would remove this series
         Directory.Delete(Path.Join(root, "Accel World"), true);
 
-        try
-        {
-            await ScannerWithUnreadable(unitOfWork, root).ScanLibrary(libraryId);
-        }
-        catch (UnauthorizedAccessException)
-        {
-            // Aborting is fine, deleting is not
-        }
+        await ScannerWithUnreadable(unitOfWork, eventHub, root).ScanLibrary(libraryId);
 
         Assert.Equal(2, await context.Series.CountAsync(s => s.LibraryId == libraryId));
         Assert.Equal(3, await context.MangaFile.CountAsync(f => f.Chapter.Volume.Series.LibraryId == libraryId));
+        var body = Assert.Single(UnreadableFoldersBodies(eventHub));
+        Assert.Equal([root], body.Folders);
+    }
+
+    [Fact]
+    public async Task ScanSeries_UnreadableLibraryRoot_AbortsAndReportsIt()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Unreadable Library Root Series - Manga", TwoSeries);
+        var root = await LibraryRoot(context, libraryId);
+        var eventHub = Substitute.For<IEventHub>();
+
+        await ScannerWithUnreadable(unitOfWork, eventHub, root).ScanSeries(await SeriesId(context, libraryId, "Berserk"));
+
+        Assert.Single(UnreadableFoldersBodies(eventHub));
     }
 
     [Theory]
@@ -1171,6 +1180,29 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
 
         var paths = await context.MediaError.AsNoTracking().Select(m => m.FilePath).ToListAsync();
         Assert.Equal([notRead, unchanged], paths.Order());
+    }
+
+    [Fact]
+    public async Task ProducerRow_LastLooseFileDeletedFromAParentFolder_Goes()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Producer Row Last Loose File - Manga",
+            ["Berserk/Berserk Vol. 1/Berserk Vol. 1 Ch. 0001.cbz", "Berserk/Berserk Vol. 3.cbz"]);
+        var root = await LibraryRoot(context, libraryId);
+        var looseFile = Path.Join(root, "Berserk", "Berserk Vol. 3.cbz");
+        var row = new MediaErrorBuilder(Parser.NormalizePath(looseFile)).WithProducer(MediaErrorProducer.ArchiveService)
+            .WithReason(MediaErrorReason.CoverFailed).WithDetails("details").Build();
+        row.LibraryId = libraryId;
+        row.Bytes = new FileInfo(looseFile).Length;
+        row.FileLastWriteTimeUtc = File.GetLastWriteTimeUtc(looseFile);
+        context.MediaError.Add(row);
+        await context.SaveChangesAsync();
+
+        File.Delete(looseFile);
+        Directory.SetLastWriteTime(Path.Join(root, "Berserk"), DateTime.Now.AddSeconds(2));
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Empty(await context.MediaError.ToListAsync());
     }
 
     private sealed class FailNamedFiles(IReadingItemService inner, ISet<string> failing) : IReadingItemService

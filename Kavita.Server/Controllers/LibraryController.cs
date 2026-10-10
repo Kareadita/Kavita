@@ -563,7 +563,7 @@ public class LibraryController(
 
         try
         {
-            if (ScanJobQueue.Read().Jobs.IsLibraryInUse(libraryId))
+            if (ScanJobQueue.Read().Jobs.IsLibraryInUse(libraryId, seriesIds))
             {
                 logger.LogInformation("User is attempting to delete a library while a scan is in progress");
                 throw new KavitaException(await localizationService.TranslateAsync(userId, "delete-library-while-scan"));

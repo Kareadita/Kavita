@@ -204,6 +204,9 @@ public partial class ParseScannedFiles
                     else
                     {
                         MarkRead(failures);
+                        // With no files left there is no result, and AddReadFiles would never mark these folders read
+                        _readFolders.Add(directory);
+                        _readFolders.UnionWith(specials);
                         AddSurfaceAndSpecialsFiles(result, directory, folderPath, onDisk);
                     }
                     timings.ParentSurfaceFiles.Stop();

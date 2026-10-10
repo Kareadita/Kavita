@@ -530,9 +530,18 @@ public class ScannerService(
             return false;
         }
 
+        var unreadableFolders = folders.Where(f => !CanList(f)).Select(Parser.NormalizePath).ToList();
+        if (unreadableFolders.Count > 0)
+        {
+            logger.LogError("[ScannerService] Some of the root folders for library {LibraryName} could not be read. Scan has been aborted", libraryName);
+            await eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.UnreadableFoldersEvent(libraryId, libraryName, unreadableFolders));
+
+            return false;
+        }
 
         // For Docker instances check if any of the folder roots are not available (ie disconnected volumes, etc) and fail if any of them are
-        if (folders.Any(f => directoryService.IsDirectoryEmpty(f)))
+        if (folders.Any(directoryService.IsDirectoryEmpty))
         {
             // That way logging and UI informing is all in one place with full context
             logger.LogError("[ScannerService] Some of the root folders for the library are empty. " +
@@ -546,6 +555,20 @@ public class ScannerService(
         }
 
         return true;
+    }
+
+    private bool CanList(string folder)
+    {
+        try
+        {
+            directoryService.IsDirectoryEmpty(folder);
+            return true;
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+        {
+            logger.LogWarning(ex, "[ScannerService] Could not list {Folder}", folder);
+            return false;
+        }
     }
 
     [Queue(TaskScheduler.ScanQueue)]
@@ -902,7 +925,7 @@ public class ScannerService(
     {
         var scanner = new ParseScannedFiles(logger, directoryService, readingItemService, eventHub);
         var scanWatch = Stopwatch.StartNew();
-        
+
         var folderMap = await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id);
         var problemFiles = await unitOfWork.MediaErrorRepository.GetFailedFilesAsync(library.Id);
 

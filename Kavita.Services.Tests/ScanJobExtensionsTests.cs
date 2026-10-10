@@ -100,7 +100,24 @@ public class ScanJobExtensionsTests
     {
         var jobs = new[] { Scan(ScanTarget.AllLibraries, ScanJobState.Processing) };
 
-        Assert.True(jobs.IsLibraryInUse(1));
+        Assert.True(jobs.IsLibraryInUse(1, []));
         Assert.False(jobs.HasLibraryScan(1));
+    }
+
+    [Fact]
+    public void IsLibraryInUse_SeriesScanWithoutItsLibrary()
+    {
+        var jobs = new[] { Scan(ScanTarget.Series(null, 42), ScanJobState.Processing) };
+
+        Assert.True(jobs.IsLibraryInUse(1, [41, 42]));
+        Assert.False(jobs.IsLibraryInUse(2, [43]));
+    }
+
+    [Fact]
+    public void IsLibraryInUse_RequestsDoNotCount()
+    {
+        var jobs = new[] { Request(ScanTarget.Library(1), ScanJobState.Scheduled) };
+
+        Assert.False(jobs.IsLibraryInUse(1, []));
     }
 }
