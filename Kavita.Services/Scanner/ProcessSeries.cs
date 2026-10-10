@@ -808,6 +808,16 @@ public class ProcessSeries(
         {
             foreach (var chapter in volume.Chapters)
             {
+                var droppedFiles = chapter.Files
+                    .Where(f => !mangaFileIds.Contains(f.Id) && !unverifiedFileIds.Contains(f.Id))
+                    .ToList();
+                if (droppedFiles.Count > 0)
+                {
+                    logger.LogTrace("Removing {Count} files from chapter {ChapterId} [{Range}] for {SeriesName} ({SeriesId}): {FilePaths}",
+                        droppedFiles.Count, chapter.Id, chapter.Range, args.Series.Name, args.Series.Id,
+                        string.Join(", ", droppedFiles.Select(f => f.FilePath)));
+                }
+
                 chapter.Files = [.. chapter.Files.Where(f => mangaFileIds.Contains(f.Id) || unverifiedFileIds.Contains(f.Id))];
                 chapter.Pages = chapter.Files.Sum(f => f.Pages);
             }
@@ -847,8 +857,9 @@ public class ProcessSeries(
 
         if (unmappedVolumes.Count > 0)
         {
-            logger.LogTrace("Deleting {Count} volumes for {SeriesId}. IDS: {VolumeIds}",
-                unmappedVolumes.Count, series.Id, string.Join(", ", unmappedVolumes.Select(v => v.Id)));
+            logger.LogTrace("Deleting {Count} volumes for {SeriesName} ({SeriesId}): {Volumes}",
+                unmappedVolumes.Count, series.Name, series.Id,
+                string.Join("; ", unmappedVolumes.Select(v => $"{v.Id} [{v.Name}]")));
             unitOfWork.VolumeRepository.Remove(unmappedVolumes);
 
             series.Volumes = [.. series.Volumes.Where(v => !unmappedVolumes.Contains(v))];
@@ -856,8 +867,10 @@ public class ProcessSeries(
 
         if (unmappedChapters.Count > 0)
         {
-            logger.LogTrace("Deleting {Count} chapters for {SeriesId}. IDS: {ChapterIds}",
-                unmappedChapters.Count, series.Id, string.Join(", ", unmappedChapters.Select(c => c.Id)));
+            logger.LogTrace("Deleting {Count} chapters for {SeriesName} ({SeriesId}): {Chapters}",
+                unmappedChapters.Count, series.Name, series.Id,
+                string.Join("; ", unmappedChapters.Select(c =>
+                    $"{c.Id} [{c.Range}] {string.Join(", ", c.Files.Select(f => f.FilePath))}")));
             unitOfWork.ChapterRepository.Remove(unmappedChapters);
 
             foreach (var volume in series.Volumes)
