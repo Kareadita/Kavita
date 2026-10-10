@@ -70,6 +70,8 @@ public class ScannerService(
 {
     public const string Name = "ScannerService";
     private const int Timeout = 60 * 60 * 60; // 2.5 days
+    // A retry waits in Scheduled, which IsScannerBusy does not count, so it would run beside a scan started meanwhile
+    private const int RetryAttempts = 0;
 
     /// <summary>
     /// This is only used for v0.7 to get files analyzed
@@ -226,7 +228,7 @@ public class ScannerService(
     /// <param name="bypassFolderOptimizationChecks">Not Used. Scan series will always force</param>
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(Timeout)]
-    [AutomaticRetry(Attempts = 200, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    [AutomaticRetry(Attempts = RetryAttempts, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true)
     {
         var sw = Stopwatch.StartNew();
@@ -548,7 +550,7 @@ public class ScannerService(
 
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(Timeout)]
-    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    [AutomaticRetry(Attempts = RetryAttempts, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibraries(bool forceUpdate = false)
     {
         logger.LogInformation("[ScannerService] Starting Scan of All Libraries, Forced: {Forced}", forceUpdate);
@@ -579,7 +581,7 @@ public class ScannerService(
     /// <param name="isSingleScan">Defaults to true. Is this a standalone invocation or is it in a loop?</param>
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(Timeout)]
-    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    [AutomaticRetry(Attempts = RetryAttempts, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibrary(int libraryId, bool forceUpdate = false, bool isSingleScan = true)
     {
         var sw = Stopwatch.StartNew();
