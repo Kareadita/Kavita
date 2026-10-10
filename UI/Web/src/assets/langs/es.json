@@ -431,7 +431,7 @@
         "unknown": "Desconocido",
         "early-childhood": "Infancia Temprana",
         "adults-only": "Solo adultos +18",
-        "everyone": "Todos",
+        "everyone": "Apto para todo el público",
         "everyone-10-plus": "Mayores de 10 años",
         "g": "Todas las edades",
         "kids-to-adults": "Desde niños hasta adultos",
@@ -923,13 +923,7 @@
         "open-external": "Abrir externamente"
     },
     "manage-media-issues": {
-        "description-part-1": "Esta tabla contiene los problemas detectados durante el escaneo o lectura de tus medios. Puedes limpiarla en cualquier momento y utilizar el escaneo de biblioteca (forzado) para realizar el análisis. Puedes encontrar una lista de algunos errores comunes y su significado en la ",
-        "description-part-2": "la wiki.",
         "filter-label": "{{common.filter}}",
-        "clear-alerts": "Eliminar alertas",
-        "file-header": "Archivo",
-        "comment-header": "Comentario",
-        "created-header": "Creado",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -1327,19 +1321,47 @@
     },
     "events-widget": {
         "title-alt": "Actividad",
-        "dismiss-all": "Descartar Todo",
-        "update-available": "Actualización disponible",
-        "downloading-item": "Descargando {{item}}",
-        "more-info": "Pincha para más información",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Usuarios en línea",
-        "active-events-title": "Eventos activos:",
-        "no-data": "No hay mucha actividad por aquí",
-        "left-to-process": "Queda por procesar: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} descargas en cola",
         "reading-now": "Leyendo {{num}} ahora",
-        "downloads-active": "{{count}} descarga(s) en progreso",
-        "not-connected": "No conectado, prueba a actualizar"
+        "progress-counter-label": "{{current}} / {{total}}",
+        "libraries-progress-label": "{{current}} de {{total}}",
+        "filter-all-label": "Todos",
+        "filter-attention-label": "Necesita atención",
+        "filter-jobs-label": "Trabajos",
+        "clear-finished-label": "Limpiar finalizados",
+        "now-label": "ahora",
+        "no-data-description": "No hay nada ejecutándose y nada requiere tu atención.",
+        "filter-empty-label": "Nada por aquí.",
+        "server-unreachable-label": "No se puede conectar al servidor. Intentando otra vez...",
+        "finished-while-away-label": "Finalizado mientras no estabas",
+        "finishing-up-label": "Terminando",
+        "interrupted-label": "Detenido por un reinicio del servidor",
+        "failed-label": "Detenido antes de finalizar",
+        "schedule-lost-label": "Se había configurado para {{time}}, pero se perdió por un reinicio del servidor",
+        "up-next-label": "A continuación",
+        "show-more-label": "Mostrar {{count}} más",
+        "show-less-label": "Mostrar menos",
+        "scanning-libraries-label": "Escaneando bibliotecas",
+        "scans-waiting-label": "Escaneos de biblioteca en espera: {{count}}",
+        "and-more-label": "y {{count}} más",
+        "problems-in-libraries-label": "Bibliotecas con problemas: {{count}}",
+        "status-offline-alt": "Servidor inalcanzable",
+        "status-attention-alt": "Necesita atención: {{count}}",
+        "status-attention-error-alt": "Necesita atención: {{count}}, incluyendo errores",
+        "status-running-alt": "Trabajos ejecutándose: {{count}}",
+        "title-label": "Actividad",
+        "filter-group-alt": "Filtrar actividad",
+        "scanned-libraries-label": "Bibliotecas escaneadas: {{count}}",
+        "rate-limit-description": "Sin coincidencias: {{count}}. Intenta de nuevo en unos minutos.",
+        "scan-scheduled": "Escanear {{libraryName}}",
+        "scan-libraries-scheduled": "Escanear todas las bibliotecas",
+        "scan-series-scheduled": "Escanear {{seriesName}}",
+        "scan-series-in-library-scheduled": "Escanear una serie en {{libraryName}}",
+        "scan-waiting-description": "Otro escaneo estaba ejecutándose",
+        "show-label": "Mostrar",
+        "hide-label": "Ocultar",
+        "dismiss-alt": "Descartar",
+        "view-activity-label": "Ver actividad",
+        "restoring-alt": "Restaura la actividad desde antes de la recarga"
     },
     "shortcuts-modal": {
         "title": "Atajos de Teclado",
@@ -1511,7 +1533,7 @@
         "right-to-left-alt": "Derecha a izquierda",
         "reading-direction-tooltip": "Dirección de lectura: ",
         "reading-mode-tooltip": "Modo de lectura",
-        "collapse": "Ocultar",
+        "collapse": "Colapsar",
         "fullscreen": "Pantalla completa",
         "settings-tooltip": "Ajustes",
         "image-splitting-label": "Separación de imágenes",
@@ -2164,7 +2186,8 @@
         "external-match-rate-error": "Kavita se ha quedado sin ratio al buscar {{seriesName}}. Inténtalo de nuevo en 5 minutos.",
         "confirm-delete-font": "Eliminar esta fuente la borrará del disco. Puedes obtenerla desde el directorio temporal antes de la eliminación.",
         "font-in-use": "No se puede borrar ya que esta fuente está en uso por uno o más usuarios.",
-        "reading-list-sync-enqueued": "La lista de lectura se ha puesto en cola para la sincronización."
+        "reading-list-sync-enqueued": "La lista de lectura se ha puesto en cola para la sincronización.",
+        "scan-all-queued": "Escaneo en fila para todas las bilbiotecas"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 hora",
@@ -2578,7 +2601,7 @@
         "enabled-label": "Habilitar Descarga de Metadatos",
         "enabled-tooltip": "Permite que Kavita descargue metadatos y los escriba a su base de datos.",
         "summary-tooltip": "Permite que Resumen sea escrito cuando el campo es desbloqueado.",
-        "localized-name-label": "Nombre de la serie adaptada al idioma",
+        "localized-name-label": "Nombre de la Serie Localizado",
         "localized-name-tooltip": "Permite que el nombre traducido sea escrito cuando el campo está desbloqueado. Kavita intentará hacer la mejor suposición.",
         "derive-publication-status-tooltip": "Permite que el estado de publicación sea derivado del número total de capítulos/volúmenes.",
         "enable-relations-tooltip": "Permitie que las relaciones de las series sean <b>añadidas</b>.",
@@ -3712,7 +3735,7 @@
     },
     "review-scrobble-target-name-pipe": {
         "friends": "Amigos",
-        "public": "Todos",
+        "public": "Todo el mundo",
         "private": "Solo tú"
     },
     "scrobble-read-status-pipe": {
@@ -3761,7 +3784,9 @@
         "key-bind-tooltip-last-page": "Se desplaza a la última página",
         "key-bind-title-last-page": "Última página",
         "key-bind-title-navigate-home": "Navegar a inicio",
-        "key-bind-tooltip-navigate-home": "Navega al panel desde cualquier parte de Kavita"
+        "key-bind-tooltip-navigate-home": "Navega al panel desde cualquier parte de Kavita",
+        "key-bind-tooltip-open-event-widget": "Abre la ventana emergente del widget de eventos",
+        "key-bind-title-open-event-widget": "Abrir Widget Evento"
     },
     "cbl-manager": {
         "url": "URL a CBL",
@@ -4114,7 +4139,7 @@
         "external-ids": "IDs externas",
         "title": "Título",
         "release-date": "Fecha de lanzamiento",
-        "localized-name": "Nombre traducido",
+        "localized-name": "Nombre Localizado",
         "name": "Nombre de la serie"
     },
     "register-license-key": {
@@ -4459,5 +4484,84 @@
     },
     "locked-field": {
         "field-locked-alt": "El campo está bloqueado"
+    },
+    "event-message-pipe": {
+        "backup-exists-label": "{{event-message-pipe.backup-folder-unwritable-label}}",
+        "root-folders-inaccessible-label": "No se puede acceder a las carpetas de la biblioteca",
+        "root-folders-empty-label": "Escaneo de {{libraryName}} abortado",
+        "series-collision-label": "Coincidencia de series: “{{seriesName}}” (en {{libraryName}})",
+        "files-outside-folder-label": "{{seriesName}} tiene archivos fuera de su carpeta",
+        "files-outside-folder-description": "Esto ralentiza escaneos. Mantén cada archivo de una serie en una sola carpeta.",
+        "scan-series-no-root-label": "Se abortó el escaneo de {{seriesName}}",
+        "scan-series-no-root-description": "No hay una única carpeta que contiene todos los archivos de esta serie. Revisa la disposición de las carpetas y luego reescanea.",
+        "scan-series-not-nested-label": "Se abortó el escaneo de {{seriesName}}",
+        "scan-series-not-nested-description": "Los archivos de la serie no están en una carpeta bajo la ruta de la biblioteca. Muévelos dentro de una, luego reescanea.",
+        "scan-series-no-files-label": "No se encontraron archivos para {{seriesName}}",
+        "scan-series-no-files-description": "Se esperaba encontrar archivos pero no se encontró nada. Revisa los nombres de los archivos, o pon la serie en su propia carpeta.",
+        "scan-series-folder-missing-label": "No se encuentra la carpeta de la serie {{seriesName}}",
+        "scan-series-folder-missing-description": "Borra las series o escanea la biblioteca.",
+        "scan-no-work-label": "{{seriesName}} no tiene nada que escanear",
+        "scan-no-work-description": "No se encontraron cambios en las carpetas desde el último escaneo.",
+        "db-write-failed-label": "No se pudo guardar {{seriesName}}",
+        "scan-libraries-delayed-label": "Se reprogramó el escaneo de todas las bibliotecas",
+        "scan-library-delayed-label": "Se reprogramó el escaneo de {{libraryName}}",
+        "scan-series-delayed-label": "Se reprogramó el escaneo de {{seriesName}}",
+        "scan-delayed-description": "Se ejecuta a las {{time}}. Otro escaneo estaba ejecutándose.",
+        "backup-folder-unwritable-label": "La copia de seguridad falló",
+        "backup-folder-unwritable-description": "No se puede escribir en {{folder}}.",
+        "backup-exists-description": "La ruta {{path}} ya existe.",
+        "cleanup-on-hold-label": "Se pospuso la limpieza",
+        "cleanup-on-hold-description": "Hay una conversión de medios ejecutándose. La limpieza se ejecutará cuando termine.",
+        "word-count-failed-label": "Ne se pudo contar las palabras de {{seriesName}}",
+        "word-count-failed-description": "No se puede leer {{filePath}}.",
+        "root-folders-inaccessible-description": "Comprueba que estos discos están conectados, entonces vuelve a escanear: {{folders}}",
+        "root-folders-empty-description": "Algunas carpetas raíz están vacías. Comprueba que tu montaje está conectado o cambia la carpeta raíz, entonces vuelve a escanear.",
+        "series-collision-description": "Dos carpetas analizan la misma serie. Abre detalles para ver los archivos."
+    },
+    "activity-age-pipe": {
+        "minutes": "{{value}}m",
+        "hours": "{{value}}h",
+        "now": "ahora"
+    },
+    "activity-duration-pipe": {
+        "seconds": "{{seconds}}s",
+        "minutes": "{{minutes}}m {{seconds}}s",
+        "hours": "{{hours}}h {{minutes}}m"
+    },
+    "event-title-pipe": {
+        "scan-progress": "Escaneando {{libraryName}}",
+        "scan-done": "Se escaneó {{libraryName}}",
+        "backup-database-progress": "Haciendo copia de seguridad de la base de datos",
+        "cleanup-progress": "Limpiando",
+        "cover-update-progress": "Refrescando cubiertas: {{libraryName}}",
+        "word-count-analyzer-progress": "Contando palabras: {{libraryName}}",
+        "convert-covers-progress": "Convirtiendo cubiertas",
+        "smart-collection-sync": "Sincronizando {{collectionName}}",
+        "sending-to-device": "Enviando archivos al dispositivo",
+        "download-progress": "Preparando {{downloadName}}",
+        "site-theme-progress": "Procesando tema {{themeName}}",
+        "book-theme-progress": "Procesando el tema del libro {{themeName}}",
+        "update-available": "La versión {{version}} de Kavita está disponible",
+        "scrobbling-key-expired": "Expiró la conexión de {{provider}}",
+        "external-match-rate-limit": "Se alcanzó el límite de peticiones de Kavita+",
+        "convert-bookmarks-progress": "Convirtiendo marcadores",
+        "rerun-metadata-mappings-progress": "Reaplicando asignaciones de metadatos"
+    },
+    "event-action-pipe": {
+        "reconnect": "Reconectar",
+        "whats-new": "Novedades",
+        "remind-later": "Recuérdame mas tarde",
+        "open-library": "Abrir biblioteca",
+        "open-series": "Abrir serie",
+        "open-matching": "Abrir coincidencias",
+        "rescan": "Reescanear",
+        "scan-now": "Escanear ahora",
+        "details": "Detalles"
+    },
+    "upcoming-task-name-pipe": {
+        "scan-libraries": "Escanear todas las bibliotecas",
+        "cleanup": "Limpieza",
+        "backup": "Copia de seguridad",
+        "sync-cbl": "Sincronizar listas de lectura"
     }
 }

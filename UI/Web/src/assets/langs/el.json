@@ -366,9 +366,6 @@
         "read": "{{common.read}}",
         "characters-title": "{{metadata-fields.characters-title}}"
     },
-    "events-widget": {
-        "close": "{{common.close}}"
-    },
     "shortcuts-modal": {
         "close": "{{common.close}}"
     },

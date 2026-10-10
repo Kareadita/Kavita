@@ -659,13 +659,7 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "file-header": "Fil",
-        "no-data": "{{common.no-data}}",
-        "clear-alerts": "Rensa Varningar",
-        "description-part-1": "Denna tabell innehåller problem som upptäckts under genomsökning eller läsning av din media. Du kan rensa den när som helst och använda '(Tvinga) Skanna Bibliotek' för att utföra en analys. En lista över vanliga fel och vad de betyder kan hittas på ",
-        "description-part-2": "wiki.",
-        "created-header": "Skapad",
-        "comment-header": "Kommentar"
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",
@@ -1012,17 +1006,7 @@
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Användare online",
-        "active-events-title": "Aktiva Händelser:",
-        "update-available": "Uppdatering tillgänglig",
         "title-alt": "Aktivitet",
-        "downloading-item": "Laddar ner {{item}}",
-        "dismiss-all": "Avvisa alla",
-        "more-info": "Klicka för mer information",
-        "download-in-queue": "{{num}} nedladdningar i Kö",
-        "no-data": "Här händer inte mycket",
-        "left-to-process": "Återstår att bearbeta: {{leftToProcess}} / {{totalToProcess}}",
         "reading-now": "{{num}} läser nu"
     },
     "shortcuts-modal": {

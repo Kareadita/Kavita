@@ -814,12 +814,6 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "description-part-2": "wiki 中找到。",
-        "comment-header": "評論",
-        "file-header": "檔案",
-        "clear-alerts": "清除警示",
-        "description-part-1": "這張表格包含了掃描或閱讀媒體時發現的問題。您可以隨時清除它，並使用書庫（強制）掃描來進行分析。有關一些常見錯誤及其含義的列表，可以在 ",
-        "created-header": "創建",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -1167,17 +1161,7 @@
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
-        "close": "{{common.close}}",
-        "left-to-process": "待處理：{{leftToProcess}}／{{totalToProcess}}",
-        "download-in-queue": "{{num}} 個下載在排隊中",
-        "active-events-title": "活躍事件：",
         "title-alt": "活動紀錄",
-        "dismiss-all": "忽略全部",
-        "downloading-item": "正在下載 {{item}}",
-        "users-online-count": "{{num}} 位使用者在線",
-        "no-data": "沒有任何內容",
-        "update-available": "有可用的更新",
-        "more-info": "點擊以獲取更多資訊",
         "reading-now": "目前有 {{num}} 人正在閱讀"
     },
     "shortcuts-modal": {

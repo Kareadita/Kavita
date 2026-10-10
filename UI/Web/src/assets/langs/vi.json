@@ -614,13 +614,7 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "no-data": "Không có dữ liệu",
-        "description-part-2": "Wiki.",
-        "created-header": "Đã tạo",
-        "description-part-1": "Bảng này chứa các vấn đề được tìm thấy trong quá trình quét hoặc đọc phương tiện của bạn. Bạn có thể xóa bảng này bất kỳ lúc nào và sử dụng Quét thư viện (Bắt Buộc) để thực hiện phân tích. Danh sách một số lỗi thường gặp và ý nghĩa của chúng có thể được tìm thấy trên ",
-        "clear-alerts": "Xóa Cảnh Báo",
-        "file-header": "Tệp",
-        "comment-header": "Bình Luận"
+        "no-data": "Không có dữ liệu"
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",
@@ -935,17 +929,7 @@
         "read-options-alt": "Cài Đặt Đọc"
     },
     "events-widget": {
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} người dùng đang trực tuyến",
-        "download-in-queue": "{{num}} tải xuống trong hàng đợi",
-        "downloading-item": "Đang Tải Xuống {{item}}",
-        "more-info": "Click để hiển thị thêm thông tin",
-        "title-alt": "Hoạt Động",
-        "dismiss-all": "Bỏ Qua Tất Cả",
-        "update-available": "Bản Cập Nhật Khả Dụng",
-        "active-events-title": "Sự kiện đang diễn ra:",
-        "no-data": "Không có nhiều thứ đang diễn ra ở đây",
-        "left-to-process": "Đang chờ xử lý: {{leftToProcess}}"
+        "title-alt": "Hoạt Động"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}",

@@ -723,13 +723,7 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "comment-header": "Комментарий",
-        "created-header": "Создано",
-        "no-data": "{{common.no-data}}",
-        "description-part-1": "Эта таблица содержит найденные проблемы во время сканирования или чтения вашего медиа. Вы можете очистить её в любой момент и использовать Библиотека (Принудительно) сканирование чтобы совершить анализ. Список некоторых частых ошибок и что они значат может быть найден на ",
-        "description-part-2": "вики.",
-        "clear-alerts": "Очистить оповещения",
-        "file-header": "Файл"
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",
@@ -1076,17 +1070,7 @@
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
-        "close": "{{common.close}}",
         "title-alt": "Активность",
-        "dismiss-all": "Скрыть все",
-        "update-available": "Доступно обновление",
-        "downloading-item": "Загрузка",
-        "more-info": "Подробнее",
-        "users-online-count": "{{num}} Пользователей онлайн",
-        "active-events-title": "Текущие события:",
-        "no-data": "Здесь пока ничего не происходит",
-        "left-to-process": "Осталось обработать: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} загрузок в очереди",
         "reading-now": "{{num}} сейчас читают"
     },
     "shortcuts-modal": {

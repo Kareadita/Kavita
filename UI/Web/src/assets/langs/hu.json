@@ -808,9 +808,6 @@
         "characters-title": "{{metadata-fields.characters-title}}",
         "read-options-alt": "Olvassa el a lehetőségeket"
     },
-    "events-widget": {
-        "close": "{{common.close}}"
-    },
     "shortcuts-modal": {
         "close": "{{common.close}}"
     },
