@@ -17,7 +17,6 @@ import {ResponsiveTableComponent} from "../../shared/_components/responsive-tabl
 import {VersionService} from "../../_services/version.service";
 import {CronFrequency} from "../../shared/_models/cron-frequency";
 import {SettingCronItemComponent} from "../../settings/_components/setting-cron-item/setting-cron-item.component";
-import {clearTransloco} from "../../../libs/transloco-util";
 import {ServerService} from "../../_services/server.service";
 import {DownloadService} from "../../shared/_services/download.service";
 import {Job} from "../../_models/job/job";
@@ -67,16 +66,6 @@ export class ManageTasksSettingsComponent implements OnInit {
       description: 'convert-media-task-desc',
       api: this.serverService.convertMedia(),
       successMessage: 'convert-media-task-success'
-    },
-    {
-      name: 'bust-locale-task',
-      description: 'bust-locale-task-desc',
-      api: defer(() => {
-        clearTransloco();
-        location.reload();
-        return of();
-      }),
-      successMessage: 'bust-locale-task-success',
     },
     {
       name: 'clear-reading-cache-task',

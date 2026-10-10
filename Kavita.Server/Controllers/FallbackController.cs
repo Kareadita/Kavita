@@ -18,6 +18,7 @@ public class FallbackController : Controller
             return NotFound();
         }
 
+        Response.Headers.CacheControl = "no-cache";
         return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html"), "text/HTML");
     }
 }
