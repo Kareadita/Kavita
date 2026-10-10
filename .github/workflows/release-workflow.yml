@@ -21,4 +21,4 @@ jobs:
     with:
       config-path: release.yaml
       dockerhub-username: "jvmilazz0"
-      uses-docker: 'true'
+      uses-docker: true
