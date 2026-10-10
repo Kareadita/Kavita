@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Kavita.Models.DTOs.MediaErrors;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.SignalR.Bodies;
+using Kavita.Models.Entities.Enums;
 using Kavita.Services.SignalR;
 using Xunit;
 
@@ -132,7 +134,8 @@ public class ActivityTrackerTests
     private static SignalRMessageDto ScanEnded(int libraryId = 1, int chaptersAdded = 12)
     {
         var message = MessageFactory.LibraryScanEndedEvent(
-            new LibraryScanEndedEventBodyDto(libraryId, "Manga", 2, 0, chaptersAdded, 3, 1, 4, 1));
+            new LibraryScanEndedEventBodyDto(libraryId, "Manga", 2, 0, chaptersAdded, 3, 1, 4, 1,
+                [new ScanIssueSummaryItemDto("M:/A/A Vol 2.cbz", MediaErrorReason.UnreadableArchive, 7, "A")]));
         message.CorrelationId = CorrelationId;
         return message;
     }
@@ -162,6 +165,18 @@ public class ActivityTrackerTests
         Assert.Equal(2, summary.SeriesAdded);
         Assert.Equal(12, summary.ChaptersAdded);
         Assert.Equal(4, summary.ProblemFiles);
+    }
+
+    [Fact]
+    public void Snapshot_ReplaysRecentProblemFiles()
+    {
+        RunScan();
+
+        var job = Assert.Single(_tracker.GetRecentJobs(new HashSet<string>()));
+
+        var issue = Assert.Single(Assert.Single(job.ScanSummaries).RecentProblemFiles);
+        Assert.Equal("M:/A/A Vol 2.cbz", issue.FilePath);
+        Assert.Equal(7, issue.SeriesId);
     }
 
     [Fact]

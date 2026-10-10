@@ -3141,7 +3141,9 @@
         "scan-folder-watcher-description": "Folder watching saw a change",
         "scan-folder-api-description": "Requested from the API",
         "show-label": "Show",
-        "hide-label": "Hide"
+        "hide-label": "Hide",
+        "show-problem-files-label": "Show problem files",
+        "hide-problem-files-label": "Hide problem files"
     },
 
     "event-title-pipe": {
@@ -3212,7 +3214,8 @@
         "open-matching": "Open matching",
         "rescan": "Rescan",
         "scan-now": "Scan now",
-        "details": "Details"
+        "details": "Details",
+        "open-media-issues": "Open Media Issues"
     },
 
     "activity-age-pipe": {

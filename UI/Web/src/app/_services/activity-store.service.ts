@@ -643,7 +643,7 @@ function restoreRow(row: ActivityRow): ActivityRow {
   const job: ActivityJob = {
     ...row,
     libraryIds: row.libraryIds ?? (row.libraryId === null ? [] : [row.libraryId]),
-    scanSummaries: row.scanSummaries ?? [],
+    scanSummaries: (row.scanSummaries ?? []).map(s => ({...s, recentProblemFiles: s.recentProblemFiles ?? []})),
     endReason: row.endReason ?? null,
     seenFromStart: row.endedUtc !== null && (row.seenFromStart ?? false),
   };

@@ -102,6 +102,23 @@
   white-space: nowrap;
 }
 
+.problem-files {
+  margin-top: 0.375rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  background-color: var(--event-widget-inset-bg-color);
+
+  .file {
+    overflow-wrap: anywhere;
+  }
+
+  .reason, .rest {
+    color: var(--event-widget-muted-text-color);
+  }
+}
+
 .link {
   font-size: 0.8125rem;
   color: var(--event-widget-link-color);

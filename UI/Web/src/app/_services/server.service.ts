@@ -121,6 +121,6 @@ export class ServerService {
       }
 
       return this.baseUrl + `server/media-errors-for-series?seriesId=${id}`;
-    }).asReadonly();
+    });
   }
 }

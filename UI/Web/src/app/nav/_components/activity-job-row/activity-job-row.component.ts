@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, output, signal} from '@angular/core';
 import {PercentPipe} from '@angular/common';
 import {Router} from '@angular/router';
 import {translate, TranslocoDirective} from '@jsverse/transloco';
@@ -18,6 +18,8 @@ import {LibraryScanSummary} from '../../../_models/activity/library-scan-summary
 import {SeriesService} from '../../../_services/series.service';
 import {EVENTS} from '../../../_services/message-hub.service';
 import {SeriesScanTarget} from '../../../_models/events/bodies/series-scan-target';
+import {MediaErrorReasonPipe} from '../../../_pipes/media-error-reason.pipe';
+import {SettingsTabId} from '../../../sidenav/preference-nav/preference-nav.component';
 
 interface StepCounter {
   current: number;
@@ -34,7 +36,7 @@ interface SummaryPart {
   templateUrl: './activity-job-row.component.html',
   styleUrl: './activity-job-row.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, PercentPipe, EventTitlePipe, EventActionPipe, ActivityAgePipe, ActivityDurationPipe]
+  imports: [TranslocoDirective, PercentPipe, EventTitlePipe, EventActionPipe, ActivityAgePipe, ActivityDurationPipe, MediaErrorReasonPipe]
 })
 export class ActivityJobRowComponent {
   private readonly router = inject(Router);
@@ -91,6 +93,10 @@ export class ActivityJobRowComponent {
   protected readonly summaryParts = computed(() => summaryPartsOf(this.job().scanSummaries));
   protected readonly showSummary = computed(() => this.ended() && this.isScan() && this.job().scanSummaries.length > 0);
   protected readonly canOpen = computed(() => this.ended() && this.isScan() && !this.isMultiLibrary() && this.job().libraryId !== null);
+  protected readonly problemSummaries = computed(() => this.showSummary()
+    ? this.job().scanSummaries.filter(s => s.recentProblemFiles.length > 0)
+    : []);
+  protected problemFilesOpen = signal(false);
   protected readonly canRescan = computed(() => this.isScan() && (this.isMultiLibrary() || this.job().libraryId !== null));
 
   protected open() {
@@ -100,6 +106,11 @@ export class ActivityJobRowComponent {
     } else {
       this.router.navigate(['library', this.job().libraryId]);
     }
+    this.navigated.emit();
+  }
+
+  protected openMediaIssues() {
+    this.router.navigate(['settings'], {fragment: SettingsTabId.MediaIssues});
     this.navigated.emit();
   }
 
@@ -131,7 +142,7 @@ export class ActivityJobRowComponent {
 }
 
 function summaryPartsOf(summaries: LibraryScanSummary[]): SummaryPart[] {
-  const sum = (field: keyof Omit<LibraryScanSummary, 'libraryId' | 'libraryName'>) => summaries.reduce((total, s) => total + s[field], 0);
+  const sum = (field: keyof Omit<LibraryScanSummary, 'libraryId' | 'libraryName' | 'recentProblemFiles'>) => summaries.reduce((total, s) => total + s[field], 0);
 
   const changes: SummaryPart[] = [
     {key: 'scan-series-added-label', params: {count: sum('seriesAdded')}},

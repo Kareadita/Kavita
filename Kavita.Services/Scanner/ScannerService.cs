@@ -1047,7 +1047,7 @@ public class ScannerService(
 
         public LibraryScanEndedEventBodyDto ToEventBody(Library library, ScanIssueSummaryDto issues) =>
             new(library.Id, library.Name, SeriesAdded, SeriesRemoved, ChaptersAdded, ChaptersUpdated, ChaptersRemoved,
-                issues.Count, issues.NewCount);
+                issues.Count, issues.NewCount, issues.Issues);
     }
 
     private sealed record ScanFilesResult(long ElapsedMs, Dictionary<ParsedSeries, IList<ParserInfo>> ParsedSeries, SavedScanIssues SavedIssues,

@@ -1,3 +1,5 @@
+import {ScanIssueSummaryItem} from './scan-issue-summary-item';
+
 /**
  * Body of the ScanProgress ended frame
  */
@@ -17,4 +19,8 @@ export interface LibraryScanSummary {
    */
   problemFiles: number;
   newProblemFiles: number;
+  /**
+   * The most recently seen of problemFiles, at most 10
+   */
+  recentProblemFiles: ScanIssueSummaryItem[];
 }

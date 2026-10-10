@@ -885,6 +885,47 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     }
 
     [Fact]
+    public async Task Scan_WithUnreadableFile_EndedEventListsIt()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var eventHub = Substitute.For<IEventHub>();
+        var (_, _, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Failed File Event - Manga",
+            OneBrokenVolume, [BrokenVolume], eventHub);
+
+        var summary = ScanEndedBodies(eventHub).Last();
+        var issue = Assert.Single(summary.RecentProblemFiles);
+        Assert.Equal(libraryId, summary.LibraryId);
+        Assert.Equal(Parser.NormalizePath(Path.Join(root, "Spice and Wolf", BrokenVolume)), issue.FilePath);
+        Assert.Equal(MediaErrorReason.CorruptEpub, issue.Reason);
+        Assert.Equal(await SeriesId(context, libraryId, "Spice and Wolf"), issue.SeriesId);
+    }
+
+    [Fact]
+    public async Task SkippedRescan_StillListsTheUnreadableFile()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var eventHub = Substitute.For<IEventHub>();
+        var (scanner, reader, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Failed File Skipped Event - Manga",
+            OneBrokenVolume, [BrokenVolume], eventHub);
+        eventHub.ClearReceivedCalls();
+
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Empty(reader.Parsed);
+        var issue = Assert.Single(ScanEndedBodies(eventHub).Last().RecentProblemFiles);
+        Assert.Equal(Parser.NormalizePath(Path.Join(root, "Spice and Wolf", BrokenVolume)), issue.FilePath);
+    }
+
+    private static List<LibraryScanEndedEventBodyDto> ScanEndedBodies(IEventHub eventHub)
+    {
+        return eventHub.ReceivedCalls()
+            .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
+            .Select(c => ((SignalRMessageDto) c.GetArguments()[1]!).Body)
+            .OfType<LibraryScanEndedEventBodyDto>()
+            .ToList();
+    }
+
+    [Fact]
     public async Task FailedFileDeleted_RowGoes_NextScanReadsNothing()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
@@ -1157,14 +1198,16 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
 
     /// <param name="failing">File names the scan reader fails on, read on every parse so a test can change it between scans</param>
     private async Task<(ScannerService Scanner, FailNamedFiles Reader, int LibraryId, string Root)> ScanOnceWithFailing(
-        IUnitOfWork unitOfWork, DataContext context, string testcase, string[] files, HashSet<string> failing)
+        IUnitOfWork unitOfWork, DataContext context, string testcase, string[] files, HashSet<string> failing,
+        IEventHub? eventHub = null)
     {
         var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
         var library = await scannerHelper.GenerateScannerData(testcase, [.. files], new Dictionary<string, ComicInfo>());
         ScannerHelper.Backdate(library.Folders.First().Path, TimeSpan.FromHours(1));
 
         FailNamedFiles? reader = null;
-        var scanner = scannerHelper.CreateServices(wrapScanReader: inner => reader = new FailNamedFiles(inner, failing));
+        var scanner = scannerHelper.CreateServices(wrapScanReader: inner => reader = new FailNamedFiles(inner, failing),
+            eventHub: eventHub);
         await scanner.ScanLibrary(library.Id);
         reader!.Parsed.Clear();
 

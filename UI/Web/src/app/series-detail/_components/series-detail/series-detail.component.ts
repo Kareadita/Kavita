@@ -122,6 +122,8 @@ import {SeriesMetadata} from "../../../_models/metadata/series-metadata";
 import {ReadingList} from "../../../_models/reading-list/reading-list";
 import {SeriesRemovedEvent} from "../../../_models/events/series-removed-event";
 import {ScanSeriesEvent} from "../../../_models/events/scan-series-event";
+import {NotificationProgressEvent} from "../../../_models/events/notification-progress-event";
+import {LibraryScanSummary} from "../../../_models/activity/library-scan-summary";
 import {RelatedSeries} from "../../../_models/series-detail/related-series";
 import {RelationKind} from "../../../_models/series-detail/relation-kind";
 import {EditSeriesModalComponent} from "../../../cards/_modals/edit-series-modal/edit-series-modal.component";
@@ -571,6 +573,13 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
       } else if (event.event === EVENTS.SeriesUpdated) {
         if ((event.payload as SeriesUpdateEvent).id === this.seriesId()) {
           this.loadPageSource.next(false);
+        }
+      } else if (event.event === EVENTS.NotificationProgress) {
+        // Problem rows get their series only at scan end, after the ScanSeries event
+        const progress = event.payload as NotificationProgressEvent;
+        if (progress.name === EVENTS.ScanProgress && progress.eventType === 'ended'
+          && (progress.body as LibraryScanSummary | null)?.libraryId === this.libraryId()) {
+          this.mediaErrorResource.reload();
         }
       } else if (event.event === EVENTS.ExternalMetadataUpdate) {
         if ((event.payload as ExternalMetadataUpdateEvent).seriesId === this.seriesId()) {

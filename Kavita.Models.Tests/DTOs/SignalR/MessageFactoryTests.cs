@@ -192,7 +192,7 @@ public class MessageFactoryTests
     [Fact]
     public void LibraryScanEnded_IsATrackedScanProgressEnded()
     {
-        var message = MessageFactory.LibraryScanEndedEvent(new LibraryScanEndedEventBodyDto(4, "Manga", 1, 0, 12, 3, 1, 2, 1));
+        var message = MessageFactory.LibraryScanEndedEvent(new LibraryScanEndedEventBodyDto(4, "Manga", 1, 0, 12, 3, 1, 2, 1, []));
         var json = Serialize(message);
 
         Assert.Equal(MessageFactory.LibraryScanProgressEvent(4, "Manga", ProgressEventType.Updated).Name, message.Name);

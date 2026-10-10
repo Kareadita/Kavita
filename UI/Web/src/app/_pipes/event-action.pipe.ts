@@ -22,6 +22,7 @@ export class EventActionPipe implements PipeTransform {
       case EventAction.Rescan: return this.translocoService.translate(`${PREFIX}.rescan`);
       case EventAction.ScanNow: return this.translocoService.translate(`${PREFIX}.scan-now`);
       case EventAction.Details: return this.translocoService.translate(`${PREFIX}.details`);
+      case EventAction.OpenMediaIssues: return this.translocoService.translate(`${PREFIX}.open-media-issues`);
     }
   }
 
