@@ -1092,7 +1092,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             var staff = await SetNameAndAddAliases(settings, externalMetadata.Staff);
 
-            // TODO: I can update Publisher as well but MB is not fully vetted out yet
+            Accumulate(ref madeModification, fieldChanges, await UpdateSeriesPublisher(series, settings, externalMetadata.Publisher));
             Accumulate(ref madeModification, fieldChanges, await UpdateWriters(series, settings, staff));
             Accumulate(ref madeModification, fieldChanges, await UpdateArtists(series, settings, staff));
             Accumulate(ref madeModification, fieldChanges, await UpdateCharacters(series, settings, externalMetadata.Characters));
@@ -2276,6 +2276,54 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         return await UpdateChapterPeople(chapter, settings, PersonRole.Publisher, [publisher]);
+    }
+
+    private async Task<(bool, MetadataFieldChangeDto?)> UpdateSeriesPublisher(Series series, MetadataSettingsDto settings, string? publisher)
+    {
+        if (!settings.EnablePeople) return (false, null);
+
+        if (string.IsNullOrWhiteSpace(publisher)) return (false, null);
+
+        if (series.Metadata.PublisherLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.People))
+        {
+            return (false, null);
+        }
+
+        if (!settings.IsPersonAllowed(PersonRole.Publisher))
+        {
+            return (false, null);
+        }
+
+        series.Metadata.People ??= [];
+        var publishers = new List<PersonDto>()
+            {
+                new() { Name = publisher.Trim() }
+            }
+            .Concat(series.Metadata.People
+                .Where(p => p.Role == PersonRole.Publisher)
+                .Where(p => !p.KavitaPlusConnection)
+                .Select(p => _mapper.Map<PersonDto>(p.Person)))
+            .DistinctBy(p => Parser.Normalize(p.Name))
+            .ToList();
+
+        await SeriesService.HandlePeopleUpdateAsync(series.Metadata, publishers, PersonRole.Publisher, _unitOfWork);
+
+        foreach (var person in series.Metadata.People.Where(p => p.Role == PersonRole.Publisher))
+        {
+            person.OrderWeight = 0;
+            if (publisher.Equals(person.Person.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                person.KavitaPlusConnection = true;
+            }
+        }
+
+        _unitOfWork.SeriesRepository.Update(series);
+        await _unitOfWork.CommitAsync();
+
+        series.Metadata.AddKPlusOverride(MetadataSettingField.People);
+        series.Metadata.PublisherLocked = true;
+
+        return (true, null);
     }
 
     private async Task<bool> UpdateChapterCoverImage(Chapter chapter, MetadataSettingsDto settings, int seriesId, string? coverUrl)
