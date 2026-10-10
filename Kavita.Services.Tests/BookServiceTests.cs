@@ -5,6 +5,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using VersOne.Epub;
 
 namespace Kavita.Services.Tests;
 
@@ -203,5 +204,19 @@ public class BookServiceTests
 
         Assert.True(result.IsSuccess);
         Assert.Equal("image/png", result.ContentType);
+    }
+
+    [Fact]
+    public async Task GracefullyHandleDuplicateSpineEntry()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
+        var bookFilePath = Path.Join(testDirectory, "duplicate-spine-entry.epub");
+
+        var book = await EpubReader.OpenBookAsync(bookFilePath);
+        var pageMapping = await _bookService.CreateKeyToPageMappingAsync(book);
+
+        Assert.Equal(
+            new Dictionary<string, int> { { "text00000.html", 0 } },
+            pageMapping);
     }
 }

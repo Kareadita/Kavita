@@ -997,9 +997,9 @@ public partial class BookService(
         foreach (var contentFileRef in await book.GetReadingOrderAsync())
         {
             if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) continue;
-            // Some keys are different than FilePath, so we add both to ease loookup
-            dict.Add(contentFileRef.FilePath, pageCount); // FileName -> FilePath
-            dict.TryAdd(contentFileRef.Key, pageCount); // FileName -> FilePath
+            // Some keys are different than FilePath, so we add both to ease lookup
+            dict.TryAdd(contentFileRef.FilePath, pageCount); // FilePath -> Page
+            dict.TryAdd(contentFileRef.Key, pageCount); // Key -> Page
             pageCount += 1;
         }
 
@@ -1029,7 +1029,7 @@ public partial class BookService(
                 var body = GetBodyOrCreate(doc, book);
 
                 // Find all words in the html body
-                ret.Add(page, CountLettersInBody(body));
+                ret.TryAdd(page, CountLettersInBody(body));
             }
 
         }
