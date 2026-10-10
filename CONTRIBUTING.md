@@ -50,7 +50,22 @@ The backend may fail to start due to port 5000 already being in use. To fix this
 You can re-enable the setting later, and it will bind to a different port. You may need to do this again after an update or reboot.
 
 ### Deployment
-Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
+
+Install our release tools (or clone the repo)
+
+```
+dotnet tool install --global Kavita.ReleaseTools
+```
+
+Run with the local build config
+```
+kavita-releasetools run --config local-release.yml
+```
+
+or
+```
+dotnet run --project ../GitHubActions/Kavita.ReleaseTools/Kavita.ReleaseTools.csproj run --config local-release.yml
+```
 
 ### Database Changes
 - When you need to make changes to the Db, update the Entities then run:

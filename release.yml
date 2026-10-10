@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=../GitHubActions/Kavita.ReleaseTools.schema.json
+
+CsprojPath: "Kavita.Common/Kavita.Common.csproj"
+
+VersionBump:
+  ComponentToBump: Revision
+  ReleaseTypes: [Nightly, Canary]
+
+GenerateOpenApi:
+  SwashbuckleVersionSource: "Kavita.Services/Kavita.Services.csproj"
+  CsprojPath: "Kavita.Server/Kavita.Server.csproj"
+  OutputPath: "openapi.json"
+
+FlushGitChanges:
+  Files:
+    - "Kavita.Common/Kavita.Common.csproj"
+    - "openapi.json"
+
+BuildFrontend:
+  BuildScript: "build"
+  Path: "UI/Web"
+  OutputPath: "dist/browser/"
+  CopyTo: "Kavita.Server/wwwroot"
+  AllowLegacyPeerDeps: true
+  FullReplace: true
+
+BuildServer:
+  AppName: "Kavita"
+  CsprojPath: "Kavita.Server/Kavita.Server.csproj"
+  SlnPath: "Kavita.sln"
+  OutputPath: "_output/"
+  Rids:
+    # We do not create releases so there is no need for the GA to build all of them
+    #Stable: ["linux-x64", "linux-arm64", "linux-arm", "linux-musl-x64", "win-x64", "win-x86", "osx-arm64", "osx-x64"]
+    Stable: ["linux-x64", "linux-arm64", "linux-arm"]
+    Nightly: ["linux-x64", "linux-arm64", "linux-arm"]
+    Canary: ["linux-x64", "linux-arm64", "linux-arm"]
+  RenameFiles:
+    - { From: "Kavita.Server", To: "Kavita"}
+    - { From: "Kavita.Server.exe", To: "Kavita.exe" }
+  CopyFiles:
+    - { From: "INSTALL.txt", To: "README.txt" }
+    - { From: "LICENSE", To: "LICENSE.txt" }
+    - { From: "Kavita.Server/config/appsettings.json", To: "config/appsettings-init.json"}
+  DeletePaths: ["BuildHost-net472", "BuildHost-netcore", "bin", "config/cache-long"]
+
+Docker:
+  Push: true
+  Platforms: ["linux/amd64", "linux/arm64", "linux/arm/v7"]
+  Images:
+    - "ghcr.io/kareadita/kavita"
+    - "jvmilazz0/kavita"
+  Tags:
+    Stable: ["latest", "{Version}", "nightly", "nightly-{Version}"]
+    Nightly: ["nightly", "nightly-{Version}"]
+    Canary: ["canary", "canary-{Version}"]
+
+NotifyDiscord:
+  Message: "<@939225459156217917> <@939225350775406643>  A new nightly build has been released for docker."
+  ReleaseTypes: [Nightly]
+
+CreateGitHubRelease:
+  Disabled: true
+  ReleaseTypes: [Stable]
+  AssetPath: "_output/"
+
+GitHubComments:
+  ReleaseComponent: Build
+  ReleaseTypes: [Nightly]
