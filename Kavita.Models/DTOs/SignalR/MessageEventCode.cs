@@ -18,6 +18,7 @@ public static class MessageEventCode
 
     public const string RootFoldersInaccessible = "root-folders-inaccessible";
     public const string RootFoldersEmpty = "root-folders-empty";
+    public const string UnreadableFolders = "unreadable-folders";
     public const string SeriesCollision = "series-collision";
     public const string FilesOutsideFolder = "files-outside-folder";
     public const string ScanSeriesNoRoot = "scan-series-no-root";

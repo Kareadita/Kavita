@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,9 +64,10 @@ public class MetadataService(
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null) return false;
 
+        var sourceFile = directoryService.FileSystem.FileInfo.New(firstFile.FilePath);
         if (!cacheHelper.ShouldUpdateCoverImage(
                 directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, chapter.CoverImage),
-                firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
+                HasCoverSourceChanged(chapter, sourceFile), forceUpdate, chapter.CoverImageLocked))
         {
             if (NeedsColorSpace(chapter, forceColorScape))
             {
@@ -82,6 +84,10 @@ public class MetadataService(
 
         chapter.CoverImage = readingItemService.GetCoverImage(firstFile.FilePath,
             ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format, encodeFormat, coverImageSize);
+        if (sourceFile.Exists)
+        {
+            chapter.CoverFileWriteTimeUtc = sourceFile.LastWriteTimeUtc;
+        }
 
         imageService.UpdateColorScape(chapter);
 
@@ -91,12 +97,12 @@ public class MetadataService(
         return true;
     }
 
-    private void UpdateChapterLastModified(Chapter chapter, bool forceUpdate)
+    /// <remarks>A null stamp (no cover made since v0.9.2) counts as changed, so each cover is made once more</remarks>
+    private static bool HasCoverSourceChanged(Chapter chapter, IFileInfo source)
     {
-        var firstFile = chapter.Files.MinBy(x => x.Chapter);
-        if (firstFile == null || cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
-
-        firstFile.UpdateLastModified();
+        if (!source.Exists) return false;
+        return chapter.CoverFileWriteTimeUtc == null ||
+               !FolderChangeCheck.IsSameWriteTime(chapter.CoverFileWriteTimeUtc.Value, source.LastWriteTimeUtc);
     }
 
     private static bool NeedsColorSpace(IHasCoverImage? entity, bool force)
@@ -118,12 +124,15 @@ public class MetadataService(
     /// <param name="forceColorScape">Force updating colorscape</param>
     private bool UpdateVolumeCoverImage(Volume? volume, bool forceUpdate, bool forceColorScape = false)
     {
-        // We need to check if Volume coverImage matches first chapters if forceUpdate is false
         if (volume == null) return false;
+
+        volume.Chapters ??= new List<Chapter>();
+        var coverChapter = volume.CoverImageLocked ? null : GetVolumeCoverChapter(volume);
+        var coverMoved = coverChapter != null && coverChapter.CoverImage != volume.CoverImage;
 
         if (!cacheHelper.ShouldUpdateCoverImage(
                 directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, volume.CoverImage),
-                null, volume.Created, forceUpdate))
+                false, forceUpdate || coverMoved))
         {
             if (NeedsColorSpace(volume, forceColorScape))
             {
@@ -136,17 +145,8 @@ public class MetadataService(
 
         if (!volume.CoverImageLocked)
         {
-            // For cover selection, chapters need to try for issue 1 first, then fallback to first sort order
-            volume.Chapters ??= new List<Chapter>();
-
-            var firstChapter = volume.Chapters.FirstOrDefault(x => x.MinNumber.Is(1f));
-            if (firstChapter == null)
-            {
-                firstChapter = volume.Chapters.MinBy(x => x.SortOrder, ChapterSortComparerDefaultFirst.Default);
-                if (firstChapter == null) return false;
-            }
-
-            volume.CoverImage = firstChapter.CoverImage;
+            if (coverChapter == null) return false;
+            volume.CoverImage = coverChapter.CoverImage;
         }
         imageService.UpdateColorScape(volume);
 
@@ -155,18 +155,27 @@ public class MetadataService(
         return true;
     }
 
+    private static Chapter? GetVolumeCoverChapter(Volume volume) =>
+        volume.Chapters.FirstOrDefault(x => x.MinNumber.Is(1f))
+        ?? volume.Chapters.MinBy(x => x.SortOrder, ChapterSortComparerDefaultFirst.Default);
+
     /// <summary>
     /// Updates cover image for Series
     /// </summary>
     /// <param name="series"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
+    /// <param name="forceColorScape"></param>
     private void UpdateSeriesCoverImage(Series? series, bool forceUpdate, bool forceColorScape = false)
     {
         if (series == null) return;
 
+        series.Volumes ??= [];
+        var coverImage = series.GetCoverImage();
+        var coverMoved = !series.CoverImageLocked && coverImage != series.CoverImage;
+
         if (!cacheHelper.ShouldUpdateCoverImage(
                 directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, series.CoverImage),
-                null, series.Created, forceUpdate, series.CoverImageLocked))
+                false, forceUpdate || coverMoved, series.CoverImageLocked))
         {
             // Check if we don't have a primary/seconary color
             if (NeedsColorSpace(series, forceColorScape))
@@ -178,8 +187,7 @@ public class MetadataService(
             return;
         }
 
-        series.Volumes ??= [];
-        series.CoverImage = series.GetCoverImage();
+        series.CoverImage = coverImage;
         if (series.CoverImage == null)
         {
             logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null: {SeriesId}", series.Id);
@@ -204,29 +212,17 @@ public class MetadataService(
         {
             var totalVolumes = series.Volumes.Count;
             var volumeIndex = 0;
-            var firstVolumeUpdated = false;
+            // Any, not the first in list order: the list is not sorted the way cover selection is
+            var anyVolumeUpdated = false;
             foreach (var volume in series.Volumes)
             {
-                var firstChapterUpdated = false; // This only needs to be FirstChapter updated
-                var index = 0;
+                var anyChapterUpdated = false;
                 foreach (var chapter in volume.Chapters)
                 {
-                    var chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
-                    // If cover was update, either the file has changed or first scan, and we should force a metadata update
-                    UpdateChapterLastModified(chapter, forceUpdate || chapterUpdated);
-                    if (index == 0 && chapterUpdated)
-                    {
-                        firstChapterUpdated = true;
-                    }
-
-                    index++;
+                    anyChapterUpdated |= UpdateChapterCoverImage(chapter, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
                 }
 
-                var volumeUpdated = UpdateVolumeCoverImage(volume, firstChapterUpdated || forceUpdate, forceColorScape);
-                if (volumeIndex == 0 && volumeUpdated)
-                {
-                    firstVolumeUpdated = true;
-                }
+                anyVolumeUpdated |= UpdateVolumeCoverImage(volume, anyChapterUpdated || forceUpdate, forceColorScape);
 
                 await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                     MessageFactory.CoverUpdateProgressEvent(series.LibraryId, volumeIndex / (float) totalVolumes, ProgressEventType.Started, series.Name));
@@ -234,7 +230,7 @@ public class MetadataService(
                 volumeIndex++;
             }
 
-            UpdateSeriesCoverImage(series, firstVolumeUpdated || forceUpdate, forceColorScape);
+            UpdateSeriesCoverImage(series, anyVolumeUpdated || forceUpdate, forceColorScape);
         }
         catch (Exception ex)
         {

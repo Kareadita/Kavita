@@ -16,6 +16,10 @@ public sealed record ActivitySnapshotDto
     /// </summary>
     public IList<ScheduledScanDto> Scheduled { get; init; } = [];
     public int ScheduledTotal { get; init; }
+    /// <summary>
+    /// Folder changes waiting to be looked at, see <see cref="ScheduledFolderScanDto"/>
+    /// </summary>
+    public IList<ScheduledFolderScanDto> ScheduledFolderScans { get; init; } = [];
     public IList<UpcomingTaskDto> Upcoming { get; init; } = [];
     /// <summary>
     /// Jobs that finished in the last 24 hours, newest first. In memory, so empty after a restart

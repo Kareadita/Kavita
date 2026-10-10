@@ -15,6 +15,7 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Reading;
+using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 using VersOne.Epub;
 
@@ -28,7 +29,8 @@ public class WordCountAnalyzerService(
     IUnitOfWork unitOfWork,
     IEventHub eventHub,
     ICacheHelper cacheHelper,
-    IMediaErrorService mediaErrorService)
+    IMediaErrorService mediaErrorService,
+    IDirectoryService directoryService)
     : IWordCountAnalyzerService
 {
     public const int AverageCharactersPerWord = 5;
@@ -143,11 +145,7 @@ public class WordCountAnalyzerService(
             volume.WordCount = 0;
             foreach (var chapter in volume.Chapters)
             {
-                // This compares if it's changed since a file scan only
-                var firstFile = chapter.Files.FirstOrDefault();
-                if (firstFile == null || !cacheHelper.HasFileChangedSinceLastScan(firstFile.LastFileAnalysis,
-                        forceUpdate,
-                        firstFile))
+                if (chapter.Files.Count == 0 || !(forceUpdate || chapter.Files.Any(HasFileChangedSinceAnalysis)))
                 {
                     volume.WordCount += chapter.WordCount;
                     series.WordCount += chapter.WordCount;
@@ -229,7 +227,21 @@ public class WordCountAnalyzerService(
     private void UpdateFileAnalysis(MangaFile file)
     {
         file.UpdateLastFileAnalysis();
+        var sourceFile = directoryService.FileSystem.FileInfo.New(file.FilePath);
+        if (sourceFile.Exists)
+        {
+            file.AnalyzedFileWriteTimeUtc = sourceFile.LastWriteTimeUtc;
+        }
         unitOfWork.MangaFileRepository.Update(file);
+    }
+
+    /// <remarks>A null stamp (not counted since v0.9.2) counts as changed, so each file is counted once more</remarks>
+    private bool HasFileChangedSinceAnalysis(MangaFile file)
+    {
+        var sourceFile = directoryService.FileSystem.FileInfo.New(file.FilePath);
+        if (!sourceFile.Exists) return false;
+        return file.AnalyzedFileWriteTimeUtc == null ||
+               !FolderChangeCheck.IsSameWriteTime(file.AnalyzedFileWriteTimeUtc.Value, sourceFile.LastWriteTimeUtc);
     }
 
     private async Task<int> GetWordCountFromHtml(EpubLocalTextContentFileRef bookFile, string filePath)
@@ -247,7 +259,7 @@ public class WordCountAnalyzerService(
         {
             logger.LogError(ex, "Error when counting words in epub {EpubPath}", filePath);
             await mediaErrorService.ReportMediaIssueAsync(filePath, MediaErrorProducer.BookService,
-                $"Invalid Epub Metadata, {bookFile.FilePath} does not exist", ex.Message);
+                MediaErrorReason.WordCountFailed, $"{bookFile.FilePath}: {ParseIssues.Describe(ex)}");
             return 0;
         }
     }

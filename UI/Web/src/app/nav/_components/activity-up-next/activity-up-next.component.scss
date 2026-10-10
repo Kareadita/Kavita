@@ -51,6 +51,10 @@
   .rest {
     color: var(--event-widget-muted-text-color);
   }
+
+  .folder {
+    overflow-wrap: anywhere;
+  }
 }
 
 .link {

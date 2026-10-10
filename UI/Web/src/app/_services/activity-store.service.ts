@@ -1,5 +1,6 @@
 import {computed, DestroyRef, effect, inject, Injectable, signal, untracked} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {auditTime, Subject} from 'rxjs';
 import {EVENTS, Message, MessageHubService} from './message-hub.service';
 import {AccountService} from './account.service';
 import {SignalRMessage} from '../_models/events/core/signalr-message';
@@ -13,9 +14,13 @@ import {DismissedActivity} from '../_models/activity/dismissed-activity';
 import {PersistedActivity} from '../_models/activity/persisted-activity';
 import {ActivityEndReason} from '../_models/activity/activity-end-reason';
 import {ActivitySnapshotResult} from '../_models/activity/activity-snapshot-result';
+import {ActivitySnapshot} from '../_models/activity/activity-snapshot';
 import {DelayedScanCodes} from '../_models/activity/delayed-scan-codes';
 import {ActivitySnapshotService} from './activity-snapshot.service';
 import {RecentJob} from '../_models/activity/recent-job';
+import {LibraryScanSummary} from '../_models/activity/library-scan-summary';
+import {ScanRescheduledBody} from '../_models/events/bodies/scan-rescheduled-body';
+import {isDelayedEntryFor} from '../_helpers/delayed-scan';
 
 const RowTtlMs = 24 * 60 * 60 * 1000;
 const MaxRows = 100;
@@ -40,9 +45,11 @@ export class ActivityStoreService {
   private readonly accountService = inject(AccountService);
   private readonly snapshotService = inject(ActivitySnapshotService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly rescheduleRefresh = new Subject<void>();
 
   private _rows = signal<ActivityRow[]>([]);
   private _announcement = signal<ActivityEntry | null>(null);
+  private _problemFilesAnnouncement = signal<LibraryScanSummary | null>(null);
   private dismissed: DismissedActivity[] = [];
   private storageKey: string | null = null;
   private writeTimer: ReturnType<typeof setTimeout> | undefined;
@@ -61,6 +68,10 @@ export class ActivityStoreService {
    * Latest Action or Error entry that arrived live, never one restored from storage
    */
   readonly announcement = this._announcement.asReadonly();
+  /**
+   * Latest live scan end that found new problem files. Only one of this and announcement is set at a time
+   */
+  readonly problemFilesAnnouncement = this._problemFilesAnnouncement.asReadonly();
 
   constructor() {
     effect(() => {
@@ -81,6 +92,9 @@ export class ActivityStoreService {
     });
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => this.ingest(message));
+
+    // Copying many series sends one ScanRescheduled per folder
+    this.rescheduleRefresh.pipe(auditTime(1000), takeUntilDestroyed(this.destroyRef)).subscribe(() => this.snapshotService.refresh());
 
     // pagehide fires on refresh, tab close and navigating away, so the pending write is not lost. Unlike beforeunload it also fires on mobile
     const flush = () => this.flushWrite();
@@ -129,23 +143,34 @@ export class ActivityStoreService {
       case EVENTS.ExternalMatchRateLimitError:
         if (message.meta) this.addRateLimit({...message.meta, body: message.payload});
         break;
-      case EVENTS.SeriesAdded:
-        this.countSeries(message.meta?.correlationId, 'seriesAdded');
-        break;
-      case EVENTS.SeriesRemoved:
-        this.countSeries(message.meta?.correlationId, 'seriesRemoved');
+      case EVENTS.ScanRescheduled:
+        this.applyReschedule(message.payload as ScanRescheduledBody);
         break;
     }
   }
 
-  private countSeries(correlationId: string | null | undefined, field: 'seriesAdded' | 'seriesRemoved') {
-    if (!correlationId) return;
+  /**
+   * Without this, a restart would pin a scan that already ran early as lost, its entry still holding the old time
+   */
+  private applyReschedule({scans}: ScanRescheduledBody) {
+    const now = Date.now();
+    const changed = new Map<string, ActivityEntry>();
 
-    const job = this.findJob(`job:${correlationId}`);
-    if (!job) return;
+    for (const row of this._rows()) {
+      if (row.kind !== ActivityRowKind.Entry || row.scheduleLost || row.scheduledForUtc === null || Date.parse(row.scheduledForUtc) <= now) continue;
 
-    this._rows.update(rows => rows.map(r => r === job ? {...job, [field]: job[field] + 1} : r));
-    this.scheduleWrite();
+      const scan = scans.find(s => isDelayedEntryFor(row, s));
+      if (scan && scan.runAtUtc !== row.scheduledForUtc) {
+        changed.set(row.id, {...row, scheduledForUtc: scan.runAtUtc});
+      }
+    }
+
+    if (changed.size > 0) {
+      this._rows.update(rows => rows.map(r => changed.get(r.id) ?? r));
+      this.scheduleWrite();
+    }
+
+    this.rescheduleRefresh.next();
   }
 
   private addRateLimit(message: SignalRMessage, announce = true) {
@@ -212,9 +237,19 @@ export class ActivityStoreService {
     const job = this.findJob(id);
     const previous = job?.steps[message.name];
     const isEnded = message.eventType === 'ended';
+    const summary = isEnded ? scanSummaryOf(message) : null;
+    if (live && summary && summary.newProblemFiles > 0) {
+      this._announcement.set(null);
+      this._problemFilesAnnouncement.set(summary);
+    }
 
     // An ended never creates or reopens a job (a scan with no changes sends ScanProgress ended with no prior step)
-    if (isEnded && (!previous || previous.eventType === 'ended')) return;
+    if (isEnded && (!previous || previous.eventType === 'ended')) {
+      if (job && summary) {
+        this.addScanSummary(job, summary);
+      }
+      return;
+    }
     if (!isEnded) this.dismissed = this.dismissed.filter(d => d.id !== id);
 
     const updatedUtc = toUtc(message.eventTimeUtc);
@@ -235,8 +270,7 @@ export class ActivityStoreService {
       endedUtc: null,
       endReason: null,
       steps,
-      seriesAdded: job?.seriesAdded ?? 0,
-      seriesRemoved: job?.seriesRemoved ?? 0,
+      scanSummaries: withScanSummary(job?.scanSummaries ?? [], summary),
       seenFromStart: job?.seenFromStart ?? (live && message.eventType === 'started'),
     };
 
@@ -248,6 +282,12 @@ export class ActivityStoreService {
     } else {
       this.cancelFinish(id);
     }
+  }
+
+  private addScanSummary(job: ActivityJob, summary: LibraryScanSummary) {
+    const next: ActivityJob = {...job, scanSummaries: withScanSummary(job.scanSummaries, summary)};
+    this._rows.update(rows => rows.map(r => r === job ? next : r));
+    this.scheduleWrite();
   }
 
   private scheduleFinish(id: string) {
@@ -290,7 +330,10 @@ export class ActivityStoreService {
 
     this._rows.update(rows => [...rows, entry]);
     this.scheduleWrite();
-    if (announce && entry.priority >= MessageEventPriority.Action) this._announcement.set(entry);
+    if (announce && entry.priority >= MessageEventPriority.Action) {
+      this._problemFilesAnnouncement.set(null);
+      this._announcement.set(entry);
+    }
   }
 
   private reconcile({snapshot, requestedAtMs}: ActivitySnapshotResult) {
@@ -318,7 +361,15 @@ export class ActivityStoreService {
     const changed = new Map<string, ActivityRow>();
     for (const row of this._rows()) {
       if (row.kind === ActivityRowKind.Entry) {
-        if (!row.scheduleLost && isLostSchedule(row, startedMs)) changed.set(row.id, {...row, scheduleLost: true});
+        if (!row.scheduleLost && isLostSchedule(row, startedMs)) {
+          changed.set(row.id, {...row, scheduleLost: true});
+          continue;
+        }
+
+        const scheduledForUtc = currentScheduleOf(row, snapshot, startedMs, requestedAtMs);
+        if (scheduledForUtc !== row.scheduledForUtc) {
+          changed.set(row.id, {...row, scheduledForUtc});
+        }
         continue;
       }
 
@@ -368,8 +419,7 @@ export class ActivityStoreService {
       endedUtc,
       endReason: recent.completed ? null : ActivityEndReason.Failed,
       steps: {...job?.steps, ...steps},
-      seriesAdded: recent.seriesAdded,
-      seriesRemoved: recent.seriesRemoved,
+      scanSummaries: recent.scanSummaries,
       seenFromStart: true,
     };
 
@@ -429,6 +479,7 @@ export class ActivityStoreService {
     this.dismissed = pruneDismissed(persisted?.dismissed ?? []);
     this._rows.set(pruneRows((persisted?.rows ?? []).map(restoreRow)));
     this._announcement.set(null);
+    this._problemFilesAnnouncement.set(null);
   }
 
   private cancelTimers() {
@@ -539,6 +590,15 @@ function stepOf(message: SignalRMessage, previous: ActivityStep | undefined): Ac
   };
 }
 
+function scanSummaryOf(message: SignalRMessage) {
+  if (message.name !== EVENTS.ScanProgress || numberOf(bodyField(message.body, 'chaptersAdded')) === null) return null;
+  return message.body as LibraryScanSummary;
+}
+
+function withScanSummary(summaries: LibraryScanSummary[], summary: LibraryScanSummary | null) {
+  return summary === null ? summaries : [...summaries.filter(s => s.libraryId !== summary.libraryId), summary];
+}
+
 function withLibrary(libraryIds: number[], libraryId: number | null) {
   return libraryId === null || libraryIds.includes(libraryId) ? libraryIds : [...libraryIds, libraryId];
 }
@@ -574,8 +634,8 @@ function allStepsEnded(job: ActivityJob) {
 }
 
 /**
- * Fills fields added after the row was stored. A job that was mid-scan when the page unloaded missed frames, so its
- * series counts are partial, and one that was waiting out the finish grace is finished
+ * Fills fields added after the row was stored. A job that was mid-scan when the page unloaded missed frames, and one
+ * that was waiting out the finish grace is finished
  */
 function restoreRow(row: ActivityRow): ActivityRow {
   if (row.kind === ActivityRowKind.Entry) return {...row, count: row.count ?? 1, scheduleLost: row.scheduleLost ?? false};
@@ -583,12 +643,29 @@ function restoreRow(row: ActivityRow): ActivityRow {
   const job: ActivityJob = {
     ...row,
     libraryIds: row.libraryIds ?? (row.libraryId === null ? [] : [row.libraryId]),
-    seriesAdded: row.seriesAdded ?? 0,
-    seriesRemoved: row.seriesRemoved ?? 0,
+    scanSummaries: (row.scanSummaries ?? []).map(s => ({...s, recentProblemFiles: s.recentProblemFiles ?? []})),
     endReason: row.endReason ?? null,
     seenFromStart: row.endedUtc !== null && (row.seenFromStart ?? false),
   };
   return job.endedUtc === null && allStepsEnded(job) ? {...job, endedUtc: job.updatedUtc} : job;
+}
+
+/**
+ * A retime sent while this client was away left the entry on its old time. An entry newer than the snapshot request
+ * is skipped, its job may not be listed yet
+ */
+function currentScheduleOf(entry: ActivityEntry, snapshot: ActivitySnapshot, startedMs: number, requestedAtMs: number) {
+  if (!DelayedScanCodes.includes(entry.code) || entry.scheduledForUtc === null || entry.scheduleLost) return entry.scheduledForUtc;
+
+  const updatedMs = Date.parse(entry.updatedUtc);
+  if (updatedMs < startedMs || updatedMs >= requestedAtMs || Date.parse(entry.scheduledForUtc) <= requestedAtMs) {
+    return entry.scheduledForUtc;
+  }
+
+  const scan = snapshot.scheduled.find(s => isDelayedEntryFor(entry, s));
+  if (scan) return scan.runAtUtc;
+
+  return snapshot.scheduledTotal <= snapshot.scheduled.length ? new Date(requestedAtMs).toISOString() : entry.scheduledForUtc;
 }
 
 /**

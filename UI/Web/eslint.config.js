@@ -40,7 +40,11 @@ module.exports = tseslint.config(
   },
   {
     files: ['**/*.html'],
-    extends: [...angular.configs.templateRecommended],
-    rules: {},
+    extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
+    rules: Object.fromEntries(
+      angular.configs.templateAccessibility
+        .flatMap(config => Object.keys(config.rules ?? {}))
+        .map(rule => [rule, 'warn']),
+    ),
   },
 );

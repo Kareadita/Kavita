@@ -6,7 +6,6 @@ import {
   effect,
   ElementRef,
   inject,
-  input,
   OnInit,
   signal,
   untracked,
@@ -18,7 +17,6 @@ import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {RouterLink} from "@angular/router";
 import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session-close-event";
 import {EVENTS, Message, MessageHubService} from "../../../_services/message-hub.service";
-import {User} from "../../../_models/user/user";
 import {LibraryService} from "../../../_services/library.service";
 import {EventTitlePipe} from "../../../_pipes/event-title.pipe";
 import {EventMessagePipe} from "../../../_pipes/event-message.pipe";
@@ -38,11 +36,13 @@ import {ActivityFilter} from "../../../_models/activity/activity-filter";
 import {ActivityProblemGroup, ActivityTimelineItem} from "../../../_models/activity/activity-timeline-item";
 import {MessageEventPriority} from "../../../_models/events/core/message-event-priority";
 import {DelayedScanCodes} from "../../../_models/activity/delayed-scan-codes";
+import {isDelayedEntryFor} from "../../../_helpers/delayed-scan";
 import {jobProgress} from "../../../_helpers/activity-job-progress";
 import {EventAction} from "../../../_models/events/event-action";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {KeyBindService} from "../../../_services/key-bind.service";
+import {AccountService} from "../../../_services/account.service";
 
 const AgeTickMs = 30_000;
 
@@ -62,14 +62,14 @@ export class EventsWidgetComponent implements OnInit {
   private readonly snapshotService = inject(ActivitySnapshotService);
   private readonly translocoService = inject(TranslocoService);
   private readonly keyBindService = inject(KeyBindService);
+  private readonly accountService = inject(AccountService);
   private readonly eventMessagePipe = new EventMessagePipe();
   private readonly eventTitlePipe = new EventTitlePipe();
-
-  readonly user = input.required<User>(); // TODO: Just get the user from AccountService
 
   private readonly popover = viewChild(NgbPopover);
   private readonly toggleButton = viewChild<ElementRef<HTMLButtonElement>>('toggle');
 
+  protected readonly user = this.accountService.currentUser;
   protected activeReadingSessions = signal<Set<number>>(new Set());
   protected filter = signal(ActivityFilter.All);
   protected isOpen = signal(false);
@@ -95,14 +95,14 @@ export class EventsWidgetComponent implements OnInit {
    * A delayed scan still waiting shows in Up next, and once its time has passed the scan's own job row says what happened
    */
   private readonly timeline = computed<ActivityTimelineItem[]>(() => {
-    const scheduled = new Set(this.snapshot()?.scheduled.map(s => s.runAtUtc) ?? []);
+    const scheduled = this.snapshot()?.scheduled ?? [];
     const now = this.now();
-    const isSettled = (scheduledForUtc: string | null) => scheduledForUtc !== null
-      && (scheduled.has(scheduledForUtc) || Date.parse(scheduledForUtc) <= now);
+    const isSettled = (entry: ActivityEntry) => entry.scheduledForUtc !== null
+      && (scheduled.some(s => isDelayedEntryFor(entry, s)) || Date.parse(entry.scheduledForUtc) <= now);
     const rows = this.activityStore.rows().filter(r => r.kind === ActivityRowKind.Job
       ? !isStopped(r)
       : r.priority !== MessageEventPriority.Action && r.priority !== MessageEventPriority.Silent && !r.scheduleLost
-        && !isSettled(r.scheduledForUtc));
+        && !isSettled(r));
     return groupProblems(rows);
   });
 
@@ -155,6 +155,12 @@ export class EventsWidgetComponent implements OnInit {
 
   protected readonly announcement = computed(() => {
     this.translation();
+
+    const problems = this.activityStore.problemFilesAnnouncement();
+    if (problems) {
+      return this.translocoService.translate('events-widget.new-problem-files-alt',
+        {library: problems.libraryName, count: problems.newProblemFiles});
+    }
 
     const entry = this.activityStore.announcement();
     if (!entry) return '';

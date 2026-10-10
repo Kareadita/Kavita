@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.DTOs.SignalR.Bodies;
 using Kavita.Models.DTOs.Update;
 using Kavita.Models.Entities.Enums;
 
@@ -24,6 +25,7 @@ public class MessageFactoryTests
         { MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), MessageEventPriority.Action },
         { MessageFactory.SeriesAddedEvent(1, "One Piece", 1), MessageEventPriority.Silent },
         { MessageFactory.LibraryModifiedEvent(1, "update"), MessageEventPriority.Silent },
+        { MessageFactory.ScanRescheduledEvent([]), MessageEventPriority.Silent },
     };
 
     [Theory]
@@ -174,6 +176,32 @@ public class MessageFactoryTests
     }
 
     [Fact]
+    public void LibraryScanProgress_SeriesScan_SerializesForTheWidget()
+    {
+        var seriesScan = Serialize(MessageFactory.LibraryScanProgressEvent(4, "Manga", ProgressEventType.Updated, "One Piece", 1, 1,
+            new SeriesScanTargetDto(21, "One Piece"))).GetProperty("body").GetProperty("seriesScan");
+        var libraryScan = Serialize(MessageFactory.LibraryScanProgressEvent(4, "Manga", ProgressEventType.Updated, "One Piece", 1, 2))
+            .GetProperty("body").GetProperty("seriesScan");
+
+        Assert.Equal(21, seriesScan.GetProperty("seriesId").GetInt32());
+        Assert.Equal("One Piece", seriesScan.GetProperty("seriesName").GetString());
+        Assert.Equal(JsonValueKind.Null, libraryScan.ValueKind);
+    }
+
+
+    [Fact]
+    public void LibraryScanEnded_IsATrackedScanProgressEnded()
+    {
+        var message = MessageFactory.LibraryScanEndedEvent(new LibraryScanEndedEventBodyDto(4, "Manga", 1, 0, 12, 3, 1, 2, 1, []));
+        var json = Serialize(message);
+
+        Assert.Equal(MessageFactory.LibraryScanProgressEvent(4, "Manga", ProgressEventType.Updated).Name, message.Name);
+        Assert.Equal("ended", json.GetProperty("eventType").GetString());
+        Assert.Equal(ProgressType.Indeterminate, message.Progress);
+        Assert.Equal(12, json.GetProperty("body").GetProperty("chaptersAdded").GetInt32());
+    }
+
+    [Fact]
     public void CodedError_HasTypedBodyFields_AndKeepsFallbackText()
     {
         var message = MessageFactory.WordCountFailedEvent(2, 42, "Frieren", "B:/Frieren/Frieren v01.epub");
@@ -235,6 +263,29 @@ public class MessageFactoryTests
     }
 
     [Fact]
+    public void ScanRescheduled_CarriesScans()
+    {
+        var runAt = new DateTime(2026, 10, 9, 10, 31, 0, DateTimeKind.Utc);
+        var scans = new List<ScheduledScanDto>
+        {
+            new() { JobId = "41", LibraryId = 3, RunAtUtc = runAt },
+            new() { JobId = "44", LibraryId = 1, SeriesId = 812, RunAtUtc = runAt.AddHours(3) },
+        };
+
+        var message = MessageFactory.ScanRescheduledEvent(scans);
+        var json = Serialize(message);
+        var body = json.GetProperty("body").GetProperty("scans");
+
+        Assert.Equal(MessageFactory.ScanRescheduled, message.Name);
+        Assert.Equal(2, body.GetArrayLength());
+        Assert.Equal("41", body[0].GetProperty("jobId").GetString());
+        Assert.Equal(runAt, body[0].GetProperty("runAtUtc").GetDateTime());
+        Assert.Equal(JsonValueKind.Null, body[0].GetProperty("seriesId").ValueKind);
+        Assert.Equal(812, body[1].GetProperty("seriesId").GetInt32());
+        Assert.DoesNotContain("Name", json.GetProperty("body").GetRawText(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void ScrobblingKeyExpired_BodyHasProvider()
     {
         var body = Serialize(MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList)).GetProperty("body");
@@ -248,5 +299,19 @@ public class MessageFactoryTests
         var body = Serialize(MessageFactory.SmartCollectionProgressEvent("Seasonal", "Frieren", 1, 4, ProgressEventType.Updated)).GetProperty("body");
 
         Assert.Equal("Seasonal", body.GetProperty("collectionName").GetString());
+    }
+
+    [Fact]
+    public void UnreadableFoldersEvent_CapsFoldersAndKeepsTheCount()
+    {
+        var folders = Enumerable.Range(1, 12).Select(i => $"M:/Series {i}").ToList();
+
+        var message = MessageFactory.UnreadableFoldersEvent(1, "Manga", folders);
+        var body = Assert.IsType<UnreadableFoldersEventBodyDto>(message.Body);
+
+        Assert.Equal(MessageEventCode.UnreadableFolders, message.Code);
+        Assert.Equal(MessageEventPriority.Error, message.Priority);
+        Assert.Equal(folders.Take(UnreadableFoldersEventBodyDto.MaxFolders), body.Folders);
+        Assert.Equal(12, body.FolderCount);
     }
 }

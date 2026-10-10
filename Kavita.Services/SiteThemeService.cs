@@ -267,7 +267,7 @@ public class ThemeService(
     {
 
         // Validate we don't have a collision with existing or existing doesn't already exist
-        var existingThemes = directoryService.ScanFiles(directoryService.SiteThemeDirectory, string.Empty);
+        var existingThemes = directoryService.ScanFiles(directoryService.SiteThemeDirectory, string.Empty).Select(f => f.Path).ToList();
         if (existingThemes.Any(f => Path.GetFileName(f) == dto.CssFile))
         {
             // This can happen if you delete then immediately download (to refresh). We should just delete the old file and download. Users can always rollback their version with github directly

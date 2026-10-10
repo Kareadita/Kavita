@@ -38,12 +38,15 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
         public string[] Added { get; init; } = [];
 
         /// <summary>
-        /// Every file the series should own after the rescan, relative to the library root.
+        /// Every file the library should hold after the rescan, relative to the library root
         /// </summary>
         public required string[] ExpectedFiles { get; init; }
 
+        public string[] ExpectedSeries { get; init; } = [SeriesName];
+
         /// <summary>
-        /// Expected volume name to chapter count. Volume names are what GetNumberTitle produces, so "1" for Vol. 1.
+        /// Expected volume name to chapter count for <see cref="SeriesName"/>. Volume names are what GetNumberTitle
+        /// produces, so "1" for Vol. 1
         /// </summary>
         public required (string Volume, int Chapters)[] ExpectedVolumes { get; init; }
 
@@ -134,6 +137,77 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
             ExpectedVolumes = [("1", 1)],
         },
 
+        // The volume folder stays but loses its only file
+        new ScanMutationCase
+        {
+            Name = "EmptyVolumeFolder",
+            Initial =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz",
+            ],
+            Removed = ["Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz"],
+            ExpectedFiles = ["Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0001.cbz"],
+            ExpectedVolumes = [("1", 1)],
+        },
+
+        // The unchanged loose file at the series root must not shield the volume folder below it
+        new ScanMutationCase
+        {
+            Name = "RemoveFileFromVolumeBesideUnchangedLooseFile",
+            Initial =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0004.cbz",
+            ],
+            Removed = ["Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0004.cbz"],
+            ExpectedFiles =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz",
+            ],
+            ExpectedVolumes = [("1", 1), ("2", 1)],
+        },
+
+        // The Specials folder is read through its series folder, whose own write time does not change
+        new ScanMutationCase
+        {
+            Name = "AddSpecialBesideLooseFiles",
+            Initial =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Spice and Wolf/Specials/Spice and Wolf SP01.cbz",
+            ],
+            Added = ["Spice and Wolf/Specials/Spice and Wolf SP02.cbz"],
+            ExpectedFiles =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Spice and Wolf/Specials/Spice and Wolf SP01.cbz",
+                "Spice and Wolf/Specials/Spice and Wolf SP02.cbz",
+            ],
+            ExpectedVolumes = [("1", 1), ("100000", 2)],
+        },
+
+        // Same series in two top folders, only the second one changes
+        new ScanMutationCase
+        {
+            Name = "AddFileInSecondTopFolder",
+            Initial =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Spice and Wolf Extras/Spice and Wolf Vol. 2.cbz",
+            ],
+            Added = ["Spice and Wolf Extras/Spice and Wolf Vol. 3.cbz"],
+            ExpectedFiles =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Spice and Wolf Extras/Spice and Wolf Vol. 2.cbz",
+                "Spice and Wolf Extras/Spice and Wolf Vol. 3.cbz",
+            ],
+            ExpectedVolumes = [("1", 1), ("2", 1), ("3", 1)],
+        },
+
         new ScanMutationCase
         {
             Name = "RenameFileInPlaceKeepingVolumeAndChapter",
@@ -222,6 +296,161 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
             ],
             ExpectedVolumes = [("1", 3)],
         },
+
+        new ScanMutationCase
+        {
+            Name = "AddLooseFileAtSeriesRootBesideVolumeFolders",
+            Initial =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz",
+            ],
+            Added = ["Spice and Wolf/Spice and Wolf Vol. 3.cbz"],
+            ExpectedFiles =
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 3.cbz",
+            ],
+            ExpectedVolumes = [("1", 1), ("2", 1), ("3", 1)],
+        },
+
+        // The 2025 regression: a new series under a publisher folder must be added, not hidden behind its
+        // unchanged siblings
+        new ScanMutationCase
+        {
+            Name = "AddSeriesUnderPublisher",
+            Initial =
+            [
+                "YenPress/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "YenPress/The Executioner and Her Way of Life/The Executioner and Her Way of Life Vol. 1.cbz",
+            ],
+            Added = ["YenPress/Accel World/Accel World Vol. 1.cbz"],
+            ExpectedFiles =
+            [
+                "YenPress/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "YenPress/The Executioner and Her Way of Life/The Executioner and Her Way of Life Vol. 1.cbz",
+                "YenPress/Accel World/Accel World Vol. 1.cbz",
+            ],
+            ExpectedSeries = [SeriesName, "The Executioner and Her Way of Life", "Accel World"],
+            ExpectedVolumes = [("1", 1)],
+        },
+
+        new ScanMutationCase
+        {
+            Name = "AddVolumeUnderPublisher",
+            Initial =
+            [
+                "YenPress/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "YenPress/The Executioner and Her Way of Life/The Executioner and Her Way of Life Vol. 1.cbz",
+            ],
+            Added = ["YenPress/Spice and Wolf/Spice and Wolf Vol. 2.cbz"],
+            ExpectedFiles =
+            [
+                "YenPress/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "YenPress/Spice and Wolf/Spice and Wolf Vol. 2.cbz",
+                "YenPress/The Executioner and Her Way of Life/The Executioner and Her Way of Life Vol. 1.cbz",
+            ],
+            ExpectedSeries = [SeriesName, "The Executioner and Her Way of Life"],
+            ExpectedVolumes = [("1", 1), ("2", 1)],
+        },
+
+        new ScanMutationCase
+        {
+            Name = "AddSeriesUnderPublisherDepth2",
+            Initial = ["Marvel/Civil War/Spice and Wolf/Spice and Wolf Vol. 1.cbz"],
+            Added = ["Marvel/Civil War/Accel World/Accel World Vol. 1.cbz"],
+            ExpectedFiles =
+            [
+                "Marvel/Civil War/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Marvel/Civil War/Accel World/Accel World Vol. 1.cbz",
+            ],
+            ExpectedSeries = [SeriesName, "Accel World"],
+            ExpectedVolumes = [("1", 1)],
+        },
+
+        new ScanMutationCase
+        {
+            Name = "AddVolumeUnderPublisherDepth2",
+            Initial =
+            [
+                "Marvel/Civil War/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Marvel/Civil War/Accel World/Accel World Vol. 1.cbz",
+            ],
+            Added = ["Marvel/Civil War/Spice and Wolf/Spice and Wolf Vol. 2.cbz"],
+            ExpectedFiles =
+            [
+                "Marvel/Civil War/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Marvel/Civil War/Spice and Wolf/Spice and Wolf Vol. 2.cbz",
+                "Marvel/Civil War/Accel World/Accel World Vol. 1.cbz",
+            ],
+            ExpectedSeries = [SeriesName, "Accel World"],
+            ExpectedVolumes = [("1", 1), ("2", 1)],
+        },
+
+        new ScanMutationCase
+        {
+            Name = "AddSeriesUnderPublisherDepth3",
+            Initial = ["Publisher A-M/Marvel/Civil War/Spice and Wolf/Spice and Wolf Vol. 1.cbz"],
+            Added = ["Publisher A-M/Marvel/Civil War/Accel World/Accel World Vol. 1.cbz"],
+            ExpectedFiles =
+            [
+                "Publisher A-M/Marvel/Civil War/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Publisher A-M/Marvel/Civil War/Accel World/Accel World Vol. 1.cbz",
+            ],
+            ExpectedSeries = [SeriesName, "Accel World"],
+            ExpectedVolumes = [("1", 1)],
+        },
+
+        new ScanMutationCase
+        {
+            Name = "AddVolumeUnderPublisherDepth3",
+            Initial =
+            [
+                "Publisher A-M/Marvel/Civil War/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Publisher A-M/Marvel/Civil War/Accel World/Accel World Vol. 1.cbz",
+            ],
+            Added = ["Publisher A-M/Marvel/Civil War/Spice and Wolf/Spice and Wolf Vol. 2.cbz"],
+            ExpectedFiles =
+            [
+                "Publisher A-M/Marvel/Civil War/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "Publisher A-M/Marvel/Civil War/Spice and Wolf/Spice and Wolf Vol. 2.cbz",
+                "Publisher A-M/Marvel/Civil War/Accel World/Accel World Vol. 1.cbz",
+            ],
+            ExpectedSeries = [SeriesName, "Accel World"],
+            ExpectedVolumes = [("1", 1), ("2", 1)],
+        },
+
+        new ScanMutationCase
+        {
+            Name = "RemoveSeriesFolderUnderPublisher",
+            Initial =
+            [
+                "YenPress/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "YenPress/The Executioner and Her Way of Life/The Executioner and Her Way of Life Vol. 1.cbz",
+            ],
+            Removed = ["YenPress/The Executioner and Her Way of Life"],
+            ExpectedFiles = ["YenPress/Spice and Wolf/Spice and Wolf Vol. 1.cbz"],
+            ExpectedVolumes = [("1", 1)],
+        },
+
+        // Pins today's behavior: a loose file beside series folders under a publisher becomes its own series
+        new ScanMutationCase
+        {
+            Name = "LooseFileAtPublisherLevel",
+            Initial =
+            [
+                "YenPress/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "YenPress/Wolf Children Vol. 1.cbz",
+            ],
+            ExpectedFiles =
+            [
+                "YenPress/Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+                "YenPress/Wolf Children Vol. 1.cbz",
+            ],
+            ExpectedSeries = [SeriesName, "Wolf Children"],
+            ExpectedVolumes = [("1", 1)],
+        },
     ];
 
     [Theory]
@@ -241,7 +470,7 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
         await scanner.ScanLibrary(library.Id);
 
         var seriesId = await GetSeriesId(unitOfWork, library.Id);
-        var before = await SnapshotPlacement(context, root, seriesId);
+        var before = await SnapshotPlacement(context, root, library.Id);
         Assert.Equal([.. scenario.Initial.Order()], before.Keys.Order());
 
         await ApplyMutations(scannerHelper, root, scenario);
@@ -249,9 +478,15 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
         await scanner.ScanLibrary(library.Id);
         await unitOfWork.CommitAsync();
 
-        var after = await SnapshotPlacement(context, root, seriesId);
+        var after = await SnapshotPlacement(context, root, library.Id);
 
         Assert.Equal([.. scenario.ExpectedFiles.Order()], after.Keys.Order());
+
+        var seriesNames = await context.Series
+            .Where(s => s.LibraryId == library.Id)
+            .Select(s => s.Name)
+            .ToListAsync();
+        Assert.Equal([.. scenario.ExpectedSeries.Order()], seriesNames.Order());
 
         var volumes = await context.Volume
             .Where(v => v.SeriesId == seriesId)
@@ -261,8 +496,8 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
             [.. scenario.ExpectedVolumes.Select(v => $"{v.Volume}={v.Chapters}").Order()],
             [.. volumes.Select(v => $"{v.Name}={v.Chapters}").Order()]);
 
-        // Any file the scenario did not touch must still sit in the exact volume and chapter it did before.
-        // Chapter id alone is not enough: a reparented chapter keeps its id and changes volume.
+        // Any file the scenario did not touch must still sit in the exact series, volume and chapter it did before.
+        // Chapter id alone is not enough: a reparented chapter keeps its id and changes volume
         foreach (var untouched in Untouched(scenario))
         {
             Assert.True(after.ContainsKey(untouched), $"{untouched} was dropped from the series");
@@ -336,14 +571,14 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
     }
 
     /// <summary>
-    /// Library relative file path to the (volume, chapter) it belongs to.
+    /// Library relative file path to the (series, volume, chapter) it belongs to
     /// </summary>
-    private static async Task<Dictionary<string, (int VolumeId, int ChapterId)>> SnapshotPlacement(
-        DataContext context, string root, int seriesId)
+    private static async Task<Dictionary<string, (int SeriesId, int VolumeId, int ChapterId)>> SnapshotPlacement(
+        DataContext context, string root, int libraryId)
     {
         var rows = await context.MangaFile
-            .Where(f => f.Chapter.Volume.SeriesId == seriesId)
-            .Select(f => new { f.FilePath, f.ChapterId, f.Chapter.VolumeId })
+            .Where(f => f.Chapter.Volume.Series.LibraryId == libraryId)
+            .Select(f => new { f.FilePath, f.ChapterId, f.Chapter.VolumeId, f.Chapter.Volume.SeriesId })
             .AsNoTracking()
             .ToListAsync();
 
@@ -356,6 +591,6 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
                 Assert.StartsWith(prefix, path);
                 return path[prefix.Length..];
             },
-            r => (r.VolumeId, r.ChapterId));
+            r => (r.SeriesId, r.VolumeId, r.ChapterId));
     }
 }

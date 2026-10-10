@@ -41,6 +41,14 @@ public class ArchiveService(
     /// <returns></returns>
     public virtual ArchiveLibrary CanOpen(string archivePath)
     {
+        return CanOpen(archivePath, out _);
+    }
+
+    /// <inheritdoc cref="CanOpen(string)"/>
+    /// <param name="error">Why SharpCompress could not open it, when neither library could</param>
+    public ArchiveLibrary CanOpen(string archivePath, out Exception? error)
+    {
+        error = null;
         if (string.IsNullOrEmpty(archivePath) || !(File.Exists(archivePath) && Parser.IsArchive(archivePath) || Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
 
         var ext = directoryService.FileSystem.Path.GetExtension(archivePath).ToUpper();
@@ -62,6 +70,7 @@ public class ArchiveService(
             catch (Exception ex2)
             {
                 logger.LogTrace(ex2, "[CanOpen/ArchiveFactory] This archive cannot be read: {ArchivePath}", archivePath);
+                error = ex2;
                 return ArchiveLibrary.NotSupported;
             }
         }
@@ -77,7 +86,7 @@ public class ArchiveService(
 
         try
         {
-            var libraryHandler = CanOpen(archivePath);
+            var libraryHandler = CanOpen(archivePath, out var openError);
             switch (libraryHandler)
             {
                 case ArchiveLibrary.Default:
@@ -93,12 +102,17 @@ public class ArchiveService(
                                                           && Parser.IsImage(entry.Key));
                 }
                 case ArchiveLibrary.NotSupported:
-                    logger.LogWarning("[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
-                    mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService, "File format not supported", string.Empty);
-                    return 0;
                 default:
-                    logger.LogWarning("[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
-                    mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService, "File format not supported", string.Empty);
+                    logger.LogWarning(openError, "[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                    if (openError == null)
+                    {
+                        mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService, MediaErrorReason.UnreadableArchive, string.Empty);
+                    }
+                    else
+                    {
+                        mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
+                            ParseIssues.ReasonFor(archivePath, openError), openError);
+                    }
                     return 0;
             }
         }
@@ -106,7 +120,7 @@ public class ArchiveService(
         {
             logger.LogWarning(ex, "[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
             mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
-                "This archive cannot be read or not supported", ex);
+                ParseIssues.ReasonFor(archivePath, ex), ex);
             return 0;
         }
     }
@@ -226,8 +240,7 @@ public class ArchiveService(
         catch (Exception ex)
         {
             logger.LogWarning(ex, "[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
-            mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
-                "This archive cannot be read or not supported", ex); // TODO: Localize this. Which user?
+            mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService, MediaErrorReason.CoverFailed, ex);
         }
 
         return string.Empty;
@@ -450,8 +463,7 @@ public class ArchiveService(
         catch (Exception ex)
         {
             logger.LogWarning(ex, "[GetComicInfo] There was an exception when reading archive stream: {Filepath}", archivePath);
-            mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
-                "This archive cannot be read or not supported", ex);
+            throw;
         }
 
         return null;
@@ -562,7 +574,7 @@ public class ArchiveService(
         {
             logger.LogWarning(ex, "[ExtractArchive] There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
             mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
-                "This archive cannot be read or not supported", ex);
+                ParseIssues.ReasonFor(archivePath, ex), ex);
             throw new KavitaException(
                 $"There was an error when extracting {archivePath}. Check the file exists, has read permissions or the server OS can support all path characters.");
         }

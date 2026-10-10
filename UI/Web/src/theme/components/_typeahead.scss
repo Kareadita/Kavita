@@ -1,7 +1,10 @@
 :root {
   /* size */
-  --select2-single-height: 2.25rem;
-  --select2-multiple-height: 2.25rem;
+  // Matches Bootstrap's .form-select height, so select2 lines up with native selects
+  --select2-single-height: calc(1.5em + 0.75rem + var(--bs-border-width) * 2);
+  --select2-multiple-height: calc(1.5em + 0.75rem + var(--bs-border-width) * 2);
+  --select2-selection-padding: 0.25rem 0 0 0.5rem;
+  --select2-selection-multiple-padding: 0.25rem 0.3125rem 0.125rem;
 
   /* label */
   --select2-label-text-color: #000;

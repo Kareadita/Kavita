@@ -1,0 +1,12 @@
+<select2 [id]="inputId()"
+         [data]="data()"
+         [value]="value()"
+         [placeholder]="placeholder()"
+         [resettable]="true"
+         [infiniteScroll]="true"
+         [templates]="labelTemplate"
+         (update)="updateValue($event.value)">
+  <!-- select2 renders a label without a template through innerHTML, and series names come from files -->
+  <ng-template #labelTemplate let-optionLabel="label">{{optionLabel}}</ng-template>
+  <ng-container ngProjectAs="select2-label"><span class="visually-hidden">{{label()}}</span></ng-container>
+</select2>

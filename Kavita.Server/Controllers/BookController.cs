@@ -173,7 +173,7 @@ public class BookController(
                 await unitOfWork.UserTableOfContentRepository.GetPersonalToCForPage(UserId, chapterId, page);
             var annotations = await unitOfWork.UserRepository.GetAnnotationsByPage(UserId, chapter.Id, page, ct);
 
-            return Ok(await bookService.GetBookPage(UserId, page, chapterId, path, baseUrl, ptocBookmarks, annotations, ct));
+            return Ok(await bookService.GetBookPage(UserId, page, chapterId, path, chapter.Files.First().FilePath, baseUrl, ptocBookmarks, annotations, ct));
         }
         catch (KavitaException ex)
         {

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using Kavita.API.Services.SignalR;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.DTOs.SignalR.Bodies;
 
 namespace Kavita.Services.SignalR;
 
@@ -34,7 +35,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
     {
     }
 
-    private sealed record Row(SignalRMessageDto message, DateTimeOffset FirstSeen, DateTimeOffset LastSeen);
+    private sealed record Row(SignalRMessageDto Message, DateTimeOffset FirstSeen, DateTimeOffset LastSeen);
 
     private sealed class JobHistory(DateTime startedUtc)
     {
@@ -43,24 +44,19 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
         public DateTimeOffset LastSeen { get; set; }
         public Dictionary<string, SignalRMessageDto> Steps { get; } = new();
         public HashSet<string> Ended { get; } = [];
-        public int SeriesAdded { get; set; }
-        public int SeriesRemoved { get; set; }
+        /// <summary>By library, ScanLibraries runs every library under one job</summary>
+        public Dictionary<int, LibraryScanEndedEventBodyDto> ScanSummaries { get; } = new();
     }
 
     public void Record(string method, SignalRMessageDto message)
     {
-        switch (method)
+        if (method == MessageFactory.NotificationProgress)
         {
-            case MessageFactory.NotificationProgress:
-                RecordProgress(message);
-                break;
-            case MessageFactory.SeriesAdded:
-            case MessageFactory.SeriesRemoved:
-                CountSeries(method, message.CorrelationId);
-                break;
-            default:
-                if (EntryMethods.Contains(method)) RecordEntry(message);
-                break;
+            RecordProgress(message);
+        }
+        else if (EntryMethods.Contains(method))
+        {
+            RecordEntry(message);
         }
     }
 
@@ -82,7 +78,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
         var now = timeProvider.GetUtcNow();
         _rows.AddOrUpdate(key,
             _ => new Row(message, now, now),
-            (_, existing) => existing with { message = message, LastSeen = now });
+            (_, existing) => existing with { Message = message, LastSeen = now });
 
         if (_rows.Count > MaxRows) EvictOldest();
     }
@@ -103,7 +99,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
 
         return _rows.Values
             .OrderBy(r => r.FirstSeen)
-            .Select(r => r.message)
+            .Select(r => r.Message)
             .ToList();
     }
 
@@ -123,8 +119,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
                     EndedUtc = j.Value.LastEventUtc,
                     Steps = j.Value.Steps.Values.ToList(),
                     Completed = j.Value.Steps.Keys.All(j.Value.Ended.Contains),
-                    SeriesAdded = j.Value.SeriesAdded,
-                    SeriesRemoved = j.Value.SeriesRemoved,
+                    ScanSummaries = j.Value.ScanSummaries.Values.ToList(),
                 })
                 .ToList();
         }
@@ -160,6 +155,10 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
             if (message.EventType == ProgressEventType.Ended)
             {
                 job.Ended.Add(message.Name);
+                if (message.Body is LibraryScanEndedEventBodyDto summary)
+                {
+                    job.ScanSummaries[summary.LibraryId] = summary;
+                }
             }
             else
             {
@@ -168,20 +167,10 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
                 job.Steps[message.Name] = message;
             }
 
-            if (_jobs.Count > MaxRecentJobs) _jobs.Remove(_jobs.MinBy(j => j.Value.LastSeen).Key);
-        }
-    }
-
-    private void CountSeries(string method, string? correlationId)
-    {
-        if (string.IsNullOrEmpty(correlationId)) return;
-
-        lock (_historyLock)
-        {
-            if (!_jobs.TryGetValue(correlationId, out var job)) return;
-
-            if (method == MessageFactory.SeriesAdded) job.SeriesAdded++;
-            else job.SeriesRemoved++;
+            if (_jobs.Count > MaxRecentJobs)
+            {
+                _jobs.Remove(_jobs.MinBy(j => j.Value.LastSeen).Key);
+            }
         }
     }
 
@@ -208,7 +197,7 @@ public sealed class ActivityTracker(TimeProvider timeProvider) : IActivityTracke
 
     private static bool IsAlive(Row row, IReadOnlySet<string> processingJobIds, DateTimeOffset staleBefore)
     {
-        var jobId = JobIdOf(row.message.CorrelationId);
+        var jobId = JobIdOf(row.Message.CorrelationId);
         return jobId == null ? row.LastSeen >= staleBefore : processingJobIds.Contains(jobId);
     }
 

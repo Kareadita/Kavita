@@ -1,7 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import {TranslocoService} from '@jsverse/transloco';
 import {MessageEventCode} from '../_models/events/core/message-event-code';
-import {UtcToLocalTimePipe} from './utc-to-local-time.pipe';
 
 const PREFIX = 'event-message-pipe';
 
@@ -18,10 +17,10 @@ type MessageBody = Partial<{
   libraryName: string;
   seriesName: string;
   folders: string[];
+  folderCount: number;
   folder: string;
   path: string;
   filePath: string;
-  scheduledForUtc: string;
 }>;
 
 type Params = Record<string, string | undefined>;
@@ -36,7 +35,6 @@ type Params = Record<string, string | undefined>;
 })
 export class EventMessagePipe implements PipeTransform {
   private readonly translocoService = inject(TranslocoService);
-  private readonly utcToLocalTimePipe = new UtcToLocalTimePipe();
 
   transform(source: EventMessageSource, part: EventMessagePart): string {
     const body = (source.body ?? {}) as MessageBody;
@@ -53,6 +51,8 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.root-folders-inaccessible-label`, {}, fallback);
       case MessageEventCode.RootFoldersEmpty:
         return this.translate(`${PREFIX}.root-folders-empty-label`, {libraryName}, fallback);
+      case MessageEventCode.UnreadableFolders:
+        return this.translate(`${PREFIX}.unreadable-folders-label`, {libraryName}, fallback);
       case MessageEventCode.SeriesCollision:
         return this.translate(`${PREFIX}.series-collision-label`, {seriesName, libraryName}, fallback);
       case MessageEventCode.FilesOutsideFolder:
@@ -90,13 +90,14 @@ export class EventMessagePipe implements PipeTransform {
 
   private description(source: EventMessageSource, body: MessageBody): string {
     const fallback = source.subTitle;
-    const time = body.scheduledForUtc ? this.utcToLocalTimePipe.transform(body.scheduledForUtc, 'shortTime') : undefined;
 
     switch (source.code) {
       case MessageEventCode.RootFoldersInaccessible:
         return this.translate(`${PREFIX}.root-folders-inaccessible-description`, {folders: body.folders?.join(', ')}, fallback);
       case MessageEventCode.RootFoldersEmpty:
         return this.translate(`${PREFIX}.root-folders-empty-description`, {}, fallback);
+      case MessageEventCode.UnreadableFolders:
+        return this.unreadableFoldersDescription(body, fallback);
       case MessageEventCode.SeriesCollision:
         return this.translate(`${PREFIX}.series-collision-description`, {}, fallback);
       case MessageEventCode.FilesOutsideFolder:
@@ -117,7 +118,7 @@ export class EventMessagePipe implements PipeTransform {
       case MessageEventCode.ScanLibrariesDelayed:
       case MessageEventCode.ScanLibraryDelayed:
       case MessageEventCode.ScanSeriesDelayed:
-        return this.translate(`${PREFIX}.scan-delayed-description`, {time}, fallback);
+        return this.translate(`${PREFIX}.scan-delayed-description`, {}, fallback);
       case MessageEventCode.BackupFolderUnwritable:
         return this.translate(`${PREFIX}.backup-folder-unwritable-description`, {folder: body.folder}, fallback);
       case MessageEventCode.BackupExists:
@@ -129,6 +130,15 @@ export class EventMessagePipe implements PipeTransform {
       default:
         return fallback;
     }
+  }
+
+  private unreadableFoldersDescription(body: MessageBody, fallback: string): string {
+    const folders = body.folders?.join(', ');
+    const rest = (body.folderCount ?? 0) - (body.folders?.length ?? 0);
+    if (rest > 0) {
+      return this.translate(`${PREFIX}.unreadable-folders-more-description`, {folders, count: `${rest}`}, fallback);
+    }
+    return this.translate(`${PREFIX}.unreadable-folders-description`, {folders}, fallback);
   }
 
   private translate(key: string, params: Params, fallback: string): string {

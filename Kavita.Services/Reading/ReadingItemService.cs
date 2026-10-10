@@ -21,17 +21,15 @@ public class ReadingItemService : IReadingItemService
     private readonly ImageParser _imageParser;
     private readonly BookParser _bookParser;
     private readonly PdfParser _pdfParser;
-    private readonly IMediaErrorService _mediaErrorService;
 
     public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService,
-        IDirectoryService directoryService, ILogger<ReadingItemService> logger, IMediaErrorService mediaErrorService)
+        IDirectoryService directoryService, ILogger<ReadingItemService> logger)
     {
         _archiveService = archiveService;
         _bookService = bookService;
         _imageService = imageService;
         _directoryService = directoryService;
         _logger = logger;
-        _mediaErrorService = mediaErrorService;
 
         _imageParser = new ImageParser(directoryService);
         _basicParser = new BasicParser(directoryService, _imageParser);
@@ -46,57 +44,74 @@ public class ReadingItemService : IReadingItemService
     /// </summary>
     /// <param name="filePath">Fully qualified path of file</param>
     /// <param name="enableMetadata">If false, returns null</param>
-    /// <returns></returns>
-    private ComicInfo? GetComicInfo(string filePath, bool enableMetadata)
+    /// <param name="issue">Set when the metadata could not be read, or an epub only opened leniently. The file can still be imported</param>
+    private ComicInfo? ReadComicInfo(string filePath, bool enableMetadata, out ParseIssue? issue)
     {
+        issue = null;
         if (!enableMetadata) return null;
 
-        if (Parser.IsEpub(filePath) || Parser.IsPdf(filePath))
+        try
         {
-            return _bookService.GetComicInfo(filePath);
-        }
+            if (Parser.IsEpub(filePath) || Parser.IsPdf(filePath))
+            {
+                var comicInfo = _bookService.GetComicInfo(filePath, out var strictOpenError);
+                if (strictOpenError != null)
+                {
+                    issue = new ParseIssue(MediaErrorReason.EpubNotStrict, strictOpenError);
+                }
 
-        if (Parser.IsComicInfoExtension(filePath))
+                return comicInfo;
+            }
+
+            if (Parser.IsComicInfoExtension(filePath))
+            {
+                return _archiveService.GetComicInfo(filePath);
+            }
+        }
+        catch (Exception ex)
         {
-            return _archiveService.GetComicInfo(filePath);
+            _logger.LogWarning(ex, "There was an exception reading the metadata of {FilePath}, parsing without it", filePath);
+            issue = new ParseIssue(MediaErrorReason.MetadataUnreadable, ParseIssues.Describe(ex));
         }
 
         return null;
     }
 
     /// <summary>
-    /// Processes files found during a library scan.
+    /// Processes files found during a library scan. A failure is returned for the scanner to record, not reported here
     /// </summary>
     /// <param name="path">Path of a file</param>
     /// <param name="rootPath"></param>
     /// <param name="libraryRoot"></param>
     /// <param name="type">Library type to determine parsing to perform</param>
     /// <param name="enableMetadata">Enable Metadata parsing overriding filename parsing</param>
-    public ParserInfo? ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+    public ParseFileResult ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
     {
+        var parser = ParserFor(path, type);
+        if (parser == null)
+        {
+            _logger.LogError("No parser can read file {FilePath}", path);
+            return ParseFileResult.Failed(ParseIssues.FromFailedParse(null));
+        }
+
+        var comicInfo = ReadComicInfo(path, enableMetadata, out var metadataIssue);
         try
         {
-            var parseResult = Parse(path, rootPath, libraryRoot, type, enableMetadata);
+            var parseResult = parser.Parse(path, rootPath, libraryRoot, type, enableMetadata, comicInfo);
             if (!parseResult.Success)
             {
                 _logger.LogError("Unable to parse any meaningful information out of file {FilePath}. Found {@ParserInfo}",
                     path, parseResult.Info);
 
-                _mediaErrorService.ReportMediaIssue(Path.GetFileName(path), MediaErrorProducer.Scanner,
-                    "Unable to parse any meaningful information out of file", string.Empty);
-
-                return null;
+                return ParseFileResult.Failed(ParseIssues.FromFailedParse(parseResult.Info));
             }
 
-            return parseResult.Info;
+            return parseResult.Info == null ? new ParseFileResult(null) : new ParseFileResult(parseResult.Info, metadataIssue);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an exception when parsing file {FilePath}", path);
-            _mediaErrorService.ReportMediaIssue(Path.GetFileName(path), MediaErrorProducer.Scanner,
-                "There was an exception when parsing file", ex.Message);
-
-            return null;
+            return ParseFileResult.Failed(ParseIssues.FromException(path, ex));
         }
     }
 
@@ -178,37 +193,16 @@ public class ReadingItemService : IReadingItemService
     }
 
     /// <summary>
-    /// Parses information out of a file. If file is a book (epub), it will use book metadata regardless of LibraryType
+    /// The parser for a file. A book (epub) uses book metadata regardless of LibraryType
     /// </summary>
-    /// <param name="path"></param>
-    /// <param name="rootPath"></param>
-    /// <param name="libraryRoot"></param>
-    /// <param name="type"></param>
-    /// <param name="enableMetadata"></param>
-    /// <returns></returns>
-    private ParseInfoResult Parse(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+    private DefaultParser? ParserFor(string path, LibraryType type)
     {
-        if (_comicVineParser.IsApplicable(path, type))
-        {
-            return _comicVineParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path, enableMetadata));
-        }
-        if (_imageParser.IsApplicable(path, type))
-        {
-            return _imageParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path, enableMetadata));
-        }
-        if (_bookParser.IsApplicable(path, type))
-        {
-            return _bookParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path, enableMetadata));
-        }
-        if (_pdfParser.IsApplicable(path, type))
-        {
-            return _pdfParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path, enableMetadata));
-        }
-        if (_basicParser.IsApplicable(path, type))
-        {
-            return _basicParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path, enableMetadata));
-        }
+        if (_comicVineParser.IsApplicable(path, type)) return _comicVineParser;
+        if (_imageParser.IsApplicable(path, type)) return _imageParser;
+        if (_bookParser.IsApplicable(path, type)) return _bookParser;
+        if (_pdfParser.IsApplicable(path, type)) return _pdfParser;
+        if (_basicParser.IsApplicable(path, type)) return _basicParser;
 
-        return ParseInfoResult.FailedParse();
+        return null;
     }
 }

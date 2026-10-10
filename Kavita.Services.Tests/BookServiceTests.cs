@@ -1,7 +1,11 @@
 ﻿using System.IO.Abstractions;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.Common;
+using Kavita.Common.Helpers;
+using Kavita.Models.DTOs.Account;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.User;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -12,13 +16,70 @@ public class BookServiceTests
 {
     private readonly IBookService _bookService;
     private readonly ILogger<BookService> _logger = Substitute.For<ILogger<BookService>>();
+    private readonly IMediaErrorService _mediaErrorService = Substitute.For<IMediaErrorService>();
+    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
 
     public BookServiceTests()
     {
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
         _bookService = new BookService(_logger, directoryService,
             new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService)
-            , Substitute.For<IMediaErrorService>(), Substitute.For<IUnitOfWork>());
+            , _mediaErrorService, _unitOfWork);
+    }
+
+    [Fact]
+    public async Task GetBookPage_PageFails_ReportsTheLibraryFileNotTheCacheCopy()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
+        var libraryFile = Path.GetFullPath(Path.Join(testDirectory, "Role Refinement.epub"));
+        var cacheFolder = Path.Join(Path.GetTempPath(), $"BookCache_{Guid.NewGuid():N}");
+        var cachedFile = Path.Join(cacheFolder, "Role Refinement.epub");
+        Directory.CreateDirectory(cacheFolder);
+        File.Copy(libraryFile, cachedFile);
+        _unitOfWork.UserRepository.GetAuthKeysForUserId(1, Arg.Any<CancellationToken>()).Returns(
+            [new AuthKeyDto { Key = "key", Name = AuthKeyHelper.ImageOnlyKeyName, Provider = AuthKeyProvider.System }]);
+
+        try
+        {
+            // A null bookmark list throws while the page is scoped, which takes the page-failure path
+            await Assert.ThrowsAsync<KavitaException>(() => _bookService.GetBookPage(1, 0, 1, cachedFile, libraryFile,
+                "//localhost/api/", null!, []));
+
+            await _mediaErrorService.Received(1).ReportMediaIssueAsync(libraryFile, MediaErrorProducer.BookService,
+                MediaErrorReason.CorruptEpub, Arg.Any<Exception>(), Arg.Any<CancellationToken>());
+        }
+        finally
+        {
+            Directory.Delete(cacheFolder, true);
+        }
+    }
+
+    [Fact]
+    public void BrokenEpub_ThrowsWithoutReporting()
+    {
+        var broken = Path.Join(Path.GetTempPath(), $"Broken_{Guid.NewGuid():N}.epub");
+        File.WriteAllText(broken, "not an epub");
+
+        try
+        {
+            Assert.ThrowsAny<Exception>(() => _bookService.GetComicInfo(broken, out _));
+            Assert.ThrowsAny<Exception>(() => _bookService.ParseInfo(broken));
+            Assert.Empty(_mediaErrorService.ReceivedCalls());
+        }
+        finally
+        {
+            File.Delete(broken);
+        }
+    }
+
+    [Fact]
+    public void ValidEpub_OpensStrictly()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
+
+        _bookService.GetComicInfo(Path.Join(testDirectory, "Role Refinement.epub"), out var strictOpenError);
+
+        Assert.Null(strictOpenError);
     }
 
     [Theory]
@@ -40,7 +101,7 @@ public class BookServiceTests
         var archive = Path.Join(testDirectory, "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub");
         const string summaryInfo = "Book Description";
 
-        var comicInfo = _bookService.GetComicInfo(archive);
+        var comicInfo = _bookService.GetComicInfo(archive, out _);
         Assert.NotNull(comicInfo);
         Assert.Equal(summaryInfo, comicInfo.Summary);
         Assert.Equal("genre1, genre2", comicInfo.Genre);
@@ -55,7 +116,7 @@ public class BookServiceTests
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
         var archive = Path.Join(testDirectory, "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub");
 
-        var comicInfo = _bookService.GetComicInfo(archive);
+        var comicInfo = _bookService.GetComicInfo(archive, out _);
         Assert.NotNull(comicInfo);
         Assert.Equal("Roger Starbuck,Junya Inoue", comicInfo.Writer);
     }
@@ -66,7 +127,7 @@ public class BookServiceTests
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
         var archive = Path.Join(testDirectory, "Role Refinement.epub");
 
-        var comicInfo = _bookService.GetComicInfo(archive);
+        var comicInfo = _bookService.GetComicInfo(archive, out _);
         Assert.NotNull(comicInfo);
         Assert.Equal("미아키 스가루", comicInfo.Writer); // This should not use the fallback for the test case ShouldHaveComicInfo_WithAuthors
     }
@@ -77,7 +138,7 @@ public class BookServiceTests
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
         var archive = Path.Join(testDirectory, "TitleWithVolume_NoSeriesOrSeriesIndex.epub");
 
-        var comicInfo = _bookService.GetComicInfo(archive);
+        var comicInfo = _bookService.GetComicInfo(archive, out _);
         Assert.NotNull(comicInfo);
         Assert.Equal("1", comicInfo.Volume);
         Assert.Equal("Accel World", comicInfo.Series);
@@ -89,7 +150,7 @@ public class BookServiceTests
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
         var archive = Path.Join(testDirectory, "TitleWithVolume.epub");
 
-        var comicInfo = _bookService.GetComicInfo(archive);
+        var comicInfo = _bookService.GetComicInfo(archive, out _);
         Assert.NotNull(comicInfo);
         Assert.Equal("1.0", comicInfo.Volume);
         Assert.Equal("Accel World", comicInfo.Series);
@@ -100,7 +161,7 @@ public class BookServiceTests
     {
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
         var document = Path.Join(testDirectory, "test.pdf");
-        var comicInfo = _bookService.GetComicInfo(document);
+        var comicInfo = _bookService.GetComicInfo(document, out _);
         Assert.NotNull(comicInfo);
         Assert.Equal("Variations Chromatiques de concert", comicInfo.Title);
         Assert.Equal("Georges Bizet \\(1838-1875\\)", comicInfo.Writer);
@@ -145,7 +206,7 @@ public class BookServiceTests
     {
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/Library/Books/PDFs");
         var document = Path.Join(testDirectory, "Rollo at Work SP01.pdf");
-        var comicInfo = _bookService.GetComicInfo(document);
+        var comicInfo = _bookService.GetComicInfo(document, out _);
         Assert.NotNull(comicInfo);
         Assert.Equal("Rollo at Work", comicInfo.Title);
         Assert.Equal("Jacob Abbott", comicInfo.Writer);
@@ -157,19 +218,20 @@ public class BookServiceTests
     {
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
         var document = Path.Join(testDirectory, "indirect.pdf");
-        var comicInfo = _bookService.GetComicInfo(document);
+        var comicInfo = _bookService.GetComicInfo(document, out _);
         Assert.NotNull(comicInfo);
         Assert.Equal(2018, comicInfo.Year);
         Assert.Equal(8, comicInfo.Month);
     }
 
     [Fact]
-    public void FailGracefullyWithEncryptedPdf()
+    public void EncryptedPdf_ThrowsForTheScannerToRecord()
     {
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
         var document = Path.Join(testDirectory, "encrypted.pdf");
-        var comicInfo = _bookService.GetComicInfo(document);
-        Assert.Null(comicInfo);
+
+        var ex = Assert.ThrowsAny<Exception>(() => _bookService.GetComicInfo(document, out _));
+        Assert.Equal("Encryption not supported", ex.Message);
     }
 
     [Fact]
@@ -181,7 +243,7 @@ public class BookServiceTests
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
         var filePath = Path.Join(testDirectory, "Bizet-Variations_Chromatiques_de_concert_Theme_A4.pdf");
 
-        var comicInfo = _bookService.GetComicInfo(filePath);
+        var comicInfo = _bookService.GetComicInfo(filePath, out _);
         Assert.NotNull(comicInfo);
 
         var parserInfo = pdfParser.Parse(filePath, testDirectory, ds.GetParentDirectoryName(testDirectory), LibraryType.Book, true, comicInfo).Info;

@@ -199,11 +199,12 @@ public class Startup
                 new AuthenticationRateLimiterPolicy().GetPartition(httpContext));
         });
 
-        services.AddHangfire(configuration => configuration
+        services.AddHangfire((provider, configuration) => configuration
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
             .UseInMemoryStorage()
-            .UseSerilogLogProvider());
+            .UseSerilogLogProvider()
+            .UseFilter(ActivatorUtilities.CreateInstance<ScanEndRetimeFilter>(provider)));
             //.UseSQLiteStorage("config/Hangfire.db"));
             //// UseSQLiteStorage - SQLite has some issues around resuming jobs when aborted (and locking can cause high utilization)
             /// (NOTE: There is code to clear jobs on startup a redditor gave me)
@@ -553,6 +554,7 @@ public class Startup
                     await new ManualMigrationUnassignDefaultReadingProfile().RunAsync(dataContext, logger);
                     await new ManualMigrateOnDeckSettings().RunAsync(dataContext, logger);
                     await new ManualMigrationFixInvalidOnDeckSettings().RunAsync(dataContext, logger);
+                    await new ManualMigrationClearRootLowestFolderPath().RunAsync(dataContext, logger);
 
                     #endregion
 

@@ -57,7 +57,6 @@ public class CleanupService(
             (CleanupCacheAndTempDirectories, "Cleaning cache and temp directories"),
             (CleanupBackups, "Cleaning old database backups"),
             (ConsolidateProgress, "Consolidating Progress Events"),
-            (CleanupMediaErrors, "Consolidating Media Errors"),
             (CleanupDbEntries, "Cleaning abandoned database rows"), // Cleanup DB before removing files linked to DB entries
             (DeleteSeriesCoverImages, "Cleaning deleted series cover images"),
             (DeleteChapterCoverImages, "Cleaning deleted chapter cover images"),
@@ -276,52 +275,6 @@ public class CleanupService(
 
         // Save changes
         await unitOfWork.CommitAsync(ct);
-    }
-
-    /// <summary>
-    /// Scans through Media Error and removes any entries that have been fixed and are within the DB (proper files where wordcount/pagecount > 0)
-    /// </summary>
-    public async Task CleanupMediaErrors(CancellationToken ct = default)
-    {
-        try
-        {
-            List<string> errorStrings = ["This archive cannot be read or not supported", "File format not supported"];
-            var mediaErrors = await unitOfWork.MediaErrorRepository.GetAllErrorsAsync(errorStrings, ct);
-            logger.LogInformation("Beginning consolidation of {Count} Media Errors", mediaErrors.Count);
-
-            var pathToErrorMap = mediaErrors
-                .GroupBy(me => Parser.NormalizePath(me.FilePath))
-                .ToDictionary(
-                    group => group.Key,
-                    group => group.ToList() // The same file can be duplicated (rare issue when network drives die out midscan)
-                );
-
-            var normalizedPaths = pathToErrorMap.Keys.ToList();
-
-            // Find all files that are valid
-            var validFiles = await unitOfWork.DataContext.MangaFile
-                .Where(f => normalizedPaths.Contains(f.FilePath) && f.Pages > 0)
-                .Select(f => f.FilePath)
-                .ToListAsync(cancellationToken: ct);
-
-            var removalCount = 0;
-            foreach (var validFilePath in validFiles)
-            {
-                if (!pathToErrorMap.TryGetValue(validFilePath, out var mediaError)) continue;
-
-                unitOfWork.MediaErrorRepository.Remove(mediaError);
-                removalCount++;
-            }
-
-            await unitOfWork.CommitAsync(ct);
-
-            logger.LogInformation("Finished consolidation of {Count} Media Errors, Removed: {RemovalCount}",
-                mediaErrors.Count, removalCount);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "There was an exception consolidating media errors");
-        }
     }
 
     public async Task CleanupLogs(CancellationToken ct = default)

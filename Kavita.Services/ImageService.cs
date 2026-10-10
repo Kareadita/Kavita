@@ -43,6 +43,8 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     /// Width of a cover for Library
     /// </summary>
     public const int LibraryThumbnailWidth = 32;
+    // Fixed seed for generation of ColorScapes. Do not change
+    private const int ColorScapeSeed = 7;
 
 
     public void ExtractImages(string? fileFilePath, string targetDirectory, int fileCount = 1)
@@ -317,7 +319,10 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
 
     private static List<Vector3> KMeansClustering(List<Vector3> points, int k, int maxIterations = 100)
     {
-        var random = new Random();
+        // This is non-security context, ignore warning
+#pragma warning disable S2245
+        var random = new Random(ColorScapeSeed);
+#pragma warning restore S2245
         var centroids = points.OrderBy(x => random.Next()).Take(k).ToList();
 
         for (var i = 0; i < maxIterations; i++)

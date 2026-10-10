@@ -1,4 +1,5 @@
 import {SignalRMessage} from '../events/core/signalr-message';
+import {LibraryScanSummary} from './library-scan-summary';
 
 export interface RecentJob {
   correlationId: string;
@@ -12,6 +13,8 @@ export interface RecentJob {
    * False when the job stopped without every step sending ended
    */
   completed: boolean;
-  seriesAdded: number;
-  seriesRemoved: number;
+  /**
+   * One per library scan that finished in this job
+   */
+  scanSummaries: LibraryScanSummary[];
 }

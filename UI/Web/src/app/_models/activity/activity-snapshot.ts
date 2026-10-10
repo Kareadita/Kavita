@@ -1,5 +1,6 @@
 import {SignalRMessage} from '../events/core/signalr-message';
 import {ScheduledScan} from './scheduled-scan';
+import {ScheduledFolderScan} from './scheduled-folder-scan';
 import {UpcomingTask} from './upcoming-task';
 import {RecentJob} from './recent-job';
 
@@ -12,6 +13,10 @@ export interface ActivitySnapshot {
    */
   scheduled: ScheduledScan[];
   scheduledTotal: number;
+  /**
+   * Folder changes waiting to be looked at, one per library and trigger
+   */
+  scheduledFolderScans: ScheduledFolderScan[];
   upcoming: UpcomingTask[];
   /**
    * Last 24 hours, newest first. Empty after a server restart

@@ -24,6 +24,4 @@ public interface ICleanupService
 
     Task ConsolidateProgress(CancellationToken ct = default);
 
-    Task CleanupMediaErrors(CancellationToken ct = default);
-
 }

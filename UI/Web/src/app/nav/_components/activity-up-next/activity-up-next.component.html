@@ -11,7 +11,15 @@
 
     @for (item of visibleItems(); track item.id) {
       <div class="item d-flex gap-3">
-        <div class="time flex-shrink-0">{{item.runAtUtc | utcToLocalTime : 'shortTime'}}</div>
+        <div class="time flex-shrink-0">
+          @if ((item.kind === 'scan' || item.kind === 'folders') && item.queued) {
+            {{t('scan-queued-label')}}
+          } @else if (item.kind === 'task' && item.frequency === 'weekly') {
+            {{item.runAtUtc | utcToLocalTime : 'weekdayTime'}}
+          } @else {
+            {{item.runAtUtc | utcToLocalTime : 'shortTime'}}
+          }
+        </div>
         <div class="content flex-grow-1">
           @switch (item.kind) {
             @case ('task') {
@@ -23,6 +31,28 @@
             @case ('scan') {
               <div class="title">{{item.title}}</div>
               <div class="description">{{t('scan-waiting-description')}}</div>
+            }
+            @case ('folders') {
+              <div class="d-flex justify-content-between align-items-center gap-2">
+                <span class="title">{{item.title}}</span>
+                @if (item.folders.length > 0) {
+                  @let isOpen = openFolderRows().includes(item.id);
+                  <button type="button" class="btn btn-link link p-0 flex-shrink-0" [attr.aria-expanded]="isOpen" (click)="toggleFolderRow(item.id)">
+                    {{isOpen ? t('hide-label') : t('show-label')}}
+                  </button>
+                }
+              </div>
+              <div class="description">{{item.fromFolderWatcher ? t('scan-folder-watcher-description') : t('scan-folder-api-description')}}</div>
+              @if (item.folders.length > 0 && openFolderRows().includes(item.id)) {
+                <ul class="waiting list-unstyled mb-0">
+                  @for (folder of item.folders; track folder) {
+                    <li class="folder">{{folder}}</li>
+                  }
+                  @if (item.rest > 0) {
+                    <li class="rest">{{t('and-more-label', {count: item.rest})}}</li>
+                  }
+                </ul>
+              }
             }
             @case ('waiting') {
               <div class="d-flex justify-content-between align-items-center gap-2">

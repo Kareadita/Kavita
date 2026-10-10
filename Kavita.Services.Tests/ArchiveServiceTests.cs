@@ -77,7 +77,25 @@ public class ArchiveServiceTests
         _testOutputHelper.WriteLine($"Processed Original in {sw.ElapsedMilliseconds} ms");
     }
 
+    [Theory]
+    [InlineData("", ".cbz")]
+    [InlineData("<html><body>404 Not Found</body></html>", ".cbz")]
+    public void CanOpen_NotAnArchiveInside_ReportsWhyItCannotBeOpened(string content, string extension)
+    {
+        var path = Path.Join(Path.GetTempPath(), $"{Guid.NewGuid()}{extension}");
+        File.WriteAllText(path, content);
 
+        try
+        {
+            Assert.Equal(ArchiveLibrary.NotSupported, _archiveService.CanOpen(path, out var error));
+            Assert.NotNull(error);
+            _testOutputHelper.WriteLine(ParseIssues.Describe(error));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
 
     [Theory]
     [InlineData("non existent file.zip", ArchiveLibrary.NotSupported)]

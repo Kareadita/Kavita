@@ -138,6 +138,18 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(b => b.AgeRating)
             .HasDefaultValue(AgeRating.Unknown);
 
+        builder.Entity<MediaError>()
+            .HasOne(e => e.Library)
+            .WithMany()
+            .HasForeignKey(e => e.LibraryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<MediaError>()
+            .HasOne(e => e.Series)
+            .WithMany()
+            .HasForeignKey(e => e.SeriesId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         #region Reading List
         builder.Entity<ReadingList>()
             .Property(b => b.Provider)

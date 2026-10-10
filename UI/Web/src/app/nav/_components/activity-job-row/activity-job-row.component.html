@@ -89,7 +89,9 @@
             @if (isMultiLibrary() && currentLibraryName()) {
               {{currentLibraryName()}}<span class="mx-1 dot-separator"></span>
             }
-            @if (finishingStep(); as finishing) {
+            @if (seriesFinishingLabel(); as label) {
+              {{label}}
+            } @else if (finishingStep(); as finishing) {
               {{finishing | eventTitle : false : libraryNames()}}
             } @else if (finishingUp()) {
               {{t('finishing-up-label')}}
@@ -100,13 +102,47 @@
         } @else if (endedAway()) {
           <div class="description">{{t('finished-while-away-label')}}</div>
         } @else if (showSummary()) {
-          <div class="description">{{t('scan-summary-label', {added: current.seriesAdded, removed: current.seriesRemoved})}}</div>
+          <div class="description">
+            @for (part of summaryParts(); track part.key) {
+              @if (!$first) {
+                <span class="mx-1 dot-separator"></span>
+              }
+              {{t(part.key, part.params)}}
+            }
+          </div>
         }
 
-        @if (canOpenLibrary()) {
-          <div class="d-flex gap-3 mt-1">
-            <button type="button" class="btn btn-link link p-0" (click)="openLibrary()">{{EventAction.OpenLibrary | eventAction}}</button>
+        @let problems = problemSummaries();
+        @if (canOpen() || problems.length > 0) {
+          <div class="d-flex flex-wrap gap-3 mt-1">
+            @if (canOpen()) {
+              <button type="button" class="btn btn-link link p-0" (click)="open()">{{(seriesScan() ? EventAction.OpenSeries : EventAction.OpenLibrary) | eventAction}}</button>
+            }
+            @if (problems.length > 0) {
+              <button type="button" class="btn btn-link link p-0" [attr.aria-expanded]="problemFilesOpen()" (click)="problemFilesOpen.set(!problemFilesOpen())">
+                {{problemFilesOpen() ? t('hide-problem-files-label') : t('show-problem-files-label')}}
+              </button>
+            }
           </div>
+        }
+
+        @if (problems.length > 0 && problemFilesOpen()) {
+          <ul class="problem-files list-unstyled mb-0">
+            @for (summary of problems; track summary.libraryId) {
+              @if (isMultiLibrary()) {
+                <li class="library fw-semibold">{{summary.libraryName}}</li>
+              }
+              @for (file of summary.recentProblemFiles; track file.filePath) {
+                <li class="file">{{file.filePath}}<span class="mx-1 dot-separator"></span><span class="reason">{{file.reason | mediaErrorReason}}</span></li>
+              }
+              @if (summary.problemFiles > summary.recentProblemFiles.length) {
+                <li class="rest">{{t('and-more-label', {count: summary.problemFiles - summary.recentProblemFiles.length})}}</li>
+              }
+            }
+            <li>
+              <button type="button" class="btn btn-link link p-0" (click)="openMediaIssues()">{{EventAction.OpenMediaIssues | eventAction}}</button>
+            </li>
+          </ul>
         }
       </div>
     </div>

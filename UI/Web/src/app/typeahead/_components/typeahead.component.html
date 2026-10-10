@@ -10,7 +10,7 @@
         </button>
       }
 
-      <div class="typeahead-input" [ngClass]="{'disabled': disabled()}" (click)="onInputFocus($event)">
+      <div class="typeahead-input" [class.disabled]="disabled()" (click)="onInputFocus($event)">
         @if (disabled() && selectedOptions().length > 0) {
           <span class="visually-hidden">{{t('selected-items-alt')}}</span>
         }

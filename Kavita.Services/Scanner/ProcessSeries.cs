@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -10,7 +11,6 @@ using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
-using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.ReadingLists;
@@ -50,7 +50,7 @@ internal sealed record ProcessParserInfosArgs
     /// Folders the scanner skipped because nothing in them changed. Their files are known to still be on disk,
     /// but nothing about them was read this scan.
     /// </summary>
-    public IReadOnlyCollection<string> UnchangedFolders { get; init; } = [];
+    public IReadOnlyCollection<UnchangedFolder> UnchangedFolders { get; init; } = [];
     public bool ForceUpdate { get; init; }
 }
 
@@ -61,9 +61,32 @@ internal sealed record UpdateChapterComicInfoArgs
     public required ComicInfo? ComicInfo { get; init; }
     public required Dictionary<string, Person> DatabasePeople { get; init; }
     public bool ForceUpdate { get; init; } = false;
+    /// <summary>
+    /// The file the ComicInfo came from is new or was read again this pass
+    /// </summary>
+    public bool FileChanged { get; init; }
 }
 
 internal sealed record TemporaryPerson(string Name, string NormalizedName);
+
+internal readonly record struct ChapterChanges(int Added, int Updated, int Removed);
+
+/// <param name="Changed">The file was read again</param>
+/// <param name="ChangedOnDisk">Same as Changed, minus reads that only happened because of a forced scan or a 0 page retry</param>
+internal readonly record struct UpdateChapterResult(MangaFile File, bool Changed, bool ChangedOnDisk);
+
+/// <param name="Path">Normalized folder</param>
+/// <param name="IsShallow">Covers only files directly in the folder</param>
+internal readonly record struct UnchangedFolder(string Path, bool IsShallow)
+{
+    public bool Contains(string filePath)
+    {
+        var prefix = Path.TrimEnd('/') + '/';
+        if (!filePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return false;
+
+        return !IsShallow || filePath.IndexOf('/', prefix.Length) < 0;
+    }
+}
 
 /// <summary>
 /// All code needed to Update a Series from a Scan action
@@ -73,7 +96,6 @@ public class ProcessSeries(
     ILogger<ProcessSeries> logger,
     IEventHub eventHub,
     IDirectoryService directoryService,
-    ICacheHelper cacheHelper,
     IReadingItemService readingItemService,
     IFileService fileService,
     IReadingListService readingListService,
@@ -81,9 +103,9 @@ public class ProcessSeries(
     : IProcessSeries
 {
 
-    public async Task<int?> ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, ProcessSeriesArgs args)
+    public async Task<ProcessSeriesResult> ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, ProcessSeriesArgs args)
     {
-        if (!parsedInfos.Any()) return null;
+        if (!parsedInfos.Any()) return ProcessSeriesResult.NotSaved;
 
         var library = args.Library;
 
@@ -91,7 +113,7 @@ public class ProcessSeries(
         var scanWatch = Stopwatch.StartNew();
         var seriesName = parsedInfos[0].Series;
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Updated, seriesName, args.LeftToProcess, args.TotalToProcess));
+            MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Updated, seriesName, args.LeftToProcess, args.TotalToProcess, args.SeriesScan));
         logger.LogInformation("[ScannerService] Beginning series update on {SeriesName}, Forced: {ForceUpdate}", seriesName, args.ForceUpdate);
 
         // Check if there is a Series
@@ -108,7 +130,7 @@ public class ProcessSeries(
         catch (Exception ex)
         {
             await ReportDuplicateSeriesLookup(library, firstInfo, ex);
-            return null;
+            return ProcessSeriesResult.NotSaved;
         }
 
         if (series == null)
@@ -122,6 +144,7 @@ public class ProcessSeries(
 
         if (series.LibraryId == 0) series.LibraryId = library.Id;
 
+        ChapterChanges chapterChanges;
         try
         {
             logger.LogInformation("[ScannerService] Processing series {SeriesName} with {Count} files", series.OriginalName, parsedInfos.Count);
@@ -132,12 +155,14 @@ public class ProcessSeries(
 
             var fileInfos = parsedInfos.Where(info => string.IsNullOrEmpty(info.UnchangedFolderPath)).ToList();
             var unchangedFolders = parsedInfos
-                .Select(info => info.UnchangedFolderPath)
-                .Where(path => !string.IsNullOrEmpty(path))
+                .Where(info => !string.IsNullOrEmpty(info.UnchangedFolderPath))
+                .Select(info => new UnchangedFolder(info.UnchangedFolderPath, info.UnchangedFolderIsShallow))
                 .Distinct()
                 .ToList();
+            // Skipped folders were not read, so their files may carry the LocalizedSeries or SeriesSort
+            var hasReadAllFiles = unchangedFolders.Count == 0;
 
-            await ProcessParserInfos(new ProcessParserInfosArgs
+            chapterChanges = await ProcessParserInfos(new ProcessParserInfosArgs
             {
                 Settings = settings,
                 Series = series,
@@ -160,7 +185,7 @@ public class ProcessSeries(
 
             // parsedInfos[0] is not the first volume or chapter. We need to find it
             var localizedSeries = parsedInfos.Select(p => p.LocalizedSeries).FirstOrDefault(p => !string.IsNullOrEmpty(p));
-            if (!series.LocalizedNameLocked)
+            if (!series.LocalizedNameLocked && (localizedSeries != null || hasReadAllFiles))
             {
                 series.LocalizedName = localizedSeries ?? string.Empty;
                 series.NormalizedLocalizedName = series.LocalizedName.ToNormalized();
@@ -184,20 +209,20 @@ public class ProcessSeries(
                 series.SortName = sortName;
             }
 
-            if (!series.SortNameLocked)
+            if (!series.SortNameLocked && !string.IsNullOrEmpty(firstParsedInfo.SeriesSort))
+            {
+                series.SortName = firstParsedInfo.SeriesSort;
+            }
+            else if (!series.SortNameLocked && hasReadAllFiles)
             {
                 series.SortName = sortName;
-                if (!string.IsNullOrEmpty(firstParsedInfo.SeriesSort))
-                {
-                    series.SortName = firstParsedInfo.SeriesSort;
-                }
             }
 
             await UpdateSeriesFolderPath(
                 [.. fileInfos.Select(info => info.FullFilePath), .. GetFilesInUnchangedFolders(series, unchangedFolders).Select(f => f.FilePath)],
                 library, series);
 
-            series.UpdateLastFolderScanned();
+            series.UpdateLastFolderScanned(args.ScanStarted);
 
             if (unitOfWork.HasChanges())
             {
@@ -213,7 +238,7 @@ public class ProcessSeries(
                     logger.LogDbUpdateConcurrencyException(ex);
                     await eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.DbWriteFailedEvent(library.Id, series.Id > 0 ? series.Id : null, series.OriginalName, ex.Message));
-                    return null;
+                    return ProcessSeriesResult.NotSaved;
                 }
                 catch (Exception ex)
                 {
@@ -224,7 +249,7 @@ public class ProcessSeries(
 
                     await eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.DbWriteFailedEvent(library.Id, series.Id > 0 ? series.Id : null, series.OriginalName, ex.Message));
-                    return null;
+                    return ProcessSeriesResult.NotSaved;
                 }
 
 
@@ -237,10 +262,6 @@ public class ProcessSeries(
 
                 if (seriesAdded)
                 {
-                    // See if any recommendations can link up to the series and pre-fetch external metadata for the series
-                    // BackgroundJob.Enqueue(() =>
-                    //     _externalMetadataService.FetchSeriesMetadata(series.Id, series.Library.Type));
-
                     await eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
                         MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
                 }
@@ -255,30 +276,26 @@ public class ProcessSeries(
         catch (Exception ex)
         {
             logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
-            return null;
+            return ProcessSeriesResult.NotSaved;
         }
 
         if (seriesAdded && library.AllowMetadataMatching)
         {
             // I think we can spawn this in a background job? Do we need to enqueue on a specific queue?
             // All changes to series after this should be page count etc
-            /*BackgroundJob.Enqueue<IExternalMetadataService>(s
-                => s.TryMatchAndLoadMetadataForSeries(series.Id, series.Library.Type, MetadataFetchTrigger.SeriesAdded));*/
-
             await externalMetadataService.TryMatchAndLoadMetadataForSeries(series.Id, series.Library.Type,
                 MetadataFetchTrigger.SeriesAdded);
         }
 
         await eventHub.SendMessageAsync(MessageFactory.ScanSeries,
-            MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name));
+            MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false);
 
-        return series.Id;
+        return new ProcessSeriesResult(series.Id, seriesAdded,
+            chapterChanges.Added, chapterChanges.Updated, chapterChanges.Removed);
     }
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
     {
-        // BUG: This is wrong most of the time, need to figure a better way to narrow in on the issue for the user
-
         // Re-run the same lookup args that GetFullSeriesByAnyName used so the report reflects the real collision set.
         var seriesCollisions = await unitOfWork.SeriesRepository.GetAllSeriesByAnyNameAsync(
             firstInfo.Series, firstInfo.LocalizedSeries, library.Id, firstInfo.Format);
@@ -372,7 +389,7 @@ public class ProcessSeries(
         else
         {
             // Don't save FolderPath if it's a library Folder
-            if (!library.Folders.Select(f => f.Path).Contains(seriesDirs.Keys.First()))
+            if (libraryFolders.Any(seriesDirs.Keys.First().IsInsideFolder))
             {
                 // BUG: FolderPath can be a level higher than it needs to be. I'm not sure why it's like this, but I thought it should be one level lower.
                 // I think it's like this because higher level is checked or not checked. But i think we can do both
@@ -382,11 +399,19 @@ public class ProcessSeries(
         }
 
         var lowestFolder = directoryService.FindLowestDirectoriesFromFiles(libraryFolders, seriesFiles);
-        if (!string.IsNullOrEmpty(lowestFolder))
+        if (lowestFolder == series.LowestFolderPath) return;
+
+        if (lowestFolder == null)
         {
-            series.LowestFolderPath = lowestFolder;
-            logger.LogDebug("Updating {Series} LowestFolderPath to {FolderPath}", series.Name, series.LowestFolderPath);
+            logger.LogDebug("Clearing {Series} LowestFolderPath {FolderPath}, its files share no folder below the library root",
+                series.Name, series.LowestFolderPath);
         }
+        else
+        {
+            logger.LogDebug("Updating {Series} LowestFolderPath to {FolderPath}", series.Name, lowestFolder);
+        }
+
+        series.LowestFolderPath = lowestFolder;
     }
 
 
@@ -725,11 +750,13 @@ public class ProcessSeries(
         }
     }
 
-    private async Task ProcessParserInfos(ProcessParserInfosArgs args)
+    private async Task<ChapterChanges> ProcessParserInfos(ProcessParserInfosArgs args)
     {
         var foundVolumes = new HashSet<Volume>();
         var foundChapters = new HashSet<Chapter>();
         var foundMangaFiles = new HashSet<MangaFile>();
+        var addedChapters = new HashSet<Chapter>();
+        var changedChapters = new HashSet<Chapter>();
 
         var unverifiedFileIds = GetFilesInUnchangedFolders(args.Series, args.UnchangedFolders)
             .Select(f => f.Id)
@@ -740,7 +767,10 @@ public class ProcessSeries(
             var volume = FindOrCreateVolume(args, parsedInfo);
             var chapter = FindOrCreateChapter(args, parsedInfo);
 
-
+            if (chapter.Id == 0)
+            {
+                addedChapters.Add(chapter);
+            }
 
             if (chapter.VolumeId == 0 || chapter.VolumeId != volume.Id)
             {
@@ -752,14 +782,18 @@ public class ProcessSeries(
                 chapter.Volume = volume;
             }
 
-            var mangaFile = AddOrUpdateFileForChapter(chapter, parsedInfo, args.ForceUpdate);
+            var fileResult = AddOrUpdateFileForChapter(chapter, parsedInfo, args.ForceUpdate);
 
-            await UpdateChapter(args, chapter, parsedInfo);
+            await UpdateChapter(args, chapter, parsedInfo, fileResult.Changed);
+            if (fileResult.ChangedOnDisk)
+            {
+                changedChapters.Add(chapter);
+            }
 
             // UpdateChapters may commit, we track the entities and collect the ids later
             foundVolumes.Add(volume);
             foundChapters.Add(chapter);
-            foundMangaFiles.Add(mangaFile);
+            foundMangaFiles.Add(fileResult.File);
         }
 
         var mangaFileIds = foundMangaFiles.Select(m => m.Id).ToHashSet();
@@ -767,7 +801,7 @@ public class ProcessSeries(
         var chapterIds = foundChapters.Select(c => c.Id).ToHashSet();
 
         // Remove volumes and chapter that did not match any files on disk
-        RemoveUnmappedEntities(args.Series, volumeIds, chapterIds, unverifiedFileIds);
+        var removedChapters = RemoveUnmappedEntities(args.Series, volumeIds, chapterIds, unverifiedFileIds);
 
         // Update page count once all pages have been processed
         foreach (var volume in args.Series.Volumes)
@@ -780,9 +814,11 @@ public class ProcessSeries(
 
             volume.Pages = volume.Chapters.Sum(chapter => chapter.Pages);
         }
+
+        return new ChapterChanges(addedChapters.Count, changedChapters.Except(addedChapters).Count(), removedChapters);
     }
 
-    private void RemoveUnmappedEntities(Series series, HashSet<int> foundVolumes, HashSet<int> foundChapters,
+    private int RemoveUnmappedEntities(Series series, HashSet<int> foundVolumes, HashSet<int> foundChapters,
         HashSet<int> unverifiedFileIds)
     {
         var unmappedVolumes = series.Volumes
@@ -806,7 +842,7 @@ public class ProcessSeries(
         if (unmappedVolumes.Count == 0 && unmappedChapters.Count == 0)
         {
             logger.LogTrace("No volumes, chapters, or files to delete for {SeriesId}", series.Id);
-            return;
+            return 0;
         }
 
         if (unmappedVolumes.Count > 0)
@@ -830,7 +866,7 @@ public class ProcessSeries(
             }
         }
 
-        return;
+        return unmappedChapters.Count;
 
         bool HasUnverifiedFile(IEnumerable<MangaFile> files) => files.Any(f => unverifiedFileIds.Contains(f.Id));
     }
@@ -839,7 +875,7 @@ public class ProcessSeries(
     /// Files belonging to folders the scanner skipped this scan. Nothing read them, so their entities must be kept.
     /// </summary>
     private static IEnumerable<MangaFile> GetFilesInUnchangedFolders(Series series,
-        IReadOnlyCollection<string> unchangedFolders)
+        IReadOnlyCollection<UnchangedFolder> unchangedFolders)
     {
         return series.Volumes
             .SelectMany(v => v.Chapters)
@@ -851,9 +887,9 @@ public class ProcessSeries(
     /// Whether the file lives under a folder the scanner skipped. Such a file was never looked at this scan, so it
     /// must not be treated as missing from disk.
     /// </summary>
-    private static bool IsInUnchangedFolder(MangaFile file, IReadOnlyCollection<string> unchangedFolders)
+    private static bool IsInUnchangedFolder(MangaFile file, IReadOnlyCollection<UnchangedFolder> unchangedFolders)
     {
-        return unchangedFolders.Any(folder => file.FilePath.StartsWith(folder + Path.AltDirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
+        return unchangedFolders.Any(folder => folder.Contains(file.FilePath));
     }
 
     private Volume FindOrCreateVolume(ProcessParserInfosArgs args, ParserInfo info)
@@ -953,7 +989,7 @@ public class ProcessSeries(
         return chapter;
     }
 
-    private async Task UpdateChapter(ProcessParserInfosArgs args, Chapter chapter, ParserInfo info)
+    private async Task UpdateChapter(ProcessParserInfosArgs args, Chapter chapter, ParserInfo info, bool fileChanged)
     {
         chapter.UpdateFrom(info);
 
@@ -992,6 +1028,7 @@ public class ProcessSeries(
                 ComicInfo = info.ComicInfo,
                 DatabasePeople = args.DatabasePeople,
                 ForceUpdate = args.ForceUpdate,
+                FileChanged = fileChanged,
             });
         }
         catch (Exception ex)
@@ -1026,21 +1063,19 @@ public class ProcessSeries(
         }
     }
 
-    private MangaFile AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
+    private UpdateChapterResult AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
     {
         chapter.Files ??= [];
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
         var fileInfo = directoryService.FileSystem.FileInfo.New(info.FullFilePath);
         if (existingFile != null)
         {
-            // TODO: I wonder if we can simplify this force check.
             existingFile.Format = info.Format;
 
-            if (!forceUpdate &&
-                !fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) &&
-                existingFile.Pages != 0)
+            var changedOnDisk = HasFileChanged(existingFile, fileInfo);
+            if (!forceUpdate && existingFile.Pages != 0 && !changedOnDisk)
             {
-                return existingFile;
+                return new UpdateChapterResult(existingFile, false, false);
             }
 
             existingFile.Pages = readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
@@ -1048,10 +1083,10 @@ public class ProcessSeries(
             existingFile.FileName = Parser.RemoveExtensionIfSupported(existingFile.FilePath);
             existingFile.FilePath = Parser.NormalizePath(existingFile.FilePath);
             existingFile.Bytes = fileInfo.Length;
+            existingFile.FileLastWriteTimeUtc = fileInfo.LastWriteTimeUtc;
             existingFile.KoreaderHash = KoreaderHelper.HashContents(existingFile.FilePath);
 
-            // We skip updating DB here with last modified time so that metadata refresh can do it
-            return existingFile;
+            return new UpdateChapterResult(existingFile, true, changedOnDisk);
         }
 
         var file = new MangaFileBuilder(info.FullFilePath, info.Format, readingItemService.GetNumberOfPages(info.FullFilePath, info.Format))
@@ -1061,7 +1096,18 @@ public class ProcessSeries(
             .Build();
         chapter.Files.Add(file);
 
-        return file;
+        return new UpdateChapterResult(file, true, true);
+    }
+
+    /// <summary>
+    /// Same rule as <see cref="FolderChangeCheck"/>, so a folder it flags is not skipped here
+    /// </summary>
+    private bool HasFileChanged(MangaFile file, IFileInfo fileInfo)
+    {
+        if (file.Bytes != fileInfo.Length) return true;
+        if (file.FileLastWriteTimeUtc == null) return fileService.HasFileBeenModifiedSince(file.FilePath, file.LastModified);
+
+        return !FolderChangeCheck.IsSameWriteTime(file.FileLastWriteTimeUtc.Value, fileInfo.LastWriteTimeUtc);
     }
 
     private async Task UpdateChapterFromComicInfo(UpdateChapterComicInfoArgs args)
@@ -1069,10 +1115,7 @@ public class ProcessSeries(
         var comicInfo = args.ComicInfo;
         var chapter = args.Chapter;
 
-        if (comicInfo == null) return;
-        var firstFile = chapter.Files.MinBy(x => x.Chapter);
-        if (firstFile == null ||
-            cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, args.ForceUpdate, firstFile)) return;
+        if (comicInfo == null || !(args.ForceUpdate || args.FileChanged)) return;
 
         var sw = Stopwatch.StartNew();
 

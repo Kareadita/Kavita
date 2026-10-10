@@ -1,21 +1,17 @@
-@use "../../../theme/variables" as theme;
+@use '../../../theme/variables' as theme;
 
-.table {
-    @media (max-width: theme.$grid-breakpoints-sm) {
-        overflow-x: auto;
-        width: 100% !important;
-        display: block;
-    }
-    .btn-container {
-        @media (max-width: theme.$grid-breakpoints-lg) {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-        }
-        .btn {
-            width: 2rem;
-        }
-    }
+.filter {
+  flex: 1 1 15rem;
+  max-width: 25rem;
+}
+
+.series {
+  min-width: 15rem;
+}
+
+@media (max-width: theme.$grid-breakpoints-md) {
+  .library,
+  .series {
+    width: 100%;
+  }
 }

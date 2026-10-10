@@ -8,4 +8,5 @@ export enum EventAction {
   Rescan = 6,
   ScanNow = 7,
   Details = 8,
+  OpenMediaIssues = 9,
 }

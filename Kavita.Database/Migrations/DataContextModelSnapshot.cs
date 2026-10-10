@@ -18,7 +18,7 @@ namespace Kavita.Database.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.11");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
 
             modelBuilder.Entity("AppUserCollectionSeries", b =>
                 {
@@ -187,6 +187,9 @@ namespace Kavita.Database.Migrations
 
                     b.Property<bool>("CoverArtistLocked")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("CoverFileWriteTimeUtc")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
@@ -846,6 +849,9 @@ namespace Kavita.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime?>("AnalyzedFileWriteTimeUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("Bytes")
                         .HasColumnType("INTEGER");
 
@@ -859,6 +865,9 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Extension")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("FileLastWriteTimeUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FileName")
@@ -904,8 +913,8 @@ namespace Kavita.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Comment")
-                        .HasColumnType("TEXT");
+                    b.Property<long?>("Bytes")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
@@ -914,13 +923,22 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Details")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("FileLastWriteTimeUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FilePath")
+                        .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDismissed")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
@@ -928,7 +946,26 @@ namespace Kavita.Database.Migrations
                     b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("LastSeenUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("LibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Producer")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Reason")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SeriesId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("LibraryId");
+
+                    b.HasIndex("SeriesId");
 
                     b.ToTable("MediaError");
                 });
@@ -4102,6 +4139,23 @@ namespace Kavita.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("Chapter");
+                });
+
+            modelBuilder.Entity("Kavita.Models.Entities.MediaError", b =>
+                {
+                    b.HasOne("Kavita.Models.Entities.Library", "Library")
+                        .WithMany()
+                        .HasForeignKey("LibraryId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Kavita.Models.Entities.Series", "Series")
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Library");
+
+                    b.Navigation("Series");
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Metadata.ExternalRating", b =>

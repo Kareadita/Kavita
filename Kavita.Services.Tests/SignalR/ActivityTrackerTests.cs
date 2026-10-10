@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Kavita.Models.DTOs.MediaErrors;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.DTOs.SignalR.Bodies;
+using Kavita.Models.Entities.Enums;
 using Kavita.Services.SignalR;
 using Xunit;
 
@@ -128,10 +131,12 @@ public class ActivityTrackerTests
         Assert.Equal("M:/1", running.First().SubTitle);
     }
 
-    private static SignalRMessageDto Added(string? correlationId = CorrelationId)
+    private static SignalRMessageDto ScanEnded(int libraryId = 1, int chaptersAdded = 12)
     {
-        var message = MessageFactory.SeriesAddedEvent(1, "One Piece", 1);
-        message.CorrelationId = correlationId;
+        var message = MessageFactory.LibraryScanEndedEvent(
+            new LibraryScanEndedEventBodyDto(libraryId, "Manga", 2, 0, chaptersAdded, 3, 1, 4, 1,
+                [new ScanIssueSummaryItemDto("M:/A/A Vol 2.cbz", MediaErrorReason.UnreadableArchive, 7, "A")]));
+        message.CorrelationId = CorrelationId;
         return message;
     }
 
@@ -140,9 +145,7 @@ public class ActivityTrackerTests
         _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Started));
         _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Ended));
         _tracker.Record(MessageFactory.NotificationProgress, Series(ProgressEventType.Updated));
-        _tracker.Record(MessageFactory.SeriesAdded, Added());
-        _tracker.Record(MessageFactory.SeriesAdded, Added());
-        _tracker.Record(MessageFactory.NotificationProgress, Series(ProgressEventType.Ended));
+        _tracker.Record(MessageFactory.NotificationProgress, ScanEnded());
     }
 
     [Fact]
@@ -155,9 +158,51 @@ public class ActivityTrackerTests
         var job = Assert.Single(_tracker.GetRecentJobs(new HashSet<string>()));
         Assert.Equal(CorrelationId, job.CorrelationId);
         Assert.True(job.Completed);
-        Assert.Equal(2, job.SeriesAdded);
         Assert.Equal(2, job.Steps.Count);
         Assert.All(job.Steps, s => Assert.NotEqual(ProgressEventType.Ended, s.EventType));
+
+        var summary = Assert.Single(job.ScanSummaries);
+        Assert.Equal(2, summary.SeriesAdded);
+        Assert.Equal(12, summary.ChaptersAdded);
+        Assert.Equal(4, summary.ProblemFiles);
+    }
+
+    [Fact]
+    public void Snapshot_ReplaysRecentProblemFiles()
+    {
+        RunScan();
+
+        var job = Assert.Single(_tracker.GetRecentJobs(new HashSet<string>()));
+
+        var issue = Assert.Single(Assert.Single(job.ScanSummaries).RecentProblemFiles);
+        Assert.Equal("M:/A/A Vol 2.cbz", issue.FilePath);
+        Assert.Equal(7, issue.SeriesId);
+    }
+
+    [Fact]
+    public void ScanLibraries_KeepsASummaryPerLibrary()
+    {
+        RunScan();
+        _tracker.Record(MessageFactory.NotificationProgress, Series(ProgressEventType.Started));
+        _tracker.Record(MessageFactory.NotificationProgress, ScanEnded(libraryId: 2, chaptersAdded: 5));
+
+        var job = Assert.Single(_tracker.GetRecentJobs(new HashSet<string>()));
+
+        Assert.Equal(new[] {1, 2}, job.ScanSummaries.Select(s => s.LibraryId).Order());
+        Assert.Equal(17, job.ScanSummaries.Sum(s => s.ChaptersAdded));
+    }
+
+    [Fact]
+    public void ScanWithNoChanges_StillRecordsSummary()
+    {
+        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Started));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Ended));
+        _tracker.Record(MessageFactory.NotificationProgress, ScanEnded(chaptersAdded: 0));
+
+        var job = Assert.Single(_tracker.GetRecentJobs(new HashSet<string>()));
+
+        Assert.True(job.Completed);
+        Assert.Equal(4, Assert.Single(job.ScanSummaries).ProblemFiles);
     }
 
     [Fact]

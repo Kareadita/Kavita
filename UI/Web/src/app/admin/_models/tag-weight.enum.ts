@@ -1,3 +1,5 @@
+import {allEnums} from "../../_helpers/enum";
+
 export enum TagWeight {
   Core = 1,
   Defining = 2,
@@ -6,6 +8,4 @@ export enum TagWeight {
   Unweighted = 5,
 }
 
-export const allTagWeights = Object.keys(TagWeight)
-  .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
-  .map(key => parseInt(key, 10)) as TagWeight[];
+export const allTagWeights = allEnums(TagWeight);

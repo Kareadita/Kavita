@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
+using Hangfire.States;
 using Hangfire.Storage;
 using Hangfire.Storage.Monitoring;
 using Kavita.API.Database;
@@ -17,12 +18,16 @@ using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Constants;
+using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
+using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Extensions;
+using Kavita.Models.Scanner;
+using Kavita.Services.Extensions;
 using Kavita.Services.Plus;
 using Kavita.Services.ReadingLists;
 using Kavita.Services.Scanner;
@@ -84,11 +89,14 @@ public class TaskScheduler : ITaskScheduler
 
     private const int BaseRetryDelay = 60; // 1-minute
 
-    public static readonly ImmutableArray<string> ScanTasks =
-        ["ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"];
     private static readonly ImmutableArray<string> NonCronOptions = ["disabled", "daily", "weekly"];
+    /// <summary>
+    /// Held while deciding whether a scan is already queued and queueing one, so two requests cannot both see an empty queue
+    /// </summary>
+    internal static readonly Lock ScanRequestLock = new();
 
     private static readonly Random Rnd = new Random();
+    private const int ScanHourDelay = 3;
 
     private static readonly RecurringJobOptions RecurringJobOptions = new RecurringJobOptions()
     {
@@ -157,14 +165,14 @@ public class TaskScheduler : ITaskScheduler
         if (IsInvalidCronSetting(setting))
         {
             _logger.LogError("Scan Task has invalid cron, defaulting to Daily");
-            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(false),
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => EnqueueScanLibraries(false),
                 Cron.Daily, RecurringJobOptions);
         }
         else
         {
             var scanLibrarySetting = setting;
             _logger.LogDebug("Scheduling Scan Library Task for {Setting}", scanLibrarySetting);
-            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(false),
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => EnqueueScanLibraries(false),
                 () => CronConverter.ConvertToCronNotation(scanLibrarySetting), RecurringJobOptions);
         }
 
@@ -397,43 +405,51 @@ public class TaskScheduler : ITaskScheduler
     }
 
     /// <summary>
-    /// Queue up a Scan folder for a folder from Library Watcher.
+    /// Queues a <see cref="ScannerService.ScanFolder"/> job, unless the same request is already waiting
     /// </summary>
-    /// <param name="folderPath"></param>
-    /// <param name="originalPath"></param>
-    /// <param name="delay"></param>
-    public void ScanFolder(string folderPath, string originalPath, TimeSpan delay)
+    /// <param name="delay">Lets the events of one copy settle before the folder is looked at. Zero queues it now</param>
+    public async Task EnqueueScanFolderAsync(ScanFolderRequest request, TimeSpan delay)
     {
-        var normalizedFolder = Parser.NormalizePath(folderPath);
-        var normalizedOriginal = Parser.NormalizePath(originalPath);
-
-        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, normalizedOriginal]) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, string.Empty]))
+        var normalized = request with
         {
-            _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as a job already queued",
-                normalizedFolder);
-            return;
+            Folder = Parser.NormalizePath(request.Folder),
+            ChangedPath = string.IsNullOrEmpty(request.ChangedPath) ? string.Empty : Parser.NormalizePath(request.ChangedPath),
+        };
+
+        bool isNewFolder;
+        lock (ScanRequestLock)
+        {
+            var folderJobs = ScanJobQueue.Read().FolderJobs;
+            if (folderJobs.Any(j => j.Request == normalized))
+            {
+                _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as the same request is queued", normalized.Folder);
+                return;
+            }
+
+            isNewFolder = folderJobs.All(j => j.Request.Folder != normalized.Folder);
+
+            _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalized.Folder);
+            if (delay <= TimeSpan.Zero)
+            {
+                ScanJobQueue.Enqueue(() => _scannerService.ScanFolder(normalized));
+            }
+            else
+            {
+                ScanJobQueue.Schedule(() => _scannerService.ScanFolder(normalized), delay);
+            }
         }
 
-        // Not sure where we should put this code, but we can get a bunch of ScanFolders when original has slight variations, like
-        // create a folder, add a new file, etc. All of these can be merged into just 1 request.
-
-        _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalizedFolder);
-        BackgroundJob.Schedule(() => _scannerService.ScanFolder(normalizedFolder, normalizedOriginal), delay);
+        if (!isNewFolder) return;
+        await _eventHub.SendMessageAsync(MessageFactory.ScanRescheduled, ScanQueueChangedEvent());
     }
 
-    public void ScanFolder(string folderPath, bool abortOnNoSeriesMatch = false)
+    /// <summary>
+    /// <see cref="MessageFactory.ScanRescheduled"/> with every delayed scan. The activity widget re-reads the snapshot on it,
+    /// which is also how it learns the waiting ScanFolder jobs changed
+    /// </summary>
+    public static SignalRMessageDto ScanQueueChangedEvent()
     {
-        var normalizedFolder = Parser.NormalizePath(folderPath);
-        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, string.Empty]))
-        {
-            _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as a job already queued",
-                normalizedFolder);
-            return;
-        }
-
-        _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalizedFolder);
-        _scannerService.ScanFolder(normalizedFolder, string.Empty, abortOnNoSeriesMatch);
+        return MessageFactory.ScanRescheduledEvent(GetScheduledScans(int.MaxValue).Scans);
     }
 
     #endregion
@@ -447,42 +463,65 @@ public class TaskScheduler : ITaskScheduler
     /// Attempts to call ScanLibraries on ScannerService, but if another scan task is in progress, will reschedule the invocation for 3 hours in future.
     /// </summary>
     /// <param name="force"></param>
-    public async Task ScanLibraries(bool force = false)
+    public async Task EnqueueScanLibraries(bool force = false)
     {
-        if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
+        var runAt = DateTimeOffset.UtcNow.AddHours(ScanHourDelay);
+        string delayedJobId;
+
+        lock (ScanRequestLock)
         {
-            _logger.LogInformation("A Scan is already running, rescheduling ScanLibraries in 3 hours");
-            // Send InfoEvent to UI as this is invoked my API
-            var runAt = DateTimeOffset.UtcNow.AddHours(3);
-            BackgroundJob.Schedule(() => ScanLibraries(force), runAt);
-            await _eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.ScanLibrariesDelayedEvent(runAt.UtcDateTime));
-            return;
+            var jobs = ScanJobQueue.Read().Jobs;
+            if (jobs.FindWaiting(ScanTarget.AllLibraries, force) is { } waiting)
+            {
+                _logger.LogInformation("A scan of every library is already queued as job {JobId}. Skipping", waiting.JobId);
+                return;
+            }
+
+            if (!jobs.IsScannerBusy())
+            {
+                ScanJobQueue.Enqueue(() => _scannerService.ScanLibraries(force));
+                return;
+            }
+
+            delayedJobId = ScanJobQueue.Schedule(() => EnqueueScanLibraries(force), runAt);
         }
-        BackgroundJob.Enqueue(() => _scannerService.ScanLibraries(force));
+
+        _logger.LogInformation("A Scan is already running, rescheduling ScanLibraries in 3 hours as job {JobId}", delayedJobId);
+        // Send InfoEvent to UI as this is invoked my API
+        await _eventHub.SendMessageAsync(MessageFactory.Info, MessageFactory.ScanLibrariesDelayedEvent(runAt.UtcDateTime));
     }
 
-    public async Task ScanLibrary(int libraryId, bool force = false)
+    public async Task EnqueueScanLibrary(int libraryId, bool force = false)
     {
-        if (HasScanTaskRunningForLibrary(libraryId))
+        var runAt = DateTimeOffset.UtcNow.AddHours(ScanHourDelay);
+        string delayedJobId;
+
+        lock (ScanRequestLock)
         {
-            _logger.LogInformation("A duplicate request for Library Scan on library {LibraryId} occured. Skipping", libraryId);
-            return;
-        }
-        if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
-        {
-            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
-            _logger.LogInformation("A Scan is already running, rescheduling ScanLibrary in 3 hours");
-            var runAt = DateTimeOffset.UtcNow.AddHours(3);
-            await _eventHub.SendMessageAsync(MessageFactory.Info,
-                MessageFactory.ScanLibraryDelayedEvent(libraryId, library!.Name, runAt.UtcDateTime));
-            BackgroundJob.Schedule(() => ScanLibrary(libraryId, force), runAt);
-            return;
+            var jobs = ScanJobQueue.Read().Jobs;
+            if (jobs.FindWaiting(ScanTarget.Library(libraryId), force) is { } waiting)
+            {
+                _logger.LogInformation("A scan of library {LibraryId} is already queued as job {JobId}. Skipping", libraryId, waiting.JobId);
+                return;
+            }
+
+            if (!jobs.IsScannerBusy())
+            {
+                _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
+                var jobId = ScanJobQueue.Enqueue(() => _scannerService.ScanLibrary(libraryId, force, true));
+                // When we do a scan, force cache to re-unpack in case page numbers change (TODO: Make the scanner handle this)
+                BackgroundJob.ContinueJobWith(jobId, () => _cleanupService.CleanupCacheDirectory());
+                return;
+            }
+
+            delayedJobId = ScanJobQueue.Schedule(() => EnqueueScanLibrary(libraryId, force), runAt);
         }
 
-        _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
-        var jobId = BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, force, true));
-        // When we do a scan, force cache to re-unpack in case page numbers change
-        BackgroundJob.ContinueJobWith(jobId, () => _cleanupService.CleanupCacheDirectory());
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+        _logger.LogInformation("A Scan is already running, rescheduling ScanLibrary for library {LibraryId} in 3 hours as job {JobId}",
+            libraryId, delayedJobId);
+        await _eventHub.SendMessageAsync(MessageFactory.Info,
+            MessageFactory.ScanLibraryDelayedEvent(libraryId, library!.Name, runAt.UtcDateTime));
     }
 
     public void CleanupChapters(int[] chapterIds)
@@ -520,34 +559,81 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(serverSettings, libraryId, seriesId, forceUpdate, forceColorscape));
     }
 
-    public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
+    public async Task EnqueueScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
     {
-        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", [seriesId, forceUpdate], ScanQueue))
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None);
+        if (series == null)
         {
-            _logger.LogInformation("A duplicate request to scan series occured. Skipping");
+            _logger.LogWarning("Series {SeriesId} not found, but a scan was requested. This should not happen", seriesId);
             return;
         }
-        if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
+
+        var runAt = DateTimeOffset.UtcNow.AddHours(3);
+        string delayedJobId;
+
+        lock (ScanRequestLock)
         {
-            // BUG: This can end up triggering a ton of scan series calls (but i haven't seen in practice)
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None);
-            if (series == null)
+            var jobs = ScanJobQueue.Read().Jobs;
+            if (jobs.FindWaiting(ScanTarget.Series(libraryId, seriesId), forceUpdate) is { } waiting)
             {
-                _logger.LogWarning("Series {SeriesId} not found, but a scan was requested. This should not happen", seriesId);
+                _logger.LogInformation("A scan of series {SeriesId} is already queued as job {JobId}. Skipping", seriesId, waiting.JobId);
                 return;
             }
 
-            _logger.LogInformation("A Scan is already running, rescheduling ScanSeries in 10 minutes");
-            var runAt = DateTimeOffset.UtcNow.AddMinutes(10);
-            await _eventHub.SendMessageAsync(MessageFactory.Info,
-                MessageFactory.ScanSeriesDelayedEvent(libraryId, seriesId, series.Name, runAt.UtcDateTime));
+            if (!jobs.IsScannerBusy())
+            {
+                _logger.LogInformation("Enqueuing series scan for: {SeriesId}", seriesId);
+                ScanJobQueue.Enqueue(() => _scannerService.ScanSeries(seriesId, forceUpdate));
+                return;
+            }
 
-            BackgroundJob.Schedule(() => ScanSeries(libraryId, seriesId, forceUpdate), runAt);
+            delayedJobId = ScanJobQueue.Schedule(() => EnqueueScanSeries(libraryId, seriesId, forceUpdate), runAt);
+        }
+
+        _logger.LogInformation("A Scan is already running, rescheduling ScanSeries for series {SeriesId} ({SeriesName}) in 3 hours as job {JobId}",
+            seriesId, series.Name, delayedJobId);
+        await _eventHub.SendMessageAsync(MessageFactory.Info,
+            MessageFactory.ScanSeriesDelayedEvent(libraryId, seriesId, series.Name, runAt.UtcDateTime));
+    }
+
+    public async Task RetimeDelayedScans()
+    {
+        RetimePlan plan;
+        lock (ScanRequestLock)
+        {
+            var jobs = ScanJobQueue.Read().Jobs;
+            // The scan still running will retime again when it ends
+            if (jobs.IsScannerBusy() || jobs.HasScanDueBefore(DateTime.UtcNow + DelayedScanRetime.NextScanDelay))
+            {
+                _logger.LogDebug("A scan is running or about to, not retiming delayed scans yet");
+                return;
+            }
+
+            plan = DelayedScanRetime.Plan(jobs.Delayed(), DateTime.UtcNow);
+            // fromState: a job that started running since the read must not be pushed back into Scheduled
+            foreach (var jobId in plan.Deletes)
+            {
+                ScanJobQueue.DeleteScheduled(jobId);
+            }
+            foreach (var move in plan.Moves)
+            {
+                ScanJobQueue.Reschedule(move.JobId, move.RunAtUtc);
+            }
+        }
+
+        if (plan.IsEmpty)
+        {
+            _logger.LogDebug("No delayed scans to retime");
             return;
         }
 
-        _logger.LogInformation("Enqueuing series scan for: {SeriesId}", seriesId);
-        BackgroundJob.Enqueue(() => _scannerService.ScanSeries(seriesId, forceUpdate));
+        var (scans, _) = GetScheduledScans(int.MaxValue);
+        var next = scans.FirstOrDefault();
+        _logger.LogInformation(
+            "Retimed {Moved} delayed scans, removed {Removed} duplicates, next: job {JobId} (library {LibraryId}, series {SeriesId}) at {RunAtUtc}",
+            plan.Moves.Count, plan.Deletes.Count, next?.JobId, next?.LibraryId, next?.SeriesId, next?.RunAtUtc);
+
+        await _eventHub.SendMessageAsync(MessageFactory.ScanRescheduled, MessageFactory.ScanRescheduledEvent(scans));
     }
 
     /// <summary>
@@ -710,39 +796,6 @@ public class TaskScheduler : ITaskScheduler
     }
 
     /// <summary>
-    /// If there is an enqueued or scheduled task for <see cref="ScannerService.ScanLibrary"/> method
-    /// </summary>
-    /// <param name="libraryId"></param>
-    /// <param name="checkRunningJobs">Checks against jobs currently executing as well</param>
-    /// <returns></returns>
-    public static bool HasScanTaskRunningForLibrary(int libraryId, bool checkRunningJobs = true)
-    {
-        return
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", [libraryId, true, true], ScanQueue,
-                checkRunningJobs) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", [libraryId, false, true], ScanQueue,
-                checkRunningJobs) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", [libraryId, true, false], ScanQueue,
-                checkRunningJobs) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", [libraryId, false, false], ScanQueue,
-                checkRunningJobs);
-    }
-
-    /// <summary>
-    /// If there is an enqueued or scheduled task for <see cref="ScannerService.ScanSeries"/> method
-    /// </summary>
-    /// <param name="seriesId"></param>
-    /// <param name="checkRunningJobs">Checks against jobs currently executing as well</param>
-    /// <returns></returns>
-    public static bool HasScanTaskRunningForSeries(int seriesId, bool checkRunningJobs = true)
-    {
-        return
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", [seriesId, true], ScanQueue, checkRunningJobs) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", [seriesId, false], ScanQueue, checkRunningJobs);
-    }
-
-
-    /// <summary>
     /// Checks if this same invocation is already enqueued or scheduled
     /// </summary>
     /// <param name="methodName">Method name that was enqueued</param>
@@ -780,23 +833,6 @@ public class TaskScheduler : ITaskScheduler
     }
 
 
-    /// <summary>
-    /// Checks against any jobs that are running or about to run
-    /// </summary>
-    /// <param name="classNames"></param>
-    /// <param name="queue"></param>
-    /// <returns></returns>
-    public static bool RunningAnyTasksByMethod(IEnumerable<string> classNames, string queue = DefaultQueue)
-    {
-        var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
-        var ret = enqueuedJobs.Exists(j => !j.Value.InEnqueuedState &&
-                                     classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
-        if (ret) return true;
-
-        var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
-        return runningJobs.Exists(j => classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
-    }
-
     public static bool IsMethodRunningOrEnqueued(string methodName, string queue = DefaultQueue)
     {
         using var connection = JobStorage.Current.GetConnection();
@@ -826,32 +862,72 @@ public class TaskScheduler : ITaskScheduler
     }
 
     /// <summary>
-    /// Scans delayed by <see cref="ScanLibraries"/>, <see cref="ScanLibrary"/> or <see cref="ScanSeries"/> because another scan was running
+    /// Scans delayed by <see cref="EnqueueScanLibraries"/>, <see cref="EnqueueScanLibrary"/> or <see cref="EnqueueScanSeries"/> because another scan was running
     /// </summary>
     public static (IList<ScheduledScanDto> Scans, int Total) GetScheduledScans(int take)
     {
-        var scans = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue)
-            .Where(j => j.Value.Job?.Method.DeclaringType == typeof(TaskScheduler))
-            .Select(j => ToScheduledScan(j.Key, j.Value))
-            .Where(s => s != null)
-            .Select(s => s!)
-            .OrderBy(s => s.RunAtUtc)
+        var scans = ScanJobQueue.Read().Jobs.Delayed()
+            .OrderBy(j => j.RunAtUtc)
+            .ThenBy(j => j.CreatedAtUtc)
+            .Select(ToScheduledScan)
             .ToList();
 
         return (scans.Take(take).ToList(), scans.Count);
     }
 
-    private static ScheduledScanDto? ToScheduledScan(string jobId, ScheduledJobDto job)
+    /// <summary>
+    /// Waiting <see cref="ScannerService.ScanFolder"/> jobs, one entry per library and trigger, soonest first
+    /// </summary>
+    public static IList<ScheduledFolderScanDto> GetScheduledFolderScans(IEnumerable<LibraryDto> libraries)
     {
-        var args = job.Job.Args;
-        var runAtUtc = DateTime.SpecifyKind(job.EnqueueAt, DateTimeKind.Utc);
-
-        return job.Job.Method.Name switch
+        var libraryByRoot = new Dictionary<string, int>();
+        foreach (var library in libraries)
         {
-            nameof(ScanLibraries) => new ScheduledScanDto { JobId = jobId, RunAtUtc = runAtUtc },
-            nameof(ScanLibrary) => new ScheduledScanDto { JobId = jobId, LibraryId = (int) args[0], RunAtUtc = runAtUtc },
-            nameof(ScanSeries) => new ScheduledScanDto { JobId = jobId, LibraryId = (int) args[0], SeriesId = (int) args[1], RunAtUtc = runAtUtc },
-            _ => null,
+            foreach (var root in library.Folders)
+            {
+                libraryByRoot.TryAdd(Parser.NormalizePath(root), library.Id);
+            }
+        }
+
+        return ScanJobQueue.Read().FolderJobs
+            .GroupBy(j => (LibraryId: LibraryOf(j.Request.Folder), FromFolderWatcher: !string.IsNullOrEmpty(j.Request.ChangedPath)))
+            .Select(group =>
+            {
+                var folders = group
+                    .GroupBy(j => j.Request.Folder)
+                    .Select(f => (Folder: f.Key, RunAtUtc: f.Min(j => j.RunAtUtc ?? DateTime.MinValue)))
+                    .OrderBy(f => f.RunAtUtc)
+                    .ThenBy(f => f.Folder, StringComparer.Ordinal)
+                    .ToList();
+                var runAtUtc = folders[0].RunAtUtc;
+
+                return new ScheduledFolderScanDto
+                {
+                    LibraryId = group.Key.LibraryId,
+                    FromFolderWatcher = group.Key.FromFolderWatcher,
+                    RunAtUtc = runAtUtc == DateTime.MinValue ? null : runAtUtc,
+                    Folders = folders.Take(ScheduledFolderScanDto.MaxFolders).Select(f => f.Folder).ToList(),
+                    FolderCount = folders.Count,
+                };
+            })
+            .OrderBy(s => s.RunAtUtc ?? DateTime.MinValue)
+            .ToList();
+
+        int? LibraryOf(string folder)
+        {
+            var root = folder.DeepestContainingFolder(libraryByRoot.Keys);
+            return root == null ? null : libraryByRoot[root];
+        }
+    }
+
+    private static ScheduledScanDto ToScheduledScan(ScanJob job)
+    {
+        return new ScheduledScanDto
+        {
+            JobId = job.JobId,
+            LibraryId = job.Target.LibraryId,
+            SeriesId = job.Target.SeriesId,
+            RunAtUtc = job.RunAtUtc.GetValueOrDefault(),
         };
     }
 

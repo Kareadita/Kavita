@@ -1,8 +1,8 @@
-import {DestroyRef, inject, Injectable, signal} from '@angular/core';
-import {interval, Subscription, switchMap} from 'rxjs';
+import {DestroyRef, effect, inject, Injectable, signal, untracked} from '@angular/core';
+import {EMPTY, interval, Subscription, switchMap} from 'rxjs';
 import {ServerService} from "./server.service";
 import {AccountService} from "./account.service";
-import {filter, map, take, tap} from "rxjs/operators";
+import {catchError, filter, map, take, tap} from "rxjs/operators";
 import {Router} from "@angular/router";
 import {
   VersionUpdateModalComponent
@@ -66,6 +66,7 @@ export class VersionService {
   constructor() {
     this.startInitialVersionCheck();
     this.startVersionCheck();
+    this.startReconnectVersionCheck();
     this.startUpdateAvailableListener();
   }
 
@@ -77,11 +78,13 @@ export class VersionService {
       filter((key): key is string => !!key),
       take(1),
       switchMap(key => this.serverService.getVersion(key))
-    ).subscribe(serverVersion => {
-      this.loadedVersion = serverVersion;
-      localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
-      this._currentVersion.set(serverVersion);
-    });
+    ).subscribe(serverVersion => this.recordLoadedVersion(serverVersion));
+  }
+
+  private recordLoadedVersion(serverVersion: string): void {
+    this.loadedVersion = serverVersion;
+    localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
+    this._currentVersion.set(serverVersion);
   }
 
 
@@ -93,11 +96,34 @@ export class VersionService {
       .pipe(
         map(() => this.accountService.currentUserGenericApiKey()),
         filter((key): key is string => !!key && !this.modalOpen),
-        switchMap(key => this.serverService.getVersion(key)),
+        // The error interceptor rethrows, and an error reaching interval() ends the poll for good
+        switchMap(key => this.serverService.getVersion(key).pipe(catchError(() => EMPTY))),
         filter(update => !!update),
         tap(serverVersion => this.handleVersionCheck(serverVersion)),
         takeUntilDestroyed(this.destroyRef)
       ).subscribe();
+  }
+
+  // Only the refresh check runs here, the server pushes UpdateAvailable itself on startup
+  private startReconnectVersionCheck(): void {
+    effect(() => {
+      const key = this.accountService.currentUserGenericApiKey();
+      if (!key || !this.messageHub.isConnectedSignal()) return;
+
+      untracked(() => {
+        this.serverService.getVersion(key).pipe(
+          catchError(() => EMPTY),
+          filter(serverVersion => !!serverVersion && !this.modalOpen),
+        ).subscribe(serverVersion => {
+          if (this.loadedVersion === null) {
+            this.recordLoadedVersion(serverVersion);
+            return;
+          }
+
+          this.showRefreshIfServerUpdated(serverVersion);
+        });
+      });
+    });
   }
 
   /** The server pushes UpdateAvailable on every startup and every 4-6 hours, so this must respect backoff */
@@ -125,21 +151,23 @@ export class VersionService {
    */
   handleVersionCheck(serverVersion: string): void {
     if (this.modalOpen) return;
+    if (this.showRefreshIfServerUpdated(serverVersion)) return;
 
-    const isNewServerVersion = this.loadedVersion !== null && this.loadedVersion !== serverVersion;
+    this.handleUpdateCheck();
+  }
 
-    if (isNewServerVersion) {
-      // Server was updated mid-session - don't update loadedVersion so the
-      // refresh prompt persists until the user actually refreshes.
-      localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
-      this._currentVersion.set(serverVersion);
-      this.serverService.getChangelog(1).subscribe(changelog => {
-        this.showRefreshModal(changelog[0]);
-        localStorage.setItem(VersionService.CLIENT_REFRESH_KEY, Date.now().toString());
-      });
-    } else {
-      this.handleUpdateCheck();
-    }
+  private showRefreshIfServerUpdated(serverVersion: string): boolean {
+    if (this.loadedVersion === null || this.loadedVersion === serverVersion) return false;
+
+    // Server was updated mid-session - don't update loadedVersion so the
+    // refresh prompt persists until the user actually refreshes
+    localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
+    this._currentVersion.set(serverVersion);
+    this.serverService.getChangelog(1).subscribe(changelog => {
+      this.showRefreshModal(changelog[0]);
+      localStorage.setItem(VersionService.CLIENT_REFRESH_KEY, Date.now().toString());
+    });
+    return true;
   }
 
   /**

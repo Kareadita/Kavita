@@ -1563,7 +1563,9 @@
         "off": "{{reader-settings.off}}",
         "loading": "{{common.loading}}",
         "read-count-tooltip": "Total Reads",
-        "kavitaplus-audit-alt": "Kavita+ Activity"
+        "kavitaplus-audit-alt": "Kavita+ Activity",
+        "media-error-tooltip": "This series has files with problems",
+        "media-errors-title": "One or more files were not parsed or have errors:"
     },
 
     "kavitaplus-tooltip": {
@@ -2288,14 +2290,45 @@
 
 
     "manage-media-issues": {
-        "description-part-1": "This table contains issues found during scan or reading of your media. You can clear it at any time and use Library (Force) Scan to perform analysis. A list of some common errors and what they mean can be found on the ",
-        "description-part-2": "wiki.",
+        "description": "Files Kavita had trouble with while scanning or reading. An issue clears itself once the file is replaced or removed and its folder is scanned again. Common problems and fixes are on the {{wikiLink}}.",
+        "wiki": "wiki",
         "filter-label": "{{common.filter}}",
-        "clear-alerts": "Clear Alerts",
+        "clear-all": "Clear all",
+        "library-label": "Library",
+        "all-libraries": "All libraries",
+        "series-label": "Series",
+        "all-series": "All series",
+        "reason-label": "Reason",
+        "all-reasons": "All reasons",
+        "dismissed-header": "Dismissed ({{count}})",
+        "dismissed-description": "Dismissed issues are left out of scan results. One comes back if its file changes and still has a problem.",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "No files have open issues.",
+        "no-matches-description": "No open issues match the filters.",
+        "dismiss-success": "Issues dismissed: {{count}}",
+        "restore-success": "Issues restored: {{count}}",
+        "clear-success": "All media issues cleared",
+        "results-alt": "Media issues"
+    },
+
+    "media-issues-table": {
+        "select-all-label": "{{common.select-all}}",
+        "select-alt": "Select {{file}}",
         "file-header": "File",
-        "comment-header": "Comment",
-        "created-header": "Created",
-        "no-data": "{{common.no-data}}"
+        "series-header": "Series",
+        "reason-header": "Reason",
+        "last-seen-header": "Last seen",
+        "actions-header": "Actions",
+        "no-series": "No series",
+        "show-details": "Show details",
+        "hide-details": "Hide details",
+        "first-seen-label": "First seen: {{date}}",
+        "dismiss": "Dismiss",
+        "restore": "Restore",
+        "dismiss-alt": "Dismiss {{file}}",
+        "restore-alt": "Restore {{file}}",
+        "dismiss-selected": "Dismiss selected ({{count}})",
+        "restore-selected": "Restore selected ({{count}})"
     },
 
     "manage-email-settings": {
@@ -3065,9 +3098,19 @@
         "server-unreachable-label": "Can’t reach the server. Retrying...",
         "view-activity-label": "View activity",
         "restoring-alt": "Restoring activity from before the refresh",
-        "scan-summary-label": "Added: {{added}}, removed: {{removed}}",
+        "scan-series-added-label": "Series added: {{count}}",
+        "scan-series-removed-label": "Series removed: {{count}}",
+        "scan-chapters-added-label": "Chapters added: {{count}}",
+        "scan-chapters-updated-label": "Chapters updated: {{count}}",
+        "scan-chapters-removed-label": "Chapters removed: {{count}}",
+        "scan-no-changes-label": "No changes",
+        "scan-problem-files-label": "Problem files: {{count}}",
+        "scan-problem-files-new-label": "Problem files: {{count}} ({{new}} new)",
+        "new-problem-files-alt": "Scan of {{library}} found new problem files: {{count}}",
         "finished-while-away-label": "Finished while you were away",
         "finishing-up-label": "Finishing up",
+        "refreshing-covers-label": "Refreshing covers",
+        "counting-words-label": "Counting words",
         "interrupted-label": "Stopped by a server restart",
         "failed-label": "Stopped before finishing",
         "schedule-lost-label": "Was set for {{time}}, lost in a server restart",
@@ -3092,14 +3135,24 @@
         "scan-libraries-scheduled": "Scan all libraries",
         "scan-series-scheduled": "Scan {{seriesName}}",
         "scan-series-in-library-scheduled": "Scan a series in {{libraryName}}",
-        "scan-waiting-description": "Another scan was running",
+        "scan-waiting-description": "Waiting for the scans before it",
+        "scan-queued-label": "Queued",
+        "scan-folder-scheduled": "Check {{folder}}",
+        "scan-folders-in-library-scheduled": "Check {{count}} folders in {{libraryName}}",
+        "scan-folders-scheduled": "Check {{count}} folders",
+        "scan-folder-watcher-description": "Folder watching saw a change",
+        "scan-folder-api-description": "Requested from the API",
         "show-label": "Show",
-        "hide-label": "Hide"
+        "hide-label": "Hide",
+        "show-problem-files-label": "Show problem files",
+        "hide-problem-files-label": "Hide problem files"
     },
 
     "event-title-pipe": {
         "scan-progress": "Scanning {{libraryName}}",
         "scan-done": "Scanned {{libraryName}}",
+        "scan-series-progress": "Scanning {{seriesName}}",
+        "scan-series-done": "Scanned {{seriesName}}",
         "backup-database-progress": "Backing up database",
         "cleanup-progress": "Cleaning up",
         "cover-update-progress": "Refreshing covers: {{libraryName}}",
@@ -3122,6 +3175,9 @@
         "root-folders-inaccessible-description": "Check that these drives are connected, then rescan: {{folders}}",
         "root-folders-empty-label": "{{libraryName}} scan aborted",
         "root-folders-empty-description": "Some root folders are empty. Check that your mount is connected or change the root folder, then rescan.",
+        "unreadable-folders-label": "Some folders in {{libraryName}} can’t be read",
+        "unreadable-folders-description": "Their series were kept as they are. Check the folder permissions, then rescan: {{folders}}",
+        "unreadable-folders-more-description": "Their series were kept as they are. Check the folder permissions, then rescan: {{folders}} and {{count}} more",
         "series-collision-label": "Series collision on “{{seriesName}}” in {{libraryName}}",
         "series-collision-description": "Two folders parse to the same series. Open details to see the files.",
         "files-outside-folder-label": "{{seriesName}} has files outside its folder",
@@ -3137,10 +3193,10 @@
         "scan-no-work-label": "{{seriesName}} has nothing to scan",
         "scan-no-work-description": "No folders changed since the last scan.",
         "db-write-failed-label": "Couldn’t save {{seriesName}}",
-        "scan-libraries-delayed-label": "Scan all libraries rescheduled",
-        "scan-library-delayed-label": "Scan {{libraryName}} rescheduled",
-        "scan-series-delayed-label": "Scan {{seriesName}} rescheduled",
-        "scan-delayed-description": "Runs at {{time}}. Another scan was running.",
+        "scan-libraries-delayed-label": "Scan all libraries queued",
+        "scan-library-delayed-label": "Scan {{libraryName}} queued",
+        "scan-series-delayed-label": "Scan {{seriesName}} queued",
+        "scan-delayed-description": "Another scan is running. Scans run one at a time, in the order they were asked for.",
         "backup-folder-unwritable-label": "Backup failed",
         "backup-folder-unwritable-description": "Can’t write to {{folder}}.",
         "backup-exists-label": "{{event-message-pipe.backup-folder-unwritable-label}}",
@@ -3160,7 +3216,8 @@
         "open-matching": "Open matching",
         "rescan": "Rescan",
         "scan-now": "Scan now",
-        "details": "Details"
+        "details": "Details",
+        "open-media-issues": "Open Media Issues"
     },
 
     "activity-age-pipe": {
@@ -4413,6 +4470,7 @@
 
 
     "toasts": {
+        "confirm-clear-media-issues": "Remove every media issue, including dismissed ones? Files that still have problems are reported again on the next scan.",
         "save-remap-rule": "Save \"{{from}} → {{to}}\" as a remap rule for future imports?",
         "import-complete": "Import complete",
         "failed-to-validate": "Failed to validate file",
@@ -4849,6 +4907,26 @@
         "excluded-libraries-tooltip": "Libraries to skip",
         "queued-title": "Queued re run",
         "queued-description": "Processing will kick of shortly, please be patient."
+    },
+
+    "media-error-producer-pipe": {
+        "book-service": "Book processing",
+        "archive-service": "Archive processing",
+        "scanner": "Scanner"
+    },
+
+    "media-error-reason-pipe": {
+        "unknown": "Unknown error",
+        "parse-failed": "Nothing could be parsed from the file name",
+        "no-series-name": "No series name could be found",
+        "unreadable-archive": "Archive could not be opened",
+        "corrupt-epub": "Epub is damaged or has invalid content",
+        "no-pages": "Page count could not be read",
+        "cover-failed": "Cover image could not be generated",
+        "word-count-failed": "Words could not be counted",
+        "io-error": "File could not be accessed (disk, network or permissions)",
+        "metadata-unreadable": "Embedded metadata could not be read, imported without it",
+        "epub-not-strict": "Epub has structural errors, imported in lenient mode"
     },
 
     "validation": {

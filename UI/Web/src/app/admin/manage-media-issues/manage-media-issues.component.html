@@ -1,75 +1,80 @@
 <ng-container *transloco="let t; prefix: 'manage-media-issues'">
-  <p>{{t('description-part-1')}} <a rel="noopener noreferrer" target="_blank" [href]="WikiLink.MediaIssues">{{t('description-part-2')}}</a></p>
+  <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+    <p class="mb-0">
+      <app-transloco-inject key="manage-media-issues.description">
+        <ng-template translocoSlot="wikiLink">
+          <a rel="noopener noreferrer" target="_blank" [href]="WikiLink.MediaIssues">{{t('wiki')}}</a>
+        </ng-template>
+      </app-transloco-inject>
+    </p>
+    <button class="btn btn-outline-danger flex-shrink-0" type="button" [disabled]="data().length === 0" (click)="clearAll()"
+            [attr.aria-label]="t('clear-all')">
+      <i class="fa-solid fa-trash me-1" aria-hidden="true"></i><span class="phone-hidden">{{t('clear-all')}}</span>
+    </button>
+  </div>
 
-  <div class="row g-0 justify-content-between align-items-end mb-3">
-    <div class="col">
+  <div class="d-flex flex-wrap align-items-end gap-2 mb-3">
+    <div class="filter">
       <app-filter-field [(query)]="filterQuery" [label]="t('filter-label')" />
     </div>
-    <div class="col-auto ms-2">
-      <button class="btn btn-primary" type="button" (click)="clear()">{{t('clear-alerts')}}</button>
+
+    <div class="library">
+      <label for="media-issues-library" class="visually-hidden">{{t('library-label')}}</label>
+      <app-setting-select [inputId]="'media-issues-library'" [options]="libraryOptions()" [placeholder]="t('all-libraries')"
+                          [formField]="formGroup.libraryId">
+        <ng-template #template let-id>{{libraryNames().get(id)}}</ng-template>
+      </app-setting-select>
+    </div>
+
+    <div class="series">
+      <app-filterable-select [inputId]="'media-issues-series'" [label]="t('series-label')" [options]="seriesOptions()"
+                             [placeholder]="t('all-series')" [formField]="formGroup.seriesId" />
+    </div>
+
+    <div>
+      <label for="media-issues-reason" class="visually-hidden">{{t('reason-label')}}</label>
+      <app-setting-select [inputId]="'media-issues-reason'" [options]="allMediaErrorReasons" [placeholder]="t('all-reasons')"
+                          [formField]="formGroup.reason">
+        <ng-template #template let-reason>{{reason | mediaErrorReason}}</ng-template>
+      </app-setting-select>
     </div>
   </div>
 
-  @let filteredRows = filteredData();
-  <app-responsive-table [rows]="filteredRows" [trackByFn]="trackBy">
-    <ng-template #tableTemplate>
-      <ngx-datatable
-        class="bootstrap"
-        [rows]="filteredRows"
-        [columnMode]="'flex'"
-        rowHeight="auto"
-        [footerHeight]="50"
-        [limit]="15"
-      >
+  <div #results tabindex="-1" role="region" [attr.aria-label]="t('results-alt')">
+    @if (isLoading()) {
+      <app-loading [loading]="true" />
+    } @else {
+      @let active = activeIssues();
+      @let dismissed = dismissedIssues();
 
-        <ngx-datatable-column prop="filePath" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
-          <ng-template let-column="column" ngx-datatable-header-template>
-            {{t('file-header')}}
-          </ng-template>
-          <ng-template let-item="row" ngx-datatable-cell-template>
-            {{item.filePath}}
-          </ng-template>
-        </ngx-datatable-column>
+      @if (active.length === 0) {
+        <app-empty-state [titleKey]="'no-data'" [descriptionKey]="hasActiveIssues() ? 'no-matches-description' : 'no-data-description'"
+                         [i18nPrefix]="'manage-media-issues'">
+          <i icon class="fa-solid fa-circle-check" aria-hidden="true"></i>
+        </app-empty-state>
+      } @else {
+        <app-media-issues-table [rows]="active" idPrefix="active-issues" (dismiss)="dismiss($event)" />
+      }
 
-
-        <ngx-datatable-column prop="comment" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-          <ng-template let-column="column" ngx-datatable-header-template>
-            {{t('comment-header')}}
-          </ng-template>
-          <ng-template let-item="row" ngx-datatable-cell-template>
-            {{item.comment}}
-          </ng-template>
-        </ngx-datatable-column>
-
-        <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-          <ng-template let-column="column" ngx-datatable-header-template>
-            {{t('created-header')}}
-          </ng-template>
-          <ng-template let-item="row" ngx-datatable-cell-template>
-            {{item.createdUtc | utcToLocalTime | defaultDate}}
-          </ng-template>
-        </ngx-datatable-column>
-      </ngx-datatable>
-    </ng-template>
-
-    <ng-template #cardTemplate let-item let-idx="index">
-      <div class="card mb-3">
-        <div class="card-body">
-          <h6 class="card-title mb-3 text-break">{{item.filePath}}</h6>
-
-          <div class="row g-2">
-            <div class="col-12">
-              <div class="text-muted small">{{t('comment-header')}}</div>
-              <div>{{item.comment}}</div>
-            </div>
-
-            <div class="col-12">
-              <div class="text-muted small">{{t('created-header')}}</div>
-              <div>{{item.createdUtc | utcToLocalTime | defaultDate}}</div>
+      @if (dismissed.length > 0) {
+        <div ngbAccordion class="mt-3">
+          <div ngbAccordionItem="dismissed-issues" [collapsed]="true">
+            <h2 class="accordion-header" ngbAccordionHeader>
+              <button ngbAccordionButton class="accordion-button" type="button">
+                {{t('dismissed-header', {count: dismissed.length})}}
+              </button>
+            </h2>
+            <div ngbAccordionCollapse>
+              <div ngbAccordionBody>
+                <ng-template>
+                  <p class="text-muted small">{{t('dismissed-description')}}</p>
+                  <app-media-issues-table [rows]="dismissed" [dismissed]="true" idPrefix="dismissed-issues" (restore)="restore($event)" />
+                </ng-template>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </ng-template>
-  </app-responsive-table>
+      }
+    }
+  </div>
 </ng-container>

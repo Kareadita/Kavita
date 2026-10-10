@@ -103,8 +103,8 @@ public interface ISeriesRepository
     Task<PagedList<SeriesDto>> GetWantToReadDtosForUserAsync(int userId, UserParams userParams, SeriesFilterV2Dto seriesFilter, CancellationToken ct = default);
     Task<IList<Series>> GetWantToReadForUserAsync(int userId, CancellationToken ct = default);
     Task<bool> IsSeriesInWantToRead(int userId, int seriesId, CancellationToken ct = default);
-    Task<Series?> GetSeriesByFolderPathAsync(string folder, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
-    Task<Series?> GetSeriesThatContainsLowestFolderPathAsync(string path, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
+    Task<IList<Series>> GetSeriesByFolderPathAsync(string folder, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
+    Task<IList<Series>> GetSeriesThatContainsLowestFolderPathAsync(string path, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
     Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IList<string> normalizedNames,
         int userId, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
     Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true, CancellationToken ct = default);
@@ -122,6 +122,7 @@ public interface ISeriesRepository
         MangaFormat format, CancellationToken ct = default);
     Task<IList<Series>> RemoveSeriesNotInListAsync(IList<ParsedSeries> seenSeries, int libraryId, CancellationToken ct = default);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMapAsync(int libraryId, CancellationToken ct = default);
+    Task<IList<SeriesNameMatch>> GetSeriesNameMatchesAsync(int libraryId, CancellationToken ct = default);
     Task<AgeRating> GetMaxAgeRatingFromSeriesAsyncAsync(IEnumerable<int> seriesIds, CancellationToken ct = default);
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds, CancellationToken ct = default);
     Task<IList<Series>> GetAllWithCoversInDifferentEncodingAsync(EncodeFormat encodeFormat, bool customOnly = true, CancellationToken ct = default);

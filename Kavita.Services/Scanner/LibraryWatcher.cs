@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
+using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Scanner;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -25,27 +28,33 @@ public class LibraryWatcher : ILibraryWatcher
     private readonly ILogger<LibraryWatcher> _logger;
     private readonly ITaskScheduler _taskScheduler;
 
-    private static readonly Dictionary<string, IList<FileSystemWatcher>> WatcherDictionary = new ();
     /// <summary>
     /// This is just here to prevent GC from Disposing our watchers
     /// </summary>
-    private static readonly IList<FileSystemWatcher> FileWatchers = new List<FileSystemWatcher>();
+    private static readonly List<FileSystemWatcher> FileWatchers = [];
     /// <summary>
     /// The amount of time until the Schedule ScanFolder task should be executed
     /// </summary>
     /// <remarks>The Job will be enqueued instantly</remarks>
     private readonly TimeSpan _queueWaitTime;
 
+    private static readonly TimeSpan MinRetryDelay = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromHours(1);
+
+    /// <summary>
+    /// Watcher events run on whichever scoped instance subscribed them, long after its scope is disposed
+    /// </summary>
+    private static readonly SemaphoreSlim WatcherLock = new(1, 1);
     /// <summary>
     /// Counts within a time frame how many times the buffer became full. Is used to reschedule LibraryWatcher to start monitoring much later rather than instantly
     /// </summary>
     private static int _bufferFullCounter;
     private static int _restartCounter;
     private static DateTime _lastErrorTime = DateTime.MinValue;
-    /// <summary>
-    /// Used to lock buffer Full Counter
-    /// </summary>
-    private static readonly object Lock = new ();
+    private static DateTime _retryScheduledUntil = DateTime.MinValue;
+    private static TimeSpan _retryDelay = MinRetryDelay;
+
+    internal static IReadOnlyList<FileSystemWatcher> Watchers => [.. FileWatchers];
 
     public LibraryWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork,
         ILogger<LibraryWatcher> logger, IHostEnvironment environment, ITaskScheduler taskScheduler)
@@ -61,71 +70,128 @@ public class LibraryWatcher : ILibraryWatcher
 
     public async Task StartWatching()
     {
-        FileWatchers.Clear();
-        WatcherDictionary.Clear();
+        var retryIn = await StartWatchersAsync();
+        if (retryIn != null)
+        {
+            BackgroundJob.Schedule(() => RestartWatching(), retryIn.Value);
+        }
+    }
 
+    /// <returns>When to try again, if a library folder cannot be reached and no retry is pending yet</returns>
+    internal async Task<TimeSpan?> StartWatchersAsync()
+    {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableFolderWatching)
         {
             _logger.LogInformation("Folder watching is disabled at the server level, thus ignoring any requests to create folder watching");
-            return;
+            StopWatching();
+            return null;
         }
 
-        var libraryFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
+        var configuredFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
             .Where(l => l.FolderWatching)
             .SelectMany(l => l.Folders)
-            .Distinct()
             .Select(Parser.NormalizePath)
-            .Where(_directoryService.Exists)
+            .Distinct()
             .ToList();
+        // Outside the lock, Exists on a dropped SMB share can hang until the network timeout
+        var libraryFolders = configuredFolders.Where(_directoryService.Exists).ToList();
 
-        _logger.LogInformation("[LibraryWatcher] Starting file watchers for {Count} library folders", libraryFolders.Count);
-
-        foreach (var libraryFolder in libraryFolders)
+        await WatcherLock.WaitAsync();
+        try
         {
-            _logger.LogDebug("[LibraryWatcher] Watching {FolderPath}", libraryFolder);
-            var watcher = new FileSystemWatcher(libraryFolder);
+            StopWatchers();
+
+            _logger.LogInformation("[LibraryWatcher] Starting file watchers for {Count} library folders", libraryFolders.Count);
+
+            var watchedFolders = new List<string>();
+            foreach (var libraryFolder in libraryFolders)
+            {
+                _logger.LogDebug("[LibraryWatcher] Watching {FolderPath}", libraryFolder);
+                if (TryStartWatcher(libraryFolder))
+                {
+                    watchedFolders.Add(libraryFolder);
+                }
+            }
+            _logger.LogInformation("[LibraryWatcher] Watching {Count} folders", watchedFolders.Count);
+
+            var missingFolders = configuredFolders.Except(watchedFolders).ToList();
+            if (missingFolders.Count == 0)
+            {
+                _retryDelay = MinRetryDelay;
+                return null;
+            }
+
+            if (_retryScheduledUntil > DateTime.Now) return null;
+
+            var retryIn = _retryDelay;
+            _retryDelay = TimeSpan.FromTicks(Math.Min(retryIn.Ticks * 2, MaxRetryDelay.Ticks));
+            _retryScheduledUntil = DateTime.Now + retryIn;
+            _logger.LogWarning("[LibraryWatcher] {Folders} cannot be reached or watched. Trying again in {Minutes} minutes",
+                missingFolders, retryIn.TotalMinutes);
+            return retryIn;
+        }
+        finally
+        {
+            WatcherLock.Release();
+        }
+    }
+
+    /// <summary>The folder can be gone by now even though Exists passed, the share dropped in between</summary>
+    private bool TryStartWatcher(string libraryFolder)
+    {
+        FileSystemWatcher? watcher = null;
+        try
+        {
+            watcher = new FileSystemWatcher(libraryFolder);
 
             watcher.Changed += OnChanged;
             watcher.Created += OnCreated;
             watcher.Deleted += OnDeleted;
             watcher.Error += OnError;
-            watcher.Disposed += (_, _) =>
-                _logger.LogError("[LibraryWatcher] watcher was disposed when it shouldn't have been. Please report this to Kavita dev");
 
             watcher.Filter = "*.*";
             watcher.IncludeSubdirectories = true;
             watcher.EnableRaisingEvents = true;
             FileWatchers.Add(watcher);
-            if (!WatcherDictionary.ContainsKey(libraryFolder))
-            {
-                WatcherDictionary.Add(libraryFolder, new List<FileSystemWatcher>());
-            }
-
-            WatcherDictionary[libraryFolder].Add(watcher);
+            return true;
         }
-        _logger.LogInformation("[LibraryWatcher] Watching {Count} folders", libraryFolders.Count);
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "[LibraryWatcher] Could not watch {FolderPath}", libraryFolder);
+            watcher?.Dispose();
+            return false;
+        }
     }
 
     public void StopWatching()
     {
-        _logger.LogInformation("[LibraryWatcher] Stopping watching folders");
-        foreach (var fileSystemWatcher in WatcherDictionary.Values.SelectMany(watcher => watcher))
+        WatcherLock.Wait();
+        try
         {
-            fileSystemWatcher.EnableRaisingEvents = false;
-            fileSystemWatcher.Changed -= OnChanged;
-            fileSystemWatcher.Created -= OnCreated;
-            fileSystemWatcher.Deleted -= OnDeleted;
-            fileSystemWatcher.Error -= OnError;
+            StopWatchers();
+        }
+        finally
+        {
+            WatcherLock.Release();
+        }
+    }
+
+    /// <remarks>Caller must hold <see cref="WatcherLock"/></remarks>
+    private void StopWatchers()
+    {
+        if (FileWatchers.Count == 0) return;
+
+        _logger.LogInformation("[LibraryWatcher] Stopping watching folders");
+        foreach (var fileSystemWatcher in FileWatchers)
+        {
+            fileSystemWatcher.Dispose();
         }
         FileWatchers.Clear();
-        WatcherDictionary.Clear();
     }
 
     public async Task RestartWatching()
     {
         _logger.LogDebug("[LibraryWatcher] Restarting watcher");
-
-        StopWatching();
         await StartWatching();
     }
 
@@ -175,48 +241,120 @@ public class LibraryWatcher : ILibraryWatcher
     }
 
     /// <summary>
-    /// On error, we count the number of errors that have occured. If the number of errors has been more than 2 in last 10 minutes, then we suspend listening for an hour
+    /// A folder that cannot be reached restarts watching right away, retrying until it is back. Any other error is counted: 3 in 10 minutes
+    /// suspends watching for an hour, and after 3 suspends folder watching is turned off
     /// </summary>
-    /// <remarks>This will schedule jobs to decrement the buffer full counter</remarks>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
     private void OnError(object sender, ErrorEventArgs e)
     {
-        _logger.LogError(e.GetException(), "[LibraryWatcher] An error occured, likely too many changes occured at once or the folder being watched was deleted. Restarting Watchers {Current}/{Total}", _bufferFullCounter, 3);
-        bool condition;
-        lock (Lock)
-        {
-            _bufferFullCounter += 1;
-            _lastErrorTime = DateTime.Now;
-            condition = _bufferFullCounter >= 3 && (DateTime.Now - _lastErrorTime).TotalMinutes <= 10;
-        }
+        var watcher = (FileSystemWatcher) sender;
+        var exception = e.GetException();
 
-        if (_restartCounter >= 3)
+        // Windows can raise this synchronously inside EnableRaisingEvents, while StartWatchersAsync holds the lock
+        Task.Run(async () =>
         {
-            _logger.LogInformation("[LibraryWatcher] Too many restarts occured, you either have limited inotify or an OS constraint. Kavita will turn off folder watching to prevent high utilization of resources");
-            Task.Run(TurnOffWatching);
-            return;
-        }
-
-        if (condition)
-        {
-            _logger.LogInformation("[LibraryWatcher] Internal buffer has been overflown multiple times in past 10 minutes. Suspending file watching for an hour. Restart count: {RestartCount}", _restartCounter);
-            _restartCounter++;
-            StopWatching();
-            BackgroundJob.Schedule(() => RestartWatching(), TimeSpan.FromHours(1));
-            return;
-        }
-        Task.Run(RestartWatching);
-        BackgroundJob.Schedule(() => UpdateLastBufferOverflow(), TimeSpan.FromMinutes(10));
+            try
+            {
+                switch (await HandleErrorAsync(watcher, exception))
+                {
+                    case WatcherErrorAction.FolderUnreachable:
+                        BackgroundJob.Enqueue(() => RestartWatching());
+                        break;
+                    case WatcherErrorAction.RestartNow:
+                        BackgroundJob.Enqueue(() => RestartWatching());
+                        BackgroundJob.Schedule(() => UpdateLastBufferOverflow(), TimeSpan.FromMinutes(10));
+                        break;
+                    case WatcherErrorAction.Suspend:
+                        BackgroundJob.Schedule(() => RestartWatching(), TimeSpan.FromHours(1));
+                        BackgroundJob.Schedule(() => UpdateLastBufferOverflow(), TimeSpan.FromMinutes(10));
+                        break;
+                    case WatcherErrorAction.TurnOff:
+                        BackgroundJob.Enqueue(() => TurnOffWatching());
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[LibraryWatcher] Could not recover from a watcher error, folder watching is off until the next restart");
+            }
+        });
     }
 
-    private async Task TurnOffWatching()
+    /// <summary>
+    /// The first error from a live watcher stops every watcher. One network drop raises an error on every watcher at
+    /// once, so the others find their watcher already stopped and are ignored
+    /// </summary>
+    internal async Task<WatcherErrorAction> HandleErrorAsync(FileSystemWatcher watcher, Exception exception)
+    {
+        string folder;
+        await WatcherLock.WaitAsync();
+        try
+        {
+            if (!FileWatchers.Contains(watcher))
+            {
+                _logger.LogDebug(exception, "[LibraryWatcher] Ignoring an error from a watcher that was already stopped");
+                return WatcherErrorAction.Ignore;
+            }
+
+            folder = watcher.Path;
+            StopWatchers();
+        }
+        finally
+        {
+            WatcherLock.Release();
+        }
+
+        // Outside the lock, Exists on a dropped SMB share can hang until the network timeout
+        var reachable = _directoryService.Exists(folder);
+
+        await WatcherLock.WaitAsync();
+        try
+        {
+            if (!reachable)
+            {
+                _logger.LogWarning(exception, "[LibraryWatcher] {Folder} can no longer be reached, restarting watchers for the folders that still exist", folder);
+                _retryScheduledUntil = DateTime.MinValue;
+                _retryDelay = MinRetryDelay;
+                return WatcherErrorAction.FolderUnreachable;
+            }
+
+            var now = DateTime.Now;
+            _bufferFullCounter += 1;
+            var previousErrorWithin10Minutes = (now - _lastErrorTime).TotalMinutes <= 10;
+            _lastErrorTime = now;
+            _logger.LogError(exception, "[LibraryWatcher] An error occured, likely too many changes occured at once. Restarting Watchers {Current}/{Total}", _bufferFullCounter, 3);
+
+            if (_restartCounter >= 3)
+            {
+                _logger.LogInformation("[LibraryWatcher] Too many restarts occured, you either have limited inotify or an OS constraint. Kavita will turn off folder watching to prevent high utilization of resources");
+                return WatcherErrorAction.TurnOff;
+            }
+
+            if (_bufferFullCounter >= 3 && previousErrorWithin10Minutes)
+            {
+                _logger.LogInformation("[LibraryWatcher] Internal buffer has been overflown multiple times in past 10 minutes. Suspending file watching for an hour. Restart count: {RestartCount}", _restartCounter);
+                _restartCounter++;
+                return WatcherErrorAction.Suspend;
+            }
+
+            return WatcherErrorAction.RestartNow;
+        }
+        finally
+        {
+            WatcherLock.Release();
+        }
+    }
+
+    /// <remarks>This is public only because Hangfire will invoke it. Do not call external to this class.</remarks>
+    // ReSharper disable once MemberCanBePrivate.Global
+    public async Task TurnOffWatching()
     {
         var setting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableFolderWatching);
         setting.Value = "false";
         _unitOfWork.SettingsRepository.Update(setting);
         await _unitOfWork.CommitAsync();
+
         StopWatching();
+
         _logger.LogInformation("[LibraryWatcher] Folder watching has been disabled");
     }
 
@@ -265,7 +403,7 @@ public class LibraryWatcher : ILibraryWatcher
                 return;
             }
 
-            _taskScheduler.ScanFolder(fullPath, filePath, _queueWaitTime);
+            await _taskScheduler.EnqueueScanFolderAsync(new ScanFolderRequest(fullPath, filePath, false), _queueWaitTime);
         }
         catch (Exception ex)
         {
@@ -274,7 +412,7 @@ public class LibraryWatcher : ILibraryWatcher
         _logger.LogTrace("[LibraryWatcher] ProcessChange completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
     }
 
-    private string GetFolder(string filePath, IEnumerable<string> libraryFolders)
+    internal string GetFolder(string filePath, IEnumerable<string> libraryFolders)
     {
         // TODO: I can optimize this to avoid a library scan and instead do a Series Scan by finding the series that has a lowestFolderPath higher or equal to the filePath
 
@@ -282,9 +420,7 @@ public class LibraryWatcher : ILibraryWatcher
         _logger.LogTrace("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);
         if (string.IsNullOrEmpty(parentDirectory)) return string.Empty;
 
-        // We need to find the library this creation belongs to
-        // Multiple libraries can point to the same base folder. In this case, we need use FirstOrDefault
-        var libraryFolder = libraryFolders.FirstOrDefault(f => parentDirectory.Contains(f));
+        var libraryFolder = parentDirectory.DeepestContainingFolder(libraryFolders);
         _logger.LogTrace("[LibraryWatcher] Library Folder: {LibraryFolder}", libraryFolder);
         if (string.IsNullOrEmpty(libraryFolder)) return string.Empty;
 
@@ -303,10 +439,33 @@ public class LibraryWatcher : ILibraryWatcher
     // ReSharper disable once MemberCanBePrivate.Global
     public static void UpdateLastBufferOverflow()
     {
-        lock (Lock)
+        WatcherLock.Wait();
+        try
         {
             if (_bufferFullCounter == 0) return;
             _bufferFullCounter -= 1;
         }
+        finally
+        {
+            WatcherLock.Release();
+        }
     }
+
+    internal static void ResetErrorCounters()
+    {
+        _bufferFullCounter = 0;
+        _restartCounter = 0;
+        _lastErrorTime = DateTime.MinValue;
+        _retryScheduledUntil = DateTime.MinValue;
+        _retryDelay = MinRetryDelay;
+    }
+}
+
+internal enum WatcherErrorAction
+{
+    Ignore,
+    FolderUnreachable,
+    RestartNow,
+    Suspend,
+    TurnOff,
 }

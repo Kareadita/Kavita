@@ -54,7 +54,8 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
 
         List<int> usersWithAccess = [];
 
-        if (seriesId.HasValue)
+        // The series row is already deleted when this is sent, so a series access check never passes
+        if (seriesId.HasValue && message.Name != MessageFactory.SeriesRemoved)
         {
             foreach (var user in nonAdmins)
             {

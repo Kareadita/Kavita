@@ -24,17 +24,26 @@
         </div>
 
         <div class="col-xl-10 col-lg-7 col-md-12 col-sm-12 col-xs-12">
-          <h4 class="title mb-2">
-            <span>{{seriesValue.name}}
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <h4 class="title mb-0">
+              <span>{{seriesValue.name}}
 
-              @if(showLoader()) {
-                <div class="spinner-border spinner-border-sm text-primary" role="status">
-                  <span class="visually-hidden">{{t('loading')}}</span>
-                </div>
-              }
+                @if(showLoader()) {
+                  <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">{{t('loading')}}</span>
+                  </div>
+                }
+
               </span>
 
-          </h4>
+            </h4>
+
+            @if(showMediaIssueWarning()) {
+              <button type="button" class="btn btn-link p-0 fs-4 warning" [attr.aria-label]="t('media-error-tooltip')" [ngbTooltip]="t('media-error-tooltip')" placement="bottom" (click)="showMediaErrors()">
+                <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+              </button>
+            }
+          </div>
           <div class="subtitle  mt-2 mb-2">
             @if (seriesValue.localizedName !== seriesValue.name && seriesValue.localizedName) {
               <span>{{seriesValue.localizedName | defaultValue}}</span>
@@ -73,7 +82,7 @@
                     </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
-                    <button type="button" class="btn btn-outline-primary dropdown-toggle-split" ngbDropdownToggle></button>
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle-split" ngbDropdownToggle [attr.aria-label]="t('read-options-alt')"></button>
                     <div class="dropdown-menu" ngbDropdownMenu>
                       <button ngbDropdownItem (click)="read(true)">
                         <span>
@@ -404,7 +413,7 @@
             <li [ngbNavItem]="Tabs.Activity" id="activity-tab">
               <a ngbNavLink>{{Tabs.Activity | tabTitle}}</a>
               <ng-template ngbNavContent>
-                @defer (when activeTabId == Tabs.Activity; prefetch on idle) {
+                @defer (when activeTabId === Tabs.Activity; prefetch on idle) {
                   <div class="pb-3">
                     <app-reading-history-viewer
                       [currentEntries]="readingHistory()"

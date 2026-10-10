@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, output, signal} from '@angular/core';
 import {PercentPipe} from '@angular/common';
 import {Router} from '@angular/router';
 import {translate, TranslocoDirective} from '@jsverse/transloco';
@@ -14,10 +14,21 @@ import {ActivityDurationPipe} from '../../../_pipes/activity-duration.pipe';
 import {EventAction} from '../../../_models/events/event-action';
 import {ActivityEndReason} from '../../../_models/activity/activity-end-reason';
 import {LibraryService} from '../../../_services/library.service';
+import {LibraryScanSummary} from '../../../_models/activity/library-scan-summary';
+import {SeriesService} from '../../../_services/series.service';
+import {EVENTS} from '../../../_services/message-hub.service';
+import {SeriesScanTarget} from '../../../_models/events/bodies/series-scan-target';
+import {MediaErrorReasonPipe} from '../../../_pipes/media-error-reason.pipe';
+import {SettingsTabId} from '../../../sidenav/preference-nav/preference-nav.component';
 
 interface StepCounter {
   current: number;
   total: number;
+}
+
+interface SummaryPart {
+  key: string;
+  params: Record<string, number>;
 }
 
 @Component({
@@ -25,11 +36,12 @@ interface StepCounter {
   templateUrl: './activity-job-row.component.html',
   styleUrl: './activity-job-row.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, PercentPipe, EventTitlePipe, EventActionPipe, ActivityAgePipe, ActivityDurationPipe]
+  imports: [TranslocoDirective, PercentPipe, EventTitlePipe, EventActionPipe, ActivityAgePipe, ActivityDurationPipe, MediaErrorReasonPipe]
 })
 export class ActivityJobRowComponent {
   private readonly router = inject(Router);
   private readonly libraryService = inject(LibraryService);
+  private readonly seriesService = inject(SeriesService);
   private readonly toastr = inject(ToastrService);
 
   readonly job = input.required<ActivityJob>();
@@ -49,34 +61,70 @@ export class ActivityJobRowComponent {
   protected readonly titleStep = computed(() => titleStep(this.job()));
   protected readonly step = computed(() => currentStep(this.job()));
   protected readonly counter = computed(() => counterOf(this.step()));
+  protected readonly seriesScan = computed(() => {
+    if (this.job().scanSummaries.some(s => s.seriesRemoved > 0)) return null;
+    return seriesScanOf(this.titleStep());
+  });
 
   protected readonly finishingStep = computed(() => {
     const step = this.step();
     return this.isScan() && step && isFinishingStep(step) ? step : null;
   });
   protected readonly finishingUp = computed(() => isProcessingDone(this.step()));
+  protected readonly seriesFinishingLabel = computed(() => {
+    const step = this.finishingStep();
+    if (!step || !this.seriesScan()) return null;
+
+    switch (step.name) {
+      case EVENTS.CoverUpdateProgress:
+        return translate('events-widget.refreshing-covers-label');
+      case EVENTS.WordCountAnalyzerProgress:
+        return translate('events-widget.counting-words-label');
+      default:
+        return null;
+    }
+  });
 
   protected readonly currentLibraryName = computed(() => {
     const libraryId = this.job().libraryIds.at(-1);
     return libraryId === undefined ? '' : (this.libraryNames()?.[libraryId] ?? '');
   });
 
-  protected readonly showSummary = computed(() => this.ended() && this.isScan() && this.job().seenFromStart);
-  protected readonly canOpenLibrary = computed(() => this.ended() && this.isScan() && !this.isMultiLibrary() && this.job().libraryId !== null);
+  protected readonly summaryParts = computed(() => summaryPartsOf(this.job().scanSummaries));
+  protected readonly showSummary = computed(() => this.ended() && this.isScan() && this.job().scanSummaries.length > 0);
+  protected readonly canOpen = computed(() => this.ended() && this.isScan() && !this.isMultiLibrary() && this.job().libraryId !== null);
+  protected readonly problemSummaries = computed(() => this.showSummary()
+    ? this.job().scanSummaries.filter(s => s.recentProblemFiles.length > 0)
+    : []);
+  protected problemFilesOpen = signal(false);
   protected readonly canRescan = computed(() => this.isScan() && (this.isMultiLibrary() || this.job().libraryId !== null));
 
-  protected openLibrary() {
-    this.router.navigate(['library', this.job().libraryId]);
+  protected open() {
+    const seriesScan = this.seriesScan();
+    if (seriesScan) {
+      this.router.navigate(['library', this.job().libraryId, 'series', seriesScan.seriesId]);
+    } else {
+      this.router.navigate(['library', this.job().libraryId]);
+    }
+    this.navigated.emit();
+  }
+
+  protected openMediaIssues() {
+    this.router.navigate(['settings'], {fragment: SettingsTabId.MediaIssues});
     this.navigated.emit();
   }
 
   protected rescan() {
     const job = this.job();
     const libraryId = job.libraryId!;
+    const seriesScan = this.seriesScan();
 
     let request: Observable<unknown>;
     let toast: string;
-    if (this.isMultiLibrary()) {
+    if (seriesScan) {
+      request = this.seriesService.scan(libraryId, seriesScan.seriesId);
+      toast = translate('toasts.scan-queued', {name: seriesScan.seriesName});
+    } else if (this.isMultiLibrary()) {
       request = this.libraryService.scanAll();
       toast = translate('toasts.scan-all-queued');
     } else {
@@ -91,6 +139,34 @@ export class ActivityJobRowComponent {
   }
 
   protected readonly EventAction = EventAction;
+}
+
+function summaryPartsOf(summaries: LibraryScanSummary[]): SummaryPart[] {
+  const sum = (field: keyof Omit<LibraryScanSummary, 'libraryId' | 'libraryName' | 'recentProblemFiles'>) => summaries.reduce((total, s) => total + s[field], 0);
+
+  const changes: SummaryPart[] = [
+    {key: 'scan-series-added-label', params: {count: sum('seriesAdded')}},
+    {key: 'scan-series-removed-label', params: {count: sum('seriesRemoved')}},
+    {key: 'scan-chapters-added-label', params: {count: sum('chaptersAdded')}},
+    {key: 'scan-chapters-updated-label', params: {count: sum('chaptersUpdated')}},
+    {key: 'scan-chapters-removed-label', params: {count: sum('chaptersRemoved')}},
+  ].filter(p => p.params.count > 0);
+
+  const parts = changes.length > 0 ? changes : [{key: 'scan-no-changes-label', params: {}}];
+
+  const problemFiles = sum('problemFiles');
+  const newProblemFiles = sum('newProblemFiles');
+  if (newProblemFiles > 0) {
+    parts.push({key: 'scan-problem-files-new-label', params: {count: problemFiles, new: newProblemFiles}});
+  } else if (problemFiles > 0) {
+    parts.push({key: 'scan-problem-files-label', params: {count: problemFiles}});
+  }
+
+  return parts;
+}
+
+function seriesScanOf(step: ActivityStep | undefined): SeriesScanTarget | null {
+  return (step?.body as {seriesScan?: SeriesScanTarget | null} | null)?.seriesScan ?? null;
 }
 
 function counterOf(step: ActivityStep | undefined): StepCounter | null {

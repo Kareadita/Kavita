@@ -1,8 +1,7 @@
 import {Injectable} from '@angular/core';
-import {HubConnection, HubConnectionBuilder} from '@microsoft/signalr';
+import {HubConnection, HubConnectionBuilder, IRetryPolicy} from '@microsoft/signalr';
 import {BehaviorSubject, ReplaySubject} from 'rxjs';
 import {environment} from '../../environments/environment';
-import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
 import {User} from '../_models/user/user';
 import {SignalRMessage} from '../_models/events/core/signalr-message';
 import {MessageMeta} from '../_models/events/core/message-meta';
@@ -167,6 +166,10 @@ export enum EVENTS {
    * Progress event send after a batch completes
    */
   RerunMetadataMappingsProgress = 'RerunMetadataMappingsProgress',
+  /**
+   * Delayed scans were moved or removed after a scan ended. Admins only
+   */
+  ScanRescheduled = 'ScanRescheduled',
 }
 
 export interface Message<T> {
@@ -208,6 +211,7 @@ const bodyPayloadEvents = [
   EVENTS.ScrobbleProviderUpdated,
   EVENTS.LicenseInfoUpdate,
   EVENTS.ExternalMetadataUpdate,
+  EVENTS.ScanRescheduled,
 ];
 
 const envelopePayloadEvents = [
@@ -215,13 +219,25 @@ const envelopePayloadEvents = [
   EVENTS.DownloadProgress,
 ];
 
+const RetryDelaysMs = [0, 2_000, 10_000, 30_000];
+const MaxRetryDelayMs = 60_000;
+
+function retryDelayMs(previousRetryCount: number) {
+  return RetryDelaysMs[previousRetryCount] ?? MaxRetryDelayMs;
+}
+
+// The default policy returns null after 4 tries (~42s), which closes the connection for good
+const keepRetrying: IRetryPolicy = {
+  nextRetryDelayInMilliseconds: context => retryDelayMs(context.previousRetryCount),
+};
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class MessageHubService {
   hubUrl = environment.hubUrl;
-  private hubConnection!: HubConnection;
+  private hubConnection?: HubConnection;
 
   private messagesSource = new ReplaySubject<Message<any>>(1);
   private onlineUsersSource = new BehaviorSubject<string[]>([]); // UserNames
@@ -241,59 +257,59 @@ export class MessageHubService {
 
   public readonly isConnectedSignal = toSignal(this.isConnectedSource);
 
-  constructor() {}
-
-  /**
-   * Tests that an event is of the type passed
-   * @param event
-   * @param eventType
-   * @returns
-   */
-  public isEventType(event: Message<any>, eventType: EVENTS) {
-    if (event.event == EVENTS.NotificationProgress) {
-      const notification = event.payload as NotificationProgressEvent;
-      return notification.eventType.toLowerCase() == eventType.toLowerCase();
-    }
-    return event.event === eventType;
-  }
 
   createHubConnection(user: User) {
-    this.hubConnection = new HubConnectionBuilder()
+    this.stopHubConnection();
+
+    const connection = new HubConnectionBuilder()
       .withUrl(this.hubUrl + 'messages', {
         accessTokenFactory: () => user.token
       })
-      .withAutomaticReconnect()
+      .withAutomaticReconnect(keepRetrying)
       .withStatefulReconnect()
       .build();
+    this.hubConnection = connection;
 
-    this.hubConnection.onreconnecting(() => this.isConnectedSource.next(false));
-    this.hubConnection.onreconnected(() => this.isConnectedSource.next(true));
-    this.hubConnection.onclose(() => this.isConnectedSource.next(false));
+    // A replaced connection can still close or reconnect after the new one is up
+    const setConnected = (connected: boolean) => {
+      if (connection === this.hubConnection) {
+        this.isConnectedSource.next(connected);
+      }
+    };
 
-    const started = this.hubConnection
-      .start()
-      .then(() => {
-        // Only report connected once the handshake actually resolves
-        this.isConnectedSource.next(true);
-      })
-      .catch(err => {
-        console.error(err);
-        this.isConnectedSource.next(false);
-      });
+    connection.onreconnecting(() => setConnected(false));
+    connection.onreconnected(() => setConnected(true));
+    connection.onclose(() => setConnected(false));
 
-    this.hubConnection.on(EVENTS.OnlineUsers, (usernames: string[]) => {
+    connection.on(EVENTS.OnlineUsers, (usernames: string[]) => {
       this.onlineUsersSource.next(usernames);
     });
 
     bodyPayloadEvents.forEach(event => {
-      this.hubConnection.on(event, (resp: SignalRMessage) => this.emit(event, resp, resp.body));
+      connection.on(event, (resp: SignalRMessage) => this.emit(event, resp, resp.body));
     });
 
     envelopePayloadEvents.forEach(event => {
-      this.hubConnection.on(event, (resp: SignalRMessage) => this.emit(event, resp, resp));
+      connection.on(event, (resp: SignalRMessage) => this.emit(event, resp, resp));
     });
 
-    return started;
+    this.startWithRetry(connection, setConnected);
+  }
+
+  // Automatic reconnect only covers a connection that was up once, a failed first start is never retried by SignalR
+  private async startWithRetry(connection: HubConnection, setConnected: (connected: boolean) => void) {
+    for (let attempt = 1; connection === this.hubConnection; attempt++) {
+      try {
+        await connection.start();
+        setConnected(true);
+        return;
+      } catch (err) {
+        console.error(err);
+        setConnected(false);
+      }
+
+      await new Promise(resolve => setTimeout(resolve, retryDelayMs(attempt)));
+    }
   }
 
   private emit(event: EVENTS, resp: SignalRMessage, payload: unknown) {
@@ -302,9 +318,11 @@ export class MessageHubService {
   }
 
   stopHubConnection() {
-    if (this.hubConnection) {
-      this.hubConnection.stop().catch(err => console.error(err));
-      this.isConnectedSource.next(false);
-    }
+    const connection = this.hubConnection;
+    if (!connection) return;
+
+    this.hubConnection = undefined;
+    connection.stop().catch(err => console.error(err));
+    this.isConnectedSource.next(false);
   }
 }

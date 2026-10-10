@@ -20,6 +20,7 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.Stats;
 using Kavita.Models.DTOs.Update;
 using Kavita.Models.Entities.Enums;
+using Kavita.Server.Attributes;
 using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -104,6 +105,7 @@ public class ServerController(
     /// </summary>
     /// <returns></returns>
     [HttpPost("analyze-files")]
+    [Obsolete("This will be removed in v0.9.3 - Only needed to be ran once when upgrading to v0.7.0")]
     public async Task<ActionResult> AnalyzeFiles()
     {
         logger.LogInformation("{UserName} is performing file analysis from admin dashboard", Username!);
@@ -238,9 +240,11 @@ public class ServerController(
     /// </summary>
     /// <returns></returns>
     [HttpGet("activity")]
-    public ActionResult<ActivitySnapshotDto> GetActivity()
+    public async Task<ActionResult<ActivitySnapshotDto>> GetActivity()
     {
+        var ct = HttpContext.RequestAborted;
         var (scheduled, scheduledTotal) = TaskScheduler.GetScheduledScans(20);
+        var libraries = await unitOfWork.LibraryRepository.GetLibraryDtosAsync(ct);
         var processingJobIds = TaskScheduler.GetProcessingJobIds();
 
         return Ok(new ActivitySnapshotDto
@@ -250,6 +254,7 @@ public class ServerController(
             Running = activityTracker.GetRunning(processingJobIds),
             Scheduled = scheduled,
             ScheduledTotal = scheduledTotal,
+            ScheduledFolderScans = TaskScheduler.GetScheduledFolderScans(libraries),
             Upcoming = TaskScheduler.GetUpcomingTasks(),
             RecentJobs = activityTracker.GetRecentJobs(processingJobIds),
             RecentEntries = activityTracker.GetRecentEntries(),
@@ -266,6 +271,48 @@ public class ServerController(
     {
         var ct = HttpContext.RequestAborted;
         return Ok(await unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync(ct));
+    }
+
+    /// <summary>
+    /// Dismiss one or more media error
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <returns></returns>
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpPost("media-errors/dismiss")]
+    public async Task<ActionResult> DismissMediaErrors(List<int> ids)
+    {
+        var ct = HttpContext.RequestAborted;
+        await unitOfWork.MediaErrorRepository.SetDismissStateAsync(ids, true, ct);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Undismiss one or more media error
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <returns></returns>
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpPost("media-errors/undismiss")]
+    public async Task<ActionResult> UndismissMediaErrors(List<int> ids)
+    {
+        var ct = HttpContext.RequestAborted;
+        await unitOfWork.MediaErrorRepository.SetDismissStateAsync(ids, false, ct);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Get the media errors for a given series
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("media-errors-for-series")]
+    [SeriesAccess]
+    public async Task<ActionResult<List<MediaErrorDto>>> GetMediaErrorsForSeries(int seriesId)
+    {
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.MediaErrorRepository.GetErrorDtosForSeriesAsync(seriesId, ct));
     }
 
     /// <summary>
