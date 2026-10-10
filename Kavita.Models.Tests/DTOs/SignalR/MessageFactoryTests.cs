@@ -300,4 +300,18 @@ public class MessageFactoryTests
 
         Assert.Equal("Seasonal", body.GetProperty("collectionName").GetString());
     }
+
+    [Fact]
+    public void UnreadableFoldersEvent_CapsFoldersAndKeepsTheCount()
+    {
+        var folders = Enumerable.Range(1, 12).Select(i => $"M:/Series {i}").ToList();
+
+        var message = MessageFactory.UnreadableFoldersEvent(1, "Manga", folders);
+        var body = Assert.IsType<UnreadableFoldersEventBodyDto>(message.Body);
+
+        Assert.Equal(MessageEventCode.UnreadableFolders, message.Code);
+        Assert.Equal(MessageEventPriority.Error, message.Priority);
+        Assert.Equal(folders.Take(UnreadableFoldersEventBodyDto.MaxFolders), body.Folders);
+        Assert.Equal(12, body.FolderCount);
+    }
 }

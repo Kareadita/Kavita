@@ -3,6 +3,7 @@ import {CodedEventBody} from './coded-event-body';
 import {LibraryEventBody} from './library-event-body';
 import {SeriesEventBody} from './series-event-body';
 import {RootFoldersInaccessibleBody} from './root-folders-inaccessible-body';
+import {UnreadableFoldersBody} from './unreadable-folders-body';
 import {SeriesCollisionBody} from './series-collision-body';
 import {ScanLibrariesDelayedBody} from './scan-libraries-delayed-body';
 import {ScanLibraryDelayedBody} from './scan-library-delayed-body';
@@ -17,6 +18,7 @@ import {WordCountFailedBody} from './word-count-failed-body';
 export interface CodedEventBodyMap {
   [MessageEventCode.RootFoldersInaccessible]: RootFoldersInaccessibleBody;
   [MessageEventCode.RootFoldersEmpty]: LibraryEventBody;
+  [MessageEventCode.UnreadableFolders]: UnreadableFoldersBody;
   [MessageEventCode.SeriesCollision]: SeriesCollisionBody;
   [MessageEventCode.FilesOutsideFolder]: SeriesEventBody;
   [MessageEventCode.ScanSeriesNoRoot]: SeriesEventBody;

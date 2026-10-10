@@ -115,6 +115,7 @@ export class ActivityEntryRowComponent {
     switch (entry.code) {
       case MessageEventCode.RootFoldersInaccessible:
       case MessageEventCode.RootFoldersEmpty:
+      case MessageEventCode.UnreadableFolders:
         return entry.libraryId !== null ? [EventAction.Rescan] : [];
       case MessageEventCode.SeriesCollision:
         return [EventAction.Details];
@@ -143,7 +144,7 @@ export class ActivityEntryRowComponent {
         this.navigate(['library', entry.libraryId, 'series', entry.seriesId]);
         break;
       case EventAction.Rescan:
-        this.rescan(entry.libraryId!);
+        this.rescan(entry);
         break;
       case EventAction.Details:
         this.showDetails();
@@ -159,10 +160,12 @@ export class ActivityEntryRowComponent {
     this.navigated.emit();
   }
 
-  private rescan(libraryId: number) {
+  private rescan(entry: ActivityEntry) {
+    const libraryId = entry.libraryId!;
     this.libraryService.scan(libraryId).subscribe(() => {
       const name = this.libraryNames()?.[libraryId] ?? '';
       this.toastr.info(translate('toasts.scan-queued', {name}));
+      this.dismissed.emit(entry.id);
     });
   }
 

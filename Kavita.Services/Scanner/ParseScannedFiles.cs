@@ -72,6 +72,11 @@ public partial class ParseScannedFiles
     public IReadOnlySet<string> ReadFolders => _readFolders;
 
     /// <summary>
+    /// Folders that could not be read this scan, their series were kept as they are
+    /// </summary>
+    public IReadOnlyList<string> UnreadableFolders => _unreadableFolders;
+
+    /// <summary>
     /// The folder was not read, walked, or inside a folder that could not be read this scan, so it may be gone
     /// </summary>
     public bool IsUnaccountedFor(string folder)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
@@ -481,6 +482,16 @@ public static class MessageFactory
             LibraryName = libraryName,
             Folders = folders,
         });
+    }
+
+    public static SignalRMessageDto UnreadableFoldersEvent(int libraryId, string libraryName, IReadOnlyList<string> folders)
+    {
+        var title = $"Some folders in {libraryName} could not be read. Their series were kept as they are";
+        var shown = folders.Take(UnreadableFoldersEventBodyDto.MaxFolders).ToList();
+        var subtitle = string.Join(", ", shown);
+
+        return CodedEvent(Error, MessageEventCode.UnreadableFolders, title, subtitle,
+            new UnreadableFoldersEventBodyDto(Error, title, subtitle, libraryId, libraryName, shown, folders.Count));
     }
 
     public static SignalRMessageDto RootFoldersEmptyEvent(int libraryId, string libraryName)

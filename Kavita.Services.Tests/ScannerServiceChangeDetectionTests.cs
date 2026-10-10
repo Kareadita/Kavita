@@ -1,10 +1,13 @@
 using System.Collections.Concurrent;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
 using Kavita.Database;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
+using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.DTOs.SignalR.Bodies;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
@@ -15,6 +18,7 @@ using System.IO.Abstractions;
 using System.IO.Compression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
+using NSubstitute;
 using Xunit.Abstractions;
 
 namespace Kavita.Services.Tests;
@@ -408,11 +412,71 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         Assert.Equal(3, await context.MangaFile.CountAsync(f => f.Chapter.Volume.Series.LibraryId == libraryId));
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ScanLibrary_UnreadableSeriesFolder_SendsUnreadableFoldersEvent(bool forceUpdate)
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, $"Unreadable Folder Event {forceUpdate} - Manga", TwoSeries);
+        var root = await LibraryRoot(context, libraryId);
+        var eventHub = Substitute.For<IEventHub>();
+
+        await ScannerWithUnreadable(unitOfWork, eventHub, Path.Join(root, "Berserk")).ScanLibrary(libraryId, forceUpdate);
+
+        var body = Assert.Single(UnreadableFoldersBodies(eventHub));
+        Assert.Equal(libraryId, body.LibraryId);
+        Assert.Equal([Parser.NormalizePath(Path.Join(root, "Berserk"))], body.Folders);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_UnreadableVolumeFolder_ReportsTheFolderOnce()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Unreadable Volume Folder Event - Manga", TwoSeries);
+        var root = await LibraryRoot(context, libraryId);
+        var eventHub = Substitute.For<IEventHub>();
+
+        // DirectoryService fails to list its subfolders first, the walk then fails to read it
+        await ScannerWithUnreadable(unitOfWork, eventHub, Path.Join(root, "Berserk", "Berserk Vol. 2")).ScanLibrary(libraryId);
+
+        var body = Assert.Single(UnreadableFoldersBodies(eventHub));
+        Assert.Equal([Parser.NormalizePath(Path.Join(root, "Berserk", "Berserk Vol. 2"))], body.Folders);
+        Assert.Equal(1, body.FolderCount);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_NoUnreadableFolders_SendsNoUnreadableFoldersEvent()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, "No Unreadable Folder Event - Manga", TwoSeries);
+        var eventHub = Substitute.For<IEventHub>();
+
+        await ScannerWithUnreadable(unitOfWork, eventHub).ScanLibrary(libraryId);
+
+        Assert.Empty(UnreadableFoldersBodies(eventHub));
+    }
+
+    private static List<UnreadableFoldersEventBodyDto> UnreadableFoldersBodies(IEventHub eventHub)
+    {
+        return eventHub.ReceivedCalls()
+            .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
+            .Select(c => (SignalRMessageDto) c.GetArguments()[1]!)
+            .Where(m => m.Code == MessageEventCode.UnreadableFolders)
+            .Select(m => (UnreadableFoldersEventBodyDto) m.Body!)
+            .ToList();
+    }
+
     private ScannerService ScannerWithUnreadable(IUnitOfWork unitOfWork, params string[] folders)
+    {
+        return ScannerWithUnreadable(unitOfWork, null, folders);
+    }
+
+    private ScannerService ScannerWithUnreadable(IUnitOfWork unitOfWork, IEventHub? eventHub, params string[] folders)
     {
         var fs = UnreadableFolders.Wrap(new FileSystem(), folders);
         return new ScannerHelper(unitOfWork, testOutputHelper)
-            .CreateServices(new DirectoryService(NullLogger<DirectoryService>.Instance, fs), fs);
+            .CreateServices(new DirectoryService(NullLogger<DirectoryService>.Instance, fs), fs, eventHub: eventHub);
     }
 
     private static Task<int> SeriesId(DataContext context, int libraryId, string name)

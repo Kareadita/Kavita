@@ -17,6 +17,7 @@ type MessageBody = Partial<{
   libraryName: string;
   seriesName: string;
   folders: string[];
+  folderCount: number;
   folder: string;
   path: string;
   filePath: string;
@@ -50,6 +51,8 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.root-folders-inaccessible-label`, {}, fallback);
       case MessageEventCode.RootFoldersEmpty:
         return this.translate(`${PREFIX}.root-folders-empty-label`, {libraryName}, fallback);
+      case MessageEventCode.UnreadableFolders:
+        return this.translate(`${PREFIX}.unreadable-folders-label`, {libraryName}, fallback);
       case MessageEventCode.SeriesCollision:
         return this.translate(`${PREFIX}.series-collision-label`, {seriesName, libraryName}, fallback);
       case MessageEventCode.FilesOutsideFolder:
@@ -93,6 +96,8 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.root-folders-inaccessible-description`, {folders: body.folders?.join(', ')}, fallback);
       case MessageEventCode.RootFoldersEmpty:
         return this.translate(`${PREFIX}.root-folders-empty-description`, {}, fallback);
+      case MessageEventCode.UnreadableFolders:
+        return this.unreadableFoldersDescription(body, fallback);
       case MessageEventCode.SeriesCollision:
         return this.translate(`${PREFIX}.series-collision-description`, {}, fallback);
       case MessageEventCode.FilesOutsideFolder:
@@ -125,6 +130,15 @@ export class EventMessagePipe implements PipeTransform {
       default:
         return fallback;
     }
+  }
+
+  private unreadableFoldersDescription(body: MessageBody, fallback: string): string {
+    const folders = body.folders?.join(', ');
+    const rest = (body.folderCount ?? 0) - (body.folders?.length ?? 0);
+    if (rest > 0) {
+      return this.translate(`${PREFIX}.unreadable-folders-more-description`, {folders, count: `${rest}`}, fallback);
+    }
+    return this.translate(`${PREFIX}.unreadable-folders-description`, {folders}, fallback);
   }
 
   private translate(key: string, params: Params, fallback: string): string {

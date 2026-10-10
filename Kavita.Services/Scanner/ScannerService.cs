@@ -295,7 +295,7 @@ public class ScannerService(
 
         logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var scanStarted = DateTime.Now;
-        var (scanElapsedTime, parsedSeries, savedIssues) = await ScanFiles(library, folderPaths,
+        var (scanElapsedTime, parsedSeries, savedIssues, _) = await ScanFiles(library, folderPaths,
             false, true);
 
         logger.LogInformation("ScanFiles for {Series} took {Time} milliseconds", series.Name, scanElapsedTime);
@@ -608,7 +608,7 @@ public class ScannerService(
 
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 1: Scan & Parse Files", library.Name);
         var scanStarted = DateTime.Now;
-        var (scanElapsedTime, parsedSeries, savedIssues) = await ScanFiles(library, libraryFolderPaths,
+        var (scanElapsedTime, parsedSeries, savedIssues, unreadableFolders) = await ScanFiles(library, libraryFolderPaths,
             shouldUseLibraryScan, forceUpdate);
 
         // We need to remove any keys where there is no actual parser info
@@ -646,6 +646,12 @@ public class ScannerService(
         }
 
         var issues = await ReportScanIssuesAsync(library, savedIssues);
+
+        if (unreadableFolders.Count > 0)
+        {
+            await eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.UnreadableFoldersEvent(library.Id, library.Name, unreadableFolders));
+        }
 
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanEndedEvent(tally.ToEventBody(library, issues)));
@@ -914,7 +920,7 @@ public class ScannerService(
         var parsedSeries = TrackFoundSeriesAndFiles(processedSeries,
             await unitOfWork.SeriesRepository.GetSeriesNameMatchesAsync(library.Id));
 
-        return new ScanFilesResult(scanElapsedTime, parsedSeries, savedIssues);
+        return new ScanFilesResult(scanElapsedTime, parsedSeries, savedIssues, scanner.UnreadableFolders);
     }
 
     /// <summary>
@@ -1044,7 +1050,8 @@ public class ScannerService(
                 issues.Count, issues.NewCount);
     }
 
-    private sealed record ScanFilesResult(long ElapsedMs, Dictionary<ParsedSeries, IList<ParserInfo>> ParsedSeries, SavedScanIssues SavedIssues);
+    private sealed record ScanFilesResult(long ElapsedMs, Dictionary<ParsedSeries, IList<ParserInfo>> ParsedSeries, SavedScanIssues SavedIssues,
+        IReadOnlyList<string> UnreadableFolders);
 
     private sealed record SavedScanIssues(int NewCount, IList<string> Paths, IReadOnlyDictionary<string, IList<string>> FilesByFolder);
 
