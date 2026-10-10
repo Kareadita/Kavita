@@ -916,9 +916,6 @@ namespace Kavita.Database.Migrations
                     b.Property<long?>("Bytes")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Comment")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
@@ -926,15 +923,18 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Details")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Extension")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("FileLastWriteTimeUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FilePath")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsDismissed")

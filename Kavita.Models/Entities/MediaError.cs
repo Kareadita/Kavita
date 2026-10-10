@@ -20,10 +20,6 @@ public class MediaError : IEntityDate
     /// </summary>
     public required string FilePath { get; set; }
     /// <summary>
-    /// Developer defined string
-    /// </summary>
-    public string Comment { get; set; }
-    /// <summary>
     /// Exception message
     /// </summary>
     public string Details { get; set; }

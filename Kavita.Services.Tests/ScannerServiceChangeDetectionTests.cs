@@ -1191,7 +1191,7 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
             var name = Path.GetFileName(path);
             Parsed.Enqueue(name);
             return failing.Contains(name)
-                ? ParseFileResult.Failed(new ParseIssue(MediaErrorReason.CorruptEpub, "broken", "details"))
+                ? ParseFileResult.Failed(new ParseIssue(MediaErrorReason.CorruptEpub, "details"))
                 : inner.ParseFile(path, rootPath, libraryRoot, type, enableMetadata);
         }
     }

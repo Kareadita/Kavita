@@ -13,16 +13,9 @@ public class MediaErrorBuilder(string filePath): IEntityBuilder<MediaError>
         FilePath = filePath.NormalizePath(),
         Extension = Path.GetExtension(filePath).Replace(".", string.Empty).ToUpperInvariant(),
         LastSeenUtc = DateTime.UtcNow,
-        Comment = string.Empty,
     };
 
     public MediaError Build() => _mediaError;
-
-    public MediaErrorBuilder WithComment(string comment)
-    {
-        _mediaError.Comment = comment.Trim();
-        return this;
-    }
 
     public MediaErrorBuilder WithProducer(MediaErrorProducer producer)
     {

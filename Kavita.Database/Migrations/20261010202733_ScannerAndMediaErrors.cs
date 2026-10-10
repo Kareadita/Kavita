@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Kavita.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedMediaIssueTracking : Migration
+    public partial class ScannerAndMediaErrors : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,16 +14,50 @@ namespace Kavita.Database.Migrations
             // Old scanner rows hold a file name only, with no library or stamp to match against
             migrationBuilder.Sql("DELETE FROM \"MediaError\";");
 
-            migrationBuilder.AddColumn<long>(
-                name: "Bytes",
-                table: "MediaError",
-                type: "INTEGER",
-                nullable: true);
+            migrationBuilder.DropColumn(
+                name: "Comment",
+                table: "MediaError");
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "FileLastWriteTimeUtc",
                 table: "MediaError",
                 type: "TEXT",
+                nullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "FilePath",
+                table: "MediaError",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "TEXT",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Extension",
+                table: "MediaError",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "TEXT",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Details",
+                table: "MediaError",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "TEXT",
+                oldNullable: true);
+
+            migrationBuilder.AddColumn<long>(
+                name: "Bytes",
+                table: "MediaError",
+                type: "INTEGER",
                 nullable: true);
 
             migrationBuilder.AddColumn<bool>(
@@ -64,6 +98,24 @@ namespace Kavita.Database.Migrations
                 name: "SeriesId",
                 table: "MediaError",
                 type: "INTEGER",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "AnalyzedFileWriteTimeUtc",
+                table: "MangaFile",
+                type: "TEXT",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "FileLastWriteTimeUtc",
+                table: "MangaFile",
+                type: "TEXT",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "CoverFileWriteTimeUtc",
+                table: "Chapter",
+                type: "TEXT",
                 nullable: true);
 
             migrationBuilder.CreateIndex(
@@ -117,10 +169,6 @@ namespace Kavita.Database.Migrations
                 table: "MediaError");
 
             migrationBuilder.DropColumn(
-                name: "FileLastWriteTimeUtc",
-                table: "MediaError");
-
-            migrationBuilder.DropColumn(
                 name: "IsDismissed",
                 table: "MediaError");
 
@@ -143,6 +191,52 @@ namespace Kavita.Database.Migrations
             migrationBuilder.DropColumn(
                 name: "SeriesId",
                 table: "MediaError");
+
+            migrationBuilder.DropColumn(
+                name: "AnalyzedFileWriteTimeUtc",
+                table: "MangaFile");
+
+            migrationBuilder.DropColumn(
+                name: "FileLastWriteTimeUtc",
+                table: "MangaFile");
+
+            migrationBuilder.DropColumn(
+                name: "CoverFileWriteTimeUtc",
+                table: "Chapter");
+
+            migrationBuilder.DropColumn(
+                name: "FileLastWriteTimeUtc",
+                table: "MediaError");
+
+            migrationBuilder.AddColumn<string>(
+                name: "Comment",
+                table: "MediaError",
+                type: "TEXT",
+                nullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "FilePath",
+                table: "MediaError",
+                type: "TEXT",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "TEXT");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Extension",
+                table: "MediaError",
+                type: "TEXT",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "TEXT");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Details",
+                table: "MediaError",
+                type: "TEXT",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "TEXT");
         }
     }
 }

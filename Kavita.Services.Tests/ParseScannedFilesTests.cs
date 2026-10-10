@@ -833,7 +833,7 @@ public class ParseScannedFilesTests: AbstractDbTest
     private static readonly DateTime FailedWriteTime = new(2026, 10, 5, 12, 0, 0, DateTimeKind.Utc);
     private static readonly FileStamp Broken = new($"{MurderbotFolder}/Fugitive Telemetry.epub", 100, FailedWriteTime);
     private static readonly FileStamp Readable = new($"{MurderbotFolder}/All Systems Red.epub", 200, FailedWriteTime);
-    private static readonly ParseIssue CorruptEpub = new(MediaErrorReason.CorruptEpub, "broken", "details");
+    private static readonly ParseIssue CorruptEpub = new(MediaErrorReason.CorruptEpub, "details");
 
     private static ParseScannedFiles FailedFileScanner(IDirectoryService ds, IReadingItemService? reader = null)
     {
@@ -982,7 +982,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>());
 
         var expected = failing
-            .Select(f => new ScanIssue(f.Path.Replace('\\', '/'), f.Bytes, f.LastWriteTimeUtc, CorruptEpub.Reason, CorruptEpub.Comment, CorruptEpub.Details))
+            .Select(f => new ScanIssue(f.Path.Replace('\\', '/'), f.Bytes, f.LastWriteTimeUtc, CorruptEpub.Reason, CorruptEpub.Details))
             .ToList();
         Assert.Equal(expected, psf.Issues);
     }
@@ -1006,7 +1006,7 @@ public class ParseScannedFilesTests: AbstractDbTest
     [Fact]
     public async Task ScanLibrariesForSeries_ImportedFileWithAnIssue_IsKeptWithTheIssue()
     {
-        var notStrict = new ParseIssue(MediaErrorReason.EpubNotStrict, "lenient", "navigation file is not a valid XHTML file");
+        var notStrict = new ParseIssue(MediaErrorReason.EpubNotStrict, "navigation file is not a valid XHTML file");
         var reader = ReaderReturning(_ => new ParseFileResult(MurderbotInfo(Broken), notStrict));
         var psf = FailedFileScanner(ListingOf(Broken), reader);
 
@@ -1019,7 +1019,7 @@ public class ParseScannedFilesTests: AbstractDbTest
     [Fact]
     public async Task ScanLibrariesForSeries_RejectedFile_ReplacesItsMetadataIssue()
     {
-        var unreadable = new ParseIssue(MediaErrorReason.MetadataUnreadable, "metadata", "details");
+        var unreadable = new ParseIssue(MediaErrorReason.MetadataUnreadable, "details");
         var reader = ReaderReturning(_ => new ParseFileResult(MurderbotInfo(Broken, "[&/"), unreadable));
         var psf = FailedFileScanner(ListingOf(Broken), reader);
 

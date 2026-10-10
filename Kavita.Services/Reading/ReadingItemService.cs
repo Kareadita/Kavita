@@ -57,7 +57,7 @@ public class ReadingItemService : IReadingItemService
                 var comicInfo = _bookService.GetComicInfo(filePath, out var strictOpenError);
                 if (strictOpenError != null)
                 {
-                    issue = new ParseIssue(MediaErrorReason.EpubNotStrict, "The epub only opened with lenient parsing", strictOpenError);
+                    issue = new ParseIssue(MediaErrorReason.EpubNotStrict, strictOpenError);
                 }
 
                 return comicInfo;
@@ -71,8 +71,7 @@ public class ReadingItemService : IReadingItemService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "There was an exception reading the metadata of {FilePath}, parsing without it", filePath);
-            issue = new ParseIssue(MediaErrorReason.MetadataUnreadable, "There was an exception reading the metadata of the file",
-                ParseIssues.Describe(ex));
+            issue = new ParseIssue(MediaErrorReason.MetadataUnreadable, ParseIssues.Describe(ex));
         }
 
         return null;
@@ -112,7 +111,7 @@ public class ReadingItemService : IReadingItemService
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an exception when parsing file {FilePath}", path);
-            return ParseFileResult.Failed(ParseIssues.FromException(path, "There was an exception when parsing file", ex));
+            return ParseFileResult.Failed(ParseIssues.FromException(path, ex));
         }
     }
 

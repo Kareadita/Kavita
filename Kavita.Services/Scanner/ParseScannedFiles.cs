@@ -523,7 +523,7 @@ public partial class ParseScannedFiles
             _logger.LogCritical("[ScannerService] {SeriesName} @ {FileName} is empty when normalized, this file will not be ingested! The filename does not follow our guidelines or this is a bug in the parser, please report this! https://github.com/Kareadita/Kavita/issues",
                 info.Series, info.Filename);
 
-            return new ParseIssue(MediaErrorReason.NoSeriesName, "Failed to parse a valid series name for a file",
+            return new ParseIssue(MediaErrorReason.NoSeriesName,
                 $"{info.Series} is empty when normalized, this file will not be ingested! The filename does not follow our guidelines or this is a bug in the parser, please report this! https://github.com/Kareadita/Kavita/issues");
         }
 

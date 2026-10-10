@@ -8,17 +8,17 @@ namespace Kavita.Services.Scanner;
 
 public static class ParseIssues
 {
-    public static ParseIssue FromException(string filePath, string comment, Exception ex)
+    public static ParseIssue FromException(string filePath, Exception ex)
     {
-        return new ParseIssue(ReasonFor(filePath, ex), comment, Describe(ex));
+        return new ParseIssue(ReasonFor(filePath, ex), Describe(ex));
     }
 
     /// <param name="info">What the parser returned with its failure, if anything</param>
     public static ParseIssue FromFailedParse(ParserInfo? info)
     {
         return info == null
-            ? new ParseIssue(MediaErrorReason.ParseFailed, "Unable to parse any meaningful information out of file", string.Empty)
-            : new ParseIssue(MediaErrorReason.NoSeriesName, "Failed to parse a valid series name for a file", $"{info.Filename} has no series name");
+            ? new ParseIssue(MediaErrorReason.ParseFailed, string.Empty)
+            : new ParseIssue(MediaErrorReason.NoSeriesName, $"{info.Filename} has no series name");
     }
 
     public static MediaErrorReason ReasonFor(string filePath, Exception ex)

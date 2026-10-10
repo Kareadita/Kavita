@@ -22,7 +22,7 @@ public class MediaErrorRepositoryTests(ITestOutputHelper outputHelper) : Abstrac
         MediaErrorProducer producer = MediaErrorProducer.Scanner, MediaErrorReason reason = MediaErrorReason.CorruptEpub,
         bool isDismissed = false)
     {
-        var error = new MediaErrorBuilder(path).WithProducer(producer).WithComment("comment").WithDetails("details").Build();
+        var error = new MediaErrorBuilder(path).WithProducer(producer).WithDetails("details").Build();
         error.LibraryId = libraryId;
         error.Bytes = bytes;
         error.FileLastWriteTimeUtc = writeTime ?? (bytes == null ? null : WriteTime);
