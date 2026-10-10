@@ -42,6 +42,14 @@ import {MessageHubService} from "./app/_services/message-hub.service";
 import {DownloadService} from "./app/shared/_services/download.service";
 import {LibraryService} from "./app/_services/library.service";
 import {translocoPrefixKey} from "./libs/transloco-util";
+import {
+  KavitaLocaleKey,
+  KavitaLocaleSourceKey,
+  LocaleSourceAuto,
+  matchBrowserLocale,
+  safeGet,
+  safeSet
+} from "./libs/locale-utils";
 import {ToastrModule} from "@openng/ngx-toastr";
 import {AppComponent} from "./app/app.component";
 
@@ -119,7 +127,19 @@ function getBaseHref(platformLocation: PlatformLocation): string {
 
 function loadUserLocale(transloco: TranslocoService, accountService: AccountService) {
   const user = accountService.currentUser();
-  const locale = user?.preferences?.locale || localStorage.getItem(AccountService.localeKey) || 'en';
+  let locale = user?.preferences?.locale || safeGet(KavitaLocaleKey);
+
+  // Priority: account setting > stored local choice > browser auto-match (once) > English
+  if (!locale) {
+    const browserLangs = (typeof navigator !== 'undefined' && navigator.languages?.length)
+      ? [...navigator.languages]
+      : (typeof navigator !== 'undefined' && navigator.language ? [navigator.language] : []);
+    const matched = matchBrowserLocale(browserLangs, transloco.getAvailableLangs() as Array<string>);
+    locale = matched || 'en';
+    // Auto-match is local-only; persisting to the account happens at login time
+    safeSet(KavitaLocaleKey, locale);
+    safeSet(KavitaLocaleSourceKey, LocaleSourceAuto);
+  }
 
   transloco.setActiveLang(locale);
   return transloco.load(locale);
