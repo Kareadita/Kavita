@@ -13,6 +13,7 @@ import {DismissedActivity} from '../_models/activity/dismissed-activity';
 import {PersistedActivity} from '../_models/activity/persisted-activity';
 import {ActivityEndReason} from '../_models/activity/activity-end-reason';
 import {ActivitySnapshotResult} from '../_models/activity/activity-snapshot-result';
+import {ActivitySnapshot} from '../_models/activity/activity-snapshot';
 import {DelayedScanCodes} from '../_models/activity/delayed-scan-codes';
 import {ActivitySnapshotService} from './activity-snapshot.service';
 import {RecentJob} from '../_models/activity/recent-job';
@@ -46,6 +47,7 @@ export class ActivityStoreService {
 
   private _rows = signal<ActivityRow[]>([]);
   private _announcement = signal<ActivityEntry | null>(null);
+  private _problemFilesAnnouncement = signal<LibraryScanSummary | null>(null);
   private dismissed: DismissedActivity[] = [];
   private storageKey: string | null = null;
   private writeTimer: ReturnType<typeof setTimeout> | undefined;
@@ -64,6 +66,10 @@ export class ActivityStoreService {
    * Latest Action or Error entry that arrived live, never one restored from storage
    */
   readonly announcement = this._announcement.asReadonly();
+  /**
+   * Latest live scan end that found new problem files. Only one of this and announcement is set at a time
+   */
+  readonly problemFilesAnnouncement = this._problemFilesAnnouncement.asReadonly();
 
   constructor() {
     effect(() => {
@@ -227,6 +233,10 @@ export class ActivityStoreService {
     const previous = job?.steps[message.name];
     const isEnded = message.eventType === 'ended';
     const summary = isEnded ? scanSummaryOf(message) : null;
+    if (live && summary && summary.newProblemFiles > 0) {
+      this._announcement.set(null);
+      this._problemFilesAnnouncement.set(summary);
+    }
 
     // An ended never creates or reopens a job (a scan with no changes sends ScanProgress ended with no prior step)
     if (isEnded && (!previous || previous.eventType === 'ended')) {
@@ -315,7 +325,10 @@ export class ActivityStoreService {
 
     this._rows.update(rows => [...rows, entry]);
     this.scheduleWrite();
-    if (announce && entry.priority >= MessageEventPriority.Action) this._announcement.set(entry);
+    if (announce && entry.priority >= MessageEventPriority.Action) {
+      this._problemFilesAnnouncement.set(null);
+      this._announcement.set(entry);
+    }
   }
 
   private reconcile({snapshot, requestedAtMs}: ActivitySnapshotResult) {
@@ -343,7 +356,15 @@ export class ActivityStoreService {
     const changed = new Map<string, ActivityRow>();
     for (const row of this._rows()) {
       if (row.kind === ActivityRowKind.Entry) {
-        if (!row.scheduleLost && isLostSchedule(row, startedMs)) changed.set(row.id, {...row, scheduleLost: true});
+        if (!row.scheduleLost && isLostSchedule(row, startedMs)) {
+          changed.set(row.id, {...row, scheduleLost: true});
+          continue;
+        }
+
+        const scheduledForUtc = currentScheduleOf(row, snapshot, startedMs, requestedAtMs);
+        if (scheduledForUtc !== row.scheduledForUtc) {
+          changed.set(row.id, {...row, scheduledForUtc});
+        }
         continue;
       }
 
@@ -453,6 +474,7 @@ export class ActivityStoreService {
     this.dismissed = pruneDismissed(persisted?.dismissed ?? []);
     this._rows.set(pruneRows((persisted?.rows ?? []).map(restoreRow)));
     this._announcement.set(null);
+    this._problemFilesAnnouncement.set(null);
   }
 
   private cancelTimers() {
@@ -621,6 +643,24 @@ function restoreRow(row: ActivityRow): ActivityRow {
     seenFromStart: row.endedUtc !== null && (row.seenFromStart ?? false),
   };
   return job.endedUtc === null && allStepsEnded(job) ? {...job, endedUtc: job.updatedUtc} : job;
+}
+
+/**
+ * A retime sent while this client was away left the entry on its old time. An entry newer than the snapshot request
+ * is skipped, its job may not be listed yet
+ */
+function currentScheduleOf(entry: ActivityEntry, snapshot: ActivitySnapshot, startedMs: number, requestedAtMs: number) {
+  if (!DelayedScanCodes.includes(entry.code) || entry.scheduledForUtc === null || entry.scheduleLost) return entry.scheduledForUtc;
+
+  const updatedMs = Date.parse(entry.updatedUtc);
+  if (updatedMs < startedMs || updatedMs >= requestedAtMs || Date.parse(entry.scheduledForUtc) <= requestedAtMs) {
+    return entry.scheduledForUtc;
+  }
+
+  const scan = snapshot.scheduled.find(s => isDelayedEntryFor(entry, s));
+  if (scan) return scan.runAtUtc;
+
+  return snapshot.scheduledTotal <= snapshot.scheduled.length ? new Date(requestedAtMs).toISOString() : entry.scheduledForUtc;
 }
 
 /**

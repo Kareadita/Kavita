@@ -302,6 +302,18 @@ public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper) : Abstrac
     }
 
     [Fact]
+    public async Task GetSeriesThatContainsLowestFolderPathAsync_SiblingFolderWithNoSeries_MatchesNothing()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        await AddLibrary(unitOfWork, "M:/", SeriesInFolder("Spice and Wolf", "M:/Spice and Wolf", "M:/Spice and Wolf"));
+
+        var series = await unitOfWork.SeriesRepository.GetSeriesThatContainsLowestFolderPathAsync(
+            "M:/Spice and Wolf Extras/Spice and Wolf Extras v01.cbz");
+
+        Assert.Empty(series);
+    }
+
+    [Fact]
     public async Task GetSeriesThatContainsLowestFolderPathAsync_UnderscoreIsLiteral()
     {
         var (unitOfWork, _, _) = await CreateDatabase();

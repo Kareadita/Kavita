@@ -156,6 +156,12 @@ export class EventsWidgetComponent implements OnInit {
   protected readonly announcement = computed(() => {
     this.translation();
 
+    const problems = this.activityStore.problemFilesAnnouncement();
+    if (problems) {
+      return this.translocoService.translate('events-widget.new-problem-files-alt',
+        {library: problems.libraryName, count: problems.newProblemFiles});
+    }
+
     const entry = this.activityStore.announcement();
     if (!entry) return '';
     return entry.code

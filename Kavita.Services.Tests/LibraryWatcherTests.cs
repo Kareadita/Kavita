@@ -15,6 +15,7 @@ public class LibraryWatcherTests : IDisposable
     private readonly string _root = Path.Join(Path.GetTempPath(), "LibraryWatcherTests", Guid.NewGuid().ToString());
     private readonly List<string> _libraryFolders = [];
     private readonly HashSet<string> _unreachable = [];
+    private readonly HashSet<string> _goneAfterExistsCheck = [];
 
     public LibraryWatcherTests()
     {
@@ -55,7 +56,7 @@ public class LibraryWatcherTests : IDisposable
         ds.Exists(Arg.Any<string>()).Returns(c =>
         {
             var path = Parser.NormalizePath(c.Arg<string>());
-            return Directory.Exists(path) && !_unreachable.Contains(path);
+            return (Directory.Exists(path) || _goneAfterExistsCheck.Contains(path)) && !_unreachable.Contains(path);
         });
 
         return new LibraryWatcher(ds, unitOfWork, Substitute.For<ILogger<LibraryWatcher>>(),
@@ -179,5 +180,19 @@ public class LibraryWatcherTests : IDisposable
         Assert.Equal(4, LibraryWatcher.Watchers.Count);
         Assert.Equal(TimeSpan.FromMinutes(5), firstRetry);
         Assert.Null(secondRetry);
+    }
+
+    [Fact]
+    public async Task Start_FolderGoneAfterExistsCheck_WatchesTheRestAndSchedulesARetry()
+    {
+        var gone = Parser.NormalizePath(Path.Join(_root, "Gone"));
+        _goneAfterExistsCheck.Add(gone);
+        _libraryFolders.Insert(0, gone);
+        var libraryWatcher = CreateRealWatcher();
+
+        var retry = await libraryWatcher.StartWatchersAsync();
+
+        Assert.Equal(5, LibraryWatcher.Watchers.Count);
+        Assert.Equal(TimeSpan.FromMinutes(5), retry);
     }
 }

@@ -1,23 +1,18 @@
 using System;
-using System.Collections.Immutable;
+using Hangfire;
 using Hangfire.Server;
 using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.SignalR;
 
 /// <summary>
-/// When a scan job ends, pulls the delayed scan asked for first forward. See <see cref="ITaskScheduler.RetimeDelayedScans"/>
+/// When a scanner job ends, pulls the delayed scan asked for first forward. See <see cref="ITaskScheduler.RetimeDelayedScans"/>
 /// </summary>
-public class ScanEndRetimeFilter(IServiceScopeFactory scopeFactory, ILogger<ScanEndRetimeFilter> logger) : IServerFilter
+public class ScanEndRetimeFilter(ILogger<ScanEndRetimeFilter> logger) : IServerFilter
 {
-    private static readonly ImmutableArray<string> ScanMethods =
-        [
-            nameof(IScannerService.ScanLibrary), nameof(IScannerService.ScanLibraries),
-            nameof(IScannerService.ScanSeries), nameof(IScannerService.ScanFolder),
-        ];
+    private static readonly TimeSpan RetimeDelay = TimeSpan.FromSeconds(5);
 
     public void OnPerforming(PerformingContext context)
     {
@@ -27,12 +22,12 @@ public class ScanEndRetimeFilter(IServiceScopeFactory scopeFactory, ILogger<Scan
     {
         var job = context.BackgroundJob.Job;
         // TaskScheduler has wrappers with the same method names that end as soon as they enqueue the real scan
-        if (!job.Type.IsAssignableTo(typeof(IScannerService)) || !ScanMethods.Contains(job.Method.Name)) return;
+        if (!job.Type.IsAssignableTo(typeof(IScannerService))) return;
 
         try
         {
-            using var scope = scopeFactory.CreateScope();
-            scope.ServiceProvider.GetRequiredService<ITaskScheduler>().RetimeDelayedScans().GetAwaiter().GetResult();
+            // The ending job is still Processing here, so the retime runs a moment later when it can tell whether the scanner is free
+            BackgroundJob.Schedule<ITaskScheduler>(t => t.RetimeDelayedScans(), RetimeDelay);
         }
         catch (Exception ex)
         {

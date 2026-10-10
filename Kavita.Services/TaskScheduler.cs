@@ -476,9 +476,9 @@ public class TaskScheduler : ITaskScheduler
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
             _logger.LogInformation("A Scan is already running, rescheduling ScanLibrary in 3 hours");
             var runAt = DateTimeOffset.UtcNow.AddHours(3);
+            BackgroundJob.Schedule(() => ScanLibrary(libraryId, force), runAt);
             await _eventHub.SendMessageAsync(MessageFactory.Info,
                 MessageFactory.ScanLibraryDelayedEvent(libraryId, library!.Name, runAt.UtcDateTime));
-            BackgroundJob.Schedule(() => ScanLibrary(libraryId, force), runAt);
             return;
         }
 
@@ -541,10 +541,9 @@ public class TaskScheduler : ITaskScheduler
 
             _logger.LogInformation("A Scan is already running, rescheduling ScanSeries in 3 hours");
             var runAt = DateTimeOffset.UtcNow.AddHours(3);
+            BackgroundJob.Schedule(() => ScanSeries(libraryId, seriesId, forceUpdate), runAt);
             await _eventHub.SendMessageAsync(MessageFactory.Info,
                 MessageFactory.ScanSeriesDelayedEvent(libraryId, seriesId, series.Name, runAt.UtcDateTime));
-
-            BackgroundJob.Schedule(() => ScanSeries(libraryId, seriesId, forceUpdate), runAt);
             return;
         }
 
@@ -554,6 +553,13 @@ public class TaskScheduler : ITaskScheduler
 
     public async Task RetimeDelayedScans()
     {
+        // The scan still running will retime again when it ends
+        if (RunningAnyTasksByMethod(ScanTasks, ScanQueue) || HasScanDueBefore(DateTime.UtcNow + DelayedScanRetime.NextScanDelay))
+        {
+            _logger.LogDebug("A scan is running or about to, not retiming delayed scans yet");
+            return;
+        }
+
         RetimePlan plan;
         lock (RetimeLock)
         {
@@ -829,6 +835,16 @@ public class TaskScheduler : ITaskScheduler
 
         var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
         return runningJobs.Exists(j => classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
+    }
+
+    /// <summary>
+    /// A scanner job waiting in Scheduled, such as an automatic retry, that runs before this time
+    /// </summary>
+    private static bool HasScanDueBefore(DateTime utc)
+    {
+        return JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue)
+            .Exists(j => ScanTasks.Contains(j.Value.Job?.Method.DeclaringType?.Name ?? string.Empty)
+                         && DateTime.SpecifyKind(j.Value.EnqueueAt, DateTimeKind.Utc) <= utc);
     }
 
     public static bool IsMethodRunningOrEnqueued(string methodName, string queue = DefaultQueue)

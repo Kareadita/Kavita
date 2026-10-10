@@ -43,6 +43,8 @@ public partial class ParseScannedFiles
     private readonly HashSet<string> _failedFilesInReadFolders = [];
     private readonly Dictionary<string, FileStamp> _readFiles = new();
     private readonly HashSet<string> _readFolders = [];
+    private readonly HashSet<string> _walkedFolders = [];
+    private readonly List<string> _unreadableFolders = [];
 
     /// <summary>
     /// Issues with files that were read this scan, at most one per path
@@ -68,6 +70,15 @@ public partial class ParseScannedFiles
     /// Folders whose listing was read this scan. A file in one of these and not in <see cref="ReadFiles"/> is gone
     /// </summary>
     public IReadOnlySet<string> ReadFolders => _readFolders;
+
+    /// <summary>
+    /// The folder was not read, walked, or inside a folder that could not be read this scan, so it may be gone
+    /// </summary>
+    public bool IsUnaccountedFor(string folder)
+    {
+        return !_readFolders.Contains(folder) && !_walkedFolders.Contains(folder)
+                                              && !_unreadableFolders.Exists(folder.IsSameOrInsideFolder);
+    }
 
     /// <summary>
     /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
@@ -138,6 +149,7 @@ public partial class ParseScannedFiles
         for (var i = 0; i < total; i++)
         {
             var directory = allDirectories[i];
+            _walkedFolders.Add(directory);
 
             timings.Events.Start();
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -233,6 +245,7 @@ public partial class ParseScannedFiles
                 timings.ParentChangeCheck.Stop();
                 timings.ParentSurfaceFiles.Stop();
                 _logger.LogWarning(ex, "[ScannerService] Could not read {Directory}, keeping its series as they are for this scan", directory);
+                _unreadableFolders.Add(directory);
                 KeepUnreadableFolder(result, folderPath, directory, isParent, skippedSpecials, seriesPaths);
                 if (!isParent) processedDirs.Add(directory);
             }

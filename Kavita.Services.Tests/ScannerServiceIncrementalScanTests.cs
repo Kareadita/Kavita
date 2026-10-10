@@ -38,7 +38,7 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
         public string[] Added { get; init; } = [];
 
         /// <summary>
-        /// Every file the library should hold after the rescan, relative to the library root.
+        /// Every file the library should hold after the rescan, relative to the library root
         /// </summary>
         public required string[] ExpectedFiles { get; init; }
 
@@ -46,7 +46,7 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
 
         /// <summary>
         /// Expected volume name to chapter count for <see cref="SeriesName"/>. Volume names are what GetNumberTitle
-        /// produces, so "1" for Vol. 1.
+        /// produces, so "1" for Vol. 1
         /// </summary>
         public required (string Volume, int Chapters)[] ExpectedVolumes { get; init; }
 
@@ -497,7 +497,7 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
             [.. volumes.Select(v => $"{v.Name}={v.Chapters}").Order()]);
 
         // Any file the scenario did not touch must still sit in the exact series, volume and chapter it did before.
-        // Chapter id alone is not enough: a reparented chapter keeps its id and changes volume.
+        // Chapter id alone is not enough: a reparented chapter keeps its id and changes volume
         foreach (var untouched in Untouched(scenario))
         {
             Assert.True(after.ContainsKey(untouched), $"{untouched} was dropped from the series");
@@ -571,7 +571,7 @@ public class ScannerServiceIncrementalScanTests(ITestOutputHelper testOutputHelp
     }
 
     /// <summary>
-    /// Library relative file path to the (series, volume, chapter) it belongs to.
+    /// Library relative file path to the (series, volume, chapter) it belongs to
     /// </summary>
     private static async Task<Dictionary<string, (int SeriesId, int VolumeId, int ChapterId)>> SnapshotPlacement(
         DataContext context, string root, int libraryId)

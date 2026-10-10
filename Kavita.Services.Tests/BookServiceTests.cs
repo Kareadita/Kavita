@@ -1,7 +1,11 @@
 ﻿using System.IO.Abstractions;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.Common;
+using Kavita.Common.Helpers;
+using Kavita.Models.DTOs.Account;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.User;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -13,13 +17,41 @@ public class BookServiceTests
     private readonly IBookService _bookService;
     private readonly ILogger<BookService> _logger = Substitute.For<ILogger<BookService>>();
     private readonly IMediaErrorService _mediaErrorService = Substitute.For<IMediaErrorService>();
+    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
 
     public BookServiceTests()
     {
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
         _bookService = new BookService(_logger, directoryService,
             new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService)
-            , _mediaErrorService, Substitute.For<IUnitOfWork>());
+            , _mediaErrorService, _unitOfWork);
+    }
+
+    [Fact]
+    public async Task GetBookPage_PageFails_ReportsTheLibraryFileNotTheCacheCopy()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
+        var libraryFile = Path.GetFullPath(Path.Join(testDirectory, "Role Refinement.epub"));
+        var cacheFolder = Path.Join(Path.GetTempPath(), $"BookCache_{Guid.NewGuid():N}");
+        var cachedFile = Path.Join(cacheFolder, "Role Refinement.epub");
+        Directory.CreateDirectory(cacheFolder);
+        File.Copy(libraryFile, cachedFile);
+        _unitOfWork.UserRepository.GetAuthKeysForUserId(1, Arg.Any<CancellationToken>()).Returns(
+            [new AuthKeyDto { Key = "key", Name = AuthKeyHelper.ImageOnlyKeyName, Provider = AuthKeyProvider.System }]);
+
+        try
+        {
+            // A null bookmark list throws while the page is scoped, which takes the page-failure path
+            await Assert.ThrowsAsync<KavitaException>(() => _bookService.GetBookPage(1, 0, 1, cachedFile, libraryFile,
+                "//localhost/api/", null!, []));
+
+            await _mediaErrorService.Received(1).ReportMediaIssueAsync(libraryFile, MediaErrorProducer.BookService,
+                MediaErrorReason.CorruptEpub, Arg.Any<Exception>(), Arg.Any<CancellationToken>());
+        }
+        finally
+        {
+            Directory.Delete(cacheFolder, true);
+        }
     }
 
     [Fact]

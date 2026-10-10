@@ -160,7 +160,7 @@ export class VersionService {
     if (this.loadedVersion === null || this.loadedVersion === serverVersion) return false;
 
     // Server was updated mid-session - don't update loadedVersion so the
-    // refresh prompt persists until the user actually refreshes.
+    // refresh prompt persists until the user actually refreshes
     localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
     this._currentVersion.set(serverVersion);
     this.serverService.getChangelog(1).subscribe(changelog => {

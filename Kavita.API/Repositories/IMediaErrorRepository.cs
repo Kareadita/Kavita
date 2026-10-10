@@ -15,13 +15,18 @@ public interface IMediaErrorRepository
     Task<IEnumerable<MediaErrorDto>> GetAllErrorDtosAsync(CancellationToken ct = default);
     Task DeleteAll(CancellationToken ct = default);
     /// <summary>
-    /// The row a producer other than the scanner wrote for this file and reason, tracked
+    /// The row a producer other than the scanner wrote for this file and reason
     /// </summary>
     Task<MediaError?> GetProducerErrorAsync(string filePath, MediaErrorReason reason, CancellationToken ct = default);
     /// <summary>
-    /// Every row in this library written by a producer other than the scanner, tracked
+    /// Every row in this library written by a producer other than the scanner
     /// </summary>
     Task<List<MediaError>> GetProducerErrorsAsync(int libraryId, CancellationToken ct = default);
+    /// <summary>
+    /// The file path of every row in this library, from any producer, by row id
+    /// </summary>
+    Task<Dictionary<int, string>> GetFilePathsAsync(int libraryId, CancellationToken ct = default);
+    Task DeleteAsync(IList<int> ids, CancellationToken ct = default);
     /// <summary>
     /// The library and series of the file with this path. Falls back to the library whose folder holds the path when no series has the file yet
     /// </summary>
@@ -31,7 +36,7 @@ public interface IMediaErrorRepository
     /// </summary>
     Task<List<FailedFile>> GetFailedFilesAsync(int libraryId, CancellationToken ct = default);
     /// <summary>
-    /// The scanner's rows for these paths, tracked
+    /// The scanner's rows for these paths
     /// </summary>
     Task<List<MediaError>> GetScannerErrorsAsync(int libraryId, IList<string> filePaths, CancellationToken ct = default);
     /// <summary>

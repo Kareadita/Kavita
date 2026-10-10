@@ -40,7 +40,17 @@ public class MediaErrorService(IUnitOfWork unitOfWork, IDirectoryService directo
         var file = directoryService.FileSystem.FileInfo.New(path);
 
         var error = await unitOfWork.MediaErrorRepository.GetProducerErrorAsync(path, reason, ct);
-        if (error != null && HasSameStamp(error, file)) return;
+        if (error != null && HasSameStamp(error, file))
+        {
+            if (error.SeriesId != null) return;
+
+            await AssignOwnerAsync(error, path, ct);
+            if (unitOfWork.HasChanges())
+            {
+                await unitOfWork.CommitAsync(ct);
+            }
+            return;
+        }
 
         if (error == null)
         {
@@ -57,9 +67,7 @@ public class MediaErrorService(IUnitOfWork unitOfWork, IDirectoryService directo
 
         if (error.SeriesId == null)
         {
-            var owner = await unitOfWork.MediaErrorRepository.GetOwnerAsync(path, ct);
-            error.LibraryId = owner.LibraryId ?? error.LibraryId;
-            error.SeriesId = owner.SeriesId;
+            await AssignOwnerAsync(error, path, ct);
         }
 
         error.Bytes = file.Exists ? file.Length : null;
@@ -68,6 +76,13 @@ public class MediaErrorService(IUnitOfWork unitOfWork, IDirectoryService directo
         error.LastSeenUtc = DateTime.UtcNow;
 
         await unitOfWork.CommitAsync(ct);
+    }
+
+    private async Task AssignOwnerAsync(MediaError error, string path, CancellationToken ct)
+    {
+        var owner = await unitOfWork.MediaErrorRepository.GetOwnerAsync(path, ct);
+        error.LibraryId = owner.LibraryId ?? error.LibraryId;
+        error.SeriesId = owner.SeriesId;
     }
 
     /// <summary>Is the Media Info the same as the file based on bytes and last write time</summary>

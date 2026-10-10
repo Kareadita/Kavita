@@ -7,7 +7,8 @@
         </ng-template>
       </app-transloco-inject>
     </p>
-    <button class="btn btn-outline-danger flex-shrink-0" type="button" [disabled]="data().length === 0" (click)="clearAll()">
+    <button class="btn btn-outline-danger flex-shrink-0" type="button" [disabled]="data().length === 0" (click)="clearAll()"
+            [attr.aria-label]="t('clear-all')">
       <i class="fa-solid fa-trash me-1" aria-hidden="true"></i><span class="phone-hidden">{{t('clear-all')}}</span>
     </button>
   </div>
@@ -34,39 +35,41 @@
     </div>
   </div>
 
-  @if (isLoading()) {
-    <app-loading [loading]="true" />
-  } @else {
-    @let active = activeIssues();
-    @let dismissed = dismissedIssues();
-
-    @if (active.length === 0) {
-      <app-empty-state [titleKey]="'no-data'" [descriptionKey]="hasActiveIssues() ? 'no-matches-description' : 'no-data-description'"
-                       [i18nPrefix]="'manage-media-issues'">
-        <i icon class="fa-solid fa-circle-check" aria-hidden="true"></i>
-      </app-empty-state>
+  <div #results tabindex="-1" role="region" [attr.aria-label]="t('results-alt')">
+    @if (isLoading()) {
+      <app-loading [loading]="true" />
     } @else {
-      <app-media-issues-table [rows]="active" idPrefix="active-issues" (dismiss)="dismiss($event)" />
-    }
+      @let active = activeIssues();
+      @let dismissed = dismissedIssues();
 
-    @if (dismissed.length > 0) {
-      <div ngbAccordion class="mt-3">
-        <div ngbAccordionItem="dismissed-issues" [collapsed]="true">
-          <h2 class="accordion-header" ngbAccordionHeader>
-            <button ngbAccordionButton class="accordion-button" type="button">
-              {{t('dismissed-header', {count: dismissed.length})}}
-            </button>
-          </h2>
-          <div ngbAccordionCollapse>
-            <div ngbAccordionBody>
-              <ng-template>
-                <p class="text-muted small">{{t('dismissed-description')}}</p>
-                <app-media-issues-table [rows]="dismissed" [dismissed]="true" idPrefix="dismissed-issues" (restore)="restore($event)" />
-              </ng-template>
+      @if (active.length === 0) {
+        <app-empty-state [titleKey]="'no-data'" [descriptionKey]="hasActiveIssues() ? 'no-matches-description' : 'no-data-description'"
+                         [i18nPrefix]="'manage-media-issues'">
+          <i icon class="fa-solid fa-circle-check" aria-hidden="true"></i>
+        </app-empty-state>
+      } @else {
+        <app-media-issues-table [rows]="active" idPrefix="active-issues" (dismiss)="dismiss($event)" />
+      }
+
+      @if (dismissed.length > 0) {
+        <div ngbAccordion class="mt-3">
+          <div ngbAccordionItem="dismissed-issues" [collapsed]="true">
+            <h2 class="accordion-header" ngbAccordionHeader>
+              <button ngbAccordionButton class="accordion-button" type="button">
+                {{t('dismissed-header', {count: dismissed.length})}}
+              </button>
+            </h2>
+            <div ngbAccordionCollapse>
+              <div ngbAccordionBody>
+                <ng-template>
+                  <p class="text-muted small">{{t('dismissed-description')}}</p>
+                  <app-media-issues-table [rows]="dismissed" [dismissed]="true" idPrefix="dismissed-issues" (restore)="restore($event)" />
+                </ng-template>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      }
     }
-  }
+  </div>
 </ng-container>

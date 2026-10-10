@@ -629,10 +629,12 @@ public class ParseScannedFilesTests: AbstractDbTest
     }
 
     [Fact]
-    public async Task ScanSingleDirectory_LowestFolderPathIsDriveRoot_ListsOnlySeriesFolder()
+    public async Task ScanSingleDirectory_LowestFolderPathIsDriveRoot_ReadsTheUnchangedSeriesFolder()
     {
+        const string file = "M:/Higurashi When They Cry/Higurashi When They Cry v01.cbz";
+        var writeTime = DateTime.UtcNow.AddDays(-1);
         var ds = Substitute.For<IDirectoryService>();
-        ds.ScanFiles(default!, default!).ReturnsForAnyArgs([]);
+        ds.ScanFiles(default!, default!).ReturnsForAnyArgs([new FileStamp(file, 10, writeTime)]);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>());
 
@@ -648,6 +650,10 @@ public class ParseScannedFilesTests: AbstractDbTest
                     LowestFolderPath = "M:",
                     LastScanned = DateTime.Now,
                     LibraryRoots = ["M:/"],
+                    FilesByFolder = new Dictionary<string, IReadOnlyList<KnownFile>>
+                    {
+                        ["M:/Higurashi When They Cry"] = [new KnownFile(1, file, 10, writeTime)],
+                    },
                 },
             ],
         };

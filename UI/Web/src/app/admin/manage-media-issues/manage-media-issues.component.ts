@@ -1,5 +1,17 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, output, signal} from '@angular/core';
-import {filter, map, Observable} from 'rxjs';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  OnInit,
+  output,
+  signal,
+  viewChild
+} from '@angular/core';
+import {filter, map, Observable, switchMap} from 'rxjs';
+import {ToastrService} from '@openng/ngx-toastr';
 import {allMediaErrorReasons, KavitaMediaError, MediaErrorReason} from '../_models/media-error';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -48,7 +60,10 @@ export class ManageMediaIssuesComponent implements OnInit {
   private readonly serverService = inject(ServerService);
   private readonly messageHub = inject(MessageHubService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
+
+  private readonly results = viewChild.required<ElementRef<HTMLElement>>('results');
 
   protected data = signal<KavitaMediaError[]>([]);
   protected isLoading = signal(true);
@@ -96,28 +111,37 @@ export class ManageMediaIssuesComponent implements OnInit {
   }
 
   protected loadData() {
-    this.serverService.getMediaErrors().subscribe(d => {
-      this.data.set(d);
-      this.isLoading.set(false);
-      this.alertCount.emit(d.filter(issue => !issue.isDismissed).length);
-    });
+    this.serverService.getMediaErrors().subscribe(d => this.setData(d));
   }
 
   protected dismiss(ids: number[]) {
-    this.reloadAfter(this.serverService.dismissMediaErrors(ids));
+    this.reloadAfter(this.serverService.dismissMediaErrors(ids), translate('manage-media-issues.dismiss-success', {count: ids.length}));
   }
 
   protected restore(ids: number[]) {
-    this.reloadAfter(this.serverService.undismissMediaErrors(ids));
+    this.reloadAfter(this.serverService.undismissMediaErrors(ids), translate('manage-media-issues.restore-success', {count: ids.length}));
   }
 
   protected async clearAll() {
     if (!await this.confirmService.confirm(translate('toasts.confirm-clear-media-issues'))) return;
-    this.reloadAfter(this.serverService.clearMediaAlerts());
+    this.reloadAfter(this.serverService.clearMediaAlerts(), translate('manage-media-issues.clear-success'));
   }
 
-  private reloadAfter(request: Observable<unknown>) {
-    request.subscribe(() => this.loadData());
+  private setData(data: KavitaMediaError[]) {
+    this.data.set(data);
+    this.isLoading.set(false);
+    this.alertCount.emit(data.filter(issue => !issue.isDismissed).length);
+  }
+
+  /**
+   * The button that was pressed leaves with its row, so focus moves to the results instead of falling to the page
+   */
+  private reloadAfter(request: Observable<unknown>, success: string) {
+    request.pipe(switchMap(() => this.serverService.getMediaErrors())).subscribe(d => {
+      this.setData(d);
+      this.toastr.success(success);
+      this.results().nativeElement.focus();
+    });
   }
 
   protected readonly WikiLink = WikiLink;

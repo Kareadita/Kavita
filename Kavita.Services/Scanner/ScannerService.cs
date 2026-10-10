@@ -886,6 +886,7 @@ public class ScannerService(
 
         var savedIssues = await SaveScanIssuesAsync(library, scanner, seriesId);
         await RemoveChangedProducerErrorsAsync(library, scanner);
+        await RemoveErrorsForGoneFilesAsync(library, dirs, scanner);
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 
@@ -965,6 +966,24 @@ public class ScannerService(
 
         unitOfWork.MediaErrorRepository.Remove(changed);
         await unitOfWork.CommitAsync();
+    }
+
+    /// <summary>
+    /// Removes the rows of files under the scanned folders whose folder the scan never came across and are gone from disk,
+    /// such as a deleted volume folder
+    /// </summary>
+    private async Task RemoveErrorsForGoneFilesAsync(Library library, IList<string> dirs, ParseScannedFiles scanner)
+    {
+        var roots = dirs.Select(Parser.NormalizePath).ToList();
+        var paths = await unitOfWork.MediaErrorRepository.GetFilePathsAsync(library.Id);
+        var gone = paths
+            .Where(p => roots.Exists(p.Value.IsInsideFolder) && scanner.IsUnaccountedFor(p.Value.FolderOf())
+                        && !directoryService.FileSystem.File.Exists(p.Value))
+            .Select(p => p.Key)
+            .ToList();
+        if (gone.Count == 0) return;
+
+        await unitOfWork.MediaErrorRepository.DeleteAsync(gone);
     }
 
     private static bool IsChangedOrGone(MediaError row, ParseScannedFiles scanner)

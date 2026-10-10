@@ -67,7 +67,8 @@
   </ng-template>
 
   <ng-template #actionButton let-item>
-    <button class="btn btn-sm btn-outline-secondary" type="button" (click)="apply([item.id])">
+    <button class="btn btn-sm btn-outline-secondary" type="button" (click)="apply([item.id])"
+            [attr.aria-label]="t(isDismissed ? 'restore-alt' : 'dismiss-alt', {file: fileName(item.filePath)})">
       {{isDismissed ? t('restore') : t('dismiss')}}
     </button>
   </ng-template>

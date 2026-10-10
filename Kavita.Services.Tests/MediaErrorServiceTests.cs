@@ -122,6 +122,29 @@ public class MediaErrorServiceTests(ITestOutputHelper outputHelper) : AbstractDb
     }
 
     [Fact]
+    public async Task ReportMediaIssueAsync_SameFailureAfterTheSeriesIsSaved_PicksUpTheSeries()
+    {
+        var path = Murderbot + "Fugitive Telemetry.epub";
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var library = BooksLibrary();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
+        var service = new MediaErrorService(unitOfWork, DirectoryServiceFor(FileSystemWith(path)));
+        await service.ReportMediaIssueAsync(path, MediaErrorProducer.ArchiveService, MediaErrorReason.UnreadableArchive, "first");
+
+        var series = SeriesWithFile("The Murderbot Diaries", path);
+        library.Series.Add(series);
+        await context.SaveChangesAsync();
+
+        await service.ReportMediaIssueAsync(path, MediaErrorProducer.ArchiveService, MediaErrorReason.UnreadableArchive, "second");
+
+        var row = Assert.Single(await context.MediaError.AsNoTracking().ToListAsync());
+        Assert.Equal(series.Id, row.SeriesId);
+        Assert.Equal("first", row.Details);
+    }
+
+    [Fact]
     public async Task ReportMediaIssueAsync_SameFailureOnChangedFile_Undismisses()
     {
         var path = Murderbot + "Fugitive Telemetry.epub";

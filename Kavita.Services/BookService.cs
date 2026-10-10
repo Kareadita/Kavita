@@ -486,7 +486,7 @@ public partial class BookService(
         }
     }
 
-    private async Task InlineStyles(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, CancellationToken ct = default)
+    private async Task InlineStyles(HtmlDocument doc, EpubBookRef book, string libraryFilePath, string apiBase, HtmlNode body, CancellationToken ct = default)
     {
         var inlineStyles = doc.DocumentNode.SelectNodes("//style");
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
@@ -535,7 +535,7 @@ public partial class BookService(
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "There was an error reading css file for inlining likely due to a key mismatch in metadata");
-                    await mediaErrorService.ReportMediaIssueAsync(book.FilePath ?? string.Empty, MediaErrorProducer.BookService,
+                    await mediaErrorService.ReportMediaIssueAsync(libraryFilePath, MediaErrorProducer.BookService,
                         MediaErrorReason.CorruptEpub, ex, ct);
                 }
             }
@@ -1557,6 +1557,7 @@ public partial class BookService(
     /// </summary>
     /// <param name="doc">Html Doc that will be appended to</param>
     /// <param name="book">Underlying epub</param>
+    /// <param name="libraryFilePath">The epub in the library, which media issues are reported against</param>
     /// <param name="apiBase">API Url for file loading to pass through</param>
     /// <param name="body">Body element from the epub</param>
     /// <param name="mappings">Epub mappings</param>
@@ -1565,11 +1566,11 @@ public partial class BookService(
     /// <param name="annotations"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    private async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body,
+    private async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string libraryFilePath, string apiBase, HtmlNode body,
         Dictionary<string, int> mappings, int page, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations,
         CancellationToken ct = default)
     {
-        await InlineStyles(doc, book, apiBase, body, ct);
+        await InlineStyles(doc, book, libraryFilePath, apiBase, body, ct);
 
         RewriteAnchors(page, doc, mappings);
 
@@ -1801,7 +1802,7 @@ public partial class BookService(
         return path.Substring(startIndex);
     }
 
-    public async Task<string> GetBookPage(int userId, int page, int chapterId, string cachedEpubPath, string baseUrl,
+    public async Task<string> GetBookPage(int userId, int page, int chapterId, string cachedEpubPath, string libraryFilePath, string baseUrl,
         List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations, CancellationToken ct = default)
     {
         var authKey = (await unitOfWork.UserRepository.GetAuthKeysForUserId(userId, ct))
@@ -1851,12 +1852,12 @@ public partial class BookService(
                     body = doc.DocumentNode.SelectSingleNode("/html/body");
                 }
 
-                return await ScopePage(doc, book, apiBase, body!, mappings, page, ptocBookmarks, annotations, ct);
+                return await ScopePage(doc, book, libraryFilePath, apiBase, body!, mappings, page, ptocBookmarks, annotations, ct);
             }
         } catch (Exception ex)
         {
-            logger.LogError(ex, "There was an issue reading one of the pages for {Book}", book.FilePath);
-            await mediaErrorService.ReportMediaIssueAsync(book.FilePath ?? string.Empty, MediaErrorProducer.BookService,
+            logger.LogError(ex, "There was an issue reading one of the pages for {Book}", libraryFilePath);
+            await mediaErrorService.ReportMediaIssueAsync(libraryFilePath, MediaErrorProducer.BookService,
                 MediaErrorReason.CorruptEpub, ex, ct);
         }
 

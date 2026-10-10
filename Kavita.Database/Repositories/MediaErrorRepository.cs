@@ -53,6 +53,21 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
             .ToListAsync(ct);
     }
 
+    public Task<Dictionary<int, string>> GetFilePathsAsync(int libraryId, CancellationToken ct = default)
+    {
+        return context.MediaError
+            .Where(m => m.LibraryId == libraryId)
+            .AsNoTracking()
+            .ToDictionaryAsync(m => m.Id, m => m.FilePath, ct);
+    }
+
+    public async Task DeleteAsync(IList<int> ids, CancellationToken ct = default)
+    {
+        await context.MediaError
+            .Where(m => ids.Contains(m.Id))
+            .ExecuteDeleteAsync(ct);
+    }
+
     public async Task<MediaErrorOwner> GetOwnerAsync(string filePath, CancellationToken ct = default)
     {
         var owner = await context.MangaFile
@@ -90,13 +105,6 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
             .ToListAsync(ct);
     }
 
-    /// <summary>
-    /// Finds the series id by looking at neighboring files and attach to the Scan Issues. If <see cref="MediaErrorReasons.Imported"/>, then will do a direct lookup instead.
-    /// </summary>
-    /// <param name="libraryId"></param>
-    /// <param name="filePaths"></param>
-    /// <param name="filesByFolder"></param>
-    /// <param name="ct"></param>
     public async Task AssignScannerErrorsToSeriesAsync(int libraryId, IList<string> filePaths,
         IReadOnlyDictionary<string, IList<string>> filesByFolder, CancellationToken ct = default)
     {

@@ -46,13 +46,14 @@ public interface IBookService
     /// <param name="page">The requested page</param>
     /// <param name="chapterId">The chapterId</param>
     /// <param name="cachedEpubPath">The path to the cached epub file</param>
+    /// <param name="libraryFilePath">The epub in the library, which media issues are reported against</param>
     /// <param name="baseUrl">The API base for Kavita, to rewrite urls to so we load though our endpoint</param>
     /// <param name="ptocBookmarks"></param>
     /// <param name="annotations"></param>
     /// <param name="ct"></param>
     /// <returns>Full epub HTML Page, scoped to Kavita's reader</returns>
     /// <exception cref="KavitaException">All exceptions throw this</exception>
-    Task<string> GetBookPage(int userId, int page, int chapterId, string cachedEpubPath, string baseUrl, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations, CancellationToken ct = default);
+    Task<string> GetBookPage(int userId, int page, int chapterId, string cachedEpubPath, string libraryFilePath, string baseUrl, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations, CancellationToken ct = default);
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book, CancellationToken ct = default);
     Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath, CancellationToken ct = default);
     Task<int> GetWordCountBetweenXPaths(string bookFilePath, string startXpath, int startPage, string endXpath, int endPage, CancellationToken ct = default);

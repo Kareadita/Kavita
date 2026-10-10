@@ -1564,7 +1564,7 @@
         "loading": "{{common.loading}}",
         "read-count-tooltip": "Total Reads",
         "kavitaplus-audit-alt": "Kavita+ Activity",
-        "media-error-warning": "There are problem files associated",
+        "media-error-tooltip": "This series has files with problems",
         "media-errors-title": "One or more files were not parsed or have errors:"
     },
 
@@ -2302,7 +2302,11 @@
         "dismissed-description": "Dismissed issues are left out of scan results. One comes back if its file changes and still has a problem.",
         "no-data": "{{common.no-data}}",
         "no-data-description": "No files have open issues.",
-        "no-matches-description": "No open issues match the filters."
+        "no-matches-description": "No open issues match the filters.",
+        "dismiss-success": "Issues dismissed: {{count}}",
+        "restore-success": "Issues restored: {{count}}",
+        "clear-success": "All media issues cleared",
+        "results-alt": "Media issues"
     },
 
     "media-issues-table": {
@@ -2319,6 +2323,8 @@
         "first-seen-label": "First seen: {{date}}",
         "dismiss": "Dismiss",
         "restore": "Restore",
+        "dismiss-alt": "Dismiss {{file}}",
+        "restore-alt": "Restore {{file}}",
         "dismiss-selected": "Dismiss selected ({{count}})",
         "restore-selected": "Restore selected ({{count}})"
     },
@@ -3098,6 +3104,7 @@
         "scan-no-changes-label": "No changes",
         "scan-problem-files-label": "Problem files: {{count}}",
         "scan-problem-files-new-label": "Problem files: {{count}} ({{new}} new)",
+        "new-problem-files-alt": "Scan of {{library}} found new problem files: {{count}}",
         "finished-while-away-label": "Finished while you were away",
         "finishing-up-label": "Finishing up",
         "refreshing-covers-label": "Refreshing covers",

@@ -39,7 +39,7 @@ public class MediaError : IEntityDate
     public MediaErrorProducer Producer { get; set; }
     public MediaErrorReason Reason { get; set; }
     /// <summary>
-    /// Last time the file failed. <see cref="LastModifiedUtc"/> also moves on a dismiss
+    /// Last time the file failed
     /// </summary>
     public DateTime LastSeenUtc { get; set; }
     public bool IsDismissed { get; set; }

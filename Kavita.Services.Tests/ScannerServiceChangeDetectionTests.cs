@@ -392,6 +392,8 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         var (unitOfWork, context, _) = await CreateDatabase();
         var (_, libraryId) = await ScanOnce(unitOfWork, "Unreadable Library Root - Manga", TwoSeries);
         var root = await LibraryRoot(context, libraryId);
+        // A scan that went ahead without reading the root would remove this series
+        Directory.Delete(Path.Join(root, "Accel World"), true);
 
         try
         {
@@ -877,6 +879,59 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     }
 
     [Fact]
+    public async Task VolumeFolderDeleted_SeriesSurvives_RowsInThatFolderGo()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, _, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Failed File Volume Deleted - Manga",
+            [
+                "Spice and Wolf/Spice and Wolf Vol. 1/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0003.cbz",
+                "Spice and Wolf/Spice and Wolf Vol. 2/Spice and Wolf Vol. 2 Ch. 0004.cbz",
+            ], ["Spice and Wolf Vol. 2 Ch. 0004.cbz"]);
+        var volume2 = Path.Join(root, "Spice and Wolf", "Spice and Wolf Vol. 2");
+        var coverFailed = new MediaErrorBuilder(Parser.NormalizePath(Path.Join(volume2, "Spice and Wolf Vol. 2 Ch. 0003.cbz")))
+            .WithProducer(MediaErrorProducer.ArchiveService).WithReason(MediaErrorReason.CoverFailed).WithDetails("details").Build();
+        coverFailed.LibraryId = libraryId;
+        context.MediaError.Add(coverFailed);
+        await context.SaveChangesAsync();
+        Assert.Equal(2, await context.MediaError.CountAsync());
+
+        Directory.Delete(volume2, true);
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Single(await context.Series.AsNoTracking().Where(s => s.LibraryId == libraryId).ToListAsync());
+        Assert.Empty(await context.MediaError.ToListAsync());
+    }
+
+    [Fact]
+    public async Task FolderWhereEveryFileFailsDeleted_RowsGo()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, _, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Failed Folder Deleted - Manga",
+            ["Accel World/Accel World Vol. 1.cbz", "Murderbot/Murderbot Vol. 1.cbz"], ["Murderbot Vol. 1.cbz"]);
+        Assert.Equal(1, await context.MediaError.CountAsync());
+
+        Directory.Delete(Path.Join(root, "Murderbot"), true);
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Empty(await context.MediaError.ToListAsync());
+    }
+
+    [Fact]
+    public async Task UnreadableFolder_FileLooksGone_KeepsItsRows()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, _, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Failed File Unreadable Gone - Manga",
+            TwoSeries, ["Berserk Vol. 2 Ch. 0002.cbz"]);
+        // Stands in for a share that drops mid-scan: the listing throws and File.Exists says false
+        File.Delete(Path.Join(root, "Berserk", "Berserk Vol. 2", "Berserk Vol. 2 Ch. 0002.cbz"));
+
+        await ScannerWithUnreadable(unitOfWork, Path.Join(root, "Berserk")).ScanLibrary(libraryId);
+
+        Assert.Equal(1, await context.MediaError.CountAsync());
+    }
+
+    [Fact]
     public async Task ScanSeries_FailedFileBelongsToTheScannedSeries()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
@@ -913,7 +968,7 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         var unchanged = $"{seriesFolder}/Spice and Wolf Vol. 1.cbz";
         var changed = $"{seriesFolder}/{BrokenVolume}";
         var gone = $"{seriesFolder}/Spice and Wolf Vol. 3.cbz";
-        var notRead = Parser.NormalizePath(Path.Join(root, "Not Read", "Other.cbz"));
+        var notRead = Parser.NormalizePath(Path.GetFullPath(Path.Join(root, "..", "Not Scanned", "Other.cbz")));
         context.MediaError.AddRange(
             ProducerRow(unchanged, new FileInfo(unchanged).Length, File.GetLastWriteTimeUtc(unchanged)),
             ProducerRow(changed, new FileInfo(changed).Length + 1, File.GetLastWriteTimeUtc(changed)),

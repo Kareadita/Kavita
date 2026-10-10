@@ -1,5 +1,7 @@
 using Hangfire;
+using Hangfire.Common;
 using Hangfire.InMemory;
+using Hangfire.Server;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Metadata;
@@ -10,6 +12,8 @@ using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.SignalR.Bodies;
+using Kavita.Services.Scanner;
+using Kavita.Services.SignalR;
 using Kavita.Services.Tests.Helpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -64,6 +68,59 @@ public class TaskSchedulerRetimeTests
 
         await _eventHub.Received(1).SendMessageAsync(MessageFactory.ScanRescheduled,
             Arg.Is<SignalRMessageDto>(m => ((ScanRescheduledEventBodyDto) m.Body!).Scans.Count == 2));
+    }
+
+    [Fact]
+    public async Task ScanStillRunning_RetimesNothing()
+    {
+        BackgroundJob.Schedule<TaskScheduler>(t => t.ScanLibrary(2, false), TimeSpan.FromHours(3));
+        BackgroundJob.Enqueue<ScannerService>(s => s.ScanLibrary(1, false, true));
+
+        await _taskScheduler.RetimeDelayedScans();
+
+        var (scans, _) = TaskScheduler.GetScheduledScans(10);
+        Assert.True(Assert.Single(scans).RunAtUtc > DateTime.UtcNow.AddHours(2));
+        await _eventHub.DidNotReceiveWithAnyArgs().SendMessageAsync(default!, default!);
+    }
+
+    [Fact]
+    public async Task ScanRetryDueBeforeThePulledScan_RetimesNothing()
+    {
+        BackgroundJob.Schedule<TaskScheduler>(t => t.ScanLibrary(2, false), TimeSpan.FromHours(3));
+        BackgroundJob.Schedule<ScannerService>(s => s.ScanSeries(5, false), TimeSpan.FromSeconds(30));
+
+        await _taskScheduler.RetimeDelayedScans();
+
+        var scan = Assert.Single(TaskScheduler.GetScheduledScans(10).Scans);
+        Assert.True(scan.RunAtUtc > DateTime.UtcNow.AddHours(2));
+    }
+
+    [Fact]
+    public async Task ScanRetryDueAfterThePulledScan_StillRetimes()
+    {
+        BackgroundJob.Schedule<TaskScheduler>(t => t.ScanLibrary(2, false), TimeSpan.FromHours(3));
+        BackgroundJob.Schedule<ScannerService>(s => s.ScanSeries(5, false), TimeSpan.FromHours(1));
+
+        await _taskScheduler.RetimeDelayedScans();
+
+        var scan = Assert.Single(TaskScheduler.GetScheduledScans(10).Scans);
+        Assert.True(scan.RunAtUtc < DateTime.UtcNow.AddMinutes(2));
+    }
+
+    [Fact]
+    public void ScanEnd_SchedulesTheRetimeInsteadOfRunningIt()
+    {
+        BackgroundJob.Schedule<TaskScheduler>(t => t.ScanLibrary(2, false), TimeSpan.FromHours(3));
+        var endingScan = new BackgroundJob("1", Job.FromExpression<ScannerService>(s => s.ScanLibrary(1, false, true)), DateTime.UtcNow);
+        using var connection = JobStorage.Current.GetConnection();
+        var performContext = new PerformContext(JobStorage.Current, connection, endingScan, new JobCancellationToken(false));
+
+        new ScanEndRetimeFilter(Substitute.For<ILogger<ScanEndRetimeFilter>>())
+            .OnPerformed(new PerformedContext(performContext, null, false, null));
+
+        var scheduled = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue);
+        Assert.Contains(scheduled, j => j.Value.Job.Method.Name == nameof(ITaskScheduler.RetimeDelayedScans));
+        Assert.True(Assert.Single(TaskScheduler.GetScheduledScans(10).Scans).RunAtUtc > DateTime.UtcNow.AddHours(2));
     }
 
     [Fact]

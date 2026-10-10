@@ -17,6 +17,7 @@ public class ScannerServiceScanFolderTests(ITestOutputHelper testOutputHelper) :
         { "M:/The Legend of Zelda", "M:/The Legend of Zelda/The Legend of Zelda - Twilight Princess v01.cbz", null },
         { "M:/YenPress", "M:/YenPress/New Series/New Series v01.cbz", null },
         { "M:/Spice and Wolf", "M:/Spice and Wolf/Spice and Wolf v03.cbz", "Spice and Wolf" },
+        { "M:/March Story Extras", "M:/March Story Extras/March Story Extras v01.cbz", null },
         { "M:/Accel World", "", "Accel World" },
         { "M:/YenPress", "", null },
         { "M:/", "", null },

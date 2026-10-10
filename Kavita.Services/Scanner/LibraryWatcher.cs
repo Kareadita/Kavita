@@ -102,24 +102,18 @@ public class LibraryWatcher : ILibraryWatcher
 
             _logger.LogInformation("[LibraryWatcher] Starting file watchers for {Count} library folders", libraryFolders.Count);
 
+            var watchedFolders = new List<string>();
             foreach (var libraryFolder in libraryFolders)
             {
                 _logger.LogDebug("[LibraryWatcher] Watching {FolderPath}", libraryFolder);
-                var watcher = new FileSystemWatcher(libraryFolder);
-
-                watcher.Changed += OnChanged;
-                watcher.Created += OnCreated;
-                watcher.Deleted += OnDeleted;
-                watcher.Error += OnError;
-
-                watcher.Filter = "*.*";
-                watcher.IncludeSubdirectories = true;
-                watcher.EnableRaisingEvents = true;
-                FileWatchers.Add(watcher);
+                if (TryStartWatcher(libraryFolder))
+                {
+                    watchedFolders.Add(libraryFolder);
+                }
             }
-            _logger.LogInformation("[LibraryWatcher] Watching {Count} folders", libraryFolders.Count);
+            _logger.LogInformation("[LibraryWatcher] Watching {Count} folders", watchedFolders.Count);
 
-            var missingFolders = configuredFolders.Except(libraryFolders).ToList();
+            var missingFolders = configuredFolders.Except(watchedFolders).ToList();
             if (missingFolders.Count == 0)
             {
                 _retryDelay = MinRetryDelay;
@@ -131,13 +125,40 @@ public class LibraryWatcher : ILibraryWatcher
             var retryIn = _retryDelay;
             _retryDelay = TimeSpan.FromTicks(Math.Min(retryIn.Ticks * 2, MaxRetryDelay.Ticks));
             _retryScheduledUntil = DateTime.Now + retryIn;
-            _logger.LogWarning("[LibraryWatcher] {Folders} cannot be reached and are not watched. Trying again in {Minutes} minutes",
+            _logger.LogWarning("[LibraryWatcher] {Folders} cannot be reached or watched. Trying again in {Minutes} minutes",
                 missingFolders, retryIn.TotalMinutes);
             return retryIn;
         }
         finally
         {
             WatcherLock.Release();
+        }
+    }
+
+    /// <summary>The folder can be gone by now even though Exists passed, the share dropped in between</summary>
+    private bool TryStartWatcher(string libraryFolder)
+    {
+        FileSystemWatcher? watcher = null;
+        try
+        {
+            watcher = new FileSystemWatcher(libraryFolder);
+
+            watcher.Changed += OnChanged;
+            watcher.Created += OnCreated;
+            watcher.Deleted += OnDeleted;
+            watcher.Error += OnError;
+
+            watcher.Filter = "*.*";
+            watcher.IncludeSubdirectories = true;
+            watcher.EnableRaisingEvents = true;
+            FileWatchers.Add(watcher);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "[LibraryWatcher] Could not watch {FolderPath}", libraryFolder);
+            watcher?.Dispose();
+            return false;
         }
     }
 

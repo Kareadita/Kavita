@@ -43,7 +43,7 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     /// Width of a cover for Library
     /// </summary>
     public const int LibraryThumbnailWidth = 32;
-    // Fixed seed for generation of ColorScapes. Do not change.
+    // Fixed seed for generation of ColorScapes. Do not change
     private const int ColorScapeSeed = 7;
 
 
