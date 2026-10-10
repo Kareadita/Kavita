@@ -50,7 +50,7 @@ public sealed record VolumeDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     /// <inheritdoc cref="API.Entities.Volume.CoverImage"/>
     public string CoverImage { get; set; }
     /// <inheritdoc cref="API.Entities.Volume.CoverImageLocked"/>
-    private bool CoverImageLocked { get; set; }
+    public bool CoverImageLocked { get; set; }
     /// <inheritdoc cref="API.Entities.Volume.PrimaryColor"/>
     public string? PrimaryColor { get; set; } = string.Empty;
     /// <inheritdoc cref="API.Entities.Volume.SecondaryColor"/>
