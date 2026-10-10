@@ -275,6 +275,35 @@ public class CacheService(
     }
 
     /// <summary>
+    /// Wipes the whole page cache directory, except chapters tied to currently active
+    /// reading sessions, so a scan never deletes pages out from under a live reader.
+    /// Skipped chapters are cleaned by a later scan once their sessions close.
+    /// </summary>
+    public async Task CleanupCacheExceptActiveChaptersAsync()
+    {
+        var keepPaths = (await unitOfWork.ChapterRepository.GetActiveReadingChapterIdsAsync())
+            .Select(GetCachePath)
+            .Select(NormalizeDirPath)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var dir in directoryService.GetDirectories(directoryService.CacheDirectory))
+        {
+            if (keepPaths.Contains(NormalizeDirPath(dir)))
+            {
+                logger.LogTrace("Skipping cache cleanup for {Directory} with an active reading session", dir);
+                continue;
+            }
+            directoryService.ClearAndDeleteDirectory(dir);
+        }
+
+        static string NormalizeDirPath(string path)
+        {
+            return Parser.NormalizePath(Path.GetFullPath(path)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        }
+    }
+
+    /// <summary>
     /// Removes the cached files and folders for a set of chapterIds
     /// </summary>
     /// <param name="seriesIds"></param>
