@@ -7,7 +7,7 @@ ParseReleaseTypes:
       StartWiths: "" #Always stable
 
 BuildFrontend:
-  BuildScript: "build"
+  BuildScript: "prod"
   Path: "UI/Web"
   OutputPath: "dist/browser/"
   CopyTo: "Kavita.Server/wwwroot"
