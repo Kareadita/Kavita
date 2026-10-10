@@ -755,6 +755,40 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         Assert.Equal(4, await SeriesFileCount(context, seriesId));
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ScanLibrary_NewFolderLocalizedToExistingSeries_JoinsIt(bool forceUpdate)
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, $"Localized To Existing {forceUpdate} - Manga",
+            ["Spice and Wolf/Spice and Wolf Vol. 1.cbz"]);
+        var existing = await context.Series.AsNoTracking().SingleAsync(s => s.LibraryId == libraryId);
+        var root = await LibraryRoot(context, libraryId);
+
+        await scannerHelper.Scaffold(root, [LocalizedFolderFile], new Dictionary<string, ComicInfo>
+        {
+            ["Ookami to Koushinryou v03.cbz"] = new() { Series = "Ookami to Koushinryou", LocalizedSeries = "Spice and Wolf" },
+        });
+        await scanner.ScanLibrary(libraryId, forceUpdate);
+
+        var series = await context.Series.AsNoTracking().SingleAsync(s => s.LibraryId == libraryId);
+        Assert.Equal(existing.Id, series.Id);
+        Assert.Equal(2, await SeriesFileCount(context, series.Id));
+
+        await scannerHelper.Scaffold(root, ["Ookami to Koushinryou/Ookami to Koushinryou v04.cbz"], new Dictionary<string, ComicInfo>
+        {
+            ["Ookami to Koushinryou v04.cbz"] = new() { Series = "Ookami to Koushinryou", LocalizedSeries = "Spice and Wolf" },
+        });
+        Directory.SetLastWriteTime(Path.Join(root, "Ookami to Koushinryou"), DateTime.Now.AddSeconds(2));
+        await scanner.ScanLibrary(libraryId, forceUpdate);
+
+        series = await context.Series.AsNoTracking().SingleAsync(s => s.LibraryId == libraryId);
+        Assert.Equal(existing.Id, series.Id);
+        Assert.Equal(3, await SeriesFileCount(context, series.Id));
+    }
+
     #region Failed Files
 
     private const string BrokenVolume = "Spice and Wolf Vol. 2.cbz";

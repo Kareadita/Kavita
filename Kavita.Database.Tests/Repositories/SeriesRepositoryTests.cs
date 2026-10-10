@@ -217,6 +217,26 @@ public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper) : Abstrac
         Assert.Equal("Batman", removed.First().Name);
     }
 
+    [Fact]
+    public async Task RemoveSeriesNotInListAsync_RetainsSeries_ViaExistingSeriesId()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+
+        var series = new SeriesBuilder("Spice and Wolf").WithFormat(MangaFormat.Archive).Build();
+        var library = new LibraryBuilder("Removal Test", LibraryType.Manga)
+            .WithFolderPath(new FolderPathBuilder("C:/data/manga/").Build())
+            .WithSeries(series)
+            .Build();
+        unitOfWork.LibraryRepository.Add(library);
+        await unitOfWork.CommitAsync();
+
+        var key = ParsedKey("Ookami to Koushinryou");
+        key.ExistingSeriesId = series.Id;
+        var removed = await unitOfWork.SeriesRepository.RemoveSeriesNotInListAsync([key], library.Id);
+
+        Assert.Empty(removed);
+    }
+
     #endregion
 
     #region Folder lookups

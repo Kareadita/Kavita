@@ -1520,6 +1520,11 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         var keepIds = new HashSet<int>();
         foreach (var key in seenSeries)
         {
+            if (key.ExistingSeriesId is { } existingSeriesId)
+            {
+                keepIds.Add(existingSeriesId);
+            }
+
             if (!byName.TryGetValue(key.NormalizedName, out var matches)) continue;
 
             var best = matches
