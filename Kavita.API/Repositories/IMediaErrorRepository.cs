@@ -40,11 +40,13 @@ public interface IMediaErrorRepository
     /// </summary>
     Task<List<MediaError>> GetScannerErrorsAsync(int libraryId, IList<string> filePaths, CancellationToken ct = default);
     /// <summary>
-    /// Gives each of these scanner rows with no series the series of its own file, else the only series with files in the same folder. Does not commit
+    /// Gives each of these scanner rows with no series the series of its own file, else the only series with files in the same folder,
+    /// else <paramref name="scannedSeriesId"/> when no series has files there. Does not commit
     /// </summary>
     /// <param name="filesByFolder">Every file listed directly in each row's folder</param>
+    /// <param name="scannedSeriesId">The series a series scan was run for</param>
     Task AssignScannerErrorsToSeriesAsync(int libraryId, IList<string> filePaths,
-        IReadOnlyDictionary<string, IList<string>> filesByFolder, CancellationToken ct = default);
+        IReadOnlyDictionary<string, IList<string>> filesByFolder, int? scannedSeriesId = null, CancellationToken ct = default);
     /// <summary>
     /// Files in this library the scanner could not import, dismissed ones left out
     /// </summary>

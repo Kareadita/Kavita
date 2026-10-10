@@ -278,7 +278,7 @@ public class ScannerService(
         logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var scanStarted = DateTime.Now;
         var (scanElapsedTime, parsedSeries, savedIssues) = await ScanFiles(library, folderPaths,
-            false, true, series.Id);
+            false, true);
 
         logger.LogInformation("ScanFiles for {Series} took {Time} milliseconds", series.Name, scanElapsedTime);
 
@@ -316,6 +316,7 @@ public class ScannerService(
                  await eventHub.SendMessageAsync(MessageFactory.Error,
                      MessageFactory.ScanSeriesNoFilesEvent(series.LibraryId, series.Id, series.Name));
                  await unitOfWork.RollbackAsync();
+                 await AssignScanIssuesAsync(library, savedIssues, series.Id);
                  return;
              }
         }
@@ -364,7 +365,7 @@ public class ScannerService(
             seriesLeftToProcess--;
         }
 
-        var issues = await ReportScanIssuesAsync(library, savedIssues);
+        var issues = await ReportScanIssuesAsync(library, savedIssues, series.Id);
 
         // Tell UI that this series is done
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -870,16 +871,12 @@ public class ScannerService(
         library.UpdateLastScanned(time);
     }
 
-    /// <param name="seriesId">Set by a series scan, every issue found belongs to that series</param>
     /// <returns>How long the walk took, the parsed series, and the issues saved</returns>
-    private async Task<ScanFilesResult> ScanFiles(
-        Library library, IList<string> dirs, bool isLibraryScan, bool forceChecks = false, int? seriesId = null)
+    private async Task<ScanFilesResult> ScanFiles(Library library, IList<string> dirs, bool isLibraryScan, bool forceChecks = false)
     {
         var scanner = new ParseScannedFiles(logger, directoryService, readingItemService, eventHub);
         var scanWatch = Stopwatch.StartNew();
-
-        // TODO: Refactor the ScanFiles into a ScanFileResult record
-
+        
         var folderMap = await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id);
         var problemFiles = await unitOfWork.MediaErrorRepository.GetFailedFilesAsync(library.Id);
 
@@ -890,7 +887,7 @@ public class ScannerService(
         // This is the one time backfill we must do in v0.9.2 to ensure all files have FileLastWriteTime which is critical to the new Change Detection work
         await unitOfWork.MangaFileRepository.SetFileLastWriteTimesAsync(scanner.WriteTimesToBackfill);
 
-        var savedIssues = await SaveScanIssuesAsync(library, scanner, seriesId);
+        var savedIssues = await SaveScanIssuesAsync(library, scanner);
         await RemoveChangedProducerErrorsAsync(library, scanner);
         await RemoveErrorsForGoneFilesAsync(library, dirs, scanner);
 
@@ -905,8 +902,7 @@ public class ScannerService(
     /// <summary>
     /// Saves one row per file with an issue and removes the rows of files that were read again without one, or are gone
     /// </summary>
-    /// <param name="seriesId">Set by a series scan, new rows belong to that series</param>
-    private async Task<SavedScanIssues> SaveScanIssuesAsync(Library library, ParseScannedFiles scanner, int? seriesId)
+    private async Task<SavedScanIssues> SaveScanIssuesAsync(Library library, ParseScannedFiles scanner)
     {
         var issues = scanner.Issues;
         var resolved = scanner.ResolvedFailedFiles.ToHashSet();
@@ -930,7 +926,6 @@ public class ScannerService(
             {
                 row = mapper.Map<MediaError>(issue);
                 row.LibraryId = library.Id;
-                row.SeriesId = seriesId;
                 unitOfWork.MediaErrorRepository.Attach(row);
 
                 if (!MediaErrorReasons.Imported.Contains(issue.Reason))
@@ -1035,13 +1030,20 @@ public class ScannerService(
 
     private sealed record SavedScanIssues(int NewCount, IList<string> Paths, IReadOnlyDictionary<string, IList<string>> FilesByFolder);
 
+    private async Task AssignScanIssuesAsync(Library library, SavedScanIssues savedIssues, int? scannedSeriesId)
+    {
+        await unitOfWork.MediaErrorRepository.AssignScannerErrorsToSeriesAsync(library.Id, savedIssues.Paths, savedIssues.FilesByFolder,
+            scannedSeriesId);
+        await unitOfWork.CommitAsync();
+    }
+
     /// <summary>
     /// Runs once the series are saved, so a row next to a series created this scan gets that series
     /// </summary>
-    private async Task<ScanIssueSummaryDto> ReportScanIssuesAsync(Library library, SavedScanIssues savedIssues)
+    /// <param name="scannedSeriesId">Set by a series scan, for a row whose folder holds no known file</param>
+    private async Task<ScanIssueSummaryDto> ReportScanIssuesAsync(Library library, SavedScanIssues savedIssues, int? scannedSeriesId = null)
     {
-        await unitOfWork.MediaErrorRepository.AssignScannerErrorsToSeriesAsync(library.Id, savedIssues.Paths, savedIssues.FilesByFolder);
-        await unitOfWork.CommitAsync();
+        await AssignScanIssuesAsync(library, savedIssues, scannedSeriesId);
 
         var summary = new ScanIssueSummaryDto(
             await unitOfWork.MediaErrorRepository.GetUnreadableFileCountAsync(library.Id),

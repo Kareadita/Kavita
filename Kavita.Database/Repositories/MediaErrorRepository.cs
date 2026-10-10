@@ -106,7 +106,7 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
     }
 
     public async Task AssignScannerErrorsToSeriesAsync(int libraryId, IList<string> filePaths,
-        IReadOnlyDictionary<string, IList<string>> filesByFolder, CancellationToken ct = default)
+        IReadOnlyDictionary<string, IList<string>> filesByFolder, int? scannedSeriesId = null, CancellationToken ct = default)
     {
         if (filePaths.Count == 0) return;
 
@@ -143,7 +143,12 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
             }
 
             var seriesIds = seriesByFolder[row.FilePath.FolderOf()].Distinct().ToList();
-            if (seriesIds.Count == 1) row.SeriesId = seriesIds[0];
+            row.SeriesId = seriesIds.Count switch
+            {
+                0 => scannedSeriesId,
+                1 => seriesIds[0],
+                _ => null,
+            };
         }
     }
 

@@ -982,6 +982,58 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     }
 
     [Fact]
+    public async Task ScanSeries_FailedFileInAFolderSharedBySeries_HasNoSeries()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var failing = new HashSet<string>();
+        var (scanner, _, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Failed File Shared Folder - Manga",
+            ["Shared/Alpha v01.cbz", "Shared/Beta v01.cbz"], failing);
+        var alphaId = await SeriesId(context, libraryId, "Alpha");
+
+        failing.Add("Alpha v02.cbz");
+        await scannerHelper.Scaffold(root, ["Shared/Alpha v02.cbz"]);
+        await scanner.ScanSeries(alphaId);
+
+        var row = await context.MediaError.AsNoTracking().SingleAsync();
+        Assert.Null(row.SeriesId);
+    }
+
+    [Fact]
+    public async Task ScanSeries_OnlyFileFails_RowBelongsToTheScannedSeries()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var failing = new HashSet<string>();
+        var (scanner, _, libraryId, _) = await ScanOnceWithFailing(unitOfWork, context, "Failed File Only File - Manga",
+            ["Spice and Wolf/Spice and Wolf Vol. 1.cbz"], failing);
+        var seriesId = await SeriesId(context, libraryId, "Spice and Wolf");
+
+        failing.Add("Spice and Wolf Vol. 1.cbz");
+        await scanner.ScanSeries(seriesId);
+
+        var row = await context.MediaError.AsNoTracking().SingleAsync();
+        Assert.Equal(seriesId, row.SeriesId);
+    }
+
+    [Fact]
+    public async Task ScanSeries_FailedFileAloneInANewSubfolder_BelongsToTheScannedSeries()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var failing = new HashSet<string>();
+        var (scanner, _, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Failed File New Subfolder - Manga",
+            ["Spice and Wolf/Spice and Wolf Vol. 1.cbz"], failing);
+        var seriesId = await SeriesId(context, libraryId, "Spice and Wolf");
+
+        failing.Add("Spice and Wolf Vol. 3.cbz");
+        await scannerHelper.Scaffold(root, ["Spice and Wolf/Extras/Spice and Wolf Vol. 3.cbz"]);
+        await scanner.ScanSeries(seriesId);
+
+        var row = await context.MediaError.AsNoTracking().SingleAsync();
+        Assert.Equal(seriesId, row.SeriesId);
+    }
+
+    [Fact]
     public async Task ProducerRows_InAReadFolder_GoWhenTheFileChangedOrIsGone()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
