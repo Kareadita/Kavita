@@ -91,12 +91,23 @@ public class ScanJobQueueTests
     }
 
     [Fact]
-    public void FolderRequest_ReadBackEqual()
+    public void ScheduledScanFolder_KeepsRequestAndRunTime()
     {
         var request = new ScanFolderRequest("M:/Accel World", "M:/Accel World/v02.cbz", false);
-        BackgroundJob.Schedule<ScannerService>(s => s.ScanFolder(request), TimeSpan.FromSeconds(30));
+        var before = DateTime.UtcNow;
+        var jobId = BackgroundJob.Schedule<ScannerService>(s => s.ScanFolder(request), TimeSpan.FromSeconds(30));
 
-        Assert.Equal(request, Assert.Single(ScanJobQueue.Read().FolderRequests));
+        var job = Assert.Single(ScanJobQueue.Read().FolderJobs);
+        Assert.Equal((jobId, request), (job.JobId, job.Request));
+        Assert.InRange(job.RunAtUtc!.Value, before.AddSeconds(29), DateTime.UtcNow.AddSeconds(31));
+    }
+
+    [Fact]
+    public void EnqueuedScanFolder_HasNoRunTime()
+    {
+        BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest("M:/Accel World", string.Empty, false)));
+
+        Assert.Null(Assert.Single(ScanJobQueue.Read().FolderJobs).RunAtUtc);
     }
 
     [Theory]

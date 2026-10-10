@@ -11,7 +11,7 @@ public interface ITaskScheduler
     Task ScheduleStatsTasks(CancellationToken cancellationToken = default);
     void ScheduleUpdaterTasks();
     Task ScheduleKavitaPlusTasks(CancellationToken cancellationToken = default);
-    void EnqueueScanFolder(ScanFolderRequest request, TimeSpan delay);
+    Task EnqueueScanFolderAsync(ScanFolderRequest request, TimeSpan delay);
     Task EnqueueScanLibrary(int libraryId, bool force = false);
     Task EnqueueScanLibraries(bool force = false);
     void CleanupChapters(int[] chapterIds);

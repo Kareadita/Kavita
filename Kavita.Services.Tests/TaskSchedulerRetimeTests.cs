@@ -126,6 +126,59 @@ public class TaskSchedulerRetimeTests
     }
 
     [Fact]
+    public void ScanEnds_InTheSameSecond_ScheduleOneRetime()
+    {
+        EndScannerJob("1");
+        EndScannerJob("2");
+        EndScannerJob("3");
+
+        Assert.Single(ScheduledRetimes());
+    }
+
+    [Fact]
+    public void ScanEnd_AfterTheRetimeLeftScheduled_SchedulesAnother()
+    {
+        EndScannerJob("1");
+        BackgroundJob.Delete(Assert.Single(ScheduledRetimes()));
+
+        EndScannerJob("2");
+
+        Assert.Single(ScheduledRetimes());
+    }
+
+    [Fact]
+    public void ScanEnd_WhileARetimeIsAboutToRun_PushesItBack()
+    {
+        EndScannerJob("1");
+        var retimeId = Assert.Single(ScheduledRetimes());
+        BackgroundJob.Reschedule(retimeId, TimeSpan.FromMilliseconds(500));
+
+        EndScannerJob("2");
+
+        Assert.Equal(retimeId, Assert.Single(ScheduledRetimes()));
+        var runAt = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue).Single(j => j.Key == retimeId).Value.EnqueueAt;
+        Assert.True(runAt > DateTime.UtcNow.AddSeconds(3));
+    }
+
+    private static void EndScannerJob(string jobId)
+    {
+        var endingScan = new BackgroundJob(jobId, Job.FromExpression<ScannerService>(s => s.ScanFolder(null!)), DateTime.UtcNow);
+        using var connection = JobStorage.Current.GetConnection();
+        var performContext = new PerformContext(JobStorage.Current, connection, endingScan, new JobCancellationToken(false));
+
+        new ScanEndRetimeFilter(Substitute.For<ILogger<ScanEndRetimeFilter>>())
+            .OnPerformed(new PerformedContext(performContext, null, false, null));
+    }
+
+    private static List<string> ScheduledRetimes()
+    {
+        return JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue)
+            .Where(j => j.Value.InScheduledState && j.Value.Job.Method.Name == nameof(ITaskScheduler.RetimeDelayedScans))
+            .Select(j => j.Key)
+            .ToList();
+    }
+
+    [Fact]
     public async Task NoDelayedScans_SendsNothing()
     {
         await _taskScheduler.RetimeDelayedScans();

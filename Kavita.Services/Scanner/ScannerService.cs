@@ -106,6 +106,27 @@ public class ScannerService(
     /// <remarks>Nothing is requested when a queued scan already covers the change</remarks>
     public async Task ScanFolder(ScanFolderRequest request)
     {
+        try
+        {
+            await RequestScanForFolder(request);
+        }
+        finally
+        {
+            await SendIfFolderStoppedWaiting(request.Folder);
+        }
+    }
+
+    /// <summary>
+    /// The activity widget lists waiting folders, so it is told when the last job for this folder has run
+    /// </summary>
+    private async Task SendIfFolderStoppedWaiting(string folder)
+    {
+        if (ScanJobQueue.Read().FolderJobs.Any(j => j.Request.Folder == folder)) return;
+        await eventHub.SendMessageAsync(MessageFactory.ScanRescheduled, TaskScheduler.ScanQueueChangedEvent());
+    }
+
+    private async Task RequestScanForFolder(ScanFolderRequest request)
+    {
         var folder = request.Folder;
         var series = await FindSeriesForFolder(folder, request.ChangedPath);
 
@@ -128,10 +149,7 @@ public class ScannerService(
 
         var libraries = (await unitOfWork.LibraryRepository.GetLibraryDtosAsync()).ToList();
         var libraryFolders = libraries.SelectMany(l => l.Folders);
-        var libraryFolder = libraryFolders
-            .Select(Parser.NormalizePath)
-            .Where(folder.IsSameOrInsideFolder)
-            .MaxBy(f => f.Length);
+        var libraryFolder = folder.DeepestContainingFolder(libraryFolders.Select(Parser.NormalizePath));
 
         if (string.IsNullOrEmpty(libraryFolder))
         {

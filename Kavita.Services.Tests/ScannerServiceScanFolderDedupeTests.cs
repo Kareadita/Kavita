@@ -10,6 +10,7 @@ using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
+using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Scanner;
@@ -29,6 +30,7 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
     private const string AccelWorldFile = "M:/Accel World/Accel World v02.cbz";
 
     private readonly ITestOutputHelper _testOutputHelper;
+    private readonly IEventHub _eventHub = Substitute.For<IEventHub>();
 
     public ScannerServiceScanFolderDedupeTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
@@ -124,11 +126,49 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
     {
         var (_, _, taskScheduler) = await CreateServices();
 
-        taskScheduler.EnqueueScanFolder(AccelWorldChange(AccelWorldFile), TimeSpan.FromSeconds(30));
-        taskScheduler.EnqueueScanFolder(AccelWorldChange(AccelWorldFile), TimeSpan.FromSeconds(30));
-        taskScheduler.EnqueueScanFolder(AccelWorldChange("M:/Accel World/Accel World v03.cbz"), TimeSpan.FromSeconds(30));
+        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFile), TimeSpan.FromSeconds(30));
+        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFile), TimeSpan.FromSeconds(30));
+        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange("M:/Accel World/Accel World v03.cbz"), TimeSpan.FromSeconds(30));
 
-        Assert.Equal(2, ScanJobQueue.Read().FolderRequests.Count);
+        Assert.Equal(2, ScanJobQueue.Read().FolderJobs.Count);
+    }
+
+    [Fact]
+    public async Task EnqueueScanFolder_SendsScanRescheduled_OnlyForANewFolder()
+    {
+        var (_, _, taskScheduler) = await CreateServices();
+
+        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFile), TimeSpan.FromSeconds(30));
+        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange("M:/Accel World/Accel World v03.cbz"), TimeSpan.FromSeconds(30));
+        Assert.Equal(1, ScanRescheduledCount());
+
+        await taskScheduler.EnqueueScanFolderAsync(new ScanFolderRequest("M:/YenPress", "M:/YenPress/Frieren/Frieren v02.cbz", false),
+            TimeSpan.FromSeconds(30));
+        Assert.Equal(2, ScanRescheduledCount());
+    }
+
+    [Fact]
+    public async Task ScanFolder_AnotherJobWaitsForTheFolder_SendsNothing()
+    {
+        var (scanner, _, _) = await CreateServices();
+        var waiting = AccelWorldChange("M:/Accel World/Accel World v03.cbz");
+        BackgroundJob.Schedule<ScannerService>(s => s.ScanFolder(waiting), TimeSpan.FromSeconds(30));
+
+        await scanner.ScanFolder(AccelWorldChange(AccelWorldFile));
+
+        Assert.Equal(0, ScanRescheduledCount());
+    }
+
+    [Fact]
+    public async Task ScanFolder_LastJobForTheFolder_SendsScanRescheduled()
+    {
+        var (scanner, _, _) = await CreateServices();
+        var otherFolder = new ScanFolderRequest("M:/YenPress", "M:/YenPress/Frieren/Frieren v02.cbz", false);
+        BackgroundJob.Schedule<ScannerService>(s => s.ScanFolder(otherFolder), TimeSpan.FromSeconds(30));
+
+        await scanner.ScanFolder(AccelWorldChange(AccelWorldFile));
+
+        Assert.Equal(1, ScanRescheduledCount());
     }
 
     [Fact]
@@ -179,20 +219,26 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
         unitOfWork.LibraryRepository.Add(library);
         await unitOfWork.CommitAsync();
 
-        var scanner = new ScannerHelper(unitOfWork, _testOutputHelper).CreateServices();
+        var scanner = new ScannerHelper(unitOfWork, _testOutputHelper).CreateServices(eventHub: _eventHub);
         var taskScheduler = new TaskScheduler(Substitute.For<ICacheService>(), Substitute.For<ILogger<TaskScheduler>>(),
             scanner, unitOfWork, Substitute.For<IMetadataService>(),
             Substitute.For<IBackupService>(), Substitute.For<ICleanupService>(), Substitute.For<IStatsService>(),
             Substitute.For<IVersionUpdaterService>(), Substitute.For<IWordCountAnalyzerService>(),
             Substitute.For<IMediaConversionService>(), Substitute.For<IScrobblingService>(),
             Substitute.For<ILicenseService>(), Substitute.For<IExternalMetadataService>(),
-            Substitute.For<ISmartCollectionSyncService>(), Substitute.For<IWantToReadSyncService>(), Substitute.For<IEventHub>(),
+            Substitute.For<ISmartCollectionSyncService>(), Substitute.For<IWantToReadSyncService>(), _eventHub,
             Substitute.For<IEmailService>(), Substitute.For<IAuthKeyService>());
 
         return (scanner, library, taskScheduler);
     }
 
     private static ScanFolderRequest AccelWorldChange(string changedPath) => new(AccelWorldFolder, changedPath, false);
+
+    private int ScanRescheduledCount()
+    {
+        return _eventHub.ReceivedCalls().Count(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync)
+                                                    && (string) c.GetArguments()[0]! == MessageFactory.ScanRescheduled);
+    }
 
     private static int SeriesId(Library library, string name) => library.Series.Single(s => s.Name == name).Id;
 

@@ -53,6 +53,22 @@ public static class ScanJobQueue
         BackgroundJob.Delete(jobId, ScheduledState.StateName);
     }
 
+    /// <summary>
+    /// Moves a Scheduled job that runs <paramref name="methodName"/> to <paramref name="delay"/> from now.
+    /// </summary>
+    /// <returns>False when the job is not that method or has left the Scheduled state</returns>
+    public static bool TryPushBack(string? jobId, string methodName, TimeSpan delay)
+    {
+        if (string.IsNullOrEmpty(jobId)) return false;
+
+        using (var connection = JobStorage.Current.GetConnection())
+        {
+            if (connection.GetJobData(jobId)?.Job?.Method.Name != methodName) return false;
+        }
+
+        return BackgroundJob.Reschedule(jobId, delay, ScheduledState.StateName);
+    }
+
     public static ScanQueueSnapshot Read()
     {
         var monitoring = JobStorage.Current.GetMonitoringApi();
@@ -62,13 +78,13 @@ public static class ScanJobQueue
             .Select(j => ToScanJob(j, monitoring))
             .OfType<ScanJob>()
             .ToList();
-        var folderRequests = stored
+        var folderJobs = stored
             .Where(j => j.State != ScanJobState.Processing && IsScanner(j.Job) && j.Job.Method.Name == nameof(IScannerService.ScanFolder))
-            .Select(j => j.Job.Args[0])
-            .OfType<ScanFolderRequest>()
+            .Select(j => j.Job.Args[0] is ScanFolderRequest request ? new ScanFolderJob(j.JobId, request, j.RunAtUtc) : null)
+            .OfType<ScanFolderJob>()
             .ToList();
 
-        return new ScanQueueSnapshot(jobs, folderRequests);
+        return new ScanQueueSnapshot(jobs, folderJobs);
     }
 
     private static string Remember(string jobId)

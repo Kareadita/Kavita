@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Kavita.Common.Extensions;
 #nullable enable
@@ -37,6 +39,15 @@ public static class PathExtensions
         var trimmedFolder = TrimmedPath(folder);
         return trimmedPath.Equals(trimmedFolder, StringComparison.Ordinal)
                || trimmedPath.StartsWith(trimmedFolder + '/', StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// The deepest of <paramref name="folders"/> that is <paramref name="path"/> or holds it, null when none does.
+    /// Library roots can nest (<c>B:/</c> and <c>B:/Fiction</c>)
+    /// </summary>
+    public static string? DeepestContainingFolder(this string? path, IEnumerable<string> folders)
+    {
+        return folders.Where(path.IsSameOrInsideFolder).MaxBy(folder => folder.Length);
     }
 
     /// <summary>

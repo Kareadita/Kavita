@@ -486,7 +486,7 @@ public class LibraryController(
         var seriesFolder = directoryService.FindHighestDirectoriesFromFiles(libraryFolder, [dto.FolderPath]);
 
         var folder = seriesFolder.Keys.Count == 1 ? seriesFolder.Keys.First() : dto.FolderPath;
-        taskScheduler.EnqueueScanFolder(new ScanFolderRequest(folder, string.Empty, dto.AbortOnNoSeriesMatch), TimeSpan.Zero);
+        await taskScheduler.EnqueueScanFolderAsync(new ScanFolderRequest(folder, string.Empty, dto.AbortOnNoSeriesMatch), TimeSpan.Zero);
 
         return Ok();
     }

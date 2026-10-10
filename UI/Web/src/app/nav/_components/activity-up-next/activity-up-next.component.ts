@@ -3,6 +3,7 @@ import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {ActivitySnapshot} from '../../../_models/activity/activity-snapshot';
 import {ActivityEntry} from '../../../_models/activity/activity-entry';
 import {ScheduledScan} from '../../../_models/activity/scheduled-scan';
+import {ScheduledFolderScan} from '../../../_models/activity/scheduled-folder-scan';
 import {UpcomingTask} from '../../../_models/activity/upcoming-task';
 import {UtcToLocalTimePipe} from '../../../_pipes/utc-to-local-time.pipe';
 import {UpcomingTaskNamePipe} from '../../../_pipes/upcoming-task-name.pipe';
@@ -16,7 +17,8 @@ const WaitingNamesShown = 5;
 type UpNextItem =
   | {kind: 'task'; id: string; runAtUtc: string; task: UpcomingTask; frequency: CronFrequency | null}
   | {kind: 'scan'; id: string; runAtUtc: string; title: string; queued: boolean}
-  | {kind: 'waiting'; id: string; runAtUtc: string; count: number; names: string[]; rest: number};
+  | {kind: 'waiting'; id: string; runAtUtc: string; count: number; names: string[]; rest: number}
+  | {kind: 'folders'; id: string; runAtUtc: string; queued: boolean; title: string; fromFolderWatcher: boolean; folders: string[]; rest: number};
 
 type CronFrequency = 'daily' | 'weekly';
 
@@ -39,10 +41,12 @@ export class ActivityUpNextComponent {
 
   protected expanded = signal(false);
   protected waitingOpen = signal(false);
+  protected openFolderRows = signal<string[]>([]);
 
   protected readonly items = computed<UpNextItem[]>(() => {
     const snapshot = this.snapshot();
     const scanItems = this.scanItems(snapshot.scheduled, snapshot.scheduledTotal);
+    const folderItems = snapshot.scheduledFolderScans.map(scan => this.folderItem(scan));
 
     const taskItems: UpNextItem[] = snapshot.upcoming.map(task => ({
       kind: 'task',
@@ -52,7 +56,7 @@ export class ActivityUpNextComponent {
       frequency: frequencyOf(task.cron),
     }));
 
-    return [...scanItems, ...taskItems].sort((a, b) => Date.parse(a.runAtUtc) - Date.parse(b.runAtUtc));
+    return [...scanItems, ...folderItems, ...taskItems].sort((a, b) => Date.parse(a.runAtUtc) - Date.parse(b.runAtUtc));
   });
 
   protected readonly visibleItems = computed(() => this.expanded() ? this.items() : this.items().slice(0, CollapsedCount));
@@ -83,6 +87,30 @@ export class ActivityUpNextComponent {
       names: shown.map(scan => this.scanTitle(scan)),
       rest: total - shown.length,
     }];
+  }
+
+  protected toggleFolderRow(id: string) {
+    this.openFolderRows.update(ids => ids.includes(id) ? ids.filter(i => i !== id) : [...ids, id]);
+  }
+
+  private folderItem(scan: ScheduledFolderScan): UpNextItem {
+    const libraryName = scan.libraryId !== null ? this.libraryNames()?.[scan.libraryId] : undefined;
+    const title = scan.folderCount === 1
+      ? translate('events-widget.scan-folder-scheduled', {folder: scan.folders[0]})
+      : libraryName
+        ? translate('events-widget.scan-folders-in-library-scheduled', {count: scan.folderCount, libraryName})
+        : translate('events-widget.scan-folders-scheduled', {count: scan.folderCount});
+
+    return {
+      kind: 'folders',
+      id: `folders:${scan.libraryId}:${scan.fromFolderWatcher}`,
+      runAtUtc: scan.runAtUtc ?? new Date().toISOString(),
+      queued: scan.runAtUtc === null,
+      title,
+      fromFolderWatcher: scan.fromFolderWatcher,
+      folders: scan.folderCount === 1 ? [] : scan.folders,
+      rest: scan.folderCount - scan.folders.length,
+    };
   }
 
   private scanTitle(scan: ScheduledScan) {

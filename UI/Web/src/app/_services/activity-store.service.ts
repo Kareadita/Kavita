@@ -1,5 +1,6 @@
 import {computed, DestroyRef, effect, inject, Injectable, signal, untracked} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {auditTime, Subject} from 'rxjs';
 import {EVENTS, Message, MessageHubService} from './message-hub.service';
 import {AccountService} from './account.service';
 import {SignalRMessage} from '../_models/events/core/signalr-message';
@@ -44,6 +45,7 @@ export class ActivityStoreService {
   private readonly accountService = inject(AccountService);
   private readonly snapshotService = inject(ActivitySnapshotService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly rescheduleRefresh = new Subject<void>();
 
   private _rows = signal<ActivityRow[]>([]);
   private _announcement = signal<ActivityEntry | null>(null);
@@ -90,6 +92,9 @@ export class ActivityStoreService {
     });
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => this.ingest(message));
+
+    // Copying many series sends one ScanRescheduled per folder
+    this.rescheduleRefresh.pipe(auditTime(1000), takeUntilDestroyed(this.destroyRef)).subscribe(() => this.snapshotService.refresh());
 
     // pagehide fires on refresh, tab close and navigating away, so the pending write is not lost. Unlike beforeunload it also fires on mobile
     const flush = () => this.flushWrite();
@@ -165,7 +170,7 @@ export class ActivityStoreService {
       this.scheduleWrite();
     }
 
-    this.snapshotService.refresh();
+    this.rescheduleRefresh.next();
   }
 
   private addRateLimit(message: SignalRMessage, announce = true) {

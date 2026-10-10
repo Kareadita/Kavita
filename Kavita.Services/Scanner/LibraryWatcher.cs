@@ -403,7 +403,7 @@ public class LibraryWatcher : ILibraryWatcher
                 return;
             }
 
-            _taskScheduler.EnqueueScanFolder(new ScanFolderRequest(fullPath, filePath, false), _queueWaitTime);
+            await _taskScheduler.EnqueueScanFolderAsync(new ScanFolderRequest(fullPath, filePath, false), _queueWaitTime);
         }
         catch (Exception ex)
         {
@@ -420,10 +420,7 @@ public class LibraryWatcher : ILibraryWatcher
         _logger.LogTrace("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);
         if (string.IsNullOrEmpty(parentDirectory)) return string.Empty;
 
-        // Library roots can nest (B:/ and B:/Fiction), so take the deepest one holding the change
-        var libraryFolder = libraryFolders
-            .Where(parentDirectory.IsSameOrInsideFolder)
-            .MaxBy(f => f.Length);
+        var libraryFolder = parentDirectory.DeepestContainingFolder(libraryFolders);
         _logger.LogTrace("[LibraryWatcher] Library Folder: {LibraryFolder}", libraryFolder);
         if (string.IsNullOrEmpty(libraryFolder)) return string.Empty;
 

@@ -240,9 +240,11 @@ public class ServerController(
     /// </summary>
     /// <returns></returns>
     [HttpGet("activity")]
-    public ActionResult<ActivitySnapshotDto> GetActivity()
+    public async Task<ActionResult<ActivitySnapshotDto>> GetActivity()
     {
+        var ct = HttpContext.RequestAborted;
         var (scheduled, scheduledTotal) = TaskScheduler.GetScheduledScans(20);
+        var libraries = await unitOfWork.LibraryRepository.GetLibraryDtosAsync(ct);
         var processingJobIds = TaskScheduler.GetProcessingJobIds();
 
         return Ok(new ActivitySnapshotDto
@@ -252,6 +254,7 @@ public class ServerController(
             Running = activityTracker.GetRunning(processingJobIds),
             Scheduled = scheduled,
             ScheduledTotal = scheduledTotal,
+            ScheduledFolderScans = TaskScheduler.GetScheduledFolderScans(libraries),
             Upcoming = TaskScheduler.GetUpcomingTasks(),
             RecentJobs = activityTracker.GetRecentJobs(processingJobIds),
             RecentEntries = activityTracker.GetRecentEntries(),

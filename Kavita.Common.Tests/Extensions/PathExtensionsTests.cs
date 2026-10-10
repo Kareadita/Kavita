@@ -55,6 +55,21 @@ public class PathExtensionsTests
 
     #endregion
 
+    #region DeepestContainingFolder
+
+    [Theory]
+    [InlineData("B:/Fiction/Other/a.epub", "B:/Fiction")]
+    [InlineData("B:/Other/a.epub", "B:/")]
+    [InlineData("B:/Fiction", "B:/Fiction")]
+    [InlineData("M:/Manga2/a.cbz", null)]
+    [InlineData("N:/a.cbz", null)]
+    public void DeepestContainingFolder_Test(string path, string? expected)
+    {
+        Assert.Equal(expected, path.DeepestContainingFolder(["B:/", "B:/Fiction", "M:/Manga"]));
+    }
+
+    #endregion
+
     #region FolderOf
 
     [Theory]

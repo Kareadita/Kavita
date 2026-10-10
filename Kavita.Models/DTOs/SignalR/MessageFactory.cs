@@ -676,8 +676,8 @@ public static class MessageFactory
         });
     }
 
-    /// <summary>This runs after we reschedule scanner jobs to inform event widget</summary>
-    /// <param name="scans">Every delayed scan after the retime, in run order</param>
+    /// <summary>Sent after a retime or when the set of folders waiting for a ScanFolder job changes</summary>
+    /// <param name="scans">Every delayed scan, in run order</param>
     public static SignalRMessageDto ScanRescheduledEvent(IList<ScheduledScanDto> scans)
     {
         return new SignalRMessageDto()

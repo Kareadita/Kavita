@@ -3135,6 +3135,11 @@
         "scan-series-in-library-scheduled": "Scan a series in {{libraryName}}",
         "scan-waiting-description": "Waiting for the scans before it",
         "scan-queued-label": "Queued",
+        "scan-folder-scheduled": "Check {{folder}}",
+        "scan-folders-in-library-scheduled": "Check {{count}} folders in {{libraryName}}",
+        "scan-folders-scheduled": "Check {{count}} folders",
+        "scan-folder-watcher-description": "Folder watching saw a change",
+        "scan-folder-api-description": "Requested from the API",
         "show-label": "Show",
         "hide-label": "Hide"
     },
