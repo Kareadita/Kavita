@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.10",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.12",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.1.10"
+    "version": "0.9.1.12"
   },
   "servers": [
     {
@@ -16586,7 +16586,8 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/Server/server-info-slim": {
@@ -16860,6 +16861,146 @@
           "Server"
         ],
         "summary": "Returns a list of issues found during scanning or reading in which files may have corruption or bad metadata (structural metadata)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaErrorDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaErrorDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaErrorDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Server/media-errors/dismiss": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Dismiss one or more media error",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Server/media-errors/undismiss": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Undismiss one or more media error",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Server/media-errors-for-series": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Get the media errors for a given series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -21918,6 +22059,13 @@
           "scheduledTotal": {
             "type": "integer",
             "format": "int32"
+          },
+          "scheduledFolderScans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduledFolderScanDto"
+            },
+            "nullable": true
           },
           "upcoming": {
             "type": "array",
@@ -27206,6 +27354,55 @@
         },
         "additionalProperties": false
       },
+      "LibraryScanEndedEventBodyDto": {
+        "type": "object",
+        "properties": {
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryName": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesAdded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesRemoved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chaptersAdded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chaptersUpdated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chaptersRemoved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "problemFiles": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "newProblemFiles": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recentProblemFiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScanIssueSummaryItemDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "LibraryType": {
         "enum": [
           0,
@@ -27736,6 +27933,10 @@
         ],
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
           "extension": {
             "type": "string",
             "nullable": true
@@ -27744,13 +27945,40 @@
             "type": "string",
             "nullable": true
           },
-          "comment": {
-            "type": "string",
-            "nullable": true
-          },
           "details": {
             "type": "string",
             "nullable": true
+          },
+          "producer": {
+            "$ref": "#/components/schemas/MediaErrorProducer"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/MediaErrorReason"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "libraryName": {
+            "type": "string",
+            "nullable": true
+          },
+          "isDismissed": {
+            "type": "boolean"
+          },
+          "lastSeenUtc": {
+            "type": "string",
+            "format": "date-time"
           },
           "createdUtc": {
             "type": "string",
@@ -27758,6 +27986,70 @@
           }
         },
         "additionalProperties": false
+      },
+      "MediaErrorProducer": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — BookService\n- `1` — ArchiveService\n- `2` — Scanner",
+        "format": "int32",
+        "x-enum-varnames": [
+          "BookService",
+          "ArchiveService",
+          "Scanner"
+        ],
+        "x-enum-descriptions": [
+          "BookService",
+          "ArchiveService",
+          "Scanner"
+        ]
+      },
+      "MediaErrorReason": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Unknown\n- `1` — Parse Failed (ParseFailed)\n- `2` — No Series Name (NoSeriesName)\n- `3` — Unreadable Archive (UnreadableArchive)\n- `5` — Corrupt Epub (CorruptEpub)\n- `6` — No Pages (NoPages)\n- `7` — Cover Failed (CoverFailed)\n- `8` — Word Count Failed (WordCountFailed)\n- `9` — I/O Error (IoError)\n- `10` — Metadata Unreadable (MetadataUnreadable)\n- `11` — Epub Not Strict (EpubNotStrict)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Unknown",
+          "ParseFailed",
+          "NoSeriesName",
+          "UnreadableArchive",
+          "CorruptEpub",
+          "NoPages",
+          "CoverFailed",
+          "WordCountFailed",
+          "IoError",
+          "MetadataUnreadable",
+          "EpubNotStrict"
+        ],
+        "x-enum-descriptions": [
+          "Unknown",
+          "Parse Failed",
+          "No Series Name",
+          "Unreadable Archive",
+          "Corrupt Epub",
+          "No Pages",
+          "Cover Failed",
+          "Word Count Failed",
+          "I/O Error",
+          "Metadata Unreadable",
+          "Epub Not Strict"
+        ]
       },
       "MemberDto": {
         "type": "object",
@@ -30090,13 +30382,12 @@
           "completed": {
             "type": "boolean"
           },
-          "seriesAdded": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "seriesRemoved": {
-            "type": "integer",
-            "format": "int32"
+          "scanSummaries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LibraryScanEndedEventBodyDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -30685,6 +30976,61 @@
           },
           "abortOnNoSeriesMatch": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScanIssueSummaryItemDto": {
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "$ref": "#/components/schemas/MediaErrorReason"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScheduledFolderScanDto": {
+        "required": [
+          "folders"
+        ],
+        "type": "object",
+        "properties": {
+          "libraryId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "fromFolderWatcher": {
+            "type": "boolean"
+          },
+          "runAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "folderCount": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
