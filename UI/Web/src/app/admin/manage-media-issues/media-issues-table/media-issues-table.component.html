@@ -13,12 +13,12 @@
     </button>
   </div>
 
-  <ng-template #selectAllCheckbox let-id>
+  <ng-template #selectAllCheckbox let-id let-showLabel="showLabel">
     <div class="form-check">
       <input [id]="id" type="checkbox" class="form-check-input"
              [checked]="rows().length > 0 && tracker.allSelected()" [indeterminate]="tracker.hasSomeSelected()"
              (change)="toggleAll()">
-      <label [for]="id" class="form-check-label visually-hidden">{{t('select-all-alt')}}</label>
+      <label [for]="id" class="form-check-label" [class.visually-hidden]="!showLabel">{{t('select-all-label')}}</label>
     </div>
   </ng-template>
 
@@ -131,7 +131,7 @@
 
     <div cardHeader class="card mb-3">
       <div class="card-body py-2">
-        <ng-container [ngTemplateOutlet]="selectAllCheckbox" [ngTemplateOutletContext]="{$implicit: prefix + '-select-all-cards'}" />
+        <ng-container [ngTemplateOutlet]="selectAllCheckbox" [ngTemplateOutletContext]="{$implicit: prefix + '-select-all-cards', showLabel: true}" />
       </div>
     </div>
 

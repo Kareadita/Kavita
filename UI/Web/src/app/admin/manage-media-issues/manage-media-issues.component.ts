@@ -3,11 +3,13 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
   OnInit,
   output,
   signal,
+  untracked,
   viewChild
 } from '@angular/core';
 import {filter, map, Observable, switchMap} from 'rxjs';
@@ -21,7 +23,7 @@ import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
 import {FilterFieldComponent} from "../../shared/_components/filter-field/filter-field.component";
 import {matchesQuery} from "../../_helpers/filtered";
-import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
+import {EnumOption, SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 import {form, FormField} from "@angular/forms/signals";
 import {MediaErrorReasonPipe} from "../../_pipes/media-error-reason.pipe";
 import {TranslocoInjectComponent} from "../../shared/_components/transloco-inject/transloco-inject.component";
@@ -38,9 +40,11 @@ import {
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ConfirmService} from "../../shared/confirm.service";
 import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
+import {FilterableSelectComponent} from "../../shared/_components/filterable-select/filterable-select.component";
 
 interface FormModel {
   libraryId: number | null;
+  seriesId: number | null;
   reason: MediaErrorReason | null;
 }
 
@@ -50,7 +54,7 @@ interface FormModel {
   styleUrl: './manage-media-issues.component.scss',
   imports: [TranslocoDirective, FilterFieldComponent, SettingSelectComponent, FormField, MediaErrorReasonPipe,
     TranslocoInjectComponent, TranslocoSlotDirective, MediaIssuesTableComponent, NgbAccordionDirective, NgbAccordionItem,
-    NgbAccordionHeader, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody, LoadingComponent, EmptyStateComponent],
+    NgbAccordionHeader, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody, LoadingComponent, EmptyStateComponent, FilterableSelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManageMediaIssuesComponent implements OnInit {
@@ -70,6 +74,7 @@ export class ManageMediaIssuesComponent implements OnInit {
   protected filterQuery = signal('');
   private readonly formModel = signal<FormModel>({
     libraryId: null,
+    seriesId: null,
     reason: null,
   });
   protected readonly formGroup = form(this.formModel);
@@ -88,17 +93,43 @@ export class ManageMediaIssuesComponent implements OnInit {
     .sort((a, b) => a[1].localeCompare(b[1]))
     .map(([id]) => id));
 
+  /** Series with issues in the picked library, labelled with their library while no library is picked */
+  protected readonly seriesOptions = computed<EnumOption<number>[]>(() => {
+    const libraryId = this.formModel().libraryId;
+    const options = new Map<number, string>();
+    for (const issue of this.data()) {
+      if (issue.seriesId == null || !issue.seriesName) continue;
+      if (libraryId !== null && issue.libraryId !== libraryId) continue;
+
+      options.set(issue.seriesId, libraryId === null ? `${issue.seriesName} (${issue.libraryName})` : issue.seriesName);
+    }
+    return [...options.entries()]
+      .map(([value, label]) => ({value, label}))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  });
+
   private readonly filteredData = computed(() => {
-    const {libraryId, reason} = this.formModel();
+    const {libraryId, seriesId, reason} = this.formModel();
     const query = this.filterQuery();
 
     return this.data().filter(d => (libraryId === null || d.libraryId === libraryId)
+      && (seriesId === null || d.seriesId === seriesId)
       && (reason === null || d.reason === reason)
       && matchesQuery(d, query, 'filePath', 'seriesName', 'libraryName', 'details'));
   });
   protected readonly activeIssues = computed(() => this.filteredData().filter(d => !d.isDismissed));
   protected readonly hasActiveIssues = computed(() => this.data().some(d => !d.isDismissed));
   protected readonly dismissedIssues = computed(() => this.filteredData().filter(d => d.isDismissed));
+
+  constructor() {
+    // A library change or a reload can drop the picked series from the options, which would leave an empty list
+    effect(() => {
+      const seriesId = this.formModel().seriesId;
+      if (seriesId === null || this.seriesOptions().some(o => o.value === seriesId)) return;
+
+      untracked(() => this.formModel.update(model => ({...model, seriesId: null})));
+    });
+  }
 
   ngOnInit(): void {
     this.loadData();

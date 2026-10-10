@@ -14,16 +14,21 @@
   </div>
 
   <div class="d-flex flex-wrap align-items-end gap-2 mb-3">
-    <div class="flex-fill filter">
+    <div class="filter">
       <app-filter-field [(query)]="filterQuery" [label]="t('filter-label')" />
     </div>
 
-    <div>
+    <div class="library">
       <label for="media-issues-library" class="visually-hidden">{{t('library-label')}}</label>
       <app-setting-select [inputId]="'media-issues-library'" [options]="libraryOptions()" [placeholder]="t('all-libraries')"
                           [formField]="formGroup.libraryId">
         <ng-template #template let-id>{{libraryNames().get(id)}}</ng-template>
       </app-setting-select>
+    </div>
+
+    <div class="series">
+      <app-filterable-select [inputId]="'media-issues-series'" [label]="t('series-label')" [options]="seriesOptions()"
+                             [placeholder]="t('all-series')" [formField]="formGroup.seriesId" />
     </div>
 
     <div>

@@ -1,3 +1,17 @@
+@use '../../../theme/variables' as theme;
+
 .filter {
+  flex: 1 1 15rem;
+  max-width: 25rem;
+}
+
+.series {
   min-width: 15rem;
+}
+
+@media (max-width: theme.$grid-breakpoints-md) {
+  .library,
+  .series {
+    width: 100%;
+  }
 }

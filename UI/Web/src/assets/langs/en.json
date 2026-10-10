@@ -2296,6 +2296,8 @@
         "clear-all": "Clear all",
         "library-label": "Library",
         "all-libraries": "All libraries",
+        "series-label": "Series",
+        "all-series": "All series",
         "reason-label": "Reason",
         "all-reasons": "All reasons",
         "dismissed-header": "Dismissed ({{count}})",
@@ -2310,7 +2312,7 @@
     },
 
     "media-issues-table": {
-        "select-all-alt": "{{common.select-all}}",
+        "select-all-label": "{{common.select-all}}",
         "select-alt": "Select {{file}}",
         "file-header": "File",
         "series-header": "Series",
