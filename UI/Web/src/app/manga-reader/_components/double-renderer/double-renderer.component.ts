@@ -23,6 +23,7 @@ import {MangaReaderService} from '../../_service/manga-reader.service';
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
 import {ReaderMode} from "../../../_models/preferences/reader-mode";
+import {ImageZoomDirective} from '../../../_directives/image-zoom.directive';
 
 /**
  * Renders 2 pages except on first page, last page, and before a wide image
@@ -32,7 +33,7 @@ import {ReaderMode} from "../../../_models/preferences/reader-mode";
     templateUrl: './double-renderer.component.html',
     styleUrls: ['./double-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SafeStylePipe]
+    imports: [SafeStylePipe, ImageZoomDirective]
 })
 export class DoubleRendererComponent implements OnInit, ImageRenderer {
   private readonly cdRef = inject(ChangeDetectorRef);
