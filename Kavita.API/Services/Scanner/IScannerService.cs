@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Hangfire;
 using Kavita.Common.Constants;
 using Kavita.Models.Constants;
+using Kavita.Models.Scanner;
 
 namespace Kavita.API.Services.Scanner;
 
@@ -28,7 +29,7 @@ public interface IScannerService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true);
 
-    Task ScanFolder(string folder, string originalPath, bool abortOnNoSeriesMatch = false);
+    Task ScanFolder(ScanFolderRequest request);
     Task AnalyzeFiles();
 
 }

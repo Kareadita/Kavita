@@ -422,7 +422,7 @@ public class SeriesController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> ScanSeries(RefreshSeriesDto refreshSeriesDto)
     {
-        await taskScheduler.ScanSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, true);
+        await taskScheduler.EnqueueScanSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, true);
         return Ok();
     }
 

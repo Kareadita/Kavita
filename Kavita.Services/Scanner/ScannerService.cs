@@ -23,6 +23,8 @@ using Kavita.Models.DTOs.SignalR.Bodies;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Parser;
+using Kavita.Models.Scanner;
+using Kavita.Services.Extensions;
 using Kavita.Services.Helpers;
 using Kavita.Services.Plus;
 using Microsoft.Extensions.DependencyInjection;
@@ -101,28 +103,19 @@ public class ScannerService(
     /// <summary>
     /// Given a generic folder path, will invoke a Series scan or Library scan.
     /// </summary>
-    /// <remarks>This will Schedule the job to run 1 minute in the future to allow for any close-by duplicate requests to be dropped</remarks>
-    /// <param name="folder">Normalized folder</param>
-    /// <param name="originalPath">If invoked from LibraryWatcher, this maybe a nested folder and can allow for optimization</param>
-    /// <param name="abortOnNoSeriesMatch"></param>
-    public async Task ScanFolder(string folder, string originalPath, bool abortOnNoSeriesMatch = false)
+    /// <remarks>Nothing is requested when a queued scan already covers the change</remarks>
+    public async Task ScanFolder(ScanFolderRequest request)
     {
-        var series = await FindSeriesForFolder(folder, originalPath);
+        var folder = request.Folder;
+        var series = await FindSeriesForFolder(folder, request.ChangedPath);
 
         if (series != null)
         {
-            if (TaskScheduler.HasScanTaskRunningForSeries(series.Id))
-            {
-                logger.LogTrace("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
-                return;
-            }
-
-            logger.LogInformation("[ScannerService] Scan folder invoked for {Folder}, Series matched to folder and ScanSeries enqueued for 1 minute", folder);
-            BackgroundJob.Schedule(() => ScanSeries(series.Id, false), TimeSpan.FromMinutes(1));
+            RequestScan(ScanTarget.Series(series.LibraryId, series.Id), folder);
             return;
         }
 
-        if (abortOnNoSeriesMatch) return;
+        if (request.AbortOnNoSeriesMatch) return;
 
 
         // This is basically rework of what's already done in Library Watcher but is needed if invoked via API
@@ -150,12 +143,31 @@ public class ScannerService(
 
         if (library != null)
         {
-            if (TaskScheduler.HasScanTaskRunningForLibrary(library.Id))
+            RequestScan(ScanTarget.Library(library.Id), folder);
+        }
+    }
+
+    internal void RequestScan(ScanTarget target, string folder)
+    {
+        lock (TaskScheduler.ScanRequestLock)
+        {
+            if (ScanJobQueue.Read().Jobs.FindAlreadyRequested(target) is { } covering)
             {
-                logger.LogTrace("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this library. Dropping request", folder);
+                logger.LogDebug("[ScannerService] Scan folder invoked for {Folder} but job {JobId} already covers it. Dropping request",
+                    folder, covering.JobId);
                 return;
             }
-            BackgroundJob.Schedule(() => ScanLibrary(library.Id, false, true), TimeSpan.FromMinutes(1));
+
+            var libraryId = target.LibraryId!.Value;
+            if (target.SeriesId is { } seriesId)
+            {
+                logger.LogDebug("[ScannerService] Scan folder invoked for {Folder}, requesting a scan of series {SeriesId}", folder, seriesId);
+                ScanJobQueue.Enqueue<ITaskScheduler>(t => t.EnqueueScanSeries(libraryId, seriesId, false));
+                return;
+            }
+
+            logger.LogDebug("[ScannerService] Scan folder invoked for {Folder}, requesting a scan of library {LibraryId}", folder, libraryId);
+            ScanJobQueue.Enqueue<ITaskScheduler>(t => t.EnqueueScanLibrary(libraryId, false));
         }
     }
 
@@ -199,12 +211,6 @@ public class ScannerService(
     [AutomaticRetry(Attempts = 200, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true)
     {
-        if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanSeries", [seriesId, bypassFolderOptimizationChecks], TaskScheduler.ScanQueue))
-        {
-            logger.LogInformation("[ScannerService] Scan series invoked but a task is already running/enqueued. Dropping request");
-            return;
-        }
-
         var sw = Stopwatch.StartNew();
 
         var series = await unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
@@ -530,7 +536,7 @@ public class ScannerService(
         foreach (var lib in await unitOfWork.LibraryRepository.GetLibrariesAsync())
         {
             // BUG: This will trigger the first N libraries to scan over and over if there is always an interruption later in the chain
-            if (TaskScheduler.HasScanTaskRunningForLibrary(lib.Id))
+            if (ScanJobQueue.Read().Jobs.HasLibraryScan(lib.Id))
             {
                 // We don't need to send SignalR event as this is a background job that user doesn't need insight into
                 logger.LogInformation("[ScannerService] Scan library invoked via nightly scan job but a task is already running for {LibraryName}. Rescheduling for 4 hours", lib.Name);

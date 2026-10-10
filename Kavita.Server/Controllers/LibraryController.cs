@@ -27,7 +27,9 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
+using Kavita.Models.Scanner;
 using Kavita.Server.Attributes;
+using Kavita.Services.Extensions;
 using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -150,7 +152,7 @@ public class LibraryController(
             await libraryWatcher.RestartWatching();
         }
 
-        BackgroundJob.Enqueue(() => taskScheduler.ScanLibrary(library.Id, false));
+        ScanJobQueue.Enqueue(() => taskScheduler.EnqueueScanLibrary(library.Id, false));
         await eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "create"), false, ct);
         await eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
@@ -350,7 +352,7 @@ public class LibraryController(
     public async Task<ActionResult> Scan(int libraryId, bool force = false)
     {
         if (libraryId <= 0) return BadRequest(await localizationService.TranslateAsync(UserId, "greater-0", "libraryId"));
-        await taskScheduler.ScanLibrary(libraryId, force);
+        await taskScheduler.EnqueueScanLibrary(libraryId, force);
         return Ok();
     }
 
@@ -364,7 +366,7 @@ public class LibraryController(
     {
         foreach (var libraryId in dto.Ids)
         {
-            await taskScheduler.ScanLibrary(libraryId, dto.Force ?? false);
+            await taskScheduler.EnqueueScanLibrary(libraryId, dto.Force ?? false);
         }
 
         return Ok();
@@ -379,7 +381,7 @@ public class LibraryController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> ScanAll(bool force = false)
     {
-        await taskScheduler.ScanLibraries(force);
+        await taskScheduler.EnqueueScanLibraries(force);
         return Ok();
     }
 
@@ -483,7 +485,8 @@ public class LibraryController(
 
         var seriesFolder = directoryService.FindHighestDirectoriesFromFiles(libraryFolder, [dto.FolderPath]);
 
-        taskScheduler.ScanFolder(seriesFolder.Keys.Count == 1 ? seriesFolder.Keys.First() : dto.FolderPath, dto.AbortOnNoSeriesMatch);
+        var folder = seriesFolder.Keys.Count == 1 ? seriesFolder.Keys.First() : dto.FolderPath;
+        taskScheduler.EnqueueScanFolder(new ScanFolderRequest(folder, string.Empty, dto.AbortOnNoSeriesMatch), TimeSpan.Zero);
 
         return Ok();
     }
@@ -560,7 +563,7 @@ public class LibraryController(
 
         try
         {
-            if (TaskScheduler.HasScanTaskRunningForLibrary(libraryId))
+            if (ScanJobQueue.Read().Jobs.IsLibraryInUse(libraryId))
             {
                 logger.LogInformation("User is attempting to delete a library while a scan is in progress");
                 throw new KavitaException(await localizationService.TranslateAsync(userId, "delete-library-while-scan"));
@@ -681,7 +684,7 @@ public class LibraryController(
 
         if (originalFoldersCount != dto.Folders.Count() || typeUpdate)
         {
-            await taskScheduler.ScanLibrary(library.Id);
+            await taskScheduler.EnqueueScanLibrary(library.Id);
         }
 
         await eventHub.SendMessageAsync(MessageFactory.LibraryModified,

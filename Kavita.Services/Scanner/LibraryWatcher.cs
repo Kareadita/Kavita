@@ -11,6 +11,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
 using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Scanner;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -402,7 +403,7 @@ public class LibraryWatcher : ILibraryWatcher
                 return;
             }
 
-            _taskScheduler.ScanFolder(fullPath, filePath, _queueWaitTime);
+            _taskScheduler.EnqueueScanFolder(new ScanFolderRequest(fullPath, filePath, false), _queueWaitTime);
         }
         catch (Exception ex)
         {

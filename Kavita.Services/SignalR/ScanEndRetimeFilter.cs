@@ -21,7 +21,6 @@ public class ScanEndRetimeFilter(ILogger<ScanEndRetimeFilter> logger) : IServerF
     public void OnPerformed(PerformedContext context)
     {
         var job = context.BackgroundJob.Job;
-        // TaskScheduler has wrappers with the same method names that end as soon as they enqueue the real scan
         if (!job.Type.IsAssignableTo(typeof(IScannerService))) return;
 
         try

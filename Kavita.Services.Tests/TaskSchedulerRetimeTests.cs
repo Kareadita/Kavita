@@ -44,12 +44,14 @@ public class TaskSchedulerRetimeTests
     public async Task ScanEnd_PullsOldestDelayedScanForward()
     {
         var parkedFor = TimeSpan.FromHours(3);
-        var bookId = BackgroundJob.Schedule<TaskScheduler>(t => t.ScanLibrary(2, false), parkedFor);
+        var bookId = BackgroundJob.Schedule<TaskScheduler>(t => t.EnqueueScanLibrary(2, false), parkedFor);
+
         // CreatedAt must differ between jobs for the order to be defined
         Thread.Sleep(20);
-        var seriesId = BackgroundJob.Schedule<TaskScheduler>(t => t.ScanSeries(1, 812, true), parkedFor);
+        var seriesId = BackgroundJob.Schedule<TaskScheduler>(t => t.EnqueueScanSeries(1, 812, true), parkedFor);
+
         Thread.Sleep(20);
-        BackgroundJob.Schedule<TaskScheduler>(t => t.ScanLibrary(2, false), parkedFor);
+        BackgroundJob.Schedule<TaskScheduler>(t => t.EnqueueScanLibrary(2, false), parkedFor);
 
         var before = DateTime.UtcNow;
         await _taskScheduler.RetimeDelayedScans();
@@ -73,7 +75,7 @@ public class TaskSchedulerRetimeTests
     [Fact]
     public async Task ScanStillRunning_RetimesNothing()
     {
-        BackgroundJob.Schedule<TaskScheduler>(t => t.ScanLibrary(2, false), TimeSpan.FromHours(3));
+        BackgroundJob.Schedule<TaskScheduler>(t => t.EnqueueScanLibrary(2, false), TimeSpan.FromHours(3));
         BackgroundJob.Enqueue<ScannerService>(s => s.ScanLibrary(1, false, true));
 
         await _taskScheduler.RetimeDelayedScans();
@@ -86,7 +88,7 @@ public class TaskSchedulerRetimeTests
     [Fact]
     public async Task ScanRetryDueBeforeThePulledScan_RetimesNothing()
     {
-        BackgroundJob.Schedule<TaskScheduler>(t => t.ScanLibrary(2, false), TimeSpan.FromHours(3));
+        BackgroundJob.Schedule<TaskScheduler>(t => t.EnqueueScanLibrary(2, false), TimeSpan.FromHours(3));
         BackgroundJob.Schedule<ScannerService>(s => s.ScanSeries(5, false), TimeSpan.FromSeconds(30));
 
         await _taskScheduler.RetimeDelayedScans();
@@ -98,7 +100,7 @@ public class TaskSchedulerRetimeTests
     [Fact]
     public async Task ScanRetryDueAfterThePulledScan_StillRetimes()
     {
-        BackgroundJob.Schedule<TaskScheduler>(t => t.ScanLibrary(2, false), TimeSpan.FromHours(3));
+        BackgroundJob.Schedule<TaskScheduler>(t => t.EnqueueScanLibrary(2, false), TimeSpan.FromHours(3));
         BackgroundJob.Schedule<ScannerService>(s => s.ScanSeries(5, false), TimeSpan.FromHours(1));
 
         await _taskScheduler.RetimeDelayedScans();
@@ -110,7 +112,7 @@ public class TaskSchedulerRetimeTests
     [Fact]
     public void ScanEnd_SchedulesTheRetimeInsteadOfRunningIt()
     {
-        BackgroundJob.Schedule<TaskScheduler>(t => t.ScanLibrary(2, false), TimeSpan.FromHours(3));
+        BackgroundJob.Schedule<TaskScheduler>(t => t.EnqueueScanLibrary(2, false), TimeSpan.FromHours(3));
         var endingScan = new BackgroundJob("1", Job.FromExpression<ScannerService>(s => s.ScanLibrary(1, false, true)), DateTime.UtcNow);
         using var connection = JobStorage.Current.GetConnection();
         var performContext = new PerformContext(JobStorage.Current, connection, endingScan, new JobCancellationToken(false));

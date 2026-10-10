@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace Kavita.Services.Scanner;
@@ -14,11 +13,12 @@ public static class DelayedScanRetime
     public static readonly TimeSpan NextScanDelay = TimeSpan.FromMinutes(1);
     public static readonly TimeSpan QueuedScanDelay = TimeSpan.FromHours(3);
 
-    public static RetimePlan Plan(IEnumerable<DelayedScanJob> jobs, DateTime nowUtc)
+    /// <param name="jobs">Scheduled jobs only, see ScanJobExtensions.Delayed</param>
+    public static RetimePlan Plan(IEnumerable<ScanJob> jobs, DateTime nowUtc)
     {
         var byTarget = jobs
             .OrderBy(j => j.CreatedAtUtc)
-            .GroupBy(TargetKey)
+            .GroupBy(j => new { j.Target, j.Force })
             .ToList();
 
         var deletes = byTarget.SelectMany(g => g.Skip(1)).Select(j => j.JobId).ToList();
@@ -26,21 +26,21 @@ public static class DelayedScanRetime
         if (kept.Count == 0) return new RetimePlan([], deletes);
 
         // A job already due sooner than a minute is left alone, moving it would only make it later
-        var nextRunAt = Min(kept[0].RunAtUtc, nowUtc + NextScanDelay);
+        var nextRunAt = Min(RunAt(kept[0]), nowUtc + NextScanDelay);
         var queuedRunAt = nextRunAt + QueuedScanDelay;
 
         var moves = kept
             .Select((job, index) => new { job, runAt = index == 0 ? nextRunAt : queuedRunAt })
-            .Where(m => m.job.RunAtUtc != m.runAt)
+            .Where(m => RunAt(m.job) != m.runAt)
             .Select(m => new RetimeMove(m.job.JobId, m.runAt))
             .ToList();
 
         return new RetimePlan(moves, deletes);
     }
 
-    private static string TargetKey(DelayedScanJob job)
+    private static DateTime RunAt(ScanJob job)
     {
-        return $"{job.Method}({string.Join(',', job.Args.Select(a => Convert.ToString(a, CultureInfo.InvariantCulture)))})";
+        return job.RunAtUtc ?? throw new ArgumentException($"Job {job.JobId} is not scheduled, only delayed jobs can be retimed");
     }
 
     private static DateTime Min(DateTime a, DateTime b) => a <= b ? a : b;

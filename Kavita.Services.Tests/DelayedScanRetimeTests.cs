@@ -6,9 +6,9 @@ public class DelayedScanRetimeTests
 {
     private static readonly DateTime Now = new(2026, 10, 9, 10, 30, 0, DateTimeKind.Utc);
 
-    private static DelayedScanJob Job(string jobId, string method, object[] args, int createdMinutesAgo, TimeSpan runIn)
+    private static ScanJob Job(string jobId, ScanTarget target, bool force, int createdMinutesAgo, TimeSpan runIn)
     {
-        return new DelayedScanJob(jobId, method, args, Now.AddMinutes(-createdMinutesAgo), Now + runIn);
+        return new ScanJob(jobId, target, force, true, ScanJobState.Scheduled, Now.AddMinutes(-createdMinutesAgo), Now + runIn);
     }
 
     [Fact]
@@ -16,9 +16,9 @@ public class DelayedScanRetimeTests
     {
         var jobs = new[]
         {
-            Job("41", "ScanLibrary", [1, false], 20, TimeSpan.FromHours(1)),
-            Job("40", "ScanLibrary", [2, false], 28, TimeSpan.FromHours(2.9)),
-            Job("42", "ScanLibrary", [3, false], 10, TimeSpan.FromHours(2)),
+            Job("41", ScanTarget.Library(1), false, 20, TimeSpan.FromHours(1)),
+            Job("40", ScanTarget.Library(2), false, 28, TimeSpan.FromHours(2.9)),
+            Job("42", ScanTarget.Library(3), false, 10, TimeSpan.FromHours(2)),
         };
 
         var plan = DelayedScanRetime.Plan(jobs, Now);
@@ -32,9 +32,9 @@ public class DelayedScanRetimeTests
     {
         var jobs = new[]
         {
-            Job("40", "ScanLibrary", [2, false], 28, TimeSpan.FromHours(2.5)),
-            Job("41", "ScanLibrary", [1, false], 20, TimeSpan.FromHours(2.8)),
-            Job("42", "ScanSeries", [1, 812, true], 5, TimeSpan.FromMinutes(5)),
+            Job("40", ScanTarget.Library(2), false, 28, TimeSpan.FromHours(2.5)),
+            Job("41", ScanTarget.Library(1), false, 20, TimeSpan.FromHours(2.8)),
+            Job("42", ScanTarget.Series(1, 812), true, 5, TimeSpan.FromMinutes(5)),
         };
 
         var plan = DelayedScanRetime.Plan(jobs, Now);
@@ -50,9 +50,9 @@ public class DelayedScanRetimeTests
         // A runs, then B, series D and B again are asked for while it does
         var jobs = new[]
         {
-            Job("10", "ScanLibrary", [2, false], 30, TimeSpan.FromHours(2.5)),
-            Job("11", "ScanSeries", [1, 812, true], 20, TimeSpan.FromHours(2.7)),
-            Job("12", "ScanLibrary", [2, false], 10, TimeSpan.FromHours(2.8)),
+            Job("10", ScanTarget.Library(2), false, 30, TimeSpan.FromHours(2.5)),
+            Job("11", ScanTarget.Series(1, 812), true, 20, TimeSpan.FromHours(2.7)),
+            Job("12", ScanTarget.Library(2), false, 10, TimeSpan.FromHours(2.8)),
         };
 
         var plan = DelayedScanRetime.Plan(jobs, Now);
@@ -66,7 +66,7 @@ public class DelayedScanRetimeTests
     [Fact]
     public void OldestAlreadyDueSooner_IsNotPushedBack()
     {
-        var jobs = new[] { Job("40", "ScanLibrary", [2, false], 28, TimeSpan.FromSeconds(20)) };
+        var jobs = new[] { Job("40", ScanTarget.Library(2), false, 28, TimeSpan.FromSeconds(20)) };
 
         var plan = DelayedScanRetime.Plan(jobs, Now);
 
