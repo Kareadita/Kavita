@@ -18,6 +18,6 @@ jobs:
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
     with:
-      config-path: release.yaml
+      config-path: release.yml
       dockerhub-username: "jvmilazz0"
       uses-docker: true
