@@ -96,8 +96,8 @@ export class SeriesCardComponent {
         panelClass: ''
       });
       ref.setInput('isExternalSeries', false);
-      ref.setInput('seriesId', this.recommendedBySeriesId());
-      ref.setInput('recommendedSeriesId', series.id);
+      ref.setInput('seriesId', series.id);
+      ref.setInput('recommendedSeriesId', this.recommendedBySeriesId());
       ref.setInput('libraryId', series.libraryId);
       ref.setInput('name', series.name);
 
