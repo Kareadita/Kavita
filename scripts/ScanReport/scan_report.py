@@ -191,9 +191,9 @@ def audit_tags(show_names):
                        for name in series_joined[sid]
                        for shorter, longer in [sorted((name, joined_folder), key=len)])
 
-        def owner_holds_half(folder):
-            counts = files_by_folder[folder]
-            return counts.most_common(1)[0][1] * 2 >= sum(counts.values())
+        def named_for_owner(folder):
+            owner = files_by_folder[folder].most_common(1)[0][0]
+            return shares_word(owner, folder) or spelling_variant(owner, folder)
 
         def keep(folders_by_series, test):
             kept = {sid: [f for f in folders if test(sid, f)] for sid, folders in folders_by_series.items()}
@@ -202,7 +202,7 @@ def audit_tags(show_names):
         all_guest = {sid: sorted(folders) for sid, folders in guest_folders.items()}
         c_folders = keep(all_guest, lambda sid, f: not shares_word(sid, f))
         d_folders = keep(c_folders, lambda sid, f: not spelling_variant(sid, f))
-        e_folders = keep(d_folders, lambda sid, f: owner_holds_half(f))
+        e_folders = keep(d_folders, lambda sid, f: named_for_owner(f))
 
         rule_a = set(all_guest)
         rule_b = {sid for sid, folders in all_guest.items() if len(folders) >= 2}
@@ -214,7 +214,7 @@ def audit_tags(show_names):
         write(f'Rule B (A, in 2+ such folders):                              {len(rule_b)} series')
         write(f'Rule C (A, folder name shares no word with series name):     {len(rule_c)} series')
         write(f'Rule D (C, folder name is not a spelling variant either):    {len(rule_d)} series')
-        write(f'Rule E (D, folder owner holds at least half its files):      {len(rule_e)} series')
+        write(f'Rule E (D, folder is named after the series that owns it):   {len(rule_e)} series')
         write(f'Only A (what C lets through):                                {len(rule_a - rule_c)} series')
         if has_cv_id:
             write(f'Series with a chapter ComicVine id under 1000:              {len(small_cv_series)} series '
@@ -244,7 +244,7 @@ def audit_tags(show_names):
                       + (f'  (+{more} more guest folders)' if more > 0 else ''))
 
         sample('Rule E', e_folders)
-        sample('In D, not E (folder has no clear owner)', d_folders, rule_d - rule_e)
+        sample('In D, not E (folder not named after its owner)', d_folders, rule_d - rule_e)
         sample('In C, not D (spelling variant)', c_folders, rule_c - rule_d)
         sample('Rule B', all_guest, rule_b)
         sample('Only A', all_guest, rule_a - rule_c)
