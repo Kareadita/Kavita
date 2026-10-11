@@ -97,9 +97,7 @@
   font-size: 0.75rem;
   line-height: 1.45;
   color: var(--event-widget-muted-text-color);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-wrap: break-word;
 }
 
 .problem-files {
