@@ -1,4 +1,4 @@
-import {DOCUMENT, NgClass, NgTemplateOutlet} from '@angular/common';
+import {DOCUMENT, NgTemplateOutlet} from '@angular/common';
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
@@ -53,7 +53,7 @@ export interface TypeaheadTemplateContext<T> {
 
 @Component({
   selector: 'app-typeahead',
-  imports: [TagBadgeComponent, TranslocoDirective, NgTemplateOutlet, NgClass, CdkConnectedOverlay, CdkOverlayOrigin, FormField],
+  imports: [TagBadgeComponent, TranslocoDirective, NgTemplateOutlet, CdkConnectedOverlay, CdkOverlayOrigin, FormField],
   templateUrl: './typeahead.component.html',
   styleUrls: ['./typeahead.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
