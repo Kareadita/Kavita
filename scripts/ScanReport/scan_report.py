@@ -23,6 +23,7 @@ import shutil
 import sqlite3
 import sys
 import tempfile
+import unicodedata
 import zipfile
 
 parser = argparse.ArgumentParser(description='Collect scanner diagnostics from a Kavita database')
@@ -113,8 +114,11 @@ STOP_WORDS = {'the', 'of', 'and', 'a', 'an', 'annual', 'vol', 'volume', 'special
 
 
 def name_words(name):
-    without_years = re.sub(r'\(.*?\)', ' ', (name or '').lower())
-    return {w for w in re.findall(r'\w+', without_years) if len(w) > 1 and w not in STOP_WORDS}
+    without_accents = ''.join(c for c in unicodedata.normalize('NFKD', (name or '').lower()) if not unicodedata.combining(c))
+    without_years = re.sub(r'\(.*?\)', ' ', without_accents)
+    without_joiners = re.sub(r"['.’]", '', without_years)
+    # \w matches '_', which would make Abe_Sapien_(2013) a single word
+    return {w for w in re.findall(r'[^\W_]+', without_joiners) if len(w) > 1 and w not in STOP_WORDS}
 
 
 def audit_tags(show_names):
