@@ -813,7 +813,7 @@ public class ProcessSeries(
                     .ToList();
                 if (droppedFiles.Count > 0)
                 {
-                    logger.LogTrace("Removing {Count} files from chapter {ChapterId} [{Range}] for {SeriesName} ({SeriesId}): {FilePaths}",
+                    logger.LogDebug("Removing {Count} files from chapter {ChapterId} [{Range}] for {SeriesName} ({SeriesId}): {FilePaths}",
                         droppedFiles.Count, chapter.Id, chapter.Range, args.Series.Name, args.Series.Id,
                         string.Join(", ", droppedFiles.Select(f => f.FilePath)));
                 }
@@ -857,7 +857,7 @@ public class ProcessSeries(
 
         if (unmappedVolumes.Count > 0)
         {
-            logger.LogTrace("Deleting {Count} volumes for {SeriesName} ({SeriesId}): {Volumes}",
+            logger.LogDebug("Deleting {Count} volumes for {SeriesName} ({SeriesId}): {Volumes}",
                 unmappedVolumes.Count, series.Name, series.Id,
                 string.Join("; ", unmappedVolumes.Select(v => $"{v.Id} [{v.Name}]")));
             unitOfWork.VolumeRepository.Remove(unmappedVolumes);
@@ -867,7 +867,7 @@ public class ProcessSeries(
 
         if (unmappedChapters.Count > 0)
         {
-            logger.LogTrace("Deleting {Count} chapters for {SeriesName} ({SeriesId}): {Chapters}",
+            logger.LogDebug("Deleting {Count} chapters for {SeriesName} ({SeriesId}): {Chapters}",
                 unmappedChapters.Count, series.Name, series.Id,
                 string.Join("; ", unmappedChapters.Select(c =>
                     $"{c.Id} [{c.Range}] {string.Join(", ", c.Files.Select(f => f.FilePath))}")));

@@ -490,7 +490,7 @@ public class ScannerService(
         foreach (var key in keysToRemove)
         {
             var fileNames = parsedSeries[key].Select(info => info.Filename).ToList();
-            logger.LogTrace("Removing files {FilePaths} for {SeriesName} as no match was found. {@ParsedSeries}. ",
+            logger.LogDebug("Removing files {FilePaths} for {SeriesName} as no match was found. {@ParsedSeries}. ",
                 fileNames, series.Name, key);
 
             parsedSeries.Remove(key);
