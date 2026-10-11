@@ -64,6 +64,7 @@ con = open_db(args.db)
 
 LIBRARY_TYPES = {0: 'Manga', 1: 'Comic', 2: 'Book', 3: 'Image', 4: 'LightNovel', 5: 'ComicVine'}
 MAX_ROWS = 300
+SCRIPT_VERSION = 2
 
 out = open(args.out, 'w', encoding='utf-8')
 
@@ -108,17 +109,26 @@ if table_exists('__EFMigrationsHistory'):
     last = rows('SELECT MigrationId FROM __EFMigrationsHistory ORDER BY MigrationId DESC LIMIT 3')
     write('Last migrations: ' + ', '.join(r['MigrationId'] for r in last))
 write(f'MangaFile.FileLastWriteTimeUtc present: {has_write_time}')
+write(f'Script version: {SCRIPT_VERSION}')
 
 
 STOP_WORDS = {'the', 'of', 'and', 'a', 'an', 'annual', 'vol', 'volume', 'special', 'specials'}
 
 
-def name_words(name):
+def name_parts(name):
     without_accents = ''.join(c for c in unicodedata.normalize('NFKD', (name or '').lower()) if not unicodedata.combining(c))
     without_years = re.sub(r'\(.*?\)', ' ', without_accents)
     without_joiners = re.sub(r"['.’]", '', without_years)
     # \w matches '_', which would make Abe_Sapien_(2013) a single word
-    return {w for w in re.findall(r'[^\W_]+', without_joiners) if len(w) > 1 and w not in STOP_WORDS}
+    return re.findall(r'[^\W_]+', without_joiners)
+
+
+def name_words(name):
+    return {w for w in name_parts(name) if len(w) > 1 and w not in STOP_WORDS}
+
+
+def joined_name(name):
+    return ''.join(name_parts(name))
 
 
 def audit_tags(show_names):
@@ -139,13 +149,19 @@ def audit_tags(show_names):
             continue
 
         series_words = {}
+        series_joined = {}
         series_names = {}
+        series_file_count = collections.Counter()
         files_by_folder = collections.defaultdict(collections.Counter)
         small_cv_series = set()
         for f in files:
             sid = f['SeriesId']
             series_names[sid] = f['Name']
-            series_words.setdefault(sid, name_words(f['Name']) | name_words(f['OriginalName']) | name_words(f['LocalizedName']))
+            if sid not in series_words:
+                names = (f['Name'], f['OriginalName'], f['LocalizedName'])
+                series_words[sid] = set().union(*(name_words(n) for n in names))
+                series_joined[sid] = {joined_name(n) for n in names} - {''}
+            series_file_count[sid] += 1
             files_by_folder[folder_of(f['FilePath'])][sid] += 1
             if f['ComicVineId'] and 0 < int(f['ComicVineId']) < 1000:
                 small_cv_series.add(sid)
@@ -162,36 +178,78 @@ def audit_tags(show_names):
                 if sid != owner:
                     guest_folders[sid].add(folder)
 
-        rule_a = set(guest_folders)
-        rule_b = {sid for sid, folders in guest_folders.items() if len(folders) >= 2}
-        rule_c = {sid for sid, folders in guest_folders.items()
-                  if any(not (name_words(folder.rsplit('/', 1)[-1]) & series_words[sid]) for folder in folders)}
+        def folder_name(folder):
+            return folder.rsplit('/', 1)[-1]
+
+        def shares_word(sid, folder):
+            return bool(name_words(folder_name(folder)) & series_words[sid])
+
+        def spelling_variant(sid, folder):
+            joined_folder = joined_name(folder_name(folder))
+            # Under 4 letters, a catch-all folder like 'a' or 'new' would match almost any name
+            return any(len(shorter) >= 4 and shorter in longer
+                       for name in series_joined[sid]
+                       for shorter, longer in [sorted((name, joined_folder), key=len)])
+
+        def owner_holds_half(folder):
+            counts = files_by_folder[folder]
+            return counts.most_common(1)[0][1] * 2 >= sum(counts.values())
+
+        def keep(folders_by_series, test):
+            kept = {sid: [f for f in folders if test(sid, f)] for sid, folders in folders_by_series.items()}
+            return {sid: folders for sid, folders in kept.items() if folders}
+
+        all_guest = {sid: sorted(folders) for sid, folders in guest_folders.items()}
+        c_folders = keep(all_guest, lambda sid, f: not shares_word(sid, f))
+        d_folders = keep(c_folders, lambda sid, f: not spelling_variant(sid, f))
+        e_folders = keep(d_folders, lambda sid, f: owner_holds_half(f))
+
+        rule_a = set(all_guest)
+        rule_b = {sid for sid, folders in all_guest.items() if len(folders) >= 2}
+        rule_c, rule_d, rule_e = set(c_folders), set(d_folders), set(e_folders)
 
         section(f'Tag audit: library #{library["Id"]} ({LIBRARY_TYPES.get(library["Type"], library["Type"])})')
         write(f'{len(series_names)} series, {len(files)} files, {len(files_by_folder)} folders')
         write(f'Rule A (series has files in another series\' folder):        {len(rule_a)} series')
         write(f'Rule B (A, in 2+ such folders):                              {len(rule_b)} series')
         write(f'Rule C (A, folder name shares no word with series name):     {len(rule_c)} series')
+        write(f'Rule D (C, folder name is not a spelling variant either):    {len(rule_d)} series')
+        write(f'Rule E (D, folder owner holds at least half its files):      {len(rule_e)} series')
         write(f'Only A (what C lets through):                                {len(rule_a - rule_c)} series')
         if has_cv_id:
             write(f'Series with a chapter ComicVine id under 1000:              {len(small_cv_series)} series '
-                  f'({len(small_cv_series & rule_c)} also in C)')
+                  f'({len(small_cv_series & rule_e)} also in E)')
 
         if not show_names:
             continue
 
-        def sample(title, ids):
+        def describe(sid, folder):
+            counts = files_by_folder[folder]
+            total = sum(counts.values())
+            owner_share = round(100 * counts.most_common(1)[0][1] / total)
+            return (f'{counts[sid]} of the series\' {series_file_count[sid]} files here; folder has {len(counts)} series, '
+                    f'owner holds {owner_share}% of {total} files')
+
+        def sample(title, folders_by_series, ids=None):
+            ids = set(folders_by_series) if ids is None else ids
             write()
             write(f'{title} (up to {sample_size}):')
             for sid in sorted(ids, key=lambda s: series_names[s])[:sample_size]:
-                folder = sorted(guest_folders[sid])[0].rsplit('/', 1)[-1] if sid in guest_folders else '-'
-                more = len(guest_folders.get(sid, ())) - 1
-                write(f'  {series_names[sid]}  in  {folder}' + (f'  (+{more} more folders)' if more > 0 else ''))
+                folders = folders_by_series.get(sid, [])
+                if not folders:
+                    write(f'  {series_names[sid]}  in  -')
+                    continue
+                more = len(all_guest[sid]) - 1
+                write(f'  {series_names[sid]}  in  {folder_name(folders[0])}  [{describe(sid, folders[0])}]'
+                      + (f'  (+{more} more guest folders)' if more > 0 else ''))
 
-        sample('Rule C', rule_c)
-        sample('Only A', rule_a - rule_c)
+        sample('Rule E', e_folders)
+        sample('In D, not E (folder has no clear owner)', d_folders, rule_d - rule_e)
+        sample('In C, not D (spelling variant)', c_folders, rule_c - rule_d)
+        sample('Rule B', all_guest, rule_b)
+        sample('Only A', all_guest, rule_a - rule_c)
         if has_cv_id:
-            sample('ComicVine id under 1000, not in C', small_cv_series - rule_c)
+            sample('ComicVine id under 1000, not in E', all_guest, small_cv_series - rule_e)
 
 
 if args.audit_tags:
