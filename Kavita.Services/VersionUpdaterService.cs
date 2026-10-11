@@ -67,6 +67,9 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
     [GeneratedRegex(@"^\n*([\s\S]*?)\n+^#\s(Added|Fixed|Changed|Theme|API|Removed)", RegexOptions.Multiline | RegexOptions.Compiled)]
     private static partial Regex BlogPartRegex();
+    [GeneratedRegex(@"Release changes for (\d+\.\d+\.\d+\.\d+)", RegexOptions.Multiline | RegexOptions.Compiled, 1_000)]
+    private static partial Regex NightlyReleaseRegex();
+
     private readonly string _cacheFilePath;
     /// <summary>
     /// The latest release cache
@@ -273,14 +276,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                     if (i + 1 < commitList.Count)
                     {
                         var prCommit = commitList[i + 1];
-                        var prMessage = prCommit.Commit.Message.Split('\n')[0];
-
-                        // Extract PR number using improved regex
-                        var prMatch = Regex.Match(prMessage, @"(?:^|\s)\(#(\d+)\)|\s#(\d+)");
-                        if (!prMatch.Success) continue;
-
-                        var prNumber = int.Parse(prMatch.Groups[1].Value != "" ?
-                            prMatch.Groups[1].Value : prMatch.Groups[2].Value);
+                        var prNumber = GetPrNumber(prCommit);
+                        if (prNumber is null) continue;
 
                         // Get the version from AssemblyInfo.cs in this commit
                         var version = await GetVersionFromCommit(commit.Sha);
@@ -293,10 +290,29 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                             nightlyReleases.Add(new NightlyInfo
                             {
                                 Version = version,
-                                PrNumber = prNumber,
+                                PrNumber = prNumber.Value,
                                 Date = DateTime.Parse(commit.Commit.Author.Date, CultureInfo.InvariantCulture)
                             });
                         }
+                    }
+                }
+
+                var newNightlyMatch = NightlyReleaseRegex().Match(message);
+                if (!foundLastStable && newNightlyMatch.Success && i + 1 < commitList.Count)
+                {
+                    var prCommit = commitList[i + 1];
+                    var prNumber = GetPrNumber(prCommit);
+                    if (prNumber is null) continue;
+
+                    var version = newNightlyMatch.Groups[1].Value;
+                    if (Version.TryParse(version, out var parsedVersion) && parsedVersion > latestStableVersion)
+                    {
+                        nightlyReleases.Add(new NightlyInfo
+                        {
+                            Version = version,
+                            PrNumber = prNumber.Value,
+                            Date = DateTime.Parse(commit.Commit.Author.Date, CultureInfo.InvariantCulture)
+                        });
                     }
                 }
             }
@@ -310,6 +326,22 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             _logger.LogError(ex, "Failed to get nightly releases");
             return [];
         }
+    }
+
+    private static int? GetPrNumber(CommitInfo commitInfo)
+    {
+        var prMessage = commitInfo.Commit.Message.Split('\n')[0];
+
+        // Extract PR number using improved regex
+        var prMatch = Regex.Match(prMessage, @"(?:^|\s)\(#(\d+)\)|\s#(\d+)");
+        if (!prMatch.Success)
+        {
+            return null;
+        }
+
+        var prNumber = prMatch.Groups[1].Value != "" ? prMatch.Groups[1].Value : prMatch.Groups[2].Value;
+
+        return int.TryParse(prNumber, out var result) ? result : null;
     }
 
     public async Task<IList<UpdateNotificationDto>> GetAllReleases(int count = 0, CancellationToken ct = default)
