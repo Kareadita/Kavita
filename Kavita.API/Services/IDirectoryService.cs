@@ -76,7 +76,15 @@ public interface IDirectoryService
         SearchOption searchOption = SearchOption.TopDirectoryOnly);
     IEnumerable<string> GetDirectories(string folderPath);
     IEnumerable<string> GetDirectories(string folderPath, GlobMatcher? matcher);
-    IEnumerable<string> GetAllDirectories(string folderPath, GlobMatcher? matcher = null);
+    /// <summary>
+    /// Lists every folder below <paramref name="folderPath"/> once, keeping the library files in each. Folders that are excluded
+    /// or match the glob are skipped with everything below them. Empty if the folder does not exist
+    /// </summary>
+    /// <remarks>This is explicitly to be used with the Scanner</remarks>
+    /// <param name="onFolderListed">Called with each folder after it is listed</param>
+    /// <exception cref="UnauthorizedAccessException">The folder itself cannot be listed</exception>
+    /// <exception cref="IOException">The folder itself cannot be listed</exception>
+    Task<FolderTree> ListFolderTreeAsync(string folderPath, string fileTypes, GlobMatcher? matcher, Func<string, Task> onFolderListed);
     string GetParentDirectoryName(string fileOrFolder);
     IList<FileStamp> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null, SearchOption searchOption = SearchOption.AllDirectories);
 }

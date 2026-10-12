@@ -932,7 +932,9 @@ public class ParseScannedFilesTests: AbstractDbTest
     private static IDirectoryService ListingOf(params FileStamp[] files)
     {
         var ds = Substitute.For<IDirectoryService>();
-        ds.GetAllDirectories(default!).ReturnsForAnyArgs([MurderbotFolder]);
+        var tree = new FolderTree("B:/Fiction");
+        tree.Add(MurderbotFolder, "B:/Fiction", files);
+        ds.ListFolderTreeAsync(default!, default!, default, default!).ReturnsForAnyArgs(tree);
         ds.ScanFiles(default!, default!).ReturnsForAnyArgs(files);
         return ds;
     }
@@ -1024,9 +1026,10 @@ public class ParseScannedFilesTests: AbstractDbTest
         const string author = "B:/Fiction/Martha Wells";
         var loose = new FileStamp($"{author}/Compulsory.epub", 300, FailedWriteTime);
         var ds = Substitute.For<IDirectoryService>();
-        ds.GetAllDirectories(default!).ReturnsForAnyArgs([author, MurderbotFolder]);
-        ds.ScanFiles(MurderbotFolder, Arg.Any<string>(), Arg.Any<GlobMatcher?>(), Arg.Any<SearchOption>()).Returns([Readable]);
-        ds.ScanFiles(author, Arg.Any<string>(), Arg.Any<GlobMatcher?>(), SearchOption.TopDirectoryOnly).Returns([loose]);
+        var tree = new FolderTree("B:/Fiction");
+        tree.Add(author, "B:/Fiction", [loose]);
+        tree.Add(MurderbotFolder, author, [Readable]);
+        ds.ListFolderTreeAsync(default!, default!, default, default!).ReturnsForAnyArgs(tree);
         var psf = FailedFileScanner(ds);
 
         var result = await psf.ScanFiles("B:/Fiction", true, new Dictionary<string, IList<SeriesModified>>(), BooksLibrary(),

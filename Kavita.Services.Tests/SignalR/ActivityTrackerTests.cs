@@ -135,7 +135,7 @@ public class ActivityTrackerTests
     {
         var message = MessageFactory.LibraryScanEndedEvent(
             new LibraryScanEndedEventBodyDto(libraryId, "Manga", 2, 0, chaptersAdded, 3, 1, 4, 1,
-                [new ScanIssueSummaryItemDto("M:/A/A Vol 2.cbz", MediaErrorReason.UnreadableArchive, 7, "A")]));
+                [new ScanIssueSummaryItemDto("M:/A/A Vol 2.cbz", MediaErrorReason.UnreadableArchive, 7, "A")], true));
         message.CorrelationId = CorrelationId;
         return message;
     }

@@ -9,6 +9,7 @@ export enum MessageEventCode {
 
   RootFoldersInaccessible = 'root-folders-inaccessible',
   RootFoldersEmpty = 'root-folders-empty',
+  RootFoldersUnreadable = 'root-folders-unreadable',
   UnreadableFolders = 'unreadable-folders',
   SeriesCollision = 'series-collision',
   FilesOutsideFolder = 'files-outside-folder',

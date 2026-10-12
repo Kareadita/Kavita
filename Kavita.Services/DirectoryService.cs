@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -664,33 +665,124 @@ public class DirectoryService : IDirectoryService
                 $"{FileSystem.DirectoryInfo.New(folder).Name}{FileSystem.Path.AltDirectorySeparatorChar}"));
     }
 
-    /// <summary>
-    /// Returns all directories, including subdirectories. Automatically excludes directories that shouldn't be in scope.
-    /// </summary>
-    /// <param name="folderPath"></param>
-    /// <param name="matcher"></param>
-    /// <returns></returns>
-    public IEnumerable<string> GetAllDirectories(string folderPath, GlobMatcher? matcher = null)
+    public async Task<FolderTree> ListFolderTreeAsync(string folderPath, string fileTypes, GlobMatcher? matcher,
+        Func<string, Task> onFolderListed)
     {
-        if (!FileSystem.Directory.Exists(folderPath)) return ImmutableArray<string>.Empty;
-        var directories = new List<string>();
+        var root = Parser.NormalizePath(folderPath);
+        var tree = new FolderTree(root);
+        if (!Exists(folderPath)) return tree;
 
-        var foundDirs = GetDirectories(folderPath, matcher);
-        foreach (var foundDir in foundDirs)
+        var pattern = GetExtensionPattern(fileTypes);
+        var timings = new ListingTimings();
+        var totalWatch = Stopwatch.StartNew();
+
+        // Folders are listed parent first, in listing order, so folders of equal length sort as they always have
+        var pending = new Stack<(string Folder, string Parent)>();
+        PushSubfolders(pending, ListFolder(folderPath, pattern, matcher, false, timings).Subfolders, root);
+
+        while (pending.Count > 0)
         {
-            // Kept even when unreadable, the scanner needs it to keep the series inside
-            directories.Add(foundDir);
+            var (folder, parent) = pending.Pop();
+            var key = Parser.NormalizePath(folder);
             try
             {
-                directories.AddRange(GetAllDirectories(foundDir, matcher));
+                var listing = ListFolder(folder, pattern, matcher, true, timings);
+                tree.Add(key, parent, listing.Files);
+                PushSubfolders(pending, listing.Subfolders, key);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                tree.Add(key, parent, []);
             }
             catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
             {
-                _logger.LogWarning(ex, "Could not list the folders inside {Folder}, skipping them", foundDir);
+                // Kept in the tree, the scanner needs it to keep the series inside
+                _logger.LogWarning(ex, "Could not list {Folder}, skipping everything inside it", folder);
+                tree.AddUnreadable(key, parent, ex);
+            }
+
+            var eventStart = Stopwatch.GetTimestamp();
+            await onFolderListed(key);
+            timings.EventTicks += Stopwatch.GetTimestamp() - eventStart;
+        }
+
+        LogListing(tree, totalWatch.ElapsedMilliseconds, timings);
+        return tree;
+    }
+
+    private static void PushSubfolders(Stack<(string Folder, string Parent)> pending, List<string> subfolders, string parent)
+    {
+        for (var i = subfolders.Count - 1; i >= 0; i--)
+        {
+            pending.Push((subfolders[i], parent));
+        }
+    }
+
+    private FolderListing ListFolder(string folder, Regex pattern, GlobMatcher? matcher, bool withFiles, ListingTimings timings)
+    {
+        var start = Stopwatch.GetTimestamp();
+        long stampTicks = 0;
+        var subfolders = new List<string>();
+        var files = new List<FileStamp>();
+
+        foreach (var entry in FileSystem.DirectoryInfo.New(folder).EnumerateFileSystemInfos("*", SearchOption.TopDirectoryOnly))
+        {
+            if (entry is IDirectoryInfo)
+            {
+                // Joined like Directory.GetDirectories does, so paths keep the shape the library folder was given in
+                var subfolder = FileSystem.Path.Join(folder, entry.Name);
+                if (ExcludeDirectories.IsMatch(subfolder)) continue;
+                if (matcher != null && matcher.ExcludeMatches($"{entry.Name}{FileSystem.Path.AltDirectorySeparatorChar}")) continue;
+
+                subfolders.Add(subfolder);
+                continue;
+            }
+
+            if (!withFiles || entry is not IFileInfo file) continue;
+            if (!HasWantedExtension(file.Name, file.Extension, pattern)) continue;
+            if (matcher != null && matcher.ExcludeMatches(file.Name)) continue;
+
+            var stampStart = Stopwatch.GetTimestamp();
+            files.Add(new FileStamp(file.FullName, file.Length, file.LastWriteTimeUtc));
+            stampTicks += Stopwatch.GetTimestamp() - stampStart;
+        }
+
+        var elapsed = Stopwatch.GetTimestamp() - start;
+        timings.StampTicks += stampTicks;
+        timings.EntryTicks += elapsed - stampTicks;
+        if (withFiles)
+        {
+            timings.FolderMs.Add(Stopwatch.GetElapsedTime(start).TotalMilliseconds);
+            if (elapsed > timings.SlowestTicks)
+            {
+                timings.SlowestTicks = elapsed;
+                timings.SlowestFolder = folder;
             }
         }
 
-        return directories;
+        return new FolderListing(subfolders, files);
+    }
+
+    private void LogListing(FolderTree tree, long elapsedMs, ListingTimings timings)
+    {
+        if (!_logger.IsEnabled(LogLevel.Debug)) return;
+
+        var folderMs = timings.FolderMs.Order().ToList();
+        _logger.LogDebug("[DirectoryService] Listed {Root} in {ElapsedMs} ms: {FolderCount} folders, {FileCount} files, {UnreadableCount} unreadable. " +
+                         "entries {EntriesMs} ms, stamps {StampsMs} ms, events {EventsMs} ms. " +
+                         "Per folder p50 {P50Ms} ms, p95 {P95Ms} ms, max {MaxMs} ms ({SlowestFolder})",
+            tree.Root, elapsedMs, tree.Folders.Count, tree.FileCount, tree.UnreadableCount,
+            TicksToMs(timings.EntryTicks), TicksToMs(timings.StampTicks), TicksToMs(timings.EventTicks),
+            Percentile(folderMs, 0.5), Percentile(folderMs, 0.95), folderMs.Count == 0 ? 0 : Math.Round(folderMs[^1], 1),
+            Parser.NormalizePath(timings.SlowestFolder));
+    }
+
+    private static long TicksToMs(long ticks) => (long) Stopwatch.GetElapsedTime(0, ticks).TotalMilliseconds;
+
+    private static double Percentile(List<double> sorted, double percentile)
+    {
+        if (sorted.Count == 0) return 0;
+        return Math.Round(sorted[(int) Math.Ceiling(percentile * sorted.Count) - 1], 1);
     }
 
     /// <summary>

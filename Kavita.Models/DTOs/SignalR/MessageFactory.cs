@@ -484,6 +484,15 @@ public static class MessageFactory
         });
     }
 
+    public static SignalRMessageDto RootFoldersUnreadableEvent(int libraryId, string libraryName, IList<string> folders)
+    {
+        var title = $"Some of the root folders for {libraryName} could not be read. Scan has been aborted";
+        var subtitle = string.Join(", ", folders);
+
+        return CodedEvent(Error, MessageEventCode.RootFoldersUnreadable, title, subtitle,
+            new RootFoldersUnreadableEventBodyDto(Error, title, subtitle, libraryId, libraryName, folders));
+    }
+
     public static SignalRMessageDto UnreadableFoldersEvent(int libraryId, string libraryName, IReadOnlyList<string> folders)
     {
         var title = $"Some folders in {libraryName} could not be read. Their series were kept as they are";

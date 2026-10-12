@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Kavita.Common.Helpers;
 using Kavita.Database.Tests;
+using Kavita.Models.Parser;
 using Kavita.Services.Scanner;
 using Kavita.Services.Tests.Helpers;
 using Microsoft.Extensions.Logging;
@@ -1189,39 +1190,93 @@ public class DirectoryServiceTests: AbstractFsTest
 
     #endregion
 
-    #region GetAllDirectories
+    #region ListFolderTreeAsync
+
+    private static Task<FolderTree> ListTree(DirectoryService ds, string folder, GlobMatcher? matcher = null)
+    {
+        return ds.ListFolderTreeAsync(folder, Parser.SupportedExtensions, matcher, _ => Task.CompletedTask);
+    }
 
     [Fact]
-    public void GetAllDirectories_ShouldFindAllNestedDirectories()
+    public async Task ListFolderTree_FindsNestedFoldersLongestFirst()
     {
         const string testDirectory = "C:/manga/base/";
         var fileSystem = new MockFileSystem();
         fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1"));
         fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 2"));
         fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "A"));
-        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "B"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "Bb"));
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        Assert.Equal(2, ds.GetAllDirectories(fileSystem.Path.Join(testDirectory, "folder 1")).Count());
+        var tree = await ListTree(ds, testDirectory);
+
+        Assert.Equal(["C:/manga/base/folder 1/Bb", "C:/manga/base/folder 1/A", "C:/manga/base/folder 1", "C:/manga/base/folder 2"],
+            tree.Folders);
     }
 
     [Fact]
-    public void GetAllDirectories_UnreadableSubfolder_KeepsItAndSkipsItsChildren()
+    public async Task ListFolderTree_SkipsExcludedAndGlobbedFolders()
+    {
+        var fileSystem = CreateStampLibrary();
+        fileSystem.AddFile("C:/Data/Accel World/@Recently-Snapshot/Accel World v1.cbz", new MockFileData(string.Empty));
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var matcher = new GlobMatcher();
+        matcher.AddExclude("Extras/");
+        matcher.AddExclude("*.pdf");
+
+        var tree = await ListTree(ds, "C:/Data/", matcher);
+
+        Assert.Equal(["C:/Data/Accel World/Specials", "C:/Data/Accel World"], tree.Folders);
+        Assert.Equal(["Accel World v1.cbz", "Accel World v2.cbz"],
+            tree.FilesIn("C:/Data/Accel World").Select(s => Path.GetFileName(s.Path)).Order());
+        Assert.Equal(["Accel World SP01.cbz", "Accel World v1.cbz", "Accel World v2.cbz"],
+            tree.FilesBelow("C:/Data/Accel World").Select(s => Path.GetFileName(s.Path)).Order());
+    }
+
+    [Fact]
+    public async Task ListFolderTree_ReturnsSizeAndWriteTime()
+    {
+        var fileSystem = CreateStampLibrary();
+        var written = new DateTime(2022, 4, 28, 20, 12, 21, DateTimeKind.Utc);
+        fileSystem.File.SetLastWriteTimeUtc("C:/Data/Accel World/Accel World v1.cbz", written);
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+        var tree = await ListTree(ds, "C:/Data/");
+        var stamp = tree.FilesIn("C:/Data/Accel World").Single(s => s.Path.EndsWith("v1.cbz"));
+
+        Assert.Equal("C:/Data/Accel World/Accel World v1.cbz", Parser.NormalizePath(stamp.Path));
+        Assert.Equal(5, stamp.Bytes);
+        Assert.Equal(written, stamp.LastWriteTimeUtc);
+    }
+
+    [Fact]
+    public async Task ListFolderTree_MissingFolder_ReturnsEmpty()
+    {
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateStampLibrary());
+
+        Assert.Empty((await ListTree(ds, "C:/Data/Missing")).Folders);
+    }
+
+    [Fact]
+    public async Task ListFolderTree_UnreadableSubfolder_KeepsItAndSkipsItsChildren()
     {
         const string testDirectory = "C:/manga/base/";
         var fileSystem = new MockFileSystem();
-        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "A", "A1"));
+        fileSystem.AddFile(fileSystem.Path.Join(testDirectory, "A", "A1", "A v01.cbz"), new MockFileData(string.Empty));
         fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "B", "B1"));
 
         var ds = new DirectoryService(_logger,
             UnreadableFolders.Wrap(fileSystem, fileSystem.Path.Join(testDirectory, "B")));
+        var tree = await ListTree(ds, testDirectory);
 
-        var directories = ds.GetAllDirectories(testDirectory).Select(Parser.NormalizePath).Order().ToList();
-        Assert.Equal(["C:/manga/base/A", "C:/manga/base/A/A1", "C:/manga/base/B"], directories);
+        Assert.Equal(["C:/manga/base/A", "C:/manga/base/A/A1", "C:/manga/base/B"], tree.Folders.Order());
+        Assert.Equal(1, tree.UnreadableCount);
+        Assert.Single(tree.FilesBelow("C:/manga/base/A"));
+        Assert.Throws<UnauthorizedAccessException>(() => tree.FilesBelow("C:/manga/base/B"));
     }
 
     [Fact]
-    public void GetAllDirectories_UnreadableRoot_Throws()
+    public async Task ListFolderTree_UnreadableRoot_Throws()
     {
         const string testDirectory = "C:/manga/base/";
         var fileSystem = new MockFileSystem();
@@ -1229,7 +1284,7 @@ public class DirectoryServiceTests: AbstractFsTest
 
         var ds = new DirectoryService(_logger, UnreadableFolders.Wrap(fileSystem, testDirectory));
 
-        Assert.Throws<UnauthorizedAccessException>(() => ds.GetAllDirectories(testDirectory).ToList());
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => ListTree(ds, testDirectory));
     }
 
     #endregion

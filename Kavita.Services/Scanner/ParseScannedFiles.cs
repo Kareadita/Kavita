@@ -27,6 +27,8 @@ namespace Kavita.Services.Scanner;
 /// </summary>
 public partial class ParseScannedFiles
 {
+    private static readonly TimeSpan ListingEventInterval = TimeSpan.FromSeconds(1);
+
     private readonly ILogger _logger;
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
@@ -77,7 +79,13 @@ public partial class ParseScannedFiles
     public IReadOnlyList<string> UnreadableFolders => _unreadableFolders;
 
     /// <summary>
-    /// Time spent listing folders, summed over every folder passed to <see cref="ScanLibrariesForSeries"/>
+    /// Time spent listing the folder tree of a library scan, summed over every folder passed to <see cref="ScanLibrariesForSeries"/>
+    /// </summary>
+    public TimeSpan ListTime { get; private set; }
+
+    /// <summary>
+    /// Time spent walking the listed folders and checking them for changes, summed like <see cref="ListTime"/>.
+    /// A series scan lists its folder here
     /// </summary>
     public TimeSpan WalkTime { get; private set; }
 
@@ -154,10 +162,19 @@ public partial class ParseScannedFiles
     private async Task<IList<ScanResult>> ScanDirectories(string folderPath, IDictionary<string, IList<SeriesModified>> seriesPaths,
         IReadOnlyList<FailedFile> failedFiles, Library library, bool forceCheck, GlobMatcher matcher, List<ScanResult> result, string fileExtensions)
     {
-        var allDirectories = _directoryService.GetAllDirectories(folderPath, matcher)
-            .Select(Parser.NormalizePath)
-            .OrderByDescending(d => d.Length)
-            .ToList();
+        var listWatch = Stopwatch.StartNew();
+        var nextListingEvent = TimeSpan.Zero;
+        var tree = await _directoryService.ListFolderTreeAsync(folderPath, fileExtensions, matcher, folder =>
+        {
+            if (listWatch.Elapsed < nextListingEvent) return Task.CompletedTask;
+
+            nextListingEvent = listWatch.Elapsed + ListingEventInterval;
+            return _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.FileScanProgressEvent(folder, library.Id, library.Name, ProgressEventType.Updated,
+                    MessageEventCode.ScanListingFolders));
+        });
+        ListTime += listWatch.Elapsed;
+        var allDirectories = tree.Folders;
 
         var processedDirsAndAncestors = new HashSet<string>();
         var resultFolders = new HashSet<string>();
@@ -192,9 +209,7 @@ public partial class ParseScannedFiles
                     var specialsOwners = specials.Select(s => forceCheck ? [] : SeriesWithFilesIn(seriesPaths, s)).ToList();
                     var allOwners = looseFileOwners.Concat(specialsOwners.SelectMany(o => o)).Distinct().ToList();
 
-                    var onDisk = ListLibraryFiles(directory, fileExtensions, matcher, library.Type, SearchOption.TopDirectoryOnly)
-                        .Concat(specials.SelectMany(s => ListLibraryFiles(s, fileExtensions, matcher, library.Type)))
-                        .ToList();
+                    var onDisk = LibraryFiles(tree.FilesIn(directory).Concat(specials.SelectMany(tree.FilesBelow)), library.Type);
 
                     Func<string, bool> isInScope = folder => folder == directory || specials.Exists(folder.IsSameOrInsideFolder);
                     var failures = FailedFilesIn(failedFiles, isInScope);
@@ -247,7 +262,7 @@ public partial class ParseScannedFiles
                         .Distinct()
                         .ToList();
 
-                var onDiskBelow = ListLibraryFiles(directory, fileExtensions, matcher, library.Type);
+                var onDiskBelow = LibraryFiles(tree.FilesBelow(directory), library.Type);
                 Func<string, bool> isBelow = folder => folder.IsSameOrInsideFolder(directory);
                 var failuresBelow = FailedFilesIn(failedFiles, isBelow);
 
@@ -346,12 +361,14 @@ public partial class ParseScannedFiles
     /// <summary>
     /// Files the parsers would turn into series files. Anything else would make the folder look changed on every scan
     /// </summary>
-    private List<FileStamp> ListLibraryFiles(string directory, string fileExtensions, GlobMatcher matcher, LibraryType type,
-        SearchOption searchOption = SearchOption.AllDirectories)
+    private static List<FileStamp> LibraryFiles(IEnumerable<FileStamp> files, LibraryType type)
     {
-        return _directoryService.ScanFiles(directory, fileExtensions, matcher, searchOption)
-            .Where(f => !Parser.IsSkippedCoverImage(Path.GetFileName(f.Path), type))
-            .ToList();
+        return files.Where(f => !Parser.IsSkippedCoverImage(Path.GetFileName(f.Path), type)).ToList();
+    }
+
+    private List<FileStamp> ListLibraryFiles(string directory, string fileExtensions, GlobMatcher matcher, LibraryType type)
+    {
+        return LibraryFiles(_directoryService.ScanFiles(directory, fileExtensions, matcher), type);
     }
 
     private static List<SeriesModified> SeriesWithFilesInside(IDictionary<string, IList<SeriesModified>> seriesPaths, string folder)
@@ -725,8 +742,9 @@ public partial class ParseScannedFiles
     {
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.B: Scan files in {Folder}", library.Name, folderPath);
         var stepWatch = Stopwatch.StartNew();
+        var listedBefore = ListTime;
         var scanResults = await ScanFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck, failedFiles);
-        WalkTime += stepWatch.Elapsed;
+        WalkTime += stepWatch.Elapsed - (ListTime - listedBefore);
         var walkResults = scanResults;
 
         AddReadFiles(walkResults);

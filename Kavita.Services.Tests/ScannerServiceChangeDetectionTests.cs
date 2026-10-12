@@ -390,6 +390,52 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
             await SeriesFileNames(context, await SeriesId(context, libraryId, "Berserk")));
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ScanLibrary_UnreadableSpecialsFolder_KeepsTheSeries(bool forceUpdate)
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, $"Unreadable Specials Folder {forceUpdate} - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Specials/Spice and Wolf SP01.cbz",
+        ]);
+        var root = await LibraryRoot(context, libraryId);
+
+        await ScannerWithUnreadable(unitOfWork, Path.Join(root, "Spice and Wolf", "Specials")).ScanLibrary(libraryId, forceUpdate);
+
+        Assert.Equal(["Spice and Wolf SP01.cbz", "Spice and Wolf Vol. 1 Ch. 0001.cbz"],
+            await SeriesFileNames(context, await SeriesId(context, libraryId, "Spice and Wolf")));
+    }
+
+    [Fact]
+    public async Task ScanLibrary_NoChange_ListsEachFolderOnce()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Lists Each Folder Once - Manga",
+        [
+            "Accel World/Accel World Vol. 1.cbz",
+            "Berserk/Berserk Vol. 1/Berserk Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+        ]);
+        var root = await LibraryRoot(context, libraryId);
+        var calls = new FolderCalls(new FileSystem(), root);
+        var scanner = new ScannerHelper(unitOfWork, testOutputHelper)
+            .CreateServices(new DirectoryService(NullLogger<DirectoryService>.Instance, calls.FileSystem), calls.FileSystem);
+
+        await scanner.ScanLibrary(libraryId);
+
+        var rootFolder = root.TrimEnd('/');
+        var expected = new[] { "Accel World", "Berserk", "Berserk/Berserk Vol. 1", "Spice and Wolf" }
+            .ToDictionary(f => $"{rootFolder}/{f}", _ => 1);
+        // CheckMounts lists the root once before the scan, to tell an empty or unreadable mount
+        expected[rootFolder] = 2;
+        Assert.Equal(expected.OrderBy(p => p.Key, StringComparer.Ordinal),
+            calls.ListingsByFolder.OrderBy(p => p.Key, StringComparer.Ordinal));
+        Assert.Empty(calls.ExistsByFolder.Keys.Where(f => f != rootFolder));
+    }
+
     [Fact]
     public async Task ScanLibrary_UnreadableLibraryRoot_AbortsAndReportsIt()
     {
@@ -404,8 +450,9 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
 
         Assert.Equal(2, await context.Series.CountAsync(s => s.LibraryId == libraryId));
         Assert.Equal(3, await context.MangaFile.CountAsync(f => f.Chapter.Volume.Series.LibraryId == libraryId));
-        var body = Assert.Single(UnreadableFoldersBodies(eventHub));
+        var body = Assert.Single(RootFoldersUnreadableBodies(eventHub));
         Assert.Equal([root], body.Folders);
+        Assert.Empty(UnreadableFoldersBodies(eventHub));
     }
 
     [Fact]
@@ -418,7 +465,8 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
 
         await ScannerWithUnreadable(unitOfWork, eventHub, root).ScanSeries(await SeriesId(context, libraryId, "Berserk"));
 
-        Assert.Single(UnreadableFoldersBodies(eventHub));
+        Assert.Single(RootFoldersUnreadableBodies(eventHub));
+        Assert.Empty(UnreadableFoldersBodies(eventHub));
     }
 
     [Theory]
@@ -446,7 +494,6 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         var root = await LibraryRoot(context, libraryId);
         var eventHub = Substitute.For<IEventHub>();
 
-        // DirectoryService fails to list its subfolders first, the walk then fails to read it
         await ScannerWithUnreadable(unitOfWork, eventHub, Path.Join(root, "Berserk", "Berserk Vol. 2")).ScanLibrary(libraryId);
 
         var body = Assert.Single(UnreadableFoldersBodies(eventHub));
@@ -468,11 +515,21 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
 
     private static List<UnreadableFoldersEventBodyDto> UnreadableFoldersBodies(IEventHub eventHub)
     {
+        return BodiesWithCode<UnreadableFoldersEventBodyDto>(eventHub, MessageEventCode.UnreadableFolders);
+    }
+
+    private static List<RootFoldersUnreadableEventBodyDto> RootFoldersUnreadableBodies(IEventHub eventHub)
+    {
+        return BodiesWithCode<RootFoldersUnreadableEventBodyDto>(eventHub, MessageEventCode.RootFoldersUnreadable);
+    }
+
+    private static List<T> BodiesWithCode<T>(IEventHub eventHub, string code)
+    {
         return eventHub.ReceivedCalls()
             .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
             .Select(c => (SignalRMessageDto) c.GetArguments()[1]!)
-            .Where(m => m.Code == MessageEventCode.UnreadableFolders)
-            .Select(m => (UnreadableFoldersEventBodyDto) m.Body!)
+            .Where(m => m.Code == code)
+            .Select(m => (T) m.Body!)
             .ToList();
     }
 
