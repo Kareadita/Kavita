@@ -182,8 +182,6 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     /// <returns></returns>
     private AppUserProgress? GetUserProgressForChapter(AppUser user, Chapter chapter)
     {
-        AppUserProgress? userProgress = null;
-
         if (user.Progresses == null)
         {
             //throw new ArgumentException("AppUser must have Progress on it"); // default: Figure out the impact of switching to a more dev experience exception
@@ -192,7 +190,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
 
         try
         {
-            userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+            return user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
         }
         catch (Exception)
         {
@@ -200,16 +198,25 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
             if (progresses.Count > 1)
             {
+                #pragma warning disable S6667
+                logger.LogInformation("Trying to save progress and multiple progress entries exist for chapter {ChapterId}, deleting and rewriting with highest progress rate",
+                    chapter.Id);
+                #pragma warning restore S6667
+
                 var highestProgress = progresses.Max(x => x.PagesRead);
                 var firstProgress = progresses.OrderBy(p => p.LastModifiedUtc).First();
                 firstProgress.PagesRead = highestProgress;
-                user.Progresses = [firstProgress];
-                userProgress = user.Progresses.First();
-                logger.LogInformation("Trying to save progress and multiple progress entries exist, deleting and rewriting with highest progress rate: {@Progress}", userProgress);
-            }
-        }
 
-        return userProgress;
+                user.Progresses = user.Progresses
+                    .Where(x => x.ChapterId != chapter.Id && x.AppUserId == user.Id)
+                    .Concat([firstProgress])
+                    .ToList();
+
+                return firstProgress;
+            }
+
+            return null;
+        }
     }
 
     /// <summary>
