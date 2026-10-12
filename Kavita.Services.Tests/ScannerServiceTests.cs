@@ -1800,6 +1800,32 @@ public class ScannerServiceTests: AbstractDbTest
     }
 
     [Fact]
+    public async Task ScanLibrary_VolumeSpelledTwoWays_SharesOneVolume()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Volume Spelled Two Ways - Manga";
+        var library = await scannerHelper.GenerateScannerData(testcase, [
+            "Spelled Twice/Spelled Twice Ch. 1.cbz",
+            "Spelled Twice/Spelled Twice Ch. 2.cbz"
+        ], new Dictionary<string, ComicInfo>
+        {
+            ["Spelled Twice Ch. 1.cbz"] = new() { Volume = "1.0" },
+            ["Spelled Twice Ch. 2.cbz"] = new() { Volume = "1" },
+        });
+
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        var volume = Assert.Single(Assert.Single(postLib.Series).Volumes);
+        Assert.Equal("1", volume.LookupName);
+        Assert.Equal(2, volume.Chapters.Count);
+    }
+
+    [Fact]
     public async Task ScanLibrary_CorrectTrackingWithMetadata()
     {
         var (unitOfWork, context, _) = await CreateDatabase();

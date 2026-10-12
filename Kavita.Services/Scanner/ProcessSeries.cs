@@ -767,6 +767,14 @@ public class ProcessSeries(
         }
     }
 
+    /// <summary>
+    /// Matches each parsed file to a volume and chapter of the series, creating them when none fits, then removes
+    /// the volumes, chapters and files that no parsed file matched
+    /// </summary>
+    /// <remarks>
+    /// Only files from folders read this scan are in <see cref="ProcessParserInfosArgs.ParsedInfos"/>. Files in
+    /// skipped folders were not looked at, so they and their chapters are kept as they are (unverifiedFileIds).
+    /// </remarks>
     private async Task<ChapterChanges> ProcessParserInfos(ProcessParserInfosArgs args)
     {
         var foundVolumes = new HashSet<Volume>();
@@ -778,11 +786,12 @@ public class ProcessSeries(
         var unverifiedFileIds = GetFilesInUnchangedFolders(args.Series, args.UnchangedFolders)
             .Select(f => f.Id)
             .ToHashSet();
+        var ranges = new RangeIndex(args.ParsedInfos);
 
         foreach (var parsedInfo in args.ParsedInfos)
         {
-            var volume = FindOrCreateVolume(args, parsedInfo);
-            var chapter = FindOrCreateChapter(args, parsedInfo);
+            var volume = FindOrCreateVolume(args, ranges, parsedInfo);
+            var chapter = FindOrCreateChapter(args, ranges, unverifiedFileIds, parsedInfo);
 
             if (chapter.Id == 0)
             {
@@ -910,24 +919,12 @@ public class ProcessSeries(
         return series.Volumes
             .SelectMany(v => v.Chapters)
             .SelectMany(c => c.Files)
-            .Where(f => IsInUnchangedFolder(f, unchangedFolders));
+            .Where(f => unchangedFolders.Any(folder => folder.Contains(f.FilePath)));
     }
 
-    /// <summary>
-    /// Whether the file lives under a folder the scanner skipped. Such a file was never looked at this scan, so it
-    /// must not be treated as missing from disk.
-    /// </summary>
-    private static bool IsInUnchangedFolder(MangaFile file, IReadOnlyCollection<UnchangedFolder> unchangedFolders)
+    private Volume FindOrCreateVolume(ProcessParserInfosArgs args, RangeIndex ranges, ParserInfo info)
     {
-        return unchangedFolders.Any(folder => folder.Contains(file.FilePath));
-    }
-
-    private Volume FindOrCreateVolume(ProcessParserInfosArgs args, ParserInfo info)
-    {
-        var volumeGroup = args.ParsedInfos.Select(p => p.Volumes)
-            .GroupBy(v => (Min: Parser.MinNumberFromRange(v), Max: Parser.MaxNumberFromRange(v)))
-            .Single(g => g.Contains(info.Volumes));
-        var volumeNumber = volumeGroup.OrderBy(v => v.Length).First();
+        var volumeNumber = ranges.VolumeLookupName(info.Volumes);
 
         Volume? volume;
         try
@@ -956,12 +953,10 @@ public class ProcessSeries(
         return volume;
     }
 
-    private Chapter FindOrCreateChapter(ProcessParserInfosArgs args, ParserInfo info)
+    private Chapter FindOrCreateChapter(ProcessParserInfosArgs args, RangeIndex ranges, HashSet<int> unverifiedFileIds,
+        ParserInfo info)
     {
-        var volumeGroup = args.ParsedInfos.Select(p => p.Volumes)
-            .GroupBy(v => (Min: Parser.MinNumberFromRange(v), Max: Parser.MaxNumberFromRange(v)))
-            .Single(g => g.Contains(info.Volumes));
-        var lookupVolume = volumeGroup.OrderBy(v => v.Length).First();
+        var lookupVolume = ranges.VolumeLookupName(info.Volumes);
 
         var volume = args.Series.Volumes.OneOrDefault(v => v.LookupName == lookupVolume);
         var exactChapterMatch = volume?.Chapters.GetChapterByRange(info);
@@ -973,14 +968,10 @@ public class ProcessSeries(
             return exactChapterMatch;
         }
 
-        var minVolumeRange = Parser.MinNumberFromRange(info.Volumes);
-        var maxVolumeRange = Parser.MaxNumberFromRange(info.Volumes);
-
-        var filesMatchingOnVolume = args.ParsedInfos.Select(p => p.Volumes)
-            .Count(v => Parser.MinNumberFromRange(v).Is(minVolumeRange) && Parser.MaxNumberFromRange(v).Is(maxVolumeRange));
+        var filesMatchingOnVolume = ranges.FilesMatchingVolume(info.Volumes);
 
         // Don't use volume if any files are unchanged
-        var volumeFullyRead = volume?.Chapters.All(c => c.Files.All(f => !IsInUnchangedFolder(f, args.UnchangedFolders))) ?? true;
+        var volumeFullyRead = volume?.Chapters.All(c => c.Files.All(f => !unverifiedFileIds.Contains(f.Id))) ?? true;
 
         if (volume?.Chapters.Count == 1 && filesMatchingOnVolume == 1 && volumeFullyRead)
         {
@@ -992,16 +983,12 @@ public class ProcessSeries(
             return match;
         }
 
-        var minRange = Parser.MinNumberFromRange(info.Chapters);
-        var maxRange = Parser.MaxNumberFromRange(info.Chapters);
-
         var matchingChapter = args.Series.Volumes
             .SelectMany(v => v.Chapters)
-            .Where(c => c.Files.All(f => !IsInUnchangedFolder(f, args.UnchangedFolders)))
+            .Where(c => c.Files.All(f => !unverifiedFileIds.Contains(f.Id)))
             .GetChaptersByRange(info)
             .OneOrDefault();
-        var filesMatchingOnChapter = args.ParsedInfos.Select(p => p.Chapters)
-            .Count(c => Parser.MinNumberFromRange(c).Is(minRange) &&  Parser.MaxNumberFromRange(c).Is(maxRange));
+        var filesMatchingOnChapter = ranges.FilesMatchingChapter(info.Chapters);
 
         if (matchingChapter != null && filesMatchingOnChapter == 1)
         {
@@ -1017,6 +1004,77 @@ public class ProcessSeries(
 
         var chapter = ChapterBuilder.FromParserInfo(info).Build();
         return chapter;
+    }
+
+    /// <summary>
+    /// The volume and chapter numbers of one series' parsed files, each distinct text parsed once
+    /// </summary>
+    private sealed class RangeIndex
+    {
+        private readonly record struct NumberRange(float Min, float Max);
+        private readonly record struct RangeCount(NumberRange Range, int Count);
+
+        private readonly Dictionary<string, NumberRange> _parsed = [];
+        private readonly Dictionary<string, string> _volumeLookupNames = [];
+        private readonly List<RangeCount> _volumeCounts;
+        private readonly List<RangeCount> _chapterCounts;
+
+        public RangeIndex(IList<ParserInfo> infos)
+        {
+            // Volumes are found by LookupName text, so files saying "1", "01" and "1.0" must agree on one text
+            // or each would get its own volume 1. The shortest is the one kept
+            var shortestSpellings = new Dictionary<NumberRange, string>();
+            var volumeCounts = new Dictionary<NumberRange, int>();
+            var chapterCounts = new Dictionary<NumberRange, int>();
+
+            foreach (var info in infos)
+            {
+                var volume = Parse(info.Volumes);
+                if (!shortestSpellings.TryGetValue(volume, out var shortest) || info.Volumes.Length < shortest.Length)
+                {
+                    shortestSpellings[volume] = info.Volumes;
+                }
+
+                volumeCounts[volume] = volumeCounts.GetValueOrDefault(volume) + 1;
+
+                var chapter = Parse(info.Chapters);
+                chapterCounts[chapter] = chapterCounts.GetValueOrDefault(chapter) + 1;
+            }
+
+            foreach (var volumes in infos.Select(info => info.Volumes))
+            {
+                _volumeLookupNames[volumes] = shortestSpellings[_parsed[volumes]];
+            }
+
+            _volumeCounts = [.. volumeCounts.Select(kv => new RangeCount(kv.Key, kv.Value))];
+            _chapterCounts = [.. chapterCounts.Select(kv => new RangeCount(kv.Key, kv.Value))];
+        }
+
+        /// <summary>
+        /// The shortest spelling among the files whose volume is the same number, so "1" and "1.0" both give "1"
+        /// </summary>
+        public string VolumeLookupName(string volumes) => _volumeLookupNames[volumes];
+
+        public int FilesMatchingVolume(string volumes) => CountMatching(_volumeCounts, _parsed[volumes]);
+
+        public int FilesMatchingChapter(string chapters) => CountMatching(_chapterCounts, _parsed[chapters]);
+
+        // Compares with Is (0.001 tolerance) while the lookup name groups on exact numbers, as before
+        private static int CountMatching(List<RangeCount> counts, NumberRange target)
+        {
+            return counts
+                .Where(count => count.Range.Min.Is(target.Min) && count.Range.Max.Is(target.Max))
+                .Sum(count => count.Count);
+        }
+
+        private NumberRange Parse(string range)
+        {
+            if (_parsed.TryGetValue(range, out var parsed)) return parsed;
+
+            parsed = new NumberRange(Parser.MinNumberFromRange(range), Parser.MaxNumberFromRange(range));
+            _parsed[range] = parsed;
+            return parsed;
+        }
     }
 
     private async Task UpdateChapter(ProcessParserInfosArgs args, Chapter chapter, ParserInfo info, bool fileChanged)
