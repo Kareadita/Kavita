@@ -984,6 +984,26 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     }
 
     [Fact]
+    public async Task Rescan_WithAmbiguousFile_SkipsItsFolder()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, reader, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Ambiguous File - Manga",
+            ["Spice and Wolf/Spice and Wolf Vol. 1.cbz", "Accel World/Accel World Vol. 1.cbz", "Accel World/Accel World Vol. 2.cbz"],
+            [], comicInfos: new Dictionary<string, ComicInfo>
+            {
+                ["Accel World Vol. 2.cbz"] = new() { Series = "Accel World", SeriesSort = "Spice and Wolf", Volume = "2" },
+            });
+
+        var row = await context.MediaError.AsNoTracking().SingleAsync();
+        Assert.Equal((Parser.NormalizePath(Path.Join(root, "Accel World", "Accel World Vol. 2.cbz")), MediaErrorReason.AmbiguousSeries),
+            (row.FilePath, row.Reason));
+
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Empty(reader.Parsed);
+    }
+
+    [Fact]
     public async Task FolderWhereEveryFileFails_SecondScanReadsNothing()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
@@ -1231,10 +1251,10 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     /// <param name="failing">File names the scan reader fails on, read on every parse so a test can change it between scans</param>
     private async Task<(ScannerService Scanner, FailNamedFiles Reader, int LibraryId, string Root)> ScanOnceWithFailing(
         IUnitOfWork unitOfWork, DataContext context, string testcase, string[] files, HashSet<string> failing,
-        IEventHub? eventHub = null)
+        IEventHub? eventHub = null, Dictionary<string, ComicInfo>? comicInfos = null)
     {
         var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
-        var library = await scannerHelper.GenerateScannerData(testcase, [.. files], new Dictionary<string, ComicInfo>());
+        var library = await scannerHelper.GenerateScannerData(testcase, [.. files], comicInfos ?? new Dictionary<string, ComicInfo>());
         ScannerHelper.Backdate(library.Folders.First().Path, TimeSpan.FromHours(1));
 
         FailNamedFiles? reader = null;

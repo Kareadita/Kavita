@@ -4922,7 +4922,8 @@
         "word-count-failed": "Words could not be counted",
         "io-error": "File could not be accessed (disk, network or permissions)",
         "metadata-unreadable": "Embedded metadata could not be read, imported without it",
-        "epub-not-strict": "Epub has structural errors, imported in lenient mode"
+        "epub-not-strict": "Epub has structural errors, imported in lenient mode",
+        "ambiguous-series": "LocalizedSeries name matches another Series on disk"
     },
 
     "validation": {

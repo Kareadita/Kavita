@@ -38,6 +38,7 @@ export enum MediaErrorReason {
   IoError = 9,
   MetadataUnreadable = 10,
   EpubNotStrict = 11,
+  AmbiguousSeries = 12,
 }
 
 export const allMediaErrorReasons = allEnums(MediaErrorReason);

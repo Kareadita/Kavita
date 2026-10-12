@@ -733,6 +733,94 @@ public class ParseScannedFilesTests: AbstractDbTest
         Assert.Single(scannedSeries.Values.First().DistinctBy(x => x.Series));
     }
 
+    private static ParseScannedFiles GroupingScanner()
+    {
+        return new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), Substitute.For<IDirectoryService>(),
+            Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>());
+    }
+
+    [Fact]
+    public void TrackSeries_NamesMatchTwoSeries_ReturnsAmbiguousSeriesIssue()
+    {
+        var ambiguous = new ParserInfo
+        {
+            Series = "Accel World", LocalizedSeries = "Spice and Wolf", Filename = "Accel World v02.cbz",
+            FullFilePath = "M:/Accel World/Accel World v02.cbz",
+        };
+        List<ScanResult> scanResults =
+        [
+            new()
+            {
+                ParserInfos =
+                [
+                    new ParserInfo { Series = "Spice and Wolf" },
+                    new ParserInfo { Series = "Accel World" },
+                    ambiguous,
+                ]
+            }
+        ];
+        ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries = [];
+
+        var rejected = GroupingScanner().TrackSeriesAcrossScanResults(scanResults, scannedSeries);
+
+        var (info, issue) = Assert.Single(rejected);
+        Assert.Same(ambiguous, info);
+        Assert.Equal(MediaErrorReason.AmbiguousSeries, issue.Reason);
+        Assert.Contains("Spice and Wolf", issue.Details);
+        Assert.Contains("Accel World", issue.Details);
+        Assert.Equal(2, scannedSeries.Count);
+        Assert.DoesNotContain(scannedSeries.Values, infos => infos.Contains(ambiguous));
+    }
+
+    [Fact]
+    public void TrackSeries_LocalizedNameMatchesExistingKey_GroupsUnderIt()
+    {
+        List<ScanResult> scanResults =
+        [
+            new()
+            {
+                ParserInfos =
+                [
+                    new ParserInfo { Series = "Spice and Wolf" },
+                    new ParserInfo { Series = "Ookami to Koushinryou", LocalizedSeries = "SPICE AND WOLF" },
+                ]
+            }
+        ];
+        ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries = [];
+
+        var rejected = GroupingScanner().TrackSeriesAcrossScanResults(scanResults, scannedSeries);
+
+        Assert.Empty(rejected);
+        var (key, infos) = Assert.Single(scannedSeries);
+        Assert.Equal("Spice and Wolf", key.Name);
+        Assert.Equal(2, infos.Count);
+        Assert.All(infos, i => Assert.Equal("Spice and Wolf", i.Series));
+    }
+
+    [Fact]
+    public void TrackSeries_SameNameDifferentFormat_KeepsTwoKeys()
+    {
+        List<ScanResult> scanResults =
+        [
+            new()
+            {
+                ParserInfos =
+                [
+                    new ParserInfo { Series = "Spice and Wolf", Format = MangaFormat.Archive },
+                    new ParserInfo { Series = "Spice and Wolf", Format = MangaFormat.Epub },
+                    new ParserInfo { Series = "Spice and Wolf", Format = MangaFormat.Archive },
+                ]
+            }
+        ];
+        ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries = [];
+
+        GroupingScanner().TrackSeriesAcrossScanResults(scanResults, scannedSeries);
+
+        Assert.Equal(2, scannedSeries.Count);
+        Assert.Equal(2, scannedSeries.Single(s => s.Key.Format == MangaFormat.Archive).Value.Count);
+        Assert.Single(scannedSeries.Single(s => s.Key.Format == MangaFormat.Epub).Value);
+    }
+
     #region ParseFiles Concurrency
 
     /// <summary>
