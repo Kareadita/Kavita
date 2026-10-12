@@ -28,6 +28,15 @@ export class VersionService {
   public static readonly SERVER_VERSION_KEY = 'kavita--version';
   public static readonly CLIENT_REFRESH_KEY = 'kavita--client-refresh-last-shown';
   private static readonly DISMISS_KEY_PREFIX = 'kavita--update-dismiss-';
+  private static readonly VERSION_PATTERN = /^\d+(\.\d+){1,3}$/;
+
+  /**
+   * Whether the value is a server version like 0.9.1.13. A dev server or reverse proxy can answer the version
+   * request with an HTML page, and that must never be stored, as it ends up in a request header
+   */
+  public static isVersion(value: string | null | undefined): value is string {
+    return !!value && VersionService.VERSION_PATTERN.test(value);
+  }
 
   private readonly _currentVersion = signal<string | undefined>(undefined);
   public readonly currentVersion = this._currentVersion.asReadonly();
@@ -77,8 +86,12 @@ export class VersionService {
     toObservable(this.accountService.currentUserGenericApiKey).pipe(
       filter((key): key is string => !!key),
       take(1),
-      switchMap(key => this.serverService.getVersion(key))
+      switchMap(key => this.getServerVersion(key))
     ).subscribe(serverVersion => this.recordLoadedVersion(serverVersion));
+  }
+
+  private getServerVersion(apiKey: string) {
+    return this.serverService.getVersion(apiKey).pipe(filter(VersionService.isVersion));
   }
 
   private recordLoadedVersion(serverVersion: string): void {
@@ -97,8 +110,7 @@ export class VersionService {
         map(() => this.accountService.currentUserGenericApiKey()),
         filter((key): key is string => !!key && !this.modalOpen),
         // The error interceptor rethrows, and an error reaching interval() ends the poll for good
-        switchMap(key => this.serverService.getVersion(key).pipe(catchError(() => EMPTY))),
-        filter(update => !!update),
+        switchMap(key => this.getServerVersion(key).pipe(catchError(() => EMPTY))),
         tap(serverVersion => this.handleVersionCheck(serverVersion)),
         takeUntilDestroyed(this.destroyRef)
       ).subscribe();
@@ -111,9 +123,9 @@ export class VersionService {
       if (!key || !this.messageHub.isConnectedSignal()) return;
 
       untracked(() => {
-        this.serverService.getVersion(key).pipe(
+        this.getServerVersion(key).pipe(
           catchError(() => EMPTY),
-          filter(serverVersion => !!serverVersion && !this.modalOpen),
+          filter(() => !this.modalOpen),
         ).subscribe(serverVersion => {
           if (this.loadedVersion === null) {
             this.recordLoadedVersion(serverVersion);
