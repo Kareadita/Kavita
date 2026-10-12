@@ -111,6 +111,7 @@ public class ProcessSeries(
 
         var seriesAdded = false;
         var scanWatch = Stopwatch.StartNew();
+        var stepWatch = Stopwatch.StartNew();
         var seriesName = parsedInfos[0].Series;
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Id, library.Name, ProgressEventType.Updated, seriesName, args.LeftToProcess, args.TotalToProcess, args.SeriesScan));
@@ -143,6 +144,7 @@ public class ProcessSeries(
         }
 
         if (series.LibraryId == 0) series.LibraryId = library.Id;
+        var lookupMs = stepWatch.ElapsedMilliseconds;
 
         ChapterChanges chapterChanges;
         try
@@ -151,8 +153,11 @@ public class ProcessSeries(
 
             // parsedInfos[0] is not the first volume or chapter. We need to find it using a ComicInfo check (as it uses firstParsedInfo for series sort)
             var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
+            stepWatch.Restart();
             var databasePeople = await LoadAndCreateMissingChapterPeople(series, parsedInfos);
+            var peopleMs = stepWatch.ElapsedMilliseconds;
 
+            stepWatch.Restart();
             var fileInfos = parsedInfos.Where(info => string.IsNullOrEmpty(info.UnchangedFolderPath)).ToList();
             var unchangedFolders = parsedInfos
                 .Where(info => !string.IsNullOrEmpty(info.UnchangedFolderPath))
@@ -171,7 +176,9 @@ public class ProcessSeries(
                 UnchangedFolders = unchangedFolders,
                 ForceUpdate = args.ForceUpdate,
             });
+            var chaptersMs = stepWatch.ElapsedMilliseconds;
 
+            stepWatch.Restart();
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
             series.NormalizedName = series.Name.ToNormalized();
@@ -217,18 +224,24 @@ public class ProcessSeries(
             {
                 series.SortName = sortName;
             }
+            var metadataMs = stepWatch.ElapsedMilliseconds;
 
+            stepWatch.Restart();
             await UpdateSeriesFolderPath(
                 [.. fileInfos.Select(info => info.FullFilePath), .. GetFilesInUnchangedFolders(series, unchangedFolders).Select(f => f.FilePath)],
                 library, series);
+            var folderPathMs = stepWatch.ElapsedMilliseconds;
 
             series.UpdateLastFolderScanned(args.ScanStarted);
 
             if (unitOfWork.HasChanges())
             {
+                long commitMs;
                 try
                 {
+                    stepWatch.Restart();
                     await unitOfWork.CommitAsync();
+                    commitMs = stepWatch.ElapsedMilliseconds;
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
@@ -252,7 +265,7 @@ public class ProcessSeries(
                     return ProcessSeriesResult.NotSaved;
                 }
 
-
+                stepWatch.Restart();
                 // Process reading list after commit as we need to commit per list
                 if (library.ManageReadingLists)
                 {
@@ -269,7 +282,11 @@ public class ProcessSeries(
                 {
                     await unitOfWork.ExternalSeriesMetadataRepository.LinkRecommendationsToSeries(series);
                 }
+                var afterCommitMs = stepWatch.ElapsedMilliseconds;
 
+                logger.LogDebug("[ScannerService] {SeriesName}: lookup {LookupMs} ms, people {PeopleMs} ms, chapters {ChaptersMs} ms ({FileCount} files), " +
+                                "metadata {MetadataMs} ms, folder path {FolderPathMs} ms, commit {CommitMs} ms, after commit {AfterCommitMs} ms",
+                    seriesName, lookupMs, peopleMs, chaptersMs, fileInfos.Count, metadataMs, folderPathMs, commitMs, afterCommitMs);
                 logger.LogInformation("[ScannerService] Finished series update on {SeriesName} in {Milliseconds} ms", seriesName, scanWatch.ElapsedMilliseconds);
             }
         }

@@ -77,6 +77,21 @@ public partial class ParseScannedFiles
     public IReadOnlyList<string> UnreadableFolders => _unreadableFolders;
 
     /// <summary>
+    /// Time spent listing folders, summed over every folder passed to <see cref="ScanLibrariesForSeries"/>
+    /// </summary>
+    public TimeSpan WalkTime { get; private set; }
+
+    /// <summary>
+    /// Time spent parsing the files of changed folders, summed like <see cref="WalkTime"/>
+    /// </summary>
+    public TimeSpan ParseTime { get; private set; }
+
+    /// <summary>
+    /// Time spent merging localized names and grouping parsed files into series, summed like <see cref="WalkTime"/>
+    /// </summary>
+    public TimeSpan GroupTime { get; private set; }
+
+    /// <summary>
     /// The folder was not read, walked, or inside a folder that could not be read this scan, so it may be gone
     /// </summary>
     public bool IsUnaccountedFor(string folder)
@@ -713,7 +728,9 @@ public partial class ParseScannedFiles
         Dictionary<ParserInfo, SeriesModified> placeholderOwners, bool forceCheck, IReadOnlyList<FailedFile>? failedFiles)
     {
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.B: Scan files in {Folder}", library.Name, folderPath);
+        var stepWatch = Stopwatch.StartNew();
         var scanResults = await ScanFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck, failedFiles);
+        WalkTime += stepWatch.Elapsed;
         var walkResults = scanResults;
 
         AddReadFiles(walkResults);
@@ -722,16 +739,19 @@ public partial class ParseScannedFiles
         var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
 
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.C: Process files in {Folder}", library.Name, folderPath);
+        stepWatch.Restart();
         for (var i = 0; i < scanResults.Count; i++)
         {
             await ParseFiles(scanResults[i], placeholderOwners, library, i + 1, scanResults.Count);
         }
+        ParseTime += stepWatch.Elapsed;
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent(folderPath, library.Id, library.Name, ProgressEventType.Updated,
                 MessageEventCode.ScanGroupingSeries));
 
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.D: Merge any localized series with series {Folder}", library.Name, folderPath);
+        stepWatch.Restart();
         scanResults = MergeLocalizedSeriesAcrossScanResults(scanResults);
 
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.E: Group all parsed data into logical Series", library.Name);
@@ -742,6 +762,7 @@ public partial class ParseScannedFiles
         // Now transform and add to processedScannedSeries AFTER everything is processed
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.F: Generate Sort Order for Series and Finalize", library.Name);
         GenerateProcessedScannedSeries(scannedSeries, processedScannedSeries);
+        GroupTime += stepWatch.Elapsed;
 
         return walkResults;
     }

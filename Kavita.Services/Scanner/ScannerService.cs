@@ -924,25 +924,48 @@ public class ScannerService(
     {
         var scanner = new ParseScannedFiles(logger, directoryService, readingItemService, eventHub);
         var scanWatch = Stopwatch.StartNew();
+        var stepWatch = Stopwatch.StartNew();
 
         var folderMap = await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id);
-        var problemFiles = await unitOfWork.MediaErrorRepository.GetFailedFilesAsync(library.Id);
+        var folderMapMs = stepWatch.ElapsedMilliseconds;
 
+        stepWatch.Restart();
+        var problemFiles = await unitOfWork.MediaErrorRepository.GetFailedFilesAsync(library.Id);
+        var failedFilesMs = stepWatch.ElapsedMilliseconds;
+
+        stepWatch.Restart();
         var processedSeries = await scanner.ScanLibrariesForSeries(library, dirs,
             isLibraryScan, folderMap, forceChecks,
             problemFiles);
+        var scanAndParseMs = stepWatch.ElapsedMilliseconds;
 
+        stepWatch.Restart();
         // This is the one time backfill we must do in v0.9.2 to ensure all files have FileLastWriteTime which is critical to the new Change Detection work
         await unitOfWork.MangaFileRepository.SetFileLastWriteTimesAsync(scanner.WriteTimesToBackfill);
+        var backfillMs = stepWatch.ElapsedMilliseconds;
 
+        stepWatch.Restart();
         var savedIssues = await SaveScanIssuesAsync(library, scanner);
         await RemoveChangedProducerErrorsAsync(library, scanner);
         await RemoveErrorsForGoneFilesAsync(library, dirs, scanner);
+        var issuesMs = stepWatch.ElapsedMilliseconds;
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 
+        stepWatch.Restart();
         var parsedSeries = TrackFoundSeriesAndFiles(processedSeries,
             await unitOfWork.SeriesRepository.GetSeriesNameMatchesAsync(library.Id));
+        var nameMatchesMs = stepWatch.ElapsedMilliseconds;
+
+        var walkMs = (long) scanner.WalkTime.TotalMilliseconds;
+        var parseMs = (long) scanner.ParseTime.TotalMilliseconds;
+        var groupMs = (long) scanner.GroupTime.TotalMilliseconds;
+        logger.LogDebug("[ScannerService] Step 1 for {LibraryName}: folder map {FolderMapMs} ms ({FolderCount} folders), failed files {FailedFilesMs} ms, " +
+                        "walk {WalkMs} ms, parse {ParseMs} ms ({FilesRead} files), group {GroupMs} ms, other {OtherMs} ms, " +
+                        "backfill {BackfillMs} ms, issues {IssuesMs} ms, name matches {NameMatchesMs} ms",
+            library.Name, folderMapMs, folderMap.Count, failedFilesMs,
+            walkMs, parseMs, scanner.ReadFiles.Count, groupMs, scanAndParseMs - walkMs - parseMs - groupMs,
+            backfillMs, issuesMs, nameMatchesMs);
 
         return new ScanFilesResult(scanElapsedTime, parsedSeries, savedIssues, scanner.UnreadableFolders);
     }
