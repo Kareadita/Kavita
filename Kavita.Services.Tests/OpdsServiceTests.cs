@@ -120,7 +120,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         await unitOfWork.CommitAsync();
 
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress | AppUserIncludes.WantToRead | AppUserIncludes.Collections);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.WantToRead | AppUserIncludes.Collections);
         Assert.NotNull(user);
 
         // Setup SideNav streams for library
@@ -1091,8 +1091,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         context.Series.Add(series);
         await unitOfWork.CommitAsync();
 
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1,
-            AppUserIncludes.Progress | AppUserIncludes.WantToRead | AppUserIncludes.Collections);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.WantToRead | AppUserIncludes.Collections);
         Assert.NotNull(user);
         user.SideNavStreams = new List<AppUserSideNavStream>
         {

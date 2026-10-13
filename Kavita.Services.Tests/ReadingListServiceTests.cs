@@ -393,7 +393,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
 
         await context.SaveChangesAsync();
 
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists | AppUserIncludes.Progress);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
         Assert.NotNull(user);
         user.ReadingLists = new List<ReadingList>()

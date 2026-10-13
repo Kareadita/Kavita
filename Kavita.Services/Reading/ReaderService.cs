@@ -60,11 +60,9 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     public async Task MarkSeriesAsRead(AppUser user, int seriesId, CancellationToken ct = default)
     {
         var volumes = await unitOfWork.VolumeRepository.GetVolumes(seriesId, ct);
-        user.Progresses ??= new List<AppUserProgress>();
-        foreach (var volume in volumes)
-        {
-            await MarkChaptersAsRead(user, seriesId, volume.Chapters, ct);
-        }
+        var chapters = volumes.SelectMany(v => v.Chapters).ToList();
+
+        await MarkChaptersAsRead(user, seriesId, chapters, ct);
     }
 
     /// <summary>
@@ -76,11 +74,9 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     public async Task MarkSeriesAsUnread(AppUser user, int seriesId, CancellationToken ct = default)
     {
         var volumes = await unitOfWork.VolumeRepository.GetVolumes(seriesId, ct);
-        user.Progresses ??= new List<AppUserProgress>();
-        foreach (var volume in volumes)
-        {
-            await MarkChaptersAsUnread(user, seriesId, volume.Chapters, ct);
-        }
+        var chapters = volumes.SelectMany(v => v.Chapters).ToList();
+
+        await MarkChaptersAsUnread(user, seriesId, chapters, ct);
     }
 
     /// <summary>
@@ -98,19 +94,23 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct);
         if (series == null) throw new KavitaException("series-doesnt-exist");
 
+        var progresses = await unitOfWork.AppUserProgressRepository
+            .GetProgressesForChapters(user.Id, series.Id, chapters.Select(c => c.Id), ct);
+
         foreach (var chapter in chapters)
         {
-            var userProgress = GetUserProgressForChapter(user, chapter);
+            var userProgress = GetUserProgressForChapter(progresses, chapter);
 
             if (userProgress == null)
             {
-                user.Progresses.Add(new AppUserProgress
+                unitOfWork.AppUserProgressRepository.Add(new AppUserProgress
                 {
                     PagesRead = chapter.Pages,
                     VolumeId = chapter.VolumeId,
                     SeriesId = seriesId,
                     ChapterId = chapter.Id,
                     LibraryId = series.LibraryId,
+                    AppUserId = user.Id,
                 });
             }
             else
@@ -148,10 +148,13 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     public async Task MarkChaptersAsUnread(AppUser user, int seriesId, IList<Chapter> chapters,
         CancellationToken ct = default)
     {
+        var progresses = await unitOfWork.AppUserProgressRepository
+            .GetProgressesForChapters(user.Id, seriesId, chapters.Select(c => c.Id), ct);
+
         var seenVolume = new Dictionary<int, bool>();
         foreach (var chapter in chapters)
         {
-            var userProgress = GetUserProgressForChapter(user, chapter);
+            var userProgress = GetUserProgressForChapter(progresses, chapter);
 
             if (userProgress == null) continue;
 
@@ -174,49 +177,23 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         unitOfWork.UserRepository.Update(user);
     }
 
-    /// <summary>
-    /// Gets the User Progress for a given Chapter. This will handle any duplicates that might have occured in past versions and will delete them. Does not commit.
-    /// </summary>
-    /// <param name="user">Must have Progresses populated</param>
-    /// <param name="chapter"></param>
-    /// <returns></returns>
-    private AppUserProgress? GetUserProgressForChapter(AppUser user, Chapter chapter)
+    private AppUserProgress? GetUserProgressForChapter(List<AppUserProgress> progresses, Chapter chapter)
     {
-        if (user.Progresses == null)
+        var chapterProgresses = progresses.Where(x => x.ChapterId == chapter.Id).ToList();
+        if (chapterProgresses.Count > 1)
         {
-            //throw new ArgumentException("AppUser must have Progress on it"); // default: Figure out the impact of switching to a more dev experience exception
-            throw new KavitaException("progress-must-exist");
+            logger.LogInformation("Trying to save progress and multiple progress entries exist for chapter {ChapterId}, deleting and rewriting with highest progress rate",
+                chapter.Id);
+
+            var highestProgress = progresses.Max(x => x.PagesRead);
+            var firstProgress = progresses.OrderBy(p => p.LastModifiedUtc).First();
+            firstProgress.PagesRead = highestProgress;
+
+            unitOfWork.AppUserProgressRepository.RemoveRange(chapterProgresses.Where(x => x.Id != firstProgress.Id));
+            chapterProgresses = [firstProgress];
         }
 
-        try
-        {
-            return user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
-        }
-        catch (Exception)
-        {
-            // There is a very rare chance that user progress will duplicate current row. If that happens delete one with fewer pages
-            var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
-            if (progresses.Count > 1)
-            {
-                #pragma warning disable S6667
-                logger.LogInformation("Trying to save progress and multiple progress entries exist for chapter {ChapterId}, deleting and rewriting with highest progress rate",
-                    chapter.Id);
-                #pragma warning restore S6667
-
-                var highestProgress = progresses.Max(x => x.PagesRead);
-                var firstProgress = progresses.OrderBy(p => p.LastModifiedUtc).First();
-                firstProgress.PagesRead = highestProgress;
-
-                user.Progresses = user.Progresses
-                    .Where(x => x.ChapterId != chapter.Id && x.AppUserId == user.Id)
-                    .Concat([firstProgress])
-                    .ToList();
-
-                return firstProgress;
-            }
-
-            return null;
-        }
+        return chapterProgresses.FirstOrDefault();
     }
 
     /// <summary>
@@ -255,11 +232,6 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum}", progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum);
             if (userProgress == null)
             {
-                // Create a user object
-                var userWithProgress = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress, ct);
-                if (userWithProgress == null) return false;
-
-                userWithProgress.Progresses ??= [];
                 userProgress = new AppUserProgress
                 {
                     PagesRead = progressDto.PageNum,
@@ -268,9 +240,10 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                     ChapterId = progressDto.ChapterId,
                     LibraryId = progressDto.LibraryId,
                     BookScrollId = progressDto.BookScrollId,
+                    AppUserId = userId,
                 };
-                userWithProgress.Progresses.Add(userProgress);
-                unitOfWork.UserRepository.Update(userWithProgress);
+
+                unitOfWork.AppUserProgressRepository.Add(userProgress);
             }
             else
             {

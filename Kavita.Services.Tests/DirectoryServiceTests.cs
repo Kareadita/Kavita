@@ -1147,7 +1147,8 @@ public class DirectoryServiceTests: AbstractFsTest
         var stamp = ds.ScanFiles("C:/Data/Accel World", Parser.SupportedExtensions, null, SearchOption.TopDirectoryOnly)
             .Single(s => s.Path.EndsWith("v1.cbz"));
 
-        Assert.Equal("C:/Data/Accel World/Accel World v1.cbz", Parser.NormalizePath(stamp.Path));
+        // TrimStart for macOS
+        Assert.Equal("C:/Data/Accel World/Accel World v1.cbz", Parser.NormalizePath(stamp.Path).TrimStart('/'));
         Assert.Equal(5, stamp.Bytes);
         Assert.Equal(written, stamp.LastWriteTimeUtc);
     }
