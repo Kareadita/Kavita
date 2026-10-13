@@ -50,10 +50,8 @@ public class CleanupService(
 
         logger.LogInformation("Starting Cleanup");
 
-        // TODO: Why do I have clear temp directory then immediately do it again?
         var cleanupSteps = new List<(Func<CancellationToken, Task>, string)>
         {
-            (innerCt => Task.Run(() => directoryService.ClearDirectory(directoryService.TempDirectory), innerCt), "Cleaning temp directory"),
             (CleanupCacheAndTempDirectories, "Cleaning cache and temp directories"),
             (CleanupBackups, "Cleaning old database backups"),
             (ConsolidateProgress, "Consolidating Progress Events"),
