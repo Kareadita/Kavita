@@ -30,29 +30,27 @@ public class AppUserProgressRepository(DataContext context, IMapper mapper) : IA
     }
 
     /// <summary>
-    /// This will remove any entries that have chapterIds that no longer exists. This will execute the save as well.
+    /// This will remove any entries that have chapterIds that no longer exists, deleting in the DB directly
     /// </summary>
     /// <param name="ct"></param>
+    /// <returns>How many progress rows were removed</returns>
     public async Task<int> CleanupAbandonedChapters(CancellationToken ct = default)
     {
         var chapterIds = context.Chapter.Select(c => c.Id);
 
-        var rowsToRemove = await context.AppUserProgresses
+        var progressRemoved = await context.AppUserProgresses
             .Where(progress => !chapterIds.Contains(progress.ChapterId))
-            .ToListAsync(ct);
+            .ExecuteDeleteAsync(ct);
 
-        var rowsToRemoveBookmarks = await context.AppUserBookmark
+        await context.AppUserBookmark
             .Where(progress => !chapterIds.Contains(progress.ChapterId))
-            .ToListAsync(ct);
+            .ExecuteDeleteAsync(ct);
 
-        var rowsToRemoveReadingLists = await context.ReadingListItem
+        await context.ReadingListItem
             .Where(item => !chapterIds.Contains(item.ChapterId))
-            .ToListAsync(ct);
+            .ExecuteDeleteAsync(ct);
 
-        context.RemoveRange(rowsToRemove);
-        context.RemoveRange(rowsToRemoveBookmarks);
-        context.RemoveRange(rowsToRemoveReadingLists);
-        return await context.SaveChangesAsync(ct) > 0 ? rowsToRemove.Count : 0;
+        return progressRemoved;
     }
 
     /// <summary>

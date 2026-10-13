@@ -165,14 +165,9 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
 
     public async Task<int> RemoveReadingListsWithoutSeries(CancellationToken ct = default)
     {
-        var listsToDelete = await context.ReadingList
-            .Include(c => c.Items)
+        return await context.ReadingList
             .Where(c => c.Items.Count == 0)
-            .AsSplitQuery()
-            .ToListAsync(ct);
-        context.RemoveRange(listsToDelete);
-
-        return await context.SaveChangesAsync(ct);
+            .ExecuteDeleteAsync(ct);
     }
 
 

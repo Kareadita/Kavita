@@ -386,12 +386,11 @@ public class ScannerService(
         }
 
         var issues = await ReportScanIssuesAsync(library, savedIssues, series.Id);
+        await metadataService.RemoveAbandonedMetadataKeys();
 
         // Tell UI that this series is done
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanEndedEvent(tally.ToEventBody(library, issues, true), series.Name));
-
-        await metadataService.RemoveAbandonedMetadataKeys();
 
         BackgroundJob.Enqueue(() => cacheService.CleanupChapters(existingChapterIdsToClean));
         BackgroundJob.Enqueue(() => directoryService.ClearDirectory(directoryService.CacheDirectory));
@@ -678,9 +677,9 @@ public class ScannerService(
                 MessageFactory.UnreadableFoldersEvent(library.Id, library.Name, unreadableFolders));
         }
 
+        await metadataService.RemoveAbandonedMetadataKeys();
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanEndedEvent(tally.ToEventBody(library, issues, endsJob)));
-        await metadataService.RemoveAbandonedMetadataKeys();
 
         BackgroundJob.Enqueue(() => directoryService.ClearDirectory(directoryService.CacheDirectory));
     }

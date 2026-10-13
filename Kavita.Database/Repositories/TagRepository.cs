@@ -28,18 +28,11 @@ public class TagRepository(DataContext context, IMapper mapper) : ITagRepository
         context.Tag.Remove(tag);
     }
 
-    public async Task RemoveAllTagNoLongerAssociated(CancellationToken ct = default)
+    public async Task<int> RemoveAllTagNoLongerAssociated(CancellationToken ct = default)
     {
-        var tagsWithNoConnections = await context.Tag
-            .Include(p => p.SeriesMetadatas)
-            .Include(p => p.Chapters)
+        return await context.Tag
             .Where(p => p.SeriesMetadatas.Count == 0 && p.Chapters.Count == 0)
-            .AsSplitQuery()
-            .ToListAsync(ct);
-
-        context.Tag.RemoveRange(tagsWithNoConnections);
-
-        await context.SaveChangesAsync(ct);
+            .ExecuteDeleteAsync(ct);
     }
 
     public async Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null,

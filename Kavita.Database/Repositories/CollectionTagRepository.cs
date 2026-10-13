@@ -38,15 +38,9 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
     /// <param name="ct"></param>
     public async Task<int> RemoveCollectionsWithoutSeries(CancellationToken ct = default)
     {
-        var tagsToDelete = await context.AppUserCollection
-            .Include(c => c.Items)
+        return await context.AppUserCollection
             .Where(c => c.Items.Count == 0)
-            .AsSplitQuery()
-            .ToListAsync(ct);
-
-        context.RemoveRange(tagsToDelete);
-
-        return await context.SaveChangesAsync(ct);
+            .ExecuteDeleteAsync(ct);
     }
 
     public async Task<IEnumerable<AppUserCollection>> GetAllCollectionsAsync(
