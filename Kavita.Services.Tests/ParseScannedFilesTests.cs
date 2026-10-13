@@ -214,7 +214,7 @@ public class ParseScannedFilesTests: AbstractDbTest
 
         library.Type = LibraryType.Manga;
         var parsedSeries = await psf.ScanLibrariesForSeries(library, new List<string>() {Root + "Data/"}, false,
-            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1));
+            Known(await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1)));
 
 
         // Assert.Equal(3, parsedSeries.Values.Count);
@@ -258,7 +258,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var directoriesSeen = new HashSet<string>();
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
                 LibraryIncludes.Folders | LibraryIncludes.FileTypes);
-        var scanResults = await psf.ScanFiles("C:/Data/", true, await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1), library);
+        var scanResults = await psf.ScanFiles("C:/Data/", true, Known(await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1)), library);
         foreach (var scanResult in scanResults)
         {
             directoriesSeen.Add(scanResult.Folder);
@@ -284,7 +284,7 @@ public class ParseScannedFilesTests: AbstractDbTest
 
         var directoriesSeen = new HashSet<string>();
         var scanResults = await psf.ScanFiles("C:/Data/", false,
-            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1), library);
+            Known(await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1)), library);
 
         foreach (var scanResult in scanResults)
         {
@@ -319,7 +319,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes);
         Assert.NotNull(library);
-        var scanResults = await psf.ScanFiles("C:/Data", true, await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1), library);
+        var scanResults = await psf.ScanFiles("C:/Data", true, Known(await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1)), library);
 
         Assert.Equal(2, scanResults.Count);
     }
@@ -352,7 +352,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             LibraryIncludes.Folders | LibraryIncludes.FileTypes);
         Assert.NotNull(library);
         var scanResults = await psf.ScanFiles("C:/Data", false,
-            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1), library);
+            Known(await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1)), library);
 
         Assert.Single(scanResults);
     }
@@ -409,7 +409,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var folderMap = await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id);
         Assert.Equal(10, folderMap.Count);
 
-        var res = await psf.ScanFiles(testDirectoryPath, true, folderMap, postLib);
+        var res = await psf.ScanFiles(testDirectoryPath, true, Known(folderMap), postLib);
         var changes = res.Where(sc => sc.HasChanged).ToList();
         var change = Assert.Single(changes);
         Assert.EndsWith("The Executioner and Her Way of Life Vol. 1", change.Folder);
@@ -455,7 +455,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 2.cbz"));
 
         var res = await psf.ScanFiles(testDirectoryPath, true,
-            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id), postLib);
+            Known(await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id)), postLib);
         var changes = res.Count(sc => sc.HasChanged);
         Assert.Equal(1, changes);
     }
@@ -492,7 +492,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             Path.Join(executionerDir, "The Executioner and Her Way of Life Vol. 2.cbz"));
 
         var res = await psf.ScanLibrariesForSeries(postLib, [testDirectoryPath], true,
-            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id));
+            Known(await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id)));
 
         Assert.Equal(4, res.Count);
         var changed = Assert.Single(res, r => r.HasChanged);
@@ -534,7 +534,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         await Task.Delay(1100); // Ensure at least one second has passed since library scan
 
         var res = await psf.ScanFiles(testDirectoryPath, true,
-            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id), postLib);
+            Known(await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id)), postLib);
         Assert.DoesNotContain(res, sc => sc.HasChanged);
     }
 
@@ -578,7 +578,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 4.cbz"));
 
         var res = await psf.ScanFiles(testDirectoryPath, true,
-            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id), postLib);
+            Known(await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id)), postLib);
         var changes = res.Count(sc => sc.HasChanged);
         Assert.Equal(2, changes);
     }
@@ -623,7 +623,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 3 Ch. 0013.cbz"));
 
         var res = await psf.ScanFiles(testDirectoryPath, true,
-            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id), postLib);
+            Known(await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id)), postLib);
         var changes = res.Count(sc => sc.HasChanged);
         Assert.Equal(2, changes);
     }
@@ -658,7 +658,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             ],
         };
 
-        var result = await psf.ScanFiles("M:/Higurashi When They Cry", false, seriesPaths, library);
+        var result = await psf.ScanFiles("M:/Higurashi When They Cry", false, Known(seriesPaths), library);
 
         Assert.True(Assert.Single(result).HasChanged);
         ds.Received(1).ScanFiles(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<GlobMatcher?>(), Arg.Any<SearchOption>());
@@ -900,7 +900,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         library.Type = LibraryType.Manga;
 
         await psf.ScanLibrariesForSeries(library, new List<string> { Root + "Data/" }, false,
-            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1));
+            Known(await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1)));
 
         // Every file still goes through the parser
         Assert.Equal(fileCount, readingItemService.TotalCalls);
@@ -992,6 +992,8 @@ public class ParseScannedFilesTests: AbstractDbTest
         return FolderOwnedBy(Owner("The Murderbot Diaries", Readable));
     }
 
+    private static KnownSeriesFolders Known(IDictionary<string, IList<SeriesModified>> byFolder, bool forced = false) => new(byFolder, forced);
+
     [Theory]
     [InlineData(false, false)]
     [InlineData(true, true)]
@@ -999,8 +1001,8 @@ public class ParseScannedFilesTests: AbstractDbTest
     {
         var psf = FailedFileScanner(ListingOf(Broken));
 
-        var result = await psf.ScanFiles("B:/Fiction", true, new Dictionary<string, IList<SeriesModified>>(), BooksLibrary(),
-            forceCheck, [AsFailedFile(Broken)]);
+        var result = await psf.ScanFiles("B:/Fiction", true, Known(new Dictionary<string, IList<SeriesModified>>(), forceCheck), BooksLibrary(),
+            [AsFailedFile(Broken)]);
 
         Assert.Equal(expectedChanged, Assert.Single(result).HasChanged);
     }
@@ -1012,7 +1014,7 @@ public class ParseScannedFilesTests: AbstractDbTest
     {
         var psf = FailedFileScanner(ListingOf(Readable, Broken));
 
-        var result = await psf.ScanFiles(MurderbotFolder, false, MurderbotOwnsReadable(), BooksLibrary(),
+        var result = await psf.ScanFiles(MurderbotFolder, false, Known(MurderbotOwnsReadable()), BooksLibrary(),
             failedFiles: hasRow ? [AsFailedFile(Broken)] : []);
 
         Assert.Equal(expectedChanged, Assert.Single(result).HasChanged);
@@ -1032,7 +1034,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         ds.ListFolderTreeAsync(default!, default!, default, default!).ReturnsForAnyArgs(tree);
         var psf = FailedFileScanner(ds);
 
-        var result = await psf.ScanFiles("B:/Fiction", true, new Dictionary<string, IList<SeriesModified>>(), BooksLibrary(),
+        var result = await psf.ScanFiles("B:/Fiction", true, Known(new Dictionary<string, IList<SeriesModified>>()), BooksLibrary(),
             failedFiles: hasRow ? [AsFailedFile(loose)] : []);
 
         var authorResult = result.SingleOrDefault(r => r.Folder == author);
@@ -1051,7 +1053,7 @@ public class ParseScannedFilesTests: AbstractDbTest
     {
         var psf = FailedFileScanner(ListingOf(Broken));
 
-        var result = await psf.ScanFiles(MurderbotFolder, false, new Dictionary<string, IList<SeriesModified>>(), BooksLibrary(),
+        var result = await psf.ScanFiles(MurderbotFolder, false, Known(new Dictionary<string, IList<SeriesModified>>()), BooksLibrary(),
             failedFiles: [AsFailedFile(Broken)]);
 
         Assert.True(Assert.Single(result).HasChanged);
@@ -1070,7 +1072,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var reader = ReaderReturning(path => failingPaths.Contains(path) ? ParseFileResult.Failed(CorruptEpub) : new ParseFileResult(null));
         var psf = FailedFileScanner(ListingOf(files), reader);
 
-        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>());
+        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, Known(new Dictionary<string, IList<SeriesModified>>()));
 
         var expected = failing
             .Select(f => new ScanIssue(f.Path.Replace('\\', '/'), f.Bytes, f.LastWriteTimeUtc, CorruptEpub.Reason, CorruptEpub.Details))
@@ -1086,7 +1088,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var reader = ReaderReturning(_ => new ParseFileResult(MurderbotInfo(Broken, series)));
         var psf = FailedFileScanner(ListingOf(Broken), reader);
 
-        var result = await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>());
+        var result = await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, Known(new Dictionary<string, IList<SeriesModified>>()));
 
         Assert.Empty(result);
         var issue = Assert.Single(psf.Issues);
@@ -1101,7 +1103,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var reader = ReaderReturning(_ => new ParseFileResult(MurderbotInfo(Broken), notStrict));
         var psf = FailedFileScanner(ListingOf(Broken), reader);
 
-        var result = await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>());
+        var result = await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, Known(new Dictionary<string, IList<SeriesModified>>()));
 
         Assert.Single(result);
         Assert.Equal(MediaErrorReason.EpubNotStrict, Assert.Single(psf.Issues).Reason);
@@ -1114,7 +1116,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var reader = ReaderReturning(_ => new ParseFileResult(MurderbotInfo(Broken, "[&/"), unreadable));
         var psf = FailedFileScanner(ListingOf(Broken), reader);
 
-        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>());
+        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, Known(new Dictionary<string, IList<SeriesModified>>()));
 
         Assert.Equal(MediaErrorReason.NoSeriesName, Assert.Single(psf.Issues).Reason);
     }
@@ -1128,8 +1130,8 @@ public class ParseScannedFilesTests: AbstractDbTest
         var reader = ReaderReturning(_ => new ParseFileResult(MurderbotInfo(replaced)));
         var psf = FailedFileScanner(ListingOf(replaced), reader);
 
-        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>(),
-            forceCheck, [AsFailedFile(Broken)]);
+        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, Known(new Dictionary<string, IList<SeriesModified>>(), forceCheck),
+            [AsFailedFile(Broken)]);
 
         Assert.Empty(psf.Issues);
         Assert.Equal([Broken.Path], psf.ResolvedFailedFiles);
@@ -1140,7 +1142,7 @@ public class ParseScannedFilesTests: AbstractDbTest
     {
         var psf = FailedFileScanner(ListingOf(Readable), ReaderReturning(_ => new ParseFileResult(MurderbotInfo(Readable))));
 
-        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, MurderbotOwnsReadable(), false, [AsFailedFile(Broken)]);
+        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, Known(MurderbotOwnsReadable()), [AsFailedFile(Broken)]);
 
         Assert.Equal([Broken.Path], psf.ResolvedFailedFiles);
     }
@@ -1151,8 +1153,8 @@ public class ParseScannedFilesTests: AbstractDbTest
         var replaced = Broken with { Bytes = Broken.Bytes + 1 };
         var psf = FailedFileScanner(ListingOf(replaced), ReaderReturning(_ => ParseFileResult.Failed(CorruptEpub)));
 
-        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>(),
-            false, [AsFailedFile(Broken)]);
+        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, Known(new Dictionary<string, IList<SeriesModified>>()),
+            [AsFailedFile(Broken)]);
 
         Assert.Empty(psf.ResolvedFailedFiles);
         Assert.Equal(replaced.Bytes, Assert.Single(psf.Issues).Bytes);
@@ -1163,8 +1165,8 @@ public class ParseScannedFilesTests: AbstractDbTest
     {
         var psf = FailedFileScanner(ListingOf(Broken));
 
-        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, new Dictionary<string, IList<SeriesModified>>(),
-            false, [AsFailedFile(Broken)]);
+        await psf.ScanLibrariesForSeries(BooksLibrary(), ["B:/Fiction"], true, Known(new Dictionary<string, IList<SeriesModified>>()),
+            [AsFailedFile(Broken)]);
 
         Assert.Empty(psf.Issues);
         Assert.Empty(psf.ResolvedFailedFiles);

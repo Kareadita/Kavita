@@ -1844,10 +1844,11 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     }
 
     public async Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMapAsync(int libraryId,
-        CancellationToken ct = default)
+        int? seriesId = null, CancellationToken ct = default)
     {
         var info = await context.Series
             .Where(s => s.LibraryId == libraryId)
+            .WhereIf(seriesId != null, s => s.Id == seriesId)
             .AsNoTracking()
             .Where(s => s.FolderPath != null)
             .Select(s => new
@@ -1868,6 +1869,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
         var files = await context.MangaFile
             .Where(f => f.Chapter.Volume.Series.LibraryId == libraryId)
+            .WhereIf(seriesId != null, f => f.Chapter.Volume.SeriesId == seriesId)
             .Select(f => new { f.Id, f.Chapter.Volume.SeriesId, f.FilePath, f.Bytes, f.FileLastWriteTimeUtc })
             .AsNoTracking()
             .ToListAsync(ct);

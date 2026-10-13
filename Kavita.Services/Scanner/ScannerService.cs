@@ -225,7 +225,7 @@ public class ScannerService(
     /// Scans just an existing Series for changes. If the series doesn't exist, will delete it.
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="bypassFolderOptimizationChecks">Not Used. Scan series will always force</param>
+    /// <param name="bypassFolderOptimizationChecks">Forces ProcessSeries, covers and word count. The walk always forces</param>
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(Timeout)]
     [AutomaticRetry(Attempts = RetryAttempts, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
@@ -297,8 +297,14 @@ public class ScannerService(
 
         logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var scanStarted = DateTime.Now;
-        var (scanElapsedTime, parsedSeries, savedIssues, _) = await ScanFiles(library, folderPaths,
-            false, true);
+        var (scanElapsedTime, parsedSeries, savedIssues, unreadableFolders) = await ScanFiles(library, folderPaths,
+            false, true, series.Id);
+
+        if (unreadableFolders.Count > 0)
+        {
+            await eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.UnreadableFoldersEvent(library.Id, library.Name, unreadableFolders));
+        }
 
         logger.LogInformation("ScanFiles for {Series} took {Time} milliseconds", series.Name, scanElapsedTime);
 
@@ -928,14 +934,16 @@ public class ScannerService(
         library.UpdateLastScanned(time);
     }
 
+    /// <param name="seriesId">Loads only this series' known files, for a series scan</param>
     /// <returns>How long the walk took, the parsed series, and the issues saved</returns>
-    private async Task<ScanFilesResult> ScanFiles(Library library, IList<string> dirs, bool isLibraryScan, bool forceChecks = false)
+    private async Task<ScanFilesResult> ScanFiles(Library library, IList<string> dirs, bool isLibraryScan, bool forceChecks = false,
+        int? seriesId = null)
     {
         var scanner = new ParseScannedFiles(logger, directoryService, readingItemService, eventHub);
         var scanWatch = Stopwatch.StartNew();
         var stepWatch = Stopwatch.StartNew();
 
-        var folderMap = await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id);
+        var known = new KnownSeriesFolders(await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id, seriesId), forceChecks);
         var folderMapMs = stepWatch.ElapsedMilliseconds;
 
         stepWatch.Restart();
@@ -944,8 +952,7 @@ public class ScannerService(
 
         stepWatch.Restart();
         var processedSeries = await scanner.ScanLibrariesForSeries(library, dirs,
-            isLibraryScan, folderMap, forceChecks,
-            problemFiles);
+            isLibraryScan, known, problemFiles);
         var scanAndParseMs = stepWatch.ElapsedMilliseconds;
 
         stepWatch.Restart();
@@ -973,7 +980,7 @@ public class ScannerService(
         logger.LogDebug("[ScannerService] Step 1 for {LibraryName}: folder map {FolderMapMs} ms ({FolderCount} folders), failed files {FailedFilesMs} ms, " +
                         "list {ListMs} ms, walk {WalkMs} ms, parse {ParseMs} ms ({FilesRead} files), group {GroupMs} ms, other {OtherMs} ms, " +
                         "backfill {BackfillMs} ms, issues {IssuesMs} ms, name matches {NameMatchesMs} ms",
-            library.Name, folderMapMs, folderMap.Count, failedFilesMs,
+            library.Name, folderMapMs, known.FolderCount, failedFilesMs,
             listMs, walkMs, parseMs, scanner.ReadFiles.Count, groupMs, scanAndParseMs - listMs - walkMs - parseMs - groupMs,
             backfillMs, issuesMs, nameMatchesMs);
 

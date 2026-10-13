@@ -121,7 +121,8 @@ public interface ISeriesRepository
     public Task<IList<Series>> GetAllSeriesByAnyNameAsync(string seriesName, string localizedName, int libraryId,
         MangaFormat format, CancellationToken ct = default);
     Task<IList<Series>> RemoveSeriesNotInListAsync(IList<ParsedSeries> seenSeries, int libraryId, CancellationToken ct = default);
-    Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMapAsync(int libraryId, CancellationToken ct = default);
+    /// <param name="seriesId">Only this series' files, for a series scan</param>
+    Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMapAsync(int libraryId, int? seriesId = null, CancellationToken ct = default);
     Task<IList<SeriesNameMatch>> GetSeriesNameMatchesAsync(int libraryId, CancellationToken ct = default);
     Task<AgeRating> GetMaxAgeRatingFromSeriesAsyncAsync(IEnumerable<int> seriesIds, CancellationToken ct = default);
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds, CancellationToken ct = default);
