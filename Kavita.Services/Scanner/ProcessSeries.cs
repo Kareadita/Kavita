@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.IO.Abstractions;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -46,11 +45,7 @@ internal sealed record ProcessParserInfosArgs
     public required Series Series { get; init; }
     public required IList<ParserInfo> ParsedInfos { get; init; }
     public required Dictionary<string, Person> DatabasePeople { get; init; }
-    /// <summary>
-    /// Folders the scanner skipped because nothing in them changed. Their files are known to still be on disk,
-    /// but nothing about them was read this scan.
-    /// </summary>
-    public IReadOnlyCollection<UnchangedFolder> UnchangedFolders { get; init; } = [];
+    public KeptFiles Kept { get; init; } = KeptFiles.None;
     public bool ForceUpdate { get; init; }
 }
 
@@ -74,19 +69,6 @@ internal readonly record struct ChapterChanges(int Added, int Updated, int Remov
 /// <param name="Changed">The file was read again</param>
 /// <param name="ChangedOnDisk">Same as Changed, minus reads that only happened because of a forced scan or a 0 page retry</param>
 internal readonly record struct UpdateChapterResult(MangaFile File, bool Changed, bool ChangedOnDisk);
-
-/// <param name="Path">Normalized folder</param>
-/// <param name="IsShallow">Covers only files directly in the folder</param>
-internal readonly record struct UnchangedFolder(string Path, bool IsShallow)
-{
-    public bool Contains(string filePath)
-    {
-        var prefix = Path.TrimEnd('/') + '/';
-        if (!filePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return false;
-
-        return !IsShallow || filePath.IndexOf('/', prefix.Length) < 0;
-    }
-}
 
 /// <summary>
 /// All code needed to Update a Series from a Scan action
@@ -158,14 +140,10 @@ public class ProcessSeries(
             var peopleMs = stepWatch.ElapsedMilliseconds;
 
             stepWatch.Restart();
-            var fileInfos = parsedInfos.Where(info => string.IsNullOrEmpty(info.UnchangedFolderPath)).ToList();
-            var unchangedFolders = parsedInfos
-                .Where(info => !string.IsNullOrEmpty(info.UnchangedFolderPath))
-                .Select(info => new UnchangedFolder(info.UnchangedFolderPath, info.UnchangedFolderIsShallow))
-                .Distinct()
-                .ToList();
-            // Skipped folders were not read, so their files may carry the LocalizedSeries or SeriesSort
-            var hasReadAllFiles = unchangedFolders.Count == 0;
+            var fileInfos = parsedInfos.Where(info => !info.IsPlaceholder).ToList();
+            var kept = KeptFiles.From(parsedInfos);
+            // Kept files were not read, so they may carry the LocalizedSeries or SeriesSort
+            var hasReadAllFiles = kept.IsEmpty;
 
             chapterChanges = await ProcessParserInfos(new ProcessParserInfosArgs
             {
@@ -173,7 +151,7 @@ public class ProcessSeries(
                 Series = series,
                 ParsedInfos = fileInfos,
                 DatabasePeople = databasePeople,
-                UnchangedFolders = unchangedFolders,
+                Kept = kept,
                 ForceUpdate = args.ForceUpdate,
             });
             var chaptersMs = stepWatch.ElapsedMilliseconds;
@@ -228,7 +206,7 @@ public class ProcessSeries(
 
             stepWatch.Restart();
             await UpdateSeriesFolderPath(
-                [.. fileInfos.Select(info => info.FullFilePath), .. GetFilesInUnchangedFolders(series, unchangedFolders).Select(f => f.FilePath)],
+                [.. fileInfos.Select(info => info.FullFilePath), .. GetKeptFiles(series, kept).Select(f => f.FilePath)],
                 library, series);
             var folderPathMs = stepWatch.ElapsedMilliseconds;
 
@@ -772,8 +750,8 @@ public class ProcessSeries(
     /// the volumes, chapters and files that no parsed file matched
     /// </summary>
     /// <remarks>
-    /// Only files from folders read this scan are in <see cref="ProcessParserInfosArgs.ParsedInfos"/>. Files in
-    /// skipped folders were not looked at, so they and their chapters are kept as they are (unverifiedFileIds).
+    /// Only files read this scan are in <see cref="ProcessParserInfosArgs.ParsedInfos"/>. Kept files were not looked at,
+    /// so they and their chapters are kept as they are (unverifiedFileIds).
     /// </remarks>
     private async Task<ChapterChanges> ProcessParserInfos(ProcessParserInfosArgs args)
     {
@@ -783,10 +761,13 @@ public class ProcessSeries(
         var addedChapters = new HashSet<Chapter>();
         var changedChapters = new HashSet<Chapter>();
 
-        var unverifiedFileIds = GetFilesInUnchangedFolders(args.Series, args.UnchangedFolders)
+        var unverifiedFileIds = GetKeptFiles(args.Series, args.Kept)
             .Select(f => f.Id)
             .ToHashSet();
-        var ranges = new RangeIndex(args.ParsedInfos);
+        var keptVolumeNames = args.Series.Volumes
+            .Where(v => v.Chapters.Any(c => c.Files.Any(f => unverifiedFileIds.Contains(f.Id))))
+            .Select(v => v.LookupName);
+        var ranges = new RangeIndex(args.ParsedInfos, keptVolumeNames);
 
         foreach (var parsedInfo in args.ParsedInfos)
         {
@@ -910,16 +891,12 @@ public class ProcessSeries(
         bool HasUnverifiedFile(IEnumerable<MangaFile> files) => files.Any(f => unverifiedFileIds.Contains(f.Id));
     }
 
-    /// <summary>
-    /// Files belonging to folders the scanner skipped this scan. Nothing read them, so their entities must be kept.
-    /// </summary>
-    private static IEnumerable<MangaFile> GetFilesInUnchangedFolders(Series series,
-        IReadOnlyCollection<UnchangedFolder> unchangedFolders)
+    private static IEnumerable<MangaFile> GetKeptFiles(Series series, KeptFiles kept)
     {
         return series.Volumes
             .SelectMany(v => v.Chapters)
             .SelectMany(c => c.Files)
-            .Where(f => unchangedFolders.Any(folder => folder.Contains(f.FilePath)));
+            .Where(f => kept.Contains(f.FilePath));
     }
 
     private Volume FindOrCreateVolume(ProcessParserInfosArgs args, RangeIndex ranges, ParserInfo info)
@@ -1019,7 +996,8 @@ public class ProcessSeries(
         private readonly List<RangeCount> _volumeCounts;
         private readonly List<RangeCount> _chapterCounts;
 
-        public RangeIndex(IList<ParserInfo> infos)
+        /// <param name="keptVolumeNames">Lookup names of volumes holding kept files</param>
+        public RangeIndex(IList<ParserInfo> infos, IEnumerable<string> keptVolumeNames)
         {
             // Volumes are found by LookupName text, so files saying "1", "01" and "1.0" must agree on one text
             // or each would get its own volume 1. The shortest is the one kept
@@ -1041,6 +1019,16 @@ public class ProcessSeries(
                 chapterCounts[chapter] = chapterCounts.GetValueOrDefault(chapter) + 1;
             }
 
+            // A kept file's chapter is not moved, so a parsed file joins its volume under the name it already has
+            foreach (var name in keptVolumeNames)
+            {
+                var volume = Parse(name);
+                if (shortestSpellings.ContainsKey(volume))
+                {
+                    shortestSpellings[volume] = name;
+                }
+            }
+
             foreach (var volumes in infos.Select(info => info.Volumes))
             {
                 _volumeLookupNames[volumes] = shortestSpellings[_parsed[volumes]];
@@ -1051,7 +1039,8 @@ public class ProcessSeries(
         }
 
         /// <summary>
-        /// The shortest spelling among the files whose volume is the same number, so "1" and "1.0" both give "1"
+        /// The shortest spelling among the files whose volume is the same number, so "1" and "1.0" both give "1".
+        /// A volume holding kept files keeps its own spelling
         /// </summary>
         public string VolumeLookupName(string volumes) => _volumeLookupNames[volumes];
 
@@ -1155,31 +1144,32 @@ public class ProcessSeries(
     {
         chapter.Files ??= [];
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
-        var fileInfo = directoryService.FileSystem.FileInfo.New(info.FullFilePath);
+        var stamp = info.Stamp ?? throw new InvalidOperationException($"{info.FullFilePath} has no stamp from the folder listing");
+        var extension = Path.GetExtension(info.FullFilePath).ToLowerInvariant();
         if (existingFile != null)
         {
             existingFile.Format = info.Format;
 
-            var changedOnDisk = HasFileChanged(existingFile, fileInfo);
+            var changedOnDisk = HasFileChanged(existingFile, stamp);
             if (!forceUpdate && existingFile.Pages != 0 && !changedOnDisk)
             {
                 return new UpdateChapterResult(existingFile, false, false);
             }
 
             existingFile.Pages = readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
-            existingFile.Extension = fileInfo.Extension.ToLowerInvariant();
+            existingFile.Extension = extension;
             existingFile.FileName = Parser.RemoveExtensionIfSupported(existingFile.FilePath);
             existingFile.FilePath = Parser.NormalizePath(existingFile.FilePath);
-            existingFile.Bytes = fileInfo.Length;
-            existingFile.FileLastWriteTimeUtc = fileInfo.LastWriteTimeUtc;
+            existingFile.Bytes = stamp.Bytes;
+            existingFile.FileLastWriteTimeUtc = stamp.LastWriteTimeUtc;
             existingFile.KoreaderHash = KoreaderHelper.HashContents(existingFile.FilePath);
 
             return new UpdateChapterResult(existingFile, true, changedOnDisk);
         }
 
         var file = new MangaFileBuilder(info.FullFilePath, info.Format, readingItemService.GetNumberOfPages(info.FullFilePath, info.Format))
-            .WithExtension(fileInfo.Extension)
-            .WithBytes(fileInfo.Length)
+            .WithExtension(extension)
+            .WithBytes(stamp.Bytes)
             .WithHash()
             .Build();
         chapter.Files.Add(file);
@@ -1190,12 +1180,12 @@ public class ProcessSeries(
     /// <summary>
     /// Same rule as <see cref="FolderChangeCheck"/>, so a folder it flags is not skipped here
     /// </summary>
-    private bool HasFileChanged(MangaFile file, IFileInfo fileInfo)
+    private bool HasFileChanged(MangaFile file, FileStamp onDisk)
     {
-        if (file.Bytes != fileInfo.Length) return true;
+        if (file.Bytes != onDisk.Bytes) return true;
         if (file.FileLastWriteTimeUtc == null) return fileService.HasFileBeenModifiedSince(file.FilePath, file.LastModified);
 
-        return !FolderChangeCheck.IsSameWriteTime(file.FileLastWriteTimeUtc.Value, fileInfo.LastWriteTimeUtc);
+        return !FolderChangeCheck.IsSameWriteTime(file.FileLastWriteTimeUtc.Value, onDisk.LastWriteTimeUtc);
     }
 
     private async Task UpdateChapterFromComicInfo(UpdateChapterComicInfoArgs args)

@@ -1870,14 +1870,15 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         var files = await context.MangaFile
             .Where(f => f.Chapter.Volume.Series.LibraryId == libraryId)
             .WhereIf(seriesId != null, f => f.Chapter.Volume.SeriesId == seriesId)
-            .Select(f => new { f.Id, f.Chapter.Volume.SeriesId, f.FilePath, f.Bytes, f.FileLastWriteTimeUtc })
+            .Select(f => new { f.Id, f.Chapter.Volume.SeriesId, f.FilePath, f.Bytes, f.FileLastWriteTimeUtc, f.Chapter.Range, f.Chapter.IsSpecial })
             .AsNoTracking()
             .ToListAsync(ct);
 
         var filesBySeries = files
             .GroupBy(f => f.SeriesId)
             .ToDictionary(g => g.Key, g => g
-                .Select(f => new KnownFile(f.Id, f.FilePath.NormalizePath(), f.Bytes, f.FileLastWriteTimeUtc))
+                .Select(f => new KnownFile(f.Id, f.FilePath.NormalizePath(), f.Bytes, f.FileLastWriteTimeUtc,
+                    KnownFile.IsSortedBySiblings(f.Range, f.IsSpecial)))
                 .GroupBy(f => ParentFolder(f.Path))
                 .ToDictionary(folder => folder.Key, IReadOnlyList<KnownFile> (folder) => folder.ToList()));
 

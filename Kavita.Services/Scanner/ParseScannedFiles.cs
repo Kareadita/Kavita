@@ -35,7 +35,7 @@ public partial class ParseScannedFiles
     private readonly IEventHub _eventHub;
 
     /// <summary>
-    /// File id to the write time from the listing, for files in unchanged folders that have none stored yet
+    /// File id to the write time from the listing, for unchanged files that have none stored yet
     /// </summary>
     /// <remarks>v0.9.2 added this, after one full stable, this can be removed as one scan will backfill times</remarks>
     public Dictionary<int, DateTime> WriteTimesToBackfill { get; } = new();
@@ -46,6 +46,7 @@ public partial class ParseScannedFiles
     private readonly Dictionary<string, FileStamp> _readFiles = new();
     private readonly HashSet<string> _readFolders = [];
     private readonly HashSet<string> _walkedFolders = [];
+    private readonly HashSet<string> _keptFiles = [];
     private readonly List<string> _unreadableFolders = [];
 
     /// <summary>
@@ -98,6 +99,17 @@ public partial class ParseScannedFiles
     /// Time spent merging localized names and grouping parsed files into series, summed like <see cref="WalkTime"/>
     /// </summary>
     public TimeSpan GroupTime { get; private set; }
+
+    /// <summary>
+    /// Files opened and parsed this scan
+    /// </summary>
+    public int ParsedFileCount => _parsedFileCount;
+    private int _parsedFileCount;
+
+    /// <summary>
+    /// Files in read folders that were not parsed because they match the database
+    /// </summary>
+    public int KeptFileCount { get; private set; }
 
     /// <summary>
     /// The folder was not read, walked, or inside a folder that could not be read this scan, so it may be gone
@@ -720,7 +732,7 @@ public partial class ParseScannedFiles
         stepWatch.Restart();
         for (var i = 0; i < scanResults.Count; i++)
         {
-            await ParseFiles(scanResults[i], placeholderOwners, library, i + 1, scanResults.Count);
+            await ParseFiles(scanResults[i], known, placeholderOwners, library, i + 1, scanResults.Count);
         }
         ParseTime += stepWatch.Elapsed;
 
@@ -792,10 +804,11 @@ public partial class ParseScannedFiles
     }
 
     /// <summary>
-    /// A series whose known files sit in a folder that was neither read nor skipped as unchanged lost files there
-    /// (folder deleted or emptied). It has only placeholders, so it is marked to be processed anyway
+    /// A series may have lost files when one of its known files is in a folder that was not skipped as unchanged and was not
+    /// kept by <see cref="ParseFiles"/> (file deleted or moved to another series, folder deleted or emptied). It has only
+    /// placeholders, so it is marked to be processed anyway
     /// </summary>
-    private static void FlagSeriesWithMissingFiles(IEnumerable<ScannedSeriesResult> processedScannedSeries,
+    private void FlagSeriesWithMissingFiles(IEnumerable<ScannedSeriesResult> processedScannedSeries,
         IList<string> scannedFolders, KnownSeriesFolders known,
         IList<ScanResult> unchangedFolders, Dictionary<ParserInfo, SeriesModified> placeholderOwners)
     {
@@ -806,7 +819,8 @@ public partial class ParseScannedFiles
         var recursive = unchangedFolders.Where(r => !r.IsShallow).Select(r => r.Folder.TrimEnd('/')).ToHashSet();
 
         var seriesWithMissingFiles = known.AllSeries
-            .Where(s => s.FilesByFolder.Keys.Any(f => roots.Exists(f.IsSameOrInsideFolder) && !IsCovered(f)))
+            .Where(s => s.FilesByFolder
+                .Any(f => roots.Exists(f.Key.IsSameOrInsideFolder) && !IsCovered(f.Key) && !IsKept(f.Value)))
             .ToHashSet();
 
         if (seriesWithMissingFiles.Count == 0) return;
@@ -833,6 +847,12 @@ public partial class ParseScannedFiles
             }
 
             return false;
+        }
+
+        // A file that was parsed again may now belong to another series, so only kept files count
+        bool IsKept(IReadOnlyList<KnownFile> files)
+        {
+            return files.All(f => _keptFiles.Contains(f.Path));
         }
     }
 
@@ -1019,13 +1039,14 @@ public partial class ParseScannedFiles
     }
 
     /// <summary>
-    /// For a given ScanResult, sets the ParserInfos on the result
+    /// For a given ScanResult, sets the ParserInfos on the result. In a changed folder, files that match the database are kept
+    /// behind a placeholder per series instead of parsed, unless a file in the folder is sorted by its siblings
+    /// (<see cref="KnownFile.IsSortedBySiblings"/>)
     /// </summary>
-    /// <param name="result"></param>
-    /// <param name="placeholderOwners"></param>
-    /// <param name="library"></param>
-    private async Task ParseFiles(ScanResult result, Dictionary<ParserInfo, SeriesModified> placeholderOwners, Library library,
-        int current, int total)
+    /// <param name="known">Which files the database holds, nothing when forced</param>
+    /// <param name="placeholderOwners">Filled with the series each placeholder was made for</param>
+    private async Task ParseFiles(ScanResult result, KnownSeriesFolders known, Dictionary<ParserInfo, SeriesModified> placeholderOwners,
+        Library library, int current, int total)
     {
         var normalizedFolder = Parser.NormalizePath(result.Folder);
 
@@ -1069,49 +1090,110 @@ public partial class ParseScannedFiles
             MessageFactory.FileScanProgressEvent($"{fileCount} files in {normalizedFolder}", library.Id, library.Name, ProgressEventType.Updated,
                 MessageEventCode.ScanReadingFiles, current, total));
 
-        // Written by index rather than collected, as downstream series mapping relies on file order
-        var parsed = new ParseFileResult[fileCount];
-
-        if (fileCount < 100)
+        var paths = files.Select(f => Parser.NormalizePath(f.Path)).ToList();
+        var knownFiles = known.FilesIn(paths.Select(p => p.FolderOf()).Distinct());
+        // A file with an issue row is parsed again, or the row would count as resolved and be deleted
+        var kept = Enumerable.Range(0, fileCount)
+            .Where(i => !_failedFilesInReadFolders.Contains(paths[i]) &&
+                        knownFiles.TryGetValue(paths[i], out var owned) &&
+                        FolderChangeCheck.IsFileUnchanged(files[i], owned.File, owned.Owner.LastScanned))
+            .ToHashSet();
+        if (kept.Any(i => knownFiles[paths[i]].File.SortOrderDependsOnSiblings))
         {
-            for (var i = 0; i < fileCount; i++)
-            {
-                parsed[i] = _readingItemService.ParseFile(files[i].Path, normalizedFolder, result.LibraryRoot, library.Type, library.EnableMetadata);
-            }
+            kept.Clear();
         }
-        else
-        {
-            // Process files in parallel, but bound the concurrency so that a folder with
-            // many files cannot flood the ThreadPool and starve request handling (the web UI
-            // and health checks become unresponsive during scans otherwise).
-            // Matches the scanner's existing parallelism convention (see ScannerService).
-            var maxConcurrency = Math.Max(1, Environment.ProcessorCount / 2);
 
-            await Parallel.ForEachAsync(Enumerable.Range(0, fileCount),
-                new ParallelOptions { MaxDegreeOfParallelism = maxConcurrency },
-                (i, _) =>
-                {
-                    parsed[i] = _readingItemService.ParseFile(files[i].Path, normalizedFolder, result.LibraryRoot,
-                        library.Type, library.EnableMetadata);
-                    return ValueTask.CompletedTask;
-                });
+        // Written by index rather than collected, as downstream series mapping relies on file order
+        var parsed = new ParseFileResult?[fileCount];
+        await ParseAt(result, library, parsed, [.. Enumerable.Range(0, fileCount).Where(i => !kept.Contains(i))]);
+
+        if (kept.Count > 0 && parsed.Any(p => p?.Info != null && KnownFile.IsSortedBySiblings(p.Info.Chapters, p.Info.IsSpecialInfo())))
+        {
+            await ParseAt(result, library, parsed, [.. kept]);
+            kept.Clear();
         }
 
         var infos = new List<ParserInfo>(fileCount);
         for (var i = 0; i < fileCount; i++)
         {
-            if (parsed[i].Info != null) infos.Add(parsed[i].Info!);
-            if (parsed[i].Issue != null) AddIssue(files[i], parsed[i].Issue!, files);
+            if (parsed[i] is not { } fileResult) continue;
+
+            if (fileResult.Info != null)
+            {
+                fileResult.Info.Stamp = files[i];
+                infos.Add(fileResult.Info);
+            }
+            if (fileResult.Issue != null)
+            {
+                AddIssue(files[i], fileResult.Issue, files);
+            }
+        }
+
+        var keptByOwner = kept
+            .Select(i => (Index: i, knownFiles[paths[i]].File, knownFiles[paths[i]].Owner))
+            .GroupBy(k => k.Owner);
+        foreach (var ownerFiles in keptByOwner)
+        {
+            foreach (var (index, file, _) in ownerFiles.Where(k => k.File.LastWriteTimeUtc == null))
+            {
+                WriteTimesToBackfill[file.Id] = files[index].LastWriteTimeUtc;
+            }
+
+            var placeholder = new ParserInfo
+            {
+                Series = ownerFiles.Key.SeriesName,
+                Format = ownerFiles.Key.Format,
+                UnchangedFiles = [.. ownerFiles.Select(k => k.File.Path)],
+            };
+            placeholderOwners[placeholder] = ownerFiles.Key;
+            infos.Add(placeholder);
+            _keptFiles.UnionWith(placeholder.UnchangedFiles);
+        }
+
+        KeptFileCount += kept.Count;
+        if (kept.Count > 0)
+        {
+            _logger.LogDebug("[ScannerService] Kept {KeptCount} of {Count} files in {Folder} as they match the database", kept.Count, fileCount, normalizedFolder);
         }
 
         result.ParserInfos = infos;
+    }
+
+    private async Task ParseAt(ScanResult result, Library library, ParseFileResult?[] parsed, IList<int> indexes)
+    {
+        var files = result.Files;
+        var folder = Parser.NormalizePath(result.Folder);
+        Interlocked.Add(ref _parsedFileCount, indexes.Count);
+
+        if (indexes.Count < 100)
+        {
+            foreach (var i in indexes)
+            {
+                parsed[i] = _readingItemService.ParseFile(files[i].Path, folder, result.LibraryRoot, library.Type, library.EnableMetadata);
+            }
+            return;
+        }
+
+        // Process files in parallel, but bound the concurrency so that a folder with
+        // many files cannot flood the ThreadPool and starve request handling (the web UI
+        // and health checks become unresponsive during scans otherwise).
+        // Matches the scanner's existing parallelism convention (see ScannerService).
+        var maxConcurrency = Math.Max(1, Environment.ProcessorCount / 2);
+
+        await Parallel.ForEachAsync(indexes,
+            new ParallelOptions { MaxDegreeOfParallelism = maxConcurrency },
+            (i, _) =>
+            {
+                parsed[i] = _readingItemService.ParseFile(files[i].Path, folder, result.LibraryRoot, library.Type, library.EnableMetadata);
+                return ValueTask.CompletedTask;
+            });
     }
 
 
     public static void UpdateSortOrder(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParsedSeries series)
     {
         // Placeholders from skipped folders don't map to a chapter, so they have nothing to sort
-        var fileInfos = scannedSeries[series].Where(info => string.IsNullOrEmpty(info.UnchangedFolderPath)).ToList();
+        var fileInfos = scannedSeries[series].Where(info => !info.IsPlaceholder).ToList();
 
         // Set the Sort order per Volume
         var volumes = fileInfos.GroupBy(info => info.Volumes);

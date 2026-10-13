@@ -225,7 +225,8 @@ public class ScannerService(
     /// Scans just an existing Series for changes. If the series doesn't exist, will delete it.
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="bypassFolderOptimizationChecks">Forces ProcessSeries, covers and word count. The walk always forces</param>
+    /// <param name="bypassFolderOptimizationChecks">Forces the walk to read every file, ProcessSeries, covers and word count.
+    /// The Scan Series button sends true, the folder watcher false</param>
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(Timeout)]
     [AutomaticRetry(Attempts = RetryAttempts, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
@@ -298,7 +299,7 @@ public class ScannerService(
         logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var scanStarted = DateTime.Now;
         var (scanElapsedTime, parsedSeries, savedIssues, unreadableFolders) = await ScanFiles(library, folderPaths,
-            false, true, series.Id);
+            false, bypassFolderOptimizationChecks, series.Id);
 
         if (unreadableFolders.Count > 0)
         {
@@ -752,7 +753,7 @@ public class ScannerService(
 
             if (series.Key.HasMissingFiles || series.Value.Any(info => !string.IsNullOrEmpty(info.Filename)))
             {
-                toProcess[series.Key] = series.Value.Where(info => !string.IsNullOrEmpty(info.Filename) || !string.IsNullOrEmpty(info.UnchangedFolderPath)).ToList();
+                toProcess[series.Key] = series.Value.Where(info => !string.IsNullOrEmpty(info.Filename) || info.IsPlaceholder).ToList();
             }
         }
 
@@ -878,7 +879,7 @@ public class ScannerService(
             foreach (var pSeries in toProcess)
             {
                 // Placeholders for skipped folders aren't files
-                tally.TotalFiles += pSeries.Count(info => string.IsNullOrEmpty(info.UnchangedFolderPath));
+                tally.TotalFiles += pSeries.Count(info => !info.IsPlaceholder);
 
                 using var scope = scopeFactory.CreateScope();
                 var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -978,10 +979,10 @@ public class ScannerService(
         var parseMs = (long) scanner.ParseTime.TotalMilliseconds;
         var groupMs = (long) scanner.GroupTime.TotalMilliseconds;
         logger.LogDebug("[ScannerService] Step 1 for {LibraryName}: folder map {FolderMapMs} ms ({FolderCount} folders), failed files {FailedFilesMs} ms, " +
-                        "list {ListMs} ms, walk {WalkMs} ms, parse {ParseMs} ms ({FilesRead} files), group {GroupMs} ms, other {OtherMs} ms, " +
+                        "list {ListMs} ms, walk {WalkMs} ms, parse {ParseMs} ms ({FilesParsed} files, {FilesKept} kept), group {GroupMs} ms, other {OtherMs} ms, " +
                         "backfill {BackfillMs} ms, issues {IssuesMs} ms, name matches {NameMatchesMs} ms",
             library.Name, folderMapMs, known.FolderCount, failedFilesMs,
-            listMs, walkMs, parseMs, scanner.ReadFiles.Count, groupMs, scanAndParseMs - listMs - walkMs - parseMs - groupMs,
+            listMs, walkMs, parseMs, scanner.ParsedFileCount, scanner.KeptFileCount, groupMs, scanAndParseMs - listMs - walkMs - parseMs - groupMs,
             backfillMs, issuesMs, nameMatchesMs);
 
         return new ScanFilesResult(scanElapsedTime, parsedSeries, savedIssues, scanner.UnreadableFolders);

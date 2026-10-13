@@ -9,14 +9,16 @@ namespace Kavita.Services.Scanner;
 /// <summary>
 /// What the DB knows about the series in each folder. The walk asks it two questions:
 /// <list type="number">
-/// <item>Can I skip reading this folder? Change detection, always "no" on a forced scan
-/// (<see cref="IsUnchanged"/>, <see cref="OwnersToCompareIn"/>, <see cref="CanCompare"/>)</item>
+/// <item>Can I skip reading this folder, or a file in it? Change detection, always "no" on a forced scan
+/// (<see cref="IsUnchanged"/>, <see cref="OwnersToCompareIn"/>, <see cref="CanCompare"/>, <see cref="FilesIn"/>)</item>
 /// <item>Who lives in this folder, so they are not deleted when it can't be read? Force does not change the answer
 /// (<see cref="OwnersIn"/>, <see cref="OwnersInside"/>)</item>
 /// </list>
 /// </summary>
 public sealed class KnownSeriesFolders
 {
+    public readonly record struct OwnedFile(KnownFile File, SeriesModified Owner);
+
     private readonly IDictionary<string, IList<SeriesModified>> _byFolder;
     private readonly bool _forced;
 
@@ -90,6 +92,30 @@ public sealed class KnownSeriesFolders
         return _byFolder.TryGetValue(folder, out var seriesList)
             ? seriesList.Where(s => s.FilesByFolder.ContainsKey(folder)).ToList()
             : [];
+    }
+
+    /// <summary>
+    /// The stored file and its series for each file directly in the folders, so a changed folder can skip its unchanged files.
+    /// Empty when forced, so every file is read
+    /// </summary>
+    /// <param name="folders">These should be normalized</param>
+    public Dictionary<string, OwnedFile> FilesIn(IEnumerable<string> folders)
+    {
+        var files = new Dictionary<string, OwnedFile>();
+        if (_forced) return files;
+
+        foreach (var folder in folders)
+        {
+            foreach (var owner in OwnersIn(folder))
+            {
+                foreach (var file in owner.FilesByFolder[folder])
+                {
+                    files.TryAdd(file.Path, new OwnedFile(file, owner));
+                }
+            }
+        }
+
+        return files;
     }
 
     /// <summary>
