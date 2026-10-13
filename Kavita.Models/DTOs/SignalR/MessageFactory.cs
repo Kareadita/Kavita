@@ -649,6 +649,20 @@ public static class MessageFactory
         });
     }
 
+    public static SignalRMessageDto LibraryScanFailedEvent(int libraryId, string libraryName, string error)
+    {
+        var title = $"Scan of {libraryName} failed";
+
+        return CodedEvent(Error, MessageEventCode.LibraryScanFailed, title, error, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = error,
+            LibraryId = libraryId,
+            LibraryName = libraryName,
+        });
+    }
+
     /// <param name="scheduledForUtc">Pass the same value given to Hangfire. A later retime can move the job, ScanRescheduled carries the new time</param>
     public static SignalRMessageDto ScanLibrariesDelayedEvent(DateTime scheduledForUtc)
     {

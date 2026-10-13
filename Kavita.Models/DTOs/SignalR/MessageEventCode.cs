@@ -28,6 +28,7 @@ public static class MessageEventCode
     public const string ScanSeriesFolderMissing = "scan-series-folder-missing";
     public const string ScanNoWork = "scan-no-work";
     public const string DbWriteFailed = "db-write-failed";
+    public const string LibraryScanFailed = "library-scan-failed";
 
     #endregion
 

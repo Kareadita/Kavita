@@ -29,6 +29,7 @@ export interface CodedEventBodyMap {
   [MessageEventCode.ScanSeriesFolderMissing]: SeriesEventBody;
   [MessageEventCode.ScanNoWork]: SeriesEventBody;
   [MessageEventCode.DbWriteFailed]: SeriesEventBody;
+  [MessageEventCode.LibraryScanFailed]: LibraryEventBody;
   [MessageEventCode.ScanLibrariesDelayed]: ScanLibrariesDelayedBody;
   [MessageEventCode.ScanLibraryDelayed]: ScanLibraryDelayedBody;
   [MessageEventCode.ScanSeriesDelayed]: ScanSeriesDelayedBody;

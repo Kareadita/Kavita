@@ -586,7 +586,16 @@ public class ScannerService(
             }
 
             var isLastLibrary = lib == libraries[^1];
-            await ScanLibrary(lib.Id, forceUpdate, endsJob: isLastLibrary);
+            try
+            {
+                await ScanLibrary(lib.Id, forceUpdate, endsJob: isLastLibrary);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "[ScannerService] Scan of {LibraryName} failed, moving on to the next library", lib.Name);
+                await eventHub.SendMessageAsync(MessageFactory.Error,
+                    MessageFactory.LibraryScanFailedEvent(lib.Id, lib.Name, ex.Message));
+            }
         }
 
         logger.LogInformation("[ScannerService] Scan of All Libraries Finished");

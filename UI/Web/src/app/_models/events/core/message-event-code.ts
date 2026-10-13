@@ -19,6 +19,7 @@ export enum MessageEventCode {
   ScanSeriesFolderMissing = 'scan-series-folder-missing',
   ScanNoWork = 'scan-no-work',
   DbWriteFailed = 'db-write-failed',
+  LibraryScanFailed = 'library-scan-failed',
 
   ScanLibrariesDelayed = 'scan-libraries-delayed',
   ScanLibraryDelayed = 'scan-library-delayed',

@@ -3191,6 +3191,7 @@
         "scan-no-work-label": "{{seriesName}} has nothing to scan",
         "scan-no-work-description": "No folders changed since the last scan.",
         "db-write-failed-label": "Couldn’t save {{seriesName}}",
+        "library-scan-failed-label": "{{libraryName}} scan failed",
         "scan-libraries-delayed-label": "Scan all libraries queued",
         "scan-library-delayed-label": "Scan {{libraryName}} queued",
         "scan-series-delayed-label": "Scan {{seriesName}} queued",
