@@ -779,7 +779,7 @@ public partial class BookService(
     {
         strictOpenError = null;
 
-        // default: Refactor this to use the Async version
+        // TODO: Refactor this to use the Async version
         try
         {
             return EpubReader.OpenBook(filePath, BookReaderOptions);

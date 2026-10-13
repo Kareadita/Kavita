@@ -1858,7 +1858,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
                     LibraryId = x.LibraryId,
                     SeriesId = x.SeriesId,
                     ChapterId = x.Chapter.Id,
-                    Title = x.Chapter.TitleName, // default: Use that method that makes a smart title? Do we have that? Where it falls back to Chapter #3 or whatever
+                    Title = x.Chapter.TitleName, // TODO: Use that method that makes a smart title? Do we have that? Where it falls back to Chapter #3 or whatever
                 }).ToList(),
             });
         }

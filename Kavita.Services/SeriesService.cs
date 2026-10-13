@@ -377,7 +377,7 @@ public class SeriesService(
     /// <param name="role"></param>
     public static async Task HandlePeopleUpdateAsync(SeriesMetadata metadata, ICollection<PersonDto> peopleDtos, PersonRole role, IUnitOfWork unitOfWork)
     {
-        // default: Cleanup this code so we aren't using UnitOfWork like this
+        // TODO: Cleanup this code so we aren't using UnitOfWork like this
 
         // Normalize all names from the DTOs
         var normalizedNames = peopleDtos
@@ -401,7 +401,7 @@ public class SeriesService(
             // Check if the person exists in the dictionary
             if (existingPeopleDictionary.TryGetValue(normalizedPersonName, out var p))
             {
-                // default: Should I add more controls here to map back?
+                // TODO: Should I add more controls here to map back?
                 if (personDto.AniListId > 0 && p.AniListId <= 0 && p.AniListId != personDto.AniListId)
                 {
                     p.AniListId = personDto.AniListId;
@@ -622,7 +622,7 @@ public class SeriesService(
             TotalCount = chapters.Count,
             UnreadCount = chapters.Count(c => c.Pages > 0 && c.PagesRead < c.Pages),
             LibraryType = libraryType,
-            // default: See if we can get the ContinueFrom here
+            // TODO: See if we can get the ContinueFrom here
         };
     }
 

@@ -626,7 +626,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         bool customOnly = true, CancellationToken ct = default)
     {
         var extension = encodeFormat.GetExtension();
-        var prefix = "series{0}".Replace("0", string.Empty); // default: This actually depends on ImageService#GetSeriesFormat
+        var prefix = "series{0}".Replace("0", string.Empty); // TODO: This actually depends on ImageService#GetSeriesFormat
         var query = context.Series
             .Where(c => !string.IsNullOrEmpty(c.CoverImage)
                         && !c.CoverImage.EndsWith(extension)
@@ -1646,8 +1646,8 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 VolumeId = c.VolumeId,
                 ChapterId = c.Id,
                 Format = c.Volume.Series.Format,
-                ChapterNumber = c.MinNumber + string.Empty, // default: Refactor this
-                ChapterRange = c.Range, // default: Refactor this
+                ChapterNumber = c.MinNumber + string.Empty, // TODO: Refactor this
+                ChapterRange = c.Range, // TODO: Refactor this
                 IsSpecial = c.IsSpecial,
                 VolumeNumber = c.Volume.MinNumber,
                 ChapterTitle = c.Title,

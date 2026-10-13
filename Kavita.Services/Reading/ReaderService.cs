@@ -186,7 +186,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
 
         if (user.Progresses == null)
         {
-            //throw new ArgumentException("AppUser must have Progress on it"); // default: Figure out the impact of switching to a more dev experience exception
+            //throw new ArgumentException("AppUser must have Progress on it"); // TODO: Figure out the impact of switching to a more dev experience exception
             throw new KavitaException("progress-must-exist");
         }
 
@@ -633,7 +633,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         if (series.Format == MangaFormat.Epub)
         {
             // Get the word counts for all the pages
-            var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath, ct); // default: Cache
+            var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath, ct); // TODO: Cache
             if (pageCounts == null) return GetTimeEstimate(chapter.WordCount, 0, true);
 
             // Sum character counts for unread pages
@@ -663,7 +663,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         if (series.Format == MangaFormat.Epub)
         {
             // Get the word counts for all the pages
-            var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath, ct); // default: Cache
+            var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath, ct); // TODO: Cache
             if (pageCounts == null) return GetTimeEstimate(series.WordCount, 0, true);
 
             // Sum character counts for unread pages

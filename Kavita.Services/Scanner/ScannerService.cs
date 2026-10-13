@@ -64,7 +64,6 @@ public class ScannerService(
     IDirectoryService directoryService,
     IReadingItemService readingItemService,
     IServiceScopeFactory scopeFactory,
-    IWordCountAnalyzerService wordCountAnalyzerService,
     IMapper mapper)
     : IScannerService
 {
@@ -225,7 +224,7 @@ public class ScannerService(
     /// Scans just an existing Series for changes. If the series doesn't exist, will delete it.
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="bypassFolderOptimizationChecks">Forces the walk to read every file, ProcessSeries, covers and word count.
+    /// <param name="bypassFolderOptimizationChecks">Forces the walk to read every file, ProcessSeries and word count. Covers always use their stamps.
     /// The Scan Series button sends true, the folder watcher false</param>
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(Timeout)]
@@ -246,12 +245,7 @@ public class ScannerService(
         if (library == null) return;
 
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
-        if (await ShouldScanSeries(seriesId, library, libraryPaths) != ScanCancelReason.NoCancel)
-        {
-            BackgroundJob.Enqueue(() => metadataService.GenerateCoversForSeries(serverSettings, series.LibraryId, seriesId, false, false));
-            BackgroundJob.Enqueue(() => wordCountAnalyzerService.ScanSeries(library.Id, seriesId, bypassFolderOptimizationChecks));
-            return;
-        }
+        if (await ShouldScanSeries(seriesId, library, libraryPaths) != ScanCancelReason.NoCancel) return;
 
         List<string> folderPaths = [];
         if (!string.IsNullOrEmpty(series.LowestFolderPath) && directoryService.Exists(series.LowestFolderPath))
@@ -385,7 +379,7 @@ public class ScannerService(
                 var metadataServiceScoped = scope.ServiceProvider.GetRequiredService<IMetadataService>();
                 var wordCountAnalyzerServiceScoped = scope.ServiceProvider.GetRequiredService<IWordCountAnalyzerService>();
 
-                await metadataServiceScoped.GenerateCoversForSeries(serverSettings, scopedLibrary.Id, result.SeriesId.Value, bypassFolderOptimizationChecks, false);
+                await metadataServiceScoped.GenerateCoversForSeries(serverSettings, scopedLibrary.Id, result.SeriesId.Value, false, false);
                 await wordCountAnalyzerServiceScoped.ScanSeries(scopedLibrary.Id, result.SeriesId.Value, bypassFolderOptimizationChecks);
             }
 
