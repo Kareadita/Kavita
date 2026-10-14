@@ -312,6 +312,27 @@ public class ScannerServiceTests: AbstractDbTest
     }
 
     [Fact]
+    public async Task ScanLibrary_FirstChapterHasComicVineIssueLink_KeepsTheSeriesId()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+        var infos = new Dictionary<string, ComicInfo>
+        {
+            ["Chew v01.cbz"] = new() { Series = "Chew", Web = "https://comicvine.gamespot.com/chew-1-taster-s-choice-part-1-of-5/4000-159233/" },
+            ["Chew v02.cbz"] = new() { Series = "Chew", Web = "https://comicvine.gamespot.com/chew/4050-18166/" },
+        };
+        var library = await scannerHelper.GenerateScannerData(nameof(ScanLibrary_FirstChapterHasComicVineIssueLink_KeepsTheSeriesId) + " - Manga",
+            ["Chew/Chew v01.cbz", "Chew/Chew v02.cbz"], infos);
+        library.InheritWebLinksFromFirstChapter = true;
+        await unitOfWork.CommitAsync();
+
+        await scannerHelper.CreateServices().ScanLibrary(library.Id);
+
+        var series = Assert.Single((await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series))!.Series);
+        Assert.Equal("18166", series.ComicVineId);
+    }
+
+    [Fact]
     public async Task ScanLibrary_LocalizedSeries2()
     {
         var (unitOfWork, _, _) = await CreateDatabase();

@@ -160,7 +160,6 @@ public partial class ParseScannedFiles
 
         var result = new List<ScanResult>();
 
-        // Not to self: this whole thing can be parallelized because we don't deal with any DB or global state
         if (scanDirectoryByDirectory)
         {
             return await ScanDirectories(folderPath, known, failures, library, matcher, result, fileExtensions);

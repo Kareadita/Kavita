@@ -386,8 +386,6 @@ public class ProcessSeries(
             // Don't save FolderPath if it's a library Folder
             if (libraryFolders.Any(seriesDirs.Keys.First().IsInsideFolder))
             {
-                // BUG: FolderPath can be a level higher than it needs to be. I'm not sure why it's like this, but I thought it should be one level lower.
-                // I think it's like this because higher level is checked or not checked. But i think we can do both
                 series.FolderPath = Parser.NormalizePath(seriesDirs.Keys.First());
                 logger.LogDebug("Updating {Series} FolderPath to {FolderPath}", series.Name, series.FolderPath);
             }
@@ -456,7 +454,6 @@ public class ProcessSeries(
 
         if (!string.IsNullOrEmpty(firstChapter?.WebLinks) && library.InheritWebLinksFromFirstChapter)
         {
-            // TODO: Come back and clean this up, we call this code in DefaultParser AND ProcessSeries
             series.Metadata.WebLinks = firstChapter.WebLinks;
             var aniListId = ExternalIdParser.GetAniListId(series.Metadata.WebLinks);
             if (aniListId.HasValue)
@@ -466,9 +463,11 @@ public class ProcessSeries(
             if (malId.HasValue)
                 series.MalId = malId.Value;
 
-            var (comicVineId, _) = ExternalIdParser.GetComicVineId(series.Metadata.WebLinks);
-            if (comicVineId != null)
+            var (comicVineId, isSeriesLink) = ExternalIdParser.GetComicVineId(series.Metadata.WebLinks);
+            if (comicVineId != null && isSeriesLink)
+            {
                 series.ComicVineId = comicVineId;
+            }
 
             var mangaBakaId = ExternalIdParser.GetMangaBakaId(series.Metadata.WebLinks);
             if (mangaBakaId > 0)
