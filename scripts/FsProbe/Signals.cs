@@ -21,7 +21,7 @@ public static class Signals
         var maxChange = ChangeTime.GetUtcTicks(folder);
         var names = new List<string>();
 
-        foreach (var info in WriteTime.Enumerate(folder).OrderBy(i => i.FullName, StringComparer.Ordinal))
+        foreach (var info in FileListing.Enumerate(folder).OrderBy(i => i.FullName, StringComparer.Ordinal))
         {
             var relative = Path.GetRelativePath(folder, info.FullName);
             if (info is DirectoryInfo)

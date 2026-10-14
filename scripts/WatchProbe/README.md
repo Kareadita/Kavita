@@ -1,0 +1,98 @@
+# watchprobe
+
+Checks which way of watching a folder notices changes on your setup. Kavita's folder watching does not pick up changes for some setups (Docker with the library on a network share), and we use the results to decide how to fix it. Run it where Kavita runs (inside the Docker container if that is how you run Kavita), against a real library folder.
+
+It runs three watchers on the same folder at once and prints every change each one sees:
+
+| Name | What it is |
+|---|---|
+| `watcher` | The same file watcher Kavita uses today |
+| `provider` | .NET's polling file provider. It only says "something changed", never which file |
+| `poller` | Lists the folder every few seconds and compares names, sizes and dates |
+
+## Get the binary
+
+Pick the archive for where you run it. Each one holds a single `watchprobe` program and this README, nothing to install.
+
+| Where | Archive |
+|---|---|
+| Kavita Docker image, most Linux, Unraid host | `watchprobe-linux-x64.tar.gz` |
+| Raspberry Pi, ARM NAS | `watchprobe-linux-arm64.tar.gz` |
+| Alpine-based images | `watchprobe-linux-musl-x64.tar.gz` |
+| Windows | `watchprobe-win-x64.zip` |
+| macOS (Apple Silicon) | `watchprobe-osx-arm64.tar.gz` |
+
+Not sure which Linux one? Run `uname -m`: `x86_64` is x64, `aarch64` is arm64.
+
+To build them yourself: `./publish.sh` (needs the .NET 10 SDK), output in `dist/`.
+
+## Docker (most setups)
+
+Unpack it into your Kavita config folder on the host, so the container can see it at `/kavita/config`:
+
+```bash
+tar -xzf watchprobe-linux-x64.tar.gz --strip-components=1 -C /path/to/kavita/config/ watchprobe-linux-x64/watchprobe
+```
+
+If it says `Permission denied` when run, add the executable bit: `chmod +x /path/to/kavita/config/watchprobe`.
+
+### Pick a small folder
+
+Point it at **one series folder**, or any folder with a few hundred files, not the whole library. Two of the three watchers list the whole folder every few seconds, and on a large library over a network share that keeps the share busy. If the first listing takes over 30 s, the probe warns you; press Ctrl+C and pick a smaller folder.
+
+### Run it
+
+```bash
+docker exec -it kavita /kavita/config/watchprobe "/manga/Some Series" --label "my-setup-name"
+```
+
+Use the container name and the folder path as Kavita sees them. Keep `-it`, so Enter and Ctrl+C reach the probe.
+
+What happens:
+1. **Control (about 30 s).** The probe writes a small `watchprobe-control-<time>.bin` file into the folder, waits, then deletes it. This shows whether each watcher works at all when the change is made from inside the container. If the folder is mounted read-only, add `--no-control`.
+2. **Your changes (the important part).** When the probe prints "Now make changes FROM ANOTHER MACHINE", go to the machine that normally writes to the library (the NAS, a downloader, your PC over the share) and, in that same folder:
+   - copy a new `.cbz` or `.zip` in
+   - rename a file
+   - delete a file (a copy you made, not a real one)
+   - create a new folder and copy a file into it
+   - copy a file over an existing one with the same name (Windows Explorer: "Replace the file")
+
+   Wait about 15 s between changes so they can be told apart. Each change should show up as lines in the probe's window.
+3. **Finish.** It stops after 10 minutes, or press Enter or Ctrl+C when you are done. The report is written either way, and saved every 30 s while it runs.
+
+Options: `--minutes 10` how long to watch, `--interval 5` seconds between the poller's listings.
+
+### Optional: run it on the host too
+
+If the host (outside Docker) can reach the same share, run the same test there as well, with a different label. It tells us whether the problem is Docker or the share itself.
+
+```bash
+./watchprobe "/mnt/nas/manga/Some Series" --label "my-setup-host"
+```
+
+## What to send back
+
+The `watchprobe-*.json` file (written next to the program, so in your config folder), plus one line about the setup: OS/NAS, how the library is mounted into Kavita (bind mount, SMB/CIFS, NFS, mergerfs, ...), and which machine you made the changes from.
+
+Reports include folder and file paths from your library. Remove anything you would rather not share.
+
+## Reading the output
+
+Each line is one thing one watcher saw:
+
+```
+  [    32.0s] watcher  Created  series-a\c002.cbz
+  [    32.0s] provider Fired
+  [    34.1s] poller   Added    series-a\c002.cbz  4 bytes
+```
+
+The summary at the end says, for the control file and for your changes, which watchers noticed and how fast:
+
+```
+  control create  watcher 0.0 s, provider 8.0 s, poller 2.0 s
+  poller found 6 file changes besides the control: watcher saw 6, provider fired near 6
+```
+
+`missed` means that watcher never reported it. If the `watcher` column misses your changes from another machine, that is the bug we are chasing.
+
+## NOTE: This is completely AI-coded as part of a data collection program for Kavita's folder watching work

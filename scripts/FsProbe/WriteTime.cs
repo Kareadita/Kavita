@@ -2,15 +2,6 @@ namespace FsProbe;
 
 public static class WriteTime
 {
-    // IgnoreInaccessible so one unreadable folder does not end the probe; Kavita's call throws instead
-    private static EnumerationOptions Options(bool recurse) => new()
-    {
-        RecurseSubdirectories = recurse,
-        IgnoreInaccessible = true,
-        AttributesToSkip = 0,
-        MatchType = MatchType.Win32,
-    };
-
     /// <summary>
     /// Copy of DirectoryService.GetLastWriteTime as of S5, in UTC: list the entries, then one call per entry
     /// </summary>
@@ -19,8 +10,8 @@ public static class WriteTime
         if (!Directory.Exists(folderPath)) return DateTime.MaxValue;
 
         var fileEntries = searchOption == SearchOption.AllDirectories
-            ? Directory.GetFileSystemEntries(folderPath, "*.*", Options(true))
-            : Directory.GetFiles(folderPath, "*.*", Options(false));
+            ? Directory.GetFileSystemEntries(folderPath, "*.*", FileListing.Options(true))
+            : Directory.GetFiles(folderPath, "*.*", FileListing.Options(false));
         if (fileEntries.Length == 0) return DateTime.MaxValue;
 
         var maxFiles = fileEntries.Max(File.GetLastWriteTimeUtc);
@@ -38,8 +29,8 @@ public static class WriteTime
         if (!dir.Exists) return DateTime.MaxValue;
 
         IEnumerable<FileSystemInfo> entries = searchOption == SearchOption.AllDirectories
-            ? dir.EnumerateFileSystemInfos("*.*", Options(true))
-            : dir.EnumerateFiles("*.*", Options(false));
+            ? dir.EnumerateFileSystemInfos("*.*", FileListing.Options(true))
+            : dir.EnumerateFiles("*.*", FileListing.Options(false));
 
         var any = false;
         var maxFiles = DateTime.MinValue;
@@ -54,9 +45,6 @@ public static class WriteTime
         var directoryLastWriteTime = dir.LastWriteTimeUtc;
         return directoryLastWriteTime > maxFiles ? directoryLastWriteTime : maxFiles;
     }
-
-    public static IEnumerable<FileSystemInfo> Enumerate(string folderPath, bool recurse = true) =>
-        new DirectoryInfo(folderPath).EnumerateFileSystemInfos("*.*", Options(recurse));
 
     public static DateTime TruncateToSecond(DateTime time) =>
         time == DateTime.MaxValue ? time : new DateTime(time.Ticks - time.Ticks % TimeSpan.TicksPerSecond, time.Kind);

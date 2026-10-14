@@ -1,18 +1,16 @@
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
-namespace FsProbe;
+namespace ProbeCommon;
 
 public static class EnvironmentReader
 {
-    public const string ProbeVersion = "1";
-
-    public static EnvironmentInfo Read(string mode, string path, string? label)
+    public static EnvironmentInfo Read(string probeVersion, string mode, string path, string? label)
     {
         var fullPath = Path.GetFullPath(path);
         var info = new EnvironmentInfo
         {
-            ProbeVersion = ProbeVersion,
+            ProbeVersion = probeVersion,
             Mode = mode,
             Label = label,
             StartedUtc = DateTime.UtcNow.ToString("O"),

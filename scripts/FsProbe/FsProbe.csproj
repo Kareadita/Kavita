@@ -20,4 +20,9 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ProbeCommon\ProbeCommon.csproj" />
+    <Using Include="ProbeCommon" />
+  </ItemGroup>
+
 </Project>

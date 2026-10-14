@@ -62,7 +62,7 @@ public static class PassiveProbe
         var future = DateTime.UtcNow.AddDays(1);
         var oldest = new DateTime(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        foreach (var info in WriteTime.Enumerate(root))
+        foreach (var info in FileListing.Enumerate(root))
         {
             var isFolder = info is DirectoryInfo;
             var listing = info.LastWriteTimeUtc;
