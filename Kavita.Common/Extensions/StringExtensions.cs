@@ -15,6 +15,10 @@ public static partial class StringExtensions
         RegexOptions.ExplicitCapture | RegexOptions.Compiled,
         TimeSpan.FromMilliseconds(500));
 
+    private static readonly Regex NonPrintableAsciiRegex = new(@"[^\u0020-\u007E]",
+        RegexOptions.ExplicitCapture | RegexOptions.Compiled,
+        TimeSpan.FromMilliseconds(500));
+
     /// <summary>
     /// Normalize everything within Kavita. Some characters don't fall under Unicode, like full-width characters and need to be
     /// added on a case-by-case basis.
@@ -36,7 +40,7 @@ public static partial class StringExtensions
                 .Replace("\r", string.Empty);
 
             // Optionally remove other potentially unwanted characters
-            sanitized = Regex.Replace(sanitized, @"[^\u0020-\u007E]", string.Empty); // Removes non-printable ASCII
+            sanitized = NonPrintableAsciiRegex.Replace(sanitized, string.Empty);// Removes non-printable ASCII
 
             return sanitized.Trim(); // Trim any leading/trailing whitespace
         }
