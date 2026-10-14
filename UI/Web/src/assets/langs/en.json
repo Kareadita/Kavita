@@ -2553,10 +2553,6 @@
         "bust-cache-task-desc": "Busts the Kavita+ Cache - should only be used when debugging bad matches.",
         "bust-cache-task-success": "Kavita+ Cache busted",
 
-        "bust-locale-task": "Bust Locale Cache",
-        "bust-locale-task-desc": "Busts the Locale Cache. This can fix issues with strings not showing correctly after an update. A browser refresh is needed.",
-        "bust-locale-task-success": "Locale Cache busted",
-
         "clear-reading-cache-task": "Clear Reading Cache",
         "clear-reading-cache-task-desc": "Clears cached files for reading. Useful when you've just updated a file that you were previously reading within the last 24 hours.",
         "clear-reading-cache-task-success": "Cache has been cleared",
@@ -3175,6 +3171,8 @@
         "root-folders-inaccessible-description": "Check that these drives are connected, then rescan: {{folders}}",
         "root-folders-empty-label": "{{libraryName}} scan aborted",
         "root-folders-empty-description": "Some root folders are empty. Check that your mount is connected or change the root folder, then rescan.",
+        "root-folders-unreadable-label": "{{libraryName}} scan aborted",
+        "root-folders-unreadable-description": "Some root folders can’t be read. Check the folder permissions, then rescan: {{folders}}",
         "unreadable-folders-label": "Some folders in {{libraryName}} can’t be read",
         "unreadable-folders-description": "Their series were kept as they are. Check the folder permissions, then rescan: {{folders}}",
         "unreadable-folders-more-description": "Their series were kept as they are. Check the folder permissions, then rescan: {{folders}} and {{count}} more",
@@ -3193,6 +3191,7 @@
         "scan-no-work-label": "{{seriesName}} has nothing to scan",
         "scan-no-work-description": "No folders changed since the last scan.",
         "db-write-failed-label": "Couldn’t save {{seriesName}}",
+        "library-scan-failed-label": "{{libraryName}} scan failed",
         "scan-libraries-delayed-label": "Scan all libraries queued",
         "scan-library-delayed-label": "Scan {{libraryName}} queued",
         "scan-series-delayed-label": "Scan {{seriesName}} queued",
@@ -4926,7 +4925,8 @@
         "word-count-failed": "Words could not be counted",
         "io-error": "File could not be accessed (disk, network or permissions)",
         "metadata-unreadable": "Embedded metadata could not be read, imported without it",
-        "epub-not-strict": "Epub has structural errors, imported in lenient mode"
+        "epub-not-strict": "Epub has structural errors, imported in lenient mode",
+        "ambiguous-series": "Matches more than one series, edit its SeriesSort/LocalizedSeries tag"
     },
 
     "validation": {

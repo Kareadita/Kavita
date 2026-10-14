@@ -336,7 +336,9 @@ public class Startup
             HttpsCompression = HttpsCompressionMode.Compress,
             OnPrepareResponse = ctx =>
             {
-                ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + TimeSpan.FromHours(24);
+                ctx.Context.Response.Headers[HeaderNames.CacheControl] = ctx.File.Name == "index.html"
+                    ? "no-cache"
+                    : "public,max-age=" + (int) TimeSpan.FromHours(24).TotalSeconds;
                 ctx.Context.Response.Headers[Headers.RobotsTag] = "noindex,nofollow";
             }
         });

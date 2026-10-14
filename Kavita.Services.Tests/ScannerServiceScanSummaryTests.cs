@@ -1,3 +1,5 @@
+using Hangfire;
+using Hangfire.InMemory;
 using Kavita.API.Services.SignalR;
 using Kavita.Database.Tests;
 using Kavita.Models.DTOs.SignalR;
@@ -10,6 +12,7 @@ using Xunit.Abstractions;
 
 namespace Kavita.Services.Tests;
 
+[Collection(HangfireStorageCollection.Name)]
 public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) : AbstractDbTest(testOutputHelper)
 {
     private const string Volume1 = "Spice and Wolf/Spice and Wolf Vol. 1";
@@ -37,13 +40,18 @@ public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) 
 
     private LibraryScanEndedEventBodyDto LastSummary()
     {
+        return Summaries().Last();
+    }
+
+    private List<LibraryScanEndedEventBodyDto> Summaries()
+    {
         return _eventHub.ReceivedCalls()
             .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
             .Select(c => c.GetArguments()[1])
             .OfType<SignalRMessageDto>()
             .Select(m => m.Body)
             .OfType<LibraryScanEndedEventBodyDto>()
-            .Last();
+            .ToList();
     }
 
     /// <returns>The onlyAdmins argument of each ScanSeries send</returns>
@@ -202,5 +210,59 @@ public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) 
 
         Assert.True(bodies.Count >= 2, "Expected the started frame and at least one per-series update");
         Assert.All(bodies, b => Assert.Equal(new SeriesScanTargetDto(scanned.SeriesId, "Spice and Wolf"), b.SeriesScan));
+    }
+
+    [Fact]
+    public async Task ScanLibrary_EndsTheJob()
+    {
+        await ScanOnce(nameof(ScanLibrary_EndsTheJob));
+
+        Assert.True(LastSummary().EndsJob);
+    }
+
+    [Fact]
+    public async Task ScanSeries_EndsTheJob()
+    {
+        var (scanner, _, _) = await ScanOnce(nameof(ScanSeries_EndsTheJob));
+        var scanned = LastScannedSeries();
+        _eventHub.ClearReceivedCalls();
+
+        await scanner.ScanSeries(scanned.SeriesId);
+
+        Assert.True(LastSummary().EndsJob);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_ThatThrows_StillEndsTheJob()
+    {
+        _eventHub.SendMessageAsync(MessageFactory.ScanSeries, Arg.Any<SignalRMessageDto>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new InvalidOperationException("Boom")));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => ScanOnce(nameof(ScanLibrary_ThatThrows_StillEndsTheJob)));
+
+        Assert.True(LastSummary().EndsJob);
+        var failed = _eventHub.ReceivedCalls()
+            .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
+            .Select(c => c.GetArguments()[1])
+            .OfType<SignalRMessageDto>()
+            .Single(m => m.Code == MessageEventCode.LibraryScanFailed);
+        Assert.Equal("Boom", failed.SubTitle);
+    }
+
+    [Fact]
+    public async Task ScanLibraries_OnlyTheLastLibraryEndsTheJob()
+    {
+        // ScanLibraries waits 4 hours on a library that has a scan job in storage, other classes leave theirs behind
+        JobStorage.Current = new InMemoryStorage();
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        await scannerHelper.GenerateScannerData($"{nameof(ScanLibraries_OnlyTheLastLibraryEndsTheJob)} A - Manga", Files, new Dictionary<string, ComicInfo>());
+        await scannerHelper.GenerateScannerData($"{nameof(ScanLibraries_OnlyTheLastLibraryEndsTheJob)} B - Manga", Files, new Dictionary<string, ComicInfo>());
+
+        await scannerHelper.CreateServices(eventHub: _eventHub).ScanLibraries();
+
+        var endsJob = Summaries().Select(s => s.EndsJob).ToList();
+        Assert.True(endsJob.Count >= 2, "Expected a scan ended event per library");
+        Assert.Equal([..Enumerable.Repeat(false, endsJob.Count - 1), true], endsJob);
     }
 }

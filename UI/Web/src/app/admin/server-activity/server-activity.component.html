@@ -2,6 +2,6 @@
   @for(session of activeSessions(); track session.id) {
     <app-activity-card [session]="session" />
   } @empty {
-    {{t('no-data')}}
+    <app-empty-state [titleKey]="t('no-data')" />
   }
 </ng-container>

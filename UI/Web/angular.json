@@ -57,6 +57,7 @@
             },
             "extractLicenses": false,
             "optimization": false,
+            "outputHashing": "all",
             "namedChunks": true,
             "stylePreprocessorOptions": {
               "sass": {

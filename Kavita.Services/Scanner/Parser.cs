@@ -524,7 +524,7 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
         // Batgirl Vol.2000 #57 (December, 2004)
         new Regex(
-            @"^(?<Series>.+?)(?:\s|_)(v|vol|tome|t)\.?(\s|_)?(?<Volume>\d+)",
+            @"^(?<Series>.+?)(?:\s|_)(v|vol|volume|tome|t)\.?(\s|_)?(?<Volume>\d+)",
             MatchOptions, RegexTimeout),
         // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
         new Regex(
@@ -1230,21 +1230,6 @@ public static partial class Parser
     private static string ReplaceUnderscores(string name)
     {
         return string.IsNullOrEmpty(name) ? string.Empty : name.Replace('_', ' ');
-    }
-
-    public static string? ExtractFilename(string fileUrl)
-    {
-        var matches = CssImageUrlRegex.Matches(fileUrl);
-        foreach (Match match in matches)
-        {
-            if (!match.Success) continue;
-
-            // NOTE: This is failing for //localhost:5000/api/book/29919/book-resources?file=OPS/images/tick1.jpg
-            var importFile = match.Groups["Filename"].Value;
-            if (!importFile.Contains('?')) return importFile;
-        }
-
-        return null;
     }
 
     /// <summary>

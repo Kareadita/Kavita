@@ -1,9 +1,12 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
+using Kavita.Database.Tests;
 
 namespace Kavita.Services.Tests;
 
-public class FileSystemTests
+public class FileSystemTests : AbstractFsTest
 {
+    private static readonly string FilePath = Root + "myfile.txt";
+
     [Fact]
     public void FileHasNotBeenModifiedSinceCreation()
     {
@@ -13,12 +16,12 @@ public class FileSystemTests
         };
         var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
         {
-            { @"c:\myfile.txt", file }
+            { FilePath, file }
         });
 
         var fileService = new FileService(fileSystem);
 
-        Assert.False(fileService.HasFileBeenModifiedSince(@"c:\myfile.txt", DateTime.Now));
+        Assert.False(fileService.HasFileBeenModifiedSince(FilePath,DateTime.Now));
     }
 
     [Fact]
@@ -30,11 +33,11 @@ public class FileSystemTests
         };
         var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
         {
-            { @"c:\myfile.txt", file }
+            { FilePath, file }
         });
 
         var fileService = new FileService(fileSystem);
 
-        Assert.True(fileService.HasFileBeenModifiedSince(@"c:\myfile.txt", DateTime.Now.Subtract(TimeSpan.FromMinutes(1))));
+        Assert.True(fileService.HasFileBeenModifiedSince(FilePath,DateTime.Now.Subtract(TimeSpan.FromMinutes(1))));
     }
 }

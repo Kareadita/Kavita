@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
+using Kavita.Database.Tests;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
@@ -6,19 +7,19 @@ using NSubstitute;
 
 namespace Kavita.Services.Tests.Parsers;
 
-public class ImageParserTests
+public class ImageParserTests : AbstractFsTest
 {
     private readonly ImageParser _parser;
     private readonly ILogger<DirectoryService> _dsLogger = Substitute.For<ILogger<DirectoryService>>();
-    private const string RootDirectory = "C:/Comics/";
+    private static readonly string RootDirectory = Root + "Comics/";
 
     public ImageParserTests()
     {
         var fileSystem = new MockFileSystem();
-        fileSystem.AddDirectory("C:/Comics/");
-        fileSystem.AddDirectory("C:/Comics/Birds of Prey (2002)");
-        fileSystem.AddFile("C:/Comics/Birds of Prey/Chapter 01/01.jpg", new MockFileData(""));
-        fileSystem.AddFile("C:/Comics/DC Comics/Birds of Prey/Chapter 01/01.jpg", new MockFileData(""));
+        fileSystem.AddDirectory(RootDirectory);
+        fileSystem.AddDirectory(RootDirectory + "Birds of Prey (2002)");
+        fileSystem.AddFile(RootDirectory + "Birds of Prey/Chapter 01/01.jpg", new MockFileData(""));
+        fileSystem.AddFile(RootDirectory + "DC Comics/Birds of Prey/Chapter 01/01.jpg", new MockFileData(""));
         var ds = new DirectoryService(_dsLogger, fileSystem);
         _parser = new ImageParser(ds);
     }
@@ -31,7 +32,7 @@ public class ImageParserTests
     [Fact]
     public void Parse_SeriesWithDirectoryName()
     {
-        var actual = _parser.Parse("C:/Comics/Birds of Prey/Chapter 01/01.jpg", "C:/Comics/Birds of Prey/",
+        var actual = _parser.Parse(RootDirectory + "Birds of Prey/Chapter 01/01.jpg", RootDirectory + "Birds of Prey/",
             RootDirectory, LibraryType.Image, true, null).Info;
 
         Assert.NotNull(actual);
@@ -45,7 +46,7 @@ public class ImageParserTests
     [Fact]
     public void Parse_SeriesWithNoNestedChapter()
     {
-        var actual = _parser.Parse("C:/Comics/Birds of Prey/Chapter 01 page 01.jpg", "C:/Comics/",
+        var actual = _parser.Parse(RootDirectory + "Birds of Prey/Chapter 01 page 01.jpg", RootDirectory,
             RootDirectory, LibraryType.Image, true, null).Info;
 
         Assert.NotNull(actual);
@@ -59,7 +60,7 @@ public class ImageParserTests
     [Fact]
     public void Parse_SeriesWithLooseImages()
     {
-        var actual = _parser.Parse("C:/Comics/Birds of Prey/page 01.jpg", "C:/Comics/",
+        var actual = _parser.Parse(RootDirectory + "Birds of Prey/page 01.jpg", RootDirectory,
             RootDirectory, LibraryType.Image, true, null).Info;
 
         Assert.NotNull(actual);

@@ -6,12 +6,14 @@ import {ReadingSession} from "../../_models/progress/reading-session";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {debounceTime, filter} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
 
 @Component({
   selector: 'app-server-activity',
   imports: [
     TranslocoDirective,
-    ActivityCardComponent
+    ActivityCardComponent,
+    EmptyStateComponent
   ],
   templateUrl: './server-activity.component.html',
   styleUrl: './server-activity.component.scss',

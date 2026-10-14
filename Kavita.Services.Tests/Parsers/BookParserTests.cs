@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
 using Kavita.API.Services;
+using Kavita.Database.Tests;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
@@ -7,19 +8,19 @@ using NSubstitute;
 
 namespace Kavita.Services.Tests.Parsers;
 
-public class BookParserTests
+public class BookParserTests : AbstractFsTest
 {
     private readonly BookParser _parser;
     private readonly ILogger<DirectoryService> _dsLogger = Substitute.For<ILogger<DirectoryService>>();
-    private const string RootDirectory = "C:/Books/";
+    private static readonly string RootDirectory = Root + "Books/";
 
     public BookParserTests()
     {
         var fileSystem = new MockFileSystem();
-        fileSystem.AddDirectory("C:/Books/");
-        fileSystem.AddFile("C:/Books/Harry Potter/Harry Potter - Vol 1.epub", new MockFileData(""));
-        fileSystem.AddFile("C:/Books/Adam Freeman - Pro ASP.NET Core 6.epub", new MockFileData(""));
-        fileSystem.AddFile("C:/Books/My Fav Book SP01.epub", new MockFileData(""));
+        fileSystem.AddDirectory(RootDirectory);
+        fileSystem.AddFile(RootDirectory + "Harry Potter/Harry Potter - Vol 1.epub", new MockFileData(""));
+        fileSystem.AddFile(RootDirectory + "Adam Freeman - Pro ASP.NET Core 6.epub", new MockFileData(""));
+        fileSystem.AddFile(RootDirectory + "My Fav Book SP01.epub", new MockFileData(""));
         var ds = new DirectoryService(_dsLogger, fileSystem);
         _parser = new BookParser(ds, Substitute.For<IBookService>(), new BasicParser(ds, new ImageParser(ds)));
     }
@@ -34,7 +35,7 @@ public class BookParserTests
     // [Fact]
     // public void Parse_SeriesWithDirectoryName()
     // {
-    //     var actual = _parser.Parse("C:/Books/Harry Potter/Harry Potter - Vol 1.epub", "C:/Books/Birds of Prey/",
+    //     var actual = _parser.Parse(RootDirectory + "Harry Potter/Harry Potter - Vol 1.epub", RootDirectory + "Birds of Prey/",
     //         RootDirectory, LibraryType.Book, new ComicInfo()
     //         {
     //             Series = "Harry Potter",

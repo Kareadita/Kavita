@@ -32,6 +32,8 @@ export class MediaErrorReasonPipe implements PipeTransform {
         return this.t('metadata-unreadable');
       case MediaErrorReason.EpubNotStrict:
         return this.t('epub-not-strict');
+      case MediaErrorReason.AmbiguousSeries:
+        return this.t('ambiguous-series');
     }
   }
 

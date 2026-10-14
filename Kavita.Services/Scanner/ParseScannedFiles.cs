@@ -27,13 +27,15 @@ namespace Kavita.Services.Scanner;
 /// </summary>
 public partial class ParseScannedFiles
 {
+    private static readonly TimeSpan ListingEventInterval = TimeSpan.FromSeconds(1);
+
     private readonly ILogger _logger;
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly IEventHub _eventHub;
 
     /// <summary>
-    /// File id to the write time from the listing, for files in unchanged folders that have none stored yet
+    /// File id to the write time from the listing, for unchanged files that have none stored yet
     /// </summary>
     /// <remarks>v0.9.2 added this, after one full stable, this can be removed as one scan will backfill times</remarks>
     public Dictionary<int, DateTime> WriteTimesToBackfill { get; } = new();
@@ -44,6 +46,7 @@ public partial class ParseScannedFiles
     private readonly Dictionary<string, FileStamp> _readFiles = new();
     private readonly HashSet<string> _readFolders = [];
     private readonly HashSet<string> _walkedFolders = [];
+    private readonly HashSet<string> _keptFiles = [];
     private readonly List<string> _unreadableFolders = [];
 
     /// <summary>
@@ -77,6 +80,38 @@ public partial class ParseScannedFiles
     public IReadOnlyList<string> UnreadableFolders => _unreadableFolders;
 
     /// <summary>
+    /// Time spent listing the folder tree of a library scan, summed over every folder passed to <see cref="ScanLibrariesForSeries"/>
+    /// </summary>
+    public TimeSpan ListTime { get; private set; }
+
+    /// <summary>
+    /// Time spent walking the listed folders and checking them for changes, summed like <see cref="ListTime"/>.
+    /// A series scan lists its folder here
+    /// </summary>
+    public TimeSpan WalkTime { get; private set; }
+
+    /// <summary>
+    /// Time spent parsing the files of changed folders, summed like <see cref="WalkTime"/>
+    /// </summary>
+    public TimeSpan ParseTime { get; private set; }
+
+    /// <summary>
+    /// Time spent merging localized names and grouping parsed files into series, summed like <see cref="WalkTime"/>
+    /// </summary>
+    public TimeSpan GroupTime { get; private set; }
+
+    /// <summary>
+    /// Files opened and parsed this scan
+    /// </summary>
+    public int ParsedFileCount => _parsedFileCount;
+    private int _parsedFileCount;
+
+    /// <summary>
+    /// Files in read folders that were not parsed because they match the database
+    /// </summary>
+    public int KeptFileCount { get; private set; }
+
+    /// <summary>
     /// The folder was not read, walked, or inside a folder that could not be read this scan, so it may be gone
     /// </summary>
     public bool IsUnaccountedFor(string folder)
@@ -106,13 +141,11 @@ public partial class ParseScannedFiles
     /// This will Scan all files in a folder path. For each folder within the folderPath, FolderAction will be invoked for all files contained
     /// </summary>
     /// <param name="scanDirectoryByDirectory">Scan directory by directory and for each, call folderAction</param>
-    /// <param name="seriesPaths">A dictionary mapping a normalized path to a list of <see cref="SeriesModified"/> to help scanner skip I/O</param>
+    /// <param name="known">The series in each folder, and whether the scan is forced</param>
     /// <param name="folderPath">A library folder or series folder</param>
-    /// <param name="forceCheck">If we should bypass any folder last write time checks on the scan and force I/O</param>
-    /// <param name="failedFiles">Files that failed on an earlier scan, known while unchanged. Not known with <paramref name="forceCheck"/></param>
+    /// <param name="failedFiles">Files that failed on an earlier scan, known while unchanged</param>
     public async Task<IList<ScanResult>> ScanFiles(string folderPath, bool scanDirectoryByDirectory,
-        IDictionary<string, IList<SeriesModified>> seriesPaths, Library library, bool forceCheck = false,
-        IReadOnlyList<FailedFile>? failedFiles = null)
+        KnownSeriesFolders known, Library library, IReadOnlyList<FailedFile>? failedFiles = null)
     {
         var fileExtensions = string.Join("|", library.LibraryFileTypes.Select(l => l.FileTypeGroup.GetRegex()));
 
@@ -127,24 +160,33 @@ public partial class ParseScannedFiles
 
         var result = new List<ScanResult>();
 
-        // Not to self: this whole thing can be parallelized because we don't deal with any DB or global state
         if (scanDirectoryByDirectory)
         {
-            return await ScanDirectories(folderPath, seriesPaths, failures, library, forceCheck, matcher, result, fileExtensions);
+            return await ScanDirectories(folderPath, known, failures, library, matcher, result, fileExtensions);
         }
 
-        return await ScanSingleDirectory(folderPath, seriesPaths, failures, library, forceCheck, result, fileExtensions, matcher);
+        return await ScanSingleDirectory(folderPath, known, failures, library, result, fileExtensions, matcher);
     }
 
-    private async Task<IList<ScanResult>> ScanDirectories(string folderPath, IDictionary<string, IList<SeriesModified>> seriesPaths,
-        IReadOnlyList<FailedFile> failedFiles, Library library, bool forceCheck, GlobMatcher matcher, List<ScanResult> result, string fileExtensions)
+    private async Task<IList<ScanResult>> ScanDirectories(string folderPath, KnownSeriesFolders known,
+        IReadOnlyList<FailedFile> failedFiles, Library library, GlobMatcher matcher, List<ScanResult> result, string fileExtensions)
     {
-        var allDirectories = _directoryService.GetAllDirectories(folderPath, matcher)
-            .Select(Parser.NormalizePath)
-            .OrderByDescending(d => d.Length)
-            .ToList();
+        var listWatch = Stopwatch.StartNew();
+        var nextListingEvent = TimeSpan.Zero;
+        var tree = await _directoryService.ListFolderTreeAsync(folderPath, fileExtensions, matcher, folder =>
+        {
+            if (listWatch.Elapsed < nextListingEvent) return Task.CompletedTask;
 
-        var processedDirs = new HashSet<string>();
+            nextListingEvent = listWatch.Elapsed + ListingEventInterval;
+            return _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.FileScanProgressEvent(folder, library.Id, library.Name, ProgressEventType.Updated,
+                    MessageEventCode.ScanListingFolders));
+        });
+        ListTime += listWatch.Elapsed;
+        var allDirectories = tree.Folders;
+
+        var processedDirsAndAncestors = new HashSet<string>();
+        var resultFolders = new HashSet<string>();
         var skippedSpecials = new List<string>();
         var total = allDirectories.Count;
         var timings = new DirectoryScanTimings();
@@ -162,7 +204,11 @@ public partial class ParseScannedFiles
                     MessageEventCode.ScanListingFolders, i + 1, total));
             timings.Events.Stop();
 
-            var isParent = processedDirs.Any(d => d.StartsWith(directory + Path.AltDirectorySeparatorChar) || d.Equals(directory));
+            var isParent = processedDirsAndAncestors.Contains(directory);
+            var specials = isParent ? skippedSpecials.Where(s => IsDirectChild(s, directory)).ToList() : [];
+            Func<string, bool> isInScope = isParent
+                ? folder => folder == directory || specials.Exists(folder.IsSameOrInsideFolder)
+                : folder => folder.IsSameOrInsideFolder(directory);
             try
             {
                 // Subfolders were already read, so only the loose files at this level and its Specials folders are left
@@ -171,19 +217,14 @@ public partial class ParseScannedFiles
                     timings.ParentCount++;
                     timings.ParentChangeCheck.Start();
 
-                    var specials = skippedSpecials.Where(s => IsDirectChild(s, directory)).ToList();
-                    var looseFileOwners = forceCheck ? [] : SeriesWithFilesIn(seriesPaths, directory);
-                    var specialsOwners = specials.Select(s => forceCheck ? [] : SeriesWithFilesIn(seriesPaths, s)).ToList();
+                    var looseFileOwners = known.OwnersToCompareIn(directory);
+                    var specialsOwners = specials.Select(known.OwnersToCompareIn).ToList();
                     var allOwners = looseFileOwners.Concat(specialsOwners.SelectMany(o => o)).Distinct().ToList();
 
-                    var onDisk = ListLibraryFiles(directory, fileExtensions, matcher, library.Type, SearchOption.TopDirectoryOnly)
-                        .Concat(specials.SelectMany(s => ListLibraryFiles(s, fileExtensions, matcher, library.Type)))
-                        .ToList();
+                    var onDisk = LibraryFiles(tree.FilesIn(directory).Concat(specials.SelectMany(tree.FilesBelow)), library.Type);
 
-                    Func<string, bool> isInScope = folder => folder == directory || specials.Exists(folder.IsSameOrInsideFolder);
                     var failures = FailedFilesIn(failedFiles, isInScope);
-                    var unchanged = !forceCheck && (allOwners.Count > 0 || failures.Count > 0) &&
-                                    FolderChangeCheck.IsUnchanged(onDisk, allOwners, failures, isInScope, WriteTimesToBackfill);
+                    var unchanged = known.IsUnchanged(onDisk, allOwners, failures, isInScope, WriteTimesToBackfill);
 
                     timings.ParentChangeCheck.Stop();
                     timings.ParentSurfaceFiles.Start();
@@ -192,13 +233,13 @@ public partial class ParseScannedFiles
                     {
                         if (looseFileOwners.Count > 0)
                         {
-                            HandleUnchangedFolder(result, folderPath, directory, looseFileOwners, true);
+                            HandleUnchangedFolder(result, resultFolders, folderPath, directory, looseFileOwners, true);
                         }
 
                         for (var j = 0; j < specials.Count; j++)
                         {
                             if (specialsOwners[j].Count == 0) continue;
-                            HandleUnchangedFolder(result, folderPath, specials[j], specialsOwners[j], false);
+                            HandleUnchangedFolder(result, resultFolders, folderPath, specials[j], specialsOwners[j], false);
                         }
                     }
                     else
@@ -207,7 +248,7 @@ public partial class ParseScannedFiles
                         // With no files left there is no result, and AddReadFiles would never mark these folders read
                         _readFolders.Add(directory);
                         _readFolders.UnionWith(specials);
-                        AddSurfaceAndSpecialsFiles(result, directory, folderPath, onDisk);
+                        AddSurfaceAndSpecialsFiles(result, resultFolders, directory, folderPath, onDisk);
                     }
                     timings.ParentSurfaceFiles.Stop();
                     continue;
@@ -222,40 +263,41 @@ public partial class ParseScannedFiles
                 }
 
                 // A full scan also reads the Specials folders skipped below this one
-                var owners = forceCheck
-                    ? []
-                    : skippedSpecials
-                        .Where(s => s.IsInsideFolder(directory))
-                        .Prepend(directory)
-                        .SelectMany(f => SeriesWithFilesIn(seriesPaths, f))
-                        .Distinct()
-                        .ToList();
+                var owners = skippedSpecials
+                    .Where(s => s.IsInsideFolder(directory))
+                    .Prepend(directory)
+                    .SelectMany(known.OwnersToCompareIn)
+                    .Distinct()
+                    .ToList();
 
-                var onDiskBelow = ListLibraryFiles(directory, fileExtensions, matcher, library.Type);
-                Func<string, bool> isBelow = folder => folder.IsSameOrInsideFolder(directory);
-                var failuresBelow = FailedFilesIn(failedFiles, isBelow);
+                var onDiskBelow = LibraryFiles(tree.FilesBelow(directory), library.Type);
+                var failuresBelow = FailedFilesIn(failedFiles, isInScope);
 
-                if (!forceCheck && (owners.Count > 0 || failuresBelow.Count > 0) &&
-                    FolderChangeCheck.IsUnchanged(onDiskBelow, owners, failuresBelow, isBelow, WriteTimesToBackfill))
+                if (known.IsUnchanged(onDiskBelow, owners, failuresBelow, isInScope, WriteTimesToBackfill))
                 {
-                    HandleUnchangedFolder(result, folderPath, directory, owners, false);
+                    HandleUnchangedFolder(result, resultFolders, folderPath, directory, owners, false);
                 }
                 else
                 {
                     MarkRead(failuresBelow);
-                    AddChangedFolder(result, directory, folderPath, onDiskBelow);
+                    AddChangedFolder(result, resultFolders, directory, folderPath, onDiskBelow);
                 }
 
-                processedDirs.Add(directory);
+                AddWithAncestors(processedDirsAndAncestors, directory);
             }
             catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
             {
                 timings.ParentChangeCheck.Stop();
                 timings.ParentSurfaceFiles.Stop();
-                _logger.LogWarning(ex, "[ScannerService] Could not read {Directory}, keeping its series as they are for this scan", directory);
-                _unreadableFolders.Add(directory);
-                KeepUnreadableFolder(result, folderPath, directory, isParent, skippedSpecials, seriesPaths);
-                if (!isParent) processedDirs.Add(directory);
+                var unreadable = tree.UnreadableFolders.Where(isInScope).ToList();
+                _logger.LogWarning(ex, "[ScannerService] Could not read {Folders}, keeping the series in {Directory} as they are for this scan",
+                    unreadable, directory);
+                _unreadableFolders.AddRange(unreadable);
+                KeepUnreadableFolder(result, resultFolders, folderPath, directory, isParent, skippedSpecials, known);
+                if (!isParent)
+                {
+                    AddWithAncestors(processedDirsAndAncestors, directory);
+                }
             }
         }
 
@@ -272,29 +314,29 @@ public partial class ParseScannedFiles
     /// Placeholders for every series with files in a folder that could not be read, so none of them are removed (due to lack of forced check).
     /// A parent's subfolders were already read, so it only covers its own loose files and its Specials folders
     /// </summary>
-    private void KeepUnreadableFolder(List<ScanResult> result, string folderPath, string directory, bool isParent,
-        IEnumerable<string> skippedSpecials, IDictionary<string, IList<SeriesModified>> seriesPaths)
+    private void KeepUnreadableFolder(List<ScanResult> result, HashSet<string> resultFolders, string folderPath, string directory, bool isParent,
+        IEnumerable<string> skippedSpecials, KnownSeriesFolders known)
     {
         if (!isParent)
         {
-            var owners = SeriesWithFilesInside(seriesPaths, directory);
+            var owners = known.OwnersInside(directory);
             if (owners.Count > 0)
             {
-                HandleUnchangedFolder(result, folderPath, directory, owners, false);
+                HandleUnchangedFolder(result, resultFolders, folderPath, directory, owners, false);
             }
 
             return;
         }
 
-        var looseFileOwners = SeriesWithFilesIn(seriesPaths, directory);
-        if (looseFileOwners.Count > 0) HandleUnchangedFolder(result, folderPath, directory, looseFileOwners, true);
+        var looseFileOwners = known.OwnersIn(directory);
+        if (looseFileOwners.Count > 0) HandleUnchangedFolder(result, resultFolders, folderPath, directory, looseFileOwners, true);
 
         foreach (var special in skippedSpecials.Where(s => IsDirectChild(s, directory)))
         {
-            var specialOwners = SeriesWithFilesIn(seriesPaths, special);
+            var specialOwners = known.OwnersIn(special);
             if (specialOwners.Count > 0)
             {
-                HandleUnchangedFolder(result, folderPath, special, specialOwners, false);
+                HandleUnchangedFolder(result, resultFolders, folderPath, special, specialOwners, false);
             }
         }
     }
@@ -317,53 +359,21 @@ public partial class ParseScannedFiles
         _failedFilesInReadFolders.UnionWith(failedFiles.Select(f => f.Path));
     }
 
-    private static List<SeriesModified> SeriesWithFilesIn(IDictionary<string, IList<SeriesModified>> seriesPaths, string folder)
-    {
-        return seriesPaths.TryGetValue(folder, out var seriesList)
-            ? seriesList.Where(s => s.FilesByFolder.ContainsKey(folder)).ToList()
-            : [];
-    }
-
     /// <summary>
     /// Files the parsers would turn into series files. Anything else would make the folder look changed on every scan
     /// </summary>
-    private List<FileStamp> ListLibraryFiles(string directory, string fileExtensions, GlobMatcher matcher, LibraryType type,
-        SearchOption searchOption = SearchOption.AllDirectories)
+    private static List<FileStamp> LibraryFiles(IEnumerable<FileStamp> files, LibraryType type)
     {
-        return _directoryService.ScanFiles(directory, fileExtensions, matcher, searchOption)
-            .Where(f => !Parser.IsSkippedCoverImage(Path.GetFileName(f.Path), type))
-            .ToList();
-    }
-
-    private static List<SeriesModified> SeriesWithFilesInside(IDictionary<string, IList<SeriesModified>> seriesPaths, string folder)
-    {
-        return seriesPaths.Values
-            .SelectMany(s => s)
-            .Distinct()
-            .Where(s => s.FilesByFolder.Keys.Any(f => f.IsSameOrInsideFolder(folder)))
-            .ToList();
-    }
-
-    /// <param name="directory">This should be normalized</param>
-    private static bool CanCompareSeriesFolder(IDictionary<string, IList<SeriesModified>> seriesPaths, string directory, bool forceCheck)
-    {
-        if (forceCheck || !seriesPaths.TryGetValue(directory, out var seriesList))
-        {
-            return false;
-        }
-
-        // Null stays "changed" (FolderPath alone misses a deleted sibling folder)
-        return seriesList.All(series => !string.IsNullOrEmpty(series.LowestFolderPath) &&
-                                        series.LibraryRoots.Any(series.LowestFolderPath.IsInsideFolder));
+        return files.Where(f => !Parser.IsSkippedCoverImage(Path.GetFileName(f.Path), type)).ToList();
     }
 
     /// <summary>
     /// Handles directories that haven't changed since the last scan.
     /// </summary>
-    private void HandleUnchangedFolder(List<ScanResult> result, string folderPath, string directory,
+    private void HandleUnchangedFolder(List<ScanResult> result, HashSet<string> resultFolders, string folderPath, string directory,
         IList<SeriesModified> owners, bool isShallow)
     {
-        if (result.Exists(r => r.Folder == directory))
+        if (resultFolders.Contains(directory))
         {
             _logger.LogDebug("[ProcessFiles] Skipping adding {Directory} as it's already added, this indicates a bad layout issue", directory);
         }
@@ -373,32 +383,56 @@ public partial class ParseScannedFiles
             var unchanged = CreateScanResult(directory, folderPath, false, ArraySegment<FileStamp>.Empty);
             unchanged.UnchangedSeries = owners;
             unchanged.IsShallow = isShallow;
-            result.Add(unchanged);
+            AddResult(result, resultFolders, unchanged);
         }
     }
 
-    private void AddChangedFolder(List<ScanResult> result, string directory, string folderPath, List<FileStamp> files)
+    private void AddChangedFolder(List<ScanResult> result, HashSet<string> resultFolders, string directory, string folderPath, List<FileStamp> files)
     {
         _logger.LogDebug("[ProcessFiles] Performing full scan on {Directory}", directory);
         if (files.Count == 0)
         {
             _logger.LogDebug("[ProcessFiles] Empty directory: {Directory}. Keeping empty will cause Kavita to scan this each time", directory);
         }
-        result.Add(CreateScanResult(directory, folderPath, true, files));
+        AddResult(result, resultFolders, CreateScanResult(directory, folderPath, true, files));
     }
 
     /// <summary>
     /// Reads the files directly in the directory and everything in the given Specials folders.
     /// They share one result so the files are parsed with the directory as root, else the series would be named "Specials"
     /// </summary>
-    private static void AddSurfaceAndSpecialsFiles(List<ScanResult> result, string directory, string folderPath,
+    private static void AddSurfaceAndSpecialsFiles(List<ScanResult> result, HashSet<string> resultFolders, string directory, string folderPath,
         List<FileStamp> files)
     {
         if (files.Count == 0)
         {
             return;
         }
-        result.Add(CreateScanResult(directory, folderPath, true, files));
+        AddResult(result, resultFolders, CreateScanResult(directory, folderPath, true, files));
+    }
+
+    private static void AddResult(List<ScanResult> result, HashSet<string> resultFolders, ScanResult scanResult)
+    {
+        resultFolders.Add(scanResult.Folder);
+        result.Add(scanResult);
+    }
+
+    /// <summary>
+    /// Adds the folder and every folder above it, stopping at the first one already in the set
+    /// </summary>
+    private static void AddWithAncestors(HashSet<string> folders, string folder)
+    {
+        var current = folder;
+        while (current.Length > 0 && folders.Add(current))
+        {
+            current = ParentOf(current);
+        }
+    }
+
+    private static string ParentOf(string folder)
+    {
+        var lastSlash = folder.LastIndexOf('/');
+        return lastSlash <= 0 ? string.Empty : folder[..lastSlash];
     }
 
     private static bool IsDirectChild(string folder, string parent)
@@ -410,8 +444,8 @@ public partial class ParseScannedFiles
     /// <summary>
     /// Scans a single directory and processes the scan result.
     /// </summary>
-    private async Task<IList<ScanResult>> ScanSingleDirectory(string folderPath, IDictionary<string, IList<SeriesModified>> seriesPaths,
-        IReadOnlyList<FailedFile> failedFiles, Library library, bool forceCheck, List<ScanResult> result,
+    private async Task<IList<ScanResult>> ScanSingleDirectory(string folderPath, KnownSeriesFolders known,
+        IReadOnlyList<FailedFile> failedFiles, Library library, List<ScanResult> result,
         string fileExtensions, GlobMatcher matcher)
     {
         var normalizedPath = Parser.NormalizePath(folderPath);
@@ -423,21 +457,43 @@ public partial class ParseScannedFiles
             MessageFactory.FileScanProgressEvent(normalizedPath, library.Id, library.Name, ProgressEventType.Updated,
                 MessageEventCode.ScanListingFolders, 1, 1));
 
-        var onDisk = ListLibraryFiles(folderPath, fileExtensions, matcher, library.Type);
+        var listWatch = Stopwatch.StartNew();
+        FolderTree tree;
+        try
+        {
+            tree = await _directoryService.ListFolderTreeAsync(folderPath, fileExtensions, matcher, _ => Task.CompletedTask, withRootFiles: true);
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+        {
+            _logger.LogWarning(ex, "[ScannerService] Could not read {Directory}, keeping its series as they are for this scan", normalizedPath);
+            return KeepUnreadable([normalizedPath]);
+        }
+        finally
+        {
+            ListTime += listWatch.Elapsed;
+        }
+
+        if (tree.UnreadableFolders.Count > 0)
+        {
+            _logger.LogWarning("[ScannerService] Could not read {Folders}, keeping the series in {Directory} as they are for this scan",
+                tree.UnreadableFolders, normalizedPath);
+            return KeepUnreadable(tree.UnreadableFolders);
+        }
+
+        var onDisk = LibraryFiles(tree.FilesBelow(tree.Root), library.Type);
 
         // Every series with files inside, so a folder shared by several series does not see the others' files as new
-        var canCompare = CanCompareSeriesFolder(seriesPaths, normalizedPath, forceCheck);
-        var owners = canCompare ? SeriesWithFilesInside(seriesPaths, normalizedPath) : [];
+        var canCompare = known.CanCompare(normalizedPath);
+        var owners = canCompare ? known.OwnersInside(normalizedPath) : [];
 
         Func<string, bool> isInside = folder => folder.IsSameOrInsideFolder(normalizedPath);
         var failures = FailedFilesIn(failedFiles, isInside);
         var knownFailures = canCompare ? failures : [];
 
-        if ((owners.Count > 0 || knownFailures.Count > 0) &&
-            FolderChangeCheck.IsUnchanged(onDisk, owners, knownFailures, isInside, WriteTimesToBackfill))
+        if (known.IsUnchanged(onDisk, owners, knownFailures, isInside, WriteTimesToBackfill))
         {
             var unchanged = CreateScanResult(folderPath, libraryRoot, false, ArraySegment<FileStamp>.Empty);
-            unchanged.UnchangedSeries = seriesPaths[normalizedPath];
+            unchanged.UnchangedSeries = known.SeriesAt(normalizedPath);
             result.Add(unchanged);
         }
         else
@@ -447,6 +503,13 @@ public partial class ParseScannedFiles
         }
 
         return result;
+
+        IList<ScanResult> KeepUnreadable(IEnumerable<string> unreadableFolders)
+        {
+            _unreadableFolders.AddRange(unreadableFolders);
+            KeepUnreadableFolder(result, [], libraryRoot, normalizedPath, false, [], known);
+            return result;
+        }
     }
 
     private static GlobMatcher BuildMatcher(Library library)
@@ -484,6 +547,7 @@ public partial class ParseScannedFiles
         // Flatten all ParserInfos from scanResults
         var allInfos = scanResults.SelectMany(sr => sr.ParserInfos).ToList();
         var rejected = new List<(ParserInfo, ParseIssue)>();
+        var index = new SeriesNameIndex(scannedSeries);
 
         // Iterate through each ParserInfo and track the series
         foreach (var info in allInfos)
@@ -492,7 +556,7 @@ public partial class ParseScannedFiles
 
             try
             {
-                var rejection = TrackSeries(scannedSeries, info);
+                var rejection = TrackSeries(scannedSeries, index, info);
                 if (rejection != null && !string.IsNullOrEmpty(info.FullFilePath)) rejected.Add((info, rejection));
             }
             catch (Exception ex)
@@ -506,22 +570,26 @@ public partial class ParseScannedFiles
 
 
     /// <summary>
-    /// Attempts to either add a new instance of a series mapping to the _scannedSeries bag or adds to an existing.
-    /// This will check if the name matches an existing series name (multiple fields) <see cref="MergeName"/>
+    /// Adds the info to the series whose normalized name matches its series, sort or localized name, else to a new series.
+    /// A match keeps the series' spelling, as punctuation or capitalization may differ between files
     /// </summary>
     /// <param name="scannedSeries">A localized list of a series' parsed infos</param>
+    /// <param name="index">Name lookup over the keys of <paramref name="scannedSeries"/></param>
     /// <param name="info"></param>
     /// <returns>Set when the file is turned away</returns>
-    private ParseIssue? TrackSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo? info)
+    private ParseIssue? TrackSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, SeriesNameIndex index,
+        ParserInfo? info)
     {
         if (info == null) return null;
         if (info.Series == string.Empty) return ParseIssues.FromFailedParse(info);
+
+        var normalizedSeries = info.Series.ToNormalized();
 
         // Do not ingest series with no meaningful information as title. These break merging as they'll all merge into each other
         // They would also merge all series that don't have localized names previously
         // This does create the edge case where some series may really not have any meaningful information.
         // But until this is reported, we should ignore it and play it safe!
-        if (string.IsNullOrEmpty(info.Series.ToNormalized()))
+        if (string.IsNullOrEmpty(normalizedSeries))
         {
             _logger.LogCritical("[ScannerService] {SeriesName} @ {FileName} is empty when normalized, this file will not be ingested! The filename does not follow our guidelines or this is a bug in the parser, please report this! https://github.com/Kareadita/Kavita/issues",
                 info.Series, info.Filename);
@@ -530,140 +598,100 @@ public partial class ParseScannedFiles
                 $"{info.Series} is empty when normalized, this file will not be ingested! The filename does not follow our guidelines or this is a bug in the parser, please report this! https://github.com/Kareadita/Kavita/issues");
         }
 
-        // Check if normalized info.Series already exists and if so, update info to use that name instead
-        info.Series = MergeName(scannedSeries, info);
-
         // BUG: This will fail for Solo Leveling & Solo Leveling (Manga)
-
-        var normalizedSeries = info.Series.ToNormalized();
-        var normalizedSortSeries = info.SeriesSort.ToNormalized();
-        var normalizedLocalizedSeries = info.LocalizedSeries.ToNormalized();
-
-        try
+        var matches = index.Find(info.Format, normalizedSeries, info.SeriesSort.ToNormalized(), info.LocalizedSeries.ToNormalized());
+        if (matches.Count > 1)
         {
-            var existingKey = scannedSeries.Keys.SingleOrDefault(Guard);
-            existingKey ??= new ParsedSeries()
+            var names = matches.Select(m => m.Name).ToList();
+            _logger.LogWarning("[ScannerService] {FilePath} matches {MatchCount} series ({SeriesNames}), it was not added to any of them",
+                info.FullFilePath, names.Count, string.Join(", ", names));
+            return ParseIssues.FromAmbiguousSeries(info, names);
+        }
+
+        var key = matches.Count == 1
+            ? matches[0]
+            : index.Add(new ParsedSeries
             {
                 Format = info.Format,
                 Name = info.Series,
                 NormalizedName = normalizedSeries
-            };
-
-            scannedSeries.AddOrUpdate(existingKey, [info], (_, oldValue) =>
-            {
-                oldValue ??= new List<ParserInfo>();
-                if (!oldValue.Contains(info))
-                {
-                    oldValue.Add(info);
-                }
-
-                return oldValue;
             });
-        }
-        catch (Exception ex)
+
+        info.Series = key.Name;
+        if (!index.Track(info)) return null;
+
+        scannedSeries.AddOrUpdate(key, [info], (_, infos) =>
         {
-            #pragma warning disable S6667
-            _logger.LogCritical("[ScannerService] {SeriesName} matches against multiple series in the parsed series. This indicates a critical unsupported layout issue. Key will be skipped", info.Series);
-            #pragma warning restore S6667
-            foreach (var seriesKey in scannedSeries.Keys.Where(Guard))
-            {
-                _logger.LogCritical("[ScannerService] Matches: '{SeriesName}' matches on '{SeriesKey}'", info.Series, seriesKey.Name);
-            }
-        }
+            infos.Add(info);
+            return infos;
+        });
 
         return null;
-
-        bool Guard(ParsedSeries series)
-        {
-            return MergeNameGuard(series.Format, series.NormalizedName, info.Format,
-                normalizedSeries, normalizedSortSeries, normalizedLocalizedSeries);
-        }
-    }
-
-
-    /// <summary>
-    /// Using a normalized name from the passed ParserInfo, this checks against all found series so far and if an existing one exists with
-    /// same normalized name, it merges into the existing one. This is important as some manga may have a slight difference with punctuation or capitalization.
-    /// </summary>
-    /// <param name="scannedSeries"></param>
-    /// <param name="info"></param>
-    /// <returns>Series Name to group this info into</returns>
-    private string MergeName(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
-    {
-
-        var normalizedName = info.Series.ToNormalized();
-        var normalizedSortName = info.SeriesSort.ToNormalized();
-        var normalizedLocalizedName = info.LocalizedSeries.ToNormalized();
-
-        try
-        {
-            var existingName = scannedSeries.SingleOrDefault(Guard).Key;
-
-            if (existingName == null)
-            {
-                return info.Series;
-            }
-
-            if (!string.IsNullOrEmpty(existingName.Name))
-            {
-                return existingName.Name;
-            }
-        }
-        catch (Exception ex)
-        {
-            #pragma warning disable S6667
-            _logger.LogCritical("[ScannerService] Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
-            #pragma warning restore S6667
-            var values = scannedSeries.Where(Guard);
-
-            foreach (var pair in values)
-            {
-                _logger.LogCritical("[ScannerService] Duplicate Series in DB matches with {SeriesName}: {DuplicateName}", info.Series, pair.Key.Name);
-            }
-
-        }
-
-        return info.Series;
-
-        bool Guard(KeyValuePair<ParsedSeries, List<ParserInfo>> p)
-        {
-            return MergeNameGuard(p.Key.Format, p.Key.NormalizedName, info.Format,
-                normalizedName, normalizedSortName, normalizedLocalizedName);
-        }
     }
 
     /// <summary>
-    /// Checks if the given series should be merged into the other
+    /// The series found so far by format and normalized name, so a file finds its series in one lookup per name
     /// </summary>
-    /// <param name="mergeIntoFormat"></param>
-    /// <param name="mergeIntoSeries">Normalised name of the series to be merged into</param>
-    /// <param name="format"></param>
-    /// <param name="normalizedNames"></param>
-    /// <returns></returns>
-    private static bool MergeNameGuard(
-        MangaFormat mergeIntoFormat, string mergeIntoSeries,
-        MangaFormat format, params string[] normalizedNames)
+    private sealed class SeriesNameIndex
     {
-        if (mergeIntoFormat != format) return false;
+        private readonly Dictionary<(MangaFormat Format, string NormalizedName), ParsedSeries> _keys = new();
+        private readonly HashSet<ParserInfo> _tracked = new(ReferenceEqualityComparer.Instance);
 
-        if (string.IsNullOrEmpty(mergeIntoSeries)) return false;
+        public SeriesNameIndex(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries)
+        {
+            foreach (var (key, infos) in scannedSeries)
+            {
+                Add(key);
+                _tracked.UnionWith(infos);
+            }
+        }
 
-        return normalizedNames.Any(n => n.Equals(mergeIntoSeries));
+        public ParsedSeries Add(ParsedSeries key)
+        {
+            if (!string.IsNullOrEmpty(key.NormalizedName))
+            {
+                _keys.TryAdd((key.Format, key.NormalizedName), key);
+            }
+
+            return key;
+        }
+
+        /// <returns>False when the info was already tracked</returns>
+        public bool Track(ParserInfo info)
+        {
+            return _tracked.Add(info);
+        }
+
+        /// <returns>Each distinct series of this format named by any of the normalized names</returns>
+        public List<ParsedSeries> Find(MangaFormat format, string normalizedName, string normalizedSortName,
+            string normalizedLocalizedName)
+        {
+            var matches = new List<ParsedSeries>(1);
+            AddMatch(matches, format, normalizedName);
+            AddMatch(matches, format, normalizedSortName);
+            AddMatch(matches, format, normalizedLocalizedName);
+            return matches;
+        }
+
+        private void AddMatch(List<ParsedSeries> matches, MangaFormat format, string normalizedName)
+        {
+            if (string.IsNullOrEmpty(normalizedName)) return;
+            if (!_keys.TryGetValue((format, normalizedName), out var key) || matches.Contains(key)) return;
+
+            matches.Add(key);
+        }
     }
 
     /// <summary>
     /// This will process series by folder groups. This is used by ScanSeries and ScanLibrary
     /// </summary>
     /// <param name="library">This should have the FileTypes included</param>
-    /// <param name="folders"></param>
-    /// <param name="isLibraryScan">If true, does a directory scan first (resulting in folders being tackled in parallel), else does an immediate scan files</param>
-    /// <param name="seriesPaths">A map of Series names -> existing folder paths to handle skipping folders</param>
-    /// <param name="forceCheck">Defaults to false</param>
+    /// <param name="folders">Library roots for a library scan, series folders for a series scan</param>
+    /// <param name="isLibraryScan">If true, walks each folder's tree folder by folder, else lists each folder as one</param>
+    /// <param name="known">The series in each folder, and whether the scan is forced</param>
     /// <param name="failedFiles">Files that failed on an earlier scan, known while unchanged</param>
-    /// <returns></returns>
     public async Task<IList<ScannedSeriesResult>> ScanLibrariesForSeries(Library library,
-        IList<string> folders, bool isLibraryScan,
-        IDictionary<string, IList<SeriesModified>> seriesPaths, bool forceCheck = false,
+        IList<string> folders, bool isLibraryScan, KnownSeriesFolders known,
         IReadOnlyList<FailedFile>? failedFiles = null)
     {
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -678,8 +706,8 @@ public partial class ParseScannedFiles
         {
             try
             {
-                var scanResults = await ScanAndParseFolder(folder, library, isLibraryScan, seriesPaths,
-                    processedScannedSeries, placeholderOwners, forceCheck, failedFiles);
+                var scanResults = await ScanAndParseFolder(folder, library, isLibraryScan, known,
+                    processedScannedSeries, placeholderOwners, failedFiles);
                 unchangedFolders.AddRange(scanResults.Where(r => !r.HasChanged));
             }
             catch (ArgumentException ex)
@@ -688,7 +716,7 @@ public partial class ParseScannedFiles
             }
         }
 
-        FlagSeriesWithMissingFiles(processedScannedSeries, folders, seriesPaths, unchangedFolders, placeholderOwners);
+        FlagSeriesWithMissingFiles(processedScannedSeries, folders, known, unchangedFolders, placeholderOwners);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent("File Scan Done", library.Id, library.Name, ProgressEventType.Ended));
@@ -696,24 +724,19 @@ public partial class ParseScannedFiles
         return processedScannedSeries.ToList();
     }
 
-    /// <summary>
-    /// Helper method to scan and parse a folder
-    /// </summary>
-    /// <param name="folderPath"></param>
-    /// <param name="library"></param>
-    /// <param name="isLibraryScan"></param>
-    /// <param name="seriesPaths"></param>
-    /// <param name="processedScannedSeries"></param>
+    /// <param name="processedScannedSeries">Gets the series found in the folder</param>
     /// <param name="placeholderOwners">Filled with the series each placeholder was made for</param>
-    /// <param name="forceCheck"></param>
     /// <returns>Every folder result of the walk</returns>
     private async Task<IList<ScanResult>> ScanAndParseFolder(string folderPath, Library library,
-        bool isLibraryScan, IDictionary<string, IList<SeriesModified>> seriesPaths,
+        bool isLibraryScan, KnownSeriesFolders known,
         ConcurrentBag<ScannedSeriesResult> processedScannedSeries,
-        Dictionary<ParserInfo, SeriesModified> placeholderOwners, bool forceCheck, IReadOnlyList<FailedFile>? failedFiles)
+        Dictionary<ParserInfo, SeriesModified> placeholderOwners, IReadOnlyList<FailedFile>? failedFiles)
     {
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.B: Scan files in {Folder}", library.Name, folderPath);
-        var scanResults = await ScanFiles(folderPath, isLibraryScan, seriesPaths, library, forceCheck, failedFiles);
+        var stepWatch = Stopwatch.StartNew();
+        var listedBefore = ListTime;
+        var scanResults = await ScanFiles(folderPath, isLibraryScan, known, library, failedFiles);
+        WalkTime += stepWatch.Elapsed - (ListTime - listedBefore);
         var walkResults = scanResults;
 
         AddReadFiles(walkResults);
@@ -722,16 +745,19 @@ public partial class ParseScannedFiles
         var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
 
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.C: Process files in {Folder}", library.Name, folderPath);
+        stepWatch.Restart();
         for (var i = 0; i < scanResults.Count; i++)
         {
-            await ParseFiles(scanResults[i], placeholderOwners, library, i + 1, scanResults.Count);
+            await ParseFiles(scanResults[i], known, placeholderOwners, library, i + 1, scanResults.Count);
         }
+        ParseTime += stepWatch.Elapsed;
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent(folderPath, library.Id, library.Name, ProgressEventType.Updated,
                 MessageEventCode.ScanGroupingSeries));
 
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.D: Merge any localized series with series {Folder}", library.Name, folderPath);
+        stepWatch.Restart();
         scanResults = MergeLocalizedSeriesAcrossScanResults(scanResults);
 
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.E: Group all parsed data into logical Series", library.Name);
@@ -742,6 +768,7 @@ public partial class ParseScannedFiles
         // Now transform and add to processedScannedSeries AFTER everything is processed
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.F: Generate Sort Order for Series and Finalize", library.Name);
         GenerateProcessedScannedSeries(scannedSeries, processedScannedSeries);
+        GroupTime += stepWatch.Elapsed;
 
         return walkResults;
     }
@@ -793,11 +820,12 @@ public partial class ParseScannedFiles
     }
 
     /// <summary>
-    /// A series whose known files sit in a folder that was neither read nor skipped as unchanged lost files there
-    /// (folder deleted or emptied). It has only placeholders, so it is marked to be processed anyway
+    /// A series may have lost files when one of its known files is in a folder that was not skipped as unchanged and was not
+    /// kept by <see cref="ParseFiles"/> (file deleted or moved to another series, folder deleted or emptied). It has only
+    /// placeholders, so it is marked to be processed anyway
     /// </summary>
-    private static void FlagSeriesWithMissingFiles(IEnumerable<ScannedSeriesResult> processedScannedSeries,
-        IList<string> scannedFolders, IDictionary<string, IList<SeriesModified>> seriesPaths,
+    private void FlagSeriesWithMissingFiles(IEnumerable<ScannedSeriesResult> processedScannedSeries,
+        IList<string> scannedFolders, KnownSeriesFolders known,
         IList<ScanResult> unchangedFolders, Dictionary<ParserInfo, SeriesModified> placeholderOwners)
     {
         if (placeholderOwners.Count == 0) return;
@@ -806,10 +834,9 @@ public partial class ParseScannedFiles
         var shallow = unchangedFolders.Where(r => r.IsShallow).Select(r => r.Folder.TrimEnd('/')).ToHashSet();
         var recursive = unchangedFolders.Where(r => !r.IsShallow).Select(r => r.Folder.TrimEnd('/')).ToHashSet();
 
-        var seriesWithMissingFiles = seriesPaths.Values
-            .SelectMany(s => s)
-            .Distinct()
-            .Where(s => s.FilesByFolder.Keys.Any(f => roots.Exists(f.IsSameOrInsideFolder) && !IsCovered(f)))
+        var seriesWithMissingFiles = known.AllSeries
+            .Where(s => s.FilesByFolder
+                .Any(f => roots.Exists(f.Key.IsSameOrInsideFolder) && !IsCovered(f.Key) && !IsKept(f.Value)))
             .ToHashSet();
 
         if (seriesWithMissingFiles.Count == 0) return;
@@ -838,10 +865,10 @@ public partial class ParseScannedFiles
             return false;
         }
 
-        static string ParentOf(string folder)
+        // A file that was parsed again may now belong to another series, so only kept files count
+        bool IsKept(IReadOnlyList<KnownFile> files)
         {
-            var lastSlash = folder.LastIndexOf('/');
-            return lastSlash <= 0 ? string.Empty : folder[..lastSlash];
+            return files.All(f => _keptFiles.Contains(f.Path));
         }
     }
 
@@ -1028,13 +1055,14 @@ public partial class ParseScannedFiles
     }
 
     /// <summary>
-    /// For a given ScanResult, sets the ParserInfos on the result
+    /// For a given ScanResult, sets the ParserInfos on the result. In a changed folder, files that match the database are kept
+    /// behind a placeholder per series instead of parsed, unless a file in the folder is sorted by its siblings
+    /// (<see cref="KnownFile.IsSortedBySiblings"/>)
     /// </summary>
-    /// <param name="result"></param>
-    /// <param name="placeholderOwners"></param>
-    /// <param name="library"></param>
-    private async Task ParseFiles(ScanResult result, Dictionary<ParserInfo, SeriesModified> placeholderOwners, Library library,
-        int current, int total)
+    /// <param name="known">Which files the database holds, nothing when forced</param>
+    /// <param name="placeholderOwners">Filled with the series each placeholder was made for</param>
+    private async Task ParseFiles(ScanResult result, KnownSeriesFolders known, Dictionary<ParserInfo, SeriesModified> placeholderOwners,
+        Library library, int current, int total)
     {
         var normalizedFolder = Parser.NormalizePath(result.Folder);
 
@@ -1078,49 +1106,110 @@ public partial class ParseScannedFiles
             MessageFactory.FileScanProgressEvent($"{fileCount} files in {normalizedFolder}", library.Id, library.Name, ProgressEventType.Updated,
                 MessageEventCode.ScanReadingFiles, current, total));
 
-        // Written by index rather than collected, as downstream series mapping relies on file order
-        var parsed = new ParseFileResult[fileCount];
-
-        if (fileCount < 100)
+        var paths = files.Select(f => Parser.NormalizePath(f.Path)).ToList();
+        var knownFiles = known.FilesIn(paths.Select(p => p.FolderOf()).Distinct());
+        // A file with an issue row is parsed again, or the row would count as resolved and be deleted
+        var kept = Enumerable.Range(0, fileCount)
+            .Where(i => !_failedFilesInReadFolders.Contains(paths[i]) &&
+                        knownFiles.TryGetValue(paths[i], out var owned) &&
+                        FolderChangeCheck.IsFileUnchanged(files[i], owned.File, owned.Owner.LastScanned))
+            .ToHashSet();
+        if (kept.Any(i => knownFiles[paths[i]].File.SortOrderDependsOnSiblings))
         {
-            for (var i = 0; i < fileCount; i++)
-            {
-                parsed[i] = _readingItemService.ParseFile(files[i].Path, normalizedFolder, result.LibraryRoot, library.Type, library.EnableMetadata);
-            }
+            kept.Clear();
         }
-        else
-        {
-            // Process files in parallel, but bound the concurrency so that a folder with
-            // many files cannot flood the ThreadPool and starve request handling (the web UI
-            // and health checks become unresponsive during scans otherwise).
-            // Matches the scanner's existing parallelism convention (see ScannerService).
-            var maxConcurrency = Math.Max(1, Environment.ProcessorCount / 2);
 
-            await Parallel.ForEachAsync(Enumerable.Range(0, fileCount),
-                new ParallelOptions { MaxDegreeOfParallelism = maxConcurrency },
-                (i, _) =>
-                {
-                    parsed[i] = _readingItemService.ParseFile(files[i].Path, normalizedFolder, result.LibraryRoot,
-                        library.Type, library.EnableMetadata);
-                    return ValueTask.CompletedTask;
-                });
+        // Written by index rather than collected, as downstream series mapping relies on file order
+        var parsed = new ParseFileResult?[fileCount];
+        await ParseAt(result, library, parsed, [.. Enumerable.Range(0, fileCount).Where(i => !kept.Contains(i))]);
+
+        if (kept.Count > 0 && parsed.Any(p => p?.Info != null && KnownFile.IsSortedBySiblings(p.Info.Chapters, p.Info.IsSpecialInfo())))
+        {
+            await ParseAt(result, library, parsed, [.. kept]);
+            kept.Clear();
         }
 
         var infos = new List<ParserInfo>(fileCount);
         for (var i = 0; i < fileCount; i++)
         {
-            if (parsed[i].Info != null) infos.Add(parsed[i].Info!);
-            if (parsed[i].Issue != null) AddIssue(files[i], parsed[i].Issue!, files);
+            if (parsed[i] is not { } fileResult) continue;
+
+            if (fileResult.Info != null)
+            {
+                fileResult.Info.Stamp = files[i];
+                infos.Add(fileResult.Info);
+            }
+            if (fileResult.Issue != null)
+            {
+                AddIssue(files[i], fileResult.Issue, files);
+            }
+        }
+
+        var keptByOwner = kept
+            .Select(i => (Index: i, knownFiles[paths[i]].File, knownFiles[paths[i]].Owner))
+            .GroupBy(k => k.Owner);
+        foreach (var ownerFiles in keptByOwner)
+        {
+            foreach (var (index, file, _) in ownerFiles.Where(k => k.File.LastWriteTimeUtc == null))
+            {
+                WriteTimesToBackfill[file.Id] = files[index].LastWriteTimeUtc;
+            }
+
+            var placeholder = new ParserInfo
+            {
+                Series = ownerFiles.Key.SeriesName,
+                Format = ownerFiles.Key.Format,
+                UnchangedFiles = [.. ownerFiles.Select(k => k.File.Path)],
+            };
+            placeholderOwners[placeholder] = ownerFiles.Key;
+            infos.Add(placeholder);
+            _keptFiles.UnionWith(placeholder.UnchangedFiles);
+        }
+
+        KeptFileCount += kept.Count;
+        if (kept.Count > 0)
+        {
+            _logger.LogDebug("[ScannerService] Kept {KeptCount} of {Count} files in {Folder} as they match the database", kept.Count, fileCount, normalizedFolder);
         }
 
         result.ParserInfos = infos;
+    }
+
+    private async Task ParseAt(ScanResult result, Library library, ParseFileResult?[] parsed, IList<int> indexes)
+    {
+        var files = result.Files;
+        var folder = Parser.NormalizePath(result.Folder);
+        Interlocked.Add(ref _parsedFileCount, indexes.Count);
+
+        if (indexes.Count < 100)
+        {
+            foreach (var i in indexes)
+            {
+                parsed[i] = _readingItemService.ParseFile(files[i].Path, folder, result.LibraryRoot, library.Type, library.EnableMetadata);
+            }
+            return;
+        }
+
+        // Process files in parallel, but bound the concurrency so that a folder with
+        // many files cannot flood the ThreadPool and starve request handling (the web UI
+        // and health checks become unresponsive during scans otherwise).
+        // Matches the scanner's existing parallelism convention (see ScannerService).
+        var maxConcurrency = Math.Max(1, Environment.ProcessorCount / 2);
+
+        await Parallel.ForEachAsync(indexes,
+            new ParallelOptions { MaxDegreeOfParallelism = maxConcurrency },
+            (i, _) =>
+            {
+                parsed[i] = _readingItemService.ParseFile(files[i].Path, folder, result.LibraryRoot, library.Type, library.EnableMetadata);
+                return ValueTask.CompletedTask;
+            });
     }
 
 
     public static void UpdateSortOrder(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParsedSeries series)
     {
         // Placeholders from skipped folders don't map to a chapter, so they have nothing to sort
-        var fileInfos = scannedSeries[series].Where(info => string.IsNullOrEmpty(info.UnchangedFolderPath)).ToList();
+        var fileInfos = scannedSeries[series].Where(info => !info.IsPlaceholder).ToList();
 
         // Set the Sort order per Volume
         var volumes = fileInfos.GroupBy(info => info.Volumes);

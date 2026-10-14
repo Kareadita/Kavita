@@ -294,7 +294,7 @@ public class MetadataServiceTests(ITestOutputHelper outputHelper) : AbstractDbTe
         await h.Context.Chapter.ExecuteUpdateAsync(s => s.SetProperty(c => c.CoverFileWriteTimeUtc, (DateTime?) null));
         var wordCount = new Kavita.Services.Metadata.WordCountAnalyzerService(
             Substitute.For<ILogger<Kavita.Services.Metadata.WordCountAnalyzerService>>(), h.UnitOfWork,
-            Substitute.For<IEventHub>(), new CacheHelper(new FileService()), Substitute.For<IMediaErrorService>(),
+            Substitute.For<IEventHub>(), Substitute.For<IMediaErrorService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()));
 
         h.Context.ChangeTracker.Clear();

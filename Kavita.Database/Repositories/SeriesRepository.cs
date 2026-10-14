@@ -626,7 +626,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         bool customOnly = true, CancellationToken ct = default)
     {
         var extension = encodeFormat.GetExtension();
-        var prefix = "series{0}".Replace("0", string.Empty); // default: This actually depends on ImageService#GetSeriesFormat
+        var prefix = "series{0}".Replace("0", string.Empty); // TODO: This actually depends on ImageService#GetSeriesFormat
         var query = context.Series
             .Where(c => !string.IsNullOrEmpty(c.CoverImage)
                         && !c.CoverImage.EndsWith(extension)
@@ -1264,31 +1264,33 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     }
 
     /// <summary>
-    /// Every series whose FolderPath or LowestFolderPath equals the folder
+    /// Every series of the library whose FolderPath or LowestFolderPath equals the folder
     /// </summary>
-    public async Task<IList<Series>> GetSeriesByFolderPathAsync(string folder, SeriesIncludes includes = SeriesIncludes.None,
+    public async Task<IList<Series>> GetSeriesByFolderPathAsync(int libraryId, string folder, SeriesIncludes includes = SeriesIncludes.None,
         CancellationToken ct = default)
     {
         var normalized = folder.NormalizePath().TrimEnd('/');
         if (string.IsNullOrEmpty(normalized)) return [];
 
         return await context.Series
+            .Where(s => s.LibraryId == libraryId)
             .Where(s => s.FolderPath == normalized || s.LowestFolderPath == normalized)
             .Includes(includes)
             .ToListAsync(ct);
     }
 
     /// <summary>
-    /// The series whose LowestFolderPath is the deepest folder containing the path (or equal to it). Several when
-    /// they share that folder
+    /// The series of the library whose LowestFolderPath is the deepest folder containing the path (or equal to it).
+    /// Several when they share that folder
     /// </summary>
-    public async Task<IList<Series>> GetSeriesThatContainsLowestFolderPathAsync(string path,
+    public async Task<IList<Series>> GetSeriesThatContainsLowestFolderPathAsync(int libraryId, string path,
         SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
     {
         var candidates = SelfAndParentFolders(path.NormalizePath().TrimEnd('/'));
         if (candidates.Count == 0) return [];
 
         var matches = await context.Series
+            .Where(s => s.LibraryId == libraryId)
             .Where(s => s.LowestFolderPath != null && candidates.Contains(s.LowestFolderPath))
             .Includes(includes)
             .ToListAsync(ct);
@@ -1646,8 +1648,8 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 VolumeId = c.VolumeId,
                 ChapterId = c.Id,
                 Format = c.Volume.Series.Format,
-                ChapterNumber = c.MinNumber + string.Empty, // default: Refactor this
-                ChapterRange = c.Range, // default: Refactor this
+                ChapterNumber = c.MinNumber + string.Empty, // TODO: Refactor this
+                ChapterRange = c.Range, // TODO: Refactor this
                 IsSpecial = c.IsSpecial,
                 VolumeNumber = c.Volume.MinNumber,
                 ChapterTitle = c.Title,
@@ -1844,10 +1846,11 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     }
 
     public async Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMapAsync(int libraryId,
-        CancellationToken ct = default)
+        int? seriesId = null, CancellationToken ct = default)
     {
         var info = await context.Series
             .Where(s => s.LibraryId == libraryId)
+            .WhereIf(seriesId != null, s => s.Id == seriesId)
             .AsNoTracking()
             .Where(s => s.FolderPath != null)
             .Select(s => new
@@ -1868,14 +1871,16 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
         var files = await context.MangaFile
             .Where(f => f.Chapter.Volume.Series.LibraryId == libraryId)
-            .Select(f => new { f.Id, f.Chapter.Volume.SeriesId, f.FilePath, f.Bytes, f.FileLastWriteTimeUtc })
+            .WhereIf(seriesId != null, f => f.Chapter.Volume.SeriesId == seriesId)
+            .Select(f => new { f.Id, f.Chapter.Volume.SeriesId, f.FilePath, f.Bytes, f.FileLastWriteTimeUtc, f.Chapter.Range, f.Chapter.IsSpecial })
             .AsNoTracking()
             .ToListAsync(ct);
 
         var filesBySeries = files
             .GroupBy(f => f.SeriesId)
             .ToDictionary(g => g.Key, g => g
-                .Select(f => new KnownFile(f.Id, f.FilePath.NormalizePath(), f.Bytes, f.FileLastWriteTimeUtc))
+                .Select(f => new KnownFile(f.Id, f.FilePath.NormalizePath(), f.Bytes, f.FileLastWriteTimeUtc,
+                    KnownFile.IsSortedBySiblings(f.Range, f.IsSpecial)))
                 .GroupBy(f => ParentFolder(f.Path))
                 .ToDictionary(folder => folder.Key, IReadOnlyList<KnownFile> (folder) => folder.ToList()));
 

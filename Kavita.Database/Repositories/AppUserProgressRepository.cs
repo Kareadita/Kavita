@@ -19,6 +19,11 @@ namespace Kavita.Database.Repositories;
 
 public class AppUserProgressRepository(DataContext context, IMapper mapper) : IAppUserProgressRepository
 {
+    public void Add(AppUserProgress progress)
+    {
+        context.Add(progress).State = EntityState.Added;
+    }
+
     public void Update(AppUserProgress userProgress)
     {
         context.Entry(userProgress).State = EntityState.Modified;
@@ -29,30 +34,33 @@ public class AppUserProgressRepository(DataContext context, IMapper mapper) : IA
         context.Remove(userProgress);
     }
 
+    public void RemoveRange(IEnumerable<AppUserProgress> userProgress)
+    {
+        context.RemoveRange(userProgress);
+    }
+
     /// <summary>
-    /// This will remove any entries that have chapterIds that no longer exists. This will execute the save as well.
+    /// This will remove any entries that have chapterIds that no longer exists, deleting in the DB directly
     /// </summary>
     /// <param name="ct"></param>
+    /// <returns>How many progress rows were removed</returns>
     public async Task<int> CleanupAbandonedChapters(CancellationToken ct = default)
     {
         var chapterIds = context.Chapter.Select(c => c.Id);
 
-        var rowsToRemove = await context.AppUserProgresses
+        var progressRemoved = await context.AppUserProgresses
             .Where(progress => !chapterIds.Contains(progress.ChapterId))
-            .ToListAsync(ct);
+            .ExecuteDeleteAsync(ct);
 
-        var rowsToRemoveBookmarks = await context.AppUserBookmark
+        await context.AppUserBookmark
             .Where(progress => !chapterIds.Contains(progress.ChapterId))
-            .ToListAsync(ct);
+            .ExecuteDeleteAsync(ct);
 
-        var rowsToRemoveReadingLists = await context.ReadingListItem
+        await context.ReadingListItem
             .Where(item => !chapterIds.Contains(item.ChapterId))
-            .ToListAsync(ct);
+            .ExecuteDeleteAsync(ct);
 
-        context.RemoveRange(rowsToRemove);
-        context.RemoveRange(rowsToRemoveBookmarks);
-        context.RemoveRange(rowsToRemoveReadingLists);
-        return await context.SaveChangesAsync(ct) > 0 ? rowsToRemove.Count : 0;
+        return progressRemoved;
     }
 
     /// <summary>
@@ -239,6 +247,24 @@ public class AppUserProgressRepository(DataContext context, IMapper mapper) : IA
         // Execute the batch SQL
         var batchSql = sqlBuilder.ToString();
         await context.Database.ExecuteSqlRawAsync(batchSql, ct);
+    }
+
+    public async Task<List<AppUserProgress>> GetProgressesForChapters(int userId, int seriesId, IEnumerable<int> chapterIds, CancellationToken ct = default)
+    {
+        const int batchSize = 50;
+
+        List<AppUserProgress> progresses = [];
+
+        foreach (var ids in chapterIds.Chunk(batchSize))
+        {
+            var idProgresses = await context.AppUserProgresses
+                .Where(x => x.SeriesId == seriesId && x.AppUserId == userId && ids.Contains(x.ChapterId))
+                .ToListAsync(ct);
+
+            progresses.AddRange(idProgresses);
+        }
+
+        return progresses;
     }
 
 

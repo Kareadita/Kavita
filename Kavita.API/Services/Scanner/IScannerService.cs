@@ -11,7 +11,8 @@ public interface IScannerService
     /// </summary>
     /// <param name="libraryId">Library to scan against</param>
     /// <param name="forceUpdate">Don't perform optimization checks, defaults to false</param>
-    Task ScanLibrary(int libraryId, bool forceUpdate = false, bool isSingleScan = true);
+    /// <param name="endsJob">No other library is scanned after this, in the same job; sent to the UI on the scan ended event to close the widget row</param>
+    Task ScanLibrary(int libraryId, bool forceUpdate = false, bool endsJob = true);
 
     Task ScanLibraries(bool forceUpdate = false);
 

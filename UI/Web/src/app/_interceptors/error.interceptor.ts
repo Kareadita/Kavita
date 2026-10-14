@@ -1,57 +1,79 @@
 import {inject} from '@angular/core';
-import {HttpInterceptorFn, HttpRequest} from '@angular/common/http';
-import {throwError} from 'rxjs';
-import {Router} from '@angular/router';
+import {HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest} from '@angular/common/http';
+import {EMPTY, Observable, switchMap, throwError} from 'rxjs';
 import {ToastrService} from '@openng/ngx-toastr';
 import {catchError} from 'rxjs/operators';
 import {AccountService} from '../_services/account.service';
-import {translate, TranslocoService} from "@jsverse/transloco";
+import {translate} from "@jsverse/transloco";
 import {AUTH_URL_KEY} from "../_guards/auth.guard";
 import {APP_BASE_HREF} from "@angular/common";
 
+const REFRESH_URL_FRAGMENT = '/api/account/refresh-token';
+
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-  const router = inject(Router);
   const toastr = inject(ToastrService);
   const accountService = inject(AccountService);
-  const translocoService = inject(TranslocoService);
   const baseURL = inject(APP_BASE_HREF);
 
-  return next(req).pipe(
-    catchError(error => {
-      if (error === undefined || error === null) {
-        return throwError(() => error);
-      }
-
-      switch (error.status) {
-        case 400:
-          handleValidationError(error, toastr);
-          break;
-        case 401:
-          handleAuthError(req, error, accountService, toastr, baseURL);
-          break;
-        case 403:
-          handleForbiddenError(error, toastr);
-          break;
-        case 404:
-          handleNotFound(toastr);
-          break;
-        case 500:
-          handleServerException(error, toastr);
-          break;
-        case 413:
-          handlePayloadTooLargeException(toastr);
-          break;
-        default:
-          const genericError = translate('errors.generic');
-          if (toastr.previousToastMessage !== 'Something unexpected went wrong.' &&
-            toastr.previousToastMessage !== genericError) {
-            toast(genericError, toastr);
-          }
-          console.error(error);
-          break;
-      }
+  const handleError = (req: HttpRequest<unknown>, error: any, next: HttpHandlerFn, allowRefresh: boolean): Observable<HttpEvent<unknown>> => {
+    if (error === undefined || error === null) {
       return throwError(() => error);
-    })
+    }
+
+    switch (error.status) {
+      case 400:
+        handleValidationError(error, toastr);
+        break;
+      case 401:
+        if (allowRefresh && !req.url.endsWith(REFRESH_URL_FRAGMENT) && accountService.currentUser()?.token) {
+          return accountService.refreshToken().pipe(
+            switchMap(tokens => {
+              if (!tokens.token) {
+                handleAuthError(req, error, accountService, toastr, baseURL);
+                return throwError(() => error);
+              }
+
+              const retryRequest = req.clone({
+                setHeaders: {
+                  Authorization: `Bearer ${tokens.token}`
+                }
+              });
+
+              return next(retryRequest).pipe(
+                catchError(err => handleError(retryRequest, err, next, false))
+              );
+            })
+          )
+        }
+
+        handleAuthError(req, error, accountService, toastr, baseURL);
+        break;
+      case 403:
+        handleForbiddenError(error, toastr);
+        break;
+      case 404:
+        handleNotFound(toastr);
+        break;
+      case 500:
+        handleServerException(error, toastr);
+        break;
+      case 413:
+        handlePayloadTooLargeException(toastr);
+        break;
+      default:
+        const genericError = translate('errors.generic');
+        if (toastr.previousToastMessage !== 'Something unexpected went wrong.' &&
+          toastr.previousToastMessage !== genericError) {
+          toast(genericError, toastr);
+        }
+        console.error(error);
+        break;
+    }
+    return throwError(() => error);
+  }
+
+  return next(req).pipe(
+    catchError(err => handleError(req, err, next, true))
   );
 };
 

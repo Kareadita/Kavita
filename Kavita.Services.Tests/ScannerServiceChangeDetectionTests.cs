@@ -390,6 +390,52 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
             await SeriesFileNames(context, await SeriesId(context, libraryId, "Berserk")));
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ScanLibrary_UnreadableSpecialsFolder_KeepsTheSeries(bool forceUpdate)
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, $"Unreadable Specials Folder {forceUpdate} - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Specials/Spice and Wolf SP01.cbz",
+        ]);
+        var root = await LibraryRoot(context, libraryId);
+
+        await ScannerWithUnreadable(unitOfWork, Path.Join(root, "Spice and Wolf", "Specials")).ScanLibrary(libraryId, forceUpdate);
+
+        Assert.Equal(["Spice and Wolf SP01.cbz", "Spice and Wolf Vol. 1 Ch. 0001.cbz"],
+            await SeriesFileNames(context, await SeriesId(context, libraryId, "Spice and Wolf")));
+    }
+
+    [Fact]
+    public async Task ScanLibrary_NoChange_ListsEachFolderOnce()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Lists Each Folder Once - Manga",
+        [
+            "Accel World/Accel World Vol. 1.cbz",
+            "Berserk/Berserk Vol. 1/Berserk Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Spice and Wolf Vol. 1.cbz",
+        ]);
+        var root = await LibraryRoot(context, libraryId);
+        var calls = new FolderCalls(new FileSystem(), root);
+        var scanner = new ScannerHelper(unitOfWork, testOutputHelper)
+            .CreateServices(new DirectoryService(NullLogger<DirectoryService>.Instance, calls.FileSystem), calls.FileSystem);
+
+        await scanner.ScanLibrary(libraryId);
+
+        var rootFolder = root.TrimEnd('/');
+        var expected = new[] { "Accel World", "Berserk", "Berserk/Berserk Vol. 1", "Spice and Wolf" }
+            .ToDictionary(f => $"{rootFolder}/{f}", _ => 1);
+        // CheckMounts lists the root once before the scan, to tell an empty or unreadable mount
+        expected[rootFolder] = 2;
+        Assert.Equal(expected.OrderBy(p => p.Key, StringComparer.Ordinal),
+            calls.ListingsByFolder.OrderBy(p => p.Key, StringComparer.Ordinal));
+        Assert.Empty(calls.ExistsByFolder.Keys.Where(f => f != rootFolder));
+    }
+
     [Fact]
     public async Task ScanLibrary_UnreadableLibraryRoot_AbortsAndReportsIt()
     {
@@ -404,8 +450,9 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
 
         Assert.Equal(2, await context.Series.CountAsync(s => s.LibraryId == libraryId));
         Assert.Equal(3, await context.MangaFile.CountAsync(f => f.Chapter.Volume.Series.LibraryId == libraryId));
-        var body = Assert.Single(UnreadableFoldersBodies(eventHub));
+        var body = Assert.Single(RootFoldersUnreadableBodies(eventHub));
         Assert.Equal([root], body.Folders);
+        Assert.Empty(UnreadableFoldersBodies(eventHub));
     }
 
     [Fact]
@@ -418,7 +465,8 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
 
         await ScannerWithUnreadable(unitOfWork, eventHub, root).ScanSeries(await SeriesId(context, libraryId, "Berserk"));
 
-        Assert.Single(UnreadableFoldersBodies(eventHub));
+        Assert.Single(RootFoldersUnreadableBodies(eventHub));
+        Assert.Empty(UnreadableFoldersBodies(eventHub));
     }
 
     [Theory]
@@ -446,12 +494,88 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         var root = await LibraryRoot(context, libraryId);
         var eventHub = Substitute.For<IEventHub>();
 
-        // DirectoryService fails to list its subfolders first, the walk then fails to read it
         await ScannerWithUnreadable(unitOfWork, eventHub, Path.Join(root, "Berserk", "Berserk Vol. 2")).ScanLibrary(libraryId);
 
         var body = Assert.Single(UnreadableFoldersBodies(eventHub));
         Assert.Equal([Parser.NormalizePath(Path.Join(root, "Berserk", "Berserk Vol. 2"))], body.Folders);
         Assert.Equal(1, body.FolderCount);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_UnreadableSpecialsFolder_ReportsTheSpecialsFolder()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Unreadable Specials Folder Event - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Specials/Spice and Wolf SP01.cbz",
+        ]);
+        var root = await LibraryRoot(context, libraryId);
+        var eventHub = Substitute.For<IEventHub>();
+
+        await ScannerWithUnreadable(unitOfWork, eventHub, Path.Join(root, "Spice and Wolf", "Specials")).ScanLibrary(libraryId);
+
+        var body = Assert.Single(UnreadableFoldersBodies(eventHub));
+        Assert.Equal([Parser.NormalizePath(Path.Join(root, "Spice and Wolf", "Specials"))], body.Folders);
+    }
+
+    [Fact]
+    public async Task ScanSeries_UnreadableSubfolderWithKnownFile_KeepsItAndReportsTheSubfolder()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Series Scan Unreadable Known Subfolder - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Extra/Spice and Wolf Vol. 1 Ch. 0002.cbz",
+        ]);
+        var root = await LibraryRoot(context, libraryId);
+        var seriesId = await SeriesId(context, libraryId, "Spice and Wolf");
+        var eventHub = Substitute.For<IEventHub>();
+
+        await ScannerWithUnreadable(unitOfWork, eventHub, Path.Join(root, "Spice and Wolf", "Extra")).ScanSeries(seriesId);
+
+        Assert.Empty(RootFoldersUnreadableBodies(eventHub));
+        var body = Assert.Single(UnreadableFoldersBodies(eventHub));
+        Assert.Equal([Parser.NormalizePath(Path.Join(root, "Spice and Wolf", "Extra"))], body.Folders);
+        Assert.Equal(["Spice and Wolf Vol. 1 Ch. 0001.cbz", "Spice and Wolf Vol. 1 Ch. 0002.cbz"], await SeriesFileNames(context, seriesId));
+    }
+
+    [Fact]
+    public async Task ScanSeries_UnreadableSpecialsFolder_ReportsTheSpecialsFolder()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Series Scan Unreadable Specials Folder - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Specials/Spice and Wolf SP01.cbz",
+        ]);
+        var root = await LibraryRoot(context, libraryId);
+        var seriesId = await SeriesId(context, libraryId, "Spice and Wolf");
+        var eventHub = Substitute.For<IEventHub>();
+
+        await ScannerWithUnreadable(unitOfWork, eventHub, Path.Join(root, "Spice and Wolf", "Specials")).ScanSeries(seriesId);
+
+        var body = Assert.Single(UnreadableFoldersBodies(eventHub));
+        Assert.Equal([Parser.NormalizePath(Path.Join(root, "Spice and Wolf", "Specials"))], body.Folders);
+        Assert.Equal(["Spice and Wolf SP01.cbz", "Spice and Wolf Vol. 1 Ch. 0001.cbz"], await SeriesFileNames(context, seriesId));
+    }
+
+    [Fact]
+    public async Task ScanSeries_SubfolderEmptied_RemovesItsChapter()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Series Scan Emptied Subfolder - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Extra/Spice and Wolf Vol. 1 Ch. 0002.cbz",
+        ]);
+        var root = await LibraryRoot(context, libraryId);
+        var seriesId = await SeriesId(context, libraryId, "Spice and Wolf");
+        File.Delete(Path.Join(root, "Spice and Wolf", "Extra", "Spice and Wolf Vol. 1 Ch. 0002.cbz"));
+
+        await scanner.ScanSeries(seriesId);
+
+        Assert.Equal(["Spice and Wolf Vol. 1 Ch. 0001.cbz"], await SeriesFileNames(context, seriesId));
     }
 
     [Fact]
@@ -468,11 +592,21 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
 
     private static List<UnreadableFoldersEventBodyDto> UnreadableFoldersBodies(IEventHub eventHub)
     {
+        return BodiesWithCode<UnreadableFoldersEventBodyDto>(eventHub, MessageEventCode.UnreadableFolders);
+    }
+
+    private static List<RootFoldersUnreadableEventBodyDto> RootFoldersUnreadableBodies(IEventHub eventHub)
+    {
+        return BodiesWithCode<RootFoldersUnreadableEventBodyDto>(eventHub, MessageEventCode.RootFoldersUnreadable);
+    }
+
+    private static List<T> BodiesWithCode<T>(IEventHub eventHub, string code)
+    {
         return eventHub.ReceivedCalls()
             .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
             .Select(c => (SignalRMessageDto) c.GetArguments()[1]!)
-            .Where(m => m.Code == MessageEventCode.UnreadableFolders)
-            .Select(m => (UnreadableFoldersEventBodyDto) m.Body!)
+            .Where(m => m.Code == code)
+            .Select(m => (T) m.Body!)
             .ToList();
     }
 
@@ -984,6 +1118,26 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     }
 
     [Fact]
+    public async Task Rescan_WithAmbiguousFile_SkipsItsFolder()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, reader, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Ambiguous File - Manga",
+            ["Spice and Wolf/Spice and Wolf Vol. 1.cbz", "Accel World/Accel World Vol. 1.cbz", "Accel World/Accel World Vol. 2.cbz"],
+            [], comicInfos: new Dictionary<string, ComicInfo>
+            {
+                ["Accel World Vol. 2.cbz"] = new() { Series = "Accel World", SeriesSort = "Spice and Wolf", Volume = "2" },
+            });
+
+        var row = await context.MediaError.AsNoTracking().SingleAsync();
+        Assert.Equal((Parser.NormalizePath(Path.Join(root, "Accel World", "Accel World Vol. 2.cbz")), MediaErrorReason.AmbiguousSeries),
+            (row.FilePath, row.Reason));
+
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Empty(reader.Parsed);
+    }
+
+    [Fact]
     public async Task FolderWhereEveryFileFails_SecondScanReadsNothing()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
@@ -1231,10 +1385,10 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     /// <param name="failing">File names the scan reader fails on, read on every parse so a test can change it between scans</param>
     private async Task<(ScannerService Scanner, FailNamedFiles Reader, int LibraryId, string Root)> ScanOnceWithFailing(
         IUnitOfWork unitOfWork, DataContext context, string testcase, string[] files, HashSet<string> failing,
-        IEventHub? eventHub = null)
+        IEventHub? eventHub = null, Dictionary<string, ComicInfo>? comicInfos = null)
     {
         var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
-        var library = await scannerHelper.GenerateScannerData(testcase, [.. files], new Dictionary<string, ComicInfo>());
+        var library = await scannerHelper.GenerateScannerData(testcase, [.. files], comicInfos ?? new Dictionary<string, ComicInfo>());
         ScannerHelper.Backdate(library.Folders.First().Path, TimeSpan.FromHours(1));
 
         FailNamedFiles? reader = null;
@@ -1244,6 +1398,248 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         reader!.Parsed.Clear();
 
         return (scanner, reader, library.Id, await LibraryRoot(context, library.Id));
+    }
+
+    #endregion
+
+    #region Changed Files Only
+
+    private const string ChapterSeries = "Spice and Wolf";
+
+    private static string ChapterFile(string number) => $"{ChapterSeries}/{ChapterSeries} Ch. {number}.cbz";
+
+    private static Dictionary<string, ComicInfo> ChapterInfos(params string[] numbers)
+    {
+        return numbers.ToDictionary(n => Path.GetFileName(ChapterFile(n)), n => new ComicInfo { Series = ChapterSeries, Number = n });
+    }
+
+    private async Task AddChapters(IUnitOfWork unitOfWork, string root, params string[] numbers)
+    {
+        await new ScannerHelper(unitOfWork, testOutputHelper).Scaffold(root, [.. numbers.Select(ChapterFile)], ChapterInfos(numbers));
+    }
+
+    private static readonly string[] FiveChapters = ["001", "002", "003", "004", "005"];
+
+    [Fact]
+    public async Task ScanLibrary_FileAddedToFolder_ParsesOnlyTheNewFile()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, reader, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Changed Files Library Add - Manga",
+            [.. FiveChapters.Select(ChapterFile)], [], comicInfos: ChapterInfos(FiveChapters));
+
+        await AddChapters(unitOfWork, root, "006");
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Equal(["Spice and Wolf Ch. 006.cbz"], reader.Parsed);
+        Assert.Equal(6, await SeriesFileCount(context, await SeriesId(context, libraryId, ChapterSeries)));
+    }
+
+    [Fact]
+    public async Task ScanSeries_NotForced_ParsesOnlyTheNewFile()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, reader, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Changed Files Series Add - Manga",
+            [.. FiveChapters.Select(ChapterFile)], [], comicInfos: ChapterInfos(FiveChapters));
+        var seriesId = await SeriesId(context, libraryId, ChapterSeries);
+
+        await AddChapters(unitOfWork, root, "006");
+        await scanner.ScanSeries(seriesId, false);
+
+        Assert.Equal(["Spice and Wolf Ch. 006.cbz"], reader.Parsed);
+        Assert.Equal(6, await SeriesFileCount(context, seriesId));
+    }
+
+    [Fact]
+    public async Task ScanSeries_NotForced_NoChange_LeavesTheSeries()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var eventHub = Substitute.For<IEventHub>();
+        var (scanner, reader, libraryId, _) = await ScanOnceWithFailing(unitOfWork, context, "Changed Files Series No Change - Manga",
+            [.. FiveChapters.Select(ChapterFile)], [], eventHub, ChapterInfos(FiveChapters));
+        var seriesId = await SeriesId(context, libraryId, ChapterSeries);
+        var before = await LastFolderScanned(context, libraryId);
+        eventHub.ClearReceivedCalls();
+
+        await scanner.ScanSeries(seriesId, false);
+
+        Assert.Empty(reader.Parsed);
+        Assert.Equal(before, await LastFolderScanned(context, libraryId));
+        Assert.Equal(5, await SeriesFileCount(context, seriesId));
+        await eventHub.DidNotReceive().SendMessageAsync(MessageFactory.Error, Arg.Any<SignalRMessageDto>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ScanLibrary_FileRemovedFromFolder_RemovesOnlyItsChapter()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Changed Files Remove - Manga",
+            [.. FiveChapters.Select(ChapterFile)], ChapterInfos(FiveChapters));
+        var seriesId = await SeriesId(context, libraryId, ChapterSeries);
+        var chapterIds = await ChapterIdsByFile(context, seriesId);
+
+        File.Delete(Path.Join(await LibraryRoot(context, libraryId), ChapterFile("003")));
+        await scanner.ScanLibrary(libraryId);
+
+        var after = await ChapterIdsByFile(context, seriesId);
+        Assert.Equal(chapterIds.Where(c => c.Key != "Spice and Wolf Ch. 003.cbz"), after);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_FileRetaggedToOtherSeries_LeavesTheFirstSeries()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Changed Files Retagged - Manga",
+            [.. FiveChapters.Select(ChapterFile)], ChapterInfos(FiveChapters));
+
+        var retagged = Path.Join(await LibraryRoot(context, libraryId), ChapterFile("003"));
+        File.Delete(retagged);
+        await new ScannerHelper(unitOfWork, testOutputHelper).Scaffold(await LibraryRoot(context, libraryId), [ChapterFile("003")],
+            new Dictionary<string, ComicInfo> { ["Spice and Wolf Ch. 003.cbz"] = new() { Series = "Beta", Number = "003" } });
+        await scanner.ScanLibrary(libraryId);
+
+        Assert.Equal(4, await SeriesFileCount(context, await SeriesId(context, libraryId, ChapterSeries)));
+        Assert.Equal(1, await SeriesFileCount(context, await SeriesId(context, libraryId, "Beta")));
+        Assert.Equal(5, await context.MangaFile.CountAsync(f => f.Chapter.Volume.Series.LibraryId == libraryId));
+    }
+
+    [Fact]
+    public async Task ScanLibrary_KeptFileWithMetadataIssue_KeepsItsMediaError()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var library = await scannerHelper.GenerateScannerData("Changed Files Metadata Issue - Manga",
+            [.. FiveChapters.Select(ChapterFile)], ChapterInfos(FiveChapters));
+        ScannerHelper.Backdate(library.Folders.First().Path, TimeSpan.FromHours(1));
+        var scanner = scannerHelper.CreateServices(wrapScanReader: inner => new MetadataIssueOnNamedFiles(inner, "Spice and Wolf Ch. 003.cbz"));
+        await scanner.ScanLibrary(library.Id);
+        Assert.Single(await context.MediaError.ToListAsync());
+
+        await AddChapters(unitOfWork, await LibraryRoot(context, library.Id), "006");
+        await scanner.ScanLibrary(library.Id);
+
+        var row = Assert.Single(await context.MediaError.ToListAsync());
+        Assert.EndsWith("Spice and Wolf Ch. 003.cbz", row.FilePath);
+    }
+
+    private sealed class MetadataIssueOnNamedFiles(IReadingItemService inner, params string[] names) : IReadingItemService
+    {
+        public int GetNumberOfPages(string filePath, MangaFormat format) => inner.GetNumberOfPages(filePath, format);
+
+        public string GetCoverImage(string filePath, string fileName, MangaFormat format, EncodeFormat encodeFormat,
+            CoverImageSize size = CoverImageSize.Default) =>
+            inner.GetCoverImage(filePath, fileName, format, encodeFormat, size);
+
+        public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1) =>
+            inner.Extract(fileFilePath, targetDirectory, format, imageCount);
+
+        public ParseFileResult ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+        {
+            var result = inner.ParseFile(path, rootPath, libraryRoot, type, enableMetadata);
+            return names.Contains(Path.GetFileName(path))
+                ? result with { Issue = new ParseIssue(MediaErrorReason.MetadataUnreadable, "details") }
+                : result;
+        }
+    }
+
+    private static async Task<Dictionary<string, int>> ChapterIdsByFile(DataContext context, int seriesId)
+    {
+        var rows = await context.MangaFile
+            .Where(f => f.Chapter.Volume.SeriesId == seriesId)
+            .Select(f => new { f.FilePath, f.ChapterId })
+            .ToListAsync();
+
+        return rows.OrderBy(r => r.FilePath).ToDictionary(r => Path.GetFileName(r.FilePath), r => r.ChapterId);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_NewFileSpellsVolumeDifferently_JoinsExistingVolume()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Changed Files Volume Spelling - Manga",
+            ["Spelled Twice/Spelled Twice Ch. 1.cbz"],
+            new Dictionary<string, ComicInfo> { ["Spelled Twice Ch. 1.cbz"] = new() { Series = "Spelled Twice", Volume = "1", Number = "1" } });
+
+        await new ScannerHelper(unitOfWork, testOutputHelper).Scaffold(await LibraryRoot(context, libraryId), ["Spelled Twice/Spelled Twice Ch. 2.cbz"],
+            new Dictionary<string, ComicInfo> { ["Spelled Twice Ch. 2.cbz"] = new() { Series = "Spelled Twice", Volume = "1.0", Number = "2" } });
+        await scanner.ScanLibrary(libraryId);
+
+        var volumes = await context.Volume.AsNoTracking()
+            .Where(v => v.Series.LibraryId == libraryId)
+            .Select(v => new { v.LookupName, Chapters = v.Chapters.Count })
+            .ToListAsync();
+        var volume = Assert.Single(volumes);
+        Assert.Equal("1", volume.LookupName);
+        Assert.Equal(2, volume.Chapters);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_SkippedFileHoldsLocalizedName_NameKept()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Changed Files Localized Kept - Manga",
+            [ChapterFile("001"), ChapterFile("002")], new Dictionary<string, ComicInfo>
+            {
+                ["Spice and Wolf Ch. 001.cbz"] = new() { Series = ChapterSeries, LocalizedSeries = "Ookami to Koushinryou", Number = "001" },
+                ["Spice and Wolf Ch. 002.cbz"] = new() { Series = ChapterSeries, Number = "002" },
+            });
+
+        await AddChapters(unitOfWork, await LibraryRoot(context, libraryId), "003");
+        await scanner.ScanLibrary(libraryId);
+
+        var series = await context.Series.AsNoTracking().SingleAsync(s => s.LibraryId == libraryId);
+        Assert.Equal("Ookami to Koushinryou", series.LocalizedName);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_SpecialAdded_KeepsSpecialOrder()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var specials = new[] { "SP01", "SP02" };
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Changed Files Specials - Manga",
+            [ChapterFile("001"), .. specials.Select(SpecialFile)], new Dictionary<string, ComicInfo>
+            {
+                ["Spice and Wolf Ch. 001.cbz"] = new() { Series = ChapterSeries, Number = "001" },
+                ["Spice and Wolf SP01.cbz"] = new() { Series = ChapterSeries },
+                ["Spice and Wolf SP02.cbz"] = new() { Series = ChapterSeries },
+            });
+
+        await new ScannerHelper(unitOfWork, testOutputHelper).Scaffold(await LibraryRoot(context, libraryId), [SpecialFile("SP03")],
+            new Dictionary<string, ComicInfo> { ["Spice and Wolf SP03.cbz"] = new() { Series = ChapterSeries } });
+        await scanner.ScanLibrary(libraryId);
+
+        var orders = await SortOrderByFile(context, libraryId);
+        Assert.Equal([0f, 1f, 2f],
+            [orders["Spice and Wolf SP01.cbz"], orders["Spice and Wolf SP02.cbz"], orders["Spice and Wolf SP03.cbz"]]);
+
+        static string SpecialFile(string name) => $"{ChapterSeries}/Specials/{ChapterSeries} {name}.cbz";
+    }
+
+    [Theory]
+    [InlineData("15.UH", "15.BEY")]
+    [InlineData("15.UH", "15")]
+    [InlineData("4-6", "4")]
+    [InlineData("4", "4-6")]
+    public async Task ScanLibrary_SameBaseChapterAdded_KeepsChapterOrder(string kept, string added)
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, $"Changed Files Same Base {kept} {added} - Manga",
+            [ChapterFile(kept)], ChapterInfos(kept));
+        await AddChapters(unitOfWork, await LibraryRoot(context, libraryId), added);
+        await scanner.ScanLibrary(libraryId);
+
+        var orders = await SortOrderByFile(context, libraryId);
+        Assert.Equal(2, orders.Count);
+        Assert.Equal(2, orders.Values.Distinct().Count());
+    }
+
+    private static async Task<Dictionary<string, float>> SortOrderByFile(DataContext context, int libraryId)
+    {
+        var rows = await context.MangaFile
+            .Where(f => f.Chapter.Volume.Series.LibraryId == libraryId)
+            .Select(f => new { f.FilePath, f.Chapter.SortOrder })
+            .ToListAsync();
+
+        return rows.ToDictionary(r => Path.GetFileName(r.FilePath), r => r.SortOrder);
     }
 
     #endregion

@@ -21,7 +21,6 @@ import {provideTranslocoLocale} from "@jsverse/transloco-locale";
 import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
 import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
-import {provideTranslocoPersistTranslations} from '@jsverse/transloco-persist-translations';
 import {HttpLoader} from "./httpLoader";
 import {clientInfoInterceptor} from "./app/_interceptors/client-info.interceptor";
 import {
@@ -41,7 +40,7 @@ import {ActivityStoreService} from './app/_services/activity-store.service';
 import {MessageHubService} from "./app/_services/message-hub.service";
 import {DownloadService} from "./app/shared/_services/download.service";
 import {LibraryService} from "./app/_services/library.service";
-import {translocoPrefixKey} from "./libs/transloco-util";
+import {manualMigrationRemovePersistedTranslations} from "./app/_migrations/v0.9.2/manual-migration-remove-persisted-translations";
 import {ToastrModule} from "@openng/ngx-toastr";
 import {AppComponent} from "./app/app.component";
 
@@ -97,6 +96,7 @@ const languageCodes = [
 ];
 
 const translocoOptions = {
+  loader: HttpLoader,
   config: {
     reRenderOnLangChange: true,
     availableLangs: transformLanguageCodes(languageCodes),
@@ -136,6 +136,9 @@ function bootstrapUser() {
   const transloco = inject(TranslocoService);
   // Created before the hub connects so no message is missed
   inject(ActivityStoreService);
+
+  // Migration: pre v0.9.2 localization cache hashing wasn't working
+  manualMigrationRemovePersistedTranslations();
 
   // Load user from localStorage so refreshAccount() and locale loading can proceed
   const localUser = accountService.getUserFromLocalStorage();
@@ -187,12 +190,6 @@ bootstrapApplication(AppComponent, {
         provideTransloco(translocoOptions),
         provideTranslocoLocale({
           defaultLocale: 'en'
-        }),
-        provideTranslocoPersistTranslations({
-          loader: HttpLoader,
-          storage: { useValue: localStorage },
-          ttl: environment.production ? 129600 : 0, // 1.5 days in seconds for prod
-          storageKey: translocoPrefixKey
         }),
         Title,
         { provide: TitleStrategy, useClass: KavitaTitleStrategy },

@@ -4,6 +4,7 @@ import {LibraryEventBody} from './library-event-body';
 import {SeriesEventBody} from './series-event-body';
 import {RootFoldersInaccessibleBody} from './root-folders-inaccessible-body';
 import {UnreadableFoldersBody} from './unreadable-folders-body';
+import {RootFoldersUnreadableBody} from './root-folders-unreadable-body';
 import {SeriesCollisionBody} from './series-collision-body';
 import {ScanLibrariesDelayedBody} from './scan-libraries-delayed-body';
 import {ScanLibraryDelayedBody} from './scan-library-delayed-body';
@@ -18,6 +19,7 @@ import {WordCountFailedBody} from './word-count-failed-body';
 export interface CodedEventBodyMap {
   [MessageEventCode.RootFoldersInaccessible]: RootFoldersInaccessibleBody;
   [MessageEventCode.RootFoldersEmpty]: LibraryEventBody;
+  [MessageEventCode.RootFoldersUnreadable]: RootFoldersUnreadableBody;
   [MessageEventCode.UnreadableFolders]: UnreadableFoldersBody;
   [MessageEventCode.SeriesCollision]: SeriesCollisionBody;
   [MessageEventCode.FilesOutsideFolder]: SeriesEventBody;
@@ -27,6 +29,7 @@ export interface CodedEventBodyMap {
   [MessageEventCode.ScanSeriesFolderMissing]: SeriesEventBody;
   [MessageEventCode.ScanNoWork]: SeriesEventBody;
   [MessageEventCode.DbWriteFailed]: SeriesEventBody;
+  [MessageEventCode.LibraryScanFailed]: LibraryEventBody;
   [MessageEventCode.ScanLibrariesDelayed]: ScanLibrariesDelayedBody;
   [MessageEventCode.ScanLibraryDelayed]: ScanLibraryDelayedBody;
   [MessageEventCode.ScanSeriesDelayed]: ScanSeriesDelayedBody;

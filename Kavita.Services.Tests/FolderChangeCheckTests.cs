@@ -1,13 +1,14 @@
+using Kavita.Database.Tests;
 using Kavita.Models.Parser;
 using Kavita.Services.Scanner;
 
 namespace Kavita.Services.Tests;
 
-public class FolderChangeCheckTests
+public class FolderChangeCheckTests : AbstractFsTest
 {
-    private const string Folder = "M:/March Story";
-    private const string V01 = Folder + "/March Story v01.cbz";
-    private const string V02 = Folder + "/March Story v02.cbz";
+    private static readonly string Folder = Root + "March Story";
+    private static readonly string V01 = Folder + "/March Story v01.cbz";
+    private static readonly string V02 = Folder + "/March Story v02.cbz";
 
     private static readonly DateTime Written = new(2022, 4, 28, 20, 12, 21, DateTimeKind.Utc);
     private static readonly DateTime LastScanned = new DateTime(2026, 10, 1, 12, 0, 0, DateTimeKind.Utc).ToLocalTime();
@@ -105,8 +106,8 @@ public class FolderChangeCheckTests
     {
         Assert.True(IsUnchanged(
         [
-            new FileStamp(@"M:\March Story\March Story v01.cbz", 1000, Written),
-            new FileStamp(@"M:\March Story\March Story v02.cbz", 1000, Written),
+            new FileStamp(V01.Replace('/', '\\'), 1000, Written),
+            new FileStamp(V02.Replace('/', '\\'), 1000, Written),
         ], StoredOwner()));
     }
 
@@ -164,7 +165,7 @@ public class FolderChangeCheckTests
     {
         var owner = Owner(LastScanned,
             new KnownFile(1, V01, 1000, Written),
-            new KnownFile(2, "M:/March Story/Extras/March Story SP01.cbz", 1000, Written));
+            new KnownFile(2, Folder + "/Extras/March Story SP01.cbz", 1000, Written));
 
         Assert.True(IsUnchanged([new FileStamp(V01, 1000, Written)], owner));
     }
@@ -187,7 +188,7 @@ public class FolderChangeCheckTests
         Assert.True(IsUnchanged([], Owner(LastScanned)));
     }
 
-    private const string Broken = Folder + "/March Story v03.cbz";
+    private static readonly string Broken = Folder + "/March Story v03.cbz";
 
     [Fact]
     public void FailedFile_SameSizeAndTime_IsKnown()
@@ -222,7 +223,7 @@ public class FolderChangeCheckTests
     {
         Assert.True(IsUnchanged([new FileStamp(V01, 1000, Written)],
             [Owner(LastScanned, new KnownFile(1, V01, 1000, Written))],
-            new FailedFile("M:/March Story/Extras/March Story SP01.cbz", 500, Written)));
+            new FailedFile(Folder + "/Extras/March Story SP01.cbz", 500, Written)));
     }
 
     [Fact]

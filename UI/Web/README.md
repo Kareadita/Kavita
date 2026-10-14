@@ -48,7 +48,7 @@ Do **NOT** commit appsettings.development.json while testing OIDC. It'll contain
 `npm install @angular-eslint/builder@latest @angular-eslint/eslint-plugin@latest @angular-eslint/eslint-plugin-template@latest @angular-eslint/schematics@latest @angular-eslint/template-parser@latest`
 
 # Update Localization library
-`npm install @jsverse/transloco@latest @jsverse/transloco-locale@latest @jsverse/transloco-persist-lang@latest @jsverse/transloco-persist-translations@latest @jsverse/transloco-preload-langs@latest`
+`npm install @jsverse/transloco@latest @jsverse/transloco-locale@latest @jsverse/transloco-persist-lang@latest @jsverse/transloco-preload-langs@latest`
 
 
 # ESLint Setup (Webstorm)

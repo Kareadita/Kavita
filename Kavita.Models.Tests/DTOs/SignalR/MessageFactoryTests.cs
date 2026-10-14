@@ -192,7 +192,7 @@ public class MessageFactoryTests
     [Fact]
     public void LibraryScanEnded_IsATrackedScanProgressEnded()
     {
-        var message = MessageFactory.LibraryScanEndedEvent(new LibraryScanEndedEventBodyDto(4, "Manga", 1, 0, 12, 3, 1, 2, 1, []));
+        var message = MessageFactory.LibraryScanEndedEvent(new LibraryScanEndedEventBodyDto(4, "Manga", 1, 0, 12, 3, 1, 2, 1, [], true));
         var json = Serialize(message);
 
         Assert.Equal(MessageFactory.LibraryScanProgressEvent(4, "Manga", ProgressEventType.Updated).Name, message.Name);
@@ -232,6 +232,19 @@ public class MessageFactoryTests
         Assert.Equal("M:/, N:/", message.SubTitle);
         Assert.Equal(JsonValueKind.Array, body.GetProperty("folders").ValueKind);
         Assert.Equal(2, body.GetProperty("folders").GetArrayLength());
+    }
+
+    [Fact]
+    public void RootFoldersUnreadable_SaysTheScanWasAborted()
+    {
+        var message = MessageFactory.RootFoldersUnreadableEvent(1, "Manga", ["M:/", "N:/"]);
+        var body = Assert.IsType<RootFoldersUnreadableEventBodyDto>(message.Body);
+
+        Assert.Equal(MessageEventCode.RootFoldersUnreadable, message.Code);
+        Assert.Equal(MessageEventPriority.Error, message.Priority);
+        Assert.Contains("aborted", message.Title);
+        Assert.Equal("M:/, N:/", message.SubTitle);
+        Assert.Equal(["M:/", "N:/"], body.Folders);
     }
 
     [Fact]

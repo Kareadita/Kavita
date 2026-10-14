@@ -142,7 +142,7 @@ export class ActivityJobRowComponent {
 }
 
 function summaryPartsOf(summaries: LibraryScanSummary[]): SummaryPart[] {
-  const sum = (field: keyof Omit<LibraryScanSummary, 'libraryId' | 'libraryName' | 'recentProblemFiles'>) => summaries.reduce((total, s) => total + s[field], 0);
+  const sum = (field: keyof Omit<LibraryScanSummary, 'libraryId' | 'libraryName' | 'recentProblemFiles' | 'endsJob'>) => summaries.reduce((total, s) => total + s[field], 0);
 
   const changes: SummaryPart[] = [
     {key: 'scan-series-added-label', params: {count: sum('seriesAdded')}},
