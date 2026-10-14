@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.13",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.14",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.1.13"
+    "version": "0.9.1.14"
   },
   "servers": [
     {
@@ -27399,6 +27399,9 @@
               "$ref": "#/components/schemas/ScanIssueSummaryItemDto"
             },
             "nullable": true
+          },
+          "endsJob": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -28019,10 +28022,11 @@
           8,
           9,
           10,
-          11
+          11,
+          12
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — Unknown\n- `1` — Parse Failed (ParseFailed)\n- `2` — No Series Name (NoSeriesName)\n- `3` — Unreadable Archive (UnreadableArchive)\n- `5` — Corrupt Epub (CorruptEpub)\n- `6` — No Pages (NoPages)\n- `7` — Cover Failed (CoverFailed)\n- `8` — Word Count Failed (WordCountFailed)\n- `9` — I/O Error (IoError)\n- `10` — Metadata Unreadable (MetadataUnreadable)\n- `11` — Epub Not Strict (EpubNotStrict)",
+        "description": "Members:\n- `0` — Unknown\n- `1` — Parse Failed (ParseFailed)\n- `2` — No Series Name (NoSeriesName)\n- `3` — Unreadable Archive (UnreadableArchive)\n- `5` — Corrupt Epub (CorruptEpub)\n- `6` — No Pages (NoPages)\n- `7` — Cover Failed (CoverFailed)\n- `8` — Word Count Failed (WordCountFailed)\n- `9` — I/O Error (IoError)\n- `10` — Metadata Unreadable (MetadataUnreadable)\n- `11` — Epub Not Strict (EpubNotStrict)\n- `12` — Ambiguous Series (AmbiguousSeries)",
         "format": "int32",
         "x-enum-varnames": [
           "Unknown",
@@ -28035,7 +28039,8 @@
           "WordCountFailed",
           "IoError",
           "MetadataUnreadable",
-          "EpubNotStrict"
+          "EpubNotStrict",
+          "AmbiguousSeries"
         ],
         "x-enum-descriptions": [
           "Unknown",
@@ -28048,7 +28053,8 @@
           "Word Count Failed",
           "I/O Error",
           "Metadata Unreadable",
-          "Epub Not Strict"
+          "Epub Not Strict",
+          "Ambiguous Series"
         ]
       },
       "MemberDto": {
@@ -35805,6 +35811,9 @@
           "coverImage": {
             "type": "string",
             "nullable": true
+          },
+          "coverImageLocked": {
+            "type": "boolean"
           },
           "primaryColor": {
             "type": "string",
