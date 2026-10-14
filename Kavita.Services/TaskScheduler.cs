@@ -424,7 +424,7 @@ public class TaskScheduler : ITaskScheduler
         var target = ResolveScanFolder(path, false, libraries);
         if (target == null)
         {
-            _logger.LogWarning("Scan folder asked for {Path}, which is in no library. Dropping request", path);
+            _logger.LogWarning("Scan folder asked for {Path}, which is in no library. Dropping request", path.Sanitize());
             return;
         }
 
