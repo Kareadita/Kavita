@@ -27,7 +27,6 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
-using Kavita.Models.Scanner;
 using Kavita.Server.Attributes;
 using Kavita.Services.Extensions;
 using Kavita.Services.Scanner;
@@ -476,17 +475,7 @@ public class LibraryController(
             return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-path"));
         }
 
-        dto.FolderPath = Parser.NormalizePath(dto.FolderPath);
-
-        var libraryFolder = (await unitOfWork.LibraryRepository.GetLibraryDtosAsync(ct))
-            .SelectMany(l => l.Folders)
-            .Distinct()
-            .Select(Parser.NormalizePath);
-
-        var seriesFolder = directoryService.FindHighestDirectoriesFromFiles(libraryFolder, [dto.FolderPath]);
-
-        var folder = seriesFolder.Keys.Count == 1 ? seriesFolder.Keys.First() : dto.FolderPath;
-        await taskScheduler.EnqueueScanFolderAsync(new ScanFolderRequest(folder, string.Empty, dto.AbortOnNoSeriesMatch), TimeSpan.Zero);
+        await taskScheduler.EnqueueScanFolderFromApiAsync(dto.FolderPath, dto.AbortOnNoSeriesMatch);
 
         return Ok();
     }

@@ -42,7 +42,7 @@ public class ScanJobQueueTests : AbstractFsTest
     [Fact]
     public void ProcessingScanFolder_NotBusy()
     {
-        var jobId = BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest(AccelWorld, AccelWorld + "/v02.cbz", false)));
+        var jobId = BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest(1, AccelWorld, AccelWorld + "/v02.cbz", true, false)));
         HangfireJobs.MarkProcessing(jobId);
 
         Assert.False(ScanJobQueue.Read().Jobs.IsScannerBusy());
@@ -65,7 +65,7 @@ public class ScanJobQueueTests : AbstractFsTest
         var delayedRequest = BackgroundJob.Schedule<TaskScheduler>(t => t.EnqueueScanLibrary(2, true), TimeSpan.FromHours(3));
         var startedRequest = BackgroundJob.Enqueue<ITaskScheduler>(t => t.EnqueueScanLibrary(3, false));
         HangfireJobs.MarkProcessing(startedRequest);
-        BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest(AccelWorld, AccelWorld + "/v02.cbz", false)));
+        BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest(1, AccelWorld, AccelWorld + "/v02.cbz", true, false)));
 
         var jobs = ScanJobQueue.Read().Jobs
             .OrderBy(j => int.Parse(j.JobId))
@@ -96,7 +96,7 @@ public class ScanJobQueueTests : AbstractFsTest
     [Fact]
     public void ScheduledScanFolder_KeepsRequestAndRunTime()
     {
-        var request = new ScanFolderRequest(AccelWorld, AccelWorld + "/v02.cbz", false);
+        var request = new ScanFolderRequest(1, AccelWorld, AccelWorld + "/v02.cbz", true, false);
         var before = DateTime.UtcNow;
         var jobId = BackgroundJob.Schedule<ScannerService>(s => s.ScanFolder(request), TimeSpan.FromSeconds(30));
 
@@ -108,7 +108,7 @@ public class ScanJobQueueTests : AbstractFsTest
     [Fact]
     public void EnqueuedScanFolder_HasNoRunTime()
     {
-        BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest(AccelWorld, string.Empty, false)));
+        BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest(1, AccelWorld, AccelWorld, false, false)));
 
         Assert.Null(Assert.Single(ScanJobQueue.Read().FolderJobs).RunAtUtc);
     }

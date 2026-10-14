@@ -64,43 +64,11 @@ public class LibraryWatcherTests : AbstractFsTest, IDisposable
             Substitute.For<IHostEnvironment>(), Substitute.For<ITaskScheduler>());
     }
 
-    private static LibraryWatcher CreateWatcher()
-    {
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
-        return new LibraryWatcher(ds, Substitute.For<IUnitOfWork>(), Substitute.For<ILogger<LibraryWatcher>>(),
-            Substitute.For<IHostEnvironment>(), Substitute.For<ITaskScheduler>());
-    }
-
     private static async Task<WatcherErrorAction[]> RaiseErrorsAtOnce(LibraryWatcher libraryWatcher,
         IEnumerable<FileSystemWatcher> watchers)
     {
         return await Task.WhenAll(watchers
             .Select(w => Task.Run(() => libraryWatcher.HandleErrorAsync(w, new IOException("error")))));
-    }
-
-    private static string GetRootedFolder(string[] libraryFolders, string filePath)
-    {
-        return CreateWatcher().GetFolder(Root + filePath, libraryFolders.Select(f => Root + f));
-    }
-
-    [Theory]
-    [InlineData(new[] {"Fiction"}, "Fiction/Author/Book.epub", "Fiction/Author")]
-    [InlineData(new[] {"Fiction"}, "Fiction/Author/Series/Book.epub", "Fiction/Author")]
-    [InlineData(new[] {""}, "Accel World/Accel World v01.cbz", "Accel World")]
-    [InlineData(new[] {""}, "Accel World v01.cbz", "")]
-    [InlineData(new[] {"Fiction"}, "Other/Book.epub", "")]
-    public void GetFolder_ReturnsTopFolderUnderLibraryRoot(string[] libraryFolders, string filePath, string expected)
-    {
-        var expectedFolder = expected == string.Empty ? string.Empty : Root + expected;
-        Assert.Equal(expectedFolder, GetRootedFolder(libraryFolders, filePath));
-    }
-
-    [Theory]
-    [InlineData(new[] {"Fiction", "Fiction2"}, "Fiction2/Author/Book.epub", "Fiction2/Author")]
-    [InlineData(new[] {"", "Fiction"}, "Fiction/Author/Book.epub", "Fiction/Author")]
-    public void GetFolder_PicksTheLibraryRootTheFileIsIn(string[] libraryFolders, string filePath, string expected)
-    {
-        Assert.Equal(Root + expected, GetRootedFolder(libraryFolders, filePath));
     }
 
     [Fact]

@@ -1264,31 +1264,33 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     }
 
     /// <summary>
-    /// Every series whose FolderPath or LowestFolderPath equals the folder
+    /// Every series of the library whose FolderPath or LowestFolderPath equals the folder
     /// </summary>
-    public async Task<IList<Series>> GetSeriesByFolderPathAsync(string folder, SeriesIncludes includes = SeriesIncludes.None,
+    public async Task<IList<Series>> GetSeriesByFolderPathAsync(int libraryId, string folder, SeriesIncludes includes = SeriesIncludes.None,
         CancellationToken ct = default)
     {
         var normalized = folder.NormalizePath().TrimEnd('/');
         if (string.IsNullOrEmpty(normalized)) return [];
 
         return await context.Series
+            .Where(s => s.LibraryId == libraryId)
             .Where(s => s.FolderPath == normalized || s.LowestFolderPath == normalized)
             .Includes(includes)
             .ToListAsync(ct);
     }
 
     /// <summary>
-    /// The series whose LowestFolderPath is the deepest folder containing the path (or equal to it). Several when
-    /// they share that folder
+    /// The series of the library whose LowestFolderPath is the deepest folder containing the path (or equal to it).
+    /// Several when they share that folder
     /// </summary>
-    public async Task<IList<Series>> GetSeriesThatContainsLowestFolderPathAsync(string path,
+    public async Task<IList<Series>> GetSeriesThatContainsLowestFolderPathAsync(int libraryId, string path,
         SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
     {
         var candidates = SelfAndParentFolders(path.NormalizePath().TrimEnd('/'));
         if (candidates.Count == 0) return [];
 
         var matches = await context.Series
+            .Where(s => s.LibraryId == libraryId)
             .Where(s => s.LowestFolderPath != null && candidates.Contains(s.LowestFolderPath))
             .Includes(includes)
             .ToListAsync(ct);

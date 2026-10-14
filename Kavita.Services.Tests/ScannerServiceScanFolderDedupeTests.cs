@@ -30,6 +30,7 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
     private static readonly string AccelWorldFile = AccelWorldFolder + "/Accel World v02.cbz";
 
     private readonly ITestOutputHelper _testOutputHelper;
+    private int _libraryId;
     private readonly IEventHub _eventHub = Substitute.For<IEventHub>();
 
     public ScannerServiceScanFolderDedupeTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
@@ -91,11 +92,42 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
     {
         var (scanner, library, _) = await CreateServices();
 
-        await scanner.ScanFolder(new ScanFolderRequest(Root + "YenPress", Root + "YenPress/Frieren/Frieren v02.cbz", false));
-        await scanner.ScanFolder(new ScanFolderRequest(Root + "YenPress", Root + "YenPress/Spy x Family/Spy x Family v02.cbz", false));
+        await scanner.ScanFolder(Change(Root + "YenPress", Root + "YenPress/Frieren/Frieren v02.cbz"));
+        await scanner.ScanFolder(Change(Root + "YenPress", Root + "YenPress/Spy x Family/Spy x Family v02.cbz"));
 
         Assert.Single(SeriesScanRequests(SeriesId(library, "Frieren")));
         Assert.Single(SeriesScanRequests(SeriesId(library, "Spy x Family")));
+    }
+
+    [Theory]
+    [InlineData("New Series", true, false)]
+    [InlineData("New Series", false, true)]
+    [InlineData("YenPress", true, false)]
+    [InlineData("YenPress", false, true)]
+    public async Task ScanFolder_FromApi_NoSeriesMatch_HonorsAbort(string folder, bool abort, bool expectLibraryScan)
+    {
+        var (scanner, library, taskScheduler) = await CreateServices();
+
+        await ScanFolderFromApi(scanner, taskScheduler, Root + folder, abort);
+
+        var jobs = ScanJobQueue.Read().Jobs;
+        Assert.DoesNotContain(jobs, j => j.Target.SeriesId != null);
+        Assert.Equal(expectLibraryScan, jobs.Any(j => j.Target == ScanTarget.Library(library.Id)));
+    }
+
+    [Theory]
+    [InlineData("Solo", "Solo")]
+    [InlineData("Dr. Stone", "Dr. Stone")]
+    [InlineData("YenPress/Frieren", "Frieren")]
+    [InlineData("YenPress/Frieren/Frieren v01.cbz", "Frieren")]
+    public async Task ScanFolder_FromApi_AbortSet_ScansTheSeries(string path, string series)
+    {
+        var (scanner, library, taskScheduler) = await CreateServices();
+
+        await ScanFolderFromApi(scanner, taskScheduler, Root + path, true);
+
+        var request = Assert.Single(ScanJobQueue.Read().Jobs, j => j.Target.SeriesId != null);
+        Assert.Equal(SeriesId(library, series), request.Target.SeriesId);
     }
 
     [Fact]
@@ -142,7 +174,7 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
         await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFolder + "/Accel World v03.cbz"), TimeSpan.FromSeconds(30));
         Assert.Equal(1, ScanRescheduledCount());
 
-        await taskScheduler.EnqueueScanFolderAsync(new ScanFolderRequest(Root + "YenPress", Root + "YenPress/Frieren/Frieren v02.cbz", false),
+        await taskScheduler.EnqueueScanFolderAsync(Change(Root + "YenPress", Root + "YenPress/Frieren/Frieren v02.cbz"),
             TimeSpan.FromSeconds(30));
         Assert.Equal(2, ScanRescheduledCount());
     }
@@ -163,7 +195,7 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
     public async Task ScanFolder_LastJobForTheFolder_SendsScanRescheduled()
     {
         var (scanner, _, _) = await CreateServices();
-        var otherFolder = new ScanFolderRequest(Root + "YenPress", Root + "YenPress/Frieren/Frieren v02.cbz", false);
+        var otherFolder = Change(Root + "YenPress", Root + "YenPress/Frieren/Frieren v02.cbz");
         BackgroundJob.Schedule<ScannerService>(s => s.ScanFolder(otherFolder), TimeSpan.FromSeconds(30));
 
         await scanner.ScanFolder(AccelWorldChange(AccelWorldFile));
@@ -215,6 +247,8 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
             .WithSeries(SeriesInFolder("Accel World", Root + "Accel World", Root + "Accel World"))
             .WithSeries(SeriesInFolder("Frieren", Root + "YenPress", Root + "YenPress/Frieren"))
             .WithSeries(SeriesInFolder("Spy x Family", Root + "YenPress", Root + "YenPress/Spy x Family"))
+            .WithSeries(SeriesInFolder("Solo", Root + "Solo", Root + "Solo/Vol 1"))
+            .WithSeries(SeriesInFolder("Dr. Stone", Root + "Dr. Stone", Root + "Dr. Stone"))
             .Build();
         unitOfWork.LibraryRepository.Add(library);
         await unitOfWork.CommitAsync();
@@ -229,10 +263,19 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
             Substitute.For<ISmartCollectionSyncService>(), Substitute.For<IWantToReadSyncService>(), _eventHub,
             Substitute.For<IEmailService>(), Substitute.For<IAuthKeyService>());
 
+        _libraryId = library.Id;
         return (scanner, library, taskScheduler);
     }
 
-    private static ScanFolderRequest AccelWorldChange(string changedPath) => new(AccelWorldFolder, changedPath, false);
+    private ScanFolderRequest AccelWorldChange(string changedPath) => Change(AccelWorldFolder, changedPath);
+
+    private ScanFolderRequest Change(string folder, string changedPath) => new(_libraryId, folder, changedPath, true, false);
+
+    private static async Task ScanFolderFromApi(ScannerService scanner, TaskScheduler taskScheduler, string path, bool abort)
+    {
+        await taskScheduler.EnqueueScanFolderFromApiAsync(path, abort);
+        await scanner.ScanFolder(Assert.Single(ScanJobQueue.Read().FolderJobs).Request);
+    }
 
     private int ScanRescheduledCount()
     {

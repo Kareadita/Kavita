@@ -42,7 +42,7 @@ public class ScannerServiceScanFolderTests(ITestOutputHelper testOutputHelper) :
         await unitOfWork.CommitAsync();
 
         var scanner = new ScannerHelper(unitOfWork, testOutputHelper).CreateServices();
-        var series = await scanner.FindSeriesForFolder(folder, originalPath);
+        var series = await scanner.FindSeriesForFolder(library.Id, folder, originalPath);
 
         Assert.Equal(expected, series?.Name);
     }

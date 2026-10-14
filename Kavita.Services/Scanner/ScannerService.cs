@@ -128,42 +128,22 @@ public class ScannerService(
 
     private async Task RequestScanForFolder(ScanFolderRequest request)
     {
-        var folder = request.Folder;
-        var series = await FindSeriesForFolder(folder, request.ChangedPath);
+        var series = await FindSeriesForFolder(request.LibraryId, request.Folder, request.ChangedPath, request.AbortOnNoSeriesMatch);
 
         if (series != null)
         {
-            RequestScan(ScanTarget.Series(series.LibraryId, series.Id), folder);
+            RequestScan(ScanTarget.Series(series.LibraryId, series.Id), request.Folder);
             return;
         }
 
-        if (request.AbortOnNoSeriesMatch) return;
-
-
-        // This is basically rework of what's already done in Library Watcher but is needed if invoked via API
-        var parentDirectory = directoryService.GetParentDirectoryName(folder);
-        if (string.IsNullOrEmpty(parentDirectory))
+        if (request.AbortOnNoSeriesMatch)
         {
-            logger.LogWarning("[ScannerService] Scan folder invoked for {Folder} but parent directory is empty. Dropping request", folder);
+            logger.LogInformation("[ScannerService] Scan folder invoked for {Path} but no single series owns it. Dropping request, abortOnNoSeriesMatch is set",
+                request.ChangedPath);
             return;
         }
 
-        var libraries = (await unitOfWork.LibraryRepository.GetLibraryDtosAsync()).ToList();
-        var libraryFolders = libraries.SelectMany(l => l.Folders);
-        var libraryFolder = folder.DeepestContainingFolder(libraryFolders.Select(Parser.NormalizePath));
-
-        if (string.IsNullOrEmpty(libraryFolder))
-        {
-            logger.LogWarning("[ScannerService] Scan folder invoked for {Folder} but no matching library found. Dropping request", folder);
-            return;
-        }
-
-        var library = libraries.Find(l => l.Folders.Select(Parser.NormalizePath).Contains(libraryFolder));
-
-        if (library != null)
-        {
-            RequestScan(ScanTarget.Library(library.Id), folder);
-        }
+        RequestScan(ScanTarget.Library(request.LibraryId), request.Folder);
     }
 
     internal void RequestScan(ScanTarget target, string folder)
@@ -194,11 +174,13 @@ public class ScannerService(
     /// The one series that owns the changed path. Null when there is none, or when several could own it and only a
     /// library scan would pick up a new series beside them
     /// </summary>
-    internal async Task<Series?> FindSeriesForFolder(string folder, string originalPath)
+    /// <param name="seriesOrNothing">The caller drops the request on no match, so the only series whose top folder
+    /// is <paramref name="folder"/> is taken even when a new series beside it would be missed</param>
+    internal async Task<Series?> FindSeriesForFolder(int libraryId, string folder, string originalPath, bool seriesOrNothing = false)
     {
         var path = string.IsNullOrEmpty(originalPath) ? folder : originalPath;
 
-        var byLowestFolder = await unitOfWork.SeriesRepository.GetSeriesThatContainsLowestFolderPathAsync(path, SeriesIncludes.Library);
+        var byLowestFolder = await unitOfWork.SeriesRepository.GetSeriesThatContainsLowestFolderPathAsync(libraryId, path, SeriesIncludes.Library);
         if (byLowestFolder.Count == 1) return byLowestFolder[0];
 
         if (byLowestFolder.Count > 1)
@@ -209,8 +191,8 @@ public class ScannerService(
         }
 
         // Every series under a publisher folder has it as FolderPath, and ScanSeries would drop a new series beside them
-        var byFolder = await unitOfWork.SeriesRepository.GetSeriesByFolderPathAsync(folder, SeriesIncludes.Library);
-        if (byFolder.Count == 1 && string.IsNullOrEmpty(byFolder[0].LowestFolderPath)) return byFolder[0];
+        var byFolder = await unitOfWork.SeriesRepository.GetSeriesByFolderPathAsync(libraryId, folder, SeriesIncludes.Library);
+        if (byFolder.Count == 1 && (seriesOrNothing || string.IsNullOrEmpty(byFolder[0].LowestFolderPath))) return byFolder[0];
 
         if (byFolder.Count > 0)
         {
@@ -617,8 +599,13 @@ public class ScannerService(
         var sw = Stopwatch.StartNew();
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
+        if (library == null)
+        {
+            logger.LogInformation("[ScannerService] Library {LibraryId} no longer exists, skipping its scan", libraryId);
+            return;
+        }
 
-        var libraryFolderPaths = library!.Folders.Select(fp => fp.Path).ToList();
+        var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Id, library.Name, libraryFolderPaths)) return;
 
         try
