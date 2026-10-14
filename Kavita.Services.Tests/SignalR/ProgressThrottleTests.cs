@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Kavita.Database.Tests;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Services.SignalR;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -11,7 +12,7 @@ using Xunit;
 
 namespace Kavita.Services.Tests.SignalR;
 
-public class ProgressThrottleTests
+public class ProgressThrottleTests : AbstractFsTest
 {
     private static readonly TimeSpan Interval = TimeSpan.FromMilliseconds(100);
     private static readonly TimeSpan AfterFlush = TimeSpan.FromMilliseconds(400);
@@ -27,7 +28,7 @@ public class ProgressThrottleTests
 
     private static SignalRMessageDto Folder(int current, string eventType = ProgressEventType.Updated,
         string? code = MessageEventCode.ScanListingFolders) =>
-        MessageFactory.FileScanProgressEvent($"M:/{current}", 1, "Manga", eventType, code, current, 100);
+        MessageFactory.FileScanProgressEvent($"{Root}{current}", 1, "Manga", eventType, code, current, 100);
 
     [Fact]
     public async Task Burst_SendsFirstImmediately_ThenOnlyTheNewest()
@@ -35,12 +36,12 @@ public class ProgressThrottleTests
         for (var i = 1; i <= 100; i++) await Send(Folder(i));
 
         Assert.Single(_sent);
-        Assert.Equal("M:/1", _sent.First().SubTitle);
+        Assert.Equal(Root + "1", _sent.First().SubTitle);
 
         await Task.Delay(AfterFlush);
 
         Assert.Equal(2, _sent.Count);
-        Assert.Equal("M:/100", _sent.Last().SubTitle);
+        Assert.Equal(Root + "100", _sent.Last().SubTitle);
     }
 
     [Fact]
@@ -94,12 +95,12 @@ public class ProgressThrottleTests
 
         await clock.FireDueTimersAsync();       // the late delayed send wakes up
 
-        Assert.Equal(["M:/1", "M:/3"], sent.Select(x => x.Folder));
+        Assert.Equal([Root + "1", Root + "3"], sent.Select(x => x.Folder));
 
         clock.Advance(Interval);
         await clock.FireDueTimersAsync();
 
-        Assert.Equal(["M:/1", "M:/3", "M:/4"], sent.Select(x => x.Folder));
+        Assert.Equal([Root + "1", Root + "3", Root + "4"], sent.Select(x => x.Folder));
         Assert.Equal(Interval, sent.Last().At - sent.ElementAt(1).At);
     }
 

@@ -23,7 +23,7 @@ public class BasicParserTests : AbstractFsTest
         fileSystem.AddFile($"{_rootDirectory}Accel World/Accel World - Volume 1.cbz", new MockFileData(""));
         fileSystem.AddFile($"{_rootDirectory}Accel World/Accel World - Volume 1 Chapter 2.cbz", new MockFileData(""));
         fileSystem.AddFile($"{_rootDirectory}Accel World/Accel World - Chapter 3.cbz", new MockFileData(""));
-        fileSystem.AddFile("$\"{RootDirectory}Accel World/Accel World Gaiden SP01.cbz", new MockFileData(""));
+        fileSystem.AddFile($"{_rootDirectory}Accel World/Accel World Gaiden SP01.cbz", new MockFileData(""));
 
 
         fileSystem.AddFile($"{_rootDirectory}Accel World/cover.png", new MockFileData(""));
@@ -151,8 +151,8 @@ public class BasicParserTests : AbstractFsTest
     [Fact]
     public void Parse_MangaLibrary_SpecialInFilename2()
     {
-        var actual = _parser.Parse("M:/Kimi wa Midara na Boku no Joou/Specials/[Renzokusei] Special 1 SP02.zip",
-            "M:/Kimi wa Midara na Boku no Joou/",
+        var actual = _parser.Parse(Root + "Kimi wa Midara na Boku no Joou/Specials/[Renzokusei] Special 1 SP02.zip",
+            Root + "Kimi wa Midara na Boku no Joou/",
             _rootDirectory, LibraryType.Manga).Info;
         Assert.NotNull(actual);
 

@@ -1,6 +1,7 @@
 using System.IO.Abstractions.TestingHelpers;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.Database.Tests;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Services.Scanner;
@@ -10,7 +11,7 @@ using NSubstitute;
 
 namespace Kavita.Services.Tests;
 
-public class LibraryWatcherTests : IDisposable
+public class LibraryWatcherTests : AbstractFsTest, IDisposable
 {
     private readonly string _root = Path.Join(Path.GetTempPath(), "LibraryWatcherTests", Guid.NewGuid().ToString());
     private readonly List<string> _libraryFolders = [];
@@ -77,28 +78,29 @@ public class LibraryWatcherTests : IDisposable
             .Select(w => Task.Run(() => libraryWatcher.HandleErrorAsync(w, new IOException("error")))));
     }
 
-    [Theory]
-    [InlineData(new[] {"B:/Fiction"}, "B:/Fiction/Author/Book.epub", "B:/Fiction/Author")]
-    [InlineData(new[] {"B:/Fiction"}, "B:/Fiction/Author/Series/Book.epub", "B:/Fiction/Author")]
-    [InlineData(new[] {"M:/"}, "M:/Accel World/Accel World v01.cbz", "M:/Accel World")]
-    [InlineData(new[] {"M:/"}, "M:/Accel World v01.cbz", "")]
-    [InlineData(new[] {"B:/Fiction"}, "C:/Other/Book.epub", "")]
-    public void GetFolder_ReturnsTopFolderUnderLibraryRoot(string[] libraryFolders, string filePath, string expected)
+    private static string GetRootedFolder(string[] libraryFolders, string filePath)
     {
-        // GetParentDirectoryName goes through System.IO, which reads B:/ as a relative path off Windows
-        if (!OperatingSystem.IsWindows()) return;
-
-        Assert.Equal(expected, CreateWatcher().GetFolder(filePath, libraryFolders));
+        return CreateWatcher().GetFolder(Root + filePath, libraryFolders.Select(f => Root + f));
     }
 
     [Theory]
-    [InlineData(new[] {"B:/Fiction", "B:/Fiction2"}, "B:/Fiction2/Author/Book.epub", "B:/Fiction2/Author")]
-    [InlineData(new[] {"B:/", "B:/Fiction"}, "B:/Fiction/Author/Book.epub", "B:/Fiction/Author")]
+    [InlineData(new[] {"Fiction"}, "Fiction/Author/Book.epub", "Fiction/Author")]
+    [InlineData(new[] {"Fiction"}, "Fiction/Author/Series/Book.epub", "Fiction/Author")]
+    [InlineData(new[] {""}, "Accel World/Accel World v01.cbz", "Accel World")]
+    [InlineData(new[] {""}, "Accel World v01.cbz", "")]
+    [InlineData(new[] {"Fiction"}, "Other/Book.epub", "")]
+    public void GetFolder_ReturnsTopFolderUnderLibraryRoot(string[] libraryFolders, string filePath, string expected)
+    {
+        var expectedFolder = expected == string.Empty ? string.Empty : Root + expected;
+        Assert.Equal(expectedFolder, GetRootedFolder(libraryFolders, filePath));
+    }
+
+    [Theory]
+    [InlineData(new[] {"Fiction", "Fiction2"}, "Fiction2/Author/Book.epub", "Fiction2/Author")]
+    [InlineData(new[] {"", "Fiction"}, "Fiction/Author/Book.epub", "Fiction/Author")]
     public void GetFolder_PicksTheLibraryRootTheFileIsIn(string[] libraryFolders, string filePath, string expected)
     {
-        if (!OperatingSystem.IsWindows()) return;
-
-        Assert.Equal(expected, CreateWatcher().GetFolder(filePath, libraryFolders));
+        Assert.Equal(Root + expected, GetRootedFolder(libraryFolders, filePath));
     }
 
     [Fact]

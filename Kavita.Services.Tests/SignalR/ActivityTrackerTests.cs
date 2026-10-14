@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Kavita.Database.Tests;
 using Kavita.Models.DTOs.MediaErrors;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.SignalR.Bodies;
@@ -10,7 +11,7 @@ using Xunit;
 
 namespace Kavita.Services.Tests.SignalR;
 
-public class ActivityTrackerTests
+public class ActivityTrackerTests : AbstractFsTest
 {
     private const string JobId = "6";
     private const string CorrelationId = "d8d37d43." + JobId;
@@ -48,23 +49,23 @@ public class ActivityTrackerTests
     [Fact]
     public void Updates_KeepOnlyTheLatestMessage()
     {
-        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Started));
-        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/B"));
-        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/C"));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder(Root + "A", ProgressEventType.Started));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder(Root + "B"));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder(Root + "C"));
 
         var running = _tracker.GetRunning(_processing);
 
         Assert.Single(running);
-        Assert.Equal("M:/C", running[0].SubTitle);
+        Assert.Equal(Root + "C", running[0].SubTitle);
     }
 
     [Fact]
     public void Ended_RemovesOnlyThatName()
     {
-        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Started));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder(Root + "A", ProgressEventType.Started));
         _tracker.Record(MessageFactory.NotificationProgress, Series(ProgressEventType.Started));
 
-        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Ended));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder(Root + "A", ProgressEventType.Ended));
 
         var running = _tracker.GetRunning(_processing);
         Assert.Single(running);
@@ -95,7 +96,7 @@ public class ActivityTrackerTests
     [Fact]
     public void JobNoLongerProcessing_IsDropped()
     {
-        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Started));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder(Root + "A", ProgressEventType.Started));
 
         Assert.Empty(_tracker.GetRunning(new HashSet<string>()));
         Assert.Empty(_tracker.GetRunning(_processing));
@@ -104,7 +105,7 @@ public class ActivityTrackerTests
     [Fact]
     public void NoCorrelationId_DroppedOnceStale()
     {
-        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Started, correlationId: null));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder(Root + "A", ProgressEventType.Started, correlationId: null));
 
         _time.Advance(ActivityTracker.NoJobStaleAfter - TimeSpan.FromSeconds(1));
         Assert.Single(_tracker.GetRunning(_processing));
@@ -120,30 +121,30 @@ public class ActivityTrackerTests
         for (var i = 0; i <= ActivityTracker.MaxRows; i++)
         {
             processing.Add(i.ToString());
-            _tracker.Record(MessageFactory.NotificationProgress, Folder($"M:/{i}", ProgressEventType.Started, $"d8d37d43.{i}"));
+            _tracker.Record(MessageFactory.NotificationProgress, Folder($"{Root}{i}", ProgressEventType.Started, $"d8d37d43.{i}"));
             _time.Advance(TimeSpan.FromSeconds(1));
         }
 
         var running = _tracker.GetRunning(processing);
 
         Assert.Equal(ActivityTracker.MaxRows, running.Count);
-        Assert.DoesNotContain(running, m => m.SubTitle == "M:/0");
-        Assert.Equal("M:/1", running.First().SubTitle);
+        Assert.DoesNotContain(running, m => m.SubTitle == Root + "0");
+        Assert.Equal(Root + "1", running.First().SubTitle);
     }
 
     private static SignalRMessageDto ScanEnded(int libraryId = 1, int chaptersAdded = 12)
     {
         var message = MessageFactory.LibraryScanEndedEvent(
             new LibraryScanEndedEventBodyDto(libraryId, "Manga", 2, 0, chaptersAdded, 3, 1, 4, 1,
-                [new ScanIssueSummaryItemDto("M:/A/A Vol 2.cbz", MediaErrorReason.UnreadableArchive, 7, "A")], true));
+                [new ScanIssueSummaryItemDto(Root + "A/A Vol 2.cbz", MediaErrorReason.UnreadableArchive, 7, "A")], true));
         message.CorrelationId = CorrelationId;
         return message;
     }
 
     private void RunScan()
     {
-        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Started));
-        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Ended));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder(Root + "A", ProgressEventType.Started));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder(Root + "A", ProgressEventType.Ended));
         _tracker.Record(MessageFactory.NotificationProgress, Series(ProgressEventType.Updated));
         _tracker.Record(MessageFactory.NotificationProgress, ScanEnded());
     }
@@ -175,7 +176,7 @@ public class ActivityTrackerTests
         var job = Assert.Single(_tracker.GetRecentJobs(new HashSet<string>()));
 
         var issue = Assert.Single(Assert.Single(job.ScanSummaries).RecentProblemFiles);
-        Assert.Equal("M:/A/A Vol 2.cbz", issue.FilePath);
+        Assert.Equal(Root + "A/A Vol 2.cbz", issue.FilePath);
         Assert.Equal(7, issue.SeriesId);
     }
 
@@ -195,8 +196,8 @@ public class ActivityTrackerTests
     [Fact]
     public void ScanWithNoChanges_StillRecordsSummary()
     {
-        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Started));
-        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Ended));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder(Root + "A", ProgressEventType.Started));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder(Root + "A", ProgressEventType.Ended));
         _tracker.Record(MessageFactory.NotificationProgress, ScanEnded(chaptersAdded: 0));
 
         var job = Assert.Single(_tracker.GetRecentJobs(new HashSet<string>()));
@@ -227,7 +228,7 @@ public class ActivityTrackerTests
     [Fact]
     public void NoCorrelationId_HasNoHistory()
     {
-        _tracker.Record(MessageFactory.NotificationProgress, Folder("M:/A", ProgressEventType.Started, correlationId: null));
+        _tracker.Record(MessageFactory.NotificationProgress, Folder(Root + "A", ProgressEventType.Started, correlationId: null));
 
         Assert.Empty(_tracker.GetRecentJobs(new HashSet<string>()));
     }

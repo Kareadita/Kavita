@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
+using Kavita.Database.Tests;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Parser;
 using Kavita.Services.Builders;
@@ -9,7 +10,7 @@ using NSubstitute;
 
 namespace Kavita.Services.Tests.Extensions;
 
-public class ParserInfoListExtensions
+public class ParserInfoListExtensions : AbstractFsTest
 {
     private readonly IDefaultParser _defaultParser;
     public ParserInfoListExtensions()
@@ -27,20 +28,20 @@ public class ParserInfoListExtensions
     }
 
     [Theory]
-    [InlineData(new[] {@"Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, new[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, true)]
-    [InlineData(new[] {@"Cynthia The Mission - c000-006 (v06-07) [Desudesu&Brolen].zip"}, new[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, false)]
-    [InlineData(new[] {@"Cynthia The Mission v20 c12-20 [Desudesu&Brolen].zip"}, new[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, false)]
+    [InlineData(new[] {@"Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, new[] {@"Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, true)]
+    [InlineData(new[] {@"Cynthia The Mission - c000-006 (v06-07) [Desudesu&Brolen].zip"}, new[] {@"Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, false)]
+    [InlineData(new[] {@"Cynthia The Mission v20 c12-20 [Desudesu&Brolen].zip"}, new[] {@"Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, false)]
     public void HasInfoTest(string[] inputInfos, string[] inputChapters, bool expectedHasInfo)
     {
         var infos = new List<ParserInfo>();
         foreach (var filename in inputInfos)
         {
             infos.Add(_defaultParser.Parse(
-                Path.Join("E:/Manga/Cynthia the Mission/", filename),
-                "E:/Manga/", "E:/Manga/", LibraryType.Manga).Info!);
+                Path.Join(Root + "Manga/Cynthia the Mission/", filename),
+                Root + "Manga/", Root + "Manga/", LibraryType.Manga).Info!);
         }
 
-        var files = inputChapters.Select(s => new MangaFileBuilder(s, MangaFormat.Archive, 199).Build()).ToList();
+        var files = inputChapters.Select(s => new MangaFileBuilder(Root + s, MangaFormat.Archive, 199).Build()).ToList();
         var chapter = new ChapterBuilder("0-6")
             .WithFiles(files)
             .Build();
@@ -54,11 +55,11 @@ public class ParserInfoListExtensions
         var infos = new[]
         {
             _defaultParser.Parse(
-                "E:/Manga/Cynthia the Mission/Cynthia The Mission The Special SP01 [Desudesu&Brolen].zip",
-                "E:/Manga/", "E:/Manga/", LibraryType.Manga).Info!
+                Root + "Manga/Cynthia the Mission/Cynthia The Mission The Special SP01 [Desudesu&Brolen].zip",
+                Root + "Manga/", Root + "Manga/", LibraryType.Manga).Info!
         };
 
-    var files = new[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission The Special SP01 [Desudesu&Brolen].zip"}
+    var files = new[] {Root + @"Manga\Cynthia the Mission\Cynthia The Mission The Special SP01 [Desudesu&Brolen].zip"}
             .Select(s => new MangaFileBuilder(s, MangaFormat.Archive, 199).Build())
             .ToList();
         var chapter = new ChapterBuilder("Cynthia The Mission The Special SP01 [Desudesu&Brolen].zip")

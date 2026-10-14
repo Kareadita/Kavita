@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.Xml;
 using Kavita.API.Services;
+using Kavita.Database.Tests;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
@@ -11,10 +12,12 @@ using NSubstitute.ExceptionExtensions;
 
 namespace Kavita.Services.Tests;
 
-public class ReadingItemServiceTests
+public class ReadingItemServiceTests : AbstractFsTest
 {
-    private const string EpubPath = "B:/Fiction/Martha Wells/The Murderbot Diaries/Fugitive Telemetry.epub";
-    private const string ArchivePath = "M:/Manga/Accel World/Accel World Vol. 1.cbz";
+    private static readonly string EpubFolder = Root + "Fiction/Martha Wells/The Murderbot Diaries";
+    private static readonly string EpubPath = EpubFolder + "/Fugitive Telemetry.epub";
+    private static readonly string ArchiveFolder = Root + "Manga/Accel World";
+    private static readonly string ArchivePath = ArchiveFolder + "/Accel World Vol. 1.cbz";
 
     private readonly IBookService _bookService = Substitute.For<IBookService>();
     private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
@@ -39,14 +42,14 @@ public class ReadingItemServiceTests
     };
 
     private ParseFileResult ParseEpub() =>
-        _readingItemService.ParseFile(EpubPath, "B:/Fiction/Martha Wells/The Murderbot Diaries", "B:/Fiction", LibraryType.Book, true);
+        _readingItemService.ParseFile(EpubPath, EpubFolder, Root + "Fiction", LibraryType.Book, true);
 
     [Fact]
     public void ParseFile_UnreadableComicInfo_IsImportedWithAnIssue()
     {
         _archiveService.GetComicInfo(ArchivePath).Throws(new InvalidDataException("End of Central Directory record could not be found."));
 
-        var result = _readingItemService.ParseFile(ArchivePath, "M:/Manga/Accel World", "M:/Manga", LibraryType.Manga, true);
+        var result = _readingItemService.ParseFile(ArchivePath, ArchiveFolder, Root + "Manga", LibraryType.Manga, true);
 
         Assert.Equal("Accel World", result.Info?.Series);
         Assert.Equal(MediaErrorReason.MetadataUnreadable, result.Issue?.Reason);

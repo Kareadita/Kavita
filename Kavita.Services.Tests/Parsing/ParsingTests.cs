@@ -294,9 +294,9 @@ public class ParsingTests
     [InlineData("._Love Hina/Love Hina/", true)]
     [InlineData("@Recently-Snapshot/Love Hina/", true)]
     [InlineData("@recycle/Love Hina/", true)]
-    [InlineData("E:/Test/__MACOSX/Love Hina/", true)]
-    [InlineData("E:/Test/.caltrash/Love Hina/", true)]
-    [InlineData("E:/Test/.yacreaderlibrary/Love Hina/", true)]
+    [InlineData("Test/__MACOSX/Love Hina/", true)]
+    [InlineData("Test/.caltrash/Love Hina/", true)]
+    [InlineData("Test/.yacreaderlibrary/Love Hina/", true)]
     public void HasBlacklistedFolderInPathTest(string inputPath, bool expected)
     {
         Assert.Equal(expected, HasBlacklistedFolderInPath(inputPath));
