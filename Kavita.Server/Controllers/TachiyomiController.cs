@@ -45,7 +45,7 @@ public class TachiyomiController(
         [FromQuery] bool generateReadingSessions = true)
     {
         var ct = HttpContext.RequestAborted;
-        var user = (await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct))!;
+        var user = (await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, ct: ct))!;
 
         return Ok(await tachiyomiService.MarkChaptersUntilAsRead(user, seriesId, chapterNumber, generateReadingSessions, ct));
     }

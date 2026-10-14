@@ -35,8 +35,8 @@ jobs:
         run: dotnet test --no-restore --verbosity normal --filter "Category!=Integration"
 
   test-macos:
-    name: Test PR (macOS)
-    runs-on: macos-latest
+    name: Test PR (linux)
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v5

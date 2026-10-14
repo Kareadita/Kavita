@@ -192,6 +192,11 @@ export class MatchSeriesModalComponent implements OnInit {
       this.matchInfo.set(res);
       this.formGroup.provider().value.set(res.metadataProvider);
       this.autoSelectExistingMatch(this.matches());
+
+      // Default is MangaBaka so the set above wouldn't trigger the search effect
+      if (res.metadataProvider === MetadataProvider.Mangabaka) {
+        this.search();
+      }
     });
 
     this.formGroup.dontMatch().value.set(this.series().dontMatch || false);

@@ -331,7 +331,7 @@ public class StatsService : IStatsService
         var allUsers = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.UserPreferences
                                                                          | AppUserIncludes.ReadingLists | AppUserIncludes.Bookmarks
                                                                          | AppUserIncludes.Collections | AppUserIncludes.Devices
-                                                                         | AppUserIncludes.Progress | AppUserIncludes.Ratings
+                                                                         | AppUserIncludes.Ratings
                                                                          | AppUserIncludes.SmartFilters | AppUserIncludes.WantToRead, false);
         foreach (var user in allUsers)
         {

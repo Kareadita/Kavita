@@ -112,8 +112,6 @@ public class TachiyomiService(
         logger.LogDebug("Marking chapters until {ChapterNumber} for series {SeriesId} for user {UserId}",
             chapterNumber, seriesId, user.Id);
 
-        user.Progresses ??= [];
-
         var chapters = chapterNumber switch
         {
             // When Tachiyomi sync's progress, if there is no current progress in Tachiyomi, 0.0f is sent.

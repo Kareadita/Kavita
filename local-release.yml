@@ -7,7 +7,7 @@ ParseReleaseTypes:
       StartWiths: "" #Always stable
 
 BuildFrontend:
-  BuildScript: "build"
+  BuildScript: "prod"
   Path: "UI/Web"
   OutputPath: "dist/browser/"
   CopyTo: "Kavita.Server/wwwroot"
@@ -29,3 +29,12 @@ BuildServer:
     - { From: "LICENSE", To: "LICENSE.txt" }
     - { From: "Kavita.Server/config/appsettings.json", To: "config/appsettings-init.json"}
   DeletePaths: ["BuildHost-net472", "BuildHost-netcore", "bin", "config/cache-long"]
+
+Docker:
+  Disabled: true
+  Load: true
+  Platforms: ["linux/amd64", "linux/arm64", "linux/arm/v7"]
+  Images:
+    - "jvmilazz0/kavita"
+  Tags:
+    Stable: ["local-build-{Version}"]
