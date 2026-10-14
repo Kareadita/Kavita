@@ -236,12 +236,12 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
 
         var volumes = await unitOfWork.VolumeRepository.GetVolumes(1);
-        await readerService.MarkChaptersAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+        await readerService.MarkChaptersAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1), 1, volumes.First().Chapters);
         await context.SaveChangesAsync();
 
-        var userProgress = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
+        var userProgress = await context.AppUserProgresses.Where(p => p.AppUserId == 1).ToListAsync();
         Assert.NotNull(userProgress);
-        Assert.Equal(2, userProgress.Progresses.Count);
+        Assert.Equal(2, userProgress.Count);
     }
     #endregion
 
@@ -282,15 +282,15 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
 
         var volumes = (await unitOfWork.VolumeRepository.GetVolumes(1)).ToList();
-        await readerService.MarkChaptersAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes[0].Chapters);
+        await readerService.MarkChaptersAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1), 1, volumes[0].Chapters);
 
         await context.SaveChangesAsync();
-        Assert.Equal(2, (await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
+        Assert.Equal(2, (await context.AppUserProgresses.Where(p => p.AppUserId == 1).ToListAsync()).Count);
 
-        await readerService.MarkChaptersAsUnread(await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes[0].Chapters);
+        await readerService.MarkChaptersAsUnread(await unitOfWork.UserRepository.GetUserByIdAsync(1), 1, volumes[0].Chapters);
         await context.SaveChangesAsync();
 
-        var progresses = (await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses;
+        var progresses = await context.AppUserProgresses.Where(p => p.AppUserId == 1).ToListAsync();
         Assert.Equal(0, progresses.Max(p => p.PagesRead));
         Assert.Equal(2, progresses.Count);
     }
@@ -2305,7 +2305,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
 
         // Save progress on first volume chapters and 1st of second volume
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         await readerService.MarkSeriesAsRead(user, 1);
         await context.SaveChangesAsync();
 
@@ -2423,7 +2423,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
 
 
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         await readerService.MarkSeriesAsRead(user, 1);
         await context.SaveChangesAsync();
 
@@ -2495,7 +2495,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
 
         // Save progress on first volume chapters and 1st of second volume
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         await readerService.MarkChaptersAsRead(user, 1,
             new List<Chapter>()
             {
@@ -2752,10 +2752,10 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
 
 
-        await readerService.MarkSeriesAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1);
+        await readerService.MarkSeriesAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1), 1);
         await context.SaveChangesAsync();
 
-        Assert.Equal(4, (await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
+        Assert.Equal(4, (await context.AppUserProgresses.Where(x => x.AppUserId == 1).ToListAsync()).Count);
     }
 
 
@@ -2795,15 +2795,15 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
 
         var volumes = (await unitOfWork.VolumeRepository.GetVolumes(1)).ToList();
-        await readerService.MarkChaptersAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes[0].Chapters);
+        await readerService.MarkChaptersAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1), 1, volumes[0].Chapters);
 
         await context.SaveChangesAsync();
-        Assert.Equal(2, (await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
+        Assert.Equal(2, (await context.AppUserProgresses.Where(x => x.AppUserId == 1).ToListAsync()).Count);
 
-        await readerService.MarkSeriesAsUnread(await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1);
+        await readerService.MarkSeriesAsUnread(await unitOfWork.UserRepository.GetUserByIdAsync(1), 1);
         await context.SaveChangesAsync();
 
-        var progresses = (await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses;
+        var progresses = await context.AppUserProgresses.Where(x => x.AppUserId == 1).ToListAsync();
         Assert.Equal(0, progresses.Max(p => p.PagesRead));
         Assert.Equal(2, progresses.Count);
     }

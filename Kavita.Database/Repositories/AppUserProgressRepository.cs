@@ -19,6 +19,11 @@ namespace Kavita.Database.Repositories;
 
 public class AppUserProgressRepository(DataContext context, IMapper mapper) : IAppUserProgressRepository
 {
+    public void Add(AppUserProgress progress)
+    {
+        context.Add(progress).State = EntityState.Added;
+    }
+
     public void Update(AppUserProgress userProgress)
     {
         context.Entry(userProgress).State = EntityState.Modified;
@@ -27,6 +32,11 @@ public class AppUserProgressRepository(DataContext context, IMapper mapper) : IA
     public void Remove(AppUserProgress userProgress)
     {
         context.Remove(userProgress);
+    }
+
+    public void RemoveRange(IEnumerable<AppUserProgress> userProgress)
+    {
+        context.RemoveRange(userProgress);
     }
 
     /// <summary>
@@ -237,6 +247,24 @@ public class AppUserProgressRepository(DataContext context, IMapper mapper) : IA
         // Execute the batch SQL
         var batchSql = sqlBuilder.ToString();
         await context.Database.ExecuteSqlRawAsync(batchSql, ct);
+    }
+
+    public async Task<List<AppUserProgress>> GetProgressesForChapters(int userId, int seriesId, IEnumerable<int> chapterIds, CancellationToken ct = default)
+    {
+        const int batchSize = 50;
+
+        List<AppUserProgress> progresses = [];
+
+        foreach (var ids in chapterIds.Chunk(batchSize))
+        {
+            var idProgresses = await context.AppUserProgresses
+                .Where(x => x.SeriesId == seriesId && x.AppUserId == userId && ids.Contains(x.ChapterId))
+                .ToListAsync(ct);
+
+            progresses.AddRange(idProgresses);
+        }
+
+        return progresses;
     }
 
 

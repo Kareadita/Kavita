@@ -308,7 +308,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkChapterAsRead(MarkChapterReadDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, HttpContext.RequestAborted);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: HttpContext.RequestAborted);
         if (user == null) return Unauthorized();
 
         if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, dto.ChapterId, ct)) // TODO: Use [ChapterAccess]?
@@ -346,7 +346,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, ct);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: ct);
         if (user == null) return Unauthorized();
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(user.Id, markReadDto.SeriesId, ct))
@@ -388,7 +388,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, ct);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: ct);
         if (user == null) return Unauthorized();
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(user.Id, markReadDto.SeriesId, ct))
@@ -412,7 +412,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkVolumeAsUnread(MarkVolumeReadDto markVolumeReadDto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, ct);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: ct);
         if (user == null) return Unauthorized();
 
         if (!await unitOfWork.UserRepository.HasAccessToVolume(user.Id, markVolumeReadDto.VolumeId, ct))
@@ -442,7 +442,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkVolumeAsRead(MarkVolumeReadDto markVolumeReadDto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, ct);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: ct);
         if (user == null) return Unauthorized();
 
         if (!await unitOfWork.UserRepository.HasAccessToVolume(user.Id, markVolumeReadDto.VolumeId, ct))
@@ -497,7 +497,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkMultipleAsRead(MarkVolumesReadDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, ct);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: ct);
         if (user == null) return Unauthorized();
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(user.Id, dto.SeriesId, ct))
@@ -540,7 +540,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkMultipleAsUnread(MarkVolumesReadDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, ct: ct);
         if (user == null) return Unauthorized();
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesId, ct))
@@ -574,7 +574,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkMultipleSeriesAsRead(MarkMultipleSeriesAsReadDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, ct: ct);
         if (user == null) return Unauthorized();
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesIds, ct))
@@ -594,9 +594,10 @@ public class ReaderController(ICacheService cacheService,
         }
 
         var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true, ct);
-        foreach (var volume in volumes)
+        foreach (var g in volumes.GroupBy(v => v.SeriesId))
         {
-            await readerService.MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters, ct);
+            var chapters = g.SelectMany(v => v.Chapters).ToList();
+            await readerService.MarkChaptersAsRead(user, g.Key, chapters, ct);
         }
 
         if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-read-progress"));
@@ -624,7 +625,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> MarkMultipleSeriesAsUnread(MarkMultipleSeriesAsReadDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress, ct);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, ct: ct);
         if (user == null) return Unauthorized();
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesIds, ct))
@@ -633,9 +634,10 @@ public class ReaderController(ICacheService cacheService,
         user.Progresses ??= [];
 
         var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true, ct);
-        foreach (var volume in volumes)
+        foreach (var g in volumes.GroupBy(v => v.SeriesId))
         {
-            await readerService.MarkChaptersAsUnread(user, volume.SeriesId, volume.Chapters, ct);
+            var chapters = g.SelectMany(v => v.Chapters).ToList();
+            await readerService.MarkChaptersAsUnread(user, g.Key, chapters, ct);
         }
 
         if (await unitOfWork.CommitAsync(ct))

@@ -17,7 +17,7 @@ import {Library} from "../../_models/library/library";
 import {AgeRestriction} from "../../_models/metadata/age-restriction";
 import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
-import {form, FormField, pattern, required} from "@angular/forms/signals";
+import {form, FormField, pattern, required, validate} from "@angular/forms/signals";
 import {UpdateUserRequest} from "../../_models/user/update-user-request";
 import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 
@@ -80,7 +80,18 @@ export class EditUserComponent implements OnInit {
   });
   userForm = form(this.userFormModel, (schemaPath) => {
     required(schemaPath.email);
-    pattern(schemaPath.email, EmailRegex);
+    validate(schemaPath.email, (ctx) => {
+      const value = ctx.value();
+      if (value === this.member().email) {
+        return null
+      }
+
+      if (EmailRegex.test(value)) {
+        return null;
+      }
+
+      return {kind: 'pattern'};
+    });
 
     required(schemaPath.username);
     pattern(schemaPath.username, AllowedUsernameCharacters);

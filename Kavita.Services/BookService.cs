@@ -886,7 +886,10 @@ public partial class BookService(
 
     private static string AppendAuthor(EpubMetadataCreator person)
     {
-        return Parser.CleanAuthor(person.Creator) + ",";
+        // Remove , in the author name as they cause the author to be split later on
+        // To retain the , in the author name we will be required to use a different intermediate format
+        // for metadata (as opposed to ComicInfo)
+        return Parser.CleanAuthor(person.Creator).Replace(",", string.Empty) + ",";
     }
 
     private static (int year, int month, int day) GetPublicationDate(string? publicationDate)

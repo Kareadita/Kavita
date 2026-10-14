@@ -21,6 +21,7 @@ namespace Kavita.API.Repositories;
 public enum AppUserIncludes
 {
     None = 1,
+    [Obsolete("Do not use, very bad performance and memory usage")]
     Progress = 1 << 1,
     Bookmarks = 1 << 2,
     ReadingLists = 1 << 3,
