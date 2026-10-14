@@ -182,9 +182,8 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         var chapterProgresses = progresses.Where(x => x.ChapterId == chapter.Id).ToList();
         if (chapterProgresses.Count > 1)
         {
-            //throw new ArgumentException("AppUser must have Progress on it"); // TODO: Figure out the impact of switching to a more dev experience exception
-            throw new KavitaException("progress-must-exist");
-        }
+            logger.LogInformation("Trying to save progress and multiple progress entries exist for chapter {ChapterId}, deleting and rewriting with highest progress rate",
+                chapter.Id);
 
             var highestProgress = progresses.Max(x => x.PagesRead);
             var firstProgress = progresses.OrderBy(p => p.LastModifiedUtc).First();
