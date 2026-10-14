@@ -233,6 +233,23 @@ public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) 
     }
 
     [Fact]
+    public async Task ScanLibrary_ThatThrows_StillEndsTheJob()
+    {
+        _eventHub.SendMessageAsync(MessageFactory.ScanSeries, Arg.Any<SignalRMessageDto>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new InvalidOperationException("Boom")));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => ScanOnce(nameof(ScanLibrary_ThatThrows_StillEndsTheJob)));
+
+        Assert.True(LastSummary().EndsJob);
+        var failed = _eventHub.ReceivedCalls()
+            .Where(c => c.GetMethodInfo().Name == nameof(IEventHub.SendMessageAsync))
+            .Select(c => c.GetArguments()[1])
+            .OfType<SignalRMessageDto>()
+            .Single(m => m.Code == MessageEventCode.LibraryScanFailed);
+        Assert.Equal("Boom", failed.SubTitle);
+    }
+
+    [Fact]
     public async Task ScanLibraries_OnlyTheLastLibraryEndsTheJob()
     {
         // ScanLibraries waits 4 hours on a library that has a scan job in storage, other classes leave theirs behind

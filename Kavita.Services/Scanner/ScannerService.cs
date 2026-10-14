@@ -591,11 +591,9 @@ public class ScannerService(
             {
                 await ScanLibrary(lib.Id, forceUpdate, endsJob: isLastLibrary);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                logger.LogError(ex, "[ScannerService] Scan of {LibraryName} failed, moving on to the next library", lib.Name);
-                await eventHub.SendMessageAsync(MessageFactory.Error,
-                    MessageFactory.LibraryScanFailedEvent(lib.Id, lib.Name, ex.Message));
+                logger.LogInformation("[ScannerService] Moving on to the next library after {LibraryName} failed", lib.Name);
             }
         }
 
@@ -623,8 +621,25 @@ public class ScannerService(
         var libraryFolderPaths = library!.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Id, library.Name, libraryFolderPaths)) return;
 
+        try
+        {
+            await ScanLibraryFolders(library, libraryFolderPaths, forceUpdate, endsJob, sw);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "[ScannerService] Scan of {LibraryName} failed", library.Name);
+            await eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.LibraryScanFailedEvent(library.Id, library.Name, ex.Message));
+            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.LibraryScanEndedEvent(new ScanTally().ToEventBody(library, new ScanIssueSummaryDto(0, 0, []), endsJob)));
+            throw;
+        }
 
-        // Validations are done, now we can start actual scan
+        BackgroundJob.Enqueue(() => directoryService.ClearDirectory(directoryService.CacheDirectory));
+    }
+
+    private async Task ScanLibraryFolders(Library library, List<string> libraryFolderPaths, bool forceUpdate, bool endsJob, Stopwatch sw)
+    {
         logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
 
         if (!library.EnableMetadata)
@@ -690,8 +705,6 @@ public class ScannerService(
         await metadataService.RemoveAbandonedMetadataKeys();
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanEndedEvent(tally.ToEventBody(library, issues, endsJob)));
-
-        BackgroundJob.Enqueue(() => directoryService.ClearDirectory(directoryService.CacheDirectory));
     }
 
     /// <returns>How many series were removed</returns>
