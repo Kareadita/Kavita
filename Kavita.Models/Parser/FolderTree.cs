@@ -15,11 +15,12 @@ public sealed class FolderTree(string root)
     private readonly List<string> _listOrder = [];
     private readonly Dictionary<string, Folder> _folders = new(StringComparer.Ordinal);
     private readonly Dictionary<string, List<string>> _children = new(StringComparer.Ordinal);
+    private readonly List<string> _unreadableFolders = [];
     private List<string>? _longestFirst;
 
     public string Root { get; } = root;
     public int FileCount { get; private set; }
-    public int UnreadableCount { get; private set; }
+    public IReadOnlyList<string> UnreadableFolders => _unreadableFolders;
 
     /// <summary>
     /// Folders below the root, longest path first. Folders of equal length keep the order they were listed in
@@ -38,7 +39,7 @@ public sealed class FolderTree(string root)
     public void AddUnreadable(string folder, string parent, Exception error)
     {
         AddFolder(folder, parent, new Folder([], ExceptionDispatchInfo.Capture(error)));
-        UnreadableCount++;
+        _unreadableFolders.Add(folder);
     }
 
     /// <summary>

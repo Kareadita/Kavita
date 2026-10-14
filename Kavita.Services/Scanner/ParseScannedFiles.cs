@@ -206,6 +206,10 @@ public partial class ParseScannedFiles
             timings.Events.Stop();
 
             var isParent = processedDirsAndAncestors.Contains(directory);
+            var specials = isParent ? skippedSpecials.Where(s => IsDirectChild(s, directory)).ToList() : [];
+            Func<string, bool> isInScope = isParent
+                ? folder => folder == directory || specials.Exists(folder.IsSameOrInsideFolder)
+                : folder => folder.IsSameOrInsideFolder(directory);
             try
             {
                 // Subfolders were already read, so only the loose files at this level and its Specials folders are left
@@ -214,14 +218,12 @@ public partial class ParseScannedFiles
                     timings.ParentCount++;
                     timings.ParentChangeCheck.Start();
 
-                    var specials = skippedSpecials.Where(s => IsDirectChild(s, directory)).ToList();
                     var looseFileOwners = known.OwnersToCompareIn(directory);
                     var specialsOwners = specials.Select(known.OwnersToCompareIn).ToList();
                     var allOwners = looseFileOwners.Concat(specialsOwners.SelectMany(o => o)).Distinct().ToList();
 
                     var onDisk = LibraryFiles(tree.FilesIn(directory).Concat(specials.SelectMany(tree.FilesBelow)), library.Type);
 
-                    Func<string, bool> isInScope = folder => folder == directory || specials.Exists(folder.IsSameOrInsideFolder);
                     var failures = FailedFilesIn(failedFiles, isInScope);
                     var unchanged = known.IsUnchanged(onDisk, allOwners, failures, isInScope, WriteTimesToBackfill);
 
@@ -270,10 +272,9 @@ public partial class ParseScannedFiles
                     .ToList();
 
                 var onDiskBelow = LibraryFiles(tree.FilesBelow(directory), library.Type);
-                Func<string, bool> isBelow = folder => folder.IsSameOrInsideFolder(directory);
-                var failuresBelow = FailedFilesIn(failedFiles, isBelow);
+                var failuresBelow = FailedFilesIn(failedFiles, isInScope);
 
-                if (known.IsUnchanged(onDiskBelow, owners, failuresBelow, isBelow, WriteTimesToBackfill))
+                if (known.IsUnchanged(onDiskBelow, owners, failuresBelow, isInScope, WriteTimesToBackfill))
                 {
                     HandleUnchangedFolder(result, resultFolders, folderPath, directory, owners, false);
                 }
@@ -289,8 +290,10 @@ public partial class ParseScannedFiles
             {
                 timings.ParentChangeCheck.Stop();
                 timings.ParentSurfaceFiles.Stop();
-                _logger.LogWarning(ex, "[ScannerService] Could not read {Directory}, keeping its series as they are for this scan", directory);
-                _unreadableFolders.Add(directory);
+                var unreadable = tree.UnreadableFolders.Where(isInScope).ToList();
+                _logger.LogWarning(ex, "[ScannerService] Could not read {Folders}, keeping the series in {Directory} as they are for this scan",
+                    unreadable, directory);
+                _unreadableFolders.AddRange(unreadable);
                 KeepUnreadableFolder(result, resultFolders, folderPath, directory, isParent, skippedSpecials, known);
                 if (!isParent)
                 {

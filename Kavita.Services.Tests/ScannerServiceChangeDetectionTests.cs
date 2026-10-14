@@ -502,6 +502,24 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     }
 
     [Fact]
+    public async Task ScanLibrary_UnreadableSpecialsFolder_ReportsTheSpecialsFolder()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Unreadable Specials Folder Event - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Specials/Spice and Wolf SP01.cbz",
+        ]);
+        var root = await LibraryRoot(context, libraryId);
+        var eventHub = Substitute.For<IEventHub>();
+
+        await ScannerWithUnreadable(unitOfWork, eventHub, Path.Join(root, "Spice and Wolf", "Specials")).ScanLibrary(libraryId);
+
+        var body = Assert.Single(UnreadableFoldersBodies(eventHub));
+        Assert.Equal([Parser.NormalizePath(Path.Join(root, "Spice and Wolf", "Specials"))], body.Folders);
+    }
+
+    [Fact]
     public async Task ScanLibrary_NoUnreadableFolders_SendsNoUnreadableFoldersEvent()
     {
         var (unitOfWork, context, _) = await CreateDatabase();

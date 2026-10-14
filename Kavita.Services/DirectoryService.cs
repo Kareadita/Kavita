@@ -771,7 +771,7 @@ public class DirectoryService : IDirectoryService
         _logger.LogDebug("[DirectoryService] Listed {Root} in {ElapsedMs} ms: {FolderCount} folders, {FileCount} files, {UnreadableCount} unreadable. " +
                          "entries {EntriesMs} ms, stamps {StampsMs} ms, events {EventsMs} ms. " +
                          "Per folder p50 {P50Ms} ms, p95 {P95Ms} ms, max {MaxMs} ms ({SlowestFolder})",
-            tree.Root, elapsedMs, tree.Folders.Count, tree.FileCount, tree.UnreadableCount,
+            tree.Root, elapsedMs, tree.Folders.Count, tree.FileCount, tree.UnreadableFolders.Count,
             TicksToMs(timings.EntryTicks), TicksToMs(timings.StampTicks), TicksToMs(timings.EventTicks),
             Percentile(folderMs, 0.5), Percentile(folderMs, 0.95), folderMs.Count == 0 ? 0 : Math.Round(folderMs[^1], 1),
             Parser.NormalizePath(timings.SlowestFolder));

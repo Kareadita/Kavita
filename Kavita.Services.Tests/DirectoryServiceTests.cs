@@ -1270,7 +1270,7 @@ public class DirectoryServiceTests: AbstractFsTest
         var tree = await ListTree(ds, testDirectory);
 
         Assert.Equal(["C:/manga/base/A", "C:/manga/base/A/A1", "C:/manga/base/B"], tree.Folders.Order());
-        Assert.Equal(1, tree.UnreadableCount);
+        Assert.Equal(["C:/manga/base/B"], tree.UnreadableFolders);
         Assert.Single(tree.FilesBelow("C:/manga/base/A"));
         Assert.Throws<UnauthorizedAccessException>(() => tree.FilesBelow("C:/manga/base/B"));
     }
