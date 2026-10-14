@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Kavita.Common.Extensions;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -54,6 +55,18 @@ public class ParserInfo
     /// The unchanged folder covers only files directly in it, not its subfolders
     /// </summary>
     public bool UnchangedFolderIsShallow { get; set; }
+    /// <summary>
+    /// Set on a placeholder for the files of a read folder that were skipped because they match the database. Normalized paths
+    /// </summary>
+    public IReadOnlyList<string> UnchangedFiles { get; set; } = [];
+    /// <summary>
+    /// Stands in for files that were not read this scan, see <see cref="UnchangedFolderPath"/> and <see cref="UnchangedFiles"/>
+    /// </summary>
+    public bool IsPlaceholder => !string.IsNullOrEmpty(UnchangedFolderPath) || UnchangedFiles.Count > 0;
+    /// <summary>
+    /// Size and write time from the folder listing that found the file. Null on a placeholder
+    /// </summary>
+    public FileStamp? Stamp { get; set; }
 
     /// <summary>
     /// <see cref="MangaFormat"/> that represents the type of the file

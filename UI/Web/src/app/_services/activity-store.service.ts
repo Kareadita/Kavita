@@ -247,6 +247,9 @@ export class ActivityStoreService {
     if (isEnded && (!previous || previous.eventType === 'ended')) {
       if (job && summary) {
         this.addScanSummary(job, summary);
+        if (summary.endsJob) {
+          this.finishNow(id);
+        }
       }
       return;
     }
@@ -277,11 +280,34 @@ export class ActivityStoreService {
     this._rows.update(rows => job ? rows.map(r => r.id === id ? next : r) : [...rows, next]);
     this.scheduleWrite();
 
-    if (allStepsEnded(next)) {
+    if (summary?.endsJob) {
+      this.finishNow(id);
+    } else if (allStepsEnded(next)) {
       this.scheduleFinish(id);
     } else {
       this.cancelFinish(id);
     }
+  }
+
+  /**
+   * The server said no more scan events follow, so the finish grace is not needed
+   */
+  private finishNow(id: string) {
+    this.cancelFinish(id);
+    // A throttled frame applied after this would reopen the job
+    this.cancelPendingForJob(id);
+
+    const job = this.findJob(id);
+    if (!job || job.endedUtc !== null) return;
+
+    const finished: ActivityJob = {...job, endedUtc: job.updatedUtc};
+    this._rows.update(rows => rows.map(r => r === job ? finished : r));
+    this.scheduleWrite();
+  }
+
+  private cancelPendingForJob(id: string) {
+    const jobKeys = [...this.pendingUpdates.keys()].filter(key => key.startsWith(`${id}|`));
+    jobKeys.forEach(key => this.cancelPending(key));
   }
 
   private addScanSummary(job: ActivityJob, summary: LibraryScanSummary) {

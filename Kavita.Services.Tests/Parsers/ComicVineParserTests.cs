@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
+using Kavita.Database.Tests;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
 using Kavita.Services.Scanner;
@@ -7,20 +8,20 @@ using NSubstitute;
 
 namespace Kavita.Services.Tests.Parsers;
 
-public class ComicVineParserTests
+public class ComicVineParserTests : AbstractFsTest
 {
     private readonly ComicVineParser _parser;
     private readonly ILogger<DirectoryService> _dsLogger = Substitute.For<ILogger<DirectoryService>>();
-    private const string RootDirectory = "C:/Comics/";
+    private static readonly string RootDirectory = Root + "Comics/";
 
     public ComicVineParserTests()
     {
         var fileSystem = new MockFileSystem();
-        fileSystem.AddDirectory("C:/Comics/");
-        fileSystem.AddDirectory("C:/Comics/Birds of Prey (2002)");
-        fileSystem.AddFile("C:/Comics/Birds of Prey (2002)/Birds of Prey 001 (2002).cbz", new MockFileData(""));
-        fileSystem.AddFile("C:/Comics/DC Comics/Birds of Prey (1999)/Birds of Prey 001 (1999).cbz", new MockFileData(""));
-        fileSystem.AddFile("C:/Comics/DC Comics/Blood Syndicate/Blood Syndicate 001 (1999).cbz", new MockFileData(""));
+        fileSystem.AddDirectory(RootDirectory);
+        fileSystem.AddDirectory(RootDirectory + "Birds of Prey (2002)");
+        fileSystem.AddFile(RootDirectory + "Birds of Prey (2002)/Birds of Prey 001 (2002).cbz", new MockFileData(""));
+        fileSystem.AddFile(RootDirectory + "DC Comics/Birds of Prey (1999)/Birds of Prey 001 (1999).cbz", new MockFileData(""));
+        fileSystem.AddFile(RootDirectory + "DC Comics/Blood Syndicate/Blood Syndicate 001 (1999).cbz", new MockFileData(""));
         var ds = new DirectoryService(_dsLogger, fileSystem);
         _parser = new ComicVineParser(ds);
     }
@@ -33,7 +34,7 @@ public class ComicVineParserTests
     [Fact]
     public void Parse_SeriesWithComicInfo()
     {
-        var actual = _parser.Parse("C:/Comics/Birds of Prey (2002)/Birds of Prey 001 (2002).cbz", "C:/Comics/Birds of Prey (2002)/",
+        var actual = _parser.Parse(RootDirectory + "Birds of Prey (2002)/Birds of Prey 001 (2002).cbz", RootDirectory + "Birds of Prey (2002)/",
             RootDirectory, LibraryType.ComicVine, true, new ComicInfo()
             {
                 Series = "Birds of Prey",
@@ -51,7 +52,7 @@ public class ComicVineParserTests
     [Fact]
     public void Parse_SeriesWithDirectoryNameAsSeriesYear()
     {
-        var actual = _parser.Parse("C:/Comics/Birds of Prey (2002)/Birds of Prey 001 (2002).cbz", "C:/Comics/Birds of Prey (2002)/",
+        var actual = _parser.Parse(RootDirectory + "Birds of Prey (2002)/Birds of Prey 001 (2002).cbz", RootDirectory + "Birds of Prey (2002)/",
             RootDirectory, LibraryType.ComicVine, true, null).Info;
 
         Assert.NotNull(actual);
@@ -66,7 +67,7 @@ public class ComicVineParserTests
     [Fact]
     public void Parse_SeriesWithADirectoryNameAsSeriesYear()
     {
-        var actual = _parser.Parse("C:/Comics/DC Comics/Birds of Prey (1999)/Birds of Prey 001 (1999).cbz", "C:/Comics/DC Comics/",
+        var actual = _parser.Parse(RootDirectory + "DC Comics/Birds of Prey (1999)/Birds of Prey 001 (1999).cbz", RootDirectory + "DC Comics/",
             RootDirectory, LibraryType.ComicVine, true, null).Info;
 
         Assert.NotNull(actual);
@@ -81,7 +82,7 @@ public class ComicVineParserTests
     [Fact]
     public void Parse_FallbackToDirectoryNameOnly()
     {
-        var actual = _parser.Parse("C:/Comics/DC Comics/Blood Syndicate/Blood Syndicate 001 (1999).cbz", "C:/Comics/DC Comics/",
+        var actual = _parser.Parse(RootDirectory + "DC Comics/Blood Syndicate/Blood Syndicate 001 (1999).cbz", RootDirectory + "DC Comics/",
             RootDirectory, LibraryType.ComicVine, true, null).Info;
 
         Assert.NotNull(actual);

@@ -238,7 +238,7 @@ public class OpdsService(
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "libraries"), $"{apiKey}/libraries", apiKey, prefix);
         SetFeedId(feed, "libraries");
 
-        // default: This needs pagination and the query can be optimized
+        // TODO: This needs pagination and the query can be optimized
 
         // Ensure libraries follow SideNav order
         var userSideNavStreams = await unitOfWork.UserRepository.GetSideNavStreams(userId, ct: ct);

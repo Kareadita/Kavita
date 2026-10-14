@@ -11,7 +11,6 @@ using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
 using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Scanner;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -388,22 +387,7 @@ public class LibraryWatcher : ILibraryWatcher
                 return;
             }
 
-            var libraryFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
-                .SelectMany(l => l.Folders)
-                .Distinct()
-                .Select(Parser.NormalizePath)
-                .Where(_directoryService.Exists)
-                .ToList();
-
-            var fullPath = GetFolder(filePath, libraryFolders);
-            _logger.LogTrace("Folder path: {FolderPath}", fullPath);
-            if (string.IsNullOrEmpty(fullPath))
-            {
-                _logger.LogInformation("[LibraryWatcher] Change from {FilePath} could not find root level folder, ignoring change", filePath);
-                return;
-            }
-
-            await _taskScheduler.EnqueueScanFolderAsync(new ScanFolderRequest(fullPath, filePath, false), _queueWaitTime);
+            await _taskScheduler.EnqueueScanFolderFromWatcherAsync(filePath, isDirectoryChange, _queueWaitTime);
         }
         catch (Exception ex)
         {
@@ -411,27 +395,6 @@ public class LibraryWatcher : ILibraryWatcher
         }
         _logger.LogTrace("[LibraryWatcher] ProcessChange completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
     }
-
-    internal string GetFolder(string filePath, IEnumerable<string> libraryFolders)
-    {
-        // TODO: I can optimize this to avoid a library scan and instead do a Series Scan by finding the series that has a lowestFolderPath higher or equal to the filePath
-
-        var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
-        _logger.LogTrace("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);
-        if (string.IsNullOrEmpty(parentDirectory)) return string.Empty;
-
-        var libraryFolder = parentDirectory.DeepestContainingFolder(libraryFolders);
-        _logger.LogTrace("[LibraryWatcher] Library Folder: {LibraryFolder}", libraryFolder);
-        if (string.IsNullOrEmpty(libraryFolder)) return string.Empty;
-
-        var rootFolder = _directoryService.GetFoldersTillRoot(libraryFolder, filePath).ToList();
-        _logger.LogTrace("[LibraryWatcher] Root Folders: {RootFolders}", rootFolder);
-        if (rootFolder.Count == 0) return string.Empty;
-
-        // Select the first folder and join with library folder, this should give us the folder to scan.
-        return Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder[^1]));
-    }
-
 
     /// <summary>
     /// This is called via Hangfire to decrement the counter. Must work around a lock

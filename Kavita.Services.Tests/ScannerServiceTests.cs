@@ -312,6 +312,27 @@ public class ScannerServiceTests: AbstractDbTest
     }
 
     [Fact]
+    public async Task ScanLibrary_FirstChapterHasComicVineIssueLink_KeepsTheSeriesId()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+        var infos = new Dictionary<string, ComicInfo>
+        {
+            ["Chew v01.cbz"] = new() { Series = "Chew", Web = "https://comicvine.gamespot.com/chew-1-taster-s-choice-part-1-of-5/4000-159233/" },
+            ["Chew v02.cbz"] = new() { Series = "Chew", Web = "https://comicvine.gamespot.com/chew/4050-18166/" },
+        };
+        var library = await scannerHelper.GenerateScannerData(nameof(ScanLibrary_FirstChapterHasComicVineIssueLink_KeepsTheSeriesId) + " - Manga",
+            ["Chew/Chew v01.cbz", "Chew/Chew v02.cbz"], infos);
+        library.InheritWebLinksFromFirstChapter = true;
+        await unitOfWork.CommitAsync();
+
+        await scannerHelper.CreateServices().ScanLibrary(library.Id);
+
+        var series = Assert.Single((await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series))!.Series);
+        Assert.Equal("18166", series.ComicVineId);
+    }
+
+    [Fact]
     public async Task ScanLibrary_LocalizedSeries2()
     {
         var (unitOfWork, _, _) = await CreateDatabase();
@@ -1797,6 +1818,32 @@ public class ScannerServiceTests: AbstractDbTest
         // Since there are two chapter 1's, we cannot re-use the chapter, and it got recreated
         Assert.NotEqual(volume2Chapter1Id, postLib.Series.First().Volumes.Single(v => v.LookupName == "3").Chapters[0].Id);
 
+    }
+
+    [Fact]
+    public async Task ScanLibrary_VolumeSpelledTwoWays_SharesOneVolume()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Volume Spelled Two Ways - Manga";
+        var library = await scannerHelper.GenerateScannerData(testcase, [
+            "Spelled Twice/Spelled Twice Ch. 1.cbz",
+            "Spelled Twice/Spelled Twice Ch. 2.cbz"
+        ], new Dictionary<string, ComicInfo>
+        {
+            ["Spelled Twice Ch. 1.cbz"] = new() { Volume = "1.0" },
+            ["Spelled Twice Ch. 2.cbz"] = new() { Volume = "1" },
+        });
+
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        var volume = Assert.Single(Assert.Single(postLib.Series).Volumes);
+        Assert.Equal("1", volume.LookupName);
+        Assert.Equal(2, volume.Chapters.Count);
     }
 
     [Fact]

@@ -9,6 +9,7 @@ export enum MessageEventCode {
 
   RootFoldersInaccessible = 'root-folders-inaccessible',
   RootFoldersEmpty = 'root-folders-empty',
+  RootFoldersUnreadable = 'root-folders-unreadable',
   UnreadableFolders = 'unreadable-folders',
   SeriesCollision = 'series-collision',
   FilesOutsideFolder = 'files-outside-folder',
@@ -18,6 +19,7 @@ export enum MessageEventCode {
   ScanSeriesFolderMissing = 'scan-series-folder-missing',
   ScanNoWork = 'scan-no-work',
   DbWriteFailed = 'db-write-failed',
+  LibraryScanFailed = 'library-scan-failed',
 
   ScanLibrariesDelayed = 'scan-libraries-delayed',
   ScanLibraryDelayed = 'scan-library-delayed',

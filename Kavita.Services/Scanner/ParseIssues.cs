@@ -21,6 +21,12 @@ public static class ParseIssues
             : new ParseIssue(MediaErrorReason.NoSeriesName, $"{info.Filename} has no series name");
     }
 
+    public static ParseIssue FromAmbiguousSeries(ParserInfo info, IReadOnlyCollection<string> seriesNames)
+    {
+        return new ParseIssue(MediaErrorReason.AmbiguousSeries,
+            $"{info.Filename} matches {seriesNames.Count} series: {string.Join(", ", seriesNames)}");
+    }
+
     public static MediaErrorReason ReasonFor(string filePath, Exception ex)
     {
         return ex switch

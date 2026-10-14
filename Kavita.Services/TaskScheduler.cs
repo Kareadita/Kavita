@@ -404,11 +404,67 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => CheckForUpdate(CancellationToken.None));
     }
 
+    /// <param name="delay">Lets the events of one copy settle before the folder is looked at</param>
+    public async Task EnqueueScanFolderFromWatcherAsync(string changedPath, bool isDirectory, TimeSpan delay)
+    {
+        var libraries = await _unitOfWork.LibraryRepository.GetLibraryDtosAsync();
+        var target = ResolveScanFolder(changedPath, !isDirectory, libraries);
+        if (target == null || target.Folder == target.Root)
+        {
+            _logger.LogInformation("[LibraryWatcher] Change from {FilePath} could not find root level folder, ignoring change", changedPath);
+            return;
+        }
+
+        await EnqueueScanFolderAsync(new ScanFolderRequest(target.LibraryId, target.Folder, changedPath, true, false), delay);
+    }
+
+    public async Task EnqueueScanFolderFromApiAsync(string path, bool abortOnNoSeriesMatch)
+    {
+        var libraries = await _unitOfWork.LibraryRepository.GetLibraryDtosAsync();
+        var target = ResolveScanFolder(path, false, libraries);
+        if (target == null)
+        {
+            _logger.LogWarning("Scan folder asked for {Path}, which is in no library. Dropping request", path);
+            return;
+        }
+
+        await EnqueueScanFolderAsync(new ScanFolderRequest(target.LibraryId, target.Folder, path, false, abortOnNoSeriesMatch), TimeSpan.Zero);
+    }
+
+    /// <summary>
+    /// The deepest library root holding <paramref name="path"/> and the first folder under it, or the root when the
+    /// path is the root. Null when no library holds the path
+    /// </summary>
+    internal static ScanFolderTarget? ResolveScanFolder(string path, bool isFile, IEnumerable<LibraryDto> libraries)
+    {
+        var libraryByRoot = new Dictionary<string, int>();
+        foreach (var library in libraries)
+        {
+            foreach (var libraryRoot in library.Folders)
+            {
+                libraryByRoot.TryAdd(Parser.NormalizePath(libraryRoot), library.Id);
+            }
+        }
+
+        var normalized = Parser.NormalizePath(path).TrimEnd('/');
+        var root = normalized.DeepestContainingFolder(libraryByRoot.Keys);
+        if (root == null) return null;
+
+        var trimmedRoot = root.TrimEnd('/');
+        var segments = normalized[trimmedRoot.Length..].Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var folderCount = isFile ? segments.Length - 1 : segments.Length;
+        var folder = folderCount > 0 ? $"{trimmedRoot}/{segments[0]}" : root;
+
+        return new ScanFolderTarget(libraryByRoot[root], root, folder);
+    }
+
+    internal sealed record ScanFolderTarget(int LibraryId, string Root, string Folder);
+
     /// <summary>
     /// Queues a <see cref="ScannerService.ScanFolder"/> job, unless the same request is already waiting
     /// </summary>
-    /// <param name="delay">Lets the events of one copy settle before the folder is looked at. Zero queues it now</param>
-    public async Task EnqueueScanFolderAsync(ScanFolderRequest request, TimeSpan delay)
+    /// <param name="delay">Zero queues it now</param>
+    internal async Task EnqueueScanFolderAsync(ScanFolderRequest request, TimeSpan delay)
     {
         var normalized = request with
         {
@@ -880,17 +936,10 @@ public class TaskScheduler : ITaskScheduler
     /// </summary>
     public static IList<ScheduledFolderScanDto> GetScheduledFolderScans(IEnumerable<LibraryDto> libraries)
     {
-        var libraryByRoot = new Dictionary<string, int>();
-        foreach (var library in libraries)
-        {
-            foreach (var root in library.Folders)
-            {
-                libraryByRoot.TryAdd(Parser.NormalizePath(root), library.Id);
-            }
-        }
+        var libraryIds = libraries.Select(l => l.Id).ToHashSet();
 
         return ScanJobQueue.Read().FolderJobs
-            .GroupBy(j => (LibraryId: LibraryOf(j.Request.Folder), FromFolderWatcher: !string.IsNullOrEmpty(j.Request.ChangedPath)))
+            .GroupBy(j => (LibraryId: libraryIds.Contains(j.Request.LibraryId) ? j.Request.LibraryId : (int?) null, j.Request.FromFolderWatcher))
             .Select(group =>
             {
                 var folders = group
@@ -912,12 +961,6 @@ public class TaskScheduler : ITaskScheduler
             })
             .OrderBy(s => s.RunAtUtc ?? DateTime.MinValue)
             .ToList();
-
-        int? LibraryOf(string folder)
-        {
-            var root = folder.DeepestContainingFolder(libraryByRoot.Keys);
-            return root == null ? null : libraryByRoot[root];
-        }
     }
 
     private static ScheduledScanDto ToScheduledScan(ScanJob job)

@@ -15,7 +15,9 @@ namespace Kavita.Database.Tests.Repositories;
 
 public class MediaErrorRepositoryTests(ITestOutputHelper outputHelper) : AbstractDbTest(outputHelper)
 {
-    private const string Murderbot = "B:/Fiction/Martha Wells/The Murderbot Diaries";
+    private static readonly string Murderbot = Root + "Fiction/Martha Wells/The Murderbot Diaries";
+    private static readonly string SharedFolder = Root + "Fiction/Shared";
+    private static readonly string EmptyFolder = Root + "Fiction/Empty";
     private static readonly DateTime WriteTime = new(2026, 10, 5, 12, 0, 0, DateTimeKind.Utc);
 
     private static MediaError Row(string path, int? libraryId, long? bytes = 100, DateTime? writeTime = null,
@@ -58,7 +60,7 @@ public class MediaErrorRepositoryTests(ITestOutputHelper outputHelper) : Abstrac
             Row($"{Murderbot}/No Stamp.epub", books.Id, null),
             Row($"{Murderbot}/Cover Failed In Reader.epub", books.Id, 300, WriteTime, MediaErrorProducer.BookService),
             Row("Other Producer.epub", null, 300, WriteTime),
-            Row("M:/Manga/Other Library.cbz", manga.Id, 400, WriteTime));
+            Row(Root + "Manga/Other Library.cbz", manga.Id, 400, WriteTime));
         await context.SaveChangesAsync();
 
         var failed = await unitOfWork.MediaErrorRepository.GetFailedFilesAsync(books.Id);
@@ -76,8 +78,8 @@ public class MediaErrorRepositoryTests(ITestOutputHelper outputHelper) : Abstrac
         var (unitOfWork, context, _) = await CreateDatabase();
 
         var murderbot = SeriesWithFile("The Murderbot Diaries", $"{Murderbot}/All Systems Red.epub");
-        var novella = SeriesWithFile("Novellas", "B:/Fiction/Shared/Novella.epub");
-        var other = SeriesWithFile("Other", "B:/Fiction/Shared/Other.epub");
+        var novella = SeriesWithFile("Novellas", $"{SharedFolder}/Novella.epub");
+        var other = SeriesWithFile("Other", $"{SharedFolder}/Other.epub");
         var nested = SeriesWithFile("Nested", $"{Murderbot}/Extras/Extra.epub");
         var books = new LibraryBuilder("Books").WithSeries(murderbot).WithSeries(novella).WithSeries(other).WithSeries(nested).Build();
         context.Library.Add(books);
@@ -87,9 +89,9 @@ public class MediaErrorRepositoryTests(ITestOutputHelper outputHelper) : Abstrac
         {
             Row($"{Murderbot}/Fugitive Telemetry.epub", books.Id),
             Row($"{Murderbot}/Not Saved This Scan.epub", books.Id),
-            Row("B:/Fiction/Shared/Broken.epub", books.Id),
-            Row("B:/Fiction/Shared/Novella.epub", books.Id, reason: MediaErrorReason.EpubNotStrict),
-            Row("B:/Fiction/Empty/Broken.epub", books.Id),
+            Row($"{SharedFolder}/Broken.epub", books.Id),
+            Row($"{SharedFolder}/Novella.epub", books.Id, reason: MediaErrorReason.EpubNotStrict),
+            Row($"{EmptyFolder}/Broken.epub", books.Id),
             Row($"{Murderbot}/Reader Failure.epub", books.Id, producer: MediaErrorProducer.BookService),
         };
         context.MediaError.AddRange(rows);
@@ -98,8 +100,8 @@ public class MediaErrorRepositoryTests(ITestOutputHelper outputHelper) : Abstrac
         var filesByFolder = new Dictionary<string, IList<string>>
         {
             [Murderbot] = [$"{Murderbot}/All Systems Red.epub", $"{Murderbot}/Fugitive Telemetry.epub", $"{Murderbot}/Not Saved This Scan.epub"],
-            ["B:/Fiction/Shared"] = ["B:/Fiction/Shared/Novella.epub", "B:/Fiction/Shared/Other.epub", "B:/Fiction/Shared/Broken.epub"],
-            ["B:/Fiction/Empty"] = ["B:/Fiction/Empty/Broken.epub"],
+            [SharedFolder] = [$"{SharedFolder}/Novella.epub", $"{SharedFolder}/Other.epub", $"{SharedFolder}/Broken.epub"],
+            [EmptyFolder] = [$"{EmptyFolder}/Broken.epub"],
         };
         await unitOfWork.MediaErrorRepository.AssignScannerErrorsToSeriesAsync(books.Id,
             rows.Select(r => r.FilePath).Where(p => !p.Contains("Not Saved")).ToList(), filesByFolder);
@@ -108,9 +110,9 @@ public class MediaErrorRepositoryTests(ITestOutputHelper outputHelper) : Abstrac
         var seriesByPath = await context.MediaError.AsNoTracking().ToDictionaryAsync(m => m.FilePath, m => m.SeriesId);
         Assert.Equal(murderbot.Id, seriesByPath[$"{Murderbot}/Fugitive Telemetry.epub"]);
         Assert.Null(seriesByPath[$"{Murderbot}/Not Saved This Scan.epub"]);
-        Assert.Null(seriesByPath["B:/Fiction/Shared/Broken.epub"]);
-        Assert.Equal(novella.Id, seriesByPath["B:/Fiction/Shared/Novella.epub"]);
-        Assert.Null(seriesByPath["B:/Fiction/Empty/Broken.epub"]);
+        Assert.Null(seriesByPath[$"{SharedFolder}/Broken.epub"]);
+        Assert.Equal(novella.Id, seriesByPath[$"{SharedFolder}/Novella.epub"]);
+        Assert.Null(seriesByPath[$"{EmptyFolder}/Broken.epub"]);
         Assert.Null(seriesByPath[$"{Murderbot}/Reader Failure.epub"]);
     }
 

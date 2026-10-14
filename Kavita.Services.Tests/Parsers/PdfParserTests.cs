@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
+using Kavita.Database.Tests;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
@@ -6,19 +7,19 @@ using NSubstitute;
 
 namespace Kavita.Services.Tests.Parsers;
 
-public class PdfParserTests
+public class PdfParserTests : AbstractFsTest
 {
     private readonly PdfParser _parser;
     private readonly ILogger<DirectoryService> _dsLogger = Substitute.For<ILogger<DirectoryService>>();
-    private const string RootDirectory = "C:/Books/";
+    private static readonly string RootDirectory = Root + "Books/";
 
     public PdfParserTests()
     {
         var fileSystem = new MockFileSystem();
-        fileSystem.AddDirectory("C:/Books/");
-        fileSystem.AddDirectory("C:/Books/Birds of Prey (2002)");
-        fileSystem.AddFile("C:/Books/A Dictionary of Japanese Food - Ingredients and Culture/A Dictionary of Japanese Food - Ingredients and Culture.pdf", new MockFileData(""));
-        fileSystem.AddFile("C:/Comics/DC Comics/Birds of Prey/Chapter 01/01.jpg", new MockFileData(""));
+        fileSystem.AddDirectory(RootDirectory);
+        fileSystem.AddDirectory(RootDirectory + "Birds of Prey (2002)");
+        fileSystem.AddFile(RootDirectory + "A Dictionary of Japanese Food - Ingredients and Culture/A Dictionary of Japanese Food - Ingredients and Culture.pdf", new MockFileData(""));
+        fileSystem.AddFile(Root + "Comics/DC Comics/Birds of Prey/Chapter 01/01.jpg", new MockFileData(""));
         var ds = new DirectoryService(_dsLogger, fileSystem);
         _parser = new PdfParser(ds);
     }
@@ -31,8 +32,8 @@ public class PdfParserTests
     [Fact]
     public void Parse_Book_SeriesWithDirectoryName()
     {
-        var actual = _parser.Parse("C:/Books/A Dictionary of Japanese Food - Ingredients and Culture/A Dictionary of Japanese Food - Ingredients and Culture.pdf",
-            "C:/Books/A Dictionary of Japanese Food - Ingredients and Culture/",
+        var actual = _parser.Parse(RootDirectory + "A Dictionary of Japanese Food - Ingredients and Culture/A Dictionary of Japanese Food - Ingredients and Culture.pdf",
+            RootDirectory + "A Dictionary of Japanese Food - Ingredients and Culture/",
             RootDirectory, LibraryType.Book, true, null).Info;
 
         Assert.NotNull(actual);

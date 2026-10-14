@@ -11,7 +11,6 @@ using Kavita.Models.Builders;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Builders;
-using Kavita.Services.Helpers;
 using Kavita.Services.Metadata;
 using Kavita.Services.Reading;
 using Kavita.Services.Scanner;
@@ -71,9 +70,8 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
         await context.SaveChangesAsync();
 
 
-        var cacheService = new CacheHelper(new FileService());
         var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
-            Substitute.For<IEventHub>(), cacheService, Substitute.For<IMediaErrorService>(),
+            Substitute.For<IEventHub>(), Substitute.For<IMediaErrorService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()));
 
 
@@ -126,9 +124,8 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
         await context.SaveChangesAsync();
 
 
-        var cacheService = new CacheHelper(new FileService());
         var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
-            Substitute.For<IEventHub>(), cacheService, Substitute.For<IMediaErrorService>(),
+            Substitute.For<IEventHub>(), Substitute.For<IMediaErrorService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()));
         await service.ScanSeries(1, 1);
 
@@ -196,7 +193,7 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
         await context.SaveChangesAsync();
 
         var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
-            Substitute.For<IEventHub>(), new CacheHelper(new FileService()), Substitute.For<IMediaErrorService>(),
+            Substitute.For<IEventHub>(), Substitute.For<IMediaErrorService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()));
         await service.ScanSeries(1, 1, forceUpdate: false);
 
@@ -232,6 +229,44 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
         Assert.NotEqual(firstAnalysis, recounted.LastFileAnalysisUtc);
         Assert.Equal(File.GetLastWriteTimeUtc(file), recounted.AnalyzedFileWriteTimeUtc);
         Assert.Equal(recounted.LastFileAnalysisUtc, quiet.LastFileAnalysisUtc);
+    }
+
+    [Fact]
+    public async Task ChapterLosesAFile_ReadingTimeFollowsPages()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var folder = Path.Join(Path.GetTempPath(), "kavita-wordcount-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(folder);
+        var kept = Path.Join(folder, "Vol 1 part 1.cbz");
+        await File.WriteAllBytesAsync(kept, []);
+        File.SetLastWriteTimeUtc(kept, new DateTime(2024, 1, 1, 12, 0, 0, DateTimeKind.Utc));
+
+        var series = new SeriesBuilder("Test Series")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
+                    .WithPages(600)
+                    .WithFile(new MangaFileBuilder(kept, MangaFormat.Archive, 300).Build())
+                    .WithFile(new MangaFileBuilder(Path.Join(folder, "Vol 1 part 2.cbz"), MangaFormat.Archive, 300).Build())
+                    .Build())
+                .Build())
+            .Build();
+        context.Library.Add(new LibraryBuilder("Test", LibraryType.Manga).WithSeries(series).Build());
+        await context.SaveChangesAsync();
+
+        var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
+            Substitute.For<IEventHub>(), Substitute.For<IMediaErrorService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()));
+        await service.ScanSeries(1, 1, forceUpdate: false);
+
+        await context.MangaFile.Where(f => f.FilePath.EndsWith("part 2.cbz")).ExecuteDeleteAsync();
+        await context.Chapter.ExecuteUpdateAsync(s => s.SetProperty(c => c.Pages, 300));
+        context.ChangeTracker.Clear();
+
+        await service.ScanSeries(1, 1, forceUpdate: false);
+
+        var chapter = await context.Chapter.AsNoTracking().SingleAsync();
+        Assert.Equal(ReaderService.GetTimeEstimate(0, 300, false).AvgHours, chapter.AvgHoursToRead);
     }
 
 

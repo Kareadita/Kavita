@@ -145,8 +145,7 @@ public class ScannerHelper
         var scanner = new ScannerService(_unitOfWork, Substitute.For<ILogger<ScannerService>>(),
             Substitute.For<IMetadataService>(),
             Substitute.For<ICacheService>(), eventHub, ds,
-            wrapScanReader?.Invoke(readingItemService) ?? readingItemService, scopeFactory, Substitute.For<IWordCountAnalyzerService>(),
-            CreateMapper());
+            wrapScanReader?.Invoke(readingItemService) ?? readingItemService, scopeFactory, CreateMapper());
         return scanner;
     }
 

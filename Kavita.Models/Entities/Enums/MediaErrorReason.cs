@@ -27,6 +27,8 @@ public enum MediaErrorReason
     MetadataUnreadable = 10,
     [Description("Epub Not Strict")]
     EpubNotStrict = 11,
+    [Description("Ambiguous Series")]
+    AmbiguousSeries = 12,
 }
 
 public static class MediaErrorReasons

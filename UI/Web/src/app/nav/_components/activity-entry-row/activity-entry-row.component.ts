@@ -115,7 +115,9 @@ export class ActivityEntryRowComponent {
     switch (entry.code) {
       case MessageEventCode.RootFoldersInaccessible:
       case MessageEventCode.RootFoldersEmpty:
+      case MessageEventCode.RootFoldersUnreadable:
       case MessageEventCode.UnreadableFolders:
+      case MessageEventCode.LibraryScanFailed:
         return entry.libraryId !== null ? [EventAction.Rescan] : [];
       case MessageEventCode.SeriesCollision:
         return [EventAction.Details];

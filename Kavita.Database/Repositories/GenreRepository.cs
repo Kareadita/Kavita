@@ -24,18 +24,11 @@ public class GenreRepository(DataContext context, IMapper mapper) : IGenreReposi
         context.Genre.Attach(genre);
     }
 
-    public async Task RemoveAllGenreNoLongerAssociated(CancellationToken ct = default)
+    public async Task<int> RemoveAllGenreNoLongerAssociated(CancellationToken ct = default)
     {
-        var genresWithNoConnections = await context.Genre
-            .Include(p => p.SeriesMetadatas)
-            .Include(p => p.Chapters)
+        return await context.Genre
             .Where(p => p.SeriesMetadatas.Count == 0 && p.Chapters.Count == 0)
-            .AsSplitQuery()
-            .ToListAsync(cancellationToken: ct);
-
-        context.Genre.RemoveRange(genresWithNoConnections);
-
-        await context.SaveChangesAsync(ct);
+            .ExecuteDeleteAsync(ct);
     }
 
     private async Task<int> GetCountAsync(CancellationToken ct = default)

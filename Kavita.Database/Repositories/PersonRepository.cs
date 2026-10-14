@@ -53,18 +53,11 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
         context.Person.Update(person);
     }
 
-    public async Task RemoveAllPeopleNoLongerAssociated(CancellationToken ct = default)
+    public async Task<int> RemoveAllPeopleNoLongerAssociated(CancellationToken ct = default)
     {
-        var peopleWithNoConnections = await context.Person
-            .Include(p => p.SeriesMetadataPeople)
-            .Include(p => p.ChapterPeople)
+        return await context.Person
             .Where(p => p.SeriesMetadataPeople.Count == 0 && p.ChapterPeople.Count == 0)
-            .AsSplitQuery()
-            .ToListAsync(ct);
-
-        context.Person.RemoveRange(peopleWithNoConnections);
-
-        await context.SaveChangesAsync(ct);
+            .ExecuteDeleteAsync(ct);
     }
 
 

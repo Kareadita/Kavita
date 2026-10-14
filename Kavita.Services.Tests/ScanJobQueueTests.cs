@@ -2,6 +2,7 @@ using Hangfire;
 using Hangfire.InMemory;
 using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
+using Kavita.Database.Tests;
 using Kavita.Models.Scanner;
 using Kavita.Services.Extensions;
 using Kavita.Services.Scanner;
@@ -10,8 +11,10 @@ using Kavita.Services.Tests.Helpers;
 namespace Kavita.Services.Tests;
 
 [Collection(HangfireStorageCollection.Name)]
-public class ScanJobQueueTests
+public class ScanJobQueueTests : AbstractFsTest
 {
+    private static readonly string AccelWorld = Root + "Accel World";
+
     public ScanJobQueueTests()
     {
         JobStorage.Current = new InMemoryStorage();
@@ -39,7 +42,7 @@ public class ScanJobQueueTests
     [Fact]
     public void ProcessingScanFolder_NotBusy()
     {
-        var jobId = BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest("M:/Accel World", "M:/Accel World/v02.cbz", false)));
+        var jobId = BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest(1, AccelWorld, AccelWorld + "/v02.cbz", true, false)));
         HangfireJobs.MarkProcessing(jobId);
 
         Assert.False(ScanJobQueue.Read().Jobs.IsScannerBusy());
@@ -62,7 +65,7 @@ public class ScanJobQueueTests
         var delayedRequest = BackgroundJob.Schedule<TaskScheduler>(t => t.EnqueueScanLibrary(2, true), TimeSpan.FromHours(3));
         var startedRequest = BackgroundJob.Enqueue<ITaskScheduler>(t => t.EnqueueScanLibrary(3, false));
         HangfireJobs.MarkProcessing(startedRequest);
-        BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest("M:/Accel World", "M:/Accel World/v02.cbz", false)));
+        BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest(1, AccelWorld, AccelWorld + "/v02.cbz", true, false)));
 
         var jobs = ScanJobQueue.Read().Jobs
             .OrderBy(j => int.Parse(j.JobId))
@@ -93,7 +96,7 @@ public class ScanJobQueueTests
     [Fact]
     public void ScheduledScanFolder_KeepsRequestAndRunTime()
     {
-        var request = new ScanFolderRequest("M:/Accel World", "M:/Accel World/v02.cbz", false);
+        var request = new ScanFolderRequest(1, AccelWorld, AccelWorld + "/v02.cbz", true, false);
         var before = DateTime.UtcNow;
         var jobId = BackgroundJob.Schedule<ScannerService>(s => s.ScanFolder(request), TimeSpan.FromSeconds(30));
 
@@ -105,7 +108,7 @@ public class ScanJobQueueTests
     [Fact]
     public void EnqueuedScanFolder_HasNoRunTime()
     {
-        BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest("M:/Accel World", string.Empty, false)));
+        BackgroundJob.Enqueue<ScannerService>(s => s.ScanFolder(new ScanFolderRequest(1, AccelWorld, AccelWorld, false, false)));
 
         Assert.Null(Assert.Single(ScanJobQueue.Read().FolderJobs).RunAtUtc);
     }

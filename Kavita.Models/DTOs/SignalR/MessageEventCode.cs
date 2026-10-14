@@ -18,6 +18,7 @@ public static class MessageEventCode
 
     public const string RootFoldersInaccessible = "root-folders-inaccessible";
     public const string RootFoldersEmpty = "root-folders-empty";
+    public const string RootFoldersUnreadable = "root-folders-unreadable";
     public const string UnreadableFolders = "unreadable-folders";
     public const string SeriesCollision = "series-collision";
     public const string FilesOutsideFolder = "files-outside-folder";
@@ -27,6 +28,7 @@ public static class MessageEventCode
     public const string ScanSeriesFolderMissing = "scan-series-folder-missing";
     public const string ScanNoWork = "scan-no-work";
     public const string DbWriteFailed = "db-write-failed";
+    public const string LibraryScanFailed = "library-scan-failed";
 
     #endregion
 

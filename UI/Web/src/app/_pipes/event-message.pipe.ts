@@ -51,6 +51,8 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.root-folders-inaccessible-label`, {}, fallback);
       case MessageEventCode.RootFoldersEmpty:
         return this.translate(`${PREFIX}.root-folders-empty-label`, {libraryName}, fallback);
+      case MessageEventCode.RootFoldersUnreadable:
+        return this.translate(`${PREFIX}.root-folders-unreadable-label`, {libraryName}, fallback);
       case MessageEventCode.UnreadableFolders:
         return this.translate(`${PREFIX}.unreadable-folders-label`, {libraryName}, fallback);
       case MessageEventCode.SeriesCollision:
@@ -69,6 +71,8 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.scan-no-work-label`, {seriesName}, fallback);
       case MessageEventCode.DbWriteFailed:
         return this.translate(`${PREFIX}.db-write-failed-label`, {seriesName}, fallback);
+      case MessageEventCode.LibraryScanFailed:
+        return this.translate(`${PREFIX}.library-scan-failed-label`, {libraryName}, fallback);
       case MessageEventCode.ScanLibrariesDelayed:
         return this.translate(`${PREFIX}.scan-libraries-delayed-label`, {}, fallback);
       case MessageEventCode.ScanLibraryDelayed:
@@ -96,6 +100,8 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.root-folders-inaccessible-description`, {folders: body.folders?.join(', ')}, fallback);
       case MessageEventCode.RootFoldersEmpty:
         return this.translate(`${PREFIX}.root-folders-empty-description`, {}, fallback);
+      case MessageEventCode.RootFoldersUnreadable:
+        return this.translate(`${PREFIX}.root-folders-unreadable-description`, {folders: body.folders?.join(', ')}, fallback);
       case MessageEventCode.UnreadableFolders:
         return this.unreadableFoldersDescription(body, fallback);
       case MessageEventCode.SeriesCollision:
@@ -113,6 +119,7 @@ export class EventMessagePipe implements PipeTransform {
       case MessageEventCode.ScanNoWork:
         return this.translate(`${PREFIX}.scan-no-work-description`, {}, fallback);
       case MessageEventCode.DbWriteFailed:
+      case MessageEventCode.LibraryScanFailed:
         // SubTitle is the raw exception message
         return source.subTitle;
       case MessageEventCode.ScanLibrariesDelayed:

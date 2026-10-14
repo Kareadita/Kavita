@@ -153,7 +153,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
                 var nightlyDto = new UpdateNotificationDto
                 {
-                    // default: I should pass Title to the FE so that Nightly Release can be localized
+                    // TODO: I should pass Title to the FE so that Nightly Release can be localized
                     UpdateTitle = $"Nightly Release {nightly.Version} - {prInfo.Title}",
                     UpdateVersion = nightly.Version,
                     CurrentVersion = dto.CurrentVersion,

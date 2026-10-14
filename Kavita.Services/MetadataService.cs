@@ -325,12 +325,15 @@ public class MetadataService(
 
     public async Task RemoveAbandonedMetadataKeys(CancellationToken ct = default)
     {
-        await unitOfWork.TagRepository.RemoveAllTagNoLongerAssociated(ct);
-        await unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated(ct);
-        await unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated(ct: ct);
-        await unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries(ct);
-        await unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters(ct);
+        var sw = Stopwatch.StartNew();
+        var tags = await unitOfWork.TagRepository.RemoveAllTagNoLongerAssociated(ct);
+        var people = await unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated(ct);
+        var genres = await unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated(ct: ct);
+        var collections = await unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries(ct);
+        var progress = await unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters(ct);
 
+        logger.LogDebug("[MetadataService] Removed abandoned rows in {ElapsedMs} ms: {Tags} tags, {People} people, {Genres} genres, {Collections} collections, {Progress} progress",
+            sw.ElapsedMilliseconds, tags, people, genres, collections, progress);
     }
 
     [Queue(TaskSchedulerConstants.ScanQueue)]

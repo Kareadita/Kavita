@@ -49,13 +49,7 @@ public static class FolderChangeCheck
         foreach (var stamp in onDisk)
         {
             if (!known.TryGetValue(Parser.NormalizePath(stamp.Path), out var owned)) return false;
-            if (owned.File.Bytes != stamp.Bytes) return false; // Second Check: File Size Match
-
-            var stored = owned.File.LastWriteTimeUtc ?? stamp.LastWriteTimeUtc;
-            if (!IsSameWriteTime(stored, stamp.LastWriteTimeUtc)) return false; // Third Check: LastWriteTime check
-
-            // A time in the same second as the scan can hide a same-size rewrite later in that second
-            if (owned.OwnerLastScanned is { } lastScanned && !IsWrittenBeforeScan(stamp.LastWriteTimeUtc, lastScanned)) return false;
+            if (!IsFileUnchanged(stamp, owned.File, owned.OwnerLastScanned)) return false;
 
             if (owned.File.LastWriteTimeUtc == null)
             {
@@ -69,6 +63,20 @@ public static class FolderChangeCheck
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Same size, same write time to the second, and written in an earlier second than its series' last scan.
+    /// A file with no stored write time skips the time match
+    /// </summary>
+    /// <param name="ownerLastScanned">Null for a failed file, which has no scan time to guard against</param>
+    public static bool IsFileUnchanged(FileStamp onDisk, KnownFile known, DateTime? ownerLastScanned)
+    {
+        if (known.Bytes != onDisk.Bytes) return false;
+        if (!IsSameWriteTime(known.LastWriteTimeUtc ?? onDisk.LastWriteTimeUtc, onDisk.LastWriteTimeUtc)) return false;
+
+        // A time in the same second as the scan can hide a same-size rewrite later in that second
+        return ownerLastScanned is not { } lastScanned || IsWrittenBeforeScan(onDisk.LastWriteTimeUtc, lastScanned);
     }
 
     public static bool IsSameWriteTime(DateTime storedUtc, DateTime onDiskUtc)

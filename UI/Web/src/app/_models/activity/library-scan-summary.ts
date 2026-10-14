@@ -23,4 +23,8 @@ export interface LibraryScanSummary {
    * The most recently seen of problemFiles, at most 10
    */
   recentProblemFiles: ScanIssueSummaryItem[];
+  /**
+   * No more scan events follow in this job. False for every library but the last in a scan of all libraries
+   */
+  endsJob: boolean;
 }

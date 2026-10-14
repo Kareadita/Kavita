@@ -34,7 +34,7 @@ public interface IPersonRepository
     Task<IList<Person>> GetAllPeople(PersonIncludes includes = PersonIncludes.Aliases, CancellationToken ct = default);
     Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId, PersonIncludes includes = PersonIncludes.None, CancellationToken ct = default);
     Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role, PersonIncludes includes = PersonIncludes.None, CancellationToken ct = default);
-    Task RemoveAllPeopleNoLongerAssociated(CancellationToken ct = default);
+    Task<int> RemoveAllPeopleNoLongerAssociated(CancellationToken ct = default);
     Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null, PersonIncludes includes = PersonIncludes.None, CancellationToken ct = default);
 
     Task<IList<string?>> GetAllCoverImagesAsync(CancellationToken ct = default);

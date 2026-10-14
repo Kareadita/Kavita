@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.EnvironmentInfo;
+using Kavita.Database.Tests;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Services.SignalR;
 using Microsoft.AspNetCore.SignalR;
@@ -14,7 +15,7 @@ using Xunit;
 
 namespace Kavita.Services.Tests.SignalR;
 
-public class EventHubTests
+public class EventHubTests : AbstractFsTest
 {
     private readonly IHubContext<MessageHub> _hubContext = Substitute.For<IHubContext<MessageHub>>();
     private readonly IHubClients _clients = Substitute.For<IHubClients>();
@@ -44,7 +45,7 @@ public class EventHubTests
     [Fact]
     public async Task NotificationProgress_GoesThroughThrottle()
     {
-        var message = MessageFactory.FileScanProgressEvent("M:/One Piece", 1, "Manga", ProgressEventType.Updated);
+        var message = MessageFactory.FileScanProgressEvent(Root + "One Piece", 1, "Manga", ProgressEventType.Updated);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, message);
 
@@ -55,7 +56,7 @@ public class EventHubTests
     [Fact]
     public async Task InsideJob_StampsBootAndJobId()
     {
-        var message = MessageFactory.FileScanProgressEvent("M:/One Piece", 1, "Manga", ProgressEventType.Updated);
+        var message = MessageFactory.FileScanProgressEvent(Root + "One Piece", 1, "Manga", ProgressEventType.Updated);
 
         JobCorrelation.CurrentJobId = "184";
         try

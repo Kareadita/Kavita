@@ -613,7 +613,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         if (series.Format == MangaFormat.Epub)
         {
             // Get the word counts for all the pages
-            var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath, ct); // default: Cache
+            var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath, ct); // TODO: Cache
             if (pageCounts == null) return GetTimeEstimate(chapter.WordCount, 0, true);
 
             // Sum character counts for unread pages
@@ -643,7 +643,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         if (series.Format == MangaFormat.Epub)
         {
             // Get the word counts for all the pages
-            var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath, ct); // default: Cache
+            var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath, ct); // TODO: Cache
             if (pageCounts == null) return GetTimeEstimate(series.WordCount, 0, true);
 
             // Sum character counts for unread pages
