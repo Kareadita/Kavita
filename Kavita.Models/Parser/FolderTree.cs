@@ -34,6 +34,15 @@ public sealed class FolderTree(string root)
     }
 
     /// <summary>
+    /// The files directly in <see cref="Root"/>, so <see cref="FilesBelow"/> can start at it. The root stays out of <see cref="Folders"/>
+    /// </summary>
+    public void AddRootFiles(IReadOnlyList<FileStamp> files)
+    {
+        _folders.Add(Root, new Folder(files, null));
+        FileCount += files.Count;
+    }
+
+    /// <summary>
     /// A folder that could not be listed. Reading its files rethrows <paramref name="error"/>
     /// </summary>
     public void AddUnreadable(string folder, string parent, Exception error)

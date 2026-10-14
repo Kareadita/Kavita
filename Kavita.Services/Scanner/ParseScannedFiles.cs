@@ -367,11 +367,6 @@ public partial class ParseScannedFiles
         return files.Where(f => !Parser.IsSkippedCoverImage(Path.GetFileName(f.Path), type)).ToList();
     }
 
-    private List<FileStamp> ListLibraryFiles(string directory, string fileExtensions, GlobMatcher matcher, LibraryType type)
-    {
-        return LibraryFiles(_directoryService.ScanFiles(directory, fileExtensions, matcher), type);
-    }
-
     /// <summary>
     /// Handles directories that haven't changed since the last scan.
     /// </summary>
@@ -462,18 +457,30 @@ public partial class ParseScannedFiles
             MessageFactory.FileScanProgressEvent(normalizedPath, library.Id, library.Name, ProgressEventType.Updated,
                 MessageEventCode.ScanListingFolders, 1, 1));
 
-        List<FileStamp> onDisk;
+        var listWatch = Stopwatch.StartNew();
+        FolderTree tree;
         try
         {
-            onDisk = ListLibraryFiles(folderPath, fileExtensions, matcher, library.Type);
+            tree = await _directoryService.ListFolderTreeAsync(folderPath, fileExtensions, matcher, _ => Task.CompletedTask, withRootFiles: true);
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
         {
             _logger.LogWarning(ex, "[ScannerService] Could not read {Directory}, keeping its series as they are for this scan", normalizedPath);
-            _unreadableFolders.Add(normalizedPath);
-            KeepUnreadableFolder(result, [], libraryRoot, normalizedPath, false, [], known);
-            return result;
+            return KeepUnreadable([normalizedPath]);
         }
+        finally
+        {
+            ListTime += listWatch.Elapsed;
+        }
+
+        if (tree.UnreadableFolders.Count > 0)
+        {
+            _logger.LogWarning("[ScannerService] Could not read {Folders}, keeping the series in {Directory} as they are for this scan",
+                tree.UnreadableFolders, normalizedPath);
+            return KeepUnreadable(tree.UnreadableFolders);
+        }
+
+        var onDisk = LibraryFiles(tree.FilesBelow(tree.Root), library.Type);
 
         // Every series with files inside, so a folder shared by several series does not see the others' files as new
         var canCompare = known.CanCompare(normalizedPath);
@@ -496,6 +503,13 @@ public partial class ParseScannedFiles
         }
 
         return result;
+
+        IList<ScanResult> KeepUnreadable(IEnumerable<string> unreadableFolders)
+        {
+            _unreadableFolders.AddRange(unreadableFolders);
+            KeepUnreadableFolder(result, [], libraryRoot, normalizedPath, false, [], known);
+            return result;
+        }
     }
 
     private static GlobMatcher BuildMatcher(Library library)

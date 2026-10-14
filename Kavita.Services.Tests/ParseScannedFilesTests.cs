@@ -634,7 +634,9 @@ public class ParseScannedFilesTests: AbstractDbTest
         const string file = "M:/Higurashi When They Cry/Higurashi When They Cry v01.cbz";
         var writeTime = DateTime.UtcNow.AddDays(-1);
         var ds = Substitute.For<IDirectoryService>();
-        ds.ScanFiles(default!, default!).ReturnsForAnyArgs([new FileStamp(file, 10, writeTime)]);
+        var tree = new FolderTree("M:/Higurashi When They Cry");
+        tree.AddRootFiles([new FileStamp(file, 10, writeTime)]);
+        ds.ListFolderTreeAsync(default!, default!, default, default!, default).ReturnsForAnyArgs(tree);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>());
 
@@ -661,8 +663,10 @@ public class ParseScannedFilesTests: AbstractDbTest
         var result = await psf.ScanFiles("M:/Higurashi When They Cry", false, Known(seriesPaths), library);
 
         Assert.True(Assert.Single(result).HasChanged);
-        ds.Received(1).ScanFiles(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<GlobMatcher?>(), Arg.Any<SearchOption>());
-        ds.Received(1).ScanFiles("M:/Higurashi When They Cry", Arg.Any<string>(), Arg.Any<GlobMatcher?>(), Arg.Any<SearchOption>());
+        await ds.Received(1).ListFolderTreeAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<GlobMatcher?>(), Arg.Any<Func<string, Task>>(),
+            Arg.Any<bool>());
+        await ds.Received(1).ListFolderTreeAsync("M:/Higurashi When They Cry", Arg.Any<string>(), Arg.Any<GlobMatcher?>(),
+            Arg.Any<Func<string, Task>>(), true);
     }
 
     [Fact]
@@ -935,8 +939,13 @@ public class ParseScannedFilesTests: AbstractDbTest
         var ds = Substitute.For<IDirectoryService>();
         var tree = new FolderTree(FictionFolder);
         tree.Add(MurderbotFolder, FictionFolder, files);
-        ds.ListFolderTreeAsync(default!, default!, default, default!).ReturnsForAnyArgs(tree);
-        ds.ScanFiles(default!, default!).ReturnsForAnyArgs(files);
+        ds.ListFolderTreeAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<GlobMatcher?>(), Arg.Any<Func<string, Task>>(), false)
+            .Returns(tree);
+
+        var seriesTree = new FolderTree(MurderbotFolder);
+        seriesTree.AddRootFiles(files);
+        ds.ListFolderTreeAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<GlobMatcher?>(), Arg.Any<Func<string, Task>>(), true)
+            .Returns(seriesTree);
         return ds;
     }
 

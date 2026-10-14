@@ -82,9 +82,12 @@ public interface IDirectoryService
     /// </summary>
     /// <remarks>This is explicitly to be used with the Scanner</remarks>
     /// <param name="onFolderListed">Called with each folder after it is listed</param>
+    /// <param name="withRootFiles">Also keep the files directly in <paramref name="folderPath"/>, for a series folder.
+    /// A library root's own files are not scanned</param>
     /// <exception cref="UnauthorizedAccessException">The folder itself cannot be listed</exception>
     /// <exception cref="IOException">The folder itself cannot be listed</exception>
-    Task<FolderTree> ListFolderTreeAsync(string folderPath, string fileTypes, GlobMatcher? matcher, Func<string, Task> onFolderListed);
+    Task<FolderTree> ListFolderTreeAsync(string folderPath, string fileTypes, GlobMatcher? matcher, Func<string, Task> onFolderListed,
+        bool withRootFiles = false);
     string GetParentDirectoryName(string fileOrFolder);
     IList<FileStamp> ScanFiles(string folderPath, string fileTypes, GlobMatcher? matcher = null, SearchOption searchOption = SearchOption.AllDirectories);
 }

@@ -520,6 +520,65 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     }
 
     [Fact]
+    public async Task ScanSeries_UnreadableSubfolderWithKnownFile_KeepsItAndReportsTheSubfolder()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Series Scan Unreadable Known Subfolder - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Extra/Spice and Wolf Vol. 1 Ch. 0002.cbz",
+        ]);
+        var root = await LibraryRoot(context, libraryId);
+        var seriesId = await SeriesId(context, libraryId, "Spice and Wolf");
+        var eventHub = Substitute.For<IEventHub>();
+
+        await ScannerWithUnreadable(unitOfWork, eventHub, Path.Join(root, "Spice and Wolf", "Extra")).ScanSeries(seriesId);
+
+        Assert.Empty(RootFoldersUnreadableBodies(eventHub));
+        var body = Assert.Single(UnreadableFoldersBodies(eventHub));
+        Assert.Equal([Parser.NormalizePath(Path.Join(root, "Spice and Wolf", "Extra"))], body.Folders);
+        Assert.Equal(["Spice and Wolf Vol. 1 Ch. 0001.cbz", "Spice and Wolf Vol. 1 Ch. 0002.cbz"], await SeriesFileNames(context, seriesId));
+    }
+
+    [Fact]
+    public async Task ScanSeries_UnreadableSpecialsFolder_ReportsTheSpecialsFolder()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, libraryId) = await ScanOnce(unitOfWork, "Series Scan Unreadable Specials Folder - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Specials/Spice and Wolf SP01.cbz",
+        ]);
+        var root = await LibraryRoot(context, libraryId);
+        var seriesId = await SeriesId(context, libraryId, "Spice and Wolf");
+        var eventHub = Substitute.For<IEventHub>();
+
+        await ScannerWithUnreadable(unitOfWork, eventHub, Path.Join(root, "Spice and Wolf", "Specials")).ScanSeries(seriesId);
+
+        var body = Assert.Single(UnreadableFoldersBodies(eventHub));
+        Assert.Equal([Parser.NormalizePath(Path.Join(root, "Spice and Wolf", "Specials"))], body.Folders);
+        Assert.Equal(["Spice and Wolf SP01.cbz", "Spice and Wolf Vol. 1 Ch. 0001.cbz"], await SeriesFileNames(context, seriesId));
+    }
+
+    [Fact]
+    public async Task ScanSeries_SubfolderEmptied_RemovesItsChapter()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (scanner, libraryId) = await ScanOnce(unitOfWork, "Series Scan Emptied Subfolder - Manga",
+        [
+            "Spice and Wolf/Spice and Wolf Vol. 1 Ch. 0001.cbz",
+            "Spice and Wolf/Extra/Spice and Wolf Vol. 1 Ch. 0002.cbz",
+        ]);
+        var root = await LibraryRoot(context, libraryId);
+        var seriesId = await SeriesId(context, libraryId, "Spice and Wolf");
+        File.Delete(Path.Join(root, "Spice and Wolf", "Extra", "Spice and Wolf Vol. 1 Ch. 0002.cbz"));
+
+        await scanner.ScanSeries(seriesId);
+
+        Assert.Equal(["Spice and Wolf Vol. 1 Ch. 0001.cbz"], await SeriesFileNames(context, seriesId));
+    }
+
+    [Fact]
     public async Task ScanLibrary_NoUnreadableFolders_SendsNoUnreadableFoldersEvent()
     {
         var (unitOfWork, context, _) = await CreateDatabase();

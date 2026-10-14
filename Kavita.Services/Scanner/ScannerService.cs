@@ -447,7 +447,8 @@ public class ScannerService(
             .Distinct()
             .ToList();
 
-        if (!await CheckMounts(library.Id, library.Name, seriesFolderPaths))
+        // CheckMounts would treat an emptied or unreadable series folder as a lost mount and abort the scan
+        if (!await CheckDrivesMounted(library.Id, library.Name, seriesFolderPaths))
         {
             logger.LogWarning("[ScannerService] Scan of series {SeriesId} aborted, one of its folders failed the mount check", seriesId);
             return ScanCancelReason.FolderMount;
@@ -491,6 +492,21 @@ public class ScannerService(
     }
 
     /// <summary>
+    /// False, with an event to the UI, when the drive of any folder is not available (ie disconnected from network)
+    /// </summary>
+    private async Task<bool> CheckDrivesMounted(int libraryId, string libraryName, IList<string> folders)
+    {
+        var unmountedFolders = folders.Where(f => !directoryService.IsDriveMounted(f)).ToArray();
+        if (unmountedFolders.Length == 0) return true;
+
+        logger.LogCritical("[ScannerService] Some of the root folders for library ({LibraryName} are not accessible. Please check that drives are connected and rescan. Scan will be aborted", libraryName);
+        await eventHub.SendMessageAsync(MessageFactory.Error,
+            MessageFactory.RootFoldersInaccessibleEvent(libraryId, libraryName, unmountedFolders));
+
+        return false;
+    }
+
+    /// <summary>
     /// Ensure that all library folders are mounted. In the case that any are empty or non-existent, emit an event to the UI via EventHub and return false
     /// </summary>
     /// <param name="libraryId"></param>
@@ -499,17 +515,7 @@ public class ScannerService(
     /// <returns></returns>
     private async Task<bool> CheckMounts(int libraryId, string libraryName, IList<string> folders)
     {
-        // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
-        if (folders.Any(f => !directoryService.IsDriveMounted(f)))
-        {
-            logger.LogCritical("[ScannerService] Some of the root folders for library ({LibraryName} are not accessible. Please check that drives are connected and rescan. Scan will be aborted", libraryName);
-            var unmountedFolders = folders.Where(f => !directoryService.IsDriveMounted(f)).ToArray();
-
-            await eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.RootFoldersInaccessibleEvent(libraryId, libraryName, unmountedFolders));
-
-            return false;
-        }
+        if (!await CheckDrivesMounted(libraryId, libraryName, folders)) return false;
 
         var unreadableFolders = new List<string>();
         var anyEmpty = false;

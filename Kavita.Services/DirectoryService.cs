@@ -666,19 +666,32 @@ public class DirectoryService : IDirectoryService
     }
 
     public async Task<FolderTree> ListFolderTreeAsync(string folderPath, string fileTypes, GlobMatcher? matcher,
-        Func<string, Task> onFolderListed)
+        Func<string, Task> onFolderListed, bool withRootFiles = false)
     {
         var root = Parser.NormalizePath(folderPath);
         var tree = new FolderTree(root);
-        if (!Exists(folderPath)) return tree;
+        if (!Exists(folderPath))
+        {
+            if (withRootFiles)
+            {
+                tree.AddRootFiles([]);
+            }
+            return tree;
+        }
 
         var pattern = GetExtensionPattern(fileTypes);
         var timings = new ListingTimings();
         var totalWatch = Stopwatch.StartNew();
 
+        var rootListing = ListFolder(folderPath, pattern, matcher, withRootFiles, timings);
+        if (withRootFiles)
+        {
+            tree.AddRootFiles(rootListing.Files);
+        }
+
         // Folders are listed parent first, in listing order, so folders of equal length sort as they always have
         var pending = new Stack<(string Folder, string Parent)>();
-        PushSubfolders(pending, ListFolder(folderPath, pattern, matcher, false, timings).Subfolders, root);
+        PushSubfolders(pending, rootListing.Subfolders, root);
 
         while (pending.Count > 0)
         {
