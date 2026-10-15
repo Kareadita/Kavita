@@ -87,7 +87,17 @@ docker exec -it kavita /kavita/config/watchprobe cost /library --label "my-setup
 
 Each way runs twice, with 15 s between runs so the share's cache has expired. On a large library on a network share, the `full` runs can take several minutes each, so expect it to take a while. Add `--no-full` to skip them.
 
-Options: `--runs 2` how many times to time each way, `--gap 15` seconds between runs, `--no-full` skip the whole-tree listing.
+Options: `--runs 2` how many times to time each way, `--gap 15` seconds between runs, `--methods known-folders,full` time only these ways (comma-separated, default all four), `--no-full` skip the whole-tree listing.
+
+### Repeated folder-time checks
+
+A real poller would read the known folders' times over and over, with no walk in between. To time that:
+
+```bash
+docker exec -it kavita /kavita/config/watchprobe cost /library --methods known-folders --runs 5 --gap 60 --label "my-setup-known"
+```
+
+It walks the library once at the start to find the folders (not timed), then reads their times 5 times, a minute apart.
 
 ## What to send back
 

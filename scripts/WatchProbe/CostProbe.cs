@@ -12,9 +12,11 @@ public static class CostProbe
     private const string KnownFolders = "known-folders";
     private const string Full = "full";
 
+    public static readonly IReadOnlyList<string> AllMethods = [FolderNames, FolderTimes, KnownFolders, Full];
+
     private sealed record Pass(int Entries, int Errors);
 
-    public static CostReport Run(EnvironmentInfo environment, int runs, TimeSpan gap, bool includeFull)
+    public static CostReport Run(EnvironmentInfo environment, int runs, TimeSpan gap, IReadOnlyList<string> methods)
     {
         var root = environment.Path;
         var report = new CostReport { Environment = environment, GapSeconds = (int) gap.TotalSeconds };
@@ -24,17 +26,11 @@ public static class CostProbe
         report.Folders = folders.Count;
         Console.WriteLine($"  {folders.Count} folders");
 
-        List<string> methods = [FolderNames, FolderTimes, KnownFolders];
-        if (includeFull)
-        {
-            methods.Add(Full);
-        }
-
         var total = runs * methods.Count;
         Console.WriteLine($"Timing {total} passes, {gap.TotalSeconds:F0} s apart so the mount's attribute cache has expired before each one");
         for (var run = 1; run <= runs; run++)
         {
-            var order = run % 2 == 1 ? methods : Enumerable.Reverse(methods).ToList();
+            var order = run % 2 == 1 ? methods : methods.Reverse().ToList();
             foreach (var method in order)
             {
                 Thread.Sleep(gap);

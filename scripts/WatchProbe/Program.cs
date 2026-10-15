@@ -3,14 +3,14 @@ using System.Text.Json;
 using WatchProbe;
 
 const string tool = "watchprobe";
-const string probeVersion = "2";
+const string probeVersion = "3";
 
 const string usage = """
     Kavita folder watching probe. Shows which way of watching a folder sees changes on your setup.
 
     Usage:
       watchprobe <folder> [--minutes 10] [--interval 5] [--no-control]
-      watchprobe cost <folder> [--runs 2] [--gap 15] [--no-full]      read-only, safe on a whole library
+      watchprobe cost <folder> [--runs 2] [--gap 15] [--methods a,b] [--no-full]      read-only, safe on a whole library
 
     Watch options:
       --minutes <n>    how long to watch (default 10). Enter or Ctrl+C ends it early
@@ -20,6 +20,7 @@ const string usage = """
     Cost options:
       --runs <n>       how many times to time each way of polling (default 2)
       --gap <s>        seconds to wait between timings, longer than the mount's attribute cache (default 15)
+      --methods <list> which ways to time, comma-separated: folder-names, folder-times, known-folders, full (default all)
       --no-full        skip timing the whole-tree listing (the slowest one)
 
     Common options:
@@ -57,7 +58,21 @@ if (mode == "cost")
 {
     var runs = int.Parse(options.GetValueOrDefault("runs") ?? "2");
     var gap = TimeSpan.FromSeconds(int.Parse(options.GetValueOrDefault("gap") ?? "15"));
-    var costReport = CostProbe.Run(environment, runs, gap, !options.ContainsKey("no-full"));
+    var methods = options.GetValueOrDefault("methods") is { } list
+        ? list.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList()
+        : CostProbe.AllMethods.ToList();
+    if (options.ContainsKey("no-full"))
+    {
+        methods.Remove("full");
+    }
+    var unknown = methods.Except(CostProbe.AllMethods).ToList();
+    if (unknown.Count > 0 || methods.Count == 0)
+    {
+        Console.Error.WriteLine($"Unknown or no --methods: {string.Join(", ", unknown)}. Pick from {string.Join(", ", CostProbe.AllMethods)}");
+        return 1;
+    }
+
+    var costReport = CostProbe.Run(environment, runs, gap, methods);
     var costPath = ProbeCli.SaveReport(tool, environment, options.GetValueOrDefault("out"),
         JsonSerializer.Serialize(costReport, WatchJsonContext.Default.CostReport));
     CostProbe.PrintSummary(costReport);
