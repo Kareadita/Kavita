@@ -70,6 +70,25 @@ If the host (outside Docker) can reach the same share, run the same test there a
 ./watchprobe "/mnt/nas/manga/Some Series" --label "my-setup-host"
 ```
 
+## Cost mode: how long polling a whole library takes
+
+This one is read-only and is meant for a **whole library**, not one series. It changes nothing and needs no changes from you. It times four ways of checking a library for changes:
+
+| Name | What it does |
+|---|---|
+| `folder-names` | Walks every folder, reads no times |
+| `folder-times` | Walks every folder and reads each folder's last-modified time |
+| `known-folders` | Reads each folder's last-modified time from a list, without walking |
+| `full` | Lists every file and folder with its time, like the `poller` above |
+
+```bash
+docker exec -it kavita /kavita/config/watchprobe cost /library --label "my-setup-name"
+```
+
+Each way runs twice, with 15 s between runs so the share's cache has expired. On a large library on a network share, the `full` runs can take several minutes each, so expect it to take a while. Add `--no-full` to skip them.
+
+Options: `--runs 2` how many times to time each way, `--gap 15` seconds between runs, `--no-full` skip the whole-tree listing.
+
 ## What to send back
 
 The `watchprobe-*.json` file (written next to the program, so in your config folder), plus one line about the setup: OS/NAS, how the library is mounted into Kavita (bind mount, SMB/CIFS, NFS, mergerfs, ...), and which machine you made the changes from.
@@ -90,9 +109,9 @@ The summary at the end says, for the control file and for your changes, which wa
 
 ```
   control create  watcher 0.0 s, provider 8.0 s, poller 2.0 s
-  poller found 6 file changes besides the control: watcher saw 6, provider fired near 6
+  poller found 6 file changes besides the control: watcher saw 6, provider fired near 6, folder times would have caught 5
 ```
 
-`missed` means that watcher never reported it. If the `watcher` column misses your changes from another machine, that is the bug we are chasing.
+`folder times would have caught` counts the changes where the file's folder also got a new last-modified time, so a check that reads only folder times would have noticed it. `missed` means that watcher never reported it. If the `watcher` column misses your changes from another machine, that is the bug we are chasing.
 
 ## NOTE: This is completely AI-coded as part of a data collection program for Kavita's folder watching work

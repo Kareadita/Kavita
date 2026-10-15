@@ -177,6 +177,7 @@ public sealed class WatchSession
                         .FirstOrDefault(e => IsAbout(e, c.Path) && e.Seconds >= c.PreviousPollSeconds && e.Seconds <= c.DetectedSeconds + MatchSlackSeconds)
                         ?.Seconds,
                     ProviderFired = providerFires.Any(s => s >= c.PreviousPollSeconds && s <= c.DetectedSeconds + MatchSlackSeconds),
+                    ParentFolderSeconds = c is { IsFolder: true, Kind: "Changed" } ? null : ParentFolderSeconds(c, changes),
                 }).ToList(),
                 EventsDropped = _log.Dropped,
                 Events = events,
@@ -215,6 +216,16 @@ public sealed class WatchSession
     }
 
     private static bool IsAbout(WatchEvent e, string path) => e.Path == path || e.OldPath == path;
+
+    // NTFS can update a folder's time one poll after the file change shows up, so the next poll counts too
+    private static double? ParentFolderSeconds(SnapshotPoller.Change change, List<SnapshotPoller.Change> changes)
+    {
+        var parent = Path.GetDirectoryName(change.Path);
+        return changes
+            .FirstOrDefault(p => p is { IsFolder: true, Kind: "Changed" } && p.Path == parent
+                                 && p.PreviousPollSeconds >= change.PreviousPollSeconds && p.PreviousPollSeconds <= change.DetectedSeconds)
+            ?.DetectedSeconds;
+    }
 
     private static async Task CheckpointAsync(Action checkpoint, CancellationToken ct)
     {

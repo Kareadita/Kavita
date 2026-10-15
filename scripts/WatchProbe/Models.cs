@@ -105,6 +105,29 @@ public sealed class ChangeMatch
     public double DetectedSeconds { get; set; }
     public double? WatcherSeconds { get; set; }
     public bool ProviderFired { get; set; }
+    /// <summary>
+    /// When the poller saw the parent folder's time move, in this poll or the next: a poller reading only folder times
+    /// would have caught the change then. Null when it did not move, or for a folder's own time change
+    /// </summary>
+    public double? ParentFolderSeconds { get; set; }
+}
+
+public sealed class CostReport
+{
+    public EnvironmentInfo Environment { get; set; } = new();
+    public int Folders { get; set; }
+    public int? Files { get; set; }
+    public int GapSeconds { get; set; }
+    public List<CostTiming> Timings { get; set; } = [];
+}
+
+public sealed class CostTiming
+{
+    public string Method { get; set; } = "";
+    public int Run { get; set; }
+    public double Milliseconds { get; set; }
+    public int Entries { get; set; }
+    public int Errors { get; set; }
 }
 
 public sealed class WatchEvent
@@ -121,4 +144,5 @@ public sealed class WatchEvent
 [JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 [JsonSerializable(typeof(WatchReport))]
+[JsonSerializable(typeof(CostReport))]
 public partial class WatchJsonContext : JsonSerializerContext;

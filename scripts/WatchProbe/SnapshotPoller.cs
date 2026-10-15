@@ -137,6 +137,8 @@ public sealed class SnapshotPoller(EventLog log)
     private static Dictionary<string, Entry> List(string root)
     {
         var result = new Dictionary<string, Entry>(StringComparer.Ordinal);
+        var rootInfo = new DirectoryInfo(Path.TrimEndingDirectorySeparator(root));
+        result[rootInfo.FullName] = new Entry(true, 0, rootInfo.LastWriteTimeUtc.Ticks);
         foreach (var info in FileListing.Enumerate(root))
         {
             var size = info is FileInfo file ? file.Length : 0;
