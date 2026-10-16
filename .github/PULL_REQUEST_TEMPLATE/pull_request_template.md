@@ -16,7 +16,7 @@
 - You MUST use Fixed:, Changed:, Added: in front of any bullet points.
 - Do not use double quotes, use ' instead.
 - If you have not talked to me through an existing issue or in discord, leave a comment on PR with extra content. The PR description is user visible and as such, should not contain developer information.
-- Do not use AI, AI created PRs will be rejected. See https://github.com/Kareadita/Kavita/blob/develop/AI_POLICY.md
+- Do not use AI, AI created PRs will be rejected. See [AI POLICY](https://github.com/Kareadita/Kavita/blob/develop/.github/AI_POLICY.md)
 
 ## Example (delete section)
 
