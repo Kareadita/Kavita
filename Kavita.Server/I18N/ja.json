@@ -287,5 +287,10 @@
     "series-localized-name-exists": "このライブラリ内の別のシリーズですでにこの名前が使用されています",
     "series-localized-name-orphans-files": "このローカライズされた名前を変更すると、現在このシリーズに統合されているファイルが分割されます",
     "email.auth-key-expired.cta": "ローテーション",
-    "email.auth-key-expiring-soon.cta": "ローテーション"
+    "email.auth-key-expiring-soon.cta": "ローテーション",
+    "email.token-invalidated.subject": "Kavita - {{Provider}} トークンの有効期限が切れたため、Scrobbling イベントは停止しました",
+    "email.token-invalidated.header": "{{Provider}} トークンは、度重なる更新の失敗により無効になりました！",
+    "email.token-invalidated.description": "接続を更新するまで、Kavita は {{Provider}} との同期を停止します。",
+    "email.token-invalidated.cta": "更新",
+    "email.token-invalidated.fallback-link-label": "上記のボタンが機能しない場合は、こちらのリンクをご利用ください："
 }

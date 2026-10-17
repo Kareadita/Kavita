@@ -614,13 +614,7 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "no-data": "Không có dữ liệu",
-        "description-part-2": "Wiki.",
-        "created-header": "Đã tạo",
-        "description-part-1": "Bảng này chứa các vấn đề được tìm thấy trong quá trình quét hoặc đọc phương tiện của bạn. Bạn có thể xóa bảng này bất kỳ lúc nào và sử dụng Quét thư viện (Bắt Buộc) để thực hiện phân tích. Danh sách một số lỗi thường gặp và ý nghĩa của chúng có thể được tìm thấy trên ",
-        "clear-alerts": "Xóa Cảnh Báo",
-        "file-header": "Tệp",
-        "comment-header": "Bình Luận"
+        "no-data": "Không có dữ liệu"
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",
@@ -774,8 +768,6 @@
         "bust-cache-task": "Xóa Bộ Nhớ Đệm",
         "bust-cache-task-desc": "Xóa bộ nhớ đệm Kavita+. chỉ nên sử dụng khi gỡ lỗi các kết quả không khớp.",
         "bust-cache-task-success": "Bộ nhớ đệm Kavita+ đã bị xóa",
-        "bust-locale-task": "Xóa Bộ Nhớ Đệm Ngôn Ngữ",
-        "bust-locale-task-success": "Bộ nhớ đệm ngôn ngữ đã bị xóa",
         "clear-reading-cache-task": "Xóa Bộ Nhớ Đệm Trình Đọc",
         "clear-reading-cache-task-success": "Bộ nhớ đệm đã bị xóa",
         "clean-up-want-to-read-task": "Dọn Dẹp Các Mục Muốn Đọc",
@@ -785,7 +777,6 @@
         "convert-media-task-desc": "Chạy một tác vụ dài để chuyển đổi tất cả tệp Media do kavita quản lý sang loại mã hóa đã chọn. Tác vụ này sẽ mất thời gian (đặc biệt là trên các thiết bị ARM).",
         "cron-header": "Cron",
         "action-header": "Hành Động",
-        "bust-locale-task-desc": "Xóa bộ nhớ đệm ngôn ngữ. Việc này có thể khắc phục sự cố với các chuỗi ký tự không hiển thị đúng sau khi cập nhật. Cần phải làm mới trình duyệt.",
         "clear-reading-cache-task-desc": "Xóa các tệp được lưu trong bộ nhớ đệm của trình đọc. Hữu ích khi bạn vừa cập nhật một tệp mà bạn đã đọc trước đó trong vòng 24 giờ qua.",
         "clean-up-want-to-read-task-desc": "Xóa bất kỳ Series nào mà người dùng đã đọc hết nằm trong mục Muốn đọc và có trạng thái xuất bản là Đã hoàn thành. Chạy sau mỗi 24 giờ.",
         "clean-up-task-desc": "Thực hiện các hoạt động dọn dẹp hàng đêm trên máy chủ. Tác vụ có thể sẽ nặng, khuyên không nên chạy với người dùng đang hoạt động hoặc đang quét. Chạy sau mỗi 24 giờ.",
@@ -935,17 +926,7 @@
         "read-options-alt": "Cài Đặt Đọc"
     },
     "events-widget": {
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} người dùng đang trực tuyến",
-        "download-in-queue": "{{num}} tải xuống trong hàng đợi",
-        "downloading-item": "Đang Tải Xuống {{item}}",
-        "more-info": "Click để hiển thị thêm thông tin",
-        "title-alt": "Hoạt Động",
-        "dismiss-all": "Bỏ Qua Tất Cả",
-        "update-available": "Bản Cập Nhật Khả Dụng",
-        "active-events-title": "Sự kiện đang diễn ra:",
-        "no-data": "Không có nhiều thứ đang diễn ra ở đây",
-        "left-to-process": "Đang chờ xử lý: {{leftToProcess}}"
+        "title-alt": "Hoạt Động"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}",

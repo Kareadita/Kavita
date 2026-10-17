@@ -672,12 +672,6 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "description-part-1": "У цій таблиці наведено проблеми, виявлені під час сканування або читання медіафайлів. Ви можете очистити її будь-коли та скористатися скануванням бібліотеки (примусово) для виконання аналізу. Список деяких поширених помилок та їх значення можна знайти на ",
-        "description-part-2": "вікі.",
-        "clear-alerts": "Очистити сповіщення",
-        "file-header": "Файл",
-        "comment-header": "Коментар",
-        "created-header": "Створено",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -849,9 +843,6 @@
         "bust-cache-task": "Кеш-перебір",
         "bust-cache-task-desc": "Очищає кеш Kavita+ — слід використовувати лише під час налагодження поганих збігів.",
         "bust-cache-task-success": "Kavita+ Кеш викрито",
-        "bust-locale-task": "Кеш локалізації Bust",
-        "bust-locale-task-desc": "Очищає кеш локалізації. Це може вирішити проблеми з некоректним відображенням рядків після оновлення. Потрібне оновлення браузера.",
-        "bust-locale-task-success": "Кеш локалізації вилучено",
         "clear-reading-cache-task": "Очистити кеш читання",
         "clear-reading-cache-task-desc": "Очищає кешовані файли для читання. Корисно, коли ви щойно оновили файл, який читали протягом останніх 24 годин.",
         "clear-reading-cache-task-success": "Кеш вже очищено",
@@ -1025,17 +1016,7 @@
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
-        "close": "{{common.close}}",
         "title-alt": "Активність",
-        "dismiss-all": "Відхилити все",
-        "update-available": "Доступне оновлення",
-        "downloading-item": "Завантаження {{item}}",
-        "more-info": "Натисніть, щоб отримати більше інформації",
-        "users-online-count": "{{num}} Користувачі онлайн",
-        "active-events-title": "Активні події:",
-        "no-data": "Тут небагато чого відбувається",
-        "left-to-process": "Залишилося обробити: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} завантажень у черзі",
         "reading-now": "{{num}} читає зараз"
     },
     "shortcuts-modal": {
