@@ -648,10 +648,8 @@ public class LibraryController(
         if (await unitOfWork.LibraryRepository.LibraryExists(newName, ct) && !library.Name.Equals(newName))
             return BadRequest(await localizationService.TranslateAsync(userId, "library-name-exists"));
 
-        var originalFoldersCount = library.Folders.Count;
-
         library.Name = newName;
-        library.Folders = dto.Folders.Select(s => new FolderPath() {Path = s}).Distinct().ToList();
+        var foldersUpdate = library.SyncFolders(dto.Folders);
 
         var typeUpdate = library.Type != dto.Type;
         var folderWatchingUpdate = dto.FolderWatchMode.HasValue && library.FolderWatchMode != dto.FolderWatchMode;
@@ -659,12 +657,12 @@ public class LibraryController(
 
         if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(userId, "generic-library-update"));
 
-        if (folderWatchingUpdate || originalFoldersCount != dto.Folders.Count() || typeUpdate)
+        if (folderWatchingUpdate || foldersUpdate || typeUpdate)
         {
             BackgroundJob.Enqueue(() => libraryWatcher.RestartWatching());
         }
 
-        if (originalFoldersCount != dto.Folders.Count() || typeUpdate)
+        if (foldersUpdate || typeUpdate)
         {
             await taskScheduler.EnqueueScanLibrary(library.Id);
         }

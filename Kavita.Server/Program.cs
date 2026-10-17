@@ -16,6 +16,7 @@ using Kavita.Server.Logging;
 using Kavita.Server.ManualMigrations.v0._7._14;
 using Kavita.Server.ManualMigrations.v0._8._2;
 using Kavita.Server.ManualMigrations.v0._8._4;
+using Kavita.Server.ManualMigrations.v0._9._2;
 using Kavita.Services;
 using Kavita.Services.SignalR;
 using Microsoft.AspNetCore.Hosting;
@@ -109,6 +110,9 @@ public class Program
 
                                 // v0.8.4
                                 await ManualMigrateEncodeSettings.Migrate(context, logger);
+
+                                // v0.9.2, before StartupTasksHostedService reads the setting
+                                await new ManualMigrateFolderWatchingOn().RunAsync(context, logger);
                             }
                             catch (Exception)
                             {

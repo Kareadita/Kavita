@@ -3,7 +3,7 @@ using System.Text.Json;
 using WatchProbe;
 
 const string tool = "watchprobe";
-const string probeVersion = "3";
+const string probeVersion = "4";
 
 const string usage = """
     Kavita folder watching probe. Shows which way of watching a folder sees changes on your setup.
@@ -11,6 +11,8 @@ const string usage = """
     Usage:
       watchprobe <folder> [--minutes 10] [--interval 5] [--no-control]
       watchprobe cost <folder> [--runs 2] [--gap 15] [--methods a,b] [--no-full]      read-only, safe on a whole library
+      watchprobe copy <folder> [--source <file>] [--size-mb 300] [--seconds 60] [--methods a,b]
+                                    writes and deletes watchprobe-copy-* folders in <folder>
 
     Watch options:
       --minutes <n>    how long to watch (default 10). Enter or Ctrl+C ends it early
@@ -23,6 +25,12 @@ const string usage = """
       --methods <list> which ways to time, comma-separated: folder-names, folder-times, known-folders, full (default all)
       --no-full        skip timing the whole-tree listing (the slowest one)
 
+    Copy options:
+      --source <file>  file to copy in (default: a random file of --size-mb in the temp folder)
+      --size-mb <n>    size of the generated source (default 300)
+      --seconds <s>    how long the throttled copies (stream, robocopy) take (default 60)
+      --methods <list> which ways to copy: stream, file-copy, robocopy, shell (default all; robocopy and shell on Windows only)
+
     Common options:
       --label <text>   name for this setup, e.g. "horo-docker-cifs"
       --out <file>     report path (default: next to this program)
@@ -34,8 +42,8 @@ if (args.Length < 1 || args[0] is "-h" or "--help")
     return 1;
 }
 
-var mode = args[0] == "cost" ? "cost" : "watch";
-var rest = mode == "cost" ? args[1..] : args;
+var mode = args[0] is "cost" or "copy" ? args[0] : "watch";
+var rest = mode == "watch" ? args : args[1..];
 if (rest.Length < 1)
 {
     Console.WriteLine(usage);
@@ -77,6 +85,35 @@ if (mode == "cost")
         JsonSerializer.Serialize(costReport, WatchJsonContext.Default.CostReport));
     CostProbe.PrintSummary(costReport);
     Console.WriteLine($"Report written to {costPath}");
+    return 0;
+}
+
+if (mode == "copy")
+{
+    var requested = options.GetValueOrDefault("methods") is { } list
+        ? list.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList()
+        : CopyProbe.AllMethods.ToList();
+    var unknown = requested.Except(CopyProbe.AllMethods).ToList();
+    if (unknown.Count > 0)
+    {
+        Console.Error.WriteLine($"Unknown --methods: {string.Join(", ", unknown)}. Pick from {string.Join(", ", CopyProbe.AllMethods)}");
+        return 1;
+    }
+
+    var source = options.GetValueOrDefault("source")
+                 ?? CopyProbe.CreateSource(int.Parse(options.GetValueOrDefault("size-mb") ?? "300"));
+    if (!File.Exists(source))
+    {
+        Console.Error.WriteLine($"Source not found: {source}");
+        return 1;
+    }
+
+    var seconds = double.Parse(options.GetValueOrDefault("seconds") ?? "60", CultureInfo.InvariantCulture);
+    var copyReport = CopyProbe.Run(environment, source, seconds, CopyProbe.MethodsFor(requested));
+    var copyPath = ProbeCli.SaveReport(tool, environment, options.GetValueOrDefault("out"),
+        JsonSerializer.Serialize(copyReport, WatchJsonContext.Default.CopyReport));
+    CopyProbe.PrintSummary(copyReport);
+    Console.WriteLine($"Report written to {copyPath}");
     return 0;
 }
 

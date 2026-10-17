@@ -8,9 +8,8 @@ public class FolderPath
     public int Id { get; set; }
     public required string Path { get; set; }
     /// <summary>
-    /// Used when scanning to see if we can skip if nothing has changed
+    /// Set at the end of each library scan, in server local time. Nothing reads it: change detection uses Series.LastScanned
     /// </summary>
-    /// <remarks>Time stored in UTC</remarks>
     public DateTime LastScanned { get; set; }
 
     // Relationship

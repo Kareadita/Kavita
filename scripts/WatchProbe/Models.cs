@@ -130,6 +130,73 @@ public sealed class CostTiming
     public int Errors { get; set; }
 }
 
+public sealed class CopyReport
+{
+    public EnvironmentInfo Environment { get; set; } = new();
+    public string Source { get; set; } = "";
+    public long SourceBytes { get; set; }
+    public string SourceLastWriteUtc { get; set; } = "";
+    public List<CopyRun> Runs { get; set; } = [];
+}
+
+/// <summary>
+/// One way of copying the source into the watched folder, and what each watcher and the sampler saw while it ran
+/// </summary>
+public sealed class CopyRun
+{
+    public string Method { get; set; } = "";
+    public string Target { get; set; } = "";
+    public string? Error { get; set; }
+    public double CopySeconds { get; set; }
+    /// <summary>
+    /// Seconds after the copy started that the target's creation time reads, negative when it is older than the copy
+    /// </summary>
+    public double? CreationOffsetSeconds { get; set; }
+    public bool? LastWriteKeptFromSource { get; set; }
+    /// <summary>
+    /// Whether an open with FileShare.Read failed with a sharing violation while the copy ran, and after it
+    /// </summary>
+    public bool InUseDuringCopy { get; set; }
+    public bool InUseAfterCopy { get; set; }
+    public double? LastInUseSeconds { get; set; }
+    public List<CopyWatcherStats> Watchers { get; set; } = [];
+    public List<CopySample> Samples { get; set; } = [];
+    public List<CopyEvent> Events { get; set; } = [];
+}
+
+/// <summary>
+/// Events on the target only. Middle counts the ones more than 1 s after the copy started and before it ended
+/// </summary>
+public sealed class CopyWatcherStats
+{
+    public string Name { get; set; } = "";
+    public int Events { get; set; }
+    public int Middle { get; set; }
+    public double? LongestGapSeconds { get; set; }
+}
+
+/// <summary>
+/// The target's state, written only when it differs from the previous sample
+/// </summary>
+public sealed class CopySample
+{
+    public double Seconds { get; set; }
+    public bool Exists { get; set; }
+    public long Bytes { get; set; }
+    public string? CreationUtc { get; set; }
+    public string? LastWriteUtc { get; set; }
+    public bool InUse { get; set; }
+    public string? OpenError { get; set; }
+}
+
+public sealed class CopyEvent
+{
+    public string Watcher { get; set; } = "";
+    public string Kind { get; set; } = "";
+    public double Seconds { get; set; }
+    public string Path { get; set; } = "";
+}
+
 public sealed class WatchEvent
 {
     public string Source { get; set; } = "";
@@ -145,4 +212,5 @@ public sealed class WatchEvent
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 [JsonSerializable(typeof(WatchReport))]
 [JsonSerializable(typeof(CostReport))]
+[JsonSerializable(typeof(CopyReport))]
 public partial class WatchJsonContext : JsonSerializerContext;

@@ -827,6 +827,21 @@
         "lightNovel": "Book library with special handling optimized for light novels"
     },
 
+    "folder-watch-mode-pipe": {
+        "off": "Off",
+        "automatic": "Automatic",
+        "automatic-recommended": "Automatic (Recommended)",
+        "file-watcher": "File Watcher",
+        "polling": "Polling"
+    },
+
+    "folder-watch-mode-description-pipe": {
+        "off": "Changes are picked up by the scheduled scan or a manual scan.",
+        "automatic": "Kavita picks the best way to detect changes for each folder.",
+        "file-watcher": "Uses native OS change events, but limited supported configurations. Docker on a network share, Docker Desktop host folders, or FUSE pools do not support.",
+        "polling": "Periodically checks the folders. Slower than File Watcher, but works everywhere."
+    },
+
     "age-rating-pipe": {
         "unknown": "Unknown",
         "early-childhood": "Early Childhood",
@@ -2017,8 +2032,7 @@
         "allow-scrobbling-tooltip": "Should Kavita scrobble reading events, want to read status, ratings, and reviews to configured providers. This will only occur if the server has an active Kavita+ Subscription.",
         "allow-metadata-matching-label": "Allow Metadata Matching",
         "allow-metadata-matching-tooltip": "Should Kavita download metadata for Series within this Library. This will only occur if the server has an active Kavita+ Subscription.",
-        "folder-watching-label": "Folder Watching",
-        "folder-watching-tooltip": "Override Server folder watching for this library. If off, folder watching won't run on the folders this library contains. If libraries share folders, then folders may still be ran against. Will always wait 10 minutes before triggering scan.",
+        "folder-watch-mode-label": "Folder Watching",
         "include-in-dashboard-label": "Include in Dashboard",
         "include-in-dashboard-tooltip": "Should series from the library be included on the Dashboard. This affects all streams, like On Deck, Recently Updated, Recently Added, or any custom additions.",
         "include-in-search-label": "Include in Search",
@@ -2484,7 +2498,7 @@
         "opds-tooltip": "OPDS support will allow all users to use OPDS to read and download content from the server.",
         "enable-opds": "Enable OPDS",
         "folder-watching-label": "Folder Watching",
-        "folder-watching-tooltip": "Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans. Will always wait 10 minutes before triggering scan.",
+        "folder-watching-tooltip": "Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans. A folder is scanned 30 seconds after its last change. Each library chooses how it watches on its Folder tab.",
         "enable-folder-watching": "Enable Folder Watching",
         "host-name-label": "{{manage-email-settings.host-name-label}}",
         "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}",

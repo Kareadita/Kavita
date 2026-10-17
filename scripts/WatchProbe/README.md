@@ -99,6 +99,23 @@ docker exec -it kavita /kavita/config/watchprobe cost /library --methods known-f
 
 It walks the library once at the start to find the folders (not timed), then reads their times 5 times, a minute apart.
 
+## Copy mode: can a half-copied file be told apart
+
+Copies a large file into a folder several ways and, every 200 ms while each copy runs, records the file's size, creation time, last-modified time, and whether opening it while denying writers fails. Two watchers run alongside: one set up like Kavita's, one that also listens for size changes. It **writes** into the folder (a `watchprobe-copy-<method>` folder per copy, deleted afterwards), so point it at an empty test folder, not a library.
+
+```bash
+watchprobe copy /path/to/empty-test-folder --size-mb 300 --seconds 60 --label "my-setup-copy"
+```
+
+| Method | How it copies |
+|---|---|
+| `stream` | .NET writes in 1 MB chunks spread over `--seconds`, like a slow network copy |
+| `file-copy` | `File.Copy` (Windows: the CopyFileEx engine) |
+| `robocopy` | Windows only |
+| `shell` | Windows only, the engine Explorer uses (`Shell.Application.CopyHere`) |
+
+Options: `--source <file>` copy this file instead of a generated one, `--size-mb 300` size of the generated file (use a few GB so the fast copies last long enough to sample), `--seconds 60` length of the `stream` copy, `--methods stream,shell` copy only these ways.
+
 ## What to send back
 
 The `watchprobe-*.json` file (written next to the program, so in your config folder), plus one line about the setup: OS/NAS, how the library is mounted into Kavita (bind mount, SMB/CIFS, NFS, mergerfs, ...), and which machine you made the changes from.

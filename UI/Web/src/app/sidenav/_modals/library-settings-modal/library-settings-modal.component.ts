@@ -69,6 +69,9 @@ import {FormFieldDirective} from "../../../_directives/form-field.directive";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 import {disabled, form, FormField, required, validate} from "@angular/forms/signals";
 import {SettingSelectComponent} from "../../../settings/_components/setting-enum-select/setting-select.component";
+import {allFolderWatchModes, FolderWatchMode} from "../../../_models/library/folder-watch-mode";
+import {FolderWatchModePipe} from "../../../_pipes/folder-watch-mode.pipe";
+import {FolderWatchModeDescriptionPipe} from "../../../_pipes/folder-watch-mode-description.pipe";
 
 enum StepID {
   General = 0,
@@ -81,7 +84,7 @@ interface FormModel {
   id: number;
   name: string;
   type: LibraryType;
-  folderWatching: boolean;
+  folderWatchMode: FolderWatchMode;
   includeInDashboard: boolean;
   includeInRecommended: boolean;
   includeInSearch: boolean;
@@ -104,7 +107,7 @@ interface FormModel {
   selector: 'app-library-settings-modal',
   imports: [NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, UtcToLocalTimePipe, FormFieldDirective, ValidationErrorsComponent, FormField, SettingSelectComponent],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, UtcToLocalTimePipe, FormFieldDirective, ValidationErrorsComponent, FormField, SettingSelectComponent, FolderWatchModePipe, FolderWatchModeDescriptionPipe],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -147,7 +150,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     defaultLanguage: "",
     enableMetadata: true,
     excludePatterns: [],
-    folderWatching: true,
+    folderWatchMode: FolderWatchMode.Automatic,
     folders: [],
     includeInDashboard: true,
     includeInRecommended: true,
@@ -203,6 +206,8 @@ export class LibrarySettingsModalComponent implements OnInit {
   libraryTypes = allLibraryTypes.map(f => {
     return {title: this.libraryTypePipe.transform(f), value: f};
   }).sort((a, b) => a.title.localeCompare(b.title));
+
+  protected readonly folderWatchModes = allFolderWatchModes;
 
   languageSettings = signal<TypeaheadConfig<Language> | null>(null);
 
@@ -293,7 +298,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       defaultLanguage: library.defaultLanguage,
       enableMetadata: library.enableMetadata,
       excludePatterns: library.excludePatterns,
-      folderWatching: library.folderWatching,
+      folderWatchMode: library.folderWatchMode,
       folders: library.folders,
       includeInDashboard: library.includeInDashboard,
       includeInRecommended: library.includeInRecommended,
