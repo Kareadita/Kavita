@@ -41,22 +41,19 @@ public class KoreaderService(
         var userProgressDto = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId, ct);
         if (userProgressDto == null)
         {
-            var chapterDto = await unitOfWork.ChapterRepository.GetChapterDtoAsync(file.ChapterId, userId, ct);
-            if (chapterDto == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "chapter-doesnt-exist"));
+            var parentIds = await unitOfWork.ChapterRepository.GetParentIdsForChapter(file.ChapterId, ct);
+            if (parentIds is null)
+            {
+                throw new KavitaNotFoundException();
+            }
 
-            var volumeDto = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapterDto.VolumeId, ct: ct);
-            if (volumeDto == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "volume-doesnt-exist"));
-
-            var seriesDto = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(volumeDto.SeriesId, userId, ct);
-            if (seriesDto == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "series-doesnt-exist"));
-
-            userProgressDto = new ProgressDto()
+            userProgressDto = new ProgressDto
             {
                 PageNum = 0, // This is updated in KoreaderHelper.UpdateProgressDto
                 ChapterId = file.ChapterId,
-                VolumeId = chapterDto.VolumeId,
-                SeriesId = seriesDto.Id,
-                LibraryId = seriesDto.LibraryId
+                VolumeId = parentIds.Value.VolumeId,
+                SeriesId = parentIds.Value.SeriesId,
+                LibraryId = parentIds.Value.LibraryId,
             };
         }
 
