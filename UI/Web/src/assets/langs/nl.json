@@ -1026,15 +1026,7 @@
         "characters-title": "{{metadata-fields.characters-title}}"
     },
     "events-widget": {
-        "title-alt": "Activiteit",
-        "dismiss-all": "Alles afkeuren",
-        "update-available": "Update beschikbaar",
-        "downloading-item": "{{item}} downloaden",
-        "more-info": "Klik voor meer informatie",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Gebruikers online",
-        "active-events-title": "Actieve gebeurtenissen:",
-        "no-data": "Er gebeurt hier niet veel"
+        "title-alt": "Activiteit"
     },
     "shortcuts-modal": {
         "title": "Sneltoetsen",

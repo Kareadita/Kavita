@@ -679,9 +679,6 @@
         "convert-media-task-success": "A média célkódolásra konvertálása sorba került",
         "bust-cache-task-desc": "Feltöri a Kavita+ gyorsítótárat - csak rossz egyezések hibakeresésekor használható.",
         "bust-cache-task-success": "Kavita+ gyorsítótár feltörve",
-        "bust-locale-task": "Bust Locale gyorsítótár",
-        "bust-locale-task-desc": "Feltöri a területi beállítások gyorsítótárát. Ez kijavíthatja a frissítés utáni helytelenül megjelenő karakterláncok problémáit. Böngésző frissítése szükséges.",
-        "bust-locale-task-success": "A területi gyorsítótár feltörve",
         "clear-reading-cache-task": "Olvasási gyorsítótár törlése",
         "clear-reading-cache-task-desc": "Törli a gyorsítótárban tárolt fájlokat olvasáshoz. Hasznos, ha éppen frissítettél egy olyan fájlt, amelyet az elmúlt 24 órában olvastál.",
         "clear-reading-cache-task-success": "A gyorsítótár törölve lett",
@@ -807,9 +804,6 @@
         "read": "{{common.read}}",
         "characters-title": "{{metadata-fields.characters-title}}",
         "read-options-alt": "Olvassa el a lehetőségeket"
-    },
-    "events-widget": {
-        "close": "{{common.close}}"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}"

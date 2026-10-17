@@ -287,5 +287,10 @@
     "mappings-re-run-in-progress": "Actualmente se está procesando una solicitud de reejecución de asignaciones de metadatos. Espera a que finalice para volver a ponerla en cola",
     "series-localized-name-exists": "Otra serie en esta biblioteca ya usa este nombre",
     "series-localized-name-orphans-files": "Cambiar este nombre localizado separaría los archivos que actualmente están unidos en esta serie",
-    "series-name-orphans-files": "Cambiar este nombre separaría los archivos que actualmente están unidos en esta serie"
+    "series-name-orphans-files": "Cambiar este nombre separaría los archivos que actualmente están unidos en esta serie",
+    "email.token-invalidated.subject": "Kavita - Tu token de {{Provider}} ha sido invalidado y los eventos de scrobbling se han detenido",
+    "email.token-invalidated.header": "¡Tu token de {{Provider}} ha sido invalidado debido a fallos repetidos de actualización!",
+    "email.token-invalidated.description": "Kavita dejará de sincronizar con {{Provider}} hasta que renueves tu conexión.",
+    "email.token-invalidated.cta": "RENOVAR",
+    "email.token-invalidated.fallback-link-label": "Si el botón de abajo no funciona, por favor encuentra el enlace aquí:"
 }

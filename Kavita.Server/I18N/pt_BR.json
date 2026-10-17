@@ -187,7 +187,7 @@
     "backup": "Backup",
     "update-yearly-stats": "Atualizar Estatísticas Anuais",
     "check-scrobbling-tokens": "Verificar Tokens de Scrobble",
-    "cleanup": "Limpar",
+    "cleanup": "Limpeza",
     "kavita+-data-refresh": "Atualização de Dados do Kavita+",
     "account-email-invalid": "O e-mail cadastrado para a conta de administrador não é válido. Não é possível enviar o e-mail de teste.",
     "email-settings-invalid": "As configurações de e-mail estão incompletas. Certifique-se de que todas as configurações de e-mail foram salvas.",
@@ -287,5 +287,10 @@
     "mappings-re-run-libraries-overlap": "ExcludedLibraries e IncludedLibraries não podem conter as mesmas bibliotecas",
     "series-name-orphans-files": "Alterar este nome dividiria arquivos que estão atualmente mesclados nesta série",
     "series-localized-name-exists": "Outra série nesta biblioteca já usa esse nome",
-    "series-localized-name-orphans-files": "Alterar este nome localizado dividiria arquivos que estão atualmente mesclados nesta série"
+    "series-localized-name-orphans-files": "Alterar este nome localizado dividiria arquivos que estão atualmente mesclados nesta série",
+    "email.token-invalidated.subject": "Kavita - Seu token do {{Provider}} foi invalidado e os eventos de scrobbling foram interrompidos",
+    "email.token-invalidated.header": "Seu token do {{Provider}} foi invalidado devido a repetidas falhas de atualização!",
+    "email.token-invalidated.description": "Kavita irá parar de sincronizar com {{Provider}} até que você renove sua conexão.",
+    "email.token-invalidated.cta": "RENOVAR",
+    "email.token-invalidated.fallback-link-label": "Se o botão acima não funcionar, encontre o link aqui:"
 }
