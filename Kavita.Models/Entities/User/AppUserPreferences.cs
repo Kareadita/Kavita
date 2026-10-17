@@ -162,6 +162,11 @@ public class AppUserPreferences
     /// </summary>
     public bool CollapseSeriesRelationships { get; set; } = false;
     /// <summary>
+    /// UI Site Global Setting: Should Series cards show a badge with the number of Volumes/Chapters within
+    /// </summary>
+    /// <remarks>Defaults to false - off by default so existing card layouts don't change without opting in</remarks>
+    public bool ShowSeriesItemCount { get; set; } = false;
+    /// <summary>
     /// UI Site Global Setting: The language locale that should be used for the user
     /// </summary>
     public string Locale { get; set; }
