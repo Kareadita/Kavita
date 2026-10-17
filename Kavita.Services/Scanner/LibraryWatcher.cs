@@ -190,44 +190,35 @@ public class LibraryWatcher : ILibraryWatcher
         _logger.LogTrace("[LibraryWatcher] Changed: {FullPath}, {Name}, {ChangeType}", e.FullPath, e.Name, e.ChangeType);
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
 
-        var isDirectoryChange = string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name));
-
-        if (TaskScheduler.HasAlreadyEnqueuedTask("LibraryWatcher", "ProcessChange", [e.FullPath, isDirectoryChange],
-                checkRunningJobs: true))
-        {
-            return;
-        }
-
-        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, isDirectoryChange));
+        EnqueueChange(e.FullPath, _directoryService.FileSystem.Directory.Exists(e.FullPath));
     }
 
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
         _logger.LogTrace("[LibraryWatcher] Created: {FullPath}, {Name}", e.FullPath, e.Name);
-        var isDirectoryChange = !_directoryService.FileSystem.File.Exists(e.Name);
-        if (TaskScheduler.HasAlreadyEnqueuedTask("LibraryWatcher", "ProcessChange", [e.FullPath, isDirectoryChange],
-                checkRunningJobs: true))
-        {
-            return;
-        }
-        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, isDirectoryChange));
+        EnqueueChange(e.FullPath, _directoryService.FileSystem.Directory.Exists(e.FullPath));
     }
 
-    /// <summary>
-    /// From testing, on Deleted only needs to pass through the event when a folder is deleted. If a file is deleted, Changed will handle automatically.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void OnDeleted(object sender, FileSystemEventArgs e) {
-        var isDirectory = string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name));
-        if (!isDirectory) return;
+    /// <remarks>
+    /// NTFS also raises Changed on the parent folder of a deleted file, inotify does not, so file deletes must pass through
+    /// </remarks>
+    private void OnDeleted(object sender, FileSystemEventArgs e)
+    {
         _logger.LogTrace("[LibraryWatcher] Deleted: {FullPath}, {Name}", e.FullPath, e.Name);
-        if (TaskScheduler.HasAlreadyEnqueuedTask("LibraryWatcher", "ProcessChange", [e.FullPath, true],
+        // The path is gone, so a file is told apart by a type Kavita reads: a folder "Vol. 1" has an extension too
+        var isFile = Parser.IsArchive(e.FullPath) || Parser.IsBook(e.FullPath) || Parser.IsImage(e.FullPath);
+        EnqueueChange(e.FullPath, !isFile);
+    }
+
+    private void EnqueueChange(string path, bool isDirectoryChange)
+    {
+        if (TaskScheduler.HasAlreadyEnqueuedTask("LibraryWatcher", "ProcessChange", [path, isDirectoryChange],
                 checkRunningJobs: true))
         {
             return;
         }
-        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, true));
+
+        BackgroundJob.Enqueue(() => ProcessChange(path, isDirectoryChange));
     }
 
     /// <summary>
