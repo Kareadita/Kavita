@@ -80,7 +80,9 @@ public static class ScanJobQueue
             .ToList();
         var folderJobs = stored
             .Where(j => j.State != ScanJobState.Processing && IsScanner(j.Job) && j.Job.Method.Name == nameof(IScannerService.ScanFolder))
-            .Select(j => j.Job.Args[0] is ScanFolderRequest request ? new ScanFolderJob(j.JobId, request, j.RunAtUtc) : null)
+            .Select(j => j.Job.Args[0] is ScanFolderRequest request
+                ? new ScanFolderJob(j.JobId, request, j.RunAtUtc, CreatedAtUtc(j, monitoring))
+                : null)
             .OfType<ScanFolderJob>()
             .ToList();
 
@@ -171,12 +173,15 @@ public static class ScanJobQueue
 
     private static ScanJob Create(StoredJob stored, ScanTarget target, bool force, bool isRequest, IMonitoringApi monitoring)
     {
+        return new ScanJob(stored.JobId, target, force, isRequest, stored.State, CreatedAtUtc(stored, monitoring), stored.RunAtUtc);
+    }
+
+    private static DateTime CreatedAtUtc(StoredJob stored, IMonitoringApi monitoring)
+    {
         var createdAt = monitoring.JobDetails(stored.JobId)?.CreatedAt;
-        var createdAtUtc = createdAt.HasValue
+        return createdAt.HasValue
             ? DateTime.SpecifyKind(createdAt.Value, DateTimeKind.Utc)
             : stored.RunAtUtc ?? DateTime.UtcNow;
-
-        return new ScanJob(stored.JobId, target, force, isRequest, stored.State, createdAtUtc, stored.RunAtUtc);
     }
 
     private static bool IsScanner(Job job) => job.Type.IsAssignableTo(typeof(IScannerService));

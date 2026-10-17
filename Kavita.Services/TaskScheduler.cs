@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -97,6 +98,14 @@ public class TaskScheduler : ITaskScheduler
 
     private static readonly Random Rnd = new Random();
     private const int ScanHourDelay = 3;
+    /// <summary>
+    /// A watcher scan runs once its folder has had no changes for this long
+    /// </summary>
+    internal static readonly TimeSpan WatcherQuietTime = TimeSpan.FromSeconds(30);
+    /// <summary>
+    /// A watcher scan runs by this long after its job was created, even while changes keep coming
+    /// </summary>
+    internal static readonly TimeSpan WatcherScanCap = TimeSpan.FromMinutes(10);
 
     private static readonly RecurringJobOptions RecurringJobOptions = new RecurringJobOptions()
     {
@@ -404,8 +413,7 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => CheckForUpdate(CancellationToken.None));
     }
 
-    /// <param name="delay">Lets the events of one copy settle before the folder is looked at</param>
-    public async Task EnqueueScanFolderFromWatcherAsync(string changedPath, bool isDirectory, TimeSpan delay)
+    public async Task EnqueueScanFolderFromWatcherAsync(string changedPath, bool isDirectory)
     {
         var libraries = await _unitOfWork.LibraryRepository.GetLibraryDtosAsync();
         var target = ResolveScanFolder(changedPath, !isDirectory, libraries);
@@ -415,7 +423,8 @@ public class TaskScheduler : ITaskScheduler
             return;
         }
 
-        await EnqueueScanFolderAsync(new ScanFolderRequest(target.LibraryId, target.Folder, changedPath, true, false), delay);
+        var changedFolder = isDirectory ? changedPath : Path.GetDirectoryName(changedPath)!;
+        await EnqueueScanFolderAsync(new ScanFolderRequest(target.LibraryId, target.Folder, changedFolder, true, false));
     }
 
     public async Task EnqueueScanFolderFromApiAsync(string path, bool abortOnNoSeriesMatch)
@@ -428,7 +437,7 @@ public class TaskScheduler : ITaskScheduler
             return;
         }
 
-        await EnqueueScanFolderAsync(new ScanFolderRequest(target.LibraryId, target.Folder, path, false, abortOnNoSeriesMatch), TimeSpan.Zero);
+        await EnqueueScanFolderAsync(new ScanFolderRequest(target.LibraryId, target.Folder, path, false, abortOnNoSeriesMatch));
     }
 
     /// <summary>
@@ -461,10 +470,11 @@ public class TaskScheduler : ITaskScheduler
     internal sealed record ScanFolderTarget(int LibraryId, string Root, string Folder);
 
     /// <summary>
-    /// Queues a <see cref="ScannerService.ScanFolder"/> job, unless the same request is already waiting
+    /// Queues a <see cref="ScannerService.ScanFolder"/> job. A watcher request waits until its folder has been quiet for
+    /// <see cref="WatcherQuietTime"/>, or runs by <see cref="WatcherScanCap"/> while changes keep coming. Any other request
+    /// runs now, unless the same request is already waiting
     /// </summary>
-    /// <param name="delay">Zero queues it now</param>
-    internal async Task EnqueueScanFolderAsync(ScanFolderRequest request, TimeSpan delay)
+    internal async Task EnqueueScanFolderAsync(ScanFolderRequest request)
     {
         var normalized = request with
         {
@@ -476,27 +486,47 @@ public class TaskScheduler : ITaskScheduler
         lock (ScanRequestLock)
         {
             var folderJobs = ScanJobQueue.Read().FolderJobs;
-            if (folderJobs.Any(j => j.Request == normalized))
+            var sameRequest = folderJobs.Where(j => j.Request == normalized).ToList();
+            if (normalized.FromFolderWatcher ? TryDebounce(sameRequest) : sameRequest.Count > 0)
             {
-                _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as the same request is queued", normalized.Folder);
+                _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as the same request is waiting", normalized.Folder);
                 return;
             }
 
             isNewFolder = folderJobs.All(j => j.Request.Folder != normalized.Folder);
 
             _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalized.Folder);
-            if (delay <= TimeSpan.Zero)
+            if (normalized.FromFolderWatcher)
             {
-                ScanJobQueue.Enqueue(() => _scannerService.ScanFolder(normalized));
+                ScanJobQueue.Schedule(() => _scannerService.ScanFolder(normalized), WatcherQuietTime);
             }
             else
             {
-                ScanJobQueue.Schedule(() => _scannerService.ScanFolder(normalized), delay);
+                ScanJobQueue.Enqueue(() => _scannerService.ScanFolder(normalized));
             }
         }
 
         if (!isNewFolder) return;
         await _eventHub.SendMessageAsync(MessageFactory.ScanRescheduled, ScanQueueChangedEvent());
+    }
+
+    /// <returns>True when a waiting job covers the change, pushed back if it has not reached the cap</returns>
+    private static bool TryDebounce(List<ScanFolderJob> sameRequest)
+    {
+        var scheduled = sameRequest.FirstOrDefault(j => j.RunAtUtc != null);
+        if (scheduled == null) return false;
+
+        var delay = WatcherPushBack(scheduled.CreatedAtUtc, DateTime.UtcNow);
+        if (delay <= TimeSpan.Zero) return true;
+
+        return ScanJobQueue.TryPushBack(scheduled.JobId, nameof(IScannerService.ScanFolder), delay);
+    }
+
+    /// <returns>How far from now a waiting watcher job moves; zero or less once it reached the cap</returns>
+    internal static TimeSpan WatcherPushBack(DateTime createdAtUtc, DateTime nowUtc)
+    {
+        var untilCap = createdAtUtc + WatcherScanCap - nowUtc;
+        return untilCap < WatcherQuietTime ? untilCap : WatcherQuietTime;
     }
 
     /// <summary>

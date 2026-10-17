@@ -5,7 +5,6 @@ using Kavita.Database.Tests;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Services.Scanner;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -60,8 +59,7 @@ public class LibraryWatcherTests : AbstractFsTest, IDisposable
             return (Directory.Exists(path) || _goneAfterExistsCheck.Contains(path)) && !_unreachable.Contains(path);
         });
 
-        return new LibraryWatcher(ds, unitOfWork, Substitute.For<ILogger<LibraryWatcher>>(),
-            Substitute.For<IHostEnvironment>(), Substitute.For<ITaskScheduler>());
+        return new LibraryWatcher(ds, unitOfWork, Substitute.For<ILogger<LibraryWatcher>>(), Substitute.For<ITaskScheduler>());
     }
 
     private static async Task<WatcherErrorAction[]> RaiseErrorsAtOnce(LibraryWatcher libraryWatcher,

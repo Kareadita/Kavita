@@ -11,7 +11,6 @@ using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
 using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Scanner;
@@ -31,11 +30,6 @@ public class LibraryWatcher : ILibraryWatcher
     /// This is just here to prevent GC from Disposing our watchers
     /// </summary>
     private static readonly List<FileSystemWatcher> FileWatchers = [];
-    /// <summary>
-    /// The amount of time until the Schedule ScanFolder task should be executed
-    /// </summary>
-    /// <remarks>The Job will be enqueued instantly</remarks>
-    private readonly TimeSpan _queueWaitTime;
 
     private static readonly TimeSpan MinRetryDelay = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromHours(1);
@@ -56,15 +50,12 @@ public class LibraryWatcher : ILibraryWatcher
     internal static IReadOnlyList<FileSystemWatcher> Watchers => [.. FileWatchers];
 
     public LibraryWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork,
-        ILogger<LibraryWatcher> logger, IHostEnvironment environment, ITaskScheduler taskScheduler)
+        ILogger<LibraryWatcher> logger, ITaskScheduler taskScheduler)
     {
         _directoryService = directoryService;
         _unitOfWork = unitOfWork;
         _logger = logger;
         _taskScheduler = taskScheduler;
-
-        _queueWaitTime = environment.IsDevelopment() ? TimeSpan.FromSeconds(30) : TimeSpan.FromMinutes(5);
-
     }
 
     public async Task StartWatching()
@@ -387,7 +378,7 @@ public class LibraryWatcher : ILibraryWatcher
                 return;
             }
 
-            await _taskScheduler.EnqueueScanFolderFromWatcherAsync(filePath, isDirectoryChange, _queueWaitTime);
+            await _taskScheduler.EnqueueScanFolderFromWatcherAsync(filePath, isDirectoryChange);
         }
         catch (Exception ex)
         {
