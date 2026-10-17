@@ -557,6 +557,7 @@ public class Startup
                     await new ManualMigrateOnDeckSettings().RunAsync(dataContext, logger);
                     await new ManualMigrationFixInvalidOnDeckSettings().RunAsync(dataContext, logger);
                     await new ManualMigrationClearRootLowestFolderPath().RunAsync(dataContext, logger);
+                    await new ManualMigrateFolderWatchingOn().RunAsync(dataContext, logger);
 
                     #endregion
 
