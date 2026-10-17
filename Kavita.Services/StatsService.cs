@@ -310,7 +310,8 @@ public class StatsService : IStatsService
             libDto.NumberOfFolders = library.Folders.Count;
             libDto.FileTypes = library.LibraryFileTypes.Select(s => s.FileTypeGroup).Distinct().ToList();
             libDto.UsingExcludePatterns = library.LibraryExcludePatterns.Any(p => !string.IsNullOrEmpty(p.Pattern));
-            libDto.UsingFolderWatching = library.FolderWatching;
+            libDto.UsingFolderWatching = library.FolderWatchMode != FolderWatchMode.Off; // TODO: Remove this once we finish the File Watcher rework
+            libDto.FolderWatchMode = library.FolderWatchMode;
             libDto.CreateCollectionsFromMetadata = library.ManageCollections;
             libDto.CreateReadingListsFromMetadata = library.ManageReadingLists;
             libDto.EnabledMetadata = library.EnableMetadata;

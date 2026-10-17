@@ -7,6 +7,7 @@ using Kavita.API.Services;
 using Kavita.Database.Tests;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Settings;
+using Kavita.Models.Entities.Enums;
 using Kavita.Services.Scanner;
 using Kavita.Services.Tests.Helpers;
 using Microsoft.Extensions.Logging;
@@ -55,7 +56,7 @@ public class LibraryWatcherTests : AbstractFsTest, IDisposable
         unitOfWork.LibraryRepository.GetLibraryDtosAsync().Returns(async _ =>
         {
             await Task.Delay(50);
-            return (IEnumerable<LibraryDto>) [new LibraryDto { FolderWatching = true, Folders = _libraryFolders }];
+            return (IEnumerable<LibraryDto>) [new LibraryDto { FolderWatchMode = FolderWatchMode.Automatic, Folders = _libraryFolders }];
         });
 
         var ds = Substitute.For<IDirectoryService>();

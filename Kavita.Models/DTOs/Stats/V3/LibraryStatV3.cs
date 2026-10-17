@@ -10,7 +10,10 @@ public sealed record LibraryStatV3
 {
     public bool IncludeInDashboard { get; set; }
     public bool IncludeInSearch { get; set; }
+    [Obsolete("Use FolderWatchMode")]
     public bool UsingFolderWatching { get; set; }
+    [EnumDataType(typeof(FolderWatchMode))]
+    public FolderWatchMode FolderWatchMode { get; set; }
     /// <summary>
     /// Are any exclude patterns setup
     /// </summary>

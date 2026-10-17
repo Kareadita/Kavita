@@ -78,7 +78,7 @@ public class LibraryWatcher : ILibraryWatcher
         }
 
         var configuredFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
-            .Where(l => l.FolderWatching)
+            .Where(l => l.FolderWatchMode != FolderWatchMode.Off)
             .SelectMany(l => l.Folders)
             .Select(Parser.NormalizePath)
             .Distinct()

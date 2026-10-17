@@ -63,6 +63,7 @@ def open_db(path):
 con = open_db(args.db)
 
 LIBRARY_TYPES = {0: 'Manga', 1: 'Comic', 2: 'Book', 3: 'Image', 4: 'LightNovel', 5: 'ComicVine'}
+FOLDER_WATCH_MODES = {0: 'Off', 1: 'Automatic', 2: 'FileWatcher', 3: 'Polling'}
 MAX_ROWS = 300
 SCRIPT_VERSION = 2
 
@@ -261,11 +262,16 @@ if args.audit_tags:
     sys.exit(0)
 
 section('Libraries')
-for r in rows('SELECT Id, Name, Type, LastScanned, FolderWatching, AllowMetadataMatching FROM Library ORDER BY Id'):
+for r in rows('SELECT * FROM Library ORDER BY Id'):
     series_count = con.execute('SELECT COUNT(*) FROM Series WHERE LibraryId = ?', (r['Id'],)).fetchone()[0]
     folders = [f['Path'] for f in rows('SELECT Path FROM FolderPath WHERE LibraryId = ?', (r['Id'],))]
+    # Databases before v0.9.2 have the FolderWatching bool instead of the mode
+    if 'FolderWatchMode' in r.keys():
+        watch_mode = FOLDER_WATCH_MODES.get(r['FolderWatchMode'], r['FolderWatchMode'])
+    else:
+        watch_mode = 'Automatic' if r['FolderWatching'] else 'Off'
     write(f'#{r["Id"]} {r["Name"]} | type {LIBRARY_TYPES.get(r["Type"], r["Type"])} | {series_count} series | '
-          f'last scanned {r["LastScanned"]} | folder watching {bool(r["FolderWatching"])} | K+ matching {bool(r["AllowMetadataMatching"])}')
+          f'last scanned {r["LastScanned"]} | folder watching {watch_mode} | K+ matching {bool(r["AllowMetadataMatching"])}')
     for f in folders:
         write(f'    root: {f}')
 

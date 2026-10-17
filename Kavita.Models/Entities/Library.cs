@@ -14,10 +14,7 @@ public class Library : IEntityDate, IHasCoverImage
     public string PrimaryColor { get; set; }
     public string SecondaryColor { get; set; }
     public LibraryType Type { get; set; }
-    /// <summary>
-    /// If Folder Watching is enabled for this library
-    /// </summary>
-    public bool FolderWatching { get; set; } = true;
+    public FolderWatchMode FolderWatchMode { get; set; } = FolderWatchMode.Automatic;
     /// <summary>
     /// Include Library series on Dashboard Streams
     /// </summary>

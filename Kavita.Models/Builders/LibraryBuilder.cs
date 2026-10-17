@@ -74,9 +74,9 @@ public class LibraryBuilder : IEntityBuilder<Library>
         return this;
     }
 
-    public LibraryBuilder WithFolderWatching(bool folderWatching)
+    public LibraryBuilder WithFolderWatchMode(FolderWatchMode mode)
     {
-        _library.FolderWatching = folderWatching;
+        _library.FolderWatchMode = mode;
         return this;
     }
 

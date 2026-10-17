@@ -74,7 +74,7 @@ public class LibraryController(
 
         var library = new LibraryBuilder(dto.Name, dto.Type)
             .WithFolders(dto.Folders.Select(x => new FolderPath {Path = x}).Distinct().ToList())
-            .WithFolderWatching(dto.FolderWatching)
+            .WithFolderWatchMode(dto.FolderWatchMode ?? FolderWatchMode.Automatic)
             .WithIncludeInDashboard(dto.IncludeInDashboard)
             .WithManageCollections(dto.ManageCollections)
             .WithManageReadingLists(dto.ManageReadingLists)
@@ -116,13 +116,6 @@ public class LibraryController(
 
         logger.LogInformation("Created a new library: {LibraryName}", library.Name.Sanitize());
 
-        // Restart Folder watching if on
-        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
-        if (settings.EnableFolderWatching)
-        {
-            await libraryWatcher.RestartWatching();
-        }
-
         // Assign all the necessary users with this library side nav
         var userIds = admins.Select(u => u.Id).ToList();
         var userNeedingNewLibrary = (await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams, ct: ct))
@@ -146,7 +139,7 @@ public class LibraryController(
 
         await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey, ct);
 
-        if (library.FolderWatching)
+        if (library.FolderWatchMode != FolderWatchMode.Off)
         {
             await libraryWatcher.RestartWatching();
         }
@@ -434,7 +427,7 @@ public class LibraryController(
                 DefaultLanguage = sourceLibrary.DefaultLanguage,
                 MetadataProvider = sourceLibrary.MetadataProvider,
                 ExcludePatterns = sourceLibrary.LibraryExcludePatterns.Select(p => p.Pattern).ToList(),
-                FolderWatching = sourceLibrary.FolderWatching,
+                FolderWatchMode = sourceLibrary.FolderWatchMode,
                 ManageCollections = sourceLibrary.ManageCollections,
                 FileGroupTypes = sourceLibrary.LibraryFileTypes.Select(t => t.FileTypeGroup).ToList(),
                 IncludeInDashboard = sourceLibrary.IncludeInDashboard,
@@ -445,7 +438,7 @@ public class LibraryController(
 
         await unitOfWork.CommitAsync(ct);
 
-        if (sourceLibrary.FolderWatching)
+        if (sourceLibrary.FolderWatchMode != FolderWatchMode.Off)
         {
             BackgroundJob.Enqueue(() => libraryWatcher.RestartWatching());
         }
@@ -661,7 +654,7 @@ public class LibraryController(
         library.Folders = dto.Folders.Select(s => new FolderPath() {Path = s}).Distinct().ToList();
 
         var typeUpdate = library.Type != dto.Type;
-        var folderWatchingUpdate = library.FolderWatching != dto.FolderWatching;
+        var folderWatchingUpdate = dto.FolderWatchMode.HasValue && library.FolderWatchMode != dto.FolderWatchMode;
         UpdateLibrarySettings(dto, library);
 
         if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(userId, "generic-library-update"));
@@ -735,7 +728,10 @@ public class LibraryController(
 
         ValidateMetadataProvider(library.Type, dto.MetadataProvider);
 
-        library.FolderWatching = dto.FolderWatching;
+        if (dto.FolderWatchMode.HasValue)
+        {
+            library.FolderWatchMode = dto.FolderWatchMode.Value;
+        }
         library.IncludeInDashboard = dto.IncludeInDashboard;
         library.IncludeInSearch = dto.IncludeInSearch;
         library.ManageCollections = dto.ManageCollections;
