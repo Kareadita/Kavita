@@ -3405,6 +3405,8 @@
         "series-progress": "Series Progress: {{percentage}}",
         "page-offset-label": "Page Offset",
         "offset-only-double": "Page Offset can only be used with Double Layout",
+        "separate-last-pages-label": "Separate Last Pages",
+        "separate-last-pages-only-double": "Separate Last Pages can only be used with Double Layout",
         "layout-mode-label": "{{manage-reading-profiles.layout-mode-label}}"
     },
 

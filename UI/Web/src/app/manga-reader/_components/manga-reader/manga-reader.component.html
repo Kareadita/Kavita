@@ -275,6 +275,13 @@
                       <label class="form-check-label" for="page-offset">{{t('page-offset-label')}}</label>
                     </div>
                   </div>
+
+                  <div class="mb-3">
+                    <div class="form-check form-switch" [title]="formGroup.separateLastPages().disabled() ? t('separate-last-pages-only-double') : ''">
+                      <input type="checkbox" id="separate-last-pages" [formField]="formGroup.separateLastPages" class="form-check-input" switch>
+                      <label class="form-check-label" for="separate-last-pages">{{t('separate-last-pages-label')}}</label>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="row mb-2">
