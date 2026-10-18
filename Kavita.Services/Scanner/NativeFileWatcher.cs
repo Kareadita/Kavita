@@ -19,11 +19,11 @@ namespace Kavita.Services.Scanner;
 /// Responsible for watching the file system and processing change events. This is mainly responsible for invoking
 /// Scanner to quickly pickup on changes.
 /// </summary>
-public class LibraryWatcher : ILibraryWatcher
+public class NativeFileWatcher : INativeFileWatcher
 {
     private readonly IDirectoryService _directoryService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<LibraryWatcher> _logger;
+    private readonly ILogger<NativeFileWatcher> _logger;
     private readonly ITaskScheduler _taskScheduler;
 
     /// <summary>
@@ -39,7 +39,7 @@ public class LibraryWatcher : ILibraryWatcher
     /// </summary>
     private static readonly SemaphoreSlim WatcherLock = new(1, 1);
     /// <summary>
-    /// Counts within a time frame how many times the buffer became full. Is used to reschedule LibraryWatcher to start monitoring much later rather than instantly
+    /// Counts within a time frame how many times the buffer became full. Is used to reschedule NativeFileWatcher to start monitoring much later rather than instantly
     /// </summary>
     private static int _bufferFullCounter;
     private static int _restartCounter;
@@ -49,8 +49,8 @@ public class LibraryWatcher : ILibraryWatcher
 
     internal static IReadOnlyList<FileSystemWatcher> Watchers => [.. FileWatchers];
 
-    public LibraryWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork,
-        ILogger<LibraryWatcher> logger, ITaskScheduler taskScheduler)
+    public NativeFileWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork,
+        ILogger<NativeFileWatcher> logger, ITaskScheduler taskScheduler)
     {
         _directoryService = directoryService;
         _unitOfWork = unitOfWork;
@@ -91,18 +91,18 @@ public class LibraryWatcher : ILibraryWatcher
         {
             StopWatchers();
 
-            _logger.LogInformation("[LibraryWatcher] Starting file watchers for {Count} library folders", libraryFolders.Count);
+            _logger.LogInformation("[NativeFileWatcher] Starting file watchers for {Count} library folders", libraryFolders.Count);
 
             var watchedFolders = new List<string>();
             foreach (var libraryFolder in libraryFolders)
             {
-                _logger.LogDebug("[LibraryWatcher] Watching {FolderPath}", libraryFolder);
+                _logger.LogDebug("[NativeFileWatcher] Watching {FolderPath}", libraryFolder);
                 if (TryStartWatcher(libraryFolder))
                 {
                     watchedFolders.Add(libraryFolder);
                 }
             }
-            _logger.LogInformation("[LibraryWatcher] Watching {Count} folders", watchedFolders.Count);
+            _logger.LogInformation("[NativeFileWatcher] Watching {Count} folders", watchedFolders.Count);
 
             var missingFolders = configuredFolders.Except(watchedFolders).ToList();
             if (missingFolders.Count == 0)
@@ -116,7 +116,7 @@ public class LibraryWatcher : ILibraryWatcher
             var retryIn = _retryDelay;
             _retryDelay = TimeSpan.FromTicks(Math.Min(retryIn.Ticks * 2, MaxRetryDelay.Ticks));
             _retryScheduledUntil = DateTime.Now + retryIn;
-            _logger.LogWarning("[LibraryWatcher] {Folders} cannot be reached or watched. Trying again in {Minutes} minutes",
+            _logger.LogWarning("[NativeFileWatcher] {Folders} cannot be reached or watched. Trying again in {Minutes} minutes",
                 missingFolders, retryIn.TotalMinutes);
             return retryIn;
         }
@@ -147,7 +147,7 @@ public class LibraryWatcher : ILibraryWatcher
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "[LibraryWatcher] Could not watch {FolderPath}", libraryFolder);
+            _logger.LogWarning(ex, "[NativeFileWatcher] Could not watch {FolderPath}", libraryFolder);
             watcher?.Dispose();
             return false;
         }
@@ -171,7 +171,7 @@ public class LibraryWatcher : ILibraryWatcher
     {
         if (FileWatchers.Count == 0) return;
 
-        _logger.LogInformation("[LibraryWatcher] Stopping watching folders");
+        _logger.LogInformation("[NativeFileWatcher] Stopping watching folders");
         foreach (var fileSystemWatcher in FileWatchers)
         {
             fileSystemWatcher.Dispose();
@@ -181,13 +181,13 @@ public class LibraryWatcher : ILibraryWatcher
 
     public async Task RestartWatching()
     {
-        _logger.LogDebug("[LibraryWatcher] Restarting watcher");
+        _logger.LogDebug("[NativeFileWatcher] Restarting watcher");
         await StartWatching();
     }
 
     private void OnChanged(object sender, FileSystemEventArgs e)
     {
-        _logger.LogTrace("[LibraryWatcher] Changed: {FullPath}, {Name}, {ChangeType}", e.FullPath, e.Name, e.ChangeType);
+        _logger.LogTrace("[NativeFileWatcher] Changed: {FullPath}, {Name}, {ChangeType}", e.FullPath, e.Name, e.ChangeType);
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
 
         EnqueueChange(e.FullPath, _directoryService.FileSystem.Directory.Exists(e.FullPath));
@@ -195,7 +195,7 @@ public class LibraryWatcher : ILibraryWatcher
 
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
-        _logger.LogTrace("[LibraryWatcher] Created: {FullPath}, {Name}", e.FullPath, e.Name);
+        _logger.LogTrace("[NativeFileWatcher] Created: {FullPath}, {Name}", e.FullPath, e.Name);
         EnqueueChange(e.FullPath, _directoryService.FileSystem.Directory.Exists(e.FullPath));
     }
 
@@ -204,7 +204,7 @@ public class LibraryWatcher : ILibraryWatcher
     /// </remarks>
     private void OnDeleted(object sender, FileSystemEventArgs e)
     {
-        _logger.LogTrace("[LibraryWatcher] Deleted: {FullPath}, {Name}", e.FullPath, e.Name);
+        _logger.LogTrace("[NativeFileWatcher] Deleted: {FullPath}, {Name}", e.FullPath, e.Name);
         // The path is gone, so a file is told apart by a type Kavita reads: a folder "Vol. 1" has an extension too
         var isFile = Parser.IsArchive(e.FullPath) || Parser.IsBook(e.FullPath) || Parser.IsImage(e.FullPath);
         EnqueueChange(e.FullPath, !isFile);
@@ -212,7 +212,7 @@ public class LibraryWatcher : ILibraryWatcher
 
     private void EnqueueChange(string path, bool isDirectoryChange)
     {
-        if (TaskScheduler.HasAlreadyEnqueuedTask("LibraryWatcher", "ProcessChange", [path, isDirectoryChange],
+        if (TaskScheduler.HasAlreadyEnqueuedTask(nameof(NativeFileWatcher), nameof(ProcessChange),[path, isDirectoryChange],
                 checkRunningJobs: true))
         {
             return;
@@ -255,7 +255,7 @@ public class LibraryWatcher : ILibraryWatcher
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[LibraryWatcher] Could not recover from a watcher error, folder watching is off until the next restart");
+                _logger.LogError(ex, "[NativeFileWatcher] Could not recover from a watcher error, folder watching is off until the next restart");
             }
         });
     }
@@ -272,7 +272,7 @@ public class LibraryWatcher : ILibraryWatcher
         {
             if (!FileWatchers.Contains(watcher))
             {
-                _logger.LogDebug(exception, "[LibraryWatcher] Ignoring an error from a watcher that was already stopped");
+                _logger.LogDebug(exception, "[NativeFileWatcher] Ignoring an error from a watcher that was already stopped");
                 return WatcherErrorAction.Ignore;
             }
 
@@ -292,7 +292,7 @@ public class LibraryWatcher : ILibraryWatcher
         {
             if (!reachable)
             {
-                _logger.LogWarning(exception, "[LibraryWatcher] {Folder} can no longer be reached, restarting watchers for the folders that still exist", folder);
+                _logger.LogWarning(exception, "[NativeFileWatcher] {Folder} can no longer be reached, restarting watchers for the folders that still exist", folder);
                 _retryScheduledUntil = DateTime.MinValue;
                 _retryDelay = MinRetryDelay;
                 return WatcherErrorAction.FolderUnreachable;
@@ -302,17 +302,17 @@ public class LibraryWatcher : ILibraryWatcher
             _bufferFullCounter += 1;
             var previousErrorWithin10Minutes = (now - _lastErrorTime).TotalMinutes <= 10;
             _lastErrorTime = now;
-            _logger.LogError(exception, "[LibraryWatcher] An error occured, likely too many changes occured at once. Restarting Watchers {Current}/{Total}", _bufferFullCounter, 3);
+            _logger.LogError(exception, "[NativeFileWatcher] An error occured, likely too many changes occured at once. Restarting Watchers {Current}/{Total}", _bufferFullCounter, 3);
 
             if (_restartCounter >= 3)
             {
-                _logger.LogInformation("[LibraryWatcher] Too many restarts occured, you either have limited inotify or an OS constraint. Kavita will turn off folder watching to prevent high utilization of resources");
+                _logger.LogInformation("[NativeFileWatcher] Too many restarts occured, you either have limited inotify or an OS constraint. Kavita will turn off folder watching to prevent high utilization of resources");
                 return WatcherErrorAction.TurnOff;
             }
 
             if (_bufferFullCounter >= 3 && previousErrorWithin10Minutes)
             {
-                _logger.LogInformation("[LibraryWatcher] Internal buffer has been overflown multiple times in past 10 minutes. Suspending file watching for an hour. Restart count: {RestartCount}", _restartCounter);
+                _logger.LogInformation("[NativeFileWatcher] Internal buffer has been overflown multiple times in past 10 minutes. Suspending file watching for an hour. Restart count: {RestartCount}", _restartCounter);
                 _restartCounter++;
                 return WatcherErrorAction.Suspend;
             }
@@ -336,7 +336,7 @@ public class LibraryWatcher : ILibraryWatcher
 
         StopWatching();
 
-        _logger.LogInformation("[LibraryWatcher] Folder watching has been disabled");
+        _logger.LogInformation("[NativeFileWatcher] Folder watching has been disabled");
     }
 
 
@@ -352,7 +352,7 @@ public class LibraryWatcher : ILibraryWatcher
     public async Task ProcessChange(string filePath, bool isDirectoryChange = false)
     {
         var sw = Stopwatch.StartNew();
-        _logger.LogTrace("[LibraryWatcher] Processing change of {FilePath}", filePath);
+        _logger.LogTrace("[NativeFileWatcher] Processing change of {FilePath}", filePath);
         try
         {
             // If the change occurs in a blacklisted folder path, then abort processing
@@ -365,7 +365,7 @@ public class LibraryWatcher : ILibraryWatcher
             if (!isDirectoryChange &&
                 !(Parser.IsArchive(filePath) || Parser.IsBook(filePath)))
             {
-                _logger.LogTrace("[LibraryWatcher] Change from {FilePath} is not an archive or book, ignoring change", filePath);
+                _logger.LogTrace("[NativeFileWatcher] Change from {FilePath} is not an archive or book, ignoring change", filePath);
                 return;
             }
 
@@ -373,9 +373,9 @@ public class LibraryWatcher : ILibraryWatcher
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[LibraryWatcher] An error occured when processing a watch event");
+            _logger.LogError(ex, "[NativeFileWatcher] An error occured when processing a watch event");
         }
-        _logger.LogTrace("[LibraryWatcher] ProcessChange completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
+        _logger.LogTrace("[NativeFileWatcher] ProcessChange completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
     }
 
     /// <summary>

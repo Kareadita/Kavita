@@ -189,6 +189,7 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
 
         var job = Assert.Single(ScanJobQueue.Read().FolderJobs);
         Assert.Equal(AccelWorldFolder, job.Request.ChangedPath);
+        Assert.NotNull(job.FirstChangeUtc);
         Assert.InRange(job.RunAtUtc!.Value, before.AddSeconds(29), DateTime.UtcNow.AddSeconds(31));
     }
 
@@ -205,8 +206,8 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
         var pushed = Assert.Single(ScanJobQueue.Read().FolderJobs);
         Assert.Equal(first.JobId, pushed.JobId);
         Assert.True(pushed.RunAtUtc > first.RunAtUtc);
-        // InMemoryStorage converts its own clock on each read, so the same time can differ by a few ticks
-        Assert.Equal(first.CreatedAtUtc, pushed.CreatedAtUtc, TimeSpan.FromMilliseconds(1));
+        Assert.Equal(first.FirstChangeUtc, pushed.FirstChangeUtc);
+        Assert.Equal(2, ScanRescheduledCount());
     }
 
     [Theory]
@@ -214,11 +215,11 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
     [InlineData(590, 10)]
     [InlineData(600, 0)]
     [InlineData(700, -100)]
-    public void WatcherPushBack_StopsAtTheCap(int createdSecondsAgo, int expectedSeconds)
+    public void WatcherPushBack_StopsAtTheCap(int firstChangeSecondsAgo, int expectedSeconds)
     {
         var now = DateTime.UtcNow;
 
-        var delay = TaskScheduler.WatcherPushBack(now.AddSeconds(-createdSecondsAgo), now);
+        var delay = TaskScheduler.WatcherPushBack(now.AddSeconds(-firstChangeSecondsAgo), now);
 
         Assert.Equal(TimeSpan.FromSeconds(expectedSeconds), delay);
     }

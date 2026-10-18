@@ -47,7 +47,7 @@ public class LibraryController(
     ITaskScheduler taskScheduler,
     IUnitOfWork unitOfWork,
     IEventHub eventHub,
-    ILibraryWatcher libraryWatcher,
+    INativeFileWatcher nativeFileWatcher,
     IEasyCachingProviderFactory cachingProviderFactory,
     ILocalizationService localizationService)
     : BaseApiController
@@ -141,7 +141,7 @@ public class LibraryController(
 
         if (library.FolderWatchMode != FolderWatchMode.Off)
         {
-            await libraryWatcher.RestartWatching();
+            await nativeFileWatcher.RestartWatching();
         }
 
         ScanJobQueue.Enqueue(() => taskScheduler.EnqueueScanLibrary(library.Id, false));
@@ -440,7 +440,7 @@ public class LibraryController(
 
         if (sourceLibrary.FolderWatchMode != FolderWatchMode.Off)
         {
-            BackgroundJob.Enqueue(() => libraryWatcher.RestartWatching());
+            BackgroundJob.Enqueue(() => nativeFileWatcher.RestartWatching());
         }
 
         return Ok();
@@ -586,7 +586,7 @@ public class LibraryController(
                 taskScheduler.CleanupChapters(chapterIds);
             }
 
-            BackgroundJob.Enqueue(() => libraryWatcher.RestartWatching());
+            BackgroundJob.Enqueue(() => nativeFileWatcher.RestartWatching());
 
             foreach (var seriesId in seriesIds)
             {
@@ -659,7 +659,7 @@ public class LibraryController(
 
         if (folderWatchingUpdate || foldersUpdate || typeUpdate)
         {
-            BackgroundJob.Enqueue(() => libraryWatcher.RestartWatching());
+            BackgroundJob.Enqueue(() => nativeFileWatcher.RestartWatching());
         }
 
         if (foldersUpdate || typeUpdate)

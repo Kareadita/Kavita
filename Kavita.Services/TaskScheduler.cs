@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -419,7 +420,7 @@ public class TaskScheduler : ITaskScheduler
         var target = ResolveScanFolder(changedPath, !isDirectory, libraries);
         if (target == null || target.Folder == target.Root)
         {
-            _logger.LogInformation("[LibraryWatcher] Change from {FilePath} could not find root level folder, ignoring change", changedPath);
+            _logger.LogInformation("[NativeFileWatcher] Change from {FilePath} could not find root level folder, ignoring change", changedPath);
             return;
         }
 
@@ -467,12 +468,10 @@ public class TaskScheduler : ITaskScheduler
         return new ScanFolderTarget(libraryByRoot[root], root, folder);
     }
 
-    internal sealed record ScanFolderTarget(int LibraryId, string Root, string Folder);
-
     /// <summary>
-    /// Queues a <see cref="ScannerService.ScanFolder"/> job. A watcher request waits until its folder has been quiet for
-    /// <see cref="WatcherQuietTime"/>, or runs by <see cref="WatcherScanCap"/> while changes keep coming. Any other request
-    /// runs now, unless the same request is already waiting
+    /// Queues a <see cref="ScannerService.ScanFolder"/> job. A watcher request goes through
+    /// <see cref="FolderValidationService.ValidateFolder"/> once its folder has been quiet for <see cref="WatcherQuietTime"/>, or by
+    /// <see cref="WatcherScanCap"/> while changes keep coming. Any other request runs now, unless the same request is already waiting
     /// </summary>
     internal async Task EnqueueScanFolderAsync(ScanFolderRequest request)
     {
@@ -482,50 +481,63 @@ public class TaskScheduler : ITaskScheduler
             ChangedPath = string.IsNullOrEmpty(request.ChangedPath) ? string.Empty : Parser.NormalizePath(request.ChangedPath),
         };
 
-        bool isNewFolder;
-        lock (ScanRequestLock)
-        {
-            var folderJobs = ScanJobQueue.Read().FolderJobs;
-            var sameRequest = folderJobs.Where(j => j.Request == normalized).ToList();
-            if (normalized.FromFolderWatcher ? TryDebounce(sameRequest) : sameRequest.Count > 0)
-            {
-                _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as the same request is waiting", normalized.Folder);
-                return;
-            }
+        // The activity widget re-reads waiting folder scans only on ScanRescheduled, so it is sent when a folder starts
+        // waiting or a waiting job's run time moves; otherwise the widget shows a time that has already passed
+        var widgetMustRefresh = QueueFolderJob(normalized);
+        if (!widgetMustRefresh) return;
 
-            isNewFolder = folderJobs.All(j => j.Request.Folder != normalized.Folder);
-
-            _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalized.Folder);
-            if (normalized.FromFolderWatcher)
-            {
-                ScanJobQueue.Schedule(() => _scannerService.ScanFolder(normalized), WatcherQuietTime);
-            }
-            else
-            {
-                ScanJobQueue.Enqueue(() => _scannerService.ScanFolder(normalized));
-            }
-        }
-
-        if (!isNewFolder) return;
         await _eventHub.SendMessageAsync(MessageFactory.ScanRescheduled, ScanQueueChangedEvent());
     }
 
-    /// <returns>True when a waiting job covers the change, pushed back if it has not reached the cap</returns>
-    private static bool TryDebounce(List<ScanFolderJob> sameRequest)
+    /// <returns>True when a folder started waiting or a waiting job's run time moved</returns>
+    private bool QueueFolderJob(ScanFolderRequest request)
     {
-        var scheduled = sameRequest.FirstOrDefault(j => j.RunAtUtc != null);
-        if (scheduled == null) return false;
+        lock (ScanRequestLock)
+        {
+            var folderJobs = ScanJobQueue.Read().FolderJobs;
+            var waiting = FindWaitingJob(request, folderJobs.Where(j => j.Request == request).ToList());
+            if (waiting != WaitingJob.None)
+            {
+                _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as the same request is waiting", request.Folder);
+                return waiting == WaitingJob.PushedBack;
+            }
 
-        var delay = WatcherPushBack(scheduled.CreatedAtUtc, DateTime.UtcNow);
-        if (delay <= TimeSpan.Zero) return true;
+            var isNewFolder = folderJobs.All(j => j.Request.Folder != request.Folder);
+            if (!request.FromFolderWatcher)
+            {
+                _logger.LogInformation("Scheduling ScanFolder for {Folder}", request.Folder);
+                ScanJobQueue.Enqueue(() => _scannerService.ScanFolder(request));
+                return isNewFolder;
+            }
 
-        return ScanJobQueue.TryPushBack(scheduled.JobId, nameof(IScannerService.ScanFolder), delay);
+            _logger.LogInformation("Scheduling ValidateFolder for {Folder}", request.Folder);
+            ScanJobQueue.Schedule<IFolderValidationService>(s => s.ValidateFolder(request, DateTime.UtcNow), WatcherQuietTime);
+            return isNewFolder;
+        }
+    }
+
+    /// <summary>
+    /// A watcher request's waiting validation is pushed back unless it has reached the cap
+    /// </summary>
+    private static WaitingJob FindWaitingJob(ScanFolderRequest request, List<ScanFolderJob> sameRequest)
+    {
+        if (!request.FromFolderWatcher) return sameRequest.Count > 0 ? WaitingJob.Covers : WaitingJob.None;
+
+        var validation = sameRequest.FirstOrDefault(j => j.RunAtUtc != null && j.FirstChangeUtc != null);
+        if (validation == null) return WaitingJob.None;
+
+        var delay = WatcherPushBack(validation.FirstChangeUtc!.Value, DateTime.UtcNow);
+        if (delay <= TimeSpan.Zero) return WaitingJob.Covers;
+
+        return ScanJobQueue.TryPushBack(validation.JobId, nameof(IFolderValidationService.ValidateFolder), delay)
+            ? WaitingJob.PushedBack
+            : WaitingJob.None;
     }
 
     /// <returns>How far from now a waiting watcher job moves; zero or less once it reached the cap</returns>
-    internal static TimeSpan WatcherPushBack(DateTime createdAtUtc, DateTime nowUtc)
+    internal static TimeSpan WatcherPushBack(DateTime firstChangeUtc, DateTime nowUtc)
     {
-        var untilCap = createdAtUtc + WatcherScanCap - nowUtc;
+        var untilCap = firstChangeUtc + WatcherScanCap - nowUtc;
         return untilCap < WatcherQuietTime ? untilCap : WatcherQuietTime;
     }
 
@@ -962,7 +974,8 @@ public class TaskScheduler : ITaskScheduler
     }
 
     /// <summary>
-    /// Waiting <see cref="ScannerService.ScanFolder"/> jobs, one entry per library and trigger, soonest first
+    /// Waiting <see cref="ScannerService.ScanFolder"/> and <see cref="FolderValidationService.ValidateFolder"/> jobs, one entry per
+    /// library and trigger, soonest first
     /// </summary>
     public static IList<ScheduledFolderScanDto> GetScheduledFolderScans(IEnumerable<LibraryDto> libraries)
     {
@@ -1036,5 +1049,29 @@ public class TaskScheduler : ITaskScheduler
             .FirstOrDefault(j => j.Id == jobId);
 
         return job?.NextExecution;
+    }
+
+    internal sealed record ScanFolderTarget(int LibraryId, string Root, string Folder);
+
+    /// <summary>
+    /// What a folder scan request found already waiting for the same request
+    /// </summary>
+    private enum WaitingJob
+    {
+        /// <summary>
+        /// Nothing waits for this request, or the waiting validation already started, so a new job is queued
+        /// </summary>
+        [Description("None")]
+        None = 0,
+        /// <summary>
+        /// A waiting job already covers the request: an identical API request, or a watcher validation at its 10 minute cap
+        /// </summary>
+        [Description("Covers")]
+        Covers = 1,
+        /// <summary>
+        /// A waiting watcher validation was moved back by the quiet time, so its run time changed
+        /// </summary>
+        [Description("Pushed Back")]
+        PushedBack = 2,
     }
 }

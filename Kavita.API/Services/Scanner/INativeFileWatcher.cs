@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace Kavita.API.Services.Scanner;
 
-public interface ILibraryWatcher
+public interface INativeFileWatcher
 {
     /// <summary>
     /// Start watching all library folders

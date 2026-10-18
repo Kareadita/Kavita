@@ -159,6 +159,12 @@ public sealed class CopyRun
     public bool InUseDuringCopy { get; set; }
     public bool InUseAfterCopy { get; set; }
     public double? LastInUseSeconds { get; set; }
+    /// <summary>
+    /// When a sample first found a valid zip end record, and whether one was found while the copy still ran: a false "complete"
+    /// </summary>
+    public double? ZipEndFirstSeconds { get; set; }
+    public bool ZipEndDuringCopy { get; set; }
+    public bool? ZipEndAfterCopy { get; set; }
     public List<CopyWatcherStats> Watchers { get; set; } = [];
     public List<CopySample> Samples { get; set; } = [];
     public List<CopyEvent> Events { get; set; } = [];
@@ -187,6 +193,8 @@ public sealed class CopySample
     public string? LastWriteUtc { get; set; }
     public bool InUse { get; set; }
     public string? OpenError { get; set; }
+    public bool? ZipEnd { get; set; }
+    public string? ZipEndError { get; set; }
 }
 
 public sealed class CopyEvent

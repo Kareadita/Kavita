@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO.Compression;
 
 namespace WatchProbe;
 
@@ -26,25 +27,80 @@ public static class CopyProbe
 
     private sealed record RawEvent(string Watcher, string Kind, TimeSpan At, string Path);
 
-    private sealed record TargetState(bool Exists, long Bytes, DateTime? CreationUtc, DateTime? LastWriteUtc, bool InUse, string? OpenError);
+    private sealed record TargetState(bool Exists, long Bytes, DateTime? CreationUtc, DateTime? LastWriteUtc, bool InUse, string? OpenError,
+        bool? ZipEnd, string? ZipEndError);
 
     public static IReadOnlyList<string> MethodsFor(IReadOnlyList<string> requested) =>
         OperatingSystem.IsWindows() ? requested : requested.Where(m => m is Stream or FileCopy).ToList();
 
+    /// <summary>
+    /// A real .cbz, entries stored uncompressed, so the end-of-archive check has an end to find
+    /// </summary>
     public static string CreateSource(int megabytes)
     {
-        var path = Path.Combine(Path.GetTempPath(), $"watchprobe-source-{megabytes}mb.bin");
-        if (File.Exists(path) && new FileInfo(path).Length == megabytes * 1024L * 1024L) return path;
+        var path = Path.Combine(Path.GetTempPath(), $"watchprobe-source-{megabytes}mb.cbz");
+        if (File.Exists(path) && HasZipEnd(path, out _) == true) return path;
 
-        Console.WriteLine($"Writing a {megabytes} MB source file to {path} (not timed)...");
-        var buffer = new byte[1024 * 1024];
-        using var stream = File.Create(path);
-        for (var i = 0; i < megabytes; i++)
+        Console.WriteLine($"Writing a {megabytes} MB source .cbz to {path} (not timed)...");
+        const int entryMegabytes = 8;
+        var buffer = new byte[entryMegabytes * 1024 * 1024];
+        using (var zip = ZipFile.Open(path, ZipArchiveMode.Create))
         {
-            Random.Shared.NextBytes(buffer);
-            stream.Write(buffer);
+            for (var i = 0; i * entryMegabytes < megabytes; i++)
+            {
+                Random.Shared.NextBytes(buffer);
+                using var entry = zip.CreateEntry($"page{i:D4}.jpg", CompressionLevel.NoCompression).Open();
+                entry.Write(buffer);
+            }
         }
         return path;
+    }
+
+    /// <summary>
+    /// Whether the file ends with a zip end of central directory record whose central directory ends right before it.
+    /// Null when the file cannot be read at all
+    /// </summary>
+    public static bool? HasZipEnd(string path, out string? error)
+    {
+        const int recordLength = 22;
+        const int maxComment = 65535;
+        error = null;
+        try
+        {
+            // ReadWrite share: read alongside a writer that allows it, the in-use check is separate
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            var length = stream.Length;
+            if (length < recordLength) return false;
+
+            var tailLength = (int) Math.Min(length, recordLength + maxComment);
+            var tail = new byte[tailLength];
+            stream.Seek(-tailLength, SeekOrigin.End);
+            stream.ReadExactly(tail);
+
+            for (var i = tailLength - recordLength; i >= 0; i--)
+            {
+                if (tail[i] != 0x50 || tail[i + 1] != 0x4B || tail[i + 2] != 0x05 || tail[i + 3] != 0x06) continue;
+
+                var recordStart = length - tailLength + i;
+                var directorySize = BitConverter.ToUInt32(tail, i + 12);
+                var directoryOffset = BitConverter.ToUInt32(tail, i + 16);
+                if (directoryOffset == uint.MaxValue)
+                {
+                    // Zip64: the real offsets sit in the zip64 record, its locator is the 20 bytes before this one
+                    return i >= 20 && tail[i - 20] == 0x50 && tail[i - 19] == 0x4B && tail[i - 18] == 0x06 && tail[i - 17] == 0x07;
+                }
+
+                // A signature inside random data does not count: the record must close the central directory it names
+                if (directoryOffset + (long) directorySize == recordStart) return true;
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            error = $"{ex.GetType().Name} 0x{ex.HResult:X8}";
+            return null;
+        }
     }
 
     public static CopyReport Run(EnvironmentInfo environment, string source, double seconds, IReadOnlyList<string> methods)
@@ -96,6 +152,7 @@ public static class CopyProbe
             $"{w.Name} {w.Events} events ({w.Middle} mid-copy, longest gap {Seconds(w.LongestGapSeconds)})"));
         Console.WriteLine($"  {run.Method,-10} {run.CopySeconds,6:F1} s | created {Seconds(run.CreationOffsetSeconds)} after start | " +
                           $"write time kept: {run.LastWriteKeptFromSource} | in use during copy: {run.InUseDuringCopy}, after: {run.InUseAfterCopy}");
+        Console.WriteLine($"  {"",-10} zip end: first at {Seconds(run.ZipEndFirstSeconds)}, seen mid-copy: {run.ZipEndDuringCopy}, after copy: {run.ZipEndAfterCopy}");
         Console.WriteLine($"  {"",-10} {watchers}");
     }
 
@@ -136,6 +193,18 @@ public static class CopyProbe
                 {
                     run.Samples.Add(ToSample(state, at));
                     last = state;
+                }
+                if (state.ZipEnd == true)
+                {
+                    run.ZipEndFirstSeconds ??= Round(at.TotalSeconds);
+                    if (copyEnd == null)
+                    {
+                        run.ZipEndDuringCopy = true;
+                    }
+                }
+                if (copyEnd != null)
+                {
+                    run.ZipEndAfterCopy = state.ZipEnd;
                 }
                 if (state.InUse)
                 {
@@ -251,7 +320,7 @@ public static class CopyProbe
     private static TargetState Read(string target)
     {
         var info = new FileInfo(target);
-        if (!info.Exists) return new TargetState(false, 0, null, null, false, null);
+        if (!info.Exists) return new TargetState(false, 0, null, null, false, null, null, null);
 
         var inUse = false;
         string? openError = null;
@@ -268,7 +337,8 @@ public static class CopyProbe
             openError = $"{ex.GetType().Name} 0x{ex.HResult:X8}";
         }
 
-        return new TargetState(true, info.Length, info.CreationTimeUtc, info.LastWriteTimeUtc, inUse, openError);
+        var zipEnd = HasZipEnd(target, out var zipEndError);
+        return new TargetState(true, info.Length, info.CreationTimeUtc, info.LastWriteTimeUtc, inUse, openError, zipEnd, zipEndError);
     }
 
     private static CopySample ToSample(TargetState state, TimeSpan at) => new()
@@ -280,6 +350,8 @@ public static class CopyProbe
         LastWriteUtc = state.LastWriteUtc is { } w ? Utc(w) : null,
         InUse = state.InUse,
         OpenError = state.OpenError,
+        ZipEnd = state.ZipEnd,
+        ZipEndError = state.ZipEndError,
     };
 
     private static CopyWatcherStats Stats(string watcher, List<CopyEvent> events, TimeSpan copyEnd)

@@ -68,10 +68,11 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ICblImportService, CblImportService>();
 
         services.AddScoped<IScannerService, ScannerService>();
+        services.AddScoped<IFolderValidationService, FolderValidationService>();
         services.AddScoped<IProcessSeries, ProcessSeries>();
         services.AddScoped<IMetadataService, MetadataService>();
         services.AddScoped<IWordCountAnalyzerService, WordCountAnalyzerService>();
-        services.AddScoped<ILibraryWatcher, LibraryWatcher>();
+        services.AddScoped<INativeFileWatcher, NativeFileWatcher>();
         services.AddScoped<ITachiyomiService, TachiyomiService>();
         services.AddScoped<ICollectionTagService, CollectionTagService>();
 

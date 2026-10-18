@@ -3,7 +3,7 @@ using System.Text.Json;
 using WatchProbe;
 
 const string tool = "watchprobe";
-const string probeVersion = "4";
+const string probeVersion = "5";
 
 const string usage = """
     Kavita folder watching probe. Shows which way of watching a folder sees changes on your setup.

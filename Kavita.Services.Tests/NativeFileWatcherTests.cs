@@ -16,17 +16,17 @@ using NSubstitute;
 namespace Kavita.Services.Tests;
 
 [Collection(HangfireStorageCollection.Name)]
-public class LibraryWatcherTests : AbstractFsTest, IDisposable
+public class NativeFileWatcherTests : AbstractFsTest, IDisposable
 {
-    private readonly string _root = Path.Join(Path.GetTempPath(), "LibraryWatcherTests", Guid.NewGuid().ToString());
+    private readonly string _root = Path.Join(Path.GetTempPath(), "NativeFileWatcherTests", Guid.NewGuid().ToString());
     private readonly List<string> _libraryFolders = [];
     private readonly HashSet<string> _unreachable = [];
     private readonly HashSet<string> _goneAfterExistsCheck = [];
 
-    public LibraryWatcherTests()
+    public NativeFileWatcherTests()
     {
         JobStorage.Current = new InMemoryStorage();
-        LibraryWatcher.ResetErrorCounters();
+        NativeFileWatcher.ResetErrorCounters();
         for (var i = 0; i < 5; i++)
         {
             var folder = Path.Join(_root, $"Library{i}");
@@ -38,7 +38,7 @@ public class LibraryWatcherTests : AbstractFsTest, IDisposable
     public void Dispose()
     {
         CreateRealWatcher().StopWatching();
-        LibraryWatcher.ResetErrorCounters();
+        NativeFileWatcher.ResetErrorCounters();
         if (Directory.Exists(_root))
         {
             Directory.Delete(_root, true);
@@ -48,7 +48,7 @@ public class LibraryWatcherTests : AbstractFsTest, IDisposable
     /// <summary>
     /// The library lookup yields before returning, so two starts can interleave the way two Hangfire jobs do
     /// </summary>
-    private LibraryWatcher CreateRealWatcher()
+    private NativeFileWatcher CreateRealWatcher()
     {
         var unitOfWork = Substitute.For<IUnitOfWork>();
         unitOfWork.SettingsRepository.GetSettingsDtoAsync()
@@ -67,7 +67,7 @@ public class LibraryWatcherTests : AbstractFsTest, IDisposable
             return (Directory.Exists(path) || _goneAfterExistsCheck.Contains(path)) && !_unreachable.Contains(path);
         });
 
-        return new LibraryWatcher(ds, unitOfWork, Substitute.For<ILogger<LibraryWatcher>>(), Substitute.For<ITaskScheduler>());
+        return new NativeFileWatcher(ds, unitOfWork, Substitute.For<ILogger<NativeFileWatcher>>(), Substitute.For<ITaskScheduler>());
     }
 
     private sealed record QueuedChange(string Path, bool IsDirectory);
@@ -76,7 +76,7 @@ public class LibraryWatcherTests : AbstractFsTest, IDisposable
     {
         return JobStorage.Current.GetMonitoringApi().EnqueuedJobs(TaskScheduler.DefaultQueue, 0, int.MaxValue)
             .Select(j => j.Value.Job)
-            .Where(job => job?.Method.Name == nameof(LibraryWatcher.ProcessChange))
+            .Where(job => job?.Method.Name == nameof(NativeFileWatcher.ProcessChange))
             .Select(job => new QueuedChange(Parser.NormalizePath((string) job.Args[0]!), (bool) job.Args[1]!))
             .ToList();
     }
@@ -152,11 +152,11 @@ public class LibraryWatcherTests : AbstractFsTest, IDisposable
         Assert.Contains(new QueuedChange(Parser.NormalizePath(folder), true), await WaitForChangesTo(folder));
     }
 
-    private static async Task<WatcherErrorAction[]> RaiseErrorsAtOnce(LibraryWatcher libraryWatcher,
+    private static async Task<WatcherErrorAction[]> RaiseErrorsAtOnce(NativeFileWatcher nativeFileWatcher,
         IEnumerable<FileSystemWatcher> watchers)
     {
         return await Task.WhenAll(watchers
-            .Select(w => Task.Run(() => libraryWatcher.HandleErrorAsync(w, new IOException("error")))));
+            .Select(w => Task.Run(() => nativeFileWatcher.HandleErrorAsync(w, new IOException("error")))));
     }
 
     [Fact]
@@ -164,30 +164,30 @@ public class LibraryWatcherTests : AbstractFsTest, IDisposable
     {
         await Task.WhenAll(CreateRealWatcher().RestartWatching(), CreateRealWatcher().RestartWatching());
 
-        Assert.Equal(5, LibraryWatcher.Watchers.Count);
+        Assert.Equal(5, NativeFileWatcher.Watchers.Count);
     }
 
     [Fact]
     public async Task NetworkDrop_ErrorOnEachDroppedFolder_StopsAllAndRetriesOnce()
     {
-        var libraryWatcher = CreateRealWatcher();
-        await libraryWatcher.StartWatchersAsync();
+        var nativeFileWatcher = CreateRealWatcher();
+        await nativeFileWatcher.StartWatchersAsync();
         _unreachable.UnionWith(_libraryFolders.Take(4));
 
-        var actions = await RaiseErrorsAtOnce(libraryWatcher, LibraryWatcher.Watchers.Take(4));
+        var actions = await RaiseErrorsAtOnce(nativeFileWatcher, NativeFileWatcher.Watchers.Take(4));
 
         Assert.Single(actions, a => a == WatcherErrorAction.FolderUnreachable);
         Assert.Equal(3, actions.Count(a => a == WatcherErrorAction.Ignore));
-        Assert.Empty(LibraryWatcher.Watchers);
+        Assert.Empty(NativeFileWatcher.Watchers);
     }
 
     [Fact]
     public async Task Overflow_ErrorsOnEveryWatcher_RestartsOnce()
     {
-        var libraryWatcher = CreateRealWatcher();
-        await libraryWatcher.StartWatchersAsync();
+        var nativeFileWatcher = CreateRealWatcher();
+        await nativeFileWatcher.StartWatchersAsync();
 
-        var actions = await RaiseErrorsAtOnce(libraryWatcher, LibraryWatcher.Watchers);
+        var actions = await RaiseErrorsAtOnce(nativeFileWatcher, NativeFileWatcher.Watchers);
 
         Assert.Single(actions, a => a == WatcherErrorAction.RestartNow);
         Assert.Equal(4, actions.Count(a => a == WatcherErrorAction.Ignore));
@@ -196,12 +196,12 @@ public class LibraryWatcherTests : AbstractFsTest, IDisposable
     [Fact]
     public async Task ThirdOverflowWithin10Minutes_Suspends()
     {
-        var libraryWatcher = CreateRealWatcher();
+        var nativeFileWatcher = CreateRealWatcher();
         var actions = new List<WatcherErrorAction>();
         for (var i = 0; i < 3; i++)
         {
-            await libraryWatcher.StartWatchersAsync();
-            actions.Add(await libraryWatcher.HandleErrorAsync(LibraryWatcher.Watchers[0], new IOException("overflow")));
+            await nativeFileWatcher.StartWatchersAsync();
+            actions.Add(await nativeFileWatcher.HandleErrorAsync(NativeFileWatcher.Watchers[0], new IOException("overflow")));
         }
 
         Assert.Equal([WatcherErrorAction.RestartNow, WatcherErrorAction.RestartNow, WatcherErrorAction.Suspend], actions);
@@ -210,32 +210,32 @@ public class LibraryWatcherTests : AbstractFsTest, IDisposable
     [Fact]
     public async Task NetworkDrops_DoNotCountTowardSuspend()
     {
-        var libraryWatcher = CreateRealWatcher();
+        var nativeFileWatcher = CreateRealWatcher();
         for (var i = 0; i < 3; i++)
         {
             _unreachable.Clear();
-            await libraryWatcher.StartWatchersAsync();
+            await nativeFileWatcher.StartWatchersAsync();
             _unreachable.Add(_libraryFolders[0]);
             Assert.Equal(WatcherErrorAction.FolderUnreachable,
-                await libraryWatcher.HandleErrorAsync(LibraryWatcher.Watchers[0], new IOException("network")));
+                await nativeFileWatcher.HandleErrorAsync(NativeFileWatcher.Watchers[0], new IOException("network")));
         }
 
         _unreachable.Clear();
-        await libraryWatcher.StartWatchersAsync();
+        await nativeFileWatcher.StartWatchersAsync();
         Assert.Equal(WatcherErrorAction.RestartNow,
-            await libraryWatcher.HandleErrorAsync(LibraryWatcher.Watchers[0], new IOException("overflow")));
+            await nativeFileWatcher.HandleErrorAsync(NativeFileWatcher.Watchers[0], new IOException("overflow")));
     }
 
     [Fact]
     public async Task Start_WithUnreachableFolder_WatchesTheRestAndSchedulesOneRetry()
     {
         _unreachable.Add(_libraryFolders[0]);
-        var libraryWatcher = CreateRealWatcher();
+        var nativeFileWatcher = CreateRealWatcher();
 
-        var firstRetry = await libraryWatcher.StartWatchersAsync();
-        var secondRetry = await libraryWatcher.StartWatchersAsync();
+        var firstRetry = await nativeFileWatcher.StartWatchersAsync();
+        var secondRetry = await nativeFileWatcher.StartWatchersAsync();
 
-        Assert.Equal(4, LibraryWatcher.Watchers.Count);
+        Assert.Equal(4, NativeFileWatcher.Watchers.Count);
         Assert.Equal(TimeSpan.FromMinutes(5), firstRetry);
         Assert.Null(secondRetry);
     }
@@ -246,11 +246,11 @@ public class LibraryWatcherTests : AbstractFsTest, IDisposable
         var gone = Parser.NormalizePath(Path.Join(_root, "Gone"));
         _goneAfterExistsCheck.Add(gone);
         _libraryFolders.Insert(0, gone);
-        var libraryWatcher = CreateRealWatcher();
+        var nativeFileWatcher = CreateRealWatcher();
 
-        var retry = await libraryWatcher.StartWatchersAsync();
+        var retry = await nativeFileWatcher.StartWatchersAsync();
 
-        Assert.Equal(5, LibraryWatcher.Watchers.Count);
+        Assert.Equal(5, NativeFileWatcher.Watchers.Count);
         Assert.Equal(TimeSpan.FromMinutes(5), retry);
     }
 }
