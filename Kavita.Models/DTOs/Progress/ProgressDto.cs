@@ -15,6 +15,10 @@ public sealed record ProgressDto
     /// on pages that combine multiple "chapters".
     /// </summary>
     public string? BookScrollId { get; set; }
+    /// <summary>
+    /// When present, ignored <see cref="BookScrollId"/>
+    /// </summary>
+    public string? KoboSpan { get; set; }
 
     public DateTime LastModifiedUtc { get; set; }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Kavita.Models.Attributes;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.UserPreferences;
 
@@ -193,6 +194,12 @@ public class AppUserPreferences
     /// Values are a list of key codes that need to be pressed at the same time for the keybind to be valid
     /// </summary>
     public Dictionary<KeyBindTarget, IList<KeyBind>> CustomKeyBinds { get; set; }
+
+    /// <summary>
+    /// Kobo sync settings
+    /// </summary>
+    [JsonColumn]
+    public AppUserKoboSyncPreferences KoboSyncPreferences { get; set; } = new();
 
     #endregion
 

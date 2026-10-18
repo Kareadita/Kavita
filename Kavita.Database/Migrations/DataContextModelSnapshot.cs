@@ -717,6 +717,31 @@ namespace Kavita.Database.Migrations
                     b.ToTable("ScrobbleRuleHistory");
                 });
 
+            modelBuilder.Entity("Kavita.Models.Entities.Kobo.KoboSyncPoint", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("BookSyncTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("BooksSyncedUntilId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BooksSyncedUntilIndex")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("KoboSyncPoints");
+                });
+
             modelBuilder.Entity("Kavita.Models.Entities.Library", b =>
                 {
                     b.Property<int>("Id")
@@ -1637,6 +1662,9 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("KoboSpan")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModified")
@@ -3191,6 +3219,11 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(0);
 
+                    b.Property<string>("KoboSyncPreferences")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"AllLibraries\":false,\"SyncLibraries\":[],\"SyncCollection\":0}");
+
                     b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");
 
@@ -4106,6 +4139,17 @@ namespace Kavita.Database.Migrations
                     b.Navigation("ScrobbleEvent");
 
                     b.Navigation("Series");
+                });
+
+            modelBuilder.Entity("Kavita.Models.Entities.Kobo.KoboSyncPoint", b =>
+                {
+                    b.HasOne("Kavita.Models.Entities.User.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.LibraryExcludePattern", b =>

@@ -104,6 +104,7 @@ public interface IUserRepository
 
     #region Preferences & Settings
     Task<AppUserPreferences?> GetPreferencesAsync(string username, CancellationToken ct = default);
+    Task<AppUserKoboSyncPreferences> GetKoboSyncPreferences(int userId, CancellationToken ct = default);
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId, CancellationToken ct = default);
     Task<string> GetLocale(int userId, CancellationToken ct = default);
     Task<AppUserSocialPreferences> GetSocialPreferencesForUser(int userId, CancellationToken ct = default);

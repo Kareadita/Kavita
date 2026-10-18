@@ -23,8 +23,10 @@ import {TypeaheadComponent} from "../../typeahead/_components/typeahead.componen
 import {TypeaheadConfig} from "../../typeahead/_models/typeahead-config";
 import {TypeaheadConfigFactoryService} from "../../typeahead-config-factory.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
-import {debounce, disabled, form, FormField, min, required} from "@angular/forms/signals";
+import {debounce, disabled, form, FormField, max, min, required} from "@angular/forms/signals";
 import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
+import {UserCollection} from "../../_models/collection-tag";
+import {CollectionTagService} from "../../_services/collection-tag.service";
 
 @Component({
   selector: 'app-manga-user-preferences',
@@ -53,12 +55,15 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly metadataService = inject(MetadataService);
   private readonly typeaheadSettingFactory = inject(TypeaheadConfigFactoryService);
+  private readonly collectionTagService = inject(CollectionTagService);
 
   protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
   loading = signal(true);
   ageRatings = signal<AgeRatingDto[]>([]);
   locales = signal<KavitaLocale[]>([]);
   socialLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
+  koboLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
+  koboCollectionTypeaheadSettings = signal<TypeaheadConfig<UserCollection> | null>(null);
 
   formModel = signal<Preferences>({
     aniListScrobblingEnabled: false,
@@ -86,6 +91,13 @@ export class ManageUserPreferencesComponent implements OnInit {
       socialIncludeUnknowns: false,
       shareProfile: false
     },
+    koboSyncPreferences: {
+      syncItemLimit: 25,
+      forwardToKoboStore: false,
+      allLibraries: false,
+      syncLibraries: [],
+      syncCollection: 0
+    },
     theme: {
       id: 0,
       name: "",
@@ -110,6 +122,10 @@ export class ManageUserPreferencesComponent implements OnInit {
     min(path.onDeckProgressDays, 1);
     min(path.onDeckUpdateDays, 1);
     required(path.promptForRereadsAfter);
+
+    min(path.koboSyncPreferences.syncItemLimit, 25);
+    max(path.koboSyncPreferences.syncItemLimit, 100);
+    disabled(path.koboSyncPreferences.syncLibraries, {when: () => this.formModel().koboSyncPreferences.allLibraries})
   });
 
   selectedLocale = computed(() => {
@@ -140,8 +156,11 @@ export class ManageUserPreferencesComponent implements OnInit {
       pref: this.accountService.getPreferences(),
       libraries: this.libraryService.getLibraries(),
       ageRatings: this.metadataService.getAllAgeRatings(),
-    }).subscribe(({pref, libraries, ageRatings}) => {
+      collections: this.collectionTagService.allCollections(true)
+    }).subscribe(({pref, libraries, ageRatings, collections}) => {
       const socialLibs = this.accountService.userPreferences()?.socialPreferences.socialLibraries ?? [];
+      const syncLibs = pref.koboSyncPreferences.syncLibraries;
+      const selectedCollection = pref.koboSyncPreferences.syncCollection;
 
       this.ageRatings.set([{value: AgeRating.NotApplicable, title: '',}, ...ageRatings]);
       this.socialLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({
@@ -149,6 +168,19 @@ export class ManageUserPreferencesComponent implements OnInit {
         libraries,
         savedData: libraries.filter(l => socialLibs.includes(l.id))
       }));
+      this.koboLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({
+        id: 'kobo-sync-libraries',
+        libraries,
+        savedData: libraries.filter(l => syncLibs.includes(l.id))
+      }));
+      this.koboCollectionTypeaheadSettings.set(this.typeaheadSettingFactory.forCollections({
+        id: 'kobo-collection',
+        collections,
+        savedData: collections.filter(l => selectedCollection == l.id),
+        overrides: {
+          multiple: false
+        }
+      }))
       this.formModel.set(pref);
 
       this.loading.set(false);
@@ -157,5 +189,14 @@ export class ManageUserPreferencesComponent implements OnInit {
 
   syncFormWithTypeahead(libs: Library[] | Library) {
     this.formGroup.socialPreferences.socialLibraries().value.set((libs as Library[]).map(l => l.id));
+  }
+
+  syncKoboSyncLibrariesWithTypeahead(libs: Library[] | Library) {
+    this.formGroup.koboSyncPreferences.syncLibraries().value.set((libs as Library[]).map(l => l.id));
+  }
+
+  syncKoboSyncCollectionWithTypeahead(collections: UserCollection[] | UserCollection) {
+    const collection = (collections as UserCollection[])[0];
+    this.formGroup.koboSyncPreferences.syncCollection().value.set(collection?.id ?? 0);
   }
 }

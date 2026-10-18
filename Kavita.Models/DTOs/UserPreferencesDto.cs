@@ -73,4 +73,8 @@ public sealed record UserPreferencesDto
     /// <inheritdoc cref="AppUserPreferences.OpdsPreferences"/>
     [Required]
     public AppUserOpdsPreferences OpdsPreferences { get; set; } = new();
+
+    /// <inheritdoc cref="AppUserPreferences.KoboSyncPreferences"/>
+    [Required]
+    public AppUserKoboSyncPreferences KoboSyncPreferences { get; set; } = new();
 }

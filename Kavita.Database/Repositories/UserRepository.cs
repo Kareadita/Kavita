@@ -194,6 +194,14 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
     }
 
 
+    public Task<AppUserKoboSyncPreferences> GetKoboSyncPreferences(int userId, CancellationToken ct = default)
+    {
+        return context.AppUserPreferences
+            .Where(p => p.Id == userId)
+            .Select(p => p.KoboSyncPreferences)
+            .FirstAsync(ct);
+    }
+
     public async Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId, CancellationToken ct = default)
     {
         return await context.AppUserPreferences

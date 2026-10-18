@@ -150,6 +150,11 @@ public static class QueryableExtensions
         return condition ? queryable.Where(predicate) : queryable;
     }
 
+    public static IQueryable<T> SkipIf<T>(this IQueryable<T> queryable, bool condition, int skip)
+    {
+        return condition ? queryable.Skip(skip) : queryable;
+    }
+
 
     public static IQueryable<T> WhereGreaterThan<T>(this IQueryable<T> source,
                                                     Expression<Func<T, float>> selector,
