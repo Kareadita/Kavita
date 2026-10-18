@@ -67,7 +67,6 @@ public class ScannerService(
     IMapper mapper)
     : IScannerService
 {
-    public const string Name = "ScannerService";
     private const int Timeout = 60 * 60 * 60; // 2.5 days
     // A retry waits in Scheduled, which IsScannerBusy does not count, so it would run beside a scan started meanwhile
     private const int RetryAttempts = 0;

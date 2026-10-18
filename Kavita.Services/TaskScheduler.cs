@@ -4,9 +4,11 @@ using System.Collections.Immutable;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
+using Hangfire.Common;
 using Hangfire.States;
 using Hangfire.Storage;
 using Hangfire.Storage.Monitoring;
@@ -393,12 +395,7 @@ public class TaskScheduler : ITaskScheduler
 
     public void ConvertAllCoversToEncoding()
     {
-        var defaultParams = Array.Empty<object>();
-        if (MediaConversionService.ConversionMethods.Any(method =>
-                HasAlreadyEnqueuedTask(MediaConversionService.Name, method, defaultParams, DefaultQueue, true)))
-        {
-            return;
-        }
+        if (HasAlreadyEnqueuedTask<IMediaConversionService>(s => s.ConvertAllManagedMediaToEncodingFormat(CancellationToken.None), checkRunningJobs: true)) return;
 
         BackgroundJob.Enqueue(() => _mediaConversionService.ConvertAllManagedMediaToEncodingFormat());
     }
@@ -629,11 +626,11 @@ public class TaskScheduler : ITaskScheduler
 
     public void RefreshMetadata(int libraryId, bool forceUpdate = true, bool forceColorscape = true)
     {
-        var alreadyEnqueued = HasAlreadyEnqueuedTask(MetadataService.Name, "GenerateCoversForLibrary",
-                                  [libraryId, true, true]) ||
-                              HasAlreadyEnqueuedTask("MetadataService", "GenerateCoversForLibrary",
-                                  [libraryId, false, false]);
-        if (alreadyEnqueued)
+        var coveredByQueuedJob = AtLeast(forceUpdate)
+            .SelectMany(force => AtLeast(forceColorscape).Select(colorscape => (force, colorscape)))
+            .Any(flags => HasAlreadyEnqueuedTask<IMetadataService>(s =>
+                s.GenerateCoversForLibrary(libraryId, flags.force, flags.colorscape, CancellationToken.None)));
+        if (coveredByQueuedJob)
         {
             _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
             return;
@@ -643,15 +640,19 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, forceUpdate, forceColorscape));
     }
 
+    /// <summary>
+    /// Flag values that do at least what was asked: a forced job also covers an unforced request
+    /// </summary>
+    private static bool[] AtLeast(bool requested) => requested ? [true] : [false, true];
+
     public async Task RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false)
     {
-        if (HasAlreadyEnqueuedTask(MetadataService.Name,"GenerateCoversForSeries", [libraryId, seriesId, forceUpdate, forceColorscape]))
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (HasAlreadyEnqueuedTask<IMetadataService>(s => s.GenerateCoversForSeries(serverSettings, libraryId, seriesId, forceUpdate, forceColorscape, CancellationToken.None)))
         {
             _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
             return;
         }
-
-        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
         _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
         BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(serverSettings, libraryId, seriesId, forceUpdate, forceColorscape));
@@ -742,7 +743,7 @@ public class TaskScheduler : ITaskScheduler
     /// <param name="forceUpdate"></param>
     public void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false)
     {
-        if (HasAlreadyEnqueuedTask("WordCountAnalyzerService", "ScanSeries", [libraryId, seriesId, forceUpdate]))
+        if (HasAlreadyEnqueuedTask<IWordCountAnalyzerService>(s => s.ScanSeries(libraryId, seriesId, forceUpdate, CancellationToken.None)))
         {
             _logger.LogInformation("A duplicate request to scan series occured. Skipping");
             return;
@@ -894,40 +895,33 @@ public class TaskScheduler : ITaskScheduler
     }
 
     /// <summary>
-    /// Checks if this same invocation is already enqueued or scheduled
+    /// Checks if the same call is already enqueued or scheduled. Pass the call exactly as it is enqueued:
+    /// <c>HasAlreadyEnqueuedTask&lt;IMetadataService&gt;(s => s.GenerateCoversForLibrary(libraryId, true, true, CancellationToken.None))</c>
     /// </summary>
-    /// <param name="methodName">Method name that was enqueued</param>
-    /// <param name="className">Class name the method resides on</param>
-    /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
-    /// <param name="queue">Queue to check against. Defaults to "default"</param>
-    /// <param name="checkRunningJobs">Check against running jobs. Defaults to false.</param>
-    /// <param name="checkArgs">Check against arguments. Defaults to true.</param>
-    /// <returns></returns>
-    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue, bool checkRunningJobs = false)
+    /// <remarks>
+    /// Arguments are compared as Hangfire serializes them, so a <see cref="CancellationToken"/> (stored as null) always
+    /// matches and a DTO compares by value
+    /// </remarks>
+    /// <param name="job">The enqueued call, on the interface or class the job runs on</param>
+    /// <param name="checkRunningJobs">Also match a job that is already running</param>
+    /// <param name="queue">Queue to look in for enqueued jobs</param>
+    public static bool HasAlreadyEnqueuedTask<T>(Expression<Func<T, Task>> job, bool checkRunningJobs = false, string queue = DefaultQueue)
     {
-        var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
-        var ret = enqueuedJobs.Exists(j => j.Value.InEnqueuedState &&
-                                           j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
-                                           j.Value.Job.Method.Name.Equals(methodName) &&
-                                           j.Value.Job.Method.DeclaringType.Name.Equals(className));
-        if (ret) return true;
+        var wanted = Job.FromExpression(job);
+        var wantedArgs = InvocationData.SerializeJob(wanted).Arguments;
+        var monitoring = JobStorage.Current.GetMonitoringApi();
 
-        var scheduledJobs = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue);
-        ret = scheduledJobs.Exists(j =>
-            j.Value.Job != null &&
-            j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
-            j.Value.Job.Method.Name.Equals(methodName) &&
-            j.Value.Job.Method.DeclaringType.Name.Equals(className));
+        if (monitoring.EnqueuedJobs(queue, 0, int.MaxValue).Exists(j => j.Value.InEnqueuedState && IsSameCall(j.Value.Job))) return true;
+        if (monitoring.ScheduledJobs(0, int.MaxValue).Exists(j => IsSameCall(j.Value.Job))) return true;
 
-        if (ret) return true;
+        return checkRunningJobs && monitoring.ProcessingJobs(0, int.MaxValue).Exists(j => IsSameCall(j.Value.Job));
 
-        if (!checkRunningJobs) return false;
-
-        var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
-        return runningJobs.Exists(j =>
-            j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
-            j.Value.Job.Method.Name.Equals(methodName) &&
-            j.Value.Job.Method.DeclaringType.Name.Equals(className));
+        // Hangfire stores the class DI resolved (MetadataService), not the interface the call names
+        bool IsSameCall(Job? stored) =>
+            stored != null &&
+            stored.Type.IsAssignableTo(typeof(T)) &&
+            stored.Method.Name == wanted.Method.Name &&
+            InvocationData.SerializeJob(stored).Arguments == wantedArgs;
     }
 
 

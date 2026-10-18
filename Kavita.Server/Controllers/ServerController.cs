@@ -109,8 +109,7 @@ public class ServerController(
     public async Task<ActionResult> AnalyzeFiles()
     {
         logger.LogInformation("{UserName} is performing file analysis from admin dashboard", Username!);
-        if (TaskScheduler.HasAlreadyEnqueuedTask(ScannerService.Name, "AnalyzeFiles",
-                [], TaskScheduler.DefaultQueue, true))
+        if (TaskScheduler.HasAlreadyEnqueuedTask<IScannerService>(s => s.AnalyzeFiles(), checkRunningJobs: true))
             return Ok(await localizationService.TranslateAsync(UserId, "job-already-running"));
 
         BackgroundJob.Enqueue(() => scannerService.AnalyzeFiles());

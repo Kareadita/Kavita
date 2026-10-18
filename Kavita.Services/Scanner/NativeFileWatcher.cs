@@ -212,11 +212,7 @@ public class NativeFileWatcher : INativeFileWatcher
 
     private void EnqueueChange(string path, bool isDirectoryChange)
     {
-        if (TaskScheduler.HasAlreadyEnqueuedTask(nameof(NativeFileWatcher), nameof(ProcessChange),[path, isDirectoryChange],
-                checkRunningJobs: true))
-        {
-            return;
-        }
+        if (TaskScheduler.HasAlreadyEnqueuedTask<NativeFileWatcher>(w => w.ProcessChange(path, isDirectoryChange), checkRunningJobs: true)) return;
 
         BackgroundJob.Enqueue(() => ProcessChange(path, isDirectoryChange));
     }

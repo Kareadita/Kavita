@@ -23,8 +23,6 @@ namespace Kavita.Services;
 public class ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
     : IImageService
 {
-    public const string Name = "ImageService";
-
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
     public const string SeriesCoverImageRegex = @"series\d+";
     public const string CollectionTagCoverImageRegex = @"tag\d+";
