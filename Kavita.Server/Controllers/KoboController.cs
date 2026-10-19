@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
+using NetVips;
 
 namespace Kavita.Server.Controllers;
 
@@ -221,13 +222,26 @@ public class KoboController(
             return NotFound();
         }
 
-        if (Path.GetExtension(coverPath) != ".jpg")
+        var fullPath = Path.Join(directoryService.CoverImageDirectory, coverPath);
+        if (string.Equals(Path.GetExtension(fullPath), ".jpg", StringComparison.OrdinalIgnoreCase))
         {
-            //throw new NotImplementedException();
+            return PhysicalFile(fullPath, "image/jpeg");
         }
 
-        var fullPath = Path.Join(directoryService.CoverImageDirectory, coverPath);
-        return PhysicalFile(fullPath);
+        var q = int.TryParse(quality, out var parsedQ) ? Math.Clamp(parsedQ, 1, 100) : 85;
+
+        var bytes = await Task.Run(() =>
+        {
+            using var img = Image.Thumbnail(fullPath, int.TryParse(width, out var w) ? w : 1000000,
+                height: int.TryParse(height, out var h) ? h : 1000000,
+                size: Enums.Size.Down);
+
+            using var final = isGreyScale ? img.Colourspace(Enums.Interpretation.Bw) : img;
+
+            return final.JpegsaveBuffer(q: q);
+        }, ct);
+
+        return File(bytes, "image/jpeg");
     }
 
     [HttpDelete("v1/library/{bookId}")]
