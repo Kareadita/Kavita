@@ -137,6 +137,7 @@ public class NativeFileWatcher : INativeFileWatcher
             watcher.Changed += OnChanged;
             watcher.Created += OnCreated;
             watcher.Deleted += OnDeleted;
+            watcher.Renamed += OnRenamed;
             watcher.Error += OnError;
 
             watcher.Filter = "*.*";
@@ -189,9 +190,28 @@ public class NativeFileWatcher : INativeFileWatcher
     {
         _logger.LogTrace("[NativeFileWatcher] Changed: {FullPath}, {Name}, {ChangeType}", e.FullPath, e.Name, e.ChangeType);
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
+        // NTFS holds a folder's Changed back until the folder is next listed, so Kavita's own validation would release it
+        // and scan again. Every change inside the folder also raises an event on its file, or Renamed
+        if (_directoryService.FileSystem.Directory.Exists(e.FullPath)) return;
 
-        EnqueueChange(e.FullPath, _directoryService.FileSystem.Directory.Exists(e.FullPath));
+        EnqueueChange(e.FullPath, false);
     }
+
+    private void OnRenamed(object sender, RenamedEventArgs e)
+    {
+        _logger.LogTrace("[NativeFileWatcher] Renamed: {OldFullPath} to {FullPath}", e.OldFullPath, e.FullPath);
+        if (_directoryService.FileSystem.Directory.Exists(e.FullPath))
+        {
+            EnqueueChange(e.FullPath, true);
+            return;
+        }
+
+        if (!IsReadingFile(e.FullPath) && !IsReadingFile(e.OldFullPath)) return;
+
+        EnqueueChange(Path.GetDirectoryName(e.FullPath)!, true);
+    }
+
+    private static bool IsReadingFile(string path) => Parser.IsArchive(path) || Parser.IsBook(path) || Parser.IsImage(path);
 
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
@@ -199,15 +219,11 @@ public class NativeFileWatcher : INativeFileWatcher
         EnqueueChange(e.FullPath, _directoryService.FileSystem.Directory.Exists(e.FullPath));
     }
 
-    /// <remarks>
-    /// NTFS also raises Changed on the parent folder of a deleted file, inotify does not, so file deletes must pass through
-    /// </remarks>
     private void OnDeleted(object sender, FileSystemEventArgs e)
     {
         _logger.LogTrace("[NativeFileWatcher] Deleted: {FullPath}, {Name}", e.FullPath, e.Name);
         // The path is gone, so a file is told apart by a type Kavita reads: a folder "Vol. 1" has an extension too
-        var isFile = Parser.IsArchive(e.FullPath) || Parser.IsBook(e.FullPath) || Parser.IsImage(e.FullPath);
-        EnqueueChange(e.FullPath, !isFile);
+        EnqueueChange(e.FullPath, !IsReadingFile(e.FullPath));
     }
 
     private void EnqueueChange(string path, bool isDirectoryChange)

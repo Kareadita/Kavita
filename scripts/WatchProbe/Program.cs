@@ -3,7 +3,7 @@ using System.Text.Json;
 using WatchProbe;
 
 const string tool = "watchprobe";
-const string probeVersion = "5";
+const string probeVersion = "6";
 
 const string usage = """
     Kavita folder watching probe. Shows which way of watching a folder sees changes on your setup.
@@ -13,6 +13,8 @@ const string usage = """
       watchprobe cost <folder> [--runs 2] [--gap 15] [--methods a,b] [--no-full]      read-only, safe on a whole library
       watchprobe copy <folder> [--source <file>] [--size-mb 300] [--seconds 60] [--methods a,b]
                                     writes and deletes watchprobe-copy-* folders in <folder>
+      watchprobe selfread <folder> [--pause 5]
+                                    writes and deletes a watchprobe-self-* folder in <folder>
 
     Watch options:
       --minutes <n>    how long to watch (default 10). Enter or Ctrl+C ends it early
@@ -31,6 +33,9 @@ const string usage = """
       --seconds <s>    how long the throttled copies (stream, robocopy) take (default 60)
       --methods <list> which ways to copy: stream, file-copy, robocopy, shell (default all; robocopy and shell on Windows only)
 
+    Selfread options:
+      --pause <s>      seconds to collect watcher events after each read (default 5)
+
     Common options:
       --label <text>   name for this setup, e.g. "horo-docker-cifs"
       --out <file>     report path (default: next to this program)
@@ -42,7 +47,7 @@ if (args.Length < 1 || args[0] is "-h" or "--help")
     return 1;
 }
 
-var mode = args[0] is "cost" or "copy" ? args[0] : "watch";
+var mode = args[0] is "cost" or "copy" or "selfread" ? args[0] : "watch";
 var rest = mode == "watch" ? args : args[1..];
 if (rest.Length < 1)
 {
@@ -86,6 +91,17 @@ if (mode == "cost")
     CostProbe.PrintSummary(costReport);
     Console.WriteLine($"Report written to {costPath}");
     return 0;
+}
+
+if (mode == "selfread")
+{
+    var pause = TimeSpan.FromSeconds(double.Parse(options.GetValueOrDefault("pause") ?? "5", CultureInfo.InvariantCulture));
+    var selfReport = SelfReadProbe.Run(environment, pause);
+    var selfPath = ProbeCli.SaveReport(tool, environment, options.GetValueOrDefault("out"),
+        JsonSerializer.Serialize(selfReport, WatchJsonContext.Default.SelfReadReport));
+    SelfReadProbe.PrintSummary(selfReport);
+    Console.WriteLine($"Report written to {selfPath}");
+    return selfReport.Error == null ? 0 : 1;
 }
 
 if (mode == "copy")

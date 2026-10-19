@@ -205,6 +205,35 @@ public sealed class CopyEvent
     public string Path { get; set; } = "";
 }
 
+public sealed class SelfReadReport
+{
+    public EnvironmentInfo Environment { get; set; } = new();
+    public double PauseSeconds { get; set; }
+    public string? Error { get; set; }
+    public List<SelfReadStep> Steps { get; set; } = [];
+    public List<WatchEvent> Events { get; set; } = [];
+}
+
+/// <summary>
+/// One read or write, and every watcher event that arrived from its start until the next step
+/// </summary>
+public sealed class SelfReadStep
+{
+    public string Round { get; set; } = "";
+    public string Name { get; set; } = "";
+    public double StartSeconds { get; set; }
+    public double DurationMs { get; set; }
+    public string? Error { get; set; }
+    public List<SelfReadEvent> Events { get; set; } = [];
+}
+
+public sealed class SelfReadEvent
+{
+    public string Kind { get; set; } = "";
+    public string Path { get; set; } = "";
+    public double SecondsAfterStart { get; set; }
+}
+
 public sealed class WatchEvent
 {
     public string Source { get; set; } = "";
@@ -221,4 +250,5 @@ public sealed class WatchEvent
 [JsonSerializable(typeof(WatchReport))]
 [JsonSerializable(typeof(CostReport))]
 [JsonSerializable(typeof(CopyReport))]
+[JsonSerializable(typeof(SelfReadReport))]
 public partial class WatchJsonContext : JsonSerializerContext;

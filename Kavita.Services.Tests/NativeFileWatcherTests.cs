@@ -118,15 +118,40 @@ public class NativeFileWatcherTests : AbstractFsTest, IDisposable
     }
 
     [Fact]
-    public async Task Changed_FolderWithDot_IsADirectoryChange()
+    public async Task Changed_Folder_EnqueuesNothing()
     {
         var folder = SeriesFolder("Vol. 1");
         await CreateRealWatcher().StartWatchersAsync();
 
         Directory.SetLastWriteTimeUtc(folder, DateTime.UtcNow.AddMinutes(-1));
 
-        var changes = await WaitForChangesTo(folder);
-        Assert.Contains(new QueuedChange(Parser.NormalizePath(folder), true), changes);
+        await Task.Delay(1000);
+        Assert.DoesNotContain(QueuedChanges(), c => c.Path == Parser.NormalizePath(folder));
+    }
+
+    [Fact]
+    public async Task Renamed_FileToAnotherType_EnqueuesItsFolder()
+    {
+        var folder = SeriesFolder(string.Empty);
+        var file = Path.Join(folder, "Batman c001.cbz");
+        await File.WriteAllTextAsync(file, "c001");
+        await CreateRealWatcher().StartWatchersAsync();
+
+        File.Move(file, file + ".bak");
+
+        Assert.Contains(new QueuedChange(Parser.NormalizePath(folder), true), await WaitForChangesTo(folder));
+    }
+
+    [Fact]
+    public async Task Renamed_Folder_EnqueuesItsNewPath()
+    {
+        var folder = SeriesFolder(string.Empty);
+        var renamed = Path.Join(_libraryFolders[0], "Batman Returns");
+        await CreateRealWatcher().StartWatchersAsync();
+
+        Directory.Move(folder, renamed);
+
+        Assert.Contains(new QueuedChange(Parser.NormalizePath(renamed), true), await WaitForChangesTo(renamed));
     }
 
     [Fact]

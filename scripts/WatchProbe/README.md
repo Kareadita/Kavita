@@ -116,6 +116,16 @@ watchprobe copy /path/to/empty-test-folder --size-mb 300 --seconds 60 --label "m
 
 Options: `--source <file>` copy this file instead of a generated one, `--size-mb 300` size of the generated file (use a few GB so the fast copies last long enough to sample), `--seconds 60` length of the `stream` copy, `--methods stream,shell` copy only these ways.
 
+## Selfread mode: which reads make the watcher report a change
+
+Creates a `watchprobe-self-<time>` folder with one small `.cbz`, waits for the watcher to go quiet, then makes the reads Kavita's validation and scan make, one at a time: list the names, read sizes and times, read the folder's time, open the file denying writers, read the zip's entries, read the whole file. Then it writes a second file, deletes it and renames the first, and reports every watcher event after each step. It deletes the folder at the end. Point it at a test folder, not a library.
+
+```bash
+watchprobe selfread /path/to/test-folder --label "my-setup-selfread"
+```
+
+Options: `--pause 5` seconds to collect events after each step.
+
 ## What to send back
 
 The `watchprobe-*.json` file (written next to the program, so in your config folder), plus one line about the setup: OS/NAS, how the library is mounted into Kavita (bind mount, SMB/CIFS, NFS, mergerfs, ...), and which machine you made the changes from.
