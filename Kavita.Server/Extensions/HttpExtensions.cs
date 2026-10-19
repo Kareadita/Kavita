@@ -40,7 +40,7 @@ public static class HttpExtensions
 
     public static void CopyRequest(this HttpRequestMessage message, HttpRequest request, Func<string, bool> copyHeader)
     {
-        foreach (var header in message.Headers)
+        foreach (var header in request.Headers)
         {
             if (copyHeader(header.Key))
             {
