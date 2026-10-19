@@ -27,6 +27,7 @@ import {debounce, disabled, form, FormField, max, min, required} from "@angular/
 import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 import {UserCollection} from "../../_models/collection-tag";
 import {CollectionTagService} from "../../_services/collection-tag.service";
+import {SettingsService} from "../../admin/settings.service";
 
 @Component({
   selector: 'app-manga-user-preferences',
@@ -56,14 +57,21 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly metadataService = inject(MetadataService);
   private readonly typeaheadSettingFactory = inject(TypeaheadConfigFactoryService);
   private readonly collectionTagService = inject(CollectionTagService);
+  private readonly settingsService = inject(SettingsService);
 
   protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
+  protected readonly koboEnabledRsc = this.settingsService.getKoboEnabledResource();
+
   loading = signal(true);
   ageRatings = signal<AgeRatingDto[]>([]);
   locales = signal<KavitaLocale[]>([]);
   socialLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
   koboLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
   koboCollectionTypeaheadSettings = signal<TypeaheadConfig<UserCollection> | null>(null);
+
+  koboEnabled = computed(() => {
+    return this.koboEnabledRsc.hasValue() && this.koboEnabledRsc.value();
+  });
 
   formModel = signal<Preferences>({
     aniListScrobblingEnabled: false,
@@ -123,6 +131,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     min(path.onDeckUpdateDays, 1);
     required(path.promptForRereadsAfter);
 
+    disabled(path.koboSyncPreferences, {when: () => !this.koboEnabled()})
     min(path.koboSyncPreferences.syncItemLimit, 25);
     max(path.koboSyncPreferences.syncItemLimit, 100);
     disabled(path.koboSyncPreferences.syncLibraries, {when: () => this.formModel().koboSyncPreferences.allLibraries})

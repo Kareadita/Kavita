@@ -281,11 +281,13 @@
 
       <div class="setting-section-break"></div>
       <h4>{{t('kobo-sync-settings-title')}}</h4>
-      <p class="text-muted">{{t('kobo-sync-settings-description')}}</p>
+      @if (!koboEnabled()) {
+        <div class="alert alert-warning" role="alert">{{t('kobo-sync-disabled-alert')}}</div>
+      }
 
       <ng-container>
         <div class="row g-0 mt-4">
-          <app-setting-item [title]="t('sync-item-limit-label')" [subtitle]="t('sync-item-limit-tooltip')" [canEdit]="!isReadOnly()" [control]="formGroup.koboSyncPreferences.syncItemLimit" labelId="kobo-sync-item-limit">
+          <app-setting-item [title]="t('sync-item-limit-label')" [subtitle]="t('sync-item-limit-tooltip')" [canEdit]="!isReadOnly() && koboEnabled()" [control]="formGroup.koboSyncPreferences.syncItemLimit" labelId="kobo-sync-item-limit">
             <ng-template #view>
               <span> {{formGroup.koboSyncPreferences.syncItemLimit().value()}} </span>
             </ng-template>
@@ -324,7 +326,7 @@
             <ng-template #view>
               @let koboLibsConfig = koboLibrariesTypeaheadSettings();
               @if (koboLibsConfig) {
-                <app-typeahead [config]="koboLibsConfig" (selectedData)="syncKoboSyncLibrariesWithTypeahead($event)" [disabled]="isReadOnly() || formGroup.koboSyncPreferences.allLibraries().value()">
+                <app-typeahead [config]="koboLibsConfig" (selectedData)="syncKoboSyncLibrariesWithTypeahead($event)" [disabled]="isReadOnly() || formGroup.koboSyncPreferences.allLibraries().value() || !koboEnabled()">
                   <ng-template #optionItem let-lib>
                     {{lib.name}}
                   </ng-template>
@@ -342,7 +344,7 @@
             <ng-template #view>
               @let koboCollectionConfig = koboCollectionTypeaheadSettings();
               @if (koboCollectionConfig) {
-                <app-typeahead [config]="koboCollectionConfig" (selectedData)="syncKoboSyncCollectionWithTypeahead($event)" [disabled]="isReadOnly()">
+                <app-typeahead [config]="koboCollectionConfig" (selectedData)="syncKoboSyncCollectionWithTypeahead($event)" [disabled]="isReadOnly() || !koboEnabled()">
                   <ng-template #optionItem let-collection>
                     {{collection.title}}
                   </ng-template>

@@ -198,8 +198,16 @@ public class SettingsController(
     public async Task<ActionResult<bool>> GetOpdsEnabled()
     {
         var ct = HttpContext.RequestAborted;
-        var settingsDto = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
-        return Ok(settingsDto.EnableOpds);
+        var setting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableOpds, ct);
+        return Ok(bool.Parse(setting.Value));
+    }
+
+    [HttpGet("kobo-enabled")]
+    public async Task<ActionResult<bool>> GetKoboEnabled()
+    {
+        var ct = HttpContext.RequestAborted;
+        var setting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableKobo, ct);
+        return Ok(bool.Parse(setting.Value));
     }
 
     /// <summary>
