@@ -73,5 +73,20 @@
         </ng-template>
       </app-setting-item>
     </div>
+
+    @let kepubifyPath = settingsForm.kepubifyPath;
+    <div class="row g-0 my-2">
+      <app-setting-item [title]="t('kepubify-path-label')" [subtitle]="t('kepubify-path-tooltip')"
+                        [control]="kepubifyPath" labelId="settings-kepubify-path">
+        <ng-template #view>
+          {{kepubifyPath().value()}}
+        </ng-template>
+        <ng-template #edit>
+          <div class="input-group">
+            <input id="settings-kepubify-path" class="form-control" [formField]="kepubifyPath" type="text" aria-describedby="change-bookmarks-dir" [appFormField]="kepubifyPath">
+          </div>
+        </ng-template>
+      </app-setting-item>
+    </div>
   }
 </ng-container>

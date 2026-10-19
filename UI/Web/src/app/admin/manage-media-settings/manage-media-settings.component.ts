@@ -24,6 +24,7 @@ import {SettingSelectComponent} from "../../settings/_components/setting-enum-se
 interface FormModel {
   encodeMediaAs: EncodeFormat;
   bookmarksDirectory: string;
+  kepubifyPath: string;
   coverImageSize: CoverImageSize;
   pdfRenderResolution: PdfRenderResolution;
 }
@@ -53,6 +54,7 @@ export class ManageMediaSettingsComponent implements OnInit {
   private readonly formModel = signal<FormModel>({
     encodeMediaAs: EncodeFormat.PNG,
     bookmarksDirectory: '',
+    kepubifyPath: '',
     coverImageSize: CoverImageSize.Default,
     pdfRenderResolution: PdfRenderResolution.Default
   });
@@ -111,6 +113,7 @@ export class ManageMediaSettingsComponent implements OnInit {
     this.formModel.set({
       encodeMediaAs: settings.encodeMediaAs,
       bookmarksDirectory: settings.bookmarksDirectory,
+      kepubifyPath: settings.kepubifyPath,
       coverImageSize: (settings.coverImageSize || CoverImageSize.Default),
       pdfRenderResolution: (settings.pdfRenderResolution || PdfRenderResolution.Default),
     });
@@ -122,6 +125,7 @@ export class ManageMediaSettingsComponent implements OnInit {
     const modelSettings = Object.assign({}, this.serverSettings);
     modelSettings.encodeMediaAs = model.encodeMediaAs;
     modelSettings.bookmarksDirectory = model.bookmarksDirectory;
+    modelSettings.kepubifyPath = model.kepubifyPath;
     modelSettings.coverImageSize = model.coverImageSize;
     modelSettings.pdfRenderResolution = model.pdfRenderResolution;
 

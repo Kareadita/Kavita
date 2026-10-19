@@ -2435,7 +2435,10 @@
         "pdf-render-resolution-label": "PDF Render Resolution",
         "pdf-render-resolution-tooltip": "Resolution at which PDFs will be rendered. Higher resolutions will take longer to render and consume more memory. If you experience issues with PDF rendering, try lowering this.",
         "cover-image-size-label": "Cover Image Size",
-        "cover-image-size-tooltip": "How large should cover images generate as. Note: Anything larger than the default will incur longer page load times."
+        "cover-image-size-tooltip": "How large should cover images generate as. Note: Anything larger than the default will incur longer page load times.",
+
+        "kepubify-path-label": "Kepubify Path",
+        "kepubify-path-tooltip": "Path to the kepubify executable"
     },
 
     "pdf-render-resolution": {
@@ -2496,6 +2499,8 @@
         "opds-label": "OPDS",
         "opds-tooltip": "OPDS support will allow all users to use OPDS to read and download content from the server.",
         "enable-opds": "Enable OPDS",
+        "kobo-label": "Enable KoboSync",
+        "kobo-tooltip": "Enable KoboSync support for all users on the server",
         "folder-watching-label": "Folder Watching",
         "folder-watching-tooltip": "Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans. Will always wait 10 minutes before triggering scan.",
         "enable-folder-watching": "Enable Folder Watching",

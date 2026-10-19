@@ -170,6 +170,16 @@
     </div>
 
     <div class="row g-0 mt-4 mb-4">
+      <app-setting-switch [title]="t('kobo-label')" [subtitle]="t('kobo-tooltip')">
+        <ng-template>
+          <div class="form-check form-switch float-end">
+            <input type="checkbox" class="form-check-input" [formField]="formGroup.enableKobo">
+          </div>
+        </ng-template>
+      </app-setting-switch>
+    </div>
+
+    <div class="row g-0 mt-4 mb-4">
       <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
         <ng-template>
           <div class="form-check form-switch float-end">
