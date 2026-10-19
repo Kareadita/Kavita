@@ -29,5 +29,5 @@ public interface IKoboSyncService
     Task<Dictionary<int, KoboBookMetadataDto>> BuildBookMetadata(int userId, IEnumerable<int> chapterIds, CancellationToken cancellationToken);
 
     Task<KoboReadingStateDto?> GetProgress(int userId, int chapterId, CancellationToken cancellationToken);
-    Task SaveProgress(int userId, int chapterId, KoboReadingStateDto readingStateDto, CancellationToken cancellationToken);
+    Task<KoboStateUpdateResultDto> SaveProgress(int userId, int chapterId, KoboReadingStateDto readingStateDto, CancellationToken cancellationToken);
 }

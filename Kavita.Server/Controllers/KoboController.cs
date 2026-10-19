@@ -109,17 +109,19 @@ public class KoboController(
     {
         var ct = HttpContext.RequestAborted;
 
-        if (int.TryParse(bookId, out var kavitaId))
+        if (!int.TryParse(bookId, out var kavitaId))
         {
-            var metadata = await koboSyncService.BuildBookMetadata(UserId, [kavitaId], ct);
-            if (metadata.Count > 0)
-            {
-                return Ok(metadata.Values);
-            }
+            return await ProxyRequestIfEnabled();
+
         }
 
-        await ProxyRequest(false, ct);
-        return new EmptyResult();
+        var metadata = await koboSyncService.BuildBookMetadata(UserId, [kavitaId], ct);
+        if (metadata.Count > 0)
+        {
+            return Ok(metadata.Values);
+        }
+
+        return NotFound();
     }
 
     [HttpGet("v1/library/{bookId}/state")]
@@ -130,13 +132,7 @@ public class KoboController(
 
         if (!int.TryParse(bookId, out var kavitaId))
         {
-            if ((await KoboSyncSettings).ForwardToKoboStore)
-            {
-                await ProxyRequest(false, ct);
-                return new EmptyResult();
-            }
-
-            return NotFound();
+            return await ProxyRequestIfEnabled();
         }
 
         var progress = await koboSyncService.GetProgress(UserId, kavitaId, ct);
@@ -156,13 +152,7 @@ public class KoboController(
 
         if (!int.TryParse(bookId, out var kavitaId))
         {
-            if ((await KoboSyncSettings).ForwardToKoboStore)
-            {
-                await ProxyRequest(false, ct);
-                return new EmptyResult();
-            }
-
-            return NotFound();
+            return await ProxyRequestIfEnabled();
         }
 
         var states = await JsonSerializer.DeserializeAsync<KoboReadingStateUpdateDto>(Request.Body, KoboJsonAttribute.JsonSerializerOptions, ct);
@@ -182,31 +172,7 @@ public class KoboController(
             return BadRequest();
         }
 
-        try
-        {
-            await koboSyncService.SaveProgress(UserId, kavitaId, update, ct);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to update progress from Kobo");
-            return Ok(new KoboResultDto
-            {
-                RequestResult = KoboRequestResult.Failure,
-                UpdateResults = [new KoboReadingStateUpdateResultDto(KoboRequestResult.Failure)
-                {
-                    EntitlementId = bookId,
-                }]
-            });
-        }
-
-        return Ok(new KoboResultDto
-        {
-            RequestResult = KoboRequestResult.Success,
-            UpdateResults = [new KoboReadingStateUpdateResultDto(KoboRequestResult.Success, KoboRequestResult.Ignored, KoboRequestResult.Success)
-            {
-                EntitlementId = bookId,
-            }]
-        });
+        return Ok(await koboSyncService.SaveProgress(UserId, kavitaId, update, ct));
     }
 
     [ChapterAccess(chapterIdKey: "bookId")]
@@ -292,13 +258,7 @@ public class KoboController(
     {
         if (!int.TryParse(bookId, out _))
         {
-            if ((await KoboSyncSettings).ForwardToKoboStore)
-            {
-                await ProxyRequest(false, HttpContext.RequestAborted);
-                return new EmptyResult();
-            }
-
-            return NotFound();
+            return await ProxyRequestIfEnabled();
         }
 
         return Ok(new KoboReviewsResponseDto
@@ -319,13 +279,7 @@ public class KoboController(
 
         if (!int.TryParse(bookId, out var kavitaId))
         {
-            if ((await KoboSyncSettings).ForwardToKoboStore)
-            {
-                await ProxyRequest(false, HttpContext.RequestAborted);
-                return new EmptyResult();
-            }
-
-            return NotFound();
+            return await ProxyRequestIfEnabled();
         }
 
         var rec = await unitOfWork.ChapterRepository.GetKoboRecommendationAsync(UserId, kavitaId, ct);
@@ -341,13 +295,7 @@ public class KoboController(
 
         if (!int.TryParse(bookId, out var kavitaId))
         {
-            if ((await KoboSyncSettings).ForwardToKoboStore)
-            {
-                await ProxyRequest(false, ct);
-                return new EmptyResult();
-            }
-
-            return NotFound();
+            return await ProxyRequestIfEnabled();
         }
 
         var detail = await unitOfWork.ChapterRepository.GetKoboBookDetailsAsync(kavitaId, ct);
@@ -366,12 +314,7 @@ public class KoboController(
         var isKoboRequest = bookIds.Split(',').Any(id => !int.TryParse(id, out _));
         if (isKoboRequest)
         {
-            if ((await KoboSyncSettings).ForwardToKoboStore)
-            {
-                await ProxyRequest(false, HttpContext.RequestAborted);
-            }
-
-            return new EmptyResult();
+            return await ProxyRequestIfEnabled();
         }
 
         var prices = bookIds.Split(',').Select(id => new KoboBookPriceInformationDto
@@ -393,12 +336,7 @@ public class KoboController(
         var ct = HttpContext.RequestAborted;
         if (!int.TryParse(bookId, out var kavitaId))
         {
-            if ((await KoboSyncSettings).ForwardToKoboStore)
-            {
-                await ProxyRequest(false, HttpContext.RequestAborted);
-            }
-
-            return new EmptyResult();
+            return await ProxyRequestIfEnabled();
         }
 
         var seriesId = await unitOfWork.ChapterRepository.GetSeriesIdForChapter(kavitaId, ct);
@@ -479,15 +417,9 @@ public class KoboController(
     #endregion
 
     [Route("{**catchAll}")]
-    public async Task<ActionResult> ProxyFallback()
+    public Task<ActionResult> ProxyFallback()
     {
-        if ((await KoboSyncSettings).ForwardToKoboStore)
-        {
-            await ProxyRequest(false, HttpContext.RequestAborted);
-            return new EmptyResult();
-        }
-
-        return NotFound();
+        return ProxyRequestIfEnabled();
     }
 
     private KoboSyncToken KoboSyncToken => KoboSyncTokenHelper.Decode(Request.Headers[KoboHeaders.KoboSyncToken]);
@@ -506,6 +438,17 @@ public class KoboController(
     };
 
     private static bool IsKoboHeader(string header) => header.StartsWith("x-kobo-", StringComparison.OrdinalIgnoreCase);
+
+    private async Task<ActionResult> ProxyRequestIfEnabled()
+    {
+        if ((await KoboSyncSettings).ForwardToKoboStore)
+        {
+            await ProxyRequest(false, HttpContext.RequestAborted);
+            return new EmptyResult();
+        }
+
+        return NotFound();
+    }
 
     private async Task<JsonNode?> ProxyRequest(bool includeSyncToken, CancellationToken ct, bool copyResponse = true)
     {

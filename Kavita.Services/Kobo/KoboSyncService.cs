@@ -208,7 +208,46 @@ internal class KoboSyncService(
         return await BuildKoboReadingStateDto(chapter, progress);
     }
 
-    public async Task SaveProgress(int userId, int chapterId, KoboReadingStateDto readingStateDto, CancellationToken cancellationToken)
+    public async Task<KoboStateUpdateResultDto> SaveProgress(int userId, int chapterId, KoboReadingStateDto readingStateDto,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await SaveProgressInner(userId, chapterId, readingStateDto, cancellationToken);
+        }
+        catch(Exception ex)
+        {
+            logger.LogError(ex, "Failed to update progress from Kobo");
+
+            return new KoboStateUpdateResultDto
+            {
+                RequestResult = KoboRequestResult.Failure,
+                UpdateResults =
+                [
+                    new KoboReadingStateUpdateResultDto(KoboRequestResult.Failure)
+                    {
+                        EntitlementId = chapterId.ToString(),
+                    }
+                ]
+            };
+        }
+
+        return new KoboStateUpdateResultDto
+        {
+            RequestResult = KoboRequestResult.Success,
+            UpdateResults =
+            [
+                new KoboReadingStateUpdateResultDto(KoboRequestResult.Success, KoboRequestResult.Ignored,
+                    KoboRequestResult.Success)
+                {
+                    EntitlementId = chapterId.ToString(),
+                }
+            ]
+        };
+    }
+
+
+    private async Task SaveProgressInner(int userId, int chapterId, KoboReadingStateDto readingStateDto, CancellationToken cancellationToken)
     {
         logger.LogInformation("Saving kobo progress {@Dto}", readingStateDto);
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId, ct: cancellationToken);
@@ -239,8 +278,7 @@ internal class KoboSyncService(
 
         await readerService.SaveReadingProgress(userProgressDto, userId, false, cancellationToken);
 
-        // We are unable to track progress within a chapter from Kobo. So we can only generate sessions for
-        // Chapter updates
+        // We are unable to track progress within a chapter from Kobo. So we can only generate sessions for chapter updates
         if (startPage != userProgressDto.PageNum)
         {
             await readingSessionService.GenerateReadingSessionForChapters(userId, parentIds.Value.SeriesId,

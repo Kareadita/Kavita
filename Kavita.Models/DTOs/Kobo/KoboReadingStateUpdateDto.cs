@@ -7,7 +7,7 @@ public sealed record KoboReadingStateUpdateDto
     public List<KoboReadingStateDto> ReadingStates { get; set; } = [];
 }
 
-public sealed record KoboResultDto
+public sealed record KoboStateUpdateResultDto
 {
     public KoboRequestResult RequestResult { get; set; }
     public List<KoboReadingStateUpdateResultDto> UpdateResults { get; set; } = [];
