@@ -639,36 +639,17 @@ public class OpdsController(
     [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}")]
     public async Task<ActionResult> DownloadFile(string apiKey, int seriesId, int volumeId, int chapterId, string filename)
     {
-        var files = (await unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).ToList();
+        var ct = HttpContext.RequestAborted;
 
-        if (files.Count <= 1)
+        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId, ct: ct);
+        if (chapter is null)
         {
-            var (zipFile, contentType, fileDownloadName) = downloadService.GetFirstFileDownload(files);
-            return PhysicalFile(zipFile, contentType, fileDownloadName, true);
+            return NotFound();
         }
 
-        // Multi-file chapter: produce a single flat .cbz by reusing the
-        // page-streaming cache, which already extracts and orders pages
-        // across all the chapter's files. Otherwise, OPDS clients only
-        // receive the first file of the chapter.
-        var chapter = await cacheService.Ensure(chapterId);
-        if (chapter == null)
-        {
-            return BadRequest(await localizationService.TranslateAsync(UserId, "cache-file-find"));
-        }
-
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-        var downloadName = $"{series!.Name} - Chapter {chapter.GetNumberTitle()}.cbz";
-        var dateStr = DateTime.UtcNow.ToShortDateString().Replace("/", "_");
-        var outputPath = Path.Join(directoryService.TempDirectory, $"kavita_opds_merged_c{chapterId}_{dateStr}.cbz");
-
-        if (!System.IO.File.Exists(outputPath))
-        {
-            var cacheDir = cacheService.GetCachePath(chapterId);
-            await ZipFile.CreateFromDirectoryAsync(cacheDir, outputPath);
-        }
-
-        return PhysicalFile(outputPath, "application/x-cbz", downloadName, true);
+        var path = await downloadService.DownloadChapter(chapter, DownloadFormat.Default, ct);
+        var contentType = downloadService.GetContentTypeFromFile(path);
+        return PhysicalFile(path, contentType, Path.GetFileName(path), true);
     }
 
     private static ContentResult CreateXmlResult(string xml)
