@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.IO.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,8 +18,12 @@ public class KepubifyConverter(ILogger<KepubifyConverter> logger, IServiceScopeF
 
     public string BuildKepubifyPath(int chapterId)
     {
+        using var scope = serviceScopeFactory.CreateScope();
+        var directoryService = scope.ServiceProvider.GetRequiredService<IDirectoryService>();
+
         var dateStr = DateTime.UtcNow.ToShortDateString().Replace("/", "_");
-        return $"kavita_kepubify_c{chapterId}_{dateStr}.kepub.epub";
+        var fileName = $"kavita_kepubify_c{chapterId}_{dateStr}.kepub.epub";
+        return Path.Join(directoryService.TempDirectory, fileName);
     }
 
     public async Task CheckKepubifySupport(string kepubifyPath, CancellationToken cancellationToken)

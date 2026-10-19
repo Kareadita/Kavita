@@ -965,7 +965,7 @@ public partial class BookService(
         return 0;
     }
 
-    private static string EscapeTags(string content)
+    public static string EscapeTags(string content)
     {
         content = Regex.Replace(content, @"<script(.*)(/>)", "<script$1></script>", RegexOptions.None, Parser.RegexTimeout);
         content = Regex.Replace(content, @"<title(.*)(/>)", "<title$1></title>", RegexOptions.None, Parser.RegexTimeout);

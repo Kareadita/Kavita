@@ -107,7 +107,7 @@ public class DownloadService(
             throw new NotSupportedException();
         }
 
-        var outputPath = Path.Join(directoryService.TempDirectory, kepubifyConverter.BuildKepubifyPath(chapter.Id));
+        var outputPath = kepubifyConverter.BuildKepubifyPath(chapter.Id);
 
         await kepubifyConverter.ConvertEpubToKepub(chapter.Files.First().FilePath, outputPath, cancellationToken);
 

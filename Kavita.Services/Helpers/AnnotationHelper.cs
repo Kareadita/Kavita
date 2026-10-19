@@ -4,10 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
+using Kavita.Common.Extensions;
+using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Reader;
+using Kavita.Models.Entities.User;
 using Serilog;
 
 namespace Kavita.Services.Helpers;
+
+public readonly record struct TextAnchor(HtmlNode Element, string Path, int Offset);
 
 public static partial class AnnotationHelper
 {
@@ -165,6 +170,107 @@ public static partial class AnnotationHelper
             }
         }
     }
+
+    public static IEnumerable<KoboAnnotationDto> BuildKoboAnnotations(string fileName, HtmlDocument doc, IEnumerable<AppUserAnnotation> annotations)
+    {
+        return annotations.Select(annotation =>
+        {
+            if (!TryResolveAnchors(doc, annotation.XPath, annotation.EndingXPath,
+                    annotation.SelectedText, out var start, out var end))
+            {
+                return null;
+            }
+
+            return new KoboAnnotationDto
+            {
+                ClientLastModifiedUtc = annotation.LastModifiedUtc,
+                HighlightColor = string.Empty,
+                HighlightedText = annotation.SelectedText,
+                Id = null,
+                Location = new KoboAnnotationLocationDto
+                {
+                    Span = new KoboAnnotationLocationSpanDto
+                    {
+                        ChapterFilename = fileName,
+                        ChapterTitle = fileName,
+                        ChapterProgress = 0,
+                        EndChar = end.Offset,
+                        StartChar = start.Offset,
+                        EndPath = end.Path,
+                        StartPath = start.Path,
+                    }
+                },
+                noteText = annotation.CommentPlainText,
+            };
+        }).WhereNotNull();
+    }
+
+    internal static bool TryResolveAnchors(HtmlDocument doc, string startXPath, string endXPath, string selectedText, out TextAnchor start, out TextAnchor end)
+    {
+        start = end = default;
+
+        var startBlock = NormalizeToBlockElement(FindElementByXPath(doc, DescopeXpath(startXPath)));
+        var endBlock = NormalizeToBlockElement(FindElementByXPath(doc, DescopeXpath(endXPath)));
+        if (startBlock == null || endBlock == null) return false;
+
+        var elements = GetElementsInRange(startBlock, endBlock);
+        if (elements.Count == 0) return false;
+
+        var fullText = string.Join(ElementTextSeparator, elements.Select(GetTextForHighlighting));
+        var (decoded, rawStarts) = DecodeWithMap(fullText);
+
+        var normalizedFull = NormalizeWhitespace(decoded);
+        var normalizedSelection = NormalizeWhitespace(selectedText);
+
+        var selStart = normalizedFull.IndexOf(normalizedSelection, StringComparison.Ordinal);
+        if (selStart < 0) return false;
+
+        var rawStart = rawStarts[MapNormalizedPositionToText(decoded, selStart)];
+        var rawEnd = rawStarts[MapNormalizedPositionToText(decoded, selStart + normalizedSelection.Length)];
+
+        var mappings = BuildElementTextMappings(elements);
+
+        TextAnchor? foundStart = null, foundEnd = null;
+
+        for (var i = 0; i < elements.Count; i++)
+        {
+            foreach (var (node, runStart, runLength) in BuildTextRuns(elements[i]))
+            {
+                var globalStart = mappings[i].StartPos + runStart;
+                var globalEnd = globalStart + runLength;
+
+                // Start is inclusive of the run start, exclusive of the run end
+                if (foundStart == null && rawStart >= globalStart && rawStart < globalEnd)
+                    foundStart = CreateAnchor(node, rawStart - globalStart);
+
+                // End is exclusive of the run start, inclusive of the run end
+                if (foundEnd == null && rawEnd > globalStart && rawEnd <= globalEnd)
+                    foundEnd = CreateAnchor(node, rawEnd - globalStart);
+            }
+        }
+
+        if (foundStart == null || foundEnd == null) return false;
+
+        start = foundStart.Value;
+        end = foundEnd.Value;
+        return true;
+    }
+
+private static TextAnchor CreateAnchor(HtmlNode textNode, int rawOffsetInNode)
+{
+    var element = textNode.ParentNode;
+
+    // Offset in decoded chars, so "&amp;" counts as one character
+    var (_, starts) = DecodeWithMap(GetText(textNode));
+    var idx = Array.BinarySearch(starts, rawOffsetInNode);
+    var decodedOffset = idx >= 0 ? idx : ~idx;
+
+    // Kobo-style "span#kobo.3.2" when there's an id, otherwise a real xpath
+    var id = element.GetAttributeValue("id", string.Empty);
+    var path = string.IsNullOrEmpty(id) ? element.XPath : $"{element.Name}#{id}";
+
+    return new TextAnchor(element, path, decodedOffset);
+}
 
     private static void WrapTextRange(HtmlNode root, int start, int end, int annotationId, HtmlDocument doc)
     {

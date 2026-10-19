@@ -16,7 +16,7 @@ public sealed record KoboAnnotationDto
     public string Id { get; set; }
     public KoboAnnotationLocationDto Location { get; set; }
     public string noteText { get; set; }
-    public string Type { get; set; }
+    public string Type { get; set; } = "note";
 }
 
 public sealed record KoboAnnotationLocationDto
