@@ -10,6 +10,8 @@ public interface IKepubifyConverter
 {
     bool KepubifySupported { get; }
 
+    string BuildKepubifyPath(int chapterId);
+
     Task CheckKepubifySupport(string kepubifyPath, CancellationToken cancellationToken);
 
     Task ConvertEpubToKepub(string epubPath, string kepubPath, CancellationToken cancellationToken);

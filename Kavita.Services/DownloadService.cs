@@ -107,8 +107,7 @@ public class DownloadService(
             throw new NotSupportedException();
         }
 
-        var dateStr = DateTime.UtcNow.ToShortDateString().Replace("/", "_");
-        var outputPath = Path.Join(directoryService.TempDirectory, $"kavita_kepubify_c{chapter.Id}_{dateStr}.kepub.epub");
+        var outputPath = Path.Join(directoryService.TempDirectory, kepubifyConverter.BuildKepubifyPath(chapter.Id));
 
         await kepubifyConverter.ConvertEpubToKepub(chapter.Files.First().FilePath, outputPath, cancellationToken);
 

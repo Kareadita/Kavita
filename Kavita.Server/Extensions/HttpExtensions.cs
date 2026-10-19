@@ -1,10 +1,12 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Common.Helpers;
+using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Http;
 
 namespace Kavita.Server.Extensions;
@@ -38,7 +40,7 @@ public static class HttpExtensions
         response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
     }
 
-    public static void CopyRequest(this HttpRequestMessage message, HttpRequest request, Func<string, bool> copyHeader)
+    public static void CopyRequest(this HttpRequestMessage message, HttpRequest request, Func<string, bool> copyHeader, object? body = null)
     {
         foreach (var header in request.Headers)
         {
@@ -48,7 +50,11 @@ public static class HttpExtensions
             }
         }
 
-        if (request.ContentLength > 0 || request.Headers.ContainsKey("Transfer-Encoding"))
+        if (body != null)
+        {
+            message.Content = JsonContent.Create(body, options: KoboJsonAttribute.JsonSerializerOptions);
+        }
+        else if (request.ContentLength > 0 || request.Headers.ContainsKey("Transfer-Encoding"))
         {
             var content = new StreamContent(request.Body);
             foreach (var h in request.Headers.Where(h =>

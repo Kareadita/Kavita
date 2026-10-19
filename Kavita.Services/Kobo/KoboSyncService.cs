@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ using Kavita.Services.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using VersOne.Epub;
 
 namespace Kavita.Services.Kobo;
 
@@ -41,7 +43,8 @@ internal class KoboSyncService(
     IBookService bookService,
     IReadingSessionService readingSessionService,
     IHttpContextAccessor httpContextAccessor,
-    IKepubifyConverter kepubifyConverter
+    IKepubifyConverter kepubifyConverter,
+    IFileSystem fileSystem
     ): IKoboSyncService
 {
 
@@ -251,6 +254,90 @@ internal class KoboSyncService(
                 ],
             };
         });
+    }
+
+    #endregion
+
+    #region Annotations
+
+    public async Task<IList<KoboAnnotationDto>> GetKoboAnnotationsAsync(int userId, IEnumerable<int> chapterIds, CancellationToken cancellationToken)
+    {
+        if (!kepubifyConverter.KepubifySupported)
+        {
+            return [];
+        }
+
+        var annotations = await unitOfWork.DataContext.AppUserAnnotation
+            .Where(an => chapterIds.Contains(an.ChapterId))
+            .ToListAsync(cancellationToken);
+
+        var koboAnnotations = new List<KoboAnnotationDto>();
+
+        foreach (var grouping in annotations.GroupBy(an => an.ChapterId))
+        {
+            var koboAnnotation = await EncodeAnnotations(grouping.Key, grouping, cancellationToken);
+            koboAnnotation.AddRange(koboAnnotation);
+        }
+
+        return koboAnnotations;
+    }
+
+    public Task UpdateKoboAnnotationsAsync(int userId, int chapterId, List<KoboAnnotationDto> annotationDtos, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    private async Task<List<KoboAnnotationDto>> EncodeAnnotations(int chapterId, IEnumerable<AppUserAnnotation> annotations, CancellationToken cancellationToken)
+    {
+        var files = await unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId, cancellationToken);
+        if (files.Count != 1)
+        {
+            return [];
+        }
+
+        var epubPath = files[0].FilePath;
+        var kepubPath = kepubifyConverter.BuildKepubifyPath(chapterId);
+        if (!fileSystem.File.Exists(kepubPath))
+        {
+            await kepubifyConverter.ConvertEpubToKepub(epubPath, kepubPath, cancellationToken);
+        }
+
+        using var epub = await EpubReader.OpenBookAsync(epubPath, BookService.LenientBookReaderOptions);
+        using var kepub = await EpubReader.OpenBookAsync(kepubPath, BookService.LenientBookReaderOptions);
+        if (epub == null || kepub == null) return [];
+
+        var annotationGroups = annotations
+            .GroupBy(an => an.PageNumber)
+            .ToDictionary(g => g.Key, g => g);
+
+        var koboAnnotations = new List<KoboAnnotationDto>();
+
+        var counter = 0;
+        foreach (var fileRef in await epub.GetReadingOrderAsync())
+        {
+            if (!annotationGroups.TryGetValue(counter, out var grouping))
+            {
+                counter++;
+                continue;
+            }
+
+            if (!kepub.Content.Html.ContainsLocalFileRefWithFilePath(fileRef.FilePath))
+            {
+                logger.LogWarning("Skipping annotations for {ChapterId} at {HtmlPath} as it couldn't be matched inside the kepub",
+                    chapterId, fileRef.FilePath);
+                counter++;
+                continue;
+            }
+
+            var kepubFileRef = kepub.Content.Html.GetLocalFileRefByFilePath(fileRef.FilePath);
+
+            
+
+
+        }
+
+
+        return koboAnnotations;
     }
 
     #endregion

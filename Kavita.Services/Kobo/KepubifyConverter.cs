@@ -15,6 +15,12 @@ public class KepubifyConverter(ILogger<KepubifyConverter> logger, IServiceScopeF
 
     public bool KepubifySupported { get; private set; }
 
+    public string BuildKepubifyPath(int chapterId)
+    {
+        var dateStr = DateTime.UtcNow.ToShortDateString().Replace("/", "_");
+        return $"kavita_kepubify_c{chapterId}_{dateStr}.kepub.epub";
+    }
+
     public async Task CheckKepubifySupport(string kepubifyPath, CancellationToken cancellationToken)
     {
         using var scope = serviceScopeFactory.CreateScope();

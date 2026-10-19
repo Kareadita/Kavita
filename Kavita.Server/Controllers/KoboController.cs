@@ -8,10 +8,9 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.Common.Extensions;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.Entities.Enums;
@@ -23,7 +22,6 @@ using Kavita.Server.Middleware;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers.Kobo;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using NetVips;
@@ -40,13 +38,14 @@ public class KoboController(
     IKoboSyncService koboSyncService,
     IHttpClientFactory httpClientFactory,
     IDirectoryService directoryService,
-    IDownloadService downloadService,
-    IMapper mapper): BaseApiController
+    IDownloadService downloadService): BaseApiController
 {
 
     private const string KoboImageHost = "https://cdn.kobo.com/book-images/";
 
     private HttpClient KoboHttpClient => httpClientFactory.CreateClient("Kobo");
+    private HttpClient KoboReadingServicesClient => httpClientFactory.CreateClient("KoboReadingServices");
+    private JsonSerializerOptions JsonSerializerOptions => KoboJsonAttribute.JsonSerializerOptions;
 
     #region Sync & State
 
@@ -55,7 +54,7 @@ public class KoboController(
     {
         var ct = HttpContext.RequestAborted;
 
-        var (json, hasWrittenResponse) = await ProxyRequest(false, ct, false);
+        var (json, hasWrittenResponse) = await ProxyRequest(KoboHttpClient, false, ct, false);
         if (json is null)
         {
             return hasWrittenResponse ? new EmptyResult() : NotFound();
@@ -71,6 +70,11 @@ public class KoboController(
             resources["image_host"] = instanceUrl.TrimEnd('/');
             resources["image_url_template"] = $"{koboBase}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/false/image.jpg";
             resources["image_url_quality_template"] = $"{koboBase}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/{{Quality}}/{{IsGreyscale}}/image.jpg";
+            resources["reading_services_host"] = instanceUrl.TrimEnd('/');
+        }
+        else
+        {
+            logger.LogWarning("Failed to update Kobo Initialization values. Some request may not be redirected correctly");
         }
 
         Response.Headers[KoboHeaders.KoboApiToken] = "e30=";
@@ -157,7 +161,7 @@ public class KoboController(
             return await ProxyRequestIfEnabled();
         }
 
-        var states = await JsonSerializer.DeserializeAsync<KoboReadingStateUpdateDto>(Request.Body, KoboJsonAttribute.JsonSerializerOptions, ct);
+        var states = await JsonSerializer.DeserializeAsync<KoboReadingStateUpdateDto>(Request.Body, JsonSerializerOptions, ct);
         if (states is null)
         {
             return BadRequest();
@@ -256,7 +260,7 @@ public class KoboController(
 
         if ((await KoboSyncSettings).ForwardToKoboStore)
         {
-            await ProxyRequest(false, HttpContext.RequestAborted);
+            await ProxyRequest(KoboHttpClient, false, HttpContext.RequestAborted);
             return new EmptyResult();
         }
 
@@ -322,6 +326,20 @@ public class KoboController(
         return Ok(detail);
     }
 
+    [HttpGet("v1/products/{bookId}/nextread")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
+    public async Task<ActionResult> GetNextRead(string bookId)
+    {
+        if (!int.TryParse(bookId, out _))
+        {
+            return await ProxyRequestIfEnabled();
+        }
+
+        // TODO: Implement
+
+        return Ok();
+    }
+
     [HttpGet("v1/products/{bookIds}/prices")]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> GetPrices(string bookIds)
@@ -344,7 +362,7 @@ public class KoboController(
         });
     }
 
-    [HttpPost("v1/products/{bookId}/reviews")]
+    [HttpPut("v1/products/{bookId}/reviews")]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> UpdateReview(string bookId)
     {
@@ -360,6 +378,7 @@ public class KoboController(
             return NotFound();
         }
 
+        // This has different JSON encoding (:sob:)
         var reviewDto = await JsonSerializer.DeserializeAsync<KoboSubmitReviewDto>(Request.Body, cancellationToken: ct);
         if (reviewDto is null)
         {
@@ -398,7 +417,7 @@ public class KoboController(
         {
             if ((await KoboSyncSettings).ForwardToKoboStore)
             {
-                await ProxyRequest(false, ct);
+                await ProxyRequest(KoboHttpClient, false, ct);
             }
             return new EmptyResult();
         }
@@ -431,6 +450,63 @@ public class KoboController(
 
     #endregion
 
+    #region Annotations
+
+    [HttpPost("api/v3/content/checkforchanges")]
+    public async Task<ActionResult> GetAnnotationsForBook()
+    {
+        var ct = HttpContext.RequestAborted;
+
+        var array = await JsonSerializer.DeserializeAsync<List<JsonNode>>(Request.Body, options: JsonSerializerOptions, cancellationToken: ct);
+        if (array is null)
+        {
+            return BadRequest();
+        }
+
+        var isKoboRequest = array.Any(book => !int.TryParse(book["id"]?.GetValue<string>(), out _));
+        if (isKoboRequest)
+        {
+            return await ProxyRequestIfEnabled(KoboReadingServicesClient, array);
+        }
+
+        var bookIds = array.Select(book => book["id"]?.GetValue<string>())
+            .Distinct()
+            .WhereNotNull()
+            .Select(int.Parse)
+            .ToList();
+
+        // It seems that this request is only made when opening a book (I.e. bookIds.Count == 1). For this reason we won't bother
+        // With the ETag nonsense
+        Response.Headers.ETag = "Kavita: I will ignore this";
+
+        var annotations = await koboSyncService.GetKoboAnnotationsAsync(UserId, bookIds, ct);
+
+        return Ok(annotations);
+    }
+
+    [HttpPatch("api/v3/content/{bookId}/annotations")]
+    public async Task<ActionResult> UpdateAnnotations(string bookId)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        if (!int.TryParse(bookId, out var kavitaId))
+        {
+            return await ProxyRequestIfEnabled(KoboReadingServicesClient);
+        }
+
+        var koboAnnotations = await JsonSerializer.DeserializeAsync<KoboPatchAnnotationsDto>(Request.Body, options: JsonSerializerOptions , cancellationToken: ct);
+        if (koboAnnotations is null)
+        {
+            return BadRequest();
+        }
+
+        await koboSyncService.UpdateKoboAnnotationsAsync(UserId, kavitaId, koboAnnotations.UpdatedAnnotations, ct);
+
+        return Accepted();
+    }
+
+    #endregion
+
     [Route("{**catchAll}")]
     public Task<ActionResult> ProxyFallback()
     {
@@ -454,18 +530,24 @@ public class KoboController(
 
     private static bool IsKoboHeader(string header) => header.StartsWith("x-kobo-", StringComparison.OrdinalIgnoreCase);
 
-    private async Task<ActionResult> ProxyRequestIfEnabled()
+    /// <summary>
+    /// Defaults to <see cref="KoboHttpClient"/>
+    /// </summary>
+    /// <param name="httpClient"></param>
+    /// <param name="body"></param>
+    /// <returns></returns>
+    private async Task<ActionResult> ProxyRequestIfEnabled(HttpClient? httpClient = null, object? body = null)
     {
         if ((await KoboSyncSettings).ForwardToKoboStore)
         {
-            await ProxyRequest(false, HttpContext.RequestAborted);
+            await ProxyRequest(httpClient ?? KoboHttpClient, false, HttpContext.RequestAborted, body: body);
             return new EmptyResult();
         }
 
         return NotFound();
     }
 
-    private async Task<(JsonNode?, bool)> ProxyRequest(bool includeSyncToken, CancellationToken ct, bool copyResponse = true)
+    private async Task<(JsonNode?, bool)> ProxyRequest(HttpClient httpClient, bool includeSyncToken, CancellationToken ct, bool copyResponse = true, object? body = null)
     {
         var targetUrl = GetKoboUrl();
 
@@ -473,7 +555,7 @@ public class KoboController(
 
         using var upstreamRequest = new HttpRequestMessage(new HttpMethod(Request.Method), targetUrl);
 
-        upstreamRequest.CopyRequest(Request, header => IncludeHeaders.Contains(header) || IsKoboHeader(header));
+        upstreamRequest.CopyRequest(Request, header => IncludeHeaders.Contains(header) || IsKoboHeader(header), body);
 
         var syncToken = KoboSyncToken;
         if (includeSyncToken && !string.IsNullOrEmpty(syncToken.KoboStoreSyncToken))
@@ -485,9 +567,14 @@ public class KoboController(
             upstreamRequest.Headers.Remove(KoboHeaders.KoboSyncToken);
         }
 
-        using var upstreamResponse = await KoboHttpClient.SendAsync(upstreamRequest, HttpCompletionOption.ResponseHeadersRead, ct);
+        using var upstreamResponse = await httpClient.SendAsync(upstreamRequest, HttpCompletionOption.ResponseHeadersRead, ct);
         if (!upstreamResponse.IsSuccessStatusCode || copyResponse)
         {
+            if (!upstreamResponse.IsSuccessStatusCode)
+            {
+                logger.LogWarning("Failed to proxy request to {Url}: {StatusCode} {ReasonPhrase}", targetUrl, upstreamResponse.StatusCode, upstreamResponse.ReasonPhrase);
+            }
+
             await Response.CopyResponse(upstreamResponse, IsKoboHeader, ct);
             return (null, true);
         }

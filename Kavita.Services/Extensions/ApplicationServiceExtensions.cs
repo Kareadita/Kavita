@@ -121,6 +121,16 @@ public static class ApplicationServiceExtensions
             AutomaticDecompression = DecompressionMethods.None,
             UseCookies = false
         });
+        services.AddHttpClient("KoboReadingServices", builder =>
+        {
+            builder.BaseAddress = new Uri("https://readingservices.kobo.com");
+            builder.Timeout = TimeSpan.FromMinutes(1);
+        }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+        {
+            AllowAutoRedirect = false,
+            AutomaticDecompression = DecompressionMethods.None,
+            UseCookies = false
+        });
 
         services.AddScoped<IProcessRunner, ProcessRunner>();
         services.AddScoped<IFileCacheService, FileCacheService>();
