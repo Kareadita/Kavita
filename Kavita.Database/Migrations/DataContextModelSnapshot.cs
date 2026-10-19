@@ -732,6 +732,15 @@ namespace Kavita.Database.Migrations
                     b.Property<int>("BooksSyncedUntilIndex")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("ProgressSyncTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProgressSyncedUntilId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProgressSyncedUntilIndex")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 

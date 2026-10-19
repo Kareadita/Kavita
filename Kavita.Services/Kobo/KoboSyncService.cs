@@ -29,7 +29,6 @@ internal sealed record KoboChapterSyncData
 {
     public required Chapter Chapter { get; init; }
     public AppUserProgress? ReadingProgress { get; init; }
-    public DateTime LastModified { get; init; }
 }
 
 internal sealed record SyncAccumulationResult(IEnumerable<KoboSyncItem> Results, bool Exhausted);
@@ -55,13 +54,18 @@ internal class KoboSyncService(
         var ageRestriction = await unitOfWork.DataContext.AppUser.GetUserAgeRestriction(userId, cancellationToken);
 
         var (bookChanges, booksExhausted) = await AccumulateBookChanges(userId, syncPreferences, syncPoint, ageRestriction, cancellationToken);
+        var (progressChanges, progressExhausted) = await AccumulateProgressChanges(userId, syncPreferences, syncPoint, ageRestriction, cancellationToken);
 
         syncResults.AddRange(bookChanges);
+        syncResults.AddRange(progressChanges);
+
+        var localChangesExhausted = booksExhausted && progressExhausted;
 
         // All exhausted = sync done
-        if (booksExhausted)
+        if (localChangesExhausted)
         {
             syncPoint.BookSyncTime = DateTime.Now;
+            syncPoint.ProgressSyncTime = DateTime.Now;
         }
 
         if (unitOfWork.HasChanges())
@@ -69,7 +73,7 @@ internal class KoboSyncService(
             await unitOfWork.CommitAsync(cancellationToken);
         }
 
-        return (syncResults, booksExhausted);
+        return (syncResults, localChangesExhausted);
     }
 
     private async Task<SyncAccumulationResult> AccumulateBookChanges(
@@ -96,15 +100,14 @@ internal class KoboSyncService(
 
         if (booksToSync.Count == 0)
         {
-            logger.LogInformation("No books changes since {BooksSyncTime}", syncPoint.BookSyncTime);
+            logger.LogDebug("No books changes since {BooksSyncTime}", syncPoint.BookSyncTime);
             return new SyncAccumulationResult([], true);
         }
 
         syncPoint.BooksSyncedUntilId = booksToSync[^1].Chapter.Id;
         syncPoint.BooksSyncedUntilIndex += booksToSync.Count;
 
-        logger.LogDebug("Adding {Count} books changes. To {BookId}@{BookIndex}",
-            booksToSync.Count, syncPoint.BooksSyncedUntilId, syncPoint.BooksSyncedUntilIndex);
+        logger.LogDebug("Adding {Count} books changes.", booksToSync.Count);
 
         var metadata = await BuildBookMetadata(userId, booksToSync.Select(s => s.Chapter.Id), cancellationToken);
 
@@ -127,12 +130,7 @@ internal class KoboSyncService(
 
         IOrderedQueryable<KoboChapterSyncData> BookSyncQueryable(DateTime after)
         {
-            return unitOfWork.DataContext
-                .Chapter
-                .RestrictByLibrary(unitOfWork.DataContext.Library.GetUserLibraries(userId))
-                .RestrictAgainstAgeRestriction(ageRestriction)
-                .FilterByKoboSyncSettings(syncPreferences)
-                .Includes(ChapterIncludes.Files)
+            return KoboEligibleChapters(userId, ageRestriction, syncPreferences)
                 .LeftJoin(unitOfWork.DataContext.AppUserProgresses.Where(p => p.AppUserId == userId),
                     c => c.Id,
                     p => p.ChapterId,
@@ -140,12 +138,75 @@ internal class KoboSyncService(
                     {
                         Chapter = c,
                         ReadingProgress = p,
-                        LastModified = p != null && p.LastModified > c.LastModified ?
-                            p.LastModified : c.LastModified,
                     })
-                .Where(sync => sync.LastModified > after)
-                .OrderBy(sync => sync.LastModified);
+                .Where(sync => sync.Chapter.LastModified > after)
+                .OrderBy(sync => sync.Chapter.LastModified);
         }
+    }
+
+    private async Task<SyncAccumulationResult> AccumulateProgressChanges(int userId,
+        AppUserKoboSyncPreferences syncPreferences,
+        KoboSyncPoint syncPoint,
+        AgeRestriction ageRestriction,
+        CancellationToken cancellationToken)
+    {
+        var progressAtIndex = await ProgressSyncQueryable(syncPoint.ProgressSyncTime)
+            .Skip(syncPoint.BooksSyncedUntilIndex - 1)
+            .Take(1)
+            .Select(p => p.ReadingProgress!.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var useIndex = progressAtIndex == syncPoint.BooksSyncedUntilId;
+
+        var progressToSync = await ProgressSyncQueryable(syncPoint.ProgressSyncTime)
+            .SkipIf(useIndex, syncPoint.BooksSyncedUntilIndex)
+            .Take(syncPreferences.SyncItemLimit)
+            .ToListAsync(cancellationToken);
+
+        if (progressToSync.Count == 0)
+        {
+            logger.LogDebug("No changes since {ProgressSyncTime}", syncPoint.ProgressSyncTime);
+            return new SyncAccumulationResult([], true);
+        }
+
+        syncPoint.ProgressSyncedUntilId = progressToSync[^1].Chapter.Id;
+        syncPoint.ProgressSyncedUntilId += progressToSync.Count;
+
+        logger.LogDebug("Adding {Count} progress update changes", progressToSync.Count);
+
+        List<KoboSyncItem> changes = [];
+        foreach (var sync in progressToSync)
+        {
+         changes.Add(new KoboSyncItem { ChangedReadingState = new KoboWrappedReadingStateDto {
+             ReadingState = await BuildKoboReadingStateDto(sync.Chapter,  sync.ReadingProgress),
+         }});
+        }
+
+        return new SyncAccumulationResult(changes, progressToSync.Count < syncPreferences.SyncItemLimit);
+
+        IOrderedQueryable<KoboChapterSyncData> ProgressSyncQueryable(DateTime after)
+        {
+            return KoboEligibleChapters(userId, ageRestriction, syncPreferences)
+                .Join(unitOfWork.DataContext.AppUserProgresses.Where(p => p.AppUserId == userId),
+                    c => c.Id,
+                    p => p.ChapterId,
+                    (c, p) => new KoboChapterSyncData
+                    {
+                        Chapter = c,
+                        ReadingProgress = p,
+                    })
+                .Where(sync => sync.ReadingProgress!.LastModified > after)
+                .OrderBy(sync => sync.ReadingProgress!.LastModified);
+        }
+    }
+
+    private IQueryable<Chapter> KoboEligibleChapters(int userId, AgeRestriction ageRestriction, AppUserKoboSyncPreferences syncPreferences)
+    {
+        return unitOfWork.DataContext.Chapter
+            .RestrictByLibrary(unitOfWork.DataContext.Library.GetUserLibraries(userId))
+            .RestrictAgainstAgeRestriction(ageRestriction)
+            .FilterByKoboSyncSettings(syncPreferences)
+            .Includes(ChapterIncludes.Files);
     }
 
     #endregion
@@ -314,8 +375,18 @@ internal class KoboSyncService(
         progress.KoboSpan = readingState.CurrentBookmark.Location?.Value;
     }
 
+    /// <summary>
+    /// Prevent duplicate book opens during syncing
+    /// </summary>
+    private readonly Dictionary<int, KoboReadingStateDto> _cachedReadingStateDtos = [];
+
     private async Task<KoboReadingStateDto> BuildKoboReadingStateDto(Chapter chapter, AppUserProgress? progress)
     {
+        if (_cachedReadingStateDtos.TryGetValue(chapter.Id, out var readingStateDto))
+        {
+            return readingStateDto;
+        }
+
         if (progress is null)
         {
             var created = chapter.Created;
@@ -352,7 +423,7 @@ internal class KoboSyncService(
             readStatus = KoboReadStatus.Reading;
         }
 
-        return new KoboReadingStateDto
+        var state = new KoboReadingStateDto
         {
             EntitlementId = chapter.Id.ToString(),
             Created = progress.Created,
@@ -372,6 +443,9 @@ internal class KoboSyncService(
                 Status = readStatus,
             }
         };
+
+        _cachedReadingStateDtos[chapter.Id] = state;
+        return state;
     }
 
     private async Task<KoboLocationDto> GetKoboPosition(AppUserProgress? progress, Chapter chapter)
@@ -381,10 +455,12 @@ internal class KoboSyncService(
             return new KoboLocationDto();
         }
 
+        var source = await bookService.GetFileForPage(chapter.Files.First().FilePath, progress.PagesRead);
+
         return new KoboLocationDto
         {
             Value = string.IsNullOrEmpty(progress.KoboSpan) ? string.Empty : progress.KoboSpan,
-            Source = await bookService.GetFileForPage(chapter.Files.First().FilePath, progress.PagesRead)
+            Source = source,
         };
     }
 
