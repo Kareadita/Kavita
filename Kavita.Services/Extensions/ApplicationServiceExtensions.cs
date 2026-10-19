@@ -73,9 +73,11 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IProcessSeries, ProcessSeries>();
         services.AddScoped<IMetadataService, MetadataService>();
         services.AddScoped<IWordCountAnalyzerService, WordCountAnalyzerService>();
-        services.AddScoped<INativeFileWatcher, NativeFileWatcher>();
+        services.AddScoped<IFolderWatchService, FolderWatchService>();
         services.AddSingleton<IMountDetectorService, MountDetectorService>();
         // IFileSystem is scoped; a singleton must not hold a scoped instance, and FileSystem keeps no state
+        services.AddSingleton<INativeFileWatcherService>(sp =>
+            new NativeFileWatcherService(new FileSystem(), sp.GetRequiredService<ILogger<NativeFileWatcherService>>()));
         services.AddSingleton<IFolderPollerService>(sp =>
             new FolderPollerService(new FileSystem(), sp.GetRequiredService<ILogger<FolderPollerService>>()));
         services.AddScoped<ITachiyomiService, TachiyomiService>();

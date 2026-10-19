@@ -50,6 +50,23 @@ public class MountDetectorServiceTests
         Assert.Equal("/temp-test", mount!.Point);
     }
 
+    /// <summary>
+    /// systemd automount lists its autofs placeholder first and the real mount on the same point after it (Morsok's WSL, 2026-10-19)
+    /// </summary>
+    [Fact]
+    public void StackedOnSameMountPoint_LastWins()
+    {
+        const string automount = """
+            systemd-1 /mnt/Media autofs rw,relatime,fd=43,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=210 0 0
+            //192.168.1.166/Media /mnt/Media cifs rw,relatime,vers=3.0,cache=strict,actimeo=1 0 0
+            """;
+
+        var mount = MountDetectorService.FindMount(automount, "/mnt/Media/Comics");
+
+        Assert.Equal("cifs", mount!.Type);
+        Assert.True(mount.IsNetwork);
+    }
+
     [Fact]
     public void FolderOutsideEveryMount_FallsToRoot()
     {

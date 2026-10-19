@@ -29,7 +29,7 @@ public class SettingsServiceTests
 
         _mockUnitOfWork = Substitute.For<IUnitOfWork>();
         _settingsService = new SettingsService(_mockUnitOfWork, ds,
-            Substitute.For<INativeFileWatcher>(), Substitute.For<ITaskScheduler>(),
+            Substitute.For<IFolderWatchService>(), Substitute.For<ITaskScheduler>(),
             Substitute.For<ILogger<SettingsService>>(), Substitute.For<IOidcService>(),
             Substitute.For<ILoggingService>());
     }

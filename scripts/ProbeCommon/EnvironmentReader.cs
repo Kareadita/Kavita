@@ -66,7 +66,8 @@ public static class EnvironmentReader
             var inside = resolved == mountPoint
                          || mountPoint == "/"
                          || resolved.StartsWith(mountPoint.TrimEnd('/') + "/", StringComparison.Ordinal);
-            if (!inside || mountPoint.Length <= bestLength) continue;
+            // A later mount on the same point is stacked over the earlier one, e.g. cifs over systemd automount's autofs
+            if (!inside || mountPoint.Length < bestLength) continue;
 
             bestLength = mountPoint.Length;
             info.MountPoint = mountPoint;

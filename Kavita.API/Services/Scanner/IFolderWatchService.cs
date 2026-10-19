@@ -2,20 +2,18 @@ using System.Threading.Tasks;
 
 namespace Kavita.API.Services.Scanner;
 
-public interface INativeFileWatcher
+public interface IFolderWatchService
 {
     /// <summary>
-    /// Start watching all library folders
+    /// Start watching or polling all library folders
     /// </summary>
-    /// <returns></returns>
     Task StartWatching();
     /// <summary>
-    /// Stop watching all folders
+    /// Stop watching and polling all folders
     /// </summary>
     void StopWatching();
     /// <summary>
     /// Essentially stops then starts watching. Useful if there is a change in folders or libraries
     /// </summary>
-    /// <returns></returns>
     Task RestartWatching();
 }

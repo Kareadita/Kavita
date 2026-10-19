@@ -1,7 +1,7 @@
 namespace WatchProbe;
 
 /// <summary>
-/// Set up like Kavita's NativeFileWatcher.TryStartWatcher. Renamed is extra: Kavita does not subscribe to it
+/// Set up like Kavita's NativeFileWatcherService.TryStartWatcher
 /// </summary>
 public sealed class FileSystemWatcherSource(EventLog log) : IDisposable
 {

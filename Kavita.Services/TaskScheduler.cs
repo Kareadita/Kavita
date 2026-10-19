@@ -417,7 +417,7 @@ public class TaskScheduler : ITaskScheduler
         var target = ResolveScanFolder(changedPath, !isDirectory, libraries);
         if (target == null || target.Folder == target.Root)
         {
-            _logger.LogInformation("[NativeFileWatcher] Change from {FilePath} could not find root level folder, ignoring change", changedPath);
+            _logger.LogInformation("[FolderWatchService] Change from {FilePath} could not find root level folder, ignoring change", changedPath);
             return;
         }
 

@@ -195,7 +195,7 @@ public class FolderPollerService(IFileSystem fileSystem, ILogger<FolderPollerSer
         foreach (var folder in result.Handed)
         {
             logger.LogDebug("[FolderPollerService] {Folder} changed", folder);
-            NativeFileWatcher.EnqueueChange(folder, true);
+            FolderWatchService.EnqueueChange(folder, true);
         }
     }
 

@@ -43,7 +43,8 @@ public partial class MountDetectorService : IMountDetectorService
 
             var point = Unescape(parts[1]);
             var inside = path == point || point == "/" || path.StartsWith(point.TrimEnd('/') + "/", StringComparison.Ordinal);
-            if (!inside || (best != null && point.Length <= best.Point.Length)) continue;
+            // A later mount on the same point is stacked over the earlier one, e.g. cifs over systemd automount's autofs
+            if (!inside || (best != null && point.Length < best.Point.Length)) continue;
 
             best = new MountInfo(point, Unescape(parts[0]), parts[2]);
         }

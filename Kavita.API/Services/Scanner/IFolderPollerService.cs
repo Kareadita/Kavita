@@ -3,6 +3,7 @@ using Kavita.Models.Scanner;
 
 namespace Kavita.API.Services.Scanner;
 
+/// <remarks>Only <see cref="IFolderWatchService"/> drives this</remarks>
 public interface IFolderPollerService
 {
     /// <summary>
