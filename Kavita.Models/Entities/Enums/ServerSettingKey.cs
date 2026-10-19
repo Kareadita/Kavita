@@ -204,4 +204,9 @@ public enum ServerSettingKey
     /// </summary>
     [Description("KepubifyPath")]
     KepubifyPath = 44,
+    /// <summary>
+    /// Is KoboSync enabled on this server
+    /// </summary>
+    [Description("EnableKobo")]
+    EnableKobo = 45,
 }

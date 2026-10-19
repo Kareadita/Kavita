@@ -201,6 +201,7 @@ public static class Seed
                 new() {Key = ServerSettingKey.StatsApiHits, Value = "0"},
                 // Will be resolved later on
                 new() {Key = ServerSettingKey.KepubifyPath, Value = string.Empty},
+                new() {Key = ServerSettingKey.EnableKobo, Value = "true"},
             }.ToArray()
         ];
 

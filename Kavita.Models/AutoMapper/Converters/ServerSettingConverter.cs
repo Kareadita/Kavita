@@ -144,6 +144,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.KepubifyPath:
                     destination.KepubifyPath = row.Value;
                     break;
+                case ServerSettingKey.EnableKobo:
+                    destination.EnableKobo = bool.Parse(row.Value);
+                    break;
                 case ServerSettingKey.LicenseKey:
                 default:
                     break;

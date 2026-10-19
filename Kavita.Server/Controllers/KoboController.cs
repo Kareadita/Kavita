@@ -32,6 +32,7 @@ namespace Kavita.Server.Controllers;
 [KoboJson]
 [Route("[controller]/{apiKey}")]
 [ApiExplorerSettings(IgnoreApi = true)]
+[ServerSettingEnabled(ServerSettingKey.EnableKobo, "kobo-sync-disabled")]
 public class KoboController(
     ILogger<KoboController> logger,
     IUnitOfWork unitOfWork,

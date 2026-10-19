@@ -107,6 +107,10 @@ public sealed record ServerSettingDto
     /// Path to kepubify
     /// </summary>
     public string KepubifyPath { get; set; }
+    /// <summary>
+    /// Is KoboSync enabled on this server
+    /// </summary>
+    public bool EnableKobo { get; set; }
 
     /// <summary>
     /// The Date Kavita was first installed

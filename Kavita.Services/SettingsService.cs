@@ -477,6 +477,13 @@ public class SettingsService(
 
                 kepubifyUpdated = true;
             }
+
+            if (setting.Key == ServerSettingKey.EnableKobo &&
+                updateSettingsDto.EnableKobo + string.Empty != setting.Value)
+            {
+                setting.Value = updateSettingsDto.EnableKobo + string.Empty;
+                unitOfWork.SettingsRepository.Update(setting);
+            }
         }
 
         if (!unitOfWork.HasChanges()) return updateSettingsDto;
