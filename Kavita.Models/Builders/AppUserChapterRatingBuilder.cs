@@ -37,4 +37,10 @@ public class ChapterRatingBuilder : API.Helpers.Builders.IEntityBuilder<AppUserC
         _rating.Review = body;
         return this;
     }
+
+    public ChapterRatingBuilder WithUserId(int userId)
+    {
+        _rating.AppUserId = userId;
+        return this;
+    }
 }

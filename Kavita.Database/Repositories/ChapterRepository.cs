@@ -12,6 +12,7 @@ using Kavita.Database.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
+using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.SeriesDetail;
@@ -423,6 +424,62 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .Where(c => c.Volume.SeriesId == seriesId && chapterIds.Contains(c.Id))
             .Select(chp => chp.Id)
             .ToListAsync(ct);
+    }
+
+    public Task<KoboBookDetailsDto?> GetKoboBookDetailsAsync(int chapterId, CancellationToken ct = default)
+    {
+        return context.Chapter
+            .Where(c => c.Id == chapterId)
+            .ProjectTo<KoboBookDetailsDto>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<KoboRecommendationResponseDto> GetKoboRecommendationAsync(int userId, int chapterId, CancellationToken ct = default)
+    {
+        const int maxRecommendationCount = 25;
+
+        var seriesId = await GetSeriesIdForChapter(chapterId, ct);
+        var syncPreferences = await context.AppUserPreferences.Where(p => p.AppUserId == userId)
+            .Select(p => p.KoboSyncPreferences)
+            .FirstAsync(ct);
+        var ageRestriction = await context.AppUser.GetUserAgeRestriction(userId, ct);
+
+        var chapterIds = await context.ExternalRecommendation
+            .Where(r => r.ExternalSeriesMetadatas.Any(sm => sm.SeriesId == seriesId))
+            .Where(r => r.SeriesId != null)
+            .Select(r => r.SeriesId)
+            .Distinct()
+            .Select(s => context.Chapter
+                .Where(c => c.Volume.SeriesId == s)
+                .OrderBy(c => c.Volume.MinNumber == ParserConstants.LooseLeafVolumeNumber ||
+                              c.Volume.MinNumber == ParserConstants.SpecialVolumeNumber ? 1 : 0)
+                .ThenBy(c => c.Volume.MinNumber == ParserConstants.SpecialVolumeNumber ? 1 : 0)
+                .ThenBy(c => c.IsSpecial ? 1 : 0)
+                .ThenBy(c => c.Volume.MinNumber)
+                .ThenBy(c => c.SortOrder)
+                .First())
+            .Take(maxRecommendationCount)
+            .RestrictByLibrary(context.Library.GetUserLibraries(userId))
+            .RestrictAgainstAgeRestriction(ageRestriction)
+            .FilterByKoboSyncSettings(syncPreferences)
+            .Select(c => c.Id)
+            .ToListAsync(ct);
+
+        var chapters = await context.Chapter
+            .Where(c => chapterIds.Contains(c.Id))
+            .ProjectTo<KoboBookRecommendationDto>(mapper.ConfigurationProvider)
+            .ToListAsync(ct);
+
+        return new KoboRecommendationResponseDto
+        {
+            CurrentPageIndex = 0,
+            ItemCount = chapters.Count,
+            ItemsPerPage = maxRecommendationCount,
+            TotalItemCount = chapters.Count,
+            TotalPageCount = 1,
+            VersionCode = 2,
+            Items = [.. chapters.Select(r => new KoboBookWrapperDto<KoboBookRecommendationDto> { Book = r })]
+        };
     }
 
     public async Task<IList<Chapter>> GetChaptersByExternalIdsAsync(IList<int> kavitaIds, IList<string> comicVineIds,

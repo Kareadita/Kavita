@@ -145,6 +145,7 @@ public static class Seed
     public static async Task SeedSettings(IDataContext context, IDirectoryService directoryService)
     {
         await context.Database.EnsureCreatedAsync();
+
         Defaults.DefaultSettings = [
             ..new List<ServerSetting>()
             {
@@ -198,6 +199,8 @@ public static class Seed
                 new() {Key = ServerSettingKey.FirstInstallVersion, Value = BuildInfo.Version.ToString()},
                 new() {Key = ServerSettingKey.FirstInstallDate, Value = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)},
                 new() {Key = ServerSettingKey.StatsApiHits, Value = "0"},
+                // Will be resolved later on
+                new() {Key = ServerSettingKey.KepubifyPath, Value = string.Empty},
             }.ToArray()
         ];
 

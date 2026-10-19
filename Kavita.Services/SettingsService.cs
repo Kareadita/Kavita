@@ -282,6 +282,7 @@ public class SettingsService(
         var currentSettings = await unitOfWork.SettingsRepository.GetSettingsAsync(ct);
         var updateBookmarks = false;
         var originalBookmarkDirectory = directoryService.BookmarkDirectory;
+        var kepubifyUpdated = false;
 
         var bookmarkDirectory = updateSettingsDto.BookmarksDirectory;
         if (!updateSettingsDto.BookmarksDirectory.EndsWith("bookmarks") &&
@@ -467,6 +468,15 @@ public class SettingsService(
                 setting.Value = updateSettingsDto.EnableFolderWatching + string.Empty;
                 unitOfWork.SettingsRepository.Update(setting);
             }
+
+            if (setting.Key == ServerSettingKey.KepubifyPath &&
+                updateSettingsDto.KepubifyPath != setting.Value)
+            {
+                setting.Value = updateSettingsDto.KepubifyPath;
+                unitOfWork.SettingsRepository.Update(setting);
+
+                kepubifyUpdated = true;
+            }
         }
 
         if (!unitOfWork.HasChanges()) return updateSettingsDto;
@@ -481,17 +491,22 @@ public class SettingsService(
             }
             else
             {
-                await taskScheduler.ScheduleStatsTasks();
+                await taskScheduler.ScheduleStatsTasks(ct);
             }
 
             if (updateBookmarks)
             {
-                UpdateBookmarkDirectory(originalBookmarkDirectory, bookmarkDirectory);
+                UpdateBookmarkDirectory(originalBookmarkDirectory ?? string.Empty, bookmarkDirectory);
+            }
+
+            if (kepubifyUpdated)
+            {
+                BackgroundJob.Enqueue<IKepubifyConverter>(kc => kc.CheckKepubifySupport(updateSettingsDto.KepubifyPath, CancellationToken.None));
             }
 
             if (updateTask)
             {
-                BackgroundJob.Enqueue(() => taskScheduler.ScheduleTasks());
+                BackgroundJob.Enqueue(() => taskScheduler.ScheduleTasks(CancellationToken.None));
             }
 
             if (updatedOidcSettings)

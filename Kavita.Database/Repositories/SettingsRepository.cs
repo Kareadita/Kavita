@@ -32,6 +32,13 @@ public class SettingsRepository(DataContext context, IMapper mapper) : ISettings
         context.MetadataFieldMapping.RemoveRange(fieldMappings);
     }
 
+    public Task UpdateSettingAsync(ServerSettingKey key, string value, CancellationToken ct = default)
+    {
+        return context.ServerSetting
+            .Where(s => s.Key == key)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(s => s.Value, value), ct);
+    }
+
 
     public async Task<MetadataSettings> GetMetadataSettings(CancellationToken ct = default)
     {

@@ -141,6 +141,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.OidcConfiguration:
                     destination.OidcConfig = JsonSerializer.Deserialize<OidcConfigDto>(row.Value)!;
                     break;
+                case ServerSettingKey.KepubifyPath:
+                    destination.KepubifyPath = row.Value;
+                    break;
                 case ServerSettingKey.LicenseKey:
                 default:
                     break;

@@ -1,0 +1,553 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Kavita.API.Database;
+using Kavita.API.Services;
+using Kavita.Models.Builders;
+using Kavita.Models.DTOs.Kobo;
+using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Kobo;
+using Kavita.Models.Entities.User;
+using Kavita.Server.Attributes;
+using Kavita.Server.Extensions;
+using Kavita.Server.Middleware;
+using Kavita.Services.Extensions;
+using Kavita.Services.Helpers.Kobo;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
+
+namespace Kavita.Server.Controllers;
+
+[KoboJson]
+[Route("[controller]/{apiKey}")]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class KoboController(
+    ILogger<KoboController> logger,
+    IUnitOfWork unitOfWork,
+    IKoboSyncService koboSyncService,
+    IHttpClientFactory httpClientFactory,
+    IDirectoryService directoryService,
+    IDownloadService downloadService,
+    IMapper mapper): BaseApiController
+{
+
+    private const string KoboImageHost = "https://cdn.kobo.com/book-images/";
+
+    private HttpClient KoboHttpClient => httpClientFactory.CreateClient("Kobo");
+
+    #region Sync & State
+
+    [HttpGet("v1/initialization")]
+    public async Task<ActionResult> Initialization(string apiKey)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        var json = await ProxyRequest(false, ct, false);
+        if (json is null)
+        {
+            return NotFound();
+        }
+
+        var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        var instanceUrl = HttpContext.Request.GetInstanceUrl(serverSettings);
+        var koboBase = $"{instanceUrl}kobo/{apiKey}";
+
+        var resources = json["Resources"];
+        if (resources is not null)
+        {
+            resources["image_host"] = instanceUrl.TrimEnd('/');
+            resources["image_url_template"] = $"{koboBase}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/false/image.jpg";
+            resources["image_url_quality_template"] = $"{koboBase}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/{{Quality}}/{{IsGreyscale}}/image.jpg";
+        }
+
+        Response.Headers[KoboHeaders.KoboApiToken] = "e30=";
+
+        return Ok(json);
+    }
+
+    [HttpGet("v1/library/sync")]
+    public async Task<ActionResult> SyncLibrary()
+    {
+        var ct = HttpContext.RequestAborted;
+
+        var syncToken = KoboSyncToken;
+        var syncSettings = await KoboSyncSettings;
+
+        var syncPoint = await unitOfWork.KoboSyncPointRepository.GetSyncPoint(UserId, syncToken.SyncPointId, ct);
+
+        var (kavitaChanges, completedSync) = await koboSyncService.GetChangesSinceAsync(UserId, syncSettings, syncPoint, ct);
+
+        if (!completedSync)
+        {
+            Response.Headers[KoboHeaders.KoboSync] = "continue";
+        }
+        else if (syncSettings.ForwardToKoboStore)
+        {
+            // TODO: Load changes from Kobo store
+        }
+
+        syncToken.SyncPointId = syncPoint.Id;
+        Response.Headers[KoboHeaders.KoboSyncToken] = KoboSyncTokenHelper.Encode(syncToken);
+
+        return Ok(kavitaChanges);
+    }
+
+    [HttpGet("v1/library/{bookId}/metadata")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
+    public async Task<ActionResult> GetBookMetadata(string bookId)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        if (int.TryParse(bookId, out var kavitaId))
+        {
+            var metadata = await koboSyncService.BuildBookMetadata(UserId, [kavitaId], ct);
+            if (metadata.Count > 0)
+            {
+                return Ok(metadata.Values);
+            }
+        }
+
+        await ProxyRequest(false, ct);
+        return new EmptyResult();
+    }
+
+    [HttpGet("v1/library/{bookId}/state")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
+    public async Task<ActionResult> GetBookState(string bookId)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        if (!int.TryParse(bookId, out var kavitaId))
+        {
+            if ((await KoboSyncSettings).ForwardToKoboStore)
+            {
+                await ProxyRequest(false, ct);
+                return new EmptyResult();
+            }
+
+            return NotFound();
+        }
+
+        var progress = await koboSyncService.GetProgress(UserId, kavitaId, ct);
+        if (progress is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(new List<KoboReadingStateDto> { progress });
+    }
+
+    [HttpPut("v1/library/{bookId}/state")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
+    public async Task<ActionResult> UpdateBookState(string bookId)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        if (!int.TryParse(bookId, out var kavitaId))
+        {
+            if ((await KoboSyncSettings).ForwardToKoboStore)
+            {
+                await ProxyRequest(false, ct);
+                return new EmptyResult();
+            }
+
+            return NotFound();
+        }
+
+        var states = await JsonSerializer.DeserializeAsync<KoboReadingStateUpdateDto>(Request.Body, KoboJsonAttribute.JsonSerializerOptions, ct);
+        if (states is null)
+        {
+            return BadRequest();
+        }
+
+        var update = states.ReadingStates.FirstOrDefault();
+        if (update is null)
+        {
+            return BadRequest();
+        }
+
+        if (update.CurrentBookmark.Location is null || update.CurrentBookmark.ContentSourceProgressPercent is null)
+        {
+            return BadRequest();
+        }
+
+        try
+        {
+            await koboSyncService.SaveProgress(UserId, kavitaId, update, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update progress from Kobo");
+            return Ok(new KoboResultDto
+            {
+                RequestResult = KoboRequestResult.Failure,
+                UpdateResults = [new KoboReadingStateUpdateResultDto(KoboRequestResult.Failure)
+                {
+                    EntitlementId = bookId,
+                }]
+            });
+        }
+
+        return Ok(new KoboResultDto
+        {
+            RequestResult = KoboRequestResult.Success,
+            UpdateResults = [new KoboReadingStateUpdateResultDto(KoboRequestResult.Success, KoboRequestResult.Ignored, KoboRequestResult.Success)
+            {
+                EntitlementId = bookId,
+            }]
+        });
+    }
+
+    [ChapterAccess(chapterIdKey: "bookId")]
+    [HttpGet("v1/library/{bookId:int}/file/epub")]
+    public async Task<ActionResult> GetBookFile(int bookId, [FromQuery] bool convert = true)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(bookId, ct: ct);
+        if (chapter is null)
+        {
+            return NotFound();
+        }
+
+        var downloadFormat = convert ? DownloadFormat.Kepub : DownloadFormat.Epub;
+        var path = await downloadService.DownloadChapter(chapter, downloadFormat, ct);
+
+        return PhysicalFile(path, downloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
+    }
+
+    [HttpGet("v1/books/{thumbnailId}/thumbnail/{width}/{height}/{isGreyScale}/image.jpg")]
+    [HttpGet("v1/books/{thumbnailId}/thumbnail/{width}/{height}/{quality}/{isGreyScale}/image.jpg")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "thumbnailId")]
+    public async Task<ActionResult> GetBookCover(string thumbnailId, string width, string height, string quality, bool isGreyScale = false)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        if (!int.TryParse(thumbnailId, out var kavitaId))
+        {
+            if ((await KoboSyncSettings).ForwardToKoboStore)
+            {
+                var suffix = string.IsNullOrEmpty(quality)
+                    ? $"{thumbnailId}/{width}/{height}/{isGreyScale}/image.jpg"
+                    : $"{thumbnailId}/{width}/{height}/{quality}/{isGreyScale}/image.jpg";
+
+                return Redirect(KoboImageHost + suffix);
+            }
+
+            return NotFound();
+        }
+
+        var coverPath = await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(kavitaId, ct);
+        if (coverPath is null)
+        {
+            return NotFound();
+        }
+
+        if (Path.GetExtension(coverPath) != ".jpg")
+        {
+            //throw new NotImplementedException();
+        }
+
+        var fullPath = Path.Join(directoryService.CoverImageDirectory, coverPath);
+        return PhysicalFile(fullPath);
+    }
+
+    [HttpDelete("v1/library/{bookId}")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
+    public async Task<ActionResult> DeleteBook(string bookId)
+    {
+        if (int.TryParse(bookId, out var _))
+        {
+            // We cannot really process this. As the collection is series
+            return Ok();
+        }
+
+        if ((await KoboSyncSettings).ForwardToKoboStore)
+        {
+            await ProxyRequest(false, HttpContext.RequestAborted);
+            return new EmptyResult();
+        }
+
+        return NotFound();
+    }
+
+    #endregion
+
+    #region Products
+
+    [HttpGet("v1/products/{bookId}/reviews")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
+    public async Task<ActionResult> GetReviews(string bookId)
+    {
+        if (!int.TryParse(bookId, out _))
+        {
+            if ((await KoboSyncSettings).ForwardToKoboStore)
+            {
+                await ProxyRequest(false, HttpContext.RequestAborted);
+                return new EmptyResult();
+            }
+
+            return NotFound();
+        }
+
+        return Ok(new KoboReviewsResponseDto
+        {
+            CurrentPageIndex = 0,
+            Items = [],
+            TotalPageCount = 0,
+            Cursor = string.Empty,
+            ReviewSummary = []
+        });
+    }
+
+    [HttpGet("v1/products/{bookId}/recommendations")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
+    public async Task<ActionResult> GetRecommendations(string bookId)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        if (!int.TryParse(bookId, out var kavitaId))
+        {
+            if ((await KoboSyncSettings).ForwardToKoboStore)
+            {
+                await ProxyRequest(false, HttpContext.RequestAborted);
+                return new EmptyResult();
+            }
+
+            return NotFound();
+        }
+
+        var rec = await unitOfWork.ChapterRepository.GetKoboRecommendationAsync(UserId, kavitaId, ct);
+
+        return Ok(rec);
+    }
+
+    [HttpGet("v1/products/books/{bookId}/")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
+    public async Task<ActionResult> GetBook(string bookId)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        if (!int.TryParse(bookId, out var kavitaId))
+        {
+            if ((await KoboSyncSettings).ForwardToKoboStore)
+            {
+                await ProxyRequest(false, ct);
+                return new EmptyResult();
+            }
+
+            return NotFound();
+        }
+
+        var detail = await unitOfWork.ChapterRepository.GetKoboBookDetailsAsync(kavitaId, ct);
+        if (detail is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(detail);
+    }
+
+    [HttpGet("v1/products/{bookIds}/prices")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
+    public async Task<ActionResult> GetPrices(string bookIds)
+    {
+        var isKoboRequest = bookIds.Split(',').Any(id => !int.TryParse(id, out _));
+        if (isKoboRequest)
+        {
+            if ((await KoboSyncSettings).ForwardToKoboStore)
+            {
+                await ProxyRequest(false, HttpContext.RequestAborted);
+            }
+
+            return new EmptyResult();
+        }
+
+        var prices = bookIds.Split(',').Select(id => new KoboBookPriceInformationDto
+        {
+            Id = id,
+            CrossRevisionId = id,
+        });
+
+        return Ok(new
+        {
+            Items = prices,
+        });
+    }
+
+    [HttpPost("v1/products/{bookId}/reviews")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
+    public async Task<ActionResult> UpdateReview(string bookId)
+    {
+        var ct = HttpContext.RequestAborted;
+        if (!int.TryParse(bookId, out var kavitaId))
+        {
+            if ((await KoboSyncSettings).ForwardToKoboStore)
+            {
+                await ProxyRequest(false, HttpContext.RequestAborted);
+            }
+
+            return new EmptyResult();
+        }
+
+        var seriesId = await unitOfWork.ChapterRepository.GetSeriesIdForChapter(kavitaId, ct);
+        if (seriesId is null)
+        {
+            return NotFound();
+        }
+
+        var reviewDto = await JsonSerializer.DeserializeAsync<KoboSubmitReviewDto>(Request.Body, cancellationToken: ct);
+        if (reviewDto is null)
+        {
+            return NotFound();
+        }
+
+        var rating = new ChapterRatingBuilder(await unitOfWork.UserRepository.GetUserChapterRatingAsync(UserId, kavitaId, ct))
+            .WithBody(reviewDto.Body)
+            .WithRating(reviewDto.Rating)
+            .WithChapterId(kavitaId)
+            .WithSeriesId(seriesId.Value)
+            .WithUserId(UserId)
+            .Build();
+
+        if (rating.Id == 0)
+        {
+            unitOfWork.DataContext.AppUserChapterRating.Add(rating);
+        }
+
+        await unitOfWork.CommitAsync(ct);
+
+        return Ok();
+    }
+
+    #endregion
+
+    #region User
+
+    [HttpGet("v1/user/reviews")]
+    public async Task<ActionResult> GetReviews([FromQuery(Name = "ProductIds")] List<string> productIds)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        var isKoboRequest = productIds.Any(id => !int.TryParse(id, out _));
+        if (isKoboRequest)
+        {
+            if ((await KoboSyncSettings).ForwardToKoboStore)
+            {
+                await ProxyRequest(false, ct);
+            }
+            return new EmptyResult();
+        }
+
+        var kavitaIds = productIds.Select(int.Parse).ToList();
+
+        if (!await unitOfWork.UserRepository.HasAccessToAllChapters(UserId, kavitaIds, ct))
+        {
+            return NotFound();
+        }
+
+        var reviews = await unitOfWork.UserRepository.GetKoboReviewsForChapterAsync(UserId, kavitaIds, ct);
+
+        return Ok(new KoboReviewsResponseDto
+        {
+            CurrentPageIndex = 1,
+            Cursor = string.Empty,
+            Items = reviews,
+            ReviewSummary = reviews.GroupBy(r => r.CrossRevisionId).ToDictionary(g => g.Key,
+                g => new KoboReviewSummaryDto
+                {
+                    AvgRating = g.Average(r => r.Rating),
+                    NumberOfReviews = g.Count(),
+                    OpinionCount = 0,
+                    RatingHistogram = []
+                }),
+            TotalPageCount = 1
+        });
+    }
+
+    #endregion
+
+    [Route("{**catchAll}")]
+    public async Task<ActionResult> ProxyFallback()
+    {
+        if ((await KoboSyncSettings).ForwardToKoboStore)
+        {
+            await ProxyRequest(false, HttpContext.RequestAborted);
+            return new EmptyResult();
+        }
+
+        return NotFound();
+    }
+
+    private KoboSyncToken KoboSyncToken => KoboSyncTokenHelper.Decode(Request.Headers[KoboHeaders.KoboSyncToken]);
+
+    private Task<AppUserKoboSyncPreferences> KoboSyncSettings => unitOfWork.UserRepository.GetKoboSyncPreferences(UserId, HttpContext.RequestAborted);
+
+    #region Proxy
+
+    private static readonly IReadOnlySet<string> IncludeHeaders = new HashSet<string>
+    {
+        HeaderNames.Authorization,
+        HeaderNames.UserAgent,
+        HeaderNames.Accept,
+        HeaderNames.AcceptLanguage,
+        HeaderNames.ContentType,
+    };
+
+    private static bool IsKoboHeader(string header) => header.StartsWith("x-kobo-", StringComparison.OrdinalIgnoreCase);
+
+    private async Task<JsonNode?> ProxyRequest(bool includeSyncToken, CancellationToken ct, bool copyResponse = true)
+    {
+        var targetUrl = GetKoboUrl();
+
+        logger.LogTrace("Going to proxy request to {targetUrl} for {UserId}", targetUrl, UserId);
+
+        using var upstreamRequest = new HttpRequestMessage(new HttpMethod(Request.Method), targetUrl);
+
+        upstreamRequest.CopyRequest(Request, header => IncludeHeaders.Contains(header) || IsKoboHeader(header));
+
+        var syncToken = KoboSyncToken;
+        if (includeSyncToken && !string.IsNullOrEmpty(syncToken.KoboStoreSyncToken))
+        {
+            upstreamRequest.Headers.TryAddWithoutValidation(KoboHeaders.KoboSyncToken, syncToken.KoboStoreSyncToken);
+        }
+        else
+        {
+            upstreamRequest.Headers.Remove(KoboHeaders.KoboSyncToken);
+        }
+
+        using var upstreamResponse = await KoboHttpClient.SendAsync(upstreamRequest, HttpCompletionOption.ResponseHeadersRead, ct);
+        if (!upstreamResponse.IsSuccessStatusCode || copyResponse)
+        {
+            await Response.CopyResponse(upstreamResponse, IsKoboHeader, ct);
+            return null;
+        }
+
+        return await upstreamResponse.Content.ReadFromJsonAsync<JsonNode>(ct);
+    }
+
+    private string GetKoboUrl()
+    {
+        var path = Request.Path.ToString();
+        var queryString = Request.QueryString;
+
+        var apiKey = AuthKeyAuthenticationHandler.ExtractAuthKey(Request);
+        var prefix = $"/kobo/{apiKey}";
+
+        return $"{path[prefix.Length..]}{queryString}";
+    }
+
+    #endregion
+
+}

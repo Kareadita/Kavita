@@ -1,4 +1,9 @@
+using System;
+using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Http;
 
@@ -31,5 +36,51 @@ public static class HttpExtensions
     public static void AddPaginationHeader<T>(this HttpResponse response, PagedList<T> pagedList)
     {
         response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
+    }
+
+    public static void CopyRequest(this HttpRequestMessage message, HttpRequest request, Func<string, bool> copyHeader)
+    {
+        foreach (var header in message.Headers)
+        {
+            if (copyHeader(header.Key))
+            {
+                message.Headers.TryAddWithoutValidation(header.Key, [.. header.Value]);
+            }
+        }
+
+        if (request.ContentLength > 0 || request.Headers.ContainsKey("Transfer-Encoding"))
+        {
+            var content = new StreamContent(request.Body);
+            foreach (var h in request.Headers.Where(h =>
+                         h.Key.StartsWith("Content-", StringComparison.OrdinalIgnoreCase)))
+            {
+                content.Headers.TryAddWithoutValidation(h.Key, [.. h.Value]);
+            }
+
+            message.Content = content;
+        }
+    }
+
+    public static async Task CopyResponse(this HttpResponse response, HttpResponseMessage message, Func<string, bool> copyHeader, CancellationToken cancellationToken)
+    {
+        response.StatusCode = (int)message.StatusCode;
+
+        foreach (var header in message.Headers)
+        {
+            if (copyHeader(header.Key))
+            {
+                response.Headers[header.Key] = header.Value.ToArray();
+            }
+        }
+
+        foreach (var header in message.Content.Headers)
+        {
+            response.Headers[header.Key] = header.Value.ToArray();
+        }
+
+        // Kestrel will do this for us
+        response.Headers.Remove("transfer-encoding");
+
+        await message.Content.CopyToAsync(response.Body, cancellationToken);
     }
 }

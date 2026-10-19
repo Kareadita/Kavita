@@ -8,6 +8,7 @@ using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.KavitaPlus.Account;
+using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.SeriesDetail;
@@ -84,6 +85,7 @@ public interface IUserRepository
     Task<AppUserChapterRating?> GetUserChapterRatingAsync(int userId, int chapterId, CancellationToken ct = default);
     Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId, CancellationToken ct = default);
     Task<IList<UserReviewDto>> GetUserRatingDtosForChapterAsync(int chapterId, int userId, CancellationToken ct = default);
+    Task<List<KoboReviewDto>> GetKoboReviewsForChapterAsync(int userId, IEnumerable<int> chapterIds, CancellationToken ct = default);
     Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId, CancellationToken ct = default);
     Task<List<AppUserChapterRating>> GetChaptersWithRatings(int userId, CancellationToken ct = default);
     Task<IEnumerable<AppUserRating>> GetSeriesWithReviews(int userId, CancellationToken ct = default);

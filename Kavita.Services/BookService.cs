@@ -982,8 +982,7 @@ public partial class BookService(
         return key.Replace("../", string.Empty);
     }
 
-    public async Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book,
-        CancellationToken ct = default)
+    private static async Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book)
     {
         var dict = new Dictionary<string, int>();
         var pageCount = 0;
@@ -999,6 +998,63 @@ public partial class BookService(
         return dict;
     }
 
+    public async Task<int?> GetPageForFile(string filePath, string epubFile)
+    {
+        try
+        {
+            using var book = await EpubReader.OpenBookAsync(filePath, LenientBookReaderOptions);
+            if (book == null) return null;
+
+            var counter = 0;
+            foreach (var contentFileRef in await book.GetReadingOrderAsync())
+            {
+                if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) continue;
+
+                if (contentFileRef.FilePath.Equals(epubFile, StringComparison.InvariantCultureIgnoreCase) ||
+                    contentFileRef.Key.Equals(epubFile, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return counter;
+                }
+
+                counter++;
+            }
+
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<string?> GetFileForPage(string filePath, int page)
+    {
+        try
+        {
+            using var book = await EpubReader.OpenBookAsync(filePath, LenientBookReaderOptions);
+            if (book == null) return null;
+
+            var counter = 0;
+            foreach (var contentFileRef in await book.GetReadingOrderAsync())
+            {
+                if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) continue;
+
+                if (counter == page)
+                {
+                    return contentFileRef.FilePath;
+                }
+
+                counter++;
+            }
+
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public async Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath, CancellationToken ct = default)
     {
         var ret = new Dictionary<int, int>();
@@ -1007,7 +1063,7 @@ public partial class BookService(
             using var book = await EpubReader.OpenBookAsync(bookFilePath, LenientBookReaderOptions);
             if (book == null) return null;
 
-            var mappings = await CreateKeyToPageMappingAsync(book, ct);
+            var mappings = await CreateKeyToPageMappingAsync(book);
 
             var doc = new HtmlDocument {OptionFixNestedTags = true};
 
@@ -1676,7 +1732,7 @@ public partial class BookService(
         using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, LenientBookReaderOptions);
         if (book == null) return [];
 
-        var mappings = await CreateKeyToPageMappingAsync(book, ct);
+        var mappings = await CreateKeyToPageMappingAsync(book);
 
         var navItems = await book.GetNavigationAsync();
         var chaptersList = new List<BookChapterItem>();
@@ -1813,7 +1869,7 @@ public partial class BookService(
             .Key;
 
         using var book = await EpubReader.OpenBookAsync(cachedEpubPath, LenientBookReaderOptions);
-        var mappings = await CreateKeyToPageMappingAsync(book, ct);
+        var mappings = await CreateKeyToPageMappingAsync(book);
         var apiBase = baseUrl + "book/" + chapterId + "/" + string.Format(BookApiUrl, authKey);
 
         var counter = 0;
