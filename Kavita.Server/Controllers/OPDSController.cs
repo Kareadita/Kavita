@@ -24,6 +24,7 @@ using MimeTypes;
 namespace Kavita.Server.Controllers;
 
 [Authorize]
+[ServerSettingEnabled(ServerSettingKey.EnableOpds, "opds-disabled")]
 public class OpdsController(
     IUnitOfWork unitOfWork,
     IDownloadService downloadService,
