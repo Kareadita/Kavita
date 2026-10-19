@@ -54,10 +54,10 @@ public class KoboController(
     {
         var ct = HttpContext.RequestAborted;
 
-        var json = await ProxyRequest(false, ct, false);
+        var (json, hasWrittenResponse) = await ProxyRequest(false, ct, false);
         if (json is null)
         {
-            return NotFound();
+            return hasWrittenResponse ? new EmptyResult() : NotFound();
         }
 
         var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
@@ -451,7 +451,7 @@ public class KoboController(
         return NotFound();
     }
 
-    private async Task<JsonNode?> ProxyRequest(bool includeSyncToken, CancellationToken ct, bool copyResponse = true)
+    private async Task<(JsonNode?, bool)> ProxyRequest(bool includeSyncToken, CancellationToken ct, bool copyResponse = true)
     {
         var targetUrl = GetKoboUrl();
 
@@ -475,10 +475,10 @@ public class KoboController(
         if (!upstreamResponse.IsSuccessStatusCode || copyResponse)
         {
             await Response.CopyResponse(upstreamResponse, IsKoboHeader, ct);
-            return null;
+            return (null, true);
         }
 
-        return await upstreamResponse.Content.ReadFromJsonAsync<JsonNode>(ct);
+        return (await upstreamResponse.Content.ReadFromJsonAsync<JsonNode>(ct), false);
     }
 
     private string GetKoboUrl()
