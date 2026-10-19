@@ -197,6 +197,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<Library>()
             .Property(l => l.DefaultLanguage)
             .HasDefaultValue(string.Empty);
+        builder.Entity<Library>()
+            .Property(l => l.ScanInfo)
+            .HasJsonConversion(new LibraryScanInfo())
+            .HasColumnType("TEXT")
+            .IsRequired()
+            .HasDefaultValue(new LibraryScanInfo());
 
         #endregion
 

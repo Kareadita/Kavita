@@ -273,7 +273,7 @@ public class ScannerService(
 
         logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var scanStarted = DateTime.Now;
-        var (scanElapsedTime, parsedSeries, savedIssues, unreadableFolders) = await ScanFiles(library, folderPaths,
+        var (scanElapsedTime, parsedSeries, savedIssues, unreadableFolders, _) = await ScanFiles(library, folderPaths,
             false, bypassFolderOptimizationChecks, series.Id);
 
         if (unreadableFolders.Count > 0)
@@ -649,7 +649,7 @@ public class ScannerService(
 
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 1: Scan & Parse Files", library.Name);
         var scanStarted = DateTime.Now;
-        var (scanElapsedTime, parsedSeries, savedIssues, unreadableFolders) = await ScanFiles(library, libraryFolderPaths,
+        var (scanElapsedTime, parsedSeries, savedIssues, unreadableFolders, scanRun) = await ScanFiles(library, libraryFolderPaths,
             shouldUseLibraryScan, forceUpdate);
 
         // We need to remove any keys where there is no actual parser info
@@ -657,6 +657,10 @@ public class ScannerService(
         var tally = await ProcessParsedSeries(forceUpdate, parsedSeries, library, scanElapsedTime, scanStarted);
 
         UpdateLastScanned(library);
+        scanRun = scanRun with { AtUtc = DateTime.UtcNow, DurationMs = sw.ElapsedMilliseconds };
+        library.ScanInfo = forceUpdate
+            ? library.ScanInfo with { Forced = scanRun }
+            : library.ScanInfo with { Normal = scanRun };
         unitOfWork.LibraryRepository.Update(library);
 
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 3: Save Library", library.Name);
@@ -935,7 +939,7 @@ public class ScannerService(
     }
 
     /// <param name="seriesId">Loads only this series' known files, for a series scan</param>
-    /// <returns>How long the walk took, the parsed series, and the issues saved</returns>
+    /// <returns>How long the walk took, the parsed series, the issues saved, and the counts and step times for <see cref="Library.ScanInfo"/></returns>
     private async Task<ScanFilesResult> ScanFiles(Library library, IList<string> dirs, bool isLibraryScan, bool forceChecks = false,
         int? seriesId = null)
     {
@@ -984,7 +988,16 @@ public class ScannerService(
             listMs, walkMs, parseMs, scanner.ParsedFileCount, scanner.KeptFileCount, groupMs, scanAndParseMs - listMs - walkMs - parseMs - groupMs,
             backfillMs, issuesMs, nameMatchesMs);
 
-        return new ScanFilesResult(scanElapsedTime, parsedSeries, savedIssues, scanner.UnreadableFolders);
+        var scanRun = new LibraryScanInfo.ScanRun
+        {
+            WalkedFolderCount = scanner.WalkedFolderCount,
+            FilesParsed = scanner.ParsedFileCount,
+            ListMs = listMs,
+            WalkMs = walkMs,
+            ParseMs = parseMs
+        };
+
+        return new ScanFilesResult(scanElapsedTime, parsedSeries, savedIssues, scanner.UnreadableFolders, scanRun);
     }
 
     /// <summary>
@@ -1114,8 +1127,9 @@ public class ScannerService(
                 issues.Count, issues.NewCount, issues.Issues, endsJob);
     }
 
+    /// <param name="ScanRun">Counts and step times; its time and duration are set when the library scan saves</param>
     private sealed record ScanFilesResult(long ElapsedMs, Dictionary<ParsedSeries, IList<ParserInfo>> ParsedSeries, SavedScanIssues SavedIssues,
-        IReadOnlyList<string> UnreadableFolders);
+        IReadOnlyList<string> UnreadableFolders, LibraryScanInfo.ScanRun ScanRun);
 
     private sealed record SavedScanIssues(int NewCount, IList<string> Paths, IReadOnlyDictionary<string, IList<string>> FilesByFolder);
 

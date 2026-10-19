@@ -112,6 +112,11 @@ public partial class ParseScannedFiles
     public int KeptFileCount { get; private set; }
 
     /// <summary>
+    /// Folders below the roots walked by a library scan; a series scan walks none
+    /// </summary>
+    public int WalkedFolderCount => _walkedFolders.Count;
+
+    /// <summary>
     /// The folder was not read, walked, or inside a folder that could not be read this scan, so it may be gone
     /// </summary>
     public bool IsUnaccountedFor(string folder)

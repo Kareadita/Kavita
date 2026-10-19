@@ -794,6 +794,12 @@ namespace Kavita.Database.Migrations
                     b.Property<bool>("RemovePrefixForSortName")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ScanInfo")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{\"Normal\":null,\"Forced\":null}");
+
                     b.Property<string>("SecondaryColor")
                         .HasColumnType("TEXT");
 

@@ -17,6 +17,7 @@ using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Database;
+using Kavita.Models.DTOs.KavitaPlus.License;
 using Kavita.Models.DTOs.Stats;
 using Kavita.Models.DTOs.Stats.V3;
 using Kavita.Models.Entities;
@@ -237,6 +238,64 @@ public class StatsService : IStatsService
                 .Count());
     }
 
+    private async Task<Dictionary<int, int>> CountMultiFileEpubChaptersByLibrary()
+    {
+        var sw = Stopwatch.StartNew();
+        var libraryIds = await _context.MangaFile
+            .Where(f => f.Format == MangaFormat.Epub)
+            .GroupBy(f => new { f.ChapterId, f.Chapter.Volume.Series.LibraryId })
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key.LibraryId)
+            .ToListAsync();
+        _logger.LogDebug("[StatsService] Counted {Count} multi-file epub chapters in {ElapsedMs} ms", libraryIds.Count, sw.ElapsedMilliseconds);
+
+        return libraryIds
+            .GroupBy(id => id)
+            .ToDictionary(g => g.Key, g => g.Count());
+    }
+
+    private async Task SetKavitaPlusState(ServerInfoV3Dto dto)
+    {
+        var licenseKey = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
+        if (string.IsNullOrEmpty(licenseKey))
+        {
+            dto.KavitaPlusState = KavitaPlusState.None;
+            return;
+        }
+
+        LicenseInfoDto? info;
+        try
+        {
+            info = await _licenseService.GetLicenseInfo();
+        }
+        catch (Exception)
+        {
+            info = null;
+        }
+
+        if (info == null)
+        {
+            dto.KavitaPlusState = KavitaPlusState.Unreachable;
+            return;
+        }
+
+        dto.KavitaPlusState = ToStatsKavitaPlusState(info.State);
+        dto.KavitaPlusIsFree = info.PriceAmount == null ? null : info.PriceAmount == 0;
+    }
+
+    internal static KavitaPlusState ToStatsKavitaPlusState(KavitaPlusSubscriptionState state)
+    {
+        return state switch
+        {
+            KavitaPlusSubscriptionState.Active => KavitaPlusState.Active,
+            KavitaPlusSubscriptionState.Cancelling => KavitaPlusState.Cancelling,
+            KavitaPlusSubscriptionState.Paused => KavitaPlusState.Paused,
+            KavitaPlusSubscriptionState.Expired => KavitaPlusState.Expired,
+            KavitaPlusSubscriptionState.Cancelled => KavitaPlusState.Expired,
+            _ => throw new ArgumentOutOfRangeException(nameof(state), state, null)
+        };
+    }
+
     private async Task<ServerInfoV3Dto> GetStatV3Payload()
     {
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -279,6 +338,7 @@ public class StatsService : IStatsService
             dto.ActiveKavitaPlusSubscription = false;
         }
 
+        await SetKavitaPlusState(dto);
 
         // Find a random cbz/zip file and open it for reading
         await OpenRandomFile(dto);
@@ -296,6 +356,18 @@ public class StatsService : IStatsService
             .ToListAsync();
 
         #endregion
+
+        dto.MediaErrors = await _context.MediaError
+            .GroupBy(e => e.Reason)
+            .Select(g => new MediaErrorStatV3
+            {
+                Reason = g.Key,
+                Count = g.Count(),
+                DismissedCount = g.Count(e => e.IsDismissed)
+            })
+            .ToListAsync();
+
+        var multiFileEpubChapters = await CountMultiFileEpubChaptersByLibrary();
 
         #region Libraries
         var allLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.Folders |
@@ -316,6 +388,12 @@ public class StatsService : IStatsService
             libDto.CreateReadingListsFromMetadata = library.ManageReadingLists;
             libDto.EnabledMetadata = library.EnableMetadata;
             libDto.LibraryType = library.Type;
+            libDto.LastScanDurationMs = library.ScanInfo.Normal?.DurationMs;
+            libDto.LastScanFolderCount = library.ScanInfo.Normal?.WalkedFolderCount;
+            libDto.LastScanListMs = library.ScanInfo.Normal?.ListMs;
+            libDto.LastScanWalkMs = library.ScanInfo.Normal?.WalkMs;
+            libDto.LastScanParseMs = library.ScanInfo.Normal?.ParseMs;
+            libDto.MultiFileEpubChapterCount = multiFileEpubChapters.GetValueOrDefault(library.Id);
 
             dto.Libraries.Add(libDto);
         }
@@ -334,6 +412,10 @@ public class StatsService : IStatsService
                                                                          | AppUserIncludes.Collections | AppUserIncludes.Devices
                                                                          | AppUserIncludes.Ratings
                                                                          | AppUserIncludes.SmartFilters | AppUserIncludes.WantToRead, false);
+        var lastReadTimes = await _context.AppUserProgresses
+            .GroupBy(p => p.AppUserId)
+            .Select(g => new { AppUserId = g.Key, LastReadTime = g.Max(p => p.LastModifiedUtc) })
+            .ToDictionaryAsync(x => x.AppUserId, x => x.LastReadTime);
         foreach (var user in allUsers)
         {
             var userDto = new UserStatV3
@@ -353,10 +435,7 @@ public class StatsService : IStatsService
                 ActiveTheme = user.UserPreferences.Theme.Name,
                 CollectionsCreatedCount = user.Collections.Count,
                 ReadingListsCreatedCount = user.ReadingLists.Count,
-                LastReadTime = user.Progresses
-                    .Select(p => p.LastModifiedUtc)
-                    .DefaultIfEmpty()
-                    .Max(),
+                LastReadTime = lastReadTimes.GetValueOrDefault(user.Id),
                 DevicePlatforms = user.Devices.Select(d => d.Platform).ToList(),
                 SeriesBookmarksCreatedCount = user.Bookmarks.Count,
                 SmartFilterCreatedCount = user.SmartFilters.Count,

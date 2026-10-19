@@ -77,6 +77,7 @@ public class Library : IEntityDate, IHasCoverImage
     /// </summary>
     /// <remarks>Time stored in UTC</remarks>
     public DateTime LastScanned { get; set; }
+    public LibraryScanInfo ScanInfo { get; set; } = new();
     public ICollection<FolderPath> Folders { get; set; } = null!;
     public ICollection<AppUser> AppUsers { get; set; } = null!;
     public ICollection<Series> Series { get; set; } = null!;
