@@ -7,21 +7,21 @@ body:
       value: |
         ## Idea Submission for Kavita 💡
 
-        Please fill out the details below, and let's make Kavita even better together!
-        
+        Please fill out the details below, and let's make Kavita even better together! Use your own language, using AI instantly devalues your FR.
+
   - type: textarea
     id: idea-description
     attributes:
       label: Idea Description
       value: |
-        Go into as much detail as possible to explain why your idea should be added to Kavita. Try to present some use cases and examples of how it would help other users. The more detail you have the better. 
-  
+        Go into as much detail as possible to explain why your idea should be added to Kavita. Try to present some use cases and examples of how it would help other users. The more detail you have the better.
+
   - type: dropdown
     id: idea-category
     attributes:
       label: Idea Category
       options:
-        - API 
+        - API
         - Feature Enhancement
         - User Experience
         - Performance Improvement
@@ -29,20 +29,20 @@ body:
       description: "What area would your idea help with?"
     validations:
       required: true
-      
+
   - type: input
     id: duration-of-use
     attributes:
       label: Duration of Using Kavita
       description: "How long have you been using Kavita?"
-      
+
   - type: checkboxes
     attributes:
       label: Before submitting
       options:
         - label: "I've already searched for existing ideas before posting."
           required: true
-          
+
   - type: markdown
     attributes:
       value: |
