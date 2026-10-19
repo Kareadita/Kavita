@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Kavita.Models.DTOs.Kobo;
 
@@ -18,7 +19,9 @@ public sealed record KoboBookRecommendationDto
     /// Should be the two-letter code
     /// </summary>
     public string Language { get; set; }
+    public KoboLocaleDto Locale { get; set; }
 
+    [JsonPropertyName("ISBN")]
     public string ISBN { get; set; }
     public string ImageId { get; set; }
     public string PublisherName { get; set; }

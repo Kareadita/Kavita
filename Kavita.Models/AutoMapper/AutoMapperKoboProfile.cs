@@ -64,6 +64,10 @@ public class AutoMapperKoboProfile: Profile
             .ForMemberSimple(d => d.Title, c => c.TitleName)
             .ForMemberSimple(d => d.Description, c => c.Summary)
             .ForMemberSimple(d => d.Language, c => c.Language ?? "en")
+            .ForMember(d => d.Locale, opt => opt.MapFrom(c => new KoboLocaleDto
+            {
+                LanguageCode = ToIso6392((c.Language ?? "en"))
+            }))
             .ForMember(d => d.PublisherName, opt => opt.MapFrom(c => c.People
                 .Where(p => p.Role == PersonRole.Publisher)
                 .OrderBy(p => p.PersonId)
