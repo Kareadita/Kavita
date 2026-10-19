@@ -18,6 +18,7 @@ using Kavita.Services.ReadingLists;
 using Kavita.Services.Scanner;
 using Kavita.Services.SignalR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Extensions;
 
@@ -73,6 +74,10 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IMetadataService, MetadataService>();
         services.AddScoped<IWordCountAnalyzerService, WordCountAnalyzerService>();
         services.AddScoped<INativeFileWatcher, NativeFileWatcher>();
+        services.AddSingleton<IMountDetectorService, MountDetectorService>();
+        // IFileSystem is scoped; a singleton must not hold a scoped instance, and FileSystem keeps no state
+        services.AddSingleton<IFolderPollerService>(sp =>
+            new FolderPollerService(new FileSystem(), sp.GetRequiredService<ILogger<FolderPollerService>>()));
         services.AddScoped<ITachiyomiService, TachiyomiService>();
         services.AddScoped<ICollectionTagService, CollectionTagService>();
 

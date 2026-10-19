@@ -9,8 +9,11 @@ using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
+using Kavita.API.Repositories;
 using Kavita.Common.Extensions;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Scanner;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Scanner;
@@ -25,6 +28,8 @@ public class NativeFileWatcher : INativeFileWatcher
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<NativeFileWatcher> _logger;
     private readonly ITaskScheduler _taskScheduler;
+    private readonly IMountDetectorService _mountDetector;
+    private readonly IFolderPollerService _folderPoller;
 
     /// <summary>
     /// This is just here to prevent GC from Disposing our watchers
@@ -49,14 +54,24 @@ public class NativeFileWatcher : INativeFileWatcher
 
     internal static IReadOnlyList<FileSystemWatcher> Watchers => [.. FileWatchers];
 
+    /// <summary>
+    /// Each folder's last logged watch or poll line, so a restart after every library save does not repeat it
+    /// </summary>
+    private static readonly Dictionary<string, string> LoggedChoices = new();
+
     public NativeFileWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork,
-        ILogger<NativeFileWatcher> logger, ITaskScheduler taskScheduler)
+        ILogger<NativeFileWatcher> logger, ITaskScheduler taskScheduler, IMountDetectorService mountDetector,
+        IFolderPollerService folderPoller)
     {
         _directoryService = directoryService;
         _unitOfWork = unitOfWork;
         _logger = logger;
         _taskScheduler = taskScheduler;
+        _mountDetector = mountDetector;
+        _folderPoller = folderPoller;
     }
+
+    private sealed record FolderChoice(string Folder, MountInfo? Mount, bool Poll);
 
     public async Task StartWatching()
     {
@@ -77,19 +92,17 @@ public class NativeFileWatcher : INativeFileWatcher
             return null;
         }
 
-        var configuredFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
-            .Where(l => l.FolderWatchMode != FolderWatchMode.Off)
-            .SelectMany(l => l.Folders)
-            .Select(Parser.NormalizePath)
-            .Distinct()
-            .ToList();
-        // Outside the lock, Exists on a dropped SMB share can hang until the network timeout
+        // Outside the lock, mount detection and Exists on a dropped SMB share can hang until the network timeout
+        var choices = await ChooseWatchOrPollAsync();
+        var polled = choices.Where(c => c.Poll).ToList();
+        var configuredFolders = choices.Where(c => !c.Poll).Select(c => c.Folder).ToList();
         var libraryFolders = configuredFolders.Where(_directoryService.Exists).ToList();
 
         await WatcherLock.WaitAsync();
         try
         {
             StopWatchers();
+            _folderPoller.Poll(polled.Select(c => new PolledFolder(c.Folder, c.Mount)).ToList());
 
             _logger.LogInformation("[NativeFileWatcher] Starting file watchers for {Count} library folders", libraryFolders.Count);
 
@@ -126,6 +139,99 @@ public class NativeFileWatcher : INativeFileWatcher
         }
     }
 
+    /// <summary>
+    /// Detects each library folder's mount, records the mounts on the library, and picks watch or poll for the folder.
+    /// A folder in two libraries polls if either polls
+    /// </summary>
+    private async Task<List<FolderChoice>> ChooseWatchOrPollAsync()
+    {
+        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.Folders))
+            .Where(l => l.FolderWatchMode != FolderWatchMode.Off)
+            .ToList();
+
+        var choices = new Dictionary<string, FolderChoice>();
+        foreach (var library in libraries)
+        {
+            var folders = library.Folders
+                .Select(f => Parser.NormalizePath(f.Path))
+                .Distinct()
+                .Select(f => new FolderChoice(f, _mountDetector.Detect(f), false))
+                .ToList();
+
+            var state = DetectedState(library.FolderWatchState, folders.Select(f => f.Mount));
+            if (!state.Mounts.SequenceEqual(library.FolderWatchState.Mounts))
+            {
+                library.FolderWatchState = state;
+                _unitOfWork.LibraryRepository.Update(library);
+            }
+
+            var poll = state.Method(library.FolderWatchMode) == FolderWatchMethod.Polling;
+            foreach (var folder in folders)
+            {
+                LogChoice(library, folder.Folder, folder.Mount, poll);
+                if (choices.TryGetValue(folder.Folder, out var other) && (other.Poll || !poll)) continue;
+
+                choices[folder.Folder] = folder with { Poll = poll };
+            }
+        }
+
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync();
+        }
+
+        return choices.Values.ToList();
+    }
+
+    /// <summary>
+    /// One entry per mount the library's folders are on now. A network mount is always Network; any other keeps what the
+    /// audit learned about it, or starts in Trial
+    /// </summary>
+    internal static LibraryFolderWatchState DetectedState(LibraryFolderWatchState current, IEnumerable<MountInfo?> mounts)
+    {
+        var entries = mounts
+            .OfType<MountInfo>()
+            .DistinctBy(m => m.Fingerprint)
+            .Select(m => new LibraryFolderWatchState.MountEntry
+            {
+                Fingerprint = m.Fingerprint,
+                Result = KnownResult(current, m),
+            })
+            .ToList();
+
+        return current with { Mounts = entries };
+    }
+
+    private static LibraryFolderWatchState.MountResult KnownResult(LibraryFolderWatchState current, MountInfo mount)
+    {
+        if (mount.IsNetwork) return LibraryFolderWatchState.MountResult.Network;
+
+        var known = current.Mounts.FirstOrDefault(e => e.Fingerprint == mount.Fingerprint)?.Result;
+        return known is null or LibraryFolderWatchState.MountResult.Network ? LibraryFolderWatchState.MountResult.Trial : known.Value;
+    }
+
+    private void LogChoice(Library library, string folder, MountInfo? mount, bool poll)
+    {
+        var choice = (library.FolderWatchMode, poll, mount?.IsNetwork) switch
+        {
+            (FolderWatchMode.Polling, _, _) => "polling folder times, as the library is set to Polling",
+            (FolderWatchMode.FileWatcher, _, _) => "watching, as the library is set to File Watcher",
+            (_, true, true) => "polling folder times instead of watching",
+            (_, true, _) => $"polling folder times, as another folder of {library.Name} is on a network mount",
+            _ => "watching",
+        };
+        var line = mount == null
+            ? $"{folder}: could not read its mount, {choice}"
+            : $"{folder}: mount {mount.Point} is {mount.Type} ({mount.Source}), {choice}";
+
+        lock (LoggedChoices)
+        {
+            if (LoggedChoices.TryGetValue(folder, out var logged) && logged == line) return;
+            LoggedChoices[folder] = line;
+        }
+        _logger.LogInformation("[NativeFileWatcher] {Choice}", line);
+    }
+
     /// <summary>The folder can be gone by now even though Exists passed, the share dropped in between</summary>
     private bool TryStartWatcher(string libraryFolder)
     {
@@ -160,6 +266,7 @@ public class NativeFileWatcher : INativeFileWatcher
         try
         {
             StopWatchers();
+            _folderPoller.Stop();
         }
         finally
         {
@@ -226,11 +333,11 @@ public class NativeFileWatcher : INativeFileWatcher
         EnqueueChange(e.FullPath, !IsReadingFile(e.FullPath));
     }
 
-    private void EnqueueChange(string path, bool isDirectoryChange)
+    internal static void EnqueueChange(string path, bool isDirectoryChange)
     {
         if (TaskScheduler.HasAlreadyEnqueuedTask<NativeFileWatcher>(w => w.ProcessChange(path, isDirectoryChange), checkRunningJobs: true)) return;
 
-        BackgroundJob.Enqueue(() => ProcessChange(path, isDirectoryChange));
+        BackgroundJob.Enqueue<NativeFileWatcher>(w => w.ProcessChange(path, isDirectoryChange));
     }
 
     /// <summary>

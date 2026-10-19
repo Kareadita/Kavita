@@ -755,6 +755,12 @@ namespace Kavita.Database.Migrations
                     b.Property<int>("FolderWatchMode")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("FolderWatchState")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{\"Mounts\":[]}");
+
                     b.Property<bool>("IncludeInDashboard")
                         .HasColumnType("INTEGER");
 

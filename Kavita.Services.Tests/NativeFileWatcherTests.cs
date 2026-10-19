@@ -3,11 +3,15 @@ using System.IO.Abstractions.TestingHelpers;
 using Hangfire;
 using Hangfire.InMemory;
 using Kavita.API.Database;
+using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.Database.Tests;
-using Kavita.Models.DTOs;
+using Kavita.API.Services.Scanner;
+using Kavita.Models.Builders;
 using Kavita.Models.DTOs.Settings;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Scanner;
 using Kavita.Services.Scanner;
 using Kavita.Services.Tests.Helpers;
 using Microsoft.Extensions.Logging;
@@ -22,6 +26,8 @@ public class NativeFileWatcherTests : AbstractFsTest, IDisposable
     private readonly List<string> _libraryFolders = [];
     private readonly HashSet<string> _unreachable = [];
     private readonly HashSet<string> _goneAfterExistsCheck = [];
+    private readonly HashSet<string> _networkFolders = [];
+    private readonly IFolderPollerService _folderPoller = Substitute.For<IFolderPollerService>();
 
     public NativeFileWatcherTests()
     {
@@ -53,11 +59,19 @@ public class NativeFileWatcherTests : AbstractFsTest, IDisposable
         var unitOfWork = Substitute.For<IUnitOfWork>();
         unitOfWork.SettingsRepository.GetSettingsDtoAsync()
             .Returns(new ServerSettingDto { EnableFolderWatching = true });
-        unitOfWork.LibraryRepository.GetLibraryDtosAsync().Returns(async _ =>
+        unitOfWork.LibraryRepository.GetLibrariesAsync(Arg.Any<LibraryIncludes>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(async _ =>
         {
             await Task.Delay(50);
-            return (IEnumerable<LibraryDto>) [new LibraryDto { FolderWatchMode = FolderWatchMode.Automatic, Folders = _libraryFolders }];
+            var library = new LibraryBuilder("Manga").Build();
+            library.FolderWatchMode = FolderWatchMode.Automatic;
+            library.Folders = _libraryFolders.Select(f => new FolderPath { Path = f }).ToList();
+            return (IEnumerable<Library>) [library];
         });
+
+        var mountDetector = Substitute.For<IMountDetectorService>();
+        mountDetector.Detect(Arg.Any<string>()).Returns(c => _networkFolders.Contains(Parser.NormalizePath(c.Arg<string>()))
+            ? new MountInfo("/nas", "//nas/Media", "cifs")
+            : new MountInfo("/", "/dev/sda1", "ext4"));
 
         var ds = Substitute.For<IDirectoryService>();
         ds.FileSystem.Returns(new FileSystem());
@@ -67,7 +81,8 @@ public class NativeFileWatcherTests : AbstractFsTest, IDisposable
             return (Directory.Exists(path) || _goneAfterExistsCheck.Contains(path)) && !_unreachable.Contains(path);
         });
 
-        return new NativeFileWatcher(ds, unitOfWork, Substitute.For<ILogger<NativeFileWatcher>>(), Substitute.For<ITaskScheduler>());
+        return new NativeFileWatcher(ds, unitOfWork, Substitute.For<ILogger<NativeFileWatcher>>(), Substitute.For<ITaskScheduler>(),
+            mountDetector, _folderPoller);
     }
 
     private sealed record QueuedChange(string Path, bool IsDirectory);
@@ -277,5 +292,16 @@ public class NativeFileWatcherTests : AbstractFsTest, IDisposable
 
         Assert.Equal(5, NativeFileWatcher.Watchers.Count);
         Assert.Equal(TimeSpan.FromMinutes(5), retry);
+    }
+
+    [Fact]
+    public async Task Start_NetworkMount_PollsInsteadOfWatching()
+    {
+        _networkFolders.Add(_libraryFolders[0]);
+
+        await CreateRealWatcher().StartWatchersAsync();
+
+        Assert.Empty(NativeFileWatcher.Watchers);
+        _folderPoller.Received().Poll(Arg.Is<IReadOnlyList<PolledFolder>>(folders => folders.Count == 5));
     }
 }

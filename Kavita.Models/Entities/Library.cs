@@ -17,6 +17,7 @@ public class Library : IEntityDate, IHasCoverImage
     public string SecondaryColor { get; set; }
     public LibraryType Type { get; set; }
     public FolderWatchMode FolderWatchMode { get; set; } = FolderWatchMode.Automatic;
+    public LibraryFolderWatchState FolderWatchState { get; set; } = new();
     /// <summary>
     /// Include Library series on Dashboard Streams
     /// </summary>

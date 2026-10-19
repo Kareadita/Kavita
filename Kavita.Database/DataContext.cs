@@ -203,6 +203,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasColumnType("TEXT")
             .IsRequired()
             .HasDefaultValue(new LibraryScanInfo());
+        builder.Entity<Library>()
+            .Property(l => l.FolderWatchState)
+            .HasJsonConversion(new LibraryFolderWatchState())
+            .HasColumnType("TEXT")
+            .IsRequired()
+            .HasDefaultValue(new LibraryFolderWatchState());
 
         #endregion
 
