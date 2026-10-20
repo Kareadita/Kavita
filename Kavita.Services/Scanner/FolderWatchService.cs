@@ -96,7 +96,7 @@ public class FolderWatchService(IUnitOfWork unitOfWork, ILogger<FolderWatchServi
                 unitOfWork.LibraryRepository.Update(library);
             }
 
-            var poll = state.Method(library.FolderWatchMode) == FolderWatchMethod.Polling;
+            var poll = state.Method(library.FolderWatchMode) is FolderWatchMethod.Polling or FolderWatchMethod.Failed;
             foreach (var folder in folders)
             {
                 LogChoice(library, folder.Folder, folder.Mount, poll);

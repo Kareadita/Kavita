@@ -15,6 +15,11 @@ public sealed record LibraryStatV3
     [EnumDataType(typeof(FolderWatchMode))]
     public FolderWatchMode FolderWatchMode { get; set; }
     /// <summary>
+    /// How the library notices changes right now, Off when the server's folder watching switch is off
+    /// </summary>
+    [EnumDataType(typeof(FolderWatchMethod))]
+    public FolderWatchMethod FolderWatchMethod { get; set; }
+    /// <summary>
     /// Are any exclude patterns setup
     /// </summary>
     public bool UsingExcludePatterns { get; set; }

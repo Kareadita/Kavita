@@ -18,9 +18,10 @@ public sealed record LibraryFolderWatchState
         FolderWatchMode.Off => FolderWatchMethod.Off,
         FolderWatchMode.FileWatcher => FolderWatchMethod.FileWatcher,
         FolderWatchMode.Polling => FolderWatchMethod.Polling,
-        _ => Mounts.Any(m => m.Result is MountResult.Network or MountResult.Failed)
-            ? FolderWatchMethod.Polling
-            : FolderWatchMethod.FileWatcher,
+        _ when Mounts.Any(m => m.Result is MountResult.Failed) => FolderWatchMethod.Failed,
+        _ when Mounts.Any(m => m.Result is MountResult.Network) => FolderWatchMethod.Polling,
+        _ when Mounts.Any(m => m.Result is MountResult.Trial) => FolderWatchMethod.Trial,
+        _ => FolderWatchMethod.FileWatcher,
     };
 
     public sealed record MountEntry

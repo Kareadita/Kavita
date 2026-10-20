@@ -23,10 +23,31 @@ public class LibraryFolderWatchStateTests
     }
 
     [Theory]
-    [InlineData(FolderWatchMode.Automatic, FolderWatchMethod.FileWatcher)]
+    [InlineData(FolderWatchMode.Automatic, FolderWatchMethod.Trial)]
+    [InlineData(FolderWatchMode.FileWatcher, FolderWatchMethod.FileWatcher)]
     [InlineData(FolderWatchMode.Polling, FolderWatchMethod.Polling)]
-    public void Method_OnlyTrialMounts(FolderWatchMode mode, FolderWatchMethod expected)
+    public void Method_TrialAndWatchingMount(FolderWatchMode mode, FolderWatchMethod expected)
     {
-        Assert.Equal(expected, State(LibraryFolderWatchState.MountResult.Trial).Method(mode));
+        var state = State(LibraryFolderWatchState.MountResult.Trial, LibraryFolderWatchState.MountResult.Watching);
+
+        Assert.Equal(expected, state.Method(mode));
+    }
+
+    [Fact]
+    public void Method_OnlyWatchingMounts_IsFileWatcher()
+    {
+        var state = State(LibraryFolderWatchState.MountResult.Watching, LibraryFolderWatchState.MountResult.Watching);
+
+        Assert.Equal(FolderWatchMethod.FileWatcher, state.Method(FolderWatchMode.Automatic));
+    }
+
+    [Theory]
+    [InlineData(FolderWatchMode.Automatic, FolderWatchMethod.Failed)]
+    [InlineData(FolderWatchMode.FileWatcher, FolderWatchMethod.FileWatcher)]
+    public void Method_FailedAndNetworkMount(FolderWatchMode mode, FolderWatchMethod expected)
+    {
+        var state = State(LibraryFolderWatchState.MountResult.Network, LibraryFolderWatchState.MountResult.Failed);
+
+        Assert.Equal(expected, state.Method(mode));
     }
 }

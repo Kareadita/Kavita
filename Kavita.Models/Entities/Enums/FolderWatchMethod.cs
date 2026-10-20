@@ -13,4 +13,14 @@ public enum FolderWatchMethod
     FileWatcher = 1,
     [Description("Polling")]
     Polling = 2,
+    /// <summary>
+    /// Watched while the scan audit checks the file watcher sees changes
+    /// </summary>
+    [Description("Trial")]
+    Trial = 3,
+    /// <summary>
+    /// Polled because the scan audit found the file watcher missed changes
+    /// </summary>
+    [Description("Failed")]
+    Failed = 4,
 }

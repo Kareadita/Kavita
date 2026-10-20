@@ -311,6 +311,7 @@ public class StatsService : IStatsService
             NumOfCores = Math.Max(Environment.ProcessorCount, 1),
             DotnetVersion = Environment.Version.ToString(),
             OpdsEnabled = serverSettings.EnableOpds,
+            EnableFolderWatching = serverSettings.EnableFolderWatching,
             EncodeMediaAs = serverSettings.EncodeMediaAs,
             MatchedMetadataEnabled = mediaSettings.Enabled,
             OidcEnabled = !string.IsNullOrEmpty(serverSettings.OidcConfig.Authority),
@@ -384,6 +385,9 @@ public class StatsService : IStatsService
             libDto.UsingExcludePatterns = library.LibraryExcludePatterns.Any(p => !string.IsNullOrEmpty(p.Pattern));
             libDto.UsingFolderWatching = library.FolderWatchMode != FolderWatchMode.Off; // TODO: Remove this once we finish the File Watcher rework
             libDto.FolderWatchMode = library.FolderWatchMode;
+            libDto.FolderWatchMethod = serverSettings.EnableFolderWatching
+                ? library.FolderWatchState.Method(library.FolderWatchMode)
+                : FolderWatchMethod.Off;
             libDto.CreateCollectionsFromMetadata = library.ManageCollections;
             libDto.CreateReadingListsFromMetadata = library.ManageReadingLists;
             libDto.EnabledMetadata = library.EnableMetadata;
