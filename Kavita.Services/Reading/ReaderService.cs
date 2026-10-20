@@ -235,7 +235,8 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                 return true;
             }
 
-            logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum} {Kobo}", progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum, progressDto.KoboSpan);
+            logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum} - {BookScrollId} - {Kobo}",
+                progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum, progressDto.BookScrollId, progressDto.KoboSpan);
             if (userProgress == null)
             {
                 userProgress = new AppUserProgress
@@ -246,14 +247,9 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                     ChapterId = progressDto.ChapterId,
                     LibraryId = progressDto.LibraryId,
                     BookScrollId = progressDto.BookScrollId,
+                    KoboSpan = progressDto.KoboSpan,
                     AppUserId = userId,
                 };
-
-                if (!string.IsNullOrEmpty(progressDto.KoboSpan))
-                {
-                    userProgress.BookScrollId = null;
-                    userProgress.KoboSpan = progressDto.KoboSpan;
-                }
 
                 unitOfWork.AppUserProgressRepository.Add(userProgress);
             }
@@ -264,12 +260,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                 userProgress.VolumeId = progressDto.VolumeId;
                 userProgress.LibraryId = progressDto.LibraryId;
                 userProgress.BookScrollId = progressDto.BookScrollId;
-
-                if (!string.IsNullOrEmpty(progressDto.KoboSpan))
-                {
-                    userProgress.BookScrollId = null;
-                    userProgress.KoboSpan = progressDto.KoboSpan;
-                }
+                userProgress.KoboSpan = progressDto.KoboSpan;
 
                 unitOfWork.AppUserProgressRepository.Update(userProgress);
             }

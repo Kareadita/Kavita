@@ -11,7 +11,7 @@ public class AnnotationHelperKoboTests
     private const string KoboHtml = """
                                     <html><body>
                                     <p><span class="koboSpan" id="kobo.1.1">Lawrence mulled it over. </span><span class="koboSpan" id="kobo.1.2">Holo seemed confident that she could sell the marten pelts higher than he could. </span><span class="koboSpan" id="kobo.1.3">Wisewolf or no, he had seven years of experience as a traveling merchant. </span><span class="koboSpan" id="kobo.1.4">He wasn’t such a weak dealer that a few words tossed in from the side would bring up his prices, and there was no guarantee the buyer would accept such prices.</span></p>
-                                    <p><span class="koboSpan" id="kobo.2.1">Yet his curiosity at exactly how she would attempt this farce overpowered his doubt that it would actually happen, so in the end he said, “Agreed.”</span></p>
+                                    <p id="p-2"><span class="koboSpan" id="kobo.2.1">Yet his curiosity at exactly how she would attempt this farce overpowered his doubt that it would actually happen, so in the end he said, “Agreed.”</span></p>
                                     <p><span class="koboSpan" id="kobo.3.1">“It’s done, then!” </span><span class="koboSpan" id="kobo.3.2">replied Holo, burping.</span></p>
                                     <p><span class="koboSpan" id="kobo.4.1">“But this isn’t just limited to our pelts. </span><span class="koboSpan" id="kobo.4.2">You’re a merchant, too—there may be no chance for me to talk up our price.”</span></p>
                                     <p><span class="koboSpan" id="kobo.5.1">“How modest of you.”</span></p>
@@ -20,7 +20,7 @@ public class AnnotationHelperKoboTests
                                     </body></html>
                                     """;
 
-    private static HtmlDocument Load(string html = KoboHtml)
+    public static HtmlDocument Load(string html = KoboHtml)
     {
         var doc = new HtmlDocument();
         doc.LoadHtml(html);

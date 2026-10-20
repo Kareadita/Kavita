@@ -28,7 +28,7 @@ public static partial class AnnotationHelper
     /// If we don't do this; <p><em>foo</em></p> will have em selected as start and <see cref="GetElementsInRange"/>
     /// fails to select the correct elements
     /// </summary>
-    private static readonly HashSet<string> InlineTags = new(StringComparer.OrdinalIgnoreCase)
+    public static readonly HashSet<string> InlineTags = new(StringComparer.OrdinalIgnoreCase)
     {
         "em", "strong", "i", "b", "span", "a", "cite", "sup", "sub", "small", "mark", "code", "kbd", "samp",
         "var", "q", "abbr", "dfn", "u", "s", "del", "ins", "strike", "font", "big", "tt", "nobr", "ruby",

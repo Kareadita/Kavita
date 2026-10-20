@@ -22,6 +22,7 @@ using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers;
+using Kavita.Services.Helpers.Kobo;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -433,7 +434,7 @@ internal class KoboSyncService(
 
         var startPage = userProgressDto.PageNum;
 
-        await UpdateProgressDto(userProgressDto, readingStateDto, chapter);
+        await UpdateProgressDto(userProgressDto, readingStateDto, chapter, cancellationToken);
 
         await readerService.SaveReadingProgress(userProgressDto, userId, false, cancellationToken);
 
@@ -445,12 +446,13 @@ internal class KoboSyncService(
         }
     }
 
-    private async Task UpdateProgressDto(ProgressDto progress, KoboReadingStateDto readingState, Chapter chapter)
+    private async Task UpdateProgressDto(ProgressDto progress, KoboReadingStateDto readingState, Chapter chapter, CancellationToken cancellationToken)
     {
         if (readingState.StatusInfo.Status == KoboReadStatus.Finished)
         {
             progress.PageNum = chapter.Pages;
             progress.BookScrollId = null;
+            progress.KoboSpan = null;
             return;
         }
 
@@ -460,17 +462,101 @@ internal class KoboSyncService(
             throw new KavitaException();
         }
 
-        var pageNum = await bookService.GetPageForFile(chapter.Files.First().FilePath, file);
-        if (pageNum is null)
+        if (!kepubifyConverter.KepubifySupported)
+        {
+            logger.LogTrace("Kepubify is not supported, progress will be chapter at best");
+            await SetFallbackProgress();
+            return;
+        }
+
+        if (chapter.Files.Count != 1)
         {
             throw new KavitaException();
         }
 
-        progress.PageNum = pageNum.Value;
-        // Kobo spans are untranslatable, so we store them separately. This means that syncing between Kobo and our
-        // EPub-reader is at best chapter based
-        progress.BookScrollId = null;
-        progress.KoboSpan = readingState.CurrentBookmark.Location?.Value;
+        var kepubPath = kepubifyConverter.BuildKepubifyPath(chapter.Id);
+        if (!fileSystem.File.Exists(kepubPath))
+        {
+            await kepubifyConverter.ConvertEpubToKepub(chapter.Files.First().FilePath, kepubPath, cancellationToken);
+        }
+
+        using var kepub = await EpubReader.OpenBookAsync(kepubPath, BookService.LenientBookReaderOptions);
+        if (kepub == null)
+        {
+            logger.LogWarning("Kepub was not available after conversion");
+            await SetFallbackProgress();
+            return;
+        }
+
+
+        var counter = 0;
+        foreach (var fileRef in await kepub.GetReadingOrderAsync())
+        {
+            if (fileRef.FilePath != file)
+            {
+                counter++;
+                continue;
+            }
+
+            progress.PageNum = counter;
+            progress.KoboSpan = readingState.CurrentBookmark.Location?.Value;
+            if (string.IsNullOrEmpty(progress.KoboSpan))
+            {
+                return;
+            }
+
+            var content = await fileRef.ReadContentAsync();
+
+            var doc = new HtmlDocument {OptionFixNestedTags = true};
+            doc.LoadHtml(BookService.EscapeTags(content));
+
+            var readerDoc = await LoadReaderDocument(chapter, counter, fileRef.FilePath);
+            progress.BookScrollId = KoboPositionHelper.Decode(doc, readerDoc, progress.KoboSpan);
+            return;
+        }
+
+        return;
+
+        async Task SetFallbackProgress()
+        {
+            var pageNum = await bookService.GetPageForFile(chapter.Files.First().FilePath, file);
+            if (pageNum is null)
+            {
+                throw new KavitaException();
+            }
+
+            progress.PageNum = pageNum.Value;
+            // Reset if we can't translate
+            progress.BookScrollId = null;
+            progress.KoboSpan = readingState.CurrentBookmark.Location?.Value;
+        }
+    }
+
+    private async Task<HtmlDocument?> LoadReaderDocument(Chapter chapter, int pageNum, string kepubFilePath)
+    {
+        var chapterFile = chapter.Files.FirstOrDefault();
+        if (chapterFile == null) return null;
+
+        try
+        {
+            using var book = await EpubReader.OpenBookAsync(chapterFile.FilePath, BookService.LenientBookReaderOptions);
+            if (book == null) return null;
+
+            var readingOrder = await book.GetReadingOrderAsync();
+            var fileRef = readingOrder.FirstOrDefault(f => f.FilePath == kepubFilePath)
+                          ?? readingOrder.ElementAtOrDefault(pageNum);
+            if (fileRef == null) return null;
+
+            var content = await fileRef.ReadContentAsync();
+            var doc = new HtmlDocument {OptionFixNestedTags = true};
+            doc.LoadHtml(BookService.EscapeTags(content));
+            return doc;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Unable to load reader content for chapter {ChapterId}, Kobo progress will use the kepub structure", chapter.Id);
+            return null;
+        }
     }
 
     /// <summary>
