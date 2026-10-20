@@ -41,9 +41,6 @@ public class DirectoryService : IDirectoryService
     private readonly ILogger<DirectoryService> _logger;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
-    private static readonly Regex ExcludeDirectories = new Regex(
-        @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle|\.@__thumb|\.caltrash|#recycle|\.yacreaderlibrary",
-        MatchOptions, Parser.RegexTimeout);
     private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
         MatchOptions, Parser.RegexTimeout);
     private static readonly ConcurrentDictionary<string, Regex> ExtensionPatternCache = new();
@@ -524,7 +521,8 @@ public class DirectoryService : IDirectoryService
 
         var di = FileSystem.DirectoryInfo.New(rootPath);
         var dirs = di.GetDirectories()
-            .Where(dir => !(dir.Attributes.HasFlag(FileAttributes.Hidden) || dir.Attributes.HasFlag(FileAttributes.System)))
+            .Where(dir => !(dir.Attributes.HasFlag(FileAttributes.Hidden) || dir.Attributes.HasFlag(FileAttributes.System)
+                            || Parser.IsExcludedFolderName(dir.Name)))
             .Select(d => new DirectoryDto()
             {
                 Name = d.Name,
@@ -647,7 +645,7 @@ public class DirectoryService : IDirectoryService
     {
         if (!FileSystem.Directory.Exists(folderPath)) return ImmutableArray<string>.Empty;
         return FileSystem.Directory.GetDirectories(folderPath)
-            .Where(path => ExcludeDirectories.Matches(path).Count == 0);
+            .Where(path => !Parser.IsExcludedFolderName(FileSystem.Path.GetFileName(path)));
     }
 
     /// <summary>
@@ -742,12 +740,11 @@ public class DirectoryService : IDirectoryService
         {
             if (entry is IDirectoryInfo)
             {
-                // Joined like Directory.GetDirectories does, so paths keep the shape the library folder was given in
-                var subfolder = FileSystem.Path.Join(folder, entry.Name);
-                if (ExcludeDirectories.IsMatch(subfolder)) continue;
+                if (Parser.IsExcludedFolderName(entry.Name)) continue;
                 if (matcher != null && matcher.ExcludeMatches($"{entry.Name}{FileSystem.Path.AltDirectorySeparatorChar}")) continue;
 
-                subfolders.Add(subfolder);
+                // Joined like Directory.GetDirectories does, so paths keep the shape the library folder was given in
+                subfolders.Add(FileSystem.Path.Join(folder, entry.Name));
                 continue;
             }
 

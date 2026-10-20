@@ -701,6 +701,19 @@ public class DirectoryServiceTests: AbstractFsTest
         Assert.Single((IEnumerable)ds.ListDirectory(testDirectory));
     }
 
+    [Fact]
+    public void ListDirectory_HidesExcludedFolders()
+    {
+        const string testDirectory = "/volume1/Manga/";
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory($"{testDirectory}@eaDir");
+        fileSystem.AddDirectory($"{testDirectory}#recycle");
+        fileSystem.AddDirectory($"{testDirectory}Love Hina");
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        Assert.Equal(["Love Hina"], ds.ListDirectory(testDirectory).Select(d => d.Name));
+    }
+
     #endregion
 
     #region ReadFileAsync
