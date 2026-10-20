@@ -36,7 +36,8 @@ public class SettingsController(
     ILocalizationService localizationService,
     ISettingsService settingsService,
     IAuthenticationSchemeProvider authenticationSchemeProvider,
-    IOidcService oidcService)
+    IOidcService oidcService,
+    IKepubifyConverter kepubifyConverter)
     : BaseApiController
 {
     /// <summary>
@@ -208,6 +209,13 @@ public class SettingsController(
         var ct = HttpContext.RequestAborted;
         var setting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableKobo, ct);
         return Ok(bool.Parse(setting.Value));
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("kepubify-supported")]
+    public ActionResult<bool> GetKepubifySupported()
+    {
+        return Ok(kepubifyConverter.KepubifySupported);
     }
 
     /// <summary>

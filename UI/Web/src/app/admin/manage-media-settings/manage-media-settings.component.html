@@ -79,7 +79,15 @@
       <app-setting-item [title]="t('kepubify-path-label')" [subtitle]="t('kepubify-path-tooltip')"
                         [control]="kepubifyPath" labelId="settings-kepubify-path">
         <ng-template #view>
-          {{kepubifyPath().value()}}
+          <span>
+            {{kepubifyPath().value()}}
+            <i class="fa"
+               [class.fa-check-circle]="kepubifySupported()"
+               [class.fa-circle-xmark]="!kepubifySupported()"
+               [class.text-danger]="!kepubifySupported()"
+               [ngbTooltip]="kepubifySupported() ? t('kepubify-supported') : t('kepubify-not-supported')"
+            ></i>
+          </span>
         </ng-template>
         <ng-template #edit>
           <div class="input-group">
