@@ -41,6 +41,29 @@ public class FolderPollerServiceTests : AbstractFsTest
     }
 
     [Fact]
+    public void Walk_SkipsExcludedFolders()
+    {
+        var fs = LibraryWithOneSeries();
+        fs.AddFile(Library + "/.zfs/snapshot/daily/Series A/Series A v01.cbz", new MockFileData("v01"));
+        fs.AddFile(Library + "/Series A/@eaDir/Series A v01.cbz/SYNOPHOTO_THUMB_M.jpg", new MockFileData("thumb"));
+
+        Assert.Equal(3, Walked(fs).Count);
+    }
+
+    [Fact]
+    public void NewExcludedFolder_IsNotHanded()
+    {
+        var fs = LibraryWithOneSeries();
+        var list = Walked(fs);
+
+        fs.AddDirectory(Library + "/#recycle");
+        fs.Directory.SetLastWriteTimeUtc(Library, After);
+
+        Assert.Empty(list.Pass(CancellationToken.None).Handed);
+        Assert.Equal(3, list.Count);
+    }
+
+    [Fact]
     public void UnchangedPass_HandsNothing()
     {
         var list = Walked(LibraryWithOneSeries());

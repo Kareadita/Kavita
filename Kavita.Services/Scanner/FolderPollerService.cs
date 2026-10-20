@@ -204,7 +204,6 @@ public class FolderPollerService(IFileSystem fileSystem, ILogger<FolderPollerSer
     /// </summary>
     internal sealed class FolderList(string root, IFileSystem fileSystem)
     {
-        private static readonly EnumerationOptions WalkOptions = new() { RecurseSubdirectories = true, IgnoreInaccessible = true };
         private static readonly EnumerationOptions ListOptions = new() { IgnoreInaccessible = true };
 
         private readonly Dictionary<string, DateTime> _folders = new();
@@ -259,7 +258,7 @@ public class FolderPollerService(IFileSystem fileSystem, ILogger<FolderPollerSer
         private ChildChanges CompareChildren(IDirectoryInfo directory, CancellationToken ct)
         {
             var folder = Normalize(directory.FullName);
-            var current = directory.EnumerateDirectories("*", ListOptions).ToDictionary(d => Normalize(d.FullName));
+            var current = ListChildren(directory).ToDictionary(d => Normalize(d.FullName));
             var known = _folders.Keys.Where(k => IsChildOf(k, folder)).ToHashSet();
 
             var added = current.Keys.Where(c => !known.Contains(c)).ToList();
@@ -284,13 +283,32 @@ public class FolderPollerService(IFileSystem fileSystem, ILogger<FolderPollerSer
         {
             if (!top.Exists) return;
 
-            _folders[Normalize(top.FullName)] = top.LastWriteTimeUtc;
-            foreach (var directory in top.EnumerateDirectories("*", WalkOptions))
+            var pending = new Stack<IDirectoryInfo>([top]);
+            while (pending.Count > 0)
             {
                 ct.ThrowIfCancellationRequested();
+                var directory = pending.Pop();
                 _folders[Normalize(directory.FullName)] = directory.LastWriteTimeUtc;
+
+                List<IDirectoryInfo> children;
+                try
+                {
+                    children = ListChildren(directory).ToList();
+                }
+                catch (Exception ex) when (directory != top && ex is IOException or UnauthorizedAccessException)
+                {
+                    continue;
+                }
+
+                foreach (var child in children)
+                {
+                    pending.Push(child);
+                }
             }
         }
+
+        private static IEnumerable<IDirectoryInfo> ListChildren(IDirectoryInfo directory) =>
+            directory.EnumerateDirectories("*", ListOptions).Where(d => !Parser.IsExcludedFolderName(d.Name));
 
         private static bool IsChildOf(string path, string parent) =>
             path.StartsWith(parent + "/", StringComparison.Ordinal) && path.IndexOf('/', parent.Length + 1) < 0;
