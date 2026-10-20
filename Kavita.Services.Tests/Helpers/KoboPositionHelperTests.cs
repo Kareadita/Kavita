@@ -127,7 +127,7 @@ public class KoboPositionHelperTests
         <h1>Heading</h1>
         <p>First paragraph.</p>
         <p id="p-2">Second paragraph.</p>
-        <p>Third <em>emphasised</em> paragraph.</p>
+        <p>Third <em>emphasised</em> paragraph. He didn&rsquo;t stop.</p>
         </section></div></body></html>
         """;
 
@@ -136,7 +136,7 @@ public class KoboPositionHelperTests
         <h1><span class="koboSpan" id="kobo.1.1">Heading</span></h1>
         <p><span class="koboSpan" id="kobo.2.1">First paragraph.</span></p>
         <p id="p-2"><span class="koboSpan" id="kobo.3.1">Second paragraph.</span></p>
-        <p><span class="koboSpan" id="kobo.4.1">Third </span><em><span class="koboSpan" id="kobo.4.2">emphasised</span></em><span class="koboSpan" id="kobo.4.3"> paragraph.</span></p>
+        <p><span class="koboSpan" id="kobo.4.1">Third </span><em><span class="koboSpan" id="kobo.4.2">emphasised</span></em><span class="koboSpan" id="kobo.4.3"> paragraph. He didn’t stop.</span></p>
         </section></div></div></div></body></html>
         """;
 }

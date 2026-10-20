@@ -147,6 +147,6 @@ public static class KoboPositionHelper
 
     private static string NormalizeText(string text)
     {
-        return string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        return string.Join(' ', HtmlEntity.DeEntitize(text).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
     }
 }
