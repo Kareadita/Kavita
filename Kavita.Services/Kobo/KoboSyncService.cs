@@ -446,6 +446,17 @@ internal class KoboSyncService(
         }
     }
 
+    /// <summary>
+    /// Sets <see cref="ProgressDto.PageNum"/>, <see cref="ProgressDto.KoboSpan"/>
+    /// <see cref="ProgressDto.BookScrollId"/> is set as best as possible. Requires opening both the epub and kepub, the epub will be converted
+    /// if required. While this might be a bit expensive; the conversion is cached and the kobo only sends syncs on book close
+    /// (TODO: Confirm, I might have seen syncs when opening some menu's)
+    /// </summary>
+    /// <param name="progress"></param>
+    /// <param name="readingState"></param>
+    /// <param name="chapter"></param>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="KavitaException"></exception>
     private async Task UpdateProgressDto(ProgressDto progress, KoboReadingStateDto readingState, Chapter chapter, CancellationToken cancellationToken)
     {
         if (readingState.StatusInfo.Status == KoboReadStatus.Finished)
@@ -532,7 +543,7 @@ internal class KoboSyncService(
         }
     }
 
-    private async Task<HtmlDocument?> LoadReaderDocument(Chapter chapter, int pageNum, string kepubFilePath)
+    private async Task<HtmlDocument?> LoadReaderDocument(Chapter chapter, int pageNum, string filePath)
     {
         var chapterFile = chapter.Files.FirstOrDefault();
         if (chapterFile == null) return null;
@@ -543,13 +554,14 @@ internal class KoboSyncService(
             if (book == null) return null;
 
             var readingOrder = await book.GetReadingOrderAsync();
-            var fileRef = readingOrder.FirstOrDefault(f => f.FilePath == kepubFilePath)
+            var fileRef = readingOrder.FirstOrDefault(f => f.FilePath == filePath)
                           ?? readingOrder.ElementAtOrDefault(pageNum);
             if (fileRef == null) return null;
 
             var content = await fileRef.ReadContentAsync();
             var doc = new HtmlDocument {OptionFixNestedTags = true};
             doc.LoadHtml(BookService.EscapeTags(content));
+
             return doc;
         }
         catch (Exception ex)

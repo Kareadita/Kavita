@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using HtmlAgilityPack;
 
 namespace Kavita.Services.Helpers.Kobo;
@@ -9,6 +10,55 @@ public static class KoboPositionHelper
     private const string BookColumnsId = "book-columns";
     private const string BookInnerId = "book-inner";
     private const string ReaderBodyScope = "//body";
+
+    public static string Encode(HtmlDocument readerDoc, HtmlDocument kepubDoc, string xPath)
+    {
+        var element = AnnotationHelper.FindElementByXPath(readerDoc, AnnotationHelper.DescopeXpath(xPath));
+        if (element == null) return string.Empty;
+
+        var kepubElement = FindKepubCounterpart(kepubDoc, element);
+        if (kepubElement == null) return string.Empty;
+
+        return FindFirstKoboSpanId(kepubElement) ?? string.Empty;
+    }
+
+    private static HtmlNode? FindKepubCounterpart(HtmlDocument kepubDoc, HtmlNode element)
+    {
+        var kepubRoot = kepubDoc.GetElementbyId(BookInnerId) ?? kepubDoc.DocumentNode.SelectSingleNode(ReaderBodyScope);
+        if (kepubRoot == null) return null;
+
+        for (var candidate = element; candidate != null; candidate = candidate.ParentNode)
+        {
+            if (candidate.NodeType != HtmlNodeType.Element) continue;
+            if (candidate.Name.Equals("body", StringComparison.OrdinalIgnoreCase)) break;
+
+            if (!string.IsNullOrEmpty(candidate.Id) && !IsKepubWrapperId(candidate.Id))
+            {
+                var byId = kepubDoc.GetElementbyId(candidate.Id);
+                if (byId != null) return byId;
+            }
+
+            var relativePath = GetBodyRelativeXPath(candidate, stripBookInner: false);
+            if (relativePath == null) continue;
+
+            var kepubElement = kepubRoot.SelectSingleNode("." + relativePath);
+            if (kepubElement != null && TextMatches(candidate, kepubElement))
+            {
+                return kepubElement;
+            }
+        }
+
+        return null;
+    }
+
+    private static string? FindFirstKoboSpanId(HtmlNode node)
+    {
+        if (node.HasClass(KoboSpanClassName) && !string.IsNullOrEmpty(node.Id)) return node.Id;
+
+        return node.ChildNodes
+            .FirstOrDefault(child => child.HasClass(KoboSpanClassName) && !string.IsNullOrEmpty(child.Id))?
+            .Id ?? string.Empty;
+    }
 
     public static string Decode(HtmlDocument kepubDoc, HtmlDocument? readerDoc, string koboSpan)
     {

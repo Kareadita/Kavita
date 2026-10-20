@@ -1,4 +1,3 @@
-using HtmlAgilityPack;
 using Kavita.Services.Helpers.Kobo;
 
 namespace Kavita.Services.Tests.Helpers;
@@ -88,48 +87,63 @@ public class KoboPositionHelperTests
         Assert.Equal("id(\"chapter015\")", bookId);
     }
 
-    private static HtmlDocument LoadReaderDocumentFromKepub(string kepubHtml)
+    [Fact]
+    public void Encode_FindsSpanByPositionalPath()
     {
-        var doc = AnnotationHelperKoboTests.Load(kepubHtml);
+        var kepubDoc = AnnotationHelperKoboTests.Load(KepubChapter);
+        var readerDoc = AnnotationHelperKoboTests.Load(OriginalChapter);
 
-        var bookColumns = doc.GetElementbyId("book-columns");
-        var bookInner = doc.GetElementbyId("book-inner");
-        if (bookColumns != null && bookInner != null)
-        {
-            var body = doc.DocumentNode.SelectSingleNode("//body")!;
-            foreach (var child in bookInner.ChildNodes.ToList())
-            {
-                body.AppendChild(child);
-            }
-            body.RemoveChild(bookColumns);
-        }
+        var koboSpan = KoboPositionHelper.Encode(readerDoc, kepubDoc, "//body/div[1]/section[1]/p[3]");
 
-        var spans = doc.DocumentNode.SelectNodes("//span[contains(@class, 'koboSpan')]");
-        if (spans != null)
-        {
-            foreach (var span in spans.ToList())
-            {
-                var parent = span.ParentNode;
-                if (parent == null) continue;
-                foreach (var child in span.ChildNodes.ToList())
-                {
-                    parent.InsertBefore(child, span);
-                }
-                parent.RemoveChild(span);
-            }
-        }
+        Assert.Equal("kobo.4.1", koboSpan);
+    }
 
-        return doc;
+    [Fact]
+    public void Encode_FindsSpanById()
+    {
+        var kepubDoc = AnnotationHelperKoboTests.Load(KepubChapter);
+        var readerDoc = AnnotationHelperKoboTests.Load(OriginalChapter);
+
+        var koboSpan = KoboPositionHelper.Encode(readerDoc, kepubDoc, "id(\"p-2\")");
+
+        Assert.Equal("kobo.3.1", koboSpan);
+    }
+
+    [Fact]
+    public void Encode_InlineElement_ReturnsSpanInsideIt()
+    {
+        var kepubDoc = AnnotationHelperKoboTests.Load(KepubChapter);
+        var readerDoc = AnnotationHelperKoboTests.Load(OriginalChapter);
+
+        var koboSpan = KoboPositionHelper.Encode(readerDoc, kepubDoc, "//body/div[1]/section[1]/p[3]/em[1]");
+
+        Assert.Equal("kobo.4.2", koboSpan);
+    }
+
+    [Theory]
+    [InlineData("//body/div[1]/section[1]/p[3]")]
+    [InlineData("id(\"p-2\")")]
+    public void Encode_ThenDecode_RoundTrips(string xPath)
+    {
+        var kepubDoc = AnnotationHelperKoboTests.Load(KepubChapter);
+        var readerDoc = AnnotationHelperKoboTests.Load(OriginalChapter);
+
+        var koboSpan = KoboPositionHelper.Encode(readerDoc, kepubDoc, xPath);
+        Assert.NotEmpty(koboSpan);
+
+        var decoded = KoboPositionHelper.Decode(kepubDoc, readerDoc, koboSpan);
+
+        Assert.Equal(xPath, decoded);
     }
 
     private const string OriginalChapter = """
-        <html><body><div class="galley-rw"><section id="chapter015">
-        <h1>Heading</h1>
-        <p>First paragraph.</p>
-        <p id="p-2">Second paragraph.</p>
-        <p>Third <em>emphasised</em> paragraph. He didn&rsquo;t stop.</p>
-        </section></div></body></html>
-        """;
+                                           <html><body><div class="galley-rw"><section id="chapter015">
+                                           <h1>Heading</h1>
+                                           <p>First paragraph.</p>
+                                           <p id="p-2">Second paragraph.</p>
+                                           <p>Third <em>emphasised</em> paragraph. He didn&rsquo;t stop.</p>
+                                           </section></div></body></html>
+                                           """;
 
     private const string KepubChapter = """
         <html><body><div id="book-columns"><div id="book-inner"><div class="galley-rw"><section id="chapter015">

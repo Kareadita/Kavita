@@ -478,7 +478,7 @@ private static TextAnchor CreateAnchor(HtmlNode textNode, int rawOffsetInNode)
         return pos;
     }
 
-    private static HtmlNode? FindElementByXPath(HtmlDocument doc, string xpath)
+    public static HtmlNode? FindElementByXPath(HtmlDocument doc, string xpath)
     {
         var idMatch = IdXPathRegex().Match(xpath);
         if (!idMatch.Success) return doc.DocumentNode.SelectSingleNode(xpath.ToLowerInvariant());
