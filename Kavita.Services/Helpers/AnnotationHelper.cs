@@ -7,7 +7,9 @@ using HtmlAgilityPack;
 using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Reader;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Extensions;
 using Serilog;
 
 namespace Kavita.Services.Helpers;
@@ -171,7 +173,7 @@ public static partial class AnnotationHelper
         }
     }
 
-    public static IEnumerable<KoboAnnotationDto> BuildKoboAnnotations(string fileName, HtmlDocument doc, IEnumerable<AppUserAnnotation> annotations)
+    public static IEnumerable<KoboAnnotationDto> BuildKoboAnnotations(string fileName, HtmlDocument doc, IEnumerable<AppUserAnnotation> annotations, List<HighlightSlot> highlightSlots)
     {
         return annotations.Select(annotation =>
         {
@@ -184,9 +186,9 @@ public static partial class AnnotationHelper
             return new KoboAnnotationDto
             {
                 ClientLastModifiedUtc = annotation.LastModifiedUtc,
-                HighlightColor = string.Empty,
+                HighlightColor = highlightSlots[annotation.SelectedSlotIndex].Color.ToHex(false).ToUpper(),
                 HighlightedText = annotation.SelectedText,
-                Id = null,
+                Id = string.IsNullOrEmpty(annotation.KoboId) ? annotation.Id.ToString() : annotation.KoboId,
                 Location = new KoboAnnotationLocationDto
                 {
                     Span = new KoboAnnotationLocationSpanDto

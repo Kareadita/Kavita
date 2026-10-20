@@ -70,7 +70,7 @@ public class KoboController(
             resources["image_host"] = instanceUrl.TrimEnd('/');
             resources["image_url_template"] = $"{koboBase}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/false/image.jpg";
             resources["image_url_quality_template"] = $"{koboBase}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/{{Quality}}/{{IsGreyscale}}/image.jpg";
-            resources["reading_services_host"] = instanceUrl.TrimEnd('/');
+            resources["reading_services_host"] = koboBase;
         }
         else
         {
@@ -451,6 +451,22 @@ public class KoboController(
     #endregion
 
     #region Annotations
+
+    [HttpGet("api/v3/content/{bookId}/annotations")]
+    public async Task<ActionResult> GetAnnotations(string bookId, [FromQuery] int limit = 100)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        if (!int.TryParse(bookId, out var kavitaId))
+        {
+            return await ProxyRequestIfEnabled();
+        }
+
+        // TODO: Limit by query
+        var annotations = await koboSyncService.GetKoboAnnotationsAsync(UserId, [kavitaId], ct);
+
+        return Ok(annotations);
+    }
 
     [HttpPost("api/v3/content/checkforchanges")]
     public async Task<ActionResult> GetAnnotationsForBook()

@@ -269,6 +269,11 @@ internal class KoboSyncService(
             return [];
         }
 
+        var highlightSlots = await unitOfWork.DataContext.AppUserPreferences
+            .Where(p => p.AppUserId == userId)
+            .Select(p => p.BookReaderHighlightSlots)
+            .FirstAsync(cancellationToken);
+
         var annotations = await unitOfWork.DataContext.AppUserAnnotation
             .Where(an => chapterIds.Contains(an.ChapterId) && an.AppUserId == userId)
             .ToListAsync(cancellationToken);
@@ -279,7 +284,7 @@ internal class KoboSyncService(
         {
             try
             {
-                var koboAnnotation = await EncodeAnnotations(grouping.Key, grouping, cancellationToken);
+                var koboAnnotation = await EncodeAnnotations(grouping.Key, grouping, highlightSlots, cancellationToken);
                 koboAnnotations.AddRange(koboAnnotation);
 
                 logger.LogTrace("Converted {Converted}/{Total} annotations for chapter {ChapterId}",
@@ -299,7 +304,7 @@ internal class KoboSyncService(
         throw new NotImplementedException();
     }
 
-    private async Task<List<KoboAnnotationDto>> EncodeAnnotations(int chapterId, IEnumerable<AppUserAnnotation> annotations, CancellationToken cancellationToken)
+    private async Task<List<KoboAnnotationDto>> EncodeAnnotations(int chapterId, IEnumerable<AppUserAnnotation> annotations, List<HighlightSlot> highlightSlots, CancellationToken cancellationToken)
     {
         var kepubPath = kepubifyConverter.BuildKepubifyPath(chapterId);
         if (!fileSystem.File.Exists(kepubPath))
@@ -334,7 +339,7 @@ internal class KoboSyncService(
             var doc = new HtmlDocument {OptionFixNestedTags = true};
             doc.LoadHtml(BookService.EscapeTags(content));
 
-            var converted = AnnotationHelper.BuildKoboAnnotations(fileRef.FilePath, doc, grouping).ToList();
+            var converted = AnnotationHelper.BuildKoboAnnotations(fileRef.FilePath, doc, grouping, highlightSlots).ToList();
             koboAnnotations.AddRange(converted);
 
             logger.LogTrace("Converted {Converted}/{Total} annotations for chapter {ChapterId}@{PageNumber}",

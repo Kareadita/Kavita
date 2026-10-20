@@ -24,6 +24,12 @@ namespace Kavita.Database.Migrations
                 nullable: true,
                 defaultValue: "{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"AllLibraries\":false,\"SyncLibraries\":[],\"SyncCollection\":0}");
 
+            migrationBuilder.AddColumn<string>(
+                name: "KoboId",
+                table: "AppUserAnnotation",
+                type: "TEXT",
+                nullable: true);
+
             migrationBuilder.CreateTable(
                 name: "KoboSyncPoints",
                 columns: table => new
@@ -68,6 +74,10 @@ namespace Kavita.Database.Migrations
             migrationBuilder.DropColumn(
                 name: "KoboSyncPreferences",
                 table: "AppUserPreferences");
+
+            migrationBuilder.DropColumn(
+                name: "KoboId",
+                table: "AppUserAnnotation");
         }
     }
 }

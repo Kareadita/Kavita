@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20261019123143_KoboSyncChanges")]
+    [Migration("20261020080046_KoboSyncChanges")]
     partial class KoboSyncChanges
     {
         /// <inheritdoc />
@@ -2787,6 +2787,9 @@ namespace Kavita.Database.Migrations
 
                     b.Property<int>("HighlightCount")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("KoboId")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");

@@ -2785,6 +2785,9 @@ namespace Kavita.Database.Migrations
                     b.Property<int>("HighlightCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("KoboId")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
 

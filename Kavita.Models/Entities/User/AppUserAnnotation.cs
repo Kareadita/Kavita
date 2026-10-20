@@ -11,6 +11,10 @@ public class AppUserAnnotation : IEntityDate
 {
     public int Id { get; set; }
     /// <summary>
+    /// When created on the Kobo, will be generated. Otherwise, use stringified <see cref="Id"/>
+    /// </summary>
+    public string KoboId { get; set; }
+    /// <summary>
     /// Starting point of the Highlight
     /// </summary>
     public required string XPath { get; set; }
