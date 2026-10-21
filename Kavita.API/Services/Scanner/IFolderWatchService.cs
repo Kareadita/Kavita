@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Kavita.Models.DTOs;
 using Kavita.Models.Entities;
 
 namespace Kavita.API.Services.Scanner;
@@ -30,7 +31,10 @@ public interface IFolderWatchService
     /// <param name="readFolders">Normalized, from the scan's folder listing</param>
     Task AuditScanAsync(int libraryId, IReadOnlyCollection<string> readFolders, DateTime scanStartedUtc, bool isLibraryScan);
     /// <summary>
-    /// Failed mounts go back to Trial and a downgrade is cleared, so the library watches again
+    /// Failed mounts go back to Trial and a downgrade is cleared, so the library watches again. Watching restarts in the background
     /// </summary>
-    Task RetryAsync(int libraryId);
+    /// <returns>The library's status after the retry, null for an unknown library</returns>
+    Task<FolderWatchStatusDto?> RetryAsync(int libraryId);
+    /// <returns>Null for an unknown library</returns>
+    Task<FolderWatchStatusDto?> GetStatusAsync(int libraryId);
 }

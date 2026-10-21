@@ -1,4 +1,6 @@
 using System.IO.Abstractions;
+using Hangfire;
+using Hangfire.InMemory;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
@@ -238,6 +240,74 @@ public class FolderWatchServiceAuditTests : IDisposable
 
         await FallbackEventsSent(1, body => body.LibraryName == "Manga" && body.Reason == FolderWatchFallbackReason.Errors);
         await FallbackEventsSent(0, body => body.LibraryName == "Comics");
+    }
+
+    [Fact]
+    public async Task Miss_RecordsTheMissedFolder()
+    {
+        ChangedBeforeScan(TimeSpan.FromHours(1));
+
+        await Audit();
+
+        Assert.Equal(_seriesFolder, Mount.MissedFolder);
+    }
+
+    [Fact]
+    public async Task Status_Trial_ReportsLowestSuccesses()
+    {
+        _library.FolderWatchState = new LibraryFolderWatchState
+        {
+            Mounts =
+            [
+                new MountEntry { Fingerprint = "a", Result = MountResult.Trial, Successes = 1 },
+                new MountEntry { Fingerprint = "b", Result = MountResult.Trial, Successes = 2, AuditedScans = 1 },
+            ],
+        };
+
+        var status = await CreateFolderWatchService().GetStatusAsync(1);
+
+        Assert.NotNull(status);
+        Assert.Equal(FolderWatchMethod.Trial, status.Method);
+        Assert.Equal(1, status.Successes);
+        Assert.True(status.NeedsLibraryScan);
+    }
+
+    [Fact]
+    public async Task Status_Downgrade_NamesTheFolder()
+    {
+        _library.FolderWatchMode = FolderWatchMode.FileWatcher;
+        _library.FolderWatchState = _library.FolderWatchState with
+        {
+            Downgrade = new DowngradeMarker { Folder = _libraryFolder, Fingerprint = LocalMount.Fingerprint },
+        };
+
+        var status = await CreateFolderWatchService().GetStatusAsync(1);
+
+        Assert.NotNull(status);
+        Assert.Equal(FolderWatchMethod.Failed, status.Method);
+        Assert.Equal(FolderWatchFallbackReason.Errors, status.Reason);
+        Assert.Equal(_libraryFolder, status.Folder);
+    }
+
+    /// <summary>
+    /// The Retry request answers with the new status, and a slow mount check on a dropped share must not hold it
+    /// </summary>
+    [Fact]
+    public async Task Retry_ClearsStateBeforeRestarting()
+    {
+        JobStorage.Current = new InMemoryStorage();
+        _library.FolderWatchState = new LibraryFolderWatchState
+        {
+            Mounts = [new MountEntry { Fingerprint = LocalMount.Fingerprint, Result = MountResult.Failed, MissedFolder = _seriesFolder }],
+            Downgrade = new DowngradeMarker { Folder = _libraryFolder, Fingerprint = LocalMount.Fingerprint },
+        };
+
+        var status = await CreateFolderWatchService().RetryAsync(1);
+
+        Assert.Null(_library.FolderWatchState.Downgrade);
+        Assert.Equal(MountResult.Trial, Mount.Result);
+        Assert.Equal(FolderWatchMethod.Trial, status?.Method);
+        await _nativeFileWatcher.DidNotReceive().WatchAsync(Arg.Any<IReadOnlyList<string>>());
     }
 
     public void Dispose()

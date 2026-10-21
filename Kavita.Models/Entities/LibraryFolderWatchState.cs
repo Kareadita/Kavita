@@ -45,6 +45,10 @@ public sealed record LibraryFolderWatchState
         /// Library scans whose audit found no miss on this mount
         /// </summary>
         public int AuditedScans { get; init; }
+        /// <summary>
+        /// The folder whose change the watcher missed, set with <see cref="MountResult.Failed"/>
+        /// </summary>
+        public string? MissedFolder { get; init; }
     }
 
     /// <summary>

@@ -11,6 +11,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
+using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -324,7 +325,7 @@ public class FolderWatchService(IUnitOfWork unitOfWork, ILogger<FolderWatchServi
                 logger.LogWarning("[FolderWatchService] {Library} switched from {Result} -> Polling until Retry, the watcher missed a change in {Folder}",
                     library.Name, entry.Result, miss.Folder);
             }
-            return entry with { Result = LibraryFolderWatchState.MountResult.Failed };
+            return entry with { Result = LibraryFolderWatchState.MountResult.Failed, MissedFolder = miss.Folder };
         }
 
         var successes = entry.Successes + (mine.Exists(a => a.Outcome == AuditOutcome.Success) ? 1 : 0);
@@ -342,10 +343,18 @@ public class FolderWatchService(IUnitOfWork unitOfWork, ILogger<FolderWatchServi
         return entry with { Result = result, Successes = successes, AuditedScans = auditedScans };
     }
 
-    public async Task RetryAsync(int libraryId)
+    public async Task<FolderWatchStatusDto?> GetStatusAsync(int libraryId)
     {
-        var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
-        if (library == null) return;
+        var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+        if (library == null) return null;
+
+        return await ToStatusAsync(library);
+    }
+
+    public async Task<FolderWatchStatusDto?> RetryAsync(int libraryId)
+    {
+        var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+        if (library == null) return null;
 
         var state = library.FolderWatchState;
         var retried = state with
@@ -357,14 +366,54 @@ public class FolderWatchService(IUnitOfWork unitOfWork, ILogger<FolderWatchServi
                 .ToList(),
             Downgrade = null,
         };
-        if (IsSameState(retried, state)) return;
 
-        library.FolderWatchState = retried;
-        unitOfWork.LibraryRepository.Update(library);
-        await unitOfWork.CommitAsync();
-        logger.LogInformation("[FolderWatchService] {Library}: Retry cleared the watcher failures, watching again", library.Name);
+        if (!IsSameState(retried, state))
+        {
+            library.FolderWatchState = retried;
+            unitOfWork.LibraryRepository.Update(library);
+            await unitOfWork.CommitAsync();
+            logger.LogInformation("[FolderWatchService] {Library}: Retry cleared the watcher failures, watching again", library.Name);
 
-        await RestartWatching();
+            // Mount detection on a dropped share can hang until the network timeout, so it stays out of the request
+            BackgroundJob.Enqueue<IFolderWatchService>(s => s.RestartWatching());
+        }
+
+        return await ToStatusAsync(library);
+    }
+
+    private async Task<FolderWatchStatusDto> ToStatusAsync(Library library)
+    {
+        var enableFolderWatching = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableFolderWatching;
+        var state = library.FolderWatchState;
+        var method = state.WatchMethod(library.FolderWatchMode);
+        var trialMounts = state.Mounts.Where(m => m.Result == LibraryFolderWatchState.MountResult.Trial).ToList();
+        var missed = state.Mounts.FirstOrDefault(m => m.Result == LibraryFolderWatchState.MountResult.Failed && m.MissedFolder != null);
+        var showsReason = method is FolderWatchMethod.Failed or FolderWatchMethod.FileWatcher;
+
+        FolderWatchFallbackReason? reason = null;
+        string? folder = null;
+        if (showsReason && state.Downgrade != null)
+        {
+            reason = FolderWatchFallbackReason.Errors;
+            folder = state.Downgrade.Folder;
+        }
+        else if (showsReason && missed != null)
+        {
+            reason = FolderWatchFallbackReason.MissedChange;
+            folder = missed.MissedFolder;
+        }
+
+        return new FolderWatchStatusDto
+        {
+            Mode = library.FolderWatchMode,
+            Method = method,
+            Reason = reason,
+            Folder = folder,
+            Successes = trialMounts.Count == 0 ? 0 : trialMounts.Min(m => m.Successes),
+            SuccessesNeeded = SuccessesToLeaveTrial,
+            NeedsLibraryScan = trialMounts.Exists(m => m.AuditedScans == 0),
+            EnableFolderWatching = enableFolderWatching,
+        };
     }
 
     public async Task DowngradeFolder(string folder, LibraryFolderWatchState.DowngradeReason reason)

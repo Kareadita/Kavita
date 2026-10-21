@@ -21,7 +21,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
-import {skip, tap} from 'rxjs';
+import {finalize, skip, tap} from 'rxjs';
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {NgTemplateOutlet} from "@angular/common";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
@@ -72,6 +72,13 @@ import {SettingSelectComponent} from "../../../settings/_components/setting-enum
 import {allFolderWatchModes, FolderWatchMode} from "../../../_models/library/folder-watch-mode";
 import {FolderWatchModePipe} from "../../../_pipes/folder-watch-mode.pipe";
 import {FolderWatchModeDescriptionPipe} from "../../../_pipes/folder-watch-mode-description.pipe";
+import {FolderWatchStatusPipe} from "../../../_pipes/folder-watch-status.pipe";
+import {FolderWatchStatus} from "../../../_models/library/folder-watch-status";
+import {FolderWatchMethod} from "../../../_models/library/folder-watch-method";
+import {FolderWatchStatusDetailPipe} from "../../../_pipes/folder-watch-status-detail.pipe";
+import {FolderWatchFallbackReasonPipe} from "../../../_pipes/folder-watch-fallback-reason.pipe";
+import {TagBadgeColor, TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 
 enum StepID {
   General = 0,
@@ -107,7 +114,8 @@ interface FormModel {
   selector: 'app-library-settings-modal',
   imports: [NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, UtcToLocalTimePipe, FormFieldDirective, ValidationErrorsComponent, FormField, SettingSelectComponent, FolderWatchModePipe, FolderWatchModeDescriptionPipe],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, UtcToLocalTimePipe, FormFieldDirective, ValidationErrorsComponent, FormField, SettingSelectComponent, FolderWatchModePipe, FolderWatchModeDescriptionPipe, FolderWatchStatusPipe,
+    FolderWatchStatusDetailPipe, FolderWatchFallbackReasonPipe, TagBadgeComponent, LoadingComponent],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -209,6 +217,35 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   protected readonly folderWatchModes = allFolderWatchModes;
 
+  protected watchStatus = signal<FolderWatchStatus | null>(null);
+  protected isWatchStatusLoading = signal(false);
+  protected isRetryingWatch = signal(false);
+  /**
+   * The status describes the saved mode, so it hides while the select holds an unsaved one
+   */
+  protected readonly showWatchStatus = computed(() => (this.isWatchStatusLoading() || this.watchStatus() !== null)
+    && this.formGroup.folderWatchMode().value() === this.library()?.folderWatchMode);
+  protected readonly isWatchPolling = computed(() => {
+    const status = this.watchStatus();
+    return !!status?.enableFolderWatching
+      && (status.method === FolderWatchMethod.Polling || status.method === FolderWatchMethod.Failed);
+  });
+  /**
+   * Retry does nothing while the server has folder watching off, so the problem hides with it
+   */
+  protected readonly watchProblem = computed(() => {
+    const status = this.watchStatus();
+    return status?.enableFolderWatching ? status.reason : null;
+  });
+  protected readonly watchBadgeColor = computed<TagBadgeColor>(() => {
+    const status = this.watchStatus();
+    if (!status?.enableFolderWatching || status.method === FolderWatchMethod.Off) return 'secondary';
+    if (status.method === FolderWatchMethod.Trial || status.method === FolderWatchMethod.FileWatcher) return 'primary';
+    return 'default';
+  });
+  protected readonly watchBadgeFill = computed(() =>
+    this.watchStatus()?.enableFolderWatching && this.watchStatus()?.method === FolderWatchMethod.FileWatcher ? 'filled' : 'outline');
+
   languageSettings = signal<TypeaheadConfig<Language> | null>(null);
 
   setupStep = signal<StepID>(StepID.General);
@@ -242,8 +279,15 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.library() !== undefined) {
+    const library = this.library();
+    if (library !== undefined) {
       this.isAddLibrary.set(false);
+      this.isWatchStatusLoading.set(true);
+      this.libraryService.getWatchStatus(library.id).pipe(
+        takeUntilDestroyed(this.destroyRef),
+        tap(status => this.watchStatus.set(status)),
+        finalize(() => this.isWatchStatusLoading.set(false))
+      ).subscribe();
     }
 
     this.chooserConfig.set(this.coverChooserConfigFactory.forLibrary(this.library()));
@@ -399,6 +443,19 @@ export class LibrarySettingsModalComponent implements OnInit {
           this.checkForFilesAtRoot(true);
         }
       }
+    });
+  }
+
+  retryFolderWatch() {
+    const library = this.library();
+    if (library === undefined) return;
+
+    this.isRetryingWatch.set(true);
+    this.libraryService.retryFolderWatch(library.id).pipe(
+      finalize(() => this.isRetryingWatch.set(false))
+    ).subscribe(status => {
+      this.watchStatus.set(status);
+      this.toastr.success(translate('library-settings-modal.watch-status-retried', {name: library.name}));
     });
   }
 

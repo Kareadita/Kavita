@@ -340,10 +340,26 @@ public class LibraryController(
     [HttpPost("folder-watch/retry")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [LibraryAccess]
-    public ActionResult RetryFolderWatch(int libraryId)
+    public async Task<ActionResult<FolderWatchStatusDto>> RetryFolderWatch(int libraryId)
     {
-        BackgroundJob.Enqueue<IFolderWatchService>(s => s.RetryAsync(libraryId));
-        return Ok();
+        var status = await folderWatchService.RetryAsync(libraryId);
+        if (status == null) return NotFound();
+
+        return Ok(status);
+    }
+
+    /// <summary>
+    /// How the library notices changes now and why
+    /// </summary>
+    [HttpGet("watch-status")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [LibraryAccess]
+    public async Task<ActionResult<FolderWatchStatusDto>> GetWatchStatus(int libraryId)
+    {
+        var status = await folderWatchService.GetStatusAsync(libraryId);
+        if (status == null) return NotFound();
+
+        return Ok(status);
     }
 
     /// <summary>

@@ -9,6 +9,7 @@ import {DirectoryDto} from '../_models/system/directory-dto';
 import {EVENTS, MessageHubService} from "./message-hub.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {MetadataProvider} from "../_models/kavitaplus/metadata-provider.enum";
+import {FolderWatchStatus} from "../_models/library/folder-watch-status";
 
 
 @Injectable({
@@ -108,6 +109,14 @@ export class LibraryService {
 
   getLibraries() {
     return this.httpClient.get<Library[]>(this.baseUrl + 'library/libraries');
+  }
+
+  getWatchStatus(libraryId: number) {
+    return this.httpClient.get<FolderWatchStatus>(this.baseUrl + 'library/watch-status?libraryId=' + libraryId);
+  }
+
+  retryFolderWatch(libraryId: number) {
+    return this.httpClient.post<FolderWatchStatus>(this.baseUrl + 'library/folder-watch/retry?libraryId=' + libraryId, {});
   }
 
   getLibrariesForUser(userId: number) {

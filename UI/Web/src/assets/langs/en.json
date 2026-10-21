@@ -842,6 +842,29 @@
         "polling": "Periodically checks the folders. Slower than File Watcher, but works everywhere."
     },
 
+    "folder-watch-status-pipe": {
+        "server-off": "Off",
+        "off": "Not watched",
+        "trial": "Testing",
+        "watching": "Watching",
+        "polling": "Polling"
+    },
+
+    "folder-watch-status-detail-pipe": {
+        "server-off": "Folder watching is off for the server.",
+        "trial": "Watching, and checking the watcher against each scan. {{successes}} of {{needed}} changes caught so far. New files move this forward.",
+        "trial-waiting-scan": "{{successes}} of {{needed}} changes caught. Waiting for a full library scan.",
+        "missed-change": "The watcher missed a change in {{folder}}.",
+        "errors": "Too many errors watching {{folder}}.",
+        "polling": "Checks the folders on a schedule.",
+        "polling-network": "A folder is on a network share, so Kavita checks the folders on a schedule."
+    },
+
+    "folder-watch-fallback-reason-pipe": {
+        "errors": "Watcher failed",
+        "missed-change": "Missed a change"
+    },
+
     "age-rating-pipe": {
         "unknown": "Unknown",
         "early-childhood": "Early Childhood",
@@ -2033,6 +2056,10 @@
         "allow-metadata-matching-label": "Allow Metadata Matching",
         "allow-metadata-matching-tooltip": "Should Kavita download metadata for Series within this Library. This will only occur if the server has an active Kavita+ Subscription.",
         "folder-watch-mode-label": "Folder Watching",
+        "watch-status-label": "Status",
+        "watch-status-retry": "Retry",
+        "watch-status-retried": "{{name}} is watching for changes again",
+        "watch-status-replace-caveat": "Files replaced in place show up at the next scheduled scan.",
         "include-in-dashboard-label": "Include in Dashboard",
         "include-in-dashboard-tooltip": "Should series from the library be included on the Dashboard. This affects all streams, like On Deck, Recently Updated, Recently Added, or any custom additions.",
         "include-in-search-label": "Include in Search",
@@ -2393,7 +2420,7 @@
         "delete-library": "Delete Library",
         "delete-library-by-name": "Delete {{name}}",
         "edit-library": "Edit",
-        "edit-library-by-name": "Delete {{name}}",
+        "edit-library-by-name": "Edit {{name}}",
         "folder-count": "{{num}} folders",
         "actions-header": "{{manage-users.actions-header}}",
         "name-header": "{{manage-users.name-header}}",
