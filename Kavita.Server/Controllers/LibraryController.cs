@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
-using EasyCaching.Core;
 using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -48,12 +47,9 @@ public class LibraryController(
     IUnitOfWork unitOfWork,
     IEventHub eventHub,
     IFolderWatchService folderWatchService,
-    IEasyCachingProviderFactory cachingProviderFactory,
     ILocalizationService localizationService)
     : BaseApiController
 {
-    private readonly IEasyCachingProvider _libraryCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.Library);
-    private const string CacheKey = "library_";
 
     /// <summary>
     /// Creates a new Library. Upon library creation, adds new library to all Admin accounts.
@@ -136,8 +132,6 @@ public class LibraryController(
         {
             await unitOfWork.CommitAsync(ct);
         }
-
-        await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey, ct);
 
         if (library.FolderWatchMode != FolderWatchMode.Off)
         {
@@ -246,19 +240,13 @@ public class LibraryController(
     }
 
     /// <summary>
-    /// Get all libraries a giver username has access to. And cache them for 24h
+    /// Get all libraries a given username has access to
     /// </summary>
     /// <param name="username"></param>
     /// <returns></returns>
-    private async Task<IList<LibraryDto>> GetLibrariesForUser(string username, CancellationToken ct = default)
+    private Task<IList<LibraryDto>> GetLibrariesForUser(string username, CancellationToken ct = default)
     {
-        var cacheKey = CacheKey + username;
-        var result = await _libraryCacheProvider.GetAsync<IList<LibraryDto>>(cacheKey, ct);
-        if (result.HasValue) return result.Value;
-
-        var ret = await unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username, ct);
-        await _libraryCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromHours(24), ct);
-        return ret;
+        return unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username, ct);
     }
 
     /// <summary>
@@ -321,8 +309,6 @@ public class LibraryController(
         if (await unitOfWork.CommitAsync(ct))
         {
             logger.LogInformation("Added: {SelectedLibraries} to {UserId}", libraryString.Sanitize(), user.Id);
-            // Bust cache
-            await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey, ct);
 
             unitOfWork.UserRepository.Update(user);
 
@@ -587,7 +573,6 @@ public class LibraryController(
 
             await unitOfWork.CommitAsync(ct);
 
-            await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey, ct);
             await eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
                 MessageFactory.SideNavUpdateEvent(userId), false, ct);
 
@@ -684,8 +669,6 @@ public class LibraryController(
 
         await eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
             MessageFactory.SideNavUpdateEvent(userId), false, ct);
-
-        await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey, ct);
 
         return Ok(await unitOfWork.LibraryRepository.GetLibraryDtoByIdAsync(library.Id, ct));
 
