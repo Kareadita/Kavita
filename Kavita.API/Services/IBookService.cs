@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -60,4 +61,5 @@ public interface IBookService
     Task<int> GetWordCountBetweenXPaths(string bookFilePath, string startXpath, int startPage, string endXpath, int endPage, CancellationToken ct = default);
     Task<string> CopyImageToTempFromBook(int chapterId, BookmarkDto bookmarkDto, string cachedBookPath, CancellationToken ct = default);
     Task<BookResourceResultDto> GetResourceAsync(string bookFilePath, string requestedKey, CancellationToken ct = default);
+    Task<(HtmlDocument?, int)> GetDocumentAsync(string filePath, string fileRef, int? filePos);
 }

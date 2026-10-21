@@ -229,11 +229,19 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             if (userProgress == null && progressDto.PageNum == 0) return true;
 
             // If a kobo span is present, always process updates
-            if (oldProgress == progressDto.PageNum && userProgress?.BookScrollId == progressDto.BookScrollId &&
-                string.IsNullOrEmpty(progressDto.KoboSpan))
+            if (oldProgress == progressDto.PageNum && userProgress?.BookScrollId == progressDto.BookScrollId)
             {
                 return true;
             }
+
+            // Remove KoboSpan on chapter completion to reduce amount of needed KoboSpan Syncs
+            // We will only start syncing them again if the book is read on a kobo afterwards
+            if (progressDto.PageNum > totalPages)
+            {
+                progressDto.KoboSpan = null;
+            }
+
+            var shouldSyncKoboSpan = !string.IsNullOrEmpty(userProgress?.KoboSpan);
 
             logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum} - {BookScrollId} - {Kobo}",
                 progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum, progressDto.BookScrollId, progressDto.KoboSpan);
@@ -271,6 +279,15 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                 {
                     BackgroundJob.Enqueue(() => readingSessionService.UpdateProgress(userId, progressDto,
                         clientInfoAccessor.Current, clientInfoAccessor.CurrentDeviceId));
+                }
+
+                if (shouldSyncKoboSpan)
+                {
+                    // TODO: Check if one is scheduled already. Waiting for new TaskScheduler code
+
+                    BackgroundJob.Schedule<IKoboSyncService>(
+                        s => s.SyncXPathToKoboSpan(userProgress.Id, CancellationToken.None)
+                     ,TimeSpan.FromMinutes(5));
                 }
 
                 await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,

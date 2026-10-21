@@ -33,4 +33,6 @@ public interface IKoboSyncService
 
     Task<KoboReadingStateDto?> GetProgress(int userId, int chapterId, CancellationToken cancellationToken);
     Task<KoboStateUpdateResultDto> SaveProgress(int userId, int chapterId, KoboReadingStateDto readingStateDto, CancellationToken cancellationToken);
+
+    Task SyncXPathToKoboSpan(int progressId, CancellationToken cancellationToken);
 }

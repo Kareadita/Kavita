@@ -11,6 +11,13 @@ public static class KoboPositionHelper
     private const string BookInnerId = "book-inner";
     private const string ReaderBodyScope = "//body";
 
+    /// <summary>
+    /// Encodes an XPath as the best fitting KoboSpan
+    /// </summary>
+    /// <param name="readerDoc"></param>
+    /// <param name="kepubDoc"></param>
+    /// <param name="xPath"></param>
+    /// <returns></returns>
     public static string Encode(HtmlDocument readerDoc, HtmlDocument kepubDoc, string xPath)
     {
         var element = AnnotationHelper.FindElementByXPath(readerDoc, AnnotationHelper.DescopeXpath(xPath));
@@ -60,6 +67,13 @@ public static class KoboPositionHelper
             .Id ?? string.Empty;
     }
 
+    /// <summary>
+    /// Decodes a KoboSpan to the best fitting XPath (Moves upwards to the non KoboSpan)
+    /// </summary>
+    /// <param name="kepubDoc"></param>
+    /// <param name="readerDoc"></param>
+    /// <param name="koboSpan"></param>
+    /// <returns></returns>
     public static string Decode(HtmlDocument kepubDoc, HtmlDocument? readerDoc, string koboSpan)
     {
         var element = kepubDoc.GetElementbyId(koboSpan);

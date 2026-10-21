@@ -17,6 +17,7 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Progress;
 using Kavita.Models.Entities;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
@@ -406,10 +407,48 @@ internal class KoboSyncService(
         };
     }
 
+    public async Task SyncXPathToKoboSpan(int progressId, CancellationToken cancellationToken)
+    {
+        if (!kepubifyConverter.KepubifySupported)
+        {
+            logger.LogTrace("KoboSpan will not be synced, as kepubify is not supported");
+            return;
+        }
+
+        var progress = await unitOfWork.DataContext.AppUserProgresses.FirstOrDefaultAsync(p => p.Id  == progressId, cancellationToken);
+        if (progress == null || progress.BookScrollId is null) return;
+
+        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(progress.ChapterId, ct: cancellationToken);
+        if (chapter == null || chapter.Files.Count == 0) return;
+
+        if (chapter.Files.First().Format != MangaFormat.Epub)
+        {
+            return;
+        }
+
+        var epubPath = chapter.Files.First().FilePath;
+        var kepubPath = kepubifyConverter.BuildKepubifyPath(chapter.Id);
+        if (!fileSystem.File.Exists(kepubPath))
+        {
+            await kepubifyConverter.ConvertEpubToKepub(epubPath, kepubPath, cancellationToken);
+        }
+
+        var (readerDoc, _) = await bookService.GetDocumentAsync(epubPath, string.Empty, progress.PagesRead);
+        if (readerDoc == null) return;
+
+        var (kepubDoc, _) = await bookService.GetDocumentAsync(kepubPath, string.Empty, progress.PagesRead);
+        if (kepubDoc == null) return;
+
+        progress.KoboSpan = KoboPositionHelper.Encode(readerDoc, kepubDoc, progress.BookScrollId);
+
+        logger.LogTrace("Sync KoboSpan with XPath. {XPath} => {KoboSpan}", progress.BookScrollId, progress.KoboSpan);
+
+        await unitOfWork.CommitAsync(cancellationToken);
+    }
+
 
     private async Task SaveProgressInner(int userId, int chapterId, KoboReadingStateDto readingStateDto, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Saving kobo progress {@Dto}", readingStateDto);
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId, ct: cancellationToken);
         if (chapter == null) throw new KavitaNotFoundException();
 
@@ -473,6 +512,13 @@ internal class KoboSyncService(
             throw new KavitaException();
         }
 
+        if (chapter.Files.First().Format != MangaFormat.Epub)
+        {
+            // TODO: Decode our custom cbz page mapping
+            //progress.PageNum = int.Parse(file);
+            return;
+        }
+
         if (!kepubifyConverter.KepubifySupported)
         {
             logger.LogTrace("Kepubify is not supported, progress will be chapter at best");
@@ -491,39 +537,28 @@ internal class KoboSyncService(
             await kepubifyConverter.ConvertEpubToKepub(chapter.Files.First().FilePath, kepubPath, cancellationToken);
         }
 
-        using var kepub = await EpubReader.OpenBookAsync(kepubPath, BookService.LenientBookReaderOptions);
-        if (kepub == null)
+        var (kepubDoc, pageNum) = await bookService.GetDocumentAsync(kepubPath, file, null);
+        if (kepubDoc == null)
         {
             logger.LogWarning("Kepub was not available after conversion");
             await SetFallbackProgress();
             return;
         }
 
-
-        var counter = 0;
-        foreach (var fileRef in await kepub.GetReadingOrderAsync())
+        var (readerDoc, _) = await bookService.GetDocumentAsync(chapter.Files.First().FilePath, file, pageNum);
+        if (readerDoc == null)
         {
-            if (fileRef.FilePath != file)
-            {
-                counter++;
-                continue;
-            }
-
-            progress.PageNum = counter;
-            progress.KoboSpan = readingState.CurrentBookmark.Location?.Value;
-            if (string.IsNullOrEmpty(progress.KoboSpan))
-            {
-                return;
-            }
-
-            var content = await fileRef.ReadContentAsync();
-
-            var doc = new HtmlDocument {OptionFixNestedTags = true};
-            doc.LoadHtml(BookService.EscapeTags(content));
-
-            var readerDoc = await LoadReaderDocument(chapter, counter, fileRef.FilePath);
-            progress.BookScrollId = KoboPositionHelper.Decode(doc, readerDoc, progress.KoboSpan);
+            logger.LogWarning("Original epub could not be opened, not saving xpath");
+            await SetFallbackProgress();
             return;
+        }
+
+        progress.PageNum = pageNum;
+        progress.KoboSpan = readingState.CurrentBookmark.Location?.Value;
+        if (progress.KoboSpan is not null)
+        {
+            progress.BookScrollId = KoboPositionHelper.Decode(kepubDoc, readerDoc, progress.KoboSpan);
+            logger.LogTrace("Synced XPath with KoboSpan. {KoboSpan} => {XPath}", progress.KoboSpan, progress.BookScrollId);
         }
 
         return;
@@ -540,34 +575,6 @@ internal class KoboSyncService(
             // Reset if we can't translate
             progress.BookScrollId = null;
             progress.KoboSpan = readingState.CurrentBookmark.Location?.Value;
-        }
-    }
-
-    private async Task<HtmlDocument?> LoadReaderDocument(Chapter chapter, int pageNum, string filePath)
-    {
-        var chapterFile = chapter.Files.FirstOrDefault();
-        if (chapterFile == null) return null;
-
-        try
-        {
-            using var book = await EpubReader.OpenBookAsync(chapterFile.FilePath, BookService.LenientBookReaderOptions);
-            if (book == null) return null;
-
-            var readingOrder = await book.GetReadingOrderAsync();
-            var fileRef = readingOrder.FirstOrDefault(f => f.FilePath == filePath)
-                          ?? readingOrder.ElementAtOrDefault(pageNum);
-            if (fileRef == null) return null;
-
-            var content = await fileRef.ReadContentAsync();
-            var doc = new HtmlDocument {OptionFixNestedTags = true};
-            doc.LoadHtml(BookService.EscapeTags(content));
-
-            return doc;
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "Unable to load reader content for chapter {ChapterId}, Kobo progress will use the kepub structure", chapter.Id);
-            return null;
         }
     }
 

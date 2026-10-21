@@ -1464,6 +1464,38 @@ public partial class BookService(
         return BookResourceResultDto.Success(content, contentType, requestedKey);
     }
 
+    public async Task<(HtmlDocument?, int)> GetDocumentAsync(string filePath, string fileRef, int? filePos)
+    {
+        try
+        {
+            using var book = await EpubReader.OpenBookAsync(filePath, LenientBookReaderOptions);
+            if (book == null) return (null, 0);
+
+            var readingOrder = await book.GetReadingOrderAsync();
+
+            var contentRef = readingOrder.FirstOrDefault(f => f.FilePath == fileRef);
+            if (contentRef == null && filePos != null)
+            {
+                contentRef = readingOrder.ElementAtOrDefault(filePos.Value);
+            }
+
+            if (contentRef == null) return (null, 0);
+
+            var content = await contentRef.ReadContentAsync();
+
+            var doc = new HtmlDocument { OptionFixNestedTags = true };
+            doc.LoadHtml(EscapeTags(content));
+
+            return (doc, filePos ?? readingOrder.IndexOf(contentRef));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to read document {FileRef}@{FilePos} in {Path}", fileRef, filePos, filePath);
+        }
+
+        return (null, 0);
+    }
+
 
     /// <summary>
     /// Parses out Title from book. Chapters and Volumes will always be "0". This expects only an epub file
