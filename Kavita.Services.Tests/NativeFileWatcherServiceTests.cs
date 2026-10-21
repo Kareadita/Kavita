@@ -153,6 +153,9 @@ public class NativeFileWatcherServiceTests : WatchedLibraryFoldersTest
         Assert.Equal(4, actions.Count(a => a == WatcherErrorAction.Ignore));
     }
 
+    /// <summary>
+    /// Errors count per folder, so one busy folder does not move the libraries of the other folders to polling
+    /// </summary>
     [Fact]
     public async Task ThreeErrorsOnOneFolder_DowngradesThatFolder()
     {
@@ -270,6 +273,9 @@ public class NativeFileWatcherServiceTests : WatchedLibraryFoldersTest
         Assert.False(nativeFileWatcher.SawChange(folder, before));
     }
 
+    /// <summary>
+    /// With its event pruned, an older change must read as unwatched (skipped), not as unseen (a miss)
+    /// </summary>
     [Fact]
     public async Task Prune_ForgetsOldEventsAndMovesWatchingSince()
     {

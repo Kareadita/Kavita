@@ -663,6 +663,17 @@ public static class MessageFactory
         });
     }
 
+    public static SignalRMessageDto FolderWatchFallbackEvent(int libraryId, string libraryName, string folder, FolderWatchFallbackReason reason)
+    {
+        const string title = "Library is now using Polling";
+        var subtitle = reason == FolderWatchFallbackReason.Errors
+            ? $"Too many errors occurred watching {folder}, so {libraryName} was switched to Polling. Use Retry on the library's Folder tab to watch again"
+            : $"The watcher missed a change in {folder}, so {libraryName} was switched to Polling. Use Retry on the library's Folder tab to watch again";
+
+        return CodedEvent(Info, MessageEventCode.FolderWatchFallback, title, subtitle,
+            new FolderWatchFallbackEventBodyDto(Info, title, subtitle, libraryId, libraryName, folder, reason));
+    }
+
     /// <param name="scheduledForUtc">Pass the same value given to Hangfire. A later retime can move the job, ScanRescheduled carries the new time</param>
     public static SignalRMessageDto ScanLibrariesDelayedEvent(DateTime scheduledForUtc)
     {

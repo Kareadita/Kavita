@@ -41,6 +41,9 @@ public class LibraryFolderWatchStateTests
         Assert.Equal(FolderWatchMethod.FileWatcher, state.WatchMethod(FolderWatchMode.Automatic));
     }
 
+    /// <summary>
+    /// A downgrade wins over File Watcher: a watcher that keeps failing sees nothing, so polling is the floor
+    /// </summary>
     [Theory]
     [InlineData(FolderWatchMode.Automatic, FolderWatchMethod.Failed)]
     [InlineData(FolderWatchMode.FileWatcher, FolderWatchMethod.Failed)]

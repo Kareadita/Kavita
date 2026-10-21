@@ -9,7 +9,9 @@ using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
+using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
+using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Scanner;
@@ -23,7 +25,7 @@ namespace Kavita.Services.Scanner;
 /// </summary>
 public class FolderWatchService(IUnitOfWork unitOfWork, ILogger<FolderWatchService> logger, ITaskScheduler taskScheduler,
     IMountDetectorService mountDetector, INativeFileWatcherService nativeFileWatcher, IFolderPollerService folderPoller,
-    IDirectoryService directoryService)
+    IDirectoryService directoryService, IEventHub eventHub)
     : IFolderWatchService
 {
     /// <summary>
@@ -233,28 +235,20 @@ public class FolderWatchService(IUnitOfWork unitOfWork, ILogger<FolderWatchServi
         if (library == null) return;
 
         var roots = library.Folders.Select(f => Parser.NormalizePath(f.Path)).Distinct().ToList();
+        var state = library.FolderWatchState;
+        var isAudited = state.WatchMethod(library.FolderWatchMode) is FolderWatchMethod.Trial or FolderWatchMethod.FileWatcher;
+        var audits = isAudited ? JudgeReadFolders(library, roots, readFolders, scanStartedUtc) : [];
+
         if (isLibraryScan)
         {
-            // That scan read every folder that changed before it started, so their events are no longer needed
+            // After judging: the cutoff moves WatchingSince past every change old enough to be a miss in this scan
             foreach (var root in roots)
             {
                 nativeFileWatcher.Prune(root, scanStartedUtc - TaskScheduler.WatcherScanCap);
             }
         }
 
-        var state = library.FolderWatchState;
-        if (state.WatchMethod(library.FolderWatchMode) is not (FolderWatchMethod.Trial or FolderWatchMethod.FileWatcher)) return;
-
-        var fingerprints = roots.ToDictionary(r => r, r => mountDetector.Detect(r)?.Fingerprint);
-        var audits = readFolders
-            .Select(folder => new FolderAudit(folder, folder.DeepestContainingFolder(roots) is { } root ? fingerprints[root] : null))
-            .Where(audit => audit.Fingerprint != null)
-            .Select(audit => audit with { Outcome = Judge(audit.Folder, scanStartedUtc) })
-            .ToList();
-        foreach (var audit in audits)
-        {
-            logger.LogDebug("[FolderWatchService] {Library}: audit of {Folder} is {Outcome}", library.Name, audit.Folder, audit.Outcome);
-        }
+        if (!isAudited) return;
 
         var audited = state with
         {
@@ -266,10 +260,29 @@ public class FolderWatchService(IUnitOfWork unitOfWork, ILogger<FolderWatchServi
         unitOfWork.LibraryRepository.Update(library);
         await unitOfWork.CommitAsync();
 
-        if (library.FolderWatchMode == FolderWatchMode.Automatic && audited.WatchMethod(library.FolderWatchMode) == FolderWatchMethod.Failed)
+        if (audited.WatchMethod(library.FolderWatchMode) != FolderWatchMethod.Failed) return;
+
+        await RestartWatching();
+
+        var miss = audits.First(a => a.Outcome == AuditOutcome.Miss);
+        await eventHub.SendMessageAsync(MessageFactory.Info,
+            MessageFactory.FolderWatchFallbackEvent(library.Id, library.Name, miss.Folder, FolderWatchFallbackReason.MissedChange));
+    }
+
+    private List<FolderAudit> JudgeReadFolders(Library library, List<string> roots, IReadOnlyCollection<string> readFolders, DateTime scanStartedUtc)
+    {
+        var fingerprints = roots.ToDictionary(r => r, r => mountDetector.Detect(r)?.Fingerprint);
+        var audits = readFolders
+            .Select(folder => new FolderAudit(folder, folder.DeepestContainingFolder(roots) is { } root ? fingerprints[root] : null))
+            .Where(audit => audit.Fingerprint != null)
+            .Select(audit => audit with { Outcome = Judge(audit.Folder, scanStartedUtc) })
+            .ToList();
+        foreach (var audit in audits)
         {
-            await RestartWatching();
+            logger.LogDebug("[FolderWatchService] {Library}: audit of {Folder} is {Outcome}", library.Name, audit.Folder, audit.Outcome);
         }
+
+        return audits;
     }
 
     /// <summary>
@@ -368,11 +381,15 @@ public class FolderWatchService(IUnitOfWork unitOfWork, ILogger<FolderWatchServi
             Fingerprint = mountDetector.Detect(folder)?.Fingerprint,
             AtUtc = DateTime.UtcNow,
         };
+        var fellBack = new List<Library>();
         foreach (var library in libraries)
         {
             var from = library.FolderWatchState.WatchMethod(library.FolderWatchMode);
             library.FolderWatchState = library.FolderWatchState with { Downgrade = marker };
             unitOfWork.LibraryRepository.Update(library);
+            if (from == FolderWatchMethod.Failed) continue;
+
+            fellBack.Add(library);
             logger.LogWarning("[FolderWatchService] {Library} switched from {From} -> Polling until Retry due to watcher failing on {Folder}",
                 library.Name, from, folder);
         }
@@ -382,7 +399,14 @@ public class FolderWatchService(IUnitOfWork unitOfWork, ILogger<FolderWatchServi
             await unitOfWork.CommitAsync();
         }
 
+        // The failed watcher already stopped every watcher, so restart before anything else can throw
         await RestartWatching();
+
+        foreach (var library in fellBack)
+        {
+            await eventHub.SendMessageAsync(MessageFactory.Info,
+                MessageFactory.FolderWatchFallbackEvent(library.Id, library.Name, folder, FolderWatchFallbackReason.Errors));
+        }
     }
 
     internal static void EnqueueChange(string path, bool isDirectoryChange)

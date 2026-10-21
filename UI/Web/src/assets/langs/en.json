@@ -3217,7 +3217,10 @@
         "cleanup-on-hold-label": "Cleanup postponed",
         "cleanup-on-hold-description": "A media conversion is running. Cleanup runs after it.",
         "word-count-failed-label": "Couldn’t count words in {{seriesName}}",
-        "word-count-failed-description": "Can’t read {{filePath}}."
+        "word-count-failed-description": "Can’t read {{filePath}}.",
+        "folder-watch-fallback-label": "Library is now using Polling",
+        "folder-watch-fallback-errors-description": "Too many errors occurred watching {{folder}}, so {{libraryName}} was switched to Polling. Use Retry on the library’s Folder tab to watch again.",
+        "folder-watch-fallback-missed-change-description": "The watcher missed a change in {{folder}}, so {{libraryName}} was switched to Polling. Use Retry on the library’s Folder tab to watch again."
     },
 
     "event-action-pipe": {

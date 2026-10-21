@@ -40,6 +40,12 @@ public static class MessageEventCode
 
     #endregion
 
+    #region Folder Watching
+
+    public const string FolderWatchFallback = "folder-watch-fallback";
+
+    #endregion
+
     #region Tasks
 
     public const string BackupFolderUnwritable = "backup-folder-unwritable";

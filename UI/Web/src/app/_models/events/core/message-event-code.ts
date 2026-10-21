@@ -25,6 +25,8 @@ export enum MessageEventCode {
   ScanLibraryDelayed = 'scan-library-delayed',
   ScanSeriesDelayed = 'scan-series-delayed',
 
+  FolderWatchFallback = 'folder-watch-fallback',
+
   BackupFolderUnwritable = 'backup-folder-unwritable',
   BackupExists = 'backup-exists',
   CleanupOnHold = 'cleanup-on-hold',

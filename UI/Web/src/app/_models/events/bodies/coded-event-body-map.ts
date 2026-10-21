@@ -12,6 +12,7 @@ import {ScanSeriesDelayedBody} from './scan-series-delayed-body';
 import {BackupFolderUnwritableBody} from './backup-folder-unwritable-body';
 import {BackupExistsBody} from './backup-exists-body';
 import {WordCountFailedBody} from './word-count-failed-body';
+import {FolderWatchFallbackBody} from './folder-watch-fallback-body';
 
 /**
  * Body of a coded Info or Error, by code. Scan loop codes are left out, they ride on progress messages with their own bodies
@@ -33,6 +34,7 @@ export interface CodedEventBodyMap {
   [MessageEventCode.ScanLibrariesDelayed]: ScanLibrariesDelayedBody;
   [MessageEventCode.ScanLibraryDelayed]: ScanLibraryDelayedBody;
   [MessageEventCode.ScanSeriesDelayed]: ScanSeriesDelayedBody;
+  [MessageEventCode.FolderWatchFallback]: FolderWatchFallbackBody;
   [MessageEventCode.BackupFolderUnwritable]: BackupFolderUnwritableBody;
   [MessageEventCode.BackupExists]: BackupExistsBody;
   [MessageEventCode.CleanupOnHold]: CodedEventBody;

@@ -2,6 +2,7 @@ using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
+using Kavita.API.Services.SignalR;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities;
@@ -49,7 +50,7 @@ public class FolderWatchServiceTests : WatchedLibraryFoldersTest
             : new MountInfo("/", "/dev/sda1", "ext4"));
 
         return new FolderWatchService(unitOfWork, Substitute.For<ILogger<FolderWatchService>>(), Substitute.For<ITaskScheduler>(),
-            mountDetector, _nativeFileWatcher, _folderPoller, Substitute.For<IDirectoryService>());
+            mountDetector, _nativeFileWatcher, _folderPoller, Substitute.For<IDirectoryService>(), Substitute.For<IEventHub>());
     }
 
     [Fact]
@@ -90,6 +91,9 @@ public class FolderWatchServiceTests : WatchedLibraryFoldersTest
     private static readonly MountInfo LocalMount = new("/", "/dev/sda1", "ext4");
     private static readonly MountInfo OtherLocalMount = new("/data", "/dev/sdb1", "ext4");
 
+    /// <summary>
+    /// Every library save restarts watching, which must not reset a mount's progress through Trial
+    /// </summary>
     [Fact]
     public void DetectedState_KeepsCounters()
     {
@@ -108,6 +112,9 @@ public class FolderWatchServiceTests : WatchedLibraryFoldersTest
         Assert.Equal(1, entry.AuditedScans);
     }
 
+    /// <summary>
+    /// Moving the folder to another disk or share is a fresh start, so the old disk's watcher errors no longer hold it at polling
+    /// </summary>
     [Fact]
     public void DetectedState_DropsDowngradeOfGoneMount()
     {
