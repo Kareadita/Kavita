@@ -9,10 +9,12 @@ using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
+using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.Common.Extensions;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.Kobo;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.User;
@@ -267,6 +269,65 @@ public class KoboController(
         }
 
         return NotFound();
+    }
+
+    [HttpPost("v1/library/{bookId}")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
+    public async Task<ActionResult> AddBook(string bookId)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        if (!int.TryParse(bookId, out var kavitaId))
+        {
+            return await ProxyRequestIfEnabled();
+        }
+
+        var syncPreferences = await unitOfWork.UserRepository.GetKoboSyncPreferences(UserId, ct);
+        if (syncPreferences.SyncCollection == 0)
+        {
+            // We cannot handle this for non collection syncs
+            return Ok();
+        }
+
+        var seriesId = await unitOfWork.ChapterRepository.GetSeriesIdForChapter(kavitaId, ct);
+        if (seriesId is null) return NotFound();
+
+        var userCollection = await unitOfWork.CollectionTagRepository.GetCollectionAsync(syncPreferences.SyncCollection, CollectionIncludes.Series, ct: ct);
+        if (userCollection is null) return NotFound();
+
+        if (userCollection.Items.Any(i => i.Id == seriesId))
+        {
+            return BadRequest();
+        }
+
+        var stub = new Series
+        {
+            Id = seriesId.Value,
+            Name = null,
+            NormalizedName = null,
+            NormalizedLocalizedName = null,
+            SortName = null,
+            LocalizedName = null,
+            OriginalName = null
+        };
+
+        unitOfWork.DataContext.Series.Attach(stub);
+        userCollection.Items.Add(stub);
+        await unitOfWork.CommitAsync(ct);
+
+        return Ok(new KoboAddBookResultResponse
+        {
+            Result = new KoboDetailResults<KoboAddBookResponse>
+            {
+                DetailedResults = [new KoboAddBookResponse
+                    {
+                        RevisionId = bookId,
+                        CrossRevisionId = bookId,
+                        EntitlementId = bookId,
+                    }
+                ]
+            }
+        });
     }
 
     #endregion

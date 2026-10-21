@@ -442,6 +442,13 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
         var syncPreferences = await context.AppUserPreferences.Where(p => p.AppUserId == userId)
             .Select(p => p.KoboSyncPreferences)
             .FirstAsync(ct);
+        // Kobo only displays non-owned recommendations. The collection sync is the only way for us to manually add books
+        // without it. Recommendations are not usable
+        if (syncPreferences.SyncCollection == 0)
+        {
+            return KoboRecommendationResponseDto.Empty;
+        }
+
         var ageRestriction = await context.AppUser.GetUserAgeRestriction(userId, ct);
 
         var chapterIds = await context.ExternalRecommendation
@@ -461,7 +468,7 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .Take(maxRecommendationCount)
             .RestrictByLibrary(context.Library.GetUserLibraries(userId))
             .RestrictAgainstAgeRestriction(ageRestriction)
-            .FilterByKoboSyncSettings(syncPreferences)
+            .FilterAgainstKoboSyncSettings(syncPreferences)
             .Select(c => c.Id)
             .ToListAsync(ct);
 
