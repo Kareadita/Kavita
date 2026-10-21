@@ -31,7 +31,7 @@ public abstract class WatchedLibraryFoldersTest : IDisposable
         }
     }
 
-    protected NativeFileWatcherService CreateNativeWatcher()
+    protected NativeFileWatcherService CreateNativeWatcher(TimeProvider? timeProvider = null)
     {
         var directory = Substitute.For<IDirectory>();
         directory.Exists(Arg.Any<string?>()).Returns(c =>
@@ -42,7 +42,8 @@ public abstract class WatchedLibraryFoldersTest : IDisposable
         var fileSystem = Substitute.For<IFileSystem>();
         fileSystem.Directory.Returns(directory);
 
-        var watcher = new NativeFileWatcherService(fileSystem, Substitute.For<ILogger<NativeFileWatcherService>>());
+        var watcher = new NativeFileWatcherService(fileSystem, Substitute.For<ILogger<NativeFileWatcherService>>(),
+            timeProvider ?? TimeProvider.System);
         _watchers.Add(watcher);
         return watcher;
     }

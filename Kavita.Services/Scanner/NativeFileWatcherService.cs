@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
@@ -7,30 +8,52 @@ using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Services.Scanner;
+using Kavita.Common.Extensions;
+using Kavita.Models.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Scanner;
 
 /// <summary>
-/// Watches library folders with <see cref="FileSystemWatcher"/> and hands each change to <see cref="FolderWatchService"/>
+/// Watches library folders with <see cref="FileSystemWatcher"/> and hands each change to <see cref="FolderWatchService"/>.
+/// Records when each folder last raised an event, for the scan audit
 /// </summary>
-public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFileWatcherService> logger) : INativeFileWatcherService
+public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFileWatcherService> logger, TimeProvider timeProvider)
+    : INativeFileWatcherService
 {
     private static readonly TimeSpan MinRetryDelay = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromHours(1);
+    private static readonly TimeSpan ErrorWindow = TimeSpan.FromMinutes(10);
+    /// <summary>
+    /// Each restart is immediate, so one large copy overflows the new watcher again while its events still arrive.
+    /// Errors closer together than this count once
+    /// </summary>
+    private static readonly TimeSpan OneBurst = TimeSpan.FromMinutes(1);
+    private const int ErrorsToDowngrade = 3;
 
     private readonly List<FileSystemWatcher> _watchers = [];
     private readonly SemaphoreSlim _lock = new(1, 1);
-    /// <summary>
-    /// Counts within a time frame how many times the buffer became full. Is used to reschedule watching to start much later rather than instantly
-    /// </summary>
-    private int _bufferFullCounter;
-    private int _restartCounter;
-    private DateTime _lastErrorTime = DateTime.MinValue;
     private DateTime _retryScheduledUntil = DateTime.MinValue;
     private TimeSpan _retryDelay = MinRetryDelay;
 
+    /// <summary>
+    /// Each watched folder's errors within <see cref="ErrorWindow"/>. Caller must hold <see cref="_lock"/>
+    /// </summary>
+    private readonly Dictionary<string, List<DateTime>> _errorsUtc = new();
+    private readonly ConcurrentDictionary<string, DateTime> _startedUtc = new();
+    private readonly ConcurrentDictionary<string, DateTime> _prunedBeforeUtc = new();
+    /// <summary>
+    /// Folder to its last event. An event records the folder it happened in and that folder's parent
+    /// </summary>
+    private readonly ConcurrentDictionary<string, DateTime> _lastEventUtc = new();
+    /// <summary>
+    /// Folders a Created event made, which cover everything below them
+    /// </summary>
+    private readonly ConcurrentDictionary<string, DateTime> _createdUtc = new();
+
     internal IReadOnlyList<FileSystemWatcher> Watchers => [.. _watchers];
+
+    private DateTime UtcNow => timeProvider.GetUtcNow().UtcDateTime;
 
     public async Task<TimeSpan?> WatchAsync(IReadOnlyList<string> folders)
     {
@@ -51,6 +74,7 @@ public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFile
                 if (TryStartWatcher(libraryFolder))
                 {
                     watchedFolders.Add(libraryFolder);
+                    _startedUtc[Parser.NormalizePath(libraryFolder)] = UtcNow;
                 }
             }
             logger.LogInformation("[NativeFileWatcherService] Watching {Count} folders", watchedFolders.Count);
@@ -121,6 +145,7 @@ public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFile
     /// <remarks>Caller must hold <see cref="_lock"/></remarks>
     private void StopWatchers()
     {
+        _startedUtc.Clear();
         if (_watchers.Count == 0) return;
 
         logger.LogInformation("[NativeFileWatcherService] Stopping watching folders");
@@ -131,21 +156,77 @@ public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFile
         _watchers.Clear();
     }
 
+    public bool SawChange(string folder, DateTime sinceUtc)
+    {
+        if (_lastEventUtc.TryGetValue(folder, out var lastEvent) && lastEvent >= sinceUtc) return true;
+
+        return _createdUtc.Any(created => created.Value >= sinceUtc && folder.IsSameOrInsideFolder(created.Key));
+    }
+
+    public DateTime? WatchingSince(string folder)
+    {
+        var watchedFolder = folder.DeepestContainingFolder(_startedUtc.Keys);
+        if (watchedFolder == null || !_startedUtc.TryGetValue(watchedFolder, out var started)) return null;
+
+        // Library folders can nest, and pruning the outer one also drops events inside the inner one
+        var pruned = _prunedBeforeUtc
+            .Where(p => folder.IsSameOrInsideFolder(p.Key))
+            .Select(p => p.Value)
+            .DefaultIfEmpty(DateTime.MinValue)
+            .Max();
+
+        return pruned > started ? pruned : started;
+    }
+
+    public void Prune(string libraryFolder, DateTime beforeUtc)
+    {
+        var root = Parser.NormalizePath(libraryFolder);
+        _prunedBeforeUtc.AddOrUpdate(root, beforeUtc, (_, current) => current > beforeUtc ? current : beforeUtc);
+
+        foreach (var events in new[] { _lastEventUtc, _createdUtc })
+        {
+            foreach (var old in events.Where(e => e.Value < beforeUtc && e.Key.IsSameOrInsideFolder(root)).ToList())
+            {
+                events.TryRemove(old);
+            }
+        }
+    }
+
+    private void RecordEvent(string path, bool isFolder, bool created = false)
+    {
+        var now = UtcNow;
+        var normalized = Parser.NormalizePath(path);
+        var folder = isFolder ? normalized : normalized.FolderOf();
+
+        _lastEventUtc[folder] = now;
+        _lastEventUtc[folder.FolderOf()] = now;
+        if (created)
+        {
+            _createdUtc[folder] = now;
+        }
+    }
+
     private void OnChanged(object sender, FileSystemEventArgs e)
     {
         logger.LogTrace("[NativeFileWatcherService] Changed: {FullPath}, {Name}, {ChangeType}", e.FullPath, e.Name, e.ChangeType);
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
+
         // NTFS holds a folder's Changed back until the folder is next listed, so Kavita's own validation would release it
-        // and scan again. Every change inside the folder also raises an event on its file, or Renamed
+        // and scan again, and the scan audit would count the scan's own listing as the watcher seeing the change. Every
+        // change inside the folder also raises an event on its file, or Renamed
         if (fileSystem.Directory.Exists(e.FullPath)) return;
 
+        RecordEvent(e.FullPath, false);
         FolderWatchService.EnqueueChange(e.FullPath, false);
     }
 
     private void OnRenamed(object sender, RenamedEventArgs e)
     {
         logger.LogTrace("[NativeFileWatcherService] Renamed: {OldFullPath} to {FullPath}", e.OldFullPath, e.FullPath);
-        if (fileSystem.Directory.Exists(e.FullPath))
+        var isFolder = fileSystem.Directory.Exists(e.FullPath);
+        RecordEvent(e.FullPath, isFolder);
+        RecordEvent(e.OldFullPath, isFolder);
+        if (isFolder)
         {
             FolderWatchService.EnqueueChange(e.FullPath, true);
             return;
@@ -161,31 +242,36 @@ public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFile
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
         logger.LogTrace("[NativeFileWatcherService] Created: {FullPath}, {Name}", e.FullPath, e.Name);
-        FolderWatchService.EnqueueChange(e.FullPath, fileSystem.Directory.Exists(e.FullPath));
+        var isFolder = fileSystem.Directory.Exists(e.FullPath);
+        RecordEvent(e.FullPath, isFolder, isFolder);
+        FolderWatchService.EnqueueChange(e.FullPath, isFolder);
     }
 
     private void OnDeleted(object sender, FileSystemEventArgs e)
     {
         logger.LogTrace("[NativeFileWatcherService] Deleted: {FullPath}, {Name}", e.FullPath, e.Name);
         // The path is gone, so a file is told apart by a type Kavita reads: a folder "Vol. 1" has an extension too
-        FolderWatchService.EnqueueChange(e.FullPath, !IsReadingFile(e.FullPath));
+        var isFolder = !IsReadingFile(e.FullPath);
+        RecordEvent(e.FullPath, isFolder);
+        FolderWatchService.EnqueueChange(e.FullPath, isFolder);
     }
 
     /// <summary>
-    /// A folder that cannot be reached restarts watching right away, retrying until it is back. Any other error is counted: 3 in 10 minutes
-    /// suspends watching for an hour, and after 3 suspends folder watching is turned off
+    /// A folder that cannot be reached restarts watching right away, retrying until it is back. Any other error restarts
+    /// watching too, and the third on one folder within 10 minutes makes the libraries with that folder poll
     /// </summary>
     private void OnError(object sender, ErrorEventArgs e)
     {
         var watcher = (FileSystemWatcher) sender;
         var exception = e.GetException();
+        var folder = Parser.NormalizePath(watcher.Path);
 
         // Windows can raise this synchronously inside EnableRaisingEvents, while WatchAsync holds the lock
         Task.Run(async () =>
         {
             try
             {
-                ScheduleRecovery(await HandleErrorAsync(watcher, exception));
+                ScheduleRecovery(await HandleErrorAsync(watcher, exception), folder);
             }
             catch (Exception ex)
             {
@@ -194,34 +280,18 @@ public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFile
         });
     }
 
-    internal static void ScheduleRecovery(WatcherErrorAction action)
+    private static void ScheduleRecovery(WatcherErrorAction action, string folder)
     {
         switch (action)
         {
             case WatcherErrorAction.FolderUnreachable:
-                BackgroundJob.Enqueue<IFolderWatchService>(s => s.RestartWatching());
-                break;
             case WatcherErrorAction.RestartNow:
                 BackgroundJob.Enqueue<IFolderWatchService>(s => s.RestartWatching());
-                ScheduleBufferOverflowDecrement();
                 break;
-            case WatcherErrorAction.Suspend:
-                BackgroundJob.Schedule<IFolderWatchService>(s => s.RestartWatching(), TimeSpan.FromHours(1));
-                ScheduleBufferOverflowDecrement();
-                break;
-            case WatcherErrorAction.TurnOff:
-                BackgroundJob.Enqueue<FolderWatchService>(s => s.TurnOffWatching());
+            case WatcherErrorAction.Downgrade:
+                BackgroundJob.Enqueue<IFolderWatchService>(s => s.DowngradeFolder(folder, LibraryFolderWatchState.DowngradeReason.Errors));
                 break;
         }
-    }
-
-    /// <remarks>
-    /// Must stay typed on the interface. Hangfire stores a captured object's runtime class and builds a new instance of it,
-    /// so the <c>() => UpdateLastBufferOverflow()</c> form would decrement a throwaway counter, not this singleton's
-    /// </remarks>
-    private static void ScheduleBufferOverflowDecrement()
-    {
-        BackgroundJob.Schedule<INativeFileWatcherService>(s => s.UpdateLastBufferOverflow(), TimeSpan.FromMinutes(10));
     }
 
     /// <summary>
@@ -240,7 +310,7 @@ public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFile
                 return WatcherErrorAction.Ignore;
             }
 
-            folder = watcher.Path;
+            folder = Parser.NormalizePath(watcher.Path);
             StopWatchers();
         }
         finally
@@ -262,40 +332,28 @@ public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFile
                 return WatcherErrorAction.FolderUnreachable;
             }
 
-            var now = DateTime.Now;
-            _bufferFullCounter += 1;
-            var previousErrorWithin10Minutes = (now - _lastErrorTime).TotalMinutes <= 10;
-            _lastErrorTime = now;
-            logger.LogError(exception, "[NativeFileWatcherService] An error occured, likely too many changes occured at once. Restarting Watchers {Current}/{Total}", _bufferFullCounter, 3);
-
-            if (_restartCounter >= 3)
+            var now = UtcNow;
+            var errors = _errorsUtc.TryGetValue(folder, out var known) ? known : _errorsUtc[folder] = [];
+            errors.RemoveAll(at => now - at > ErrorWindow);
+            if (errors.Count > 0 && now - errors[^1] < OneBurst)
             {
-                logger.LogInformation("[NativeFileWatcherService] Too many restarts occured, you either have limited inotify or an OS constraint. Kavita will turn off folder watching to prevent high utilization of resources");
-                return WatcherErrorAction.TurnOff;
+                logger.LogDebug(exception, "[NativeFileWatcherService] The watcher on {Folder} failed again in the same burst of changes, restarting watchers without counting it",
+                    folder);
+                return WatcherErrorAction.RestartNow;
+            }
+            errors.Add(now);
+
+            if (errors.Count >= ErrorsToDowngrade)
+            {
+                _errorsUtc.Remove(folder);
+                logger.LogWarning(exception, "[NativeFileWatcherService] The watcher on {Folder} failed {Count} times in {Minutes} minutes, likely too many changes at once. Libraries with this folder will poll instead",
+                    folder, ErrorsToDowngrade, ErrorWindow.TotalMinutes);
+                return WatcherErrorAction.Downgrade;
             }
 
-            if (_bufferFullCounter >= 3 && previousErrorWithin10Minutes)
-            {
-                logger.LogInformation("[NativeFileWatcherService] Internal buffer has been overflown multiple times in past 10 minutes. Suspending file watching for an hour. Restart count: {RestartCount}", _restartCounter);
-                _restartCounter++;
-                return WatcherErrorAction.Suspend;
-            }
-
+            logger.LogWarning(exception, "[NativeFileWatcherService] The watcher on {Folder} failed, likely too many changes at once. Restarting watchers {Current}/{Total}",
+                folder, errors.Count, ErrorsToDowngrade);
             return WatcherErrorAction.RestartNow;
-        }
-        finally
-        {
-            _lock.Release();
-        }
-    }
-
-    public void UpdateLastBufferOverflow()
-    {
-        _lock.Wait();
-        try
-        {
-            if (_bufferFullCounter == 0) return;
-            _bufferFullCounter -= 1;
         }
         finally
         {
@@ -308,7 +366,6 @@ public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFile
         Ignore,
         FolderUnreachable,
         RestartNow,
-        Suspend,
-        TurnOff,
+        Downgrade,
     }
 }

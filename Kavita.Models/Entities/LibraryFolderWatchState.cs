@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -12,12 +13,17 @@ namespace Kavita.Models.Entities;
 public sealed record LibraryFolderWatchState
 {
     public IReadOnlyList<MountEntry> Mounts { get; init; } = [];
+    public DowngradeMarker? Downgrade { get; init; }
 
-    public FolderWatchMethod Method(FolderWatchMode mode) => mode switch
+    /// <summary>
+    /// How the library's folders are actually checked for changes: the library's setting, then what was learned about its mounts
+    /// </summary>
+    public FolderWatchMethod WatchMethod(FolderWatchMode mode) => mode switch
     {
         FolderWatchMode.Off => FolderWatchMethod.Off,
-        FolderWatchMode.FileWatcher => FolderWatchMethod.FileWatcher,
         FolderWatchMode.Polling => FolderWatchMethod.Polling,
+        _ when Downgrade != null => FolderWatchMethod.Failed,
+        FolderWatchMode.FileWatcher => FolderWatchMethod.FileWatcher,
         _ when Mounts.Any(m => m.Result is MountResult.Failed) => FolderWatchMethod.Failed,
         _ when Mounts.Any(m => m.Result is MountResult.Network) => FolderWatchMethod.Polling,
         _ when Mounts.Any(m => m.Result is MountResult.Trial) => FolderWatchMethod.Trial,
@@ -31,6 +37,34 @@ public sealed record LibraryFolderWatchState
         /// </summary>
         public required string Fingerprint { get; init; }
         public MountResult Result { get; init; }
+        /// <summary>
+        /// Audited scans that confirmed at least one changed folder on this mount
+        /// </summary>
+        public int Successes { get; init; }
+        /// <summary>
+        /// Library scans whose audit found no miss on this mount
+        /// </summary>
+        public int AuditedScans { get; init; }
+    }
+
+    /// <summary>
+    /// The library polls until an admin presses Retry or the folder's mount changes
+    /// </summary>
+    public sealed record DowngradeMarker
+    {
+        public DowngradeReason Reason { get; init; }
+        public required string Folder { get; init; }
+        public string? Fingerprint { get; init; }
+        public DateTime AtUtc { get; init; }
+    }
+
+    [JsonConverter(typeof(JsonStringEnumConverter<DowngradeReason>))]
+    public enum DowngradeReason
+    {
+        /// <summary>
+        /// The folder's watcher raised 3 errors within 10 minutes
+        /// </summary>
+        Errors,
     }
 
     [JsonConverter(typeof(JsonStringEnumConverter<MountResult>))]

@@ -49,7 +49,7 @@ public class FolderWatchServiceTests : WatchedLibraryFoldersTest
             : new MountInfo("/", "/dev/sda1", "ext4"));
 
         return new FolderWatchService(unitOfWork, Substitute.For<ILogger<FolderWatchService>>(), Substitute.For<ITaskScheduler>(),
-            mountDetector, _nativeFileWatcher, _folderPoller);
+            mountDetector, _nativeFileWatcher, _folderPoller, Substitute.For<IDirectoryService>());
     }
 
     [Fact]
@@ -85,6 +85,37 @@ public class FolderWatchServiceTests : WatchedLibraryFoldersTest
 
         Assert.Equal(5, _nativeFileWatcher.Watchers.Count);
         Assert.Equal(TimeSpan.FromMinutes(5), retry);
+    }
+
+    private static readonly MountInfo LocalMount = new("/", "/dev/sda1", "ext4");
+    private static readonly MountInfo OtherLocalMount = new("/data", "/dev/sdb1", "ext4");
+
+    [Fact]
+    public void DetectedState_KeepsCounters()
+    {
+        var current = new LibraryFolderWatchState
+        {
+            Mounts = [new LibraryFolderWatchState.MountEntry
+            {
+                Fingerprint = LocalMount.Fingerprint, Result = LibraryFolderWatchState.MountResult.Trial, Successes = 2, AuditedScans = 1,
+            }],
+        };
+
+        var state = FolderWatchService.DetectedState(current, [LocalMount]);
+
+        var entry = Assert.Single(state.Mounts);
+        Assert.Equal(2, entry.Successes);
+        Assert.Equal(1, entry.AuditedScans);
+    }
+
+    [Fact]
+    public void DetectedState_DropsDowngradeOfGoneMount()
+    {
+        var downgrade = new LibraryFolderWatchState.DowngradeMarker { Folder = "/data/manga", Fingerprint = OtherLocalMount.Fingerprint };
+        var current = new LibraryFolderWatchState { Downgrade = downgrade };
+
+        Assert.Equal(downgrade, FolderWatchService.DetectedState(current, [LocalMount, OtherLocalMount]).Downgrade);
+        Assert.Null(FolderWatchService.DetectedState(current, [LocalMount]).Downgrade);
     }
 
     [Fact]

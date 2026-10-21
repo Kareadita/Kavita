@@ -12,22 +12,19 @@ public partial class MountDetectorService : IMountDetectorService
 
     public MountInfo? Detect(string folder)
     {
-        if (OperatingSystem.IsLinux())
-        {
-            string text;
-            try
-            {
-                text = File.ReadAllText(ProcMounts);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+        if (!OperatingSystem.IsLinux()) return OperatingSystem.IsWindows() ? FromDrive(folder) : null;
 
-            return FindMount(text, ResolveLinks(folder));
+        string text;
+        try
+        {
+            text = File.ReadAllText(ProcMounts);
+        }
+        catch (Exception)
+        {
+            return null;
         }
 
-        return OperatingSystem.IsWindows() ? FromDrive(folder) : null;
+        return FindMount(text, ResolveLinks(folder));
     }
 
     /// <summary>

@@ -1,5 +1,4 @@
 using Hangfire;
-using Kavita.API.Services.Scanner;
 using Kavita.Services.Scanner;
 using Kavita.Services.Tests.Helpers;
 using static Kavita.Services.Scanner.NativeFileWatcherService;
@@ -155,21 +154,43 @@ public class NativeFileWatcherServiceTests : WatchedLibraryFoldersTest
     }
 
     [Fact]
-    public async Task ThirdOverflowWithin10Minutes_Suspends()
+    public async Task ThreeErrorsOnOneFolder_DowngradesThatFolder()
     {
-        var nativeFileWatcher = CreateNativeWatcher();
+        var time = new ManualTime();
+        var nativeFileWatcher = CreateNativeWatcher(time);
+        var actions = new List<WatcherErrorAction>();
+        foreach (var folder in new[] { 0, 1, 0, 1, 0 })
+        {
+            await nativeFileWatcher.WatchAsync(LibraryFolders);
+            actions.Add(await nativeFileWatcher.HandleErrorAsync(nativeFileWatcher.Watchers[folder], new IOException("overflow")));
+            time.Advance(TimeSpan.FromSeconds(61));
+        }
+
+        Assert.Equal([WatcherErrorAction.RestartNow, WatcherErrorAction.RestartNow, WatcherErrorAction.RestartNow,
+            WatcherErrorAction.RestartNow, WatcherErrorAction.Downgrade], actions);
+    }
+
+    /// <summary>
+    /// Each restart is immediate, so one large copy overflows the new watcher again while its events are still arriving
+    /// </summary>
+    [Fact]
+    public async Task ErrorsFromOneBurst_CountOnce()
+    {
+        var time = new ManualTime();
+        var nativeFileWatcher = CreateNativeWatcher(time);
         var actions = new List<WatcherErrorAction>();
         for (var i = 0; i < 3; i++)
         {
             await nativeFileWatcher.WatchAsync(LibraryFolders);
             actions.Add(await nativeFileWatcher.HandleErrorAsync(nativeFileWatcher.Watchers[0], new IOException("overflow")));
+            time.Advance(TimeSpan.FromMilliseconds(150));
         }
 
-        Assert.Equal([WatcherErrorAction.RestartNow, WatcherErrorAction.RestartNow, WatcherErrorAction.Suspend], actions);
+        Assert.All(actions, a => Assert.Equal(WatcherErrorAction.RestartNow, a));
     }
 
     [Fact]
-    public async Task NetworkDrops_DoNotCountTowardSuspend()
+    public async Task NetworkDrops_DoNotCountTowardDowngrade()
     {
         var nativeFileWatcher = CreateNativeWatcher();
         for (var i = 0; i < 3; i++)
@@ -187,19 +208,91 @@ public class NativeFileWatcherServiceTests : WatchedLibraryFoldersTest
             await nativeFileWatcher.HandleErrorAsync(nativeFileWatcher.Watchers[0], new IOException("overflow")));
     }
 
+    private static async Task WaitUntil(Func<bool> condition)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (DateTime.UtcNow < deadline && !condition())
+        {
+            await Task.Delay(50);
+        }
+    }
+
     /// <summary>
-    /// The decrement has to reach the singleton's counter, so it must be scheduled with Schedule&lt;INativeFileWatcherService&gt;.
-    /// Hangfire builds a new instance for a job stored under a class, and BackgroundJob.Schedule(() => ...) stores the
-    /// captured object's class even when the variable is typed as the interface
+    /// The scanner's read folders use forward slashes, Windows events backslashes
     /// </summary>
     [Fact]
-    public void Overflow_SchedulesTheDecrementOnTheInterface()
+    public async Task CreatedFile_RecordsItsFolderAndParent()
     {
-        ScheduleRecovery(WatcherErrorAction.RestartNow);
+        var folder = Parser.NormalizePath(SeriesFolder("Vol 1"));
+        var parent = Parser.NormalizePath(Path.Join(LibraryFolders[0], "Batman"));
+        var nativeFileWatcher = await StartWatching();
+        var before = DateTime.UtcNow;
 
-        var decrement = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue)
-            .Select(j => j.Value.Job)
-            .Single(job => job.Method.Name == nameof(NativeFileWatcherService.UpdateLastBufferOverflow));
-        Assert.Equal(typeof(INativeFileWatcherService), decrement.Type);
+        await File.WriteAllTextAsync(Path.Join(folder, "Batman v01.cbz"), "v01");
+
+        await WaitUntil(() => nativeFileWatcher.SawChange(folder, before));
+        Assert.True(nativeFileWatcher.SawChange(folder, before));
+        Assert.True(nativeFileWatcher.SawChange(parent, before));
+        Assert.False(nativeFileWatcher.SawChange(LibraryFolders[0], before));
+    }
+
+    /// <summary>
+    /// Files written into a new folder before inotify watches it raise nothing
+    /// </summary>
+    [Fact]
+    public async Task CreatedFolder_CoversEverythingBelowIt()
+    {
+        var nativeFileWatcher = await StartWatching();
+        var before = DateTime.UtcNow;
+        var created = Path.Join(LibraryFolders[0], "Big Series");
+
+        Directory.CreateDirectory(created);
+
+        var nested = Parser.NormalizePath(Path.Join(created, "Vol 1", "Extras"));
+        await WaitUntil(() => nativeFileWatcher.SawChange(nested, before));
+        Assert.True(nativeFileWatcher.SawChange(nested, before));
+    }
+
+    /// <summary>
+    /// NTFS releases a folder's held back Changed when the folder is listed, so a scan would raise the event it is audited on
+    /// </summary>
+    [Fact]
+    public async Task ListingAFolderChangedWhileUnwatched_IsNotAnEvent()
+    {
+        var folder = Parser.NormalizePath(SeriesFolder(string.Empty));
+        await File.WriteAllTextAsync(Path.Join(folder, "Batman c001.cbz"), "c001");
+        var nativeFileWatcher = await StartWatching();
+        var before = DateTime.UtcNow.AddMinutes(-5);
+
+        Directory.GetFileSystemEntries(folder);
+        await Task.Delay(1500);
+
+        Assert.False(nativeFileWatcher.SawChange(folder, before));
+    }
+
+    [Fact]
+    public async Task Prune_ForgetsOldEventsAndMovesWatchingSince()
+    {
+        var folder = Parser.NormalizePath(SeriesFolder(string.Empty));
+        var startedAround = DateTime.UtcNow;
+        var nativeFileWatcher = await StartWatching();
+        var before = DateTime.UtcNow;
+        await File.WriteAllTextAsync(Path.Join(folder, "Batman c001.cbz"), "c001");
+        await WaitUntil(() => nativeFileWatcher.SawChange(folder, before));
+        Assert.InRange(nativeFileWatcher.WatchingSince(folder)!.Value, startedAround, before);
+
+        var horizon = DateTime.UtcNow.AddSeconds(1);
+        nativeFileWatcher.Prune(LibraryFolders[0], horizon);
+
+        Assert.False(nativeFileWatcher.SawChange(folder, before));
+        Assert.Equal(horizon, nativeFileWatcher.WatchingSince(folder));
+        Assert.Null(nativeFileWatcher.WatchingSince(Parser.NormalizePath(TestRoot)));
+    }
+
+    private sealed class ManualTime : TimeProvider
+    {
+        private DateTimeOffset _now = new(2026, 10, 20, 12, 0, 0, TimeSpan.Zero);
+        public override DateTimeOffset GetUtcNow() => _now;
+        public void Advance(TimeSpan by) => _now += by;
     }
 }

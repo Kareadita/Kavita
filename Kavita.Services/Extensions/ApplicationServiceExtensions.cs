@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using System;
 using Kavita.API.Services;
 using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Metadata;
@@ -77,7 +78,7 @@ public static class ApplicationServiceExtensions
         services.AddSingleton<IMountDetectorService, MountDetectorService>();
         // IFileSystem is scoped; a singleton must not hold a scoped instance, and FileSystem keeps no state
         services.AddSingleton<INativeFileWatcherService>(sp =>
-            new NativeFileWatcherService(new FileSystem(), sp.GetRequiredService<ILogger<NativeFileWatcherService>>()));
+            new NativeFileWatcherService(new FileSystem(), sp.GetRequiredService<ILogger<NativeFileWatcherService>>(), TimeProvider.System));
         services.AddSingleton<IFolderPollerService>(sp =>
             new FolderPollerService(new FileSystem(), sp.GetRequiredService<ILogger<FolderPollerService>>()));
         services.AddScoped<ITachiyomiService, TachiyomiService>();

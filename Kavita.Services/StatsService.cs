@@ -386,7 +386,7 @@ public class StatsService : IStatsService
             libDto.UsingFolderWatching = library.FolderWatchMode != FolderWatchMode.Off; // TODO: Remove this once we finish the File Watcher rework
             libDto.FolderWatchMode = library.FolderWatchMode;
             libDto.FolderWatchMethod = serverSettings.EnableFolderWatching
-                ? library.FolderWatchState.Method(library.FolderWatchMode)
+                ? library.FolderWatchState.WatchMethod(library.FolderWatchMode)
                 : FolderWatchMethod.Off;
             libDto.CreateCollectionsFromMetadata = library.ManageCollections;
             libDto.CreateReadingListsFromMetadata = library.ManageReadingLists;

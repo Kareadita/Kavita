@@ -349,6 +349,18 @@ public class LibraryController(
     }
 
     /// <summary>
+    /// Watches the library again after its watcher missed a change or kept failing
+    /// </summary>
+    [HttpPost("folder-watch/retry")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [LibraryAccess]
+    public ActionResult RetryFolderWatch(int libraryId)
+    {
+        BackgroundJob.Enqueue<IFolderWatchService>(s => s.RetryAsync(libraryId));
+        return Ok();
+    }
+
+    /// <summary>
     /// Enqueues a bunch of library scans
     /// </summary>
     /// <returns></returns>
