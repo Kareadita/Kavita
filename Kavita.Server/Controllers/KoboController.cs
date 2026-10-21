@@ -70,7 +70,9 @@ public class KoboController(
             resources["image_host"] = instanceUrl.TrimEnd('/');
             resources["image_url_template"] = $"{koboBase}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/false/image.jpg";
             resources["image_url_quality_template"] = $"{koboBase}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/{{Quality}}/{{IsGreyscale}}/image.jpg";
-            resources["reading_services_host"] = koboBase;
+            // This is needed for annotations, but Kobo seems to strip the path and only use the host. So we can't inject
+            // our authentication.
+            //resources["reading_services_host"] = koboBase;
         }
         else
         {
