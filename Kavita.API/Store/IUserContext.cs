@@ -24,6 +24,11 @@ public interface IUserContext
     /// <remarks>Warning! Username's can contain .. and /, do not use folders or filenames explicitly with the Username</remarks>
     string? GetUsername();
     /// <summary>
+    /// The AuthKey used to authenticate the current request. Null if <see cref="AuthenticationType"/> is not <see cref="AuthenticationType.AuthKey"/>
+    /// </summary>
+    /// <returns></returns>
+    string? AuthKey();
+    /// <summary>
     /// The Roles associated with the Authenticated user
     /// </summary>
     IReadOnlyList<string> Roles { get; }

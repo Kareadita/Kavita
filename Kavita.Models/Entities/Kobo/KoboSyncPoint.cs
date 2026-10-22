@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities.Kobo;
@@ -11,12 +12,28 @@ public class KoboSyncPoint
     public int UserId { get; set; }
     public AppUser User { get; set; }
 
-    public DateTime BookSyncTime { get; set; }
-    public int BooksSyncedUntilId { get; set; }
-    public int BooksSyncedUntilIndex { get; set; }
+    /// <summary>
+    /// All chapter ids in the last sync
+    /// </summary>
+    public List<int> ChapterIds { get; set; } = [];
+    /// <summary>
+    /// Where in the <see cref="ChapterIds"/> list did we get. Will make jumps of <see cref="AppUserKoboSyncPreferences.SyncItemLimit"/>
+    /// </summary>
+    public int ChapterIndex { get; set; }
+    /// <summary>
+    /// The time at which chapters were synced
+    /// </summary>
+    public DateTime ChapterSyncTime { get; set; }
 
     public DateTime ProgressSyncTime { get; set; }
     public int ProgressSyncedUntilId { get; set; }
     public int ProgressSyncedUntilIndex { get; set; }
+
+    public void Reset()
+    {
+        ChapterIndex = 0;
+        ChapterSyncTime = DateTime.UtcNow;
+        ProgressSyncTime = DateTime.Now;
+    }
 
 }

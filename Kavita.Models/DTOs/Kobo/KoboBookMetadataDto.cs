@@ -52,6 +52,19 @@ public sealed record KoboBookMetadataDto
     public bool IsInternetArchive { get; set; } = false;
     public bool IsPreOrder { get; set; } = false;
     public bool IsSocialEnabled { get; set; } = true;
+
+    public static KoboBookMetadataDto DeletedBook(string id)
+    {
+        return new KoboBookMetadataDto
+        {
+            WorkId = id,
+            CoverImageId = id,
+            RevisionId = id,
+            CrossRevisionId = id,
+            EntitlementId = id,
+            Title = id,
+        };
+    }
 }
 
 public sealed record KoboSeriesDto

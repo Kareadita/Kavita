@@ -37,9 +37,9 @@ namespace Kavita.Database.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    BookSyncTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    BooksSyncedUntilId = table.Column<int>(type: "INTEGER", nullable: false),
-                    BooksSyncedUntilIndex = table.Column<int>(type: "INTEGER", nullable: false),
+                    ChapterIds = table.Column<string>(type: "TEXT", nullable: true),
+                    ChapterIndex = table.Column<int>(type: "INTEGER", nullable: false),
+                    ChapterSyncTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     ProgressSyncTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     ProgressSyncedUntilId = table.Column<int>(type: "INTEGER", nullable: false),
                     ProgressSyncedUntilIndex = table.Column<int>(type: "INTEGER", nullable: false)

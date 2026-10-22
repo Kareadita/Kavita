@@ -25,7 +25,7 @@ public class KoboSyncPointRepository(DataContext context): IKoboSyncPointReposit
             syncPoint = new KoboSyncPoint
             {
                 UserId = userId,
-                BookSyncTime = DateTime.MinValue,
+                ChapterSyncTime = DateTime.MinValue,
             };
 
             context.KoboSyncPoints.Add(syncPoint);

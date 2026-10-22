@@ -17,7 +17,7 @@ public interface IKoboSyncService
     /// <param name="syncPoint"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<(IEnumerable<KoboSyncItem>, bool)> GetChangesSinceAsync(int userId, AppUserKoboSyncPreferences syncPreferences, KoboSyncPoint syncPoint, CancellationToken cancellationToken);
+    Task<(List<KoboSyncItem>, bool)> GetChangesSinceAsync(int userId, AppUserKoboSyncPreferences syncPreferences, KoboSyncPoint syncPoint, CancellationToken cancellationToken);
 
     /// <summary>
     /// Builds book metadata for the given ids. They are not checked against access; only against sync settings in this method. The caller is responsible

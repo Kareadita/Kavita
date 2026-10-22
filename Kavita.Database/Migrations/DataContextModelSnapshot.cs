@@ -723,14 +723,14 @@ namespace Kavita.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("BookSyncTime")
+                    b.PrimitiveCollection<string>("ChapterIds")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("BooksSyncedUntilId")
+                    b.Property<int>("ChapterIndex")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BooksSyncedUntilIndex")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTime>("ChapterSyncTime")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ProgressSyncTime")
                         .HasColumnType("TEXT");

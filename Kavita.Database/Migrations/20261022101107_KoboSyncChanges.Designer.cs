@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20261020080046_KoboSyncChanges")]
+    [Migration("20261022101107_KoboSyncChanges")]
     partial class KoboSyncChanges
     {
         /// <inheritdoc />
@@ -726,14 +726,14 @@ namespace Kavita.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("BookSyncTime")
+                    b.PrimitiveCollection<string>("ChapterIds")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("BooksSyncedUntilId")
+                    b.Property<int>("ChapterIndex")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BooksSyncedUntilIndex")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTime>("ChapterSyncTime")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ProgressSyncTime")
                         .HasColumnType("TEXT");

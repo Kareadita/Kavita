@@ -22,6 +22,8 @@ public sealed record KoboBookEntitlementDto
 
     public KoboPeriodDto ActivePeriod { get; set; }
 
+    private KoboBookEntitlementDto() {}
+
     public KoboBookEntitlementDto(Chapter chapter)
     {
         Id = chapter.Id.ToString();
@@ -32,6 +34,23 @@ public sealed record KoboBookEntitlementDto
         ActivePeriod = new KoboPeriodDto
         {
             From = DateTime.UtcNow
+        };
+    }
+
+    public static KoboBookEntitlementDto ForDeleted(string id)
+    {
+        return new KoboBookEntitlementDto
+        {
+            Id = id,
+            RevisionId = id,
+            CrossRevisionId = id,
+            Created = DateTime.UtcNow,
+            LastModified = DateTime.UtcNow,
+            ActivePeriod = new KoboPeriodDto
+            {
+                From = DateTime.UtcNow
+            },
+            IsRemoved = true
         };
     }
 }
