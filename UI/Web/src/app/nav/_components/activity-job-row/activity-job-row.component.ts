@@ -92,6 +92,7 @@ export class ActivityJobRowComponent {
 
   protected readonly summaryParts = computed(() => summaryPartsOf(this.job().scanSummaries));
   protected readonly showSummary = computed(() => this.ended() && this.isScan() && this.job().scanSummaries.length > 0);
+  protected readonly hasFailedSeries = computed(() => this.job().scanSummaries.some(s => s.seriesFailed > 0));
   protected readonly canOpen = computed(() => this.ended() && this.isScan() && !this.isMultiLibrary() && this.job().libraryId !== null);
   protected readonly problemSummaries = computed(() => this.showSummary()
     ? this.job().scanSummaries.filter(s => s.recentProblemFiles.length > 0)
@@ -147,6 +148,7 @@ function summaryPartsOf(summaries: LibraryScanSummary[]): SummaryPart[] {
   const changes: SummaryPart[] = [
     {key: 'scan-series-added-label', params: {count: sum('seriesAdded')}},
     {key: 'scan-series-removed-label', params: {count: sum('seriesRemoved')}},
+    {key: 'scan-series-failed-label', params: {count: sum('seriesFailed')}},
     {key: 'scan-chapters-added-label', params: {count: sum('chaptersAdded')}},
     {key: 'scan-chapters-updated-label', params: {count: sum('chaptersUpdated')}},
     {key: 'scan-chapters-removed-label', params: {count: sum('chaptersRemoved')}},

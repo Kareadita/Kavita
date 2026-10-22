@@ -29,6 +29,8 @@ public static class MessageEventCode
     public const string ScanNoWork = "scan-no-work";
     public const string DbWriteFailed = "db-write-failed";
     public const string LibraryScanFailed = "library-scan-failed";
+    public const string SeriesUpdateFailed = "series-update-failed";
+    public const string SeriesRemovalFailed = "series-removal-failed";
 
     #endregion
 

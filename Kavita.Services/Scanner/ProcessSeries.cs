@@ -113,7 +113,7 @@ public class ProcessSeries(
         catch (Exception ex)
         {
             await ReportDuplicateSeriesLookup(library, firstInfo, ex);
-            return ProcessSeriesResult.NotSaved;
+            return ProcessSeriesResult.UpdateFailed;
         }
 
         if (series == null)
@@ -229,7 +229,7 @@ public class ProcessSeries(
                     logger.LogDbUpdateConcurrencyException(ex);
                     await eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.DbWriteFailedEvent(library.Id, series.Id > 0 ? series.Id : null, series.OriginalName, ex.Message));
-                    return ProcessSeriesResult.NotSaved;
+                    return ProcessSeriesResult.UpdateFailed;
                 }
                 catch (Exception ex)
                 {
@@ -240,7 +240,7 @@ public class ProcessSeries(
 
                     await eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.DbWriteFailedEvent(library.Id, series.Id > 0 ? series.Id : null, series.OriginalName, ex.Message));
-                    return ProcessSeriesResult.NotSaved;
+                    return ProcessSeriesResult.UpdateFailed;
                 }
 
                 stepWatch.Restart();
@@ -271,7 +271,10 @@ public class ProcessSeries(
         catch (Exception ex)
         {
             logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
-            return ProcessSeriesResult.NotSaved;
+            await eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.SeriesUpdateFailedEvent(library.Id, series.Id > 0 ? series.Id : null, series.Name,
+                    ex is KavitaException ? ex.Message : null));
+            return ProcessSeriesResult.UpdateFailed;
         }
 
         if (seriesAdded && library.AllowMetadataMatching)

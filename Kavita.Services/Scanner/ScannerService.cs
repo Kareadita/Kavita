@@ -309,6 +309,8 @@ public class ScannerService(
                  {
                      logger.LogCritical(ex, "There was an error during ScanSeries to delete the series as no files could be found. Aborting scan");
                      await unitOfWork.RollbackAsync();
+                     await eventHub.SendMessageAsync(MessageFactory.Error,
+                         MessageFactory.DbWriteFailedEvent(series.LibraryId, series.Id, series.Name, ex.Message));
                      return;
                  }
              }
@@ -649,7 +651,7 @@ public class ScannerService(
         var shouldUseLibraryScan = !(await unitOfWork.LibraryRepository.DoAnySeriesFoldersMatch(libraryFolderPaths));
         if (!shouldUseLibraryScan)
         {
-            logger.LogError("[ScannerService] Library {LibraryName} consists of one or more Series folders as a library root, using series scan", library.Name);
+            logger.LogInformation("[ScannerService] Library {LibraryName} consists of one or more Series folders as a library root, using series scan", library.Name);
         }
 
 
@@ -676,7 +678,7 @@ public class ScannerService(
             logger.LogDebug("[ScannerService] Library {LibraryName} Step 5: Remove Deleted Series", library.Name);
             tally.SeriesRemoved += await RemoveSeriesNotFound(parsedSeries, library);
 
-            if (!tally.HasChanges)
+            if (!tally.HasChanges && tally.SeriesFailed == 0)
             {
                 logger.LogInformation(
                     "[ScannerService] Finished library scan of {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}. There were no changes",
@@ -686,9 +688,9 @@ public class ScannerService(
             {
                 logger.LogInformation(
                     "[ScannerService] Finished library scan of {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}: " +
-                    "{SeriesAdded} series added, {SeriesRemoved} removed, {ChaptersAdded} chapters added, {ChaptersUpdated} updated, {ChaptersRemoved} removed",
+                    "{SeriesAdded} series added, {SeriesRemoved} removed, {SeriesFailed} failed, {ChaptersAdded} chapters added, {ChaptersUpdated} updated, {ChaptersRemoved} removed",
                     tally.TotalFiles, parsedSeries.Count, sw.ElapsedMilliseconds, library.Name,
-                    tally.SeriesAdded, tally.SeriesRemoved, tally.ChaptersAdded, tally.ChaptersUpdated, tally.ChaptersRemoved);
+                    tally.SeriesAdded, tally.SeriesRemoved, tally.SeriesFailed, tally.ChaptersAdded, tally.ChaptersUpdated, tally.ChaptersRemoved);
             }
         }
         else
@@ -763,6 +765,8 @@ public class ScannerService(
         catch (Exception ex)
         {
             logger.LogCritical(ex, "[ScannerService] Error during series cleanup. Please check logs and rescan");
+            await eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.SeriesRemovalFailedEvent(library.Id, library.Name));
             return 0;
         }
     }
@@ -1136,6 +1140,7 @@ public class ScannerService(
         public int TotalFiles { get; set; }
         public int SeriesAdded { get; private set; }
         public int SeriesRemoved { get; set; }
+        public int SeriesFailed { get; private set; }
         public int ChaptersAdded { get; private set; }
         public int ChaptersUpdated { get; private set; }
         public int ChaptersRemoved { get; private set; }
@@ -1147,13 +1152,17 @@ public class ScannerService(
             {
                 SeriesAdded++;
             }
+            if (result.Failed)
+            {
+                SeriesFailed++;
+            }
             ChaptersAdded += result.ChaptersAdded;
             ChaptersUpdated += result.ChaptersUpdated;
             ChaptersRemoved += result.ChaptersRemoved;
         }
 
         public LibraryScanEndedEventBodyDto ToEventBody(Library library, ScanIssueSummaryDto issues, bool endsJob) =>
-            new(library.Id, library.Name, SeriesAdded, SeriesRemoved, ChaptersAdded, ChaptersUpdated, ChaptersRemoved,
+            new(library.Id, library.Name, SeriesAdded, SeriesRemoved, SeriesFailed, ChaptersAdded, ChaptersUpdated, ChaptersRemoved,
                 issues.Count, issues.NewCount, issues.Issues, endsJob);
     }
 

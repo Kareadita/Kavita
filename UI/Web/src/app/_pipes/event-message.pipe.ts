@@ -23,6 +23,7 @@ type MessageBody = Partial<{
   path: string;
   filePath: string;
   reason: FolderWatchFallbackReason;
+  message: string | null;
 }>;
 
 type Params = Record<string, string | undefined>;
@@ -75,6 +76,10 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.db-write-failed-label`, {seriesName}, fallback);
       case MessageEventCode.LibraryScanFailed:
         return this.translate(`${PREFIX}.library-scan-failed-label`, {libraryName}, fallback);
+      case MessageEventCode.SeriesUpdateFailed:
+        return this.translate(`${PREFIX}.series-update-failed-label`, {seriesName}, fallback);
+      case MessageEventCode.SeriesRemovalFailed:
+        return this.translate(`${PREFIX}.series-removal-failed-label`, {libraryName}, fallback);
       case MessageEventCode.ScanLibrariesDelayed:
         return this.translate(`${PREFIX}.scan-libraries-delayed-label`, {}, fallback);
       case MessageEventCode.ScanLibraryDelayed:
@@ -126,6 +131,10 @@ export class EventMessagePipe implements PipeTransform {
       case MessageEventCode.LibraryScanFailed:
         // SubTitle is the raw exception message
         return source.subTitle;
+      case MessageEventCode.SeriesUpdateFailed:
+        return body.message ?? this.translate(`${PREFIX}.series-update-failed-description`, {}, fallback);
+      case MessageEventCode.SeriesRemovalFailed:
+        return this.translate(`${PREFIX}.series-removal-failed-description`, {}, fallback);
       case MessageEventCode.ScanLibrariesDelayed:
       case MessageEventCode.ScanLibraryDelayed:
       case MessageEventCode.ScanSeriesDelayed:

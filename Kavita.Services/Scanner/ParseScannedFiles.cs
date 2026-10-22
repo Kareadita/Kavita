@@ -562,11 +562,18 @@ public partial class ParseScannedFiles
             try
             {
                 var rejection = TrackSeries(scannedSeries, index, info);
-                if (rejection != null && !string.IsNullOrEmpty(info.FullFilePath)) rejected.Add((info, rejection));
+                if (rejection != null && !info.IsPlaceholder)
+                {
+                    rejected.Add((info, rejection));
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[ScannerService] Exception occurred during tracking {FilePath}. Skipping this file", info?.FullFilePath);
+                _logger.LogError(ex, "[ScannerService] Exception occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
+                if (!info.IsPlaceholder)
+                {
+                    rejected.Add((info, new ParseIssue(MediaErrorReason.ParseFailed, ParseIssues.Describe(ex))));
+                }
             }
         }
 
@@ -583,9 +590,8 @@ public partial class ParseScannedFiles
     /// <param name="info"></param>
     /// <returns>Set when the file is turned away</returns>
     private ParseIssue? TrackSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, SeriesNameIndex index,
-        ParserInfo? info)
+        ParserInfo info)
     {
-        if (info == null) return null;
         if (info.Series == string.Empty) return ParseIssues.FromFailedParse(info);
 
         var normalizedSeries = info.Series.ToNormalized();

@@ -649,6 +649,40 @@ public static class MessageFactory
         });
     }
 
+    /// <param name="seriesId">Null when the series was new and never saved</param>
+    /// <param name="reason">A message written for users, shown as is. Null for an unexpected error, never an exception's own message</param>
+    public static SignalRMessageDto SeriesUpdateFailedEvent(int libraryId, int? seriesId, string seriesName, string? reason)
+    {
+        var title = $"Couldn't update {seriesName}";
+        var subtitle = reason ?? "An unexpected error stopped this series from updating. Check the logs for details.";
+
+        return CodedEvent(Error, MessageEventCode.SeriesUpdateFailed, title, subtitle, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            SeriesId = seriesId,
+            SeriesName = seriesName,
+            Message = reason,
+        });
+    }
+
+    public static SignalRMessageDto SeriesRemovalFailedEvent(int libraryId, string libraryName)
+    {
+        var title = $"Couldn't remove deleted series from {libraryName}";
+        const string subtitle = "Series whose files are gone are still in the library. The next scan tries again.";
+
+        return CodedEvent(Error, MessageEventCode.SeriesRemovalFailed, title, subtitle, new
+        {
+            Name = Error,
+            Title = title,
+            SubTitle = subtitle,
+            LibraryId = libraryId,
+            LibraryName = libraryName,
+        });
+    }
+
     public static SignalRMessageDto LibraryScanFailedEvent(int libraryId, string libraryName, string error)
     {
         var title = $"Scan of {libraryName} failed";

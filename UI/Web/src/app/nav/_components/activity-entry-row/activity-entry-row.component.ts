@@ -29,6 +29,7 @@ const SeriesCodes: (MessageEventCode | null)[] = [
   MessageEventCode.ScanSeriesFolderMissing,
   MessageEventCode.ScanNoWork,
   MessageEventCode.DbWriteFailed,
+  MessageEventCode.SeriesUpdateFailed,
   MessageEventCode.WordCountFailed,
 ];
 
@@ -118,6 +119,7 @@ export class ActivityEntryRowComponent {
       case MessageEventCode.RootFoldersUnreadable:
       case MessageEventCode.UnreadableFolders:
       case MessageEventCode.LibraryScanFailed:
+      case MessageEventCode.SeriesRemovalFailed:
         return entry.libraryId !== null ? [EventAction.Rescan] : [];
       case MessageEventCode.SeriesCollision:
         return [EventAction.Details];
