@@ -49,7 +49,6 @@ public class TaskScheduler : ITaskScheduler
     private readonly IScannerService _scannerService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMetadataService _metadataService;
-    private readonly IBackupService _backupService;
     private readonly ICleanupService _cleanupService;
 
     private readonly IStatsService _statsService;
@@ -134,7 +133,6 @@ public class TaskScheduler : ITaskScheduler
         _scannerService = scannerService;
         _unitOfWork = unitOfWork;
         _metadataService = metadataService;
-        _backupService = backupService;
         _cleanupService = cleanupService;
         _statsService = statsService;
         _versionUpdaterService = versionUpdaterService;
