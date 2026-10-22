@@ -548,9 +548,6 @@ namespace Kavita.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("LastScanned")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("LibraryId")
                         .HasColumnType("INTEGER");
 
@@ -759,7 +756,7 @@ namespace Kavita.Database.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue("{\"Mounts\":[]}");
+                        .HasDefaultValue("{\"Mounts\":[],\"Downgrade\":null}");
 
                     b.Property<bool>("IncludeInDashboard")
                         .HasColumnType("INTEGER");

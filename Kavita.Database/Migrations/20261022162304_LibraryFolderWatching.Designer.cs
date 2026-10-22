@@ -14,8 +14,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20261019155622_LibraryScanInfo")]
-    partial class LibraryScanInfo
+    [Migration("20261022162304_LibraryFolderWatching")]
+    partial class LibraryFolderWatching
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -551,9 +551,6 @@ namespace Kavita.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("LastScanned")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("LibraryId")
                         .HasColumnType("INTEGER");
 
@@ -757,6 +754,12 @@ namespace Kavita.Database.Migrations
 
                     b.Property<int>("FolderWatchMode")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("FolderWatchState")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{\"Mounts\":[],\"Downgrade\":null}");
 
                     b.Property<bool>("IncludeInDashboard")
                         .HasColumnType("INTEGER");

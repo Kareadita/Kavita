@@ -665,7 +665,7 @@ public class ScannerService(
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 2: Process and Update Database", library.Name);
         var tally = await ProcessParsedSeries(forceUpdate, parsedSeries, library, scanElapsedTime, scanStarted);
 
-        UpdateLastScanned(library);
+        library.UpdateLastScanned(DateTime.Now);
         scanRun = scanRun with { AtUtc = DateTime.UtcNow, DurationMs = sw.ElapsedMilliseconds };
         library.ScanInfo = forceUpdate
             ? library.ScanInfo with { Forced = scanRun }
@@ -959,17 +959,6 @@ public class ScannerService(
         logger.LogDebug("[ScannerService] Finished writing metadata for {Count} series in {Elapsed}ms", toProcess.Count, sw.ElapsedMilliseconds);
 
         return tally;
-    }
-
-    private static void UpdateLastScanned(Library library)
-    {
-        var time = DateTime.Now;
-        foreach (var folderPath in library.Folders)
-        {
-            folderPath.UpdateLastScanned(time);
-        }
-
-        library.UpdateLastScanned(time);
     }
 
     /// <param name="seriesId">Loads only this series' known files, for a series scan</param>

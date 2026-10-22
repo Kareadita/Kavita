@@ -8,8 +8,7 @@ public class LibraryTests
     [Fact]
     public void SyncFolders_KeepsUnchangedRows()
     {
-        var lastScanned = new DateTime(2026, 10, 1, 3, 0, 0, DateTimeKind.Utc);
-        var kept = new FolderPath { Id = 1, Path = "/manga/", LastScanned = lastScanned };
+        var kept = new FolderPath { Id = 1, Path = "/manga/" };
         var library = new LibraryBuilder("Manga").Build();
         library.Folders = [kept, new FolderPath { Id = 2, Path = "/comics" }];
 
@@ -18,7 +17,6 @@ public class LibraryTests
         Assert.True(changed);
         Assert.Equal(2, library.Folders.Count);
         Assert.Same(kept, library.Folders.Single(f => f.Id == 1));
-        Assert.Equal(lastScanned, kept.LastScanned);
         Assert.Contains(library.Folders, f => f is { Id: 0, Path: "/books" });
     }
 
