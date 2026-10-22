@@ -173,7 +173,7 @@ public static class Seed
                 new() {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
                 new() {Key = ServerSettingKey.TotalBackups, Value = "30"},
                 new() {Key = ServerSettingKey.TotalLogs, Value = "30"},
-                new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
+                new() {Key = ServerSettingKey.EnableFolderWatching, Value = "true"},
                 new() {Key = ServerSettingKey.HostName, Value = string.Empty},
                 new() {Key = ServerSettingKey.EncodeMediaAs, Value = nameof(EncodeFormat.PNG)},
                 new() {Key = ServerSettingKey.LicenseKey, Value = string.Empty},

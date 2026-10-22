@@ -10,7 +10,15 @@ public sealed record LibraryStatV3
 {
     public bool IncludeInDashboard { get; set; }
     public bool IncludeInSearch { get; set; }
+    [Obsolete("Use FolderWatchMode")]
     public bool UsingFolderWatching { get; set; }
+    [EnumDataType(typeof(FolderWatchMode))]
+    public FolderWatchMode FolderWatchMode { get; set; }
+    /// <summary>
+    /// How the library notices changes right now, Off when the server's folder watching switch is off
+    /// </summary>
+    [EnumDataType(typeof(FolderWatchMethod))]
+    public FolderWatchMethod FolderWatchMethod { get; set; }
     /// <summary>
     /// Are any exclude patterns setup
     /// </summary>
@@ -42,6 +50,23 @@ public sealed record LibraryStatV3
     /// Number of folders the library has
     /// </summary>
     public int NumberOfFolders { get; set; }
-
-
+    /// <summary>
+    /// Duration of the last non-forced library scan, null when there was none since the upgrade
+    /// </summary>
+    public long? LastScanDurationMs { get; set; }
+    /// <summary>
+    /// Folders below the roots walked by the last non-forced library scan
+    /// </summary>
+    public int? LastScanFolderCount { get; set; }
+    public long? LastScanListMs { get; set; }
+    public long? LastScanWalkMs { get; set; }
+    public long? LastScanParseMs { get; set; }
+    /// <summary>
+    /// Epub chapters made of more than one file
+    /// </summary>
+    /// <remarks>
+    /// Counted to decide on https://github.com/Kareadita/Kavita/issues/5007: a non-forced scan does not recount
+    /// words when one file of such a chapter is deleted
+    /// </remarks>
+    public int? MultiFileEpubChapterCount { get; set; }
 }

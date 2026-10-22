@@ -37,6 +37,8 @@ public static class ScanJobQueue
 
     public static string Schedule(Expression<Func<Task>> job, DateTimeOffset runAt) => Remember(BackgroundJob.Schedule(job, runAt));
 
+    public static string Schedule<T>(Expression<Func<T, Task>> job, TimeSpan delay) => Remember(BackgroundJob.Schedule(job, delay));
+
     /// <summary>
     /// Moves a delayed job. Nothing happens when it already left the Scheduled state
     /// </summary>
@@ -79,13 +81,34 @@ public static class ScanJobQueue
             .OfType<ScanJob>()
             .ToList();
         var folderJobs = stored
-            .Where(j => j.State != ScanJobState.Processing && IsScanner(j.Job) && j.Job.Method.Name == nameof(IScannerService.ScanFolder))
-            .Select(j => j.Job.Args[0] is ScanFolderRequest request ? new ScanFolderJob(j.JobId, request, j.RunAtUtc) : null)
-            .OfType<ScanFolderJob>()
+            .WhereNotStarted()
+            .WhereFolderJob()
+            .Select(ToFolderJob)
             .ToList();
 
         return new ScanQueueSnapshot(jobs, folderJobs);
     }
+
+    private static IEnumerable<StoredJob> WhereNotStarted(this IEnumerable<StoredJob> jobs)
+    {
+        return jobs.Where(j => j.State != ScanJobState.Processing);
+    }
+
+    private static IEnumerable<StoredJob> WhereFolderJob(this IEnumerable<StoredJob> jobs)
+    {
+        return jobs.Where(j => (IsFolderScan(j.Job) || IsFolderValidation(j.Job)) && j.Job.Args[0] is ScanFolderRequest);
+    }
+
+    private static ScanFolderJob ToFolderJob(StoredJob stored)
+    {
+        var firstChangeUtc = IsFolderValidation(stored.Job) ? Arg<DateTime>(stored.Job, 1) : (DateTime?) null;
+        return new ScanFolderJob(stored.JobId, Arg<ScanFolderRequest>(stored.Job, 0), stored.RunAtUtc, firstChangeUtc);
+    }
+
+    private static bool IsFolderScan(Job job) => IsScanner(job) && job.Method.Name == nameof(IScannerService.ScanFolder);
+
+    private static bool IsFolderValidation(Job job) =>
+        job.Type.IsAssignableTo(typeof(IFolderValidationService)) && job.Method.Name == nameof(IFolderValidationService.ValidateFolder);
 
     private static string Remember(string jobId)
     {
@@ -171,12 +194,15 @@ public static class ScanJobQueue
 
     private static ScanJob Create(StoredJob stored, ScanTarget target, bool force, bool isRequest, IMonitoringApi monitoring)
     {
+        return new ScanJob(stored.JobId, target, force, isRequest, stored.State, CreatedAtUtc(stored, monitoring), stored.RunAtUtc);
+    }
+
+    private static DateTime CreatedAtUtc(StoredJob stored, IMonitoringApi monitoring)
+    {
         var createdAt = monitoring.JobDetails(stored.JobId)?.CreatedAt;
-        var createdAtUtc = createdAt.HasValue
+        return createdAt.HasValue
             ? DateTime.SpecifyKind(createdAt.Value, DateTimeKind.Utc)
             : stored.RunAtUtc ?? DateTime.UtcNow;
-
-        return new ScanJob(stored.JobId, target, force, isRequest, stored.State, createdAtUtc, stored.RunAtUtc);
     }
 
     private static bool IsScanner(Job job) => job.Type.IsAssignableTo(typeof(IScannerService));

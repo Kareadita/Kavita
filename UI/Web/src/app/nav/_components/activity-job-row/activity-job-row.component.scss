@@ -57,6 +57,10 @@
   height: 0.5rem;
   border-radius: 999px;
   background-color: var(--event-widget-done-dot-color);
+
+  &.failed {
+    background-color: var(--event-widget-error-dot-color);
+  }
 }
 
 .bars {

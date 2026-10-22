@@ -135,7 +135,7 @@ public class ActivityTrackerTests : AbstractFsTest
     private static SignalRMessageDto ScanEnded(int libraryId = 1, int chaptersAdded = 12)
     {
         var message = MessageFactory.LibraryScanEndedEvent(
-            new LibraryScanEndedEventBodyDto(libraryId, "Manga", 2, 0, chaptersAdded, 3, 1, 4, 1,
+            new LibraryScanEndedEventBodyDto(libraryId, "Manga", 2, 0, 0, chaptersAdded, 3, 1, 4, 1,
                 [new ScanIssueSummaryItemDto(Root + "A/A Vol 2.cbz", MediaErrorReason.UnreadableArchive, 7, "A")], true));
         message.CorrelationId = CorrelationId;
         return message;

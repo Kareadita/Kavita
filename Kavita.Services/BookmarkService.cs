@@ -25,8 +25,6 @@ public class BookmarkService(
     IMediaConversionService mediaConversionService)
     : IBookmarkService
 {
-    public const string Name = "BookmarkService";
-
     /// <summary>
     /// Deletes the files associated with the list of Bookmarks passed. Will clean up empty folders.
     /// </summary>

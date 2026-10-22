@@ -25,9 +25,12 @@ public sealed record ProcessSeriesArgs
 }
 
 /// <param name="SeriesId">Null when nothing was saved</param>
-public sealed record ProcessSeriesResult(int? SeriesId, bool SeriesAdded, int ChaptersAdded, int ChaptersUpdated, int ChaptersRemoved)
+/// <param name="Failed">The update threw or could not be saved, as opposed to having nothing to process</param>
+public sealed record ProcessSeriesResult(int? SeriesId, bool SeriesAdded, int ChaptersAdded, int ChaptersUpdated, int ChaptersRemoved,
+    bool Failed = false)
 {
     public static readonly ProcessSeriesResult NotSaved = new(null, false, 0, 0, 0);
+    public static readonly ProcessSeriesResult UpdateFailed = new(null, false, 0, 0, 0, Failed: true);
 }
 
 public interface IProcessSeries

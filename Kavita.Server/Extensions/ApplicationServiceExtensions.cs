@@ -34,7 +34,6 @@ public static class ApplicationServiceExtensions
         {
             options.UseInMemory(EasyCacheProfiles.Favicon);
             options.UseInMemory(EasyCacheProfiles.Publisher);
-            options.UseInMemory(EasyCacheProfiles.Library);
             options.UseInMemory(EasyCacheProfiles.RevokedJwt);
             options.UseInMemory(EasyCacheProfiles.LocaleOptions);
 

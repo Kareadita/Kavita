@@ -11,7 +11,7 @@ public interface ITaskScheduler
     Task ScheduleStatsTasks(CancellationToken cancellationToken = default);
     void ScheduleUpdaterTasks();
     Task ScheduleKavitaPlusTasks(CancellationToken cancellationToken = default);
-    Task EnqueueScanFolderFromWatcherAsync(string changedPath, bool isDirectory, TimeSpan delay);
+    Task EnqueueScanFolderFromWatcherAsync(string changedPath, bool isDirectory);
     Task EnqueueScanFolderFromApiAsync(string path, bool abortOnNoSeriesMatch);
     Task EnqueueScanLibrary(int libraryId, bool force = false);
     Task EnqueueScanLibraries(bool force = false);

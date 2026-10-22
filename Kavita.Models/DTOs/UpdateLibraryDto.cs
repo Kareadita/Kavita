@@ -20,9 +20,11 @@ public sealed record UpdateLibraryDto
     /// <inheritdoc cref="Library.Folders"/>
     [Required]
     public required IEnumerable<string> Folders { get; init; }
-    /// <inheritdoc cref="Library.FolderWatching"/>
-    [Required]
-    public bool FolderWatching { get; init; }
+    /// <summary>
+    /// Null keeps the library's mode, so a client still sending the old FolderWatching bool is noop
+    /// </summary>
+    [EnumDataType(typeof(FolderWatchMode))]
+    public FolderWatchMode? FolderWatchMode { get; init; }
     /// <inheritdoc cref="Library.IncludeInDashboard"/>
     [Required]
     public bool IncludeInDashboard { get; init; }

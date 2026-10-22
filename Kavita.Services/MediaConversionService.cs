@@ -24,9 +24,6 @@ public class MediaConversionService(
     ILogger<MediaConversionService> logger)
     : IMediaConversionService
 {
-    public const string Name = "MediaConversionService";
-    public static readonly string[] ConversionMethods = ["ConvertAllBookmarkToEncoding", "ConvertAllCoversToEncoding", "ConvertAllManagedMediaToEncodingFormat"];
-
     /// <summary>
     /// Converts all Kavita managed media (bookmarks, covers, favicons, etc) to the saved target encoding.
     /// Do not invoke anyway except via Hangfire.

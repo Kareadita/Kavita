@@ -29,6 +29,8 @@ public static class MessageEventCode
     public const string ScanNoWork = "scan-no-work";
     public const string DbWriteFailed = "db-write-failed";
     public const string LibraryScanFailed = "library-scan-failed";
+    public const string SeriesUpdateFailed = "series-update-failed";
+    public const string SeriesRemovalFailed = "series-removal-failed";
 
     #endregion
 
@@ -37,6 +39,12 @@ public static class MessageEventCode
     public const string ScanLibrariesDelayed = "scan-libraries-delayed";
     public const string ScanLibraryDelayed = "scan-library-delayed";
     public const string ScanSeriesDelayed = "scan-series-delayed";
+
+    #endregion
+
+    #region Folder Watching
+
+    public const string FolderWatchFallback = "folder-watch-fallback";
 
     #endregion
 

@@ -38,9 +38,9 @@ public class StartupTasksHostedService(IServiceProvider serviceProvider) : IHost
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             if ((await unitOfWork.SettingsRepository.GetSettingsDtoAsync(cancellationToken)).EnableFolderWatching)
             {
-                var libraryWatcher = scope.ServiceProvider.GetRequiredService<ILibraryWatcher>();
+                var folderWatchService = scope.ServiceProvider.GetRequiredService<IFolderWatchService>();
                 // Push this off for a bit for people with massive libraries, as it can take up to 45 mins and blocks the thread
-                BackgroundJob.Enqueue(() => libraryWatcher.StartWatching());
+                BackgroundJob.Enqueue(() => folderWatchService.StartWatching());
             }
         }
         catch (Exception)

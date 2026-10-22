@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
 
-namespace FsProbe;
+namespace ProbeCommon;
 
 /// <summary>
 /// Change time (Linux ctime, Windows ChangeTime). Set by the OS on any content or metadata write, tools cannot set it back

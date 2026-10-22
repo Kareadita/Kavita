@@ -548,9 +548,6 @@ namespace Kavita.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("LastScanned")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("LibraryId")
                         .HasColumnType("INTEGER");
 
@@ -752,8 +749,14 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
 
-                    b.Property<bool>("FolderWatching")
+                    b.Property<int>("FolderWatchMode")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("FolderWatchState")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{\"Mounts\":[],\"Downgrade\":null}");
 
                     b.Property<bool>("IncludeInDashboard")
                         .HasColumnType("INTEGER");
@@ -793,6 +796,12 @@ namespace Kavita.Database.Migrations
 
                     b.Property<bool>("RemovePrefixForSortName")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ScanInfo")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{\"Normal\":null,\"Forced\":null}");
 
                     b.Property<string>("SecondaryColor")
                         .HasColumnType("TEXT");

@@ -158,9 +158,9 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
     {
         var (_, _, taskScheduler) = await CreateServices();
 
-        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFile), TimeSpan.FromSeconds(30));
-        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFile), TimeSpan.FromSeconds(30));
-        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFolder + "/Accel World v03.cbz"), TimeSpan.FromSeconds(30));
+        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFile));
+        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFile));
+        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFolder + "/Accel World v03.cbz"));
 
         Assert.Equal(2, ScanJobQueue.Read().FolderJobs.Count);
     }
@@ -170,13 +170,58 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
     {
         var (_, _, taskScheduler) = await CreateServices();
 
-        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFile), TimeSpan.FromSeconds(30));
-        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFolder + "/Accel World v03.cbz"), TimeSpan.FromSeconds(30));
+        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFile));
+        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFolder + "/Accel World v03.cbz"));
         Assert.Equal(1, ScanRescheduledCount());
 
-        await taskScheduler.EnqueueScanFolderAsync(Change(Root + "YenPress", Root + "YenPress/Frieren/Frieren v02.cbz"),
-            TimeSpan.FromSeconds(30));
+        await taskScheduler.EnqueueScanFolderAsync(Change(Root + "YenPress", Root + "YenPress/Frieren/Frieren v02.cbz"));
         Assert.Equal(2, ScanRescheduledCount());
+    }
+
+    [Fact]
+    public async Task EnqueueScanFolderFromWatcher_TwoFilesInOneFolder_OneJobForTheFolder()
+    {
+        var (_, _, taskScheduler) = await CreateServices();
+        var before = DateTime.UtcNow;
+
+        await taskScheduler.EnqueueScanFolderFromWatcherAsync(AccelWorldFile, false);
+        await taskScheduler.EnqueueScanFolderFromWatcherAsync(AccelWorldFolder + "/Accel World v03.cbz", false);
+
+        var job = Assert.Single(ScanJobQueue.Read().FolderJobs);
+        Assert.Equal(AccelWorldFolder, job.Request.ChangedPath);
+        Assert.NotNull(job.FirstChangeUtc);
+        Assert.InRange(job.RunAtUtc!.Value, before.AddSeconds(29), DateTime.UtcNow.AddSeconds(31));
+    }
+
+    [Fact]
+    public async Task EnqueueScanFolder_SecondWatcherChange_PushesTheJobBack()
+    {
+        var (_, _, taskScheduler) = await CreateServices();
+        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFolder));
+        var first = Assert.Single(ScanJobQueue.Read().FolderJobs);
+        await Task.Delay(50);
+
+        await taskScheduler.EnqueueScanFolderAsync(AccelWorldChange(AccelWorldFolder));
+
+        var pushed = Assert.Single(ScanJobQueue.Read().FolderJobs);
+        Assert.Equal(first.JobId, pushed.JobId);
+        Assert.True(pushed.RunAtUtc > first.RunAtUtc);
+        Assert.Equal(first.FirstChangeUtc, pushed.FirstChangeUtc);
+        Assert.Equal(2, ScanRescheduledCount());
+    }
+
+    [Theory]
+    [InlineData(0, 30)]
+    [InlineData(590, 10)]
+    [InlineData(600, 0)]
+    [InlineData(700, -100)]
+    public void WatcherPushBack_StopsAtTheCap(int firstChangeSecondsAgo, int expectedSeconds)
+    {
+        var now = DateTime.UtcNow;
+
+        var delay = TaskScheduler.WatcherPushBack(now.AddSeconds(-firstChangeSecondsAgo), now);
+
+        Assert.Equal(TimeSpan.FromSeconds(expectedSeconds), delay);
     }
 
     [Fact]

@@ -1,6 +1,7 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import {TranslocoService} from '@jsverse/transloco';
 import {MessageEventCode} from '../_models/events/core/message-event-code';
+import {FolderWatchFallbackReason} from '../_models/events/core/folder-watch-fallback-reason';
 
 const PREFIX = 'event-message-pipe';
 
@@ -21,6 +22,8 @@ type MessageBody = Partial<{
   folder: string;
   path: string;
   filePath: string;
+  reason: FolderWatchFallbackReason;
+  message: string | null;
 }>;
 
 type Params = Record<string, string | undefined>;
@@ -73,12 +76,18 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.db-write-failed-label`, {seriesName}, fallback);
       case MessageEventCode.LibraryScanFailed:
         return this.translate(`${PREFIX}.library-scan-failed-label`, {libraryName}, fallback);
+      case MessageEventCode.SeriesUpdateFailed:
+        return this.translate(`${PREFIX}.series-update-failed-label`, {seriesName}, fallback);
+      case MessageEventCode.SeriesRemovalFailed:
+        return this.translate(`${PREFIX}.series-removal-failed-label`, {libraryName}, fallback);
       case MessageEventCode.ScanLibrariesDelayed:
         return this.translate(`${PREFIX}.scan-libraries-delayed-label`, {}, fallback);
       case MessageEventCode.ScanLibraryDelayed:
         return this.translate(`${PREFIX}.scan-library-delayed-label`, {libraryName}, fallback);
       case MessageEventCode.ScanSeriesDelayed:
         return this.translate(`${PREFIX}.scan-series-delayed-label`, {seriesName}, fallback);
+      case MessageEventCode.FolderWatchFallback:
+        return this.translate(`${PREFIX}.folder-watch-fallback-label`, {}, fallback);
       case MessageEventCode.BackupFolderUnwritable:
         return this.translate(`${PREFIX}.backup-folder-unwritable-label`, {}, fallback);
       case MessageEventCode.BackupExists:
@@ -122,10 +131,20 @@ export class EventMessagePipe implements PipeTransform {
       case MessageEventCode.LibraryScanFailed:
         // SubTitle is the raw exception message
         return source.subTitle;
+      case MessageEventCode.SeriesUpdateFailed:
+        return body.message ?? this.translate(`${PREFIX}.series-update-failed-description`, {}, fallback);
+      case MessageEventCode.SeriesRemovalFailed:
+        return this.translate(`${PREFIX}.series-removal-failed-description`, {}, fallback);
       case MessageEventCode.ScanLibrariesDelayed:
       case MessageEventCode.ScanLibraryDelayed:
       case MessageEventCode.ScanSeriesDelayed:
         return this.translate(`${PREFIX}.scan-delayed-description`, {}, fallback);
+      case MessageEventCode.FolderWatchFallback: {
+        const key = body.reason === FolderWatchFallbackReason.MissedChange
+          ? 'folder-watch-fallback-missed-change-description'
+          : 'folder-watch-fallback-errors-description';
+        return this.translate(`${PREFIX}.${key}`, {folder: body.folder, libraryName: body.libraryName}, fallback);
+      }
       case MessageEventCode.BackupFolderUnwritable:
         return this.translate(`${PREFIX}.backup-folder-unwritable-description`, {folder: body.folder}, fallback);
       case MessageEventCode.BackupExists:

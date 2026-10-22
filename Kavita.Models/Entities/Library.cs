@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.User;
@@ -14,10 +16,8 @@ public class Library : IEntityDate, IHasCoverImage
     public string PrimaryColor { get; set; }
     public string SecondaryColor { get; set; }
     public LibraryType Type { get; set; }
-    /// <summary>
-    /// If Folder Watching is enabled for this library
-    /// </summary>
-    public bool FolderWatching { get; set; } = true;
+    public FolderWatchMode FolderWatchMode { get; set; } = FolderWatchMode.Automatic;
+    public LibraryFolderWatchState FolderWatchState { get; set; } = new();
     /// <summary>
     /// Include Library series on Dashboard Streams
     /// </summary>
@@ -78,11 +78,43 @@ public class Library : IEntityDate, IHasCoverImage
     /// </summary>
     /// <remarks>Time stored in UTC</remarks>
     public DateTime LastScanned { get; set; }
+    public LibraryScanInfo ScanInfo { get; set; } = new();
     public ICollection<FolderPath> Folders { get; set; } = null!;
     public ICollection<AppUser> AppUsers { get; set; } = null!;
     public ICollection<Series> Series { get; set; } = null!;
     public ICollection<LibraryFileTypeGroup> LibraryFileTypes { get; set; } = new List<LibraryFileTypeGroup>();
     public ICollection<LibraryExcludePattern> LibraryExcludePatterns { get; set; } = new List<LibraryExcludePattern>();
+
+    /// <summary>
+    /// Adds and removes folder rows to match <paramref name="paths"/>, keeping the rows of folders still in it
+    /// </summary>
+    /// <returns>True when a folder was added or removed</returns>
+    public bool SyncFolders(IEnumerable<string> paths)
+    {
+        var wanted = paths
+            .DistinctBy(FolderKey)
+            .ToDictionary(FolderKey);
+
+        var removed = Folders.Where(f => !wanted.ContainsKey(FolderKey(f.Path))).ToList();
+        foreach (var folder in removed)
+        {
+            Folders.Remove(folder);
+        }
+
+        var kept = Folders.Select(f => FolderKey(f.Path)).ToHashSet();
+        var added = wanted
+            .Where(w => !kept.Contains(w.Key))
+            .Select(w => new FolderPath { Path = w.Value })
+            .ToList();
+        foreach (var folder in added)
+        {
+            Folders.Add(folder);
+        }
+
+        return removed.Count > 0 || added.Count > 0;
+    }
+
+    private static string FolderKey(string path) => path.NormalizePath().TrimEnd('/');
 
     public void UpdateLastModified()
     {
