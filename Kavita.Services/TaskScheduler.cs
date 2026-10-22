@@ -759,7 +759,7 @@ public class TaskScheduler : ITaskScheduler
     {
         await _defaultRetryPolicy.ExecuteAsync(async () =>
         {
-            var update = await _versionUpdaterService.CheckForUpdate(cancellationToken);
+            var update = await _versionUpdaterService.CheckForUpdate(ct: cancellationToken);
             if (update == null) return;
 
             await _versionUpdaterService.PushUpdate(update, cancellationToken);

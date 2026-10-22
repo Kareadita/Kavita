@@ -5,6 +5,7 @@ using Kavita.API.Services.SignalR;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.Update;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -26,7 +27,10 @@ public class VersionUpdaterServiceTests : IDisposable
         Directory.CreateDirectory(_tempPath);
         _directoryService.LongTermCacheDirectory.Returns(_tempPath);
 
-        _service = new VersionUpdaterService(_logger, _eventHub, _directoryService);
+        var fileCacheService = new FileCacheService(_directoryService, Substitute.For<ILogger<FileCacheService>>());
+        var githubApiService = new GithubApiService(fileCacheService, new MemoryCache(new MemoryCacheOptions()),
+            Substitute.For<ILogger<GithubApiService>>());
+        _service = new VersionUpdaterService(_logger, _eventHub, _directoryService, githubApiService, fileCacheService);
 
         // Setup HTTP testing
         _httpTest = new HttpTest();
@@ -241,8 +245,8 @@ public class VersionUpdaterServiceTests : IDisposable
         });
 
         // Create cache file
-        Directory.CreateDirectory(Path.Combine(_tempPath, "update"));
-        var cacheFilePath = Path.Combine(_tempPath, "update", "github_releases_cache.json");
+        Directory.CreateDirectory(Path.Combine(_tempPath, FileCacheService.VersionDirectory));
+        var cacheFilePath = Path.Combine(_tempPath, FileCacheService.VersionDirectory, "releases.json");
         await File.WriteAllTextAsync(cacheFilePath, System.Text.Json.JsonSerializer.Serialize(releases));
         File.SetLastWriteTimeUtc(cacheFilePath, DateTime.UtcNow); // Ensure it's fresh
 
@@ -386,7 +390,7 @@ public class VersionUpdaterServiceTests : IDisposable
             published_at = DateTime.UtcNow.ToString("o")
         };
 
-        _httpTest.RespondWithJson(githubResponse);
+        _httpTest.RespondWithJson(new List<object> { githubResponse });
 
 
         var result = await _service.CheckForUpdate();
@@ -439,5 +443,68 @@ public class VersionUpdaterServiceTests : IDisposable
 
         Assert.NotNull(result);
         Assert.True(result[0].IsOnNightlyInRelease);
+    }
+
+    [Fact]
+    public async Task GetAllReleases_ServesStaleCache_WhenGithubFails()
+    {
+        await WriteReleasesCache(TimeSpan.FromHours(3), "0.7.0", "0.6.0");
+        _httpTest.RespondWith("{\"message\":\"API rate limit exceeded\"}", 403, RateLimitExhaustedHeaders());
+
+        var result = await _service.GetAllReleases();
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal("0.7.0", result[0].UpdateVersion);
+    }
+
+    [Fact]
+    public async Task GetAllReleases_DoesNotFetchNightlies_OnStableBuild()
+    {
+        _httpTest.RespondWithJson(new List<object> { Release(BuildInfo.Version.ToString(), 1), Release("0.6.0", 10) });
+
+        var result = await _service.GetAllReleases();
+
+        Assert.Equal(2, result.Count);
+        Assert.Single(_httpTest.CallLog);
+    }
+
+    private static object Release(string version, int daysAgo)
+    {
+        return new
+        {
+            tag_name = $"v{version}",
+            name = $"Release {version}",
+            body = "# Added\n- Feature",
+            html_url = $"https://github.com/Kareadita/Kavita/releases/tag/v{version}",
+            published_at = DateTime.UtcNow.AddDays(-daysAgo).ToString("o")
+        };
+    }
+
+    private async Task WriteReleasesCache(TimeSpan age, params string[] versions)
+    {
+        var releases = versions.Select((v, i) => new UpdateNotificationDto
+        {
+            UpdateVersion = v,
+            CurrentVersion = "0.5.0.0",
+            PublishDate = DateTime.UtcNow.AddDays(-i).ToString("o"),
+            UpdateBody = string.Empty,
+            UpdateTitle = $"Release {v}",
+            UpdateUrl = string.Empty
+        }).ToList();
+
+        Directory.CreateDirectory(Path.Combine(_tempPath, FileCacheService.VersionDirectory));
+        var cacheFilePath = Path.Combine(_tempPath, FileCacheService.VersionDirectory, "releases.json");
+        await File.WriteAllTextAsync(cacheFilePath, System.Text.Json.JsonSerializer.Serialize(releases));
+        File.SetLastWriteTimeUtc(cacheFilePath, DateTime.UtcNow - age);
+    }
+
+    private static Dictionary<string, string> RateLimitExhaustedHeaders()
+    {
+        return new Dictionary<string, string>
+        {
+            { "X-RateLimit-Limit", "60" },
+            { "X-RateLimit-Remaining", "0" },
+            { "X-RateLimit-Reset", DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds().ToString() }
+        };
     }
 }

@@ -457,7 +457,8 @@ public class LicenseService(
             .LastOrDefault()
             ?.UpdateVersion;
 
-        licenseInfo.IsValidVersion = !string.IsNullOrEmpty(lastSupportedVersion) && new Version(lastSupportedVersion) <= BuildInfo.Version;
+        // No release data means GitHub is unreachable, not that this install is out of date
+        licenseInfo.IsValidVersion = string.IsNullOrEmpty(lastSupportedVersion) || new Version(lastSupportedVersion) <= BuildInfo.Version;
 
         licenseInfo.HasLicense = hasLicense;
         licenseInfo.InstallId = HashUtil.ServerToken();
