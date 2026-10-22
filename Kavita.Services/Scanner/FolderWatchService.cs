@@ -56,7 +56,7 @@ public class FolderWatchService(IUnitOfWork unitOfWork, ILogger<FolderWatchServi
     {
         if (!(await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableFolderWatching)
         {
-            logger.LogInformation("Folder watching is disabled at the server level, thus ignoring any requests to create folder watching");
+            logger.LogDebug("Folder watching is disabled at the server level, thus ignoring any requests to create folder watching");
             StopWatching();
             return null;
         }

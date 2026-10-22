@@ -48,7 +48,7 @@ public class FolderValidationService(
             return;
         }
 
-        logger.LogInformation("[FolderValidationService] {Count} file(s) in {Folder} still being written, checking again in {Seconds} s: {Files}",
+        logger.LogDebug("[FolderValidationService] {Count} file(s) in {Folder} still being written, checking again in {Seconds} s: {Files}",
             stillWriting.Count, request.ChangedPath, delay.TotalSeconds, string.Join(", ", stillWriting));
         if (!ScheduleValidation(request, firstChangeUtc, delay)) return;
 

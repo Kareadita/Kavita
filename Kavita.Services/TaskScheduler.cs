@@ -417,7 +417,7 @@ public class TaskScheduler : ITaskScheduler
         var target = ResolveScanFolder(changedPath, !isDirectory, libraries);
         if (target == null || target.Folder == target.Root)
         {
-            _logger.LogInformation("[FolderWatchService] Change from {FilePath} could not find root level folder, ignoring change", changedPath);
+            _logger.LogTrace("[FolderWatchService] Change from {FilePath} could not find root level folder, ignoring change", changedPath);
             return;
         }
 
@@ -502,12 +502,12 @@ public class TaskScheduler : ITaskScheduler
             var isNewFolder = folderJobs.All(j => j.Request.Folder != request.Folder);
             if (!request.FromFolderWatcher)
             {
-                _logger.LogInformation("Scheduling ScanFolder for {Folder}", request.Folder);
+                _logger.LogTrace("Scheduling ScanFolder for {Folder}", request.Folder);
                 ScanJobQueue.Enqueue(() => _scannerService.ScanFolder(request));
                 return isNewFolder;
             }
 
-            _logger.LogInformation("Scheduling ValidateFolder for {Folder}", request.Folder);
+            _logger.LogTrace("Scheduling ValidateFolder for {Folder}", request.Folder);
             ScanJobQueue.Schedule<IFolderValidationService>(s => s.ValidateFolder(request, DateTime.UtcNow), WatcherQuietTime);
             return isNewFolder;
         }

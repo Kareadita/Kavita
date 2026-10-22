@@ -65,7 +65,7 @@ public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFile
         {
             StopWatchers();
 
-            logger.LogInformation("[NativeFileWatcherService] Starting file watchers for {Count} library folders", reachable.Count);
+            logger.LogDebug("[NativeFileWatcherService] Starting file watchers for {Count} library folders", reachable.Count);
 
             var watchedFolders = new List<string>();
             foreach (var libraryFolder in reachable)
@@ -77,7 +77,7 @@ public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFile
                     _startedUtc[Parser.NormalizePath(libraryFolder)] = UtcNow;
                 }
             }
-            logger.LogInformation("[NativeFileWatcherService] Watching {Count} folders", watchedFolders.Count);
+            logger.LogDebug("[NativeFileWatcherService] Watching {Count} folders", watchedFolders.Count);
 
             var missingFolders = folders.Except(watchedFolders).ToList();
             if (missingFolders.Count == 0)
@@ -148,7 +148,7 @@ public class NativeFileWatcherService(IFileSystem fileSystem, ILogger<NativeFile
         _startedUtc.Clear();
         if (_watchers.Count == 0) return;
 
-        logger.LogInformation("[NativeFileWatcherService] Stopping watching folders");
+        logger.LogDebug("[NativeFileWatcherService] Stopping watching folders");
         foreach (var fileSystemWatcher in _watchers)
         {
             fileSystemWatcher.Dispose();

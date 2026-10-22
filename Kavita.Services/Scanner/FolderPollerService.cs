@@ -131,7 +131,7 @@ public class FolderPollerService(IFileSystem fileSystem, ILogger<FolderPollerSer
             }
 
             var wait = MinWait;
-            TimeSpan? loggedWait = null;
+            var loggedWait = false;
             var unreachable = new HashSet<string>();
             while (true)
             {
@@ -145,10 +145,10 @@ public class FolderPollerService(IFileSystem fileSystem, ILogger<FolderPollerSer
 
                 var pass = sw.Elapsed;
                 wait = WaitAfter(pass);
-                if (loggedWait == null || Math.Abs((wait - loggedWait.Value).Ticks) > loggedWait.Value.Ticks / 2)
+                if (!loggedWait)
                 {
-                    loggedWait = wait;
-                    logger.LogInformation(
+                    loggedWait = true;
+                    logger.LogDebug(
                         "[FolderPollerService] {Folders}: each pass reads {Count} folder times ({PassSeconds:F1} s), then waits {WaitSeconds:F0} s. " +
                         "New, removed or renamed files are seen within about {DetectSeconds:F0} s, and scanned once validation finds them complete. " +
                         "Files replaced in place are seen at the next scheduled library scan",

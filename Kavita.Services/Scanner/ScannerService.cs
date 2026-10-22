@@ -651,7 +651,7 @@ public class ScannerService(
         var shouldUseLibraryScan = !(await unitOfWork.LibraryRepository.DoAnySeriesFoldersMatch(libraryFolderPaths));
         if (!shouldUseLibraryScan)
         {
-            logger.LogInformation("[ScannerService] Library {LibraryName} consists of one or more Series folders as a library root, using series scan", library.Name);
+            logger.LogDebug("[ScannerService] Library {LibraryName} consists of one or more Series folders as a library root, using series scan", library.Name);
         }
 
 
