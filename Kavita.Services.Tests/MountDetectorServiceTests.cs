@@ -91,6 +91,58 @@ public class MountDetectorServiceTests
         Assert.Equal("ext4", mount.Type);
     }
 
+    // mount output from a tester's MacBook (watchprobe v7, 2026-10-22), user and NAS renamed, plus a mount point with a space
+    private const string MacMounts = """
+        /dev/disk3s1s1 on / (apfs, sealed, local, read-only, journaled)
+        devfs on /dev (devfs, local, nobrowse)
+        /dev/disk3s5 on /System/Volumes/Data (apfs, local, journaled, nobrowse, protect, root data)
+        map auto_home on /System/Volumes/Data/home (autofs, automounted, nobrowse)
+        //joe@MyCloud-ABC123._smb._tcp.local/joe on /Volumes/joe (smbfs, nodev, nosuid, mounted by joe)
+        /dev/disk4s1 on /Volumes/My Books (msdos, local, nodev, nosuid, noowners)
+        """;
+
+    [Fact]
+    public void Mac_Smbfs_IsNetwork()
+    {
+        var mount = MountDetectorService.FindMacMount(MacMounts, "/Volumes/joe/backups/Manga");
+
+        Assert.NotNull(mount);
+        Assert.Equal("/Volumes/joe", mount.Point);
+        Assert.Equal("//joe@MyCloud-ABC123._smb._tcp.local/joe", mount.Source);
+        Assert.Equal("smbfs", mount.Type);
+        Assert.True(mount.IsNetwork);
+    }
+
+    [Fact]
+    public void Mac_HomeFolder_IsLocal()
+    {
+        var mount = MountDetectorService.FindMacMount(MacMounts, "/Users/joe/Manga");
+
+        Assert.Equal("/", mount!.Point);
+        Assert.Equal("apfs", mount.Type);
+        Assert.False(mount.IsNetwork);
+    }
+
+    [Fact]
+    public void Mac_SpaceInMountPoint()
+    {
+        var mount = MountDetectorService.FindMacMount(MacMounts, "/Volumes/My Books/Series A");
+
+        Assert.Equal("/Volumes/My Books", mount!.Point);
+        Assert.Equal("msdos", mount.Type);
+    }
+
+    [Fact]
+    public void Detect_OnMac_RunsTheMountCommand()
+    {
+        if (!OperatingSystem.IsMacOS()) return;
+
+        var mount = new MountDetectorService().Detect("/");
+
+        Assert.Equal("/", mount!.Point);
+        Assert.Equal("apfs", mount.Type);
+    }
+
     [Fact]
     public void Fingerprint_HasNoSourceText_AndIsSharedByOneShare()
     {

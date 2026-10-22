@@ -10,8 +10,10 @@ namespace Kavita.Models.Scanner;
 /// <param name="Type">File system type, e.g. cifs</param>
 public sealed record MountInfo(string Point, string Source, string Type)
 {
-    // cifs, smb and nfs, plus Docker Desktop host mounts (9p, virtiofs, fakeowner) and every fuse.* (mergerfs, rclone, sshfs)
-    private static readonly string[] NetworkTypes = ["cifs", "smb3", "smbfs", "nfs", "nfs4", "9p", "virtiofs", "fakeowner"];
+    // cifs, smb and nfs, Docker Desktop host mounts (9p, virtiofs, fakeowner), macOS' afpfs, webdav and FUSE (macfuse,
+    // osxfuse before macFUSE 4), and every Linux fuse.* (mergerfs, rclone, sshfs)
+    private static readonly string[] NetworkTypes =
+        ["cifs", "smb3", "smbfs", "nfs", "nfs4", "9p", "virtiofs", "fakeowner", "afpfs", "webdav", "macfuse", "osxfuse"];
 
     /// <summary>
     /// File system events cannot see changes other machines make on this mount, so it is polled
