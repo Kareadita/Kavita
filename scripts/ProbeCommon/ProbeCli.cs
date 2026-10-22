@@ -20,6 +20,14 @@ public static class ProbeCli
         Console.WriteLine($"{tool} v{environment.ProbeVersion} {environment.Mode} on {environment.Path}");
         Console.WriteLine($"  {environment.Os} | {environment.Rid} | container: {environment.InContainer}");
         Console.WriteLine($"  filesystem: {environment.FileSystem ?? "?"} {environment.DriveType} | mount: {environment.MountPoint} {environment.MountOptions}");
+        if (environment.MountError != null)
+        {
+            Console.WriteLine($"  mount: {environment.MountError}");
+        }
+        if (environment.DriveInfoName != null || environment.DriveInfoFormat != null)
+        {
+            Console.WriteLine($"  drive info: {environment.DriveInfoName} {environment.DriveInfoFormat}");
+        }
     }
 
     /// <returns><paramref name="outPath"/>, or a timestamped file next to the program</returns>

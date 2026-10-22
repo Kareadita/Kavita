@@ -17,5 +17,9 @@ public sealed class EnvironmentInfo
     public string? FileSystem { get; set; }
     public string? MountOptions { get; set; }
     public string? DriveType { get; set; }
+    public string? MountLine { get; set; }
+    public string? MountError { get; set; }
+    public string? DriveInfoName { get; set; }
+    public string? DriveInfoFormat { get; set; }
     public bool ChangeTimeSupported { get; set; }
 }

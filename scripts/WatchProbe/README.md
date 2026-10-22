@@ -21,6 +21,7 @@ Pick the archive for where you run it. Each one holds a single `watchprobe` prog
 | Alpine-based images | `watchprobe-linux-musl-x64.tar.gz` |
 | Windows | `watchprobe-win-x64.zip` |
 | macOS (Apple Silicon) | `watchprobe-osx-arm64.tar.gz` |
+| macOS (Intel) | `watchprobe-osx-x64.tar.gz` |
 
 Not sure which Linux one? Run `uname -m`: `x86_64` is x64, `aarch64` is arm64.
 
@@ -69,6 +70,43 @@ If the host (outside Docker) can reach the same share, run the same test there a
 ```bash
 ./watchprobe "/mnt/nas/manga/Some Series" --label "my-setup-host"
 ```
+
+## macOS
+
+We have never seen how macOS behaves, so a Mac run is wanted even if Kavita works fine for you. Apple menu > About This Mac tells you the chip: Apple M1/M2/M3/M4 is `osx-arm64`, Intel is `osx-x64`.
+
+### Get it running
+
+In Terminal, in the folder you downloaded the archive to:
+
+```bash
+tar -xzf watchprobe-osx-arm64.tar.gz
+cd watchprobe-osx-arm64
+xattr -d com.apple.quarantine watchprobe 2>/dev/null
+codesign --force --sign - watchprobe
+./watchprobe --help
+```
+
+The `xattr` line stops macOS from blocking a program downloaded from the internet, and `codesign` gives it the local signature Apple Silicon requires (without it macOS stops the program with `Killed: 9`). Both only affect this one file.
+
+### Run it
+
+**1. A folder on a network share (the important one).** Mount the share the way Kavita sees it, usually Finder > Go > Connect to Server (`smb://your-nas/Media`), so it appears under `/Volumes/`. Point the probe at one series folder on it:
+
+```bash
+./watchprobe "/Volumes/Media/Manga/Some Series" --label "mac-smb"
+```
+
+Then make the changes from **another machine** (the NAS, a downloader, a Windows PC), as in step 2 of the Docker section above. If you have an NFS share as well, run it again there with `--label "mac-nfs"`.
+
+**2. A folder on the Mac's own disk (the control).** A new test folder in your home folder (Documents and Desktop make macOS ask Terminal for permission), changes made on the Mac itself:
+
+```bash
+mkdir -p ~/watchprobe-test
+./watchprobe ~/watchprobe-test --label "mac-local"
+```
+
+Both runs write a report next to the program. Send both, plus the output of `mount` (it lists what is mounted where; remove anything you would rather not share).
 
 ## Cost mode: how long polling a whole library takes
 

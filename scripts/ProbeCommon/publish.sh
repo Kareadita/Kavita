@@ -9,7 +9,7 @@ cd "$project"
 rm -rf dist
 mkdir -p dist
 
-for rid in linux-x64 linux-arm64 linux-musl-x64 win-x64 osx-arm64; do
+for rid in linux-x64 linux-arm64 linux-musl-x64 win-x64 osx-arm64 osx-x64; do
   out="dist/$name-$rid"
   dotnet publish -c Release -r "$rid" -o "$out" -v q
   cp README.md "$out/"

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
@@ -25,6 +26,11 @@ public static class EnvironmentReader
 
         if (OperatingSystem.IsLinux()) ReadLinuxMount(fullPath, info);
         else if (OperatingSystem.IsWindows()) ReadWindowsDrive(fullPath, info);
+        else if (OperatingSystem.IsMacOS())
+        {
+            ReadMacMount(fullPath, info);
+            ReadMacDriveInfo(fullPath, info);
+        }
 
         return info;
     }
@@ -91,6 +97,75 @@ public static class EnvironmentReader
         catch
         {
             return fullPath;
+        }
+    }
+
+    // macOS mount prints "//joe@nas/Media on /Volumes/Media (smbfs, nodev, nosuid, mounted by joe)", spaces unescaped
+    private static readonly Regex MacMountLine = new(@"^(?<source>.+?) on (?<point>.+) \((?<type>[^,)]+)(?:, (?<options>[^)]*))?\)$");
+
+    private static void ReadMacMount(string fullPath, EnvironmentInfo info)
+    {
+        string output;
+        try
+        {
+            using var process = Process.Start(new ProcessStartInfo("/sbin/mount")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+            })!;
+            output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit(5000);
+        }
+        catch (Exception ex)
+        {
+            info.MountError = $"{ex.GetType().Name}: {ex.Message}";
+            return;
+        }
+
+        var resolved = ResolveLinks(fullPath);
+        var bestLength = -1;
+        foreach (var line in output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var match = MacMountLine.Match(line);
+            if (!match.Success) continue;
+
+            var mountPoint = match.Groups["point"].Value;
+            var inside = resolved == mountPoint
+                         || mountPoint == "/"
+                         || resolved.StartsWith(mountPoint.TrimEnd('/') + "/", StringComparison.Ordinal);
+            if (!inside || mountPoint.Length < bestLength) continue;
+
+            bestLength = mountPoint.Length;
+            info.MountLine = line;
+            info.MountPoint = mountPoint;
+            info.MountSource = match.Groups["source"].Value;
+            info.FileSystem = match.Groups["type"].Value;
+            info.MountOptions = match.Groups["options"].Value;
+        }
+
+        if (bestLength < 0)
+        {
+            info.MountError = $"no line of mount's {output.Split('\n').Length} lines matched the folder";
+        }
+    }
+
+    private static void ReadMacDriveInfo(string fullPath, EnvironmentInfo info)
+    {
+        try
+        {
+            var resolved = ResolveLinks(fullPath);
+            var drive = DriveInfo.GetDrives()
+                .Where(d => resolved == d.Name || d.Name == "/" || resolved.StartsWith(d.Name.TrimEnd('/') + "/", StringComparison.Ordinal))
+                .MaxBy(d => d.Name.Length);
+            if (drive == null) return;
+
+            info.DriveInfoName = drive.Name;
+            info.DriveInfoFormat = drive.DriveFormat;
+        }
+        catch (Exception ex)
+        {
+            info.DriveInfoFormat = $"unknown ({ex.GetType().Name})";
         }
     }
 
