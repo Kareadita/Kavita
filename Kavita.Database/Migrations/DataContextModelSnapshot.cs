@@ -3262,6 +3262,9 @@ namespace Kavita.Database.Migrations
                     b.Property<bool>("ShowScreenHints")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ShowSeriesItemCount")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("SocialPreferences")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
