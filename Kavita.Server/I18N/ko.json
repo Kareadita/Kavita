@@ -287,5 +287,10 @@
     "mappings-re-run-libraries-overlap": "ExcludedLibraries와 IncludedLibraries는 동일한 라이브러리를 포함할 수 없습니다",
     "series-name-orphans-files": "이 이름을 변경하면 현재 이 시리즈에 병합되어 있는 파일들이 분리됩니다",
     "series-localized-name-exists": "이 라이브러리의 다른 시리즈에서 사용하는 이름입니다",
-    "series-localized-name-orphans-files": "이 번역명을 변경하면 현재 이 시리즈에 병합되어 있는 파일들이 분리됩니다"
+    "series-localized-name-orphans-files": "이 번역명을 변경하면 현재 이 시리즈에 병합되어 있는 파일들이 분리됩니다",
+    "email.token-invalidated.subject": "Kavita - {{Provider}} 토큰이 만료되어 읽기 동기화 이벤트가 정지되었습니다",
+    "email.token-invalidated.header": "{{Provider}} 토큰이 반복된 갱신 실패로 인해 만료되었습니다!",
+    "email.token-invalidated.description": "연결을 갱신할 때까지 {{Provider}}와의 동기화를 중단합니다.",
+    "email.token-invalidated.cta": "갱신",
+    "email.token-invalidated.fallback-link-label": "위 버튼이 작동하지 않는다면 이 링크를 사용하십시오:"
 }

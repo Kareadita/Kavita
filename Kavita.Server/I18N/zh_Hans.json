@@ -285,5 +285,12 @@
     "series-name-orphans-files": "更改此名称会将当前合并到此系列中的文件拆分开",
     "series-localized-name-exists": "此名称已被该库中的另一个系列占用",
     "series-localized-name-orphans-files": "更改此本地化名称将会拆分当前已合并到该系列中的文件",
-    "mappings-re-run-in-progress": "正在处理元数据重新映射请求。请等待其完成后再重新排队"
+    "mappings-re-run-in-progress": "正在处理元数据重新映射请求。请等待其完成后再重新排队",
+    "mappings-re-run-no-libraries-selected": "请求至少需要包含 1 个资料库",
+    "mappings-re-run-libraries-overlap": "排除的资料库与纳入的资料库不可重复",
+    "email.token-invalidated.subject": "Kavita - 您的 {{Provider}} 令牌已失效，Scrobble 事件已停止",
+    "email.token-invalidated.header": "由于多次刷新失败，您的 {{Provider}} 令牌已失效！",
+    "email.token-invalidated.description": "在您重新建立连接之前，Kavita 将停止与 {{Provider}} 同步。",
+    "email.token-invalidated.cta": "更新",
+    "email.token-invalidated.fallback-link-label": "如果上面的按钮不起作用，请在此处找到链接："
 }

@@ -684,8 +684,6 @@
         "manage-reading-list-tooltip": "Soll Kavita Leselisten aus den Tags StoryArc/StoryArcNumber und AlternativeSeries/AlternativeCount in den ComicInfo.xml/opf-Dateien erstellen",
         "allow-scrobbling-label": "Scrobbling zulassen",
         "allow-scrobbling-tooltip": "Ob Kavita Leseereignisse, den Status „Möchte ich lesen“, Bewertungen und Rezensionen an die konfigurierten Anbieter scrobbeln soll. Das geschieht nur bei aktivem Kavita+-Abonnement.",
-        "folder-watching-label": "Ordner-Überwachung",
-        "folder-watching-tooltip": "Server-Ordnerüberwachung für diese Bibliothek außer Kraft setzen. Wenn diese Option ausgeschaltet ist, wird die Ordnerüberwachung für die Ordner, die diese Bibliothek enthält, nicht durchgeführt. Wenn Bibliotheken Ordner gemeinsam nutzen, können diese trotzdem überprüft werden. Wartet immer 10 Minuten, bevor der Scan ausgelöst wird.",
         "include-in-dashboard-label": "In das Dashboard einbeziehen",
         "include-in-dashboard-tooltip": "Ob Serien dieser Bibliothek im Dashboard erscheinen. Betrifft alle Streams wie Weiterlesen, Kürzlich aktualisiert, Kürzlich hinzugefügt und eigene Streams.",
         "include-in-search-label": "In die Suche einbeziehen",
@@ -912,13 +910,7 @@
         "open-external": "Extern öffnen"
     },
     "manage-media-issues": {
-        "description-part-1": "Diese Tabelle enthält Probleme, die beim Scannen oder Lesen Ihrer Medien gefunden wurden. Sie können sie jederzeit leeren und mit einem (erzwungenen) Bibliotheksscan neu analysieren. Häufige Fehler und ihre Bedeutung finden Sie im ",
-        "description-part-2": "wiki.",
         "filter-label": "{{common.filter}}",
-        "clear-alerts": "Hinweise leeren",
-        "file-header": "Datei",
-        "comment-header": "Kommentar",
-        "created-header": "Erstellt",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -1116,9 +1108,6 @@
         "bust-cache-task": "Cache leeren",
         "bust-cache-task-desc": "Leert den Kavita+-Cache – nur zur Fehlersuche bei falschen Zuordnungen verwenden.",
         "bust-cache-task-success": "Kavita+ Cache geleert",
-        "bust-locale-task": "Locale-Cache leeren",
-        "bust-locale-task-desc": "Löscht den Locale-Cache. Dies kann Probleme mit Zeichenfolgen beheben, die nach einer Aktualisierung nicht korrekt angezeigt werden. Eine Aktualisierung des Browsers ist erforderlich.",
-        "bust-locale-task-success": "Locale-Cache geleert",
         "clear-reading-cache-task": "Lese-Cache löschen",
         "clear-reading-cache-task-desc": "Löscht zwischengespeicherte Dateien zum Lesen. Nützlich, wenn Sie gerade eine Datei aktualisiert haben, die Sie zuvor innerhalb der letzten 24 Stunden gelesen haben.",
         "clear-reading-cache-task-success": "Der Cache wurde geleert",
@@ -1316,19 +1305,7 @@
     },
     "events-widget": {
         "title-alt": "Aktivität",
-        "dismiss-all": "Alle ausblenden",
-        "update-available": "Update verfügbar",
-        "downloading-item": "{{item}} wird heruntergeladen",
-        "more-info": "Klicken Sie für weitere Informationen",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Benutzer online",
-        "active-events-title": "Aktive Ereignisse:",
-        "no-data": "Hier ist nicht viel los",
-        "left-to-process": "Noch zu bearbeiten: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} Downloads in der Warteschlange",
-        "reading-now": "{{num}} lesen gerade",
-        "downloads-active": "{{count}} Download(s) aktiv",
-        "not-connected": "Keine Verbindung, bitte aktualisieren"
+        "reading-now": "{{num}} lesen gerade"
     },
     "shortcuts-modal": {
         "title": "Tastenkürzel",

@@ -287,5 +287,10 @@
     "mappings-re-run-libraries-overlap": "Seznamy ExcludedLibraries a IncludedLibraries nesmí obsahovat stejné knihovny",
     "series-name-orphans-files": "Změna tohoto názvu by vedla k rozdělení souborů, které jsou v současné době sloučeny do této série",
     "series-localized-name-exists": "Tento název již používá jiná série v této knihovně",
-    "series-localized-name-orphans-files": "Změna tohoto lokalizovaného názvu by vedla k rozdělení souborů, které jsou v současné době sloučeny do této série"
+    "series-localized-name-orphans-files": "Změna tohoto lokalizovaného názvu by vedla k rozdělení souborů, které jsou v současné době sloučeny do této série",
+    "email.token-invalidated.subject": "Kavita – Tvůj token {{Provider}} byl zneplatněn a události scrobbingu byly zastaveny",
+    "email.token-invalidated.header": "Váš token {{Provider}} byl zneplatněn z důvodu opakovaných selhání při aktualizaci!",
+    "email.token-invalidated.description": "Kavita přestane synchronizovat s {{Provider}}, dokud neobnovíte připojení.",
+    "email.token-invalidated.cta": "OBNOVIT",
+    "email.token-invalidated.fallback-link-label": "Pokud výše uvedené tlačítko nefunguje, najdete odkaz zde:"
 }

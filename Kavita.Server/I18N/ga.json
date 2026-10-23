@@ -287,5 +287,10 @@
     "mappings-re-run-libraries-overlap": "Ní féidir leis na leabharlanna céanna a bheith i ExcludedLibraries agus IncludedLibraries",
     "series-name-orphans-files": "Dá n-athrófaí an t-ainm seo, scoiltfí comhaid atá cumasctha sa tsraith seo faoi láthair",
     "series-localized-name-exists": "Úsáideann sraith eile sa leabharlann seo an t-ainm seo cheana féin",
-    "series-localized-name-orphans-files": "Dá n-athrófaí an t-ainm logánta seo, scoiltfí comhaid atá cumasctha sa tsraith seo faoi láthair"
+    "series-localized-name-orphans-files": "Dá n-athrófaí an t-ainm logánta seo, scoiltfí comhaid atá cumasctha sa tsraith seo faoi láthair",
+    "email.token-invalidated.subject": "Kavita - Cuireadh do chomhartha {{Provider}} ar neamhní agus tá deireadh tagtha le himeachtaí scrobbling",
+    "email.token-invalidated.header": "Tá do chomhartha {{Provider}} curtha ó bhail de bharr teipeanna athnuachana arís agus arís eile!",
+    "email.token-invalidated.description": "Stopfaidh Kavita de bheith ag sioncrónú le {{Provider}} go dtí go ndéanfaidh tú do nasc a athnuachan.",
+    "email.token-invalidated.cta": "ATHNUAIGH",
+    "email.token-invalidated.fallback-link-label": "Mura n-oibríonn an cnaipe thuas, gheobhaidh tú an nasc anseo:"
 }

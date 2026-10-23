@@ -482,7 +482,6 @@
         "force-scan-tooltip": "Detta kommer att tvinga en genomsökning av biblioteket, som om det vore en ny skanning",
         "type-label": "Typ",
         "naming-conventions-part-1": "Kavita har ",
-        "folder-watching-tooltip": "Åsidosätt serverns mappövervakning för detta bibliotek. Om avstängt kommer mappövervakning inte att köras på de mappar som detta bibliotek innehåller. Om bibliotek delar mappar kan de ändå genomsökas. Skanning kommer alltid att vänta 10 minuter innan den triggas.",
         "add-title": "Lägg till Bibliotek",
         "folder-description": "Lägg till mappar till ditt bibliotek",
         "browse": "Bläddra efter Mediamappar",
@@ -509,7 +508,6 @@
         "include-in-search-label": "Inkludera i Sök",
         "include-in-search-tooltip": "Ska serier och all härledd information (genrer, personer, filer) från biblioteket inkluderas i sökresultaten?",
         "include-in-dashboard-tooltip": "Ska serier från biblioteket inkluderas på instrumentpanelen? Detta påverkar alla flöden, som 'På Hyllan', 'Nyligen Uppdaterad', 'Nyligen Tillagd' eller andra anpassade tillägg.",
-        "folder-watching-label": "Mapp-bevakning",
         "include-in-dashboard-label": "Inkludera i instrumentpanelen",
         "force-scan": "Tvinga Skanning",
         "help-us-part-3": "för att namnge och organisera din media.",
@@ -659,13 +657,7 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "file-header": "Fil",
-        "no-data": "{{common.no-data}}",
-        "clear-alerts": "Rensa Varningar",
-        "description-part-1": "Denna tabell innehåller problem som upptäckts under genomsökning eller läsning av din media. Du kan rensa den när som helst och använda '(Tvinga) Skanna Bibliotek' för att utföra en analys. En lista över vanliga fel och vad de betyder kan hittas på ",
-        "description-part-2": "wiki.",
-        "created-header": "Skapad",
-        "comment-header": "Kommentar"
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",
@@ -817,7 +809,6 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "library-database-backup-tooltip": "Hur ofta Kavita tar backup av databasen och relaterade filer.",
-        "bust-locale-task-desc": "Rensar Språk Cache. Detta kan fixa problem med stringar som inte dyker upp korrekt efter en uppdatering. Du behöver uppdatera webläsaren.",
         "title": "Återkommande Uppgifter",
         "library-scan-label": "Biblioteksskanning",
         "library-database-backup-label": "Kavita Backup",
@@ -834,7 +825,6 @@
         "convert-media-task": "Konvertera Media till Mål-omkodning",
         "library-scan-tooltip": "Hur ofta Kavita kommer skanna och uppdatera metadata omkring biblioteksfiler.",
         "bust-cache-task-desc": "Rensa Kavita+ Cache - bör bara användas när debugging av dåliga matchningar sker.",
-        "bust-locale-task": "Rensa Språk Cache",
         "convert-media-task-desc": "Kör ett tidskrävande uppdrag som kommer konvertera all Kavita-hanterad media till den valda omkodningen. Dertta är långsamt (speciellt på ARM enheter).",
         "action-header": "Åtgärd",
         "convert-media-task-success": "Konvertering av Media till den valda omkodningen har lagts i kö",
@@ -848,7 +838,6 @@
         "download-logs-task": "Ladda ner Loggar",
         "clean-up-task": "Allmän Rensning",
         "clean-up-want-to-read-task-success": "Vill Läsa har rensats",
-        "bust-locale-task-success": "Språk Cache rensad",
         "clear-reading-cache-task-success": "Cache har rensats",
         "clean-up-task-success": "Rensning färdig",
         "clear-reading-cache-task-desc": "Rensar cachade filer för läsning. Hjälpsamt när du precis har uppdaterat en fil som du läst inom det senaste dygnet.",
@@ -1012,17 +1001,7 @@
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Användare online",
-        "active-events-title": "Aktiva Händelser:",
-        "update-available": "Uppdatering tillgänglig",
         "title-alt": "Aktivitet",
-        "downloading-item": "Laddar ner {{item}}",
-        "dismiss-all": "Avvisa alla",
-        "more-info": "Klicka för mer information",
-        "download-in-queue": "{{num}} nedladdningar i Kö",
-        "no-data": "Här händer inte mycket",
-        "left-to-process": "Återstår att bearbeta: {{leftToProcess}} / {{totalToProcess}}",
         "reading-now": "{{num}} läser nu"
     },
     "shortcuts-modal": {
