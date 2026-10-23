@@ -18,6 +18,7 @@ export class MangaReaderService {
   private pairs: {[key: number]: number} = {};
   private renderer: Renderer2;
   private hasPageOffset: boolean = false;
+  private separateLastPages: boolean = true;
 
   constructor() {
     const rendererFactory = inject(RendererFactory2);
@@ -35,6 +36,7 @@ export class MangaReaderService {
     });
     this.pairs = chapterInfo.doublePairs!;
     this.hasPageOffset = false;
+    this.separateLastPages = true;
   }
 
   adjustForDoubleReader(page: number) {
@@ -82,6 +84,14 @@ export class MangaReaderService {
 
   setPageOffset(toggle: boolean) {
     this.hasPageOffset = toggle;
+  }
+
+  setSeparateLastPages(toggle: boolean) {
+    this.separateLastPages = toggle;
+  }
+
+  isSeparateLastPagesEnabled() {
+    return this.separateLastPages;
   }
 
   /**
