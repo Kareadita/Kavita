@@ -324,9 +324,13 @@ public class TaskScheduler : ITaskScheduler
             service => service.RunReadStatusTransitionRules(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
 
+        // Spread out token refreshes for the backend
+        var randomRefreshMinute = Rnd.Next(0, 60);
+        _logger.LogDebug("Token refreshes will happen at {Minutes}m past midnight", randomRefreshMinute);
         RecurringJob.AddOrUpdate<IOAuthService>(TaskSchedulerConstants.RefreshConnectedTokensId,
             service => service.RefreshTokens(CancellationToken.None),
-            Cron.Daily, RecurringJobOptions);
+            Cron.Daily(0, randomRefreshMinute), RecurringJobOptions);
+
         // Enqueue in case of outdated tokens
         BackgroundJob.Enqueue<IOAuthService>(s => s.RefreshTokens(CancellationToken.None));
     }
