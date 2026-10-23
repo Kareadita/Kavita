@@ -54,12 +54,22 @@ public class GithubApiService : IGithubApiService
                         .WithGithubHeaders()
                         .GetAsync(cancellationToken: token);
                     rateLimit = response.GetRateLimit();
+                    if (rateLimit is {IsLow: true, IsExhausted: false})
+                    {
+                        _logger.LogWarning("GitHub API rate limit is low: {Remaining}/{Limit}, resets at {ResetsAt}",
+                            rateLimit.Remaining, rateLimit.Limit, rateLimit.ResetsAtUtc);
+                    }
 
                     return await response.GetJsonAsync<T>();
                 }
-                catch (FlurlHttpException ex)
+                catch (FlurlHttpException ex) when (IsGithubUnavailable(ex))
                 {
                     Pause(ex);
+                    return null;
+                }
+                catch (FlurlHttpException ex)
+                {
+                    _logger.LogWarning("GitHub returned HTTP {StatusCode} for {ApiPath}", ex.StatusCode, apiPath);
                     return null;
                 }
             },
@@ -81,8 +91,7 @@ public class GithubApiService : IGithubApiService
     public async Task<GithubResult<string>> DownloadRawAsync(string repo, string gitRef, string path, TimeSpan? cacheTtl = null,
         CancellationToken ct = default)
     {
-        var escapedPath = string.Join('/', path.Trim('/').Split('/').Select(Uri.EscapeDataString));
-        var url = $"{RawBase}{repo}/{gitRef}/{escapedPath}";
+        var url = GetRawUrl(repo, gitRef, path);
 
         if (cacheTtl == null)
         {
@@ -104,6 +113,12 @@ public class GithubApiService : IGithubApiService
             Source = result.Source,
             FetchedAtUtc = result.Source == CacheSource.Live ? DateTime.UtcNow : result.CachedAtUtc
         };
+    }
+
+    public string GetRawUrl(string repo, string gitRef, string path)
+    {
+        var escapedPath = string.Join('/', path.Trim('/').Split('/').Select(Uri.EscapeDataString));
+        return $"{RawBase}{repo}/{gitRef}/{escapedPath}";
     }
 
     private async Task<string?> DownloadRaw(string url, CancellationToken ct)
@@ -129,6 +144,11 @@ public class GithubApiService : IGithubApiService
     private DateTime? GetPausedUntil()
     {
         return _memoryCache.TryGetValue(PausedUntilKey, out DateTime until) && until > DateTime.UtcNow ? until : null;
+    }
+
+    private static bool IsGithubUnavailable(FlurlHttpException ex)
+    {
+        return ex.StatusCode is null or 403 or 429 or >= 500;
     }
 
     private void Pause(FlurlHttpException ex)

@@ -32,5 +32,10 @@ public interface IGithubApiService
     Task<GithubResult<string>> DownloadRawAsync(string repo, string gitRef, string path, TimeSpan? cacheTtl = null,
         CancellationToken ct = default);
 
+    /// <summary>
+    /// The raw.githubusercontent.com url DownloadRawAsync fetches, for clients that download the file themselves
+    /// </summary>
+    string GetRawUrl(string repo, string gitRef, string path);
+
     void ClearCache();
 }

@@ -30,7 +30,7 @@ public class VersionUpdaterServiceTests : IDisposable
         var fileCacheService = new FileCacheService(_directoryService, Substitute.For<ILogger<FileCacheService>>());
         var githubApiService = new GithubApiService(fileCacheService, new MemoryCache(new MemoryCacheOptions()),
             Substitute.For<ILogger<GithubApiService>>());
-        _service = new VersionUpdaterService(_logger, _eventHub, _directoryService, githubApiService, fileCacheService);
+        _service = new VersionUpdaterService(_logger, _eventHub, githubApiService, fileCacheService);
 
         // Setup HTTP testing
         _httpTest = new HttpTest();

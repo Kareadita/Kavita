@@ -7,20 +7,16 @@ namespace Kavita.API.Services.ReadingLists;
 public interface ICblGithubService
 {
     /// <summary>
-    /// Browse a directory in the CBL repo. Returns folders and .cbl files only.
-    /// Results are cached per-directory with TTL. Pass forceRefresh to bypass cache.
+    /// Browse a directory in the CBL repo. Returns folders and .cbl/.json files only.
+    /// Served from the repo tree, which is fetched once and cached.
     /// </summary>
-    Task<CblRepoBrowseResultDto> BrowseRepo(string path = "", bool forceRefresh = false);
+    Task<CblRepoBrowseResultDto> BrowseRepo(string path = "");
     /// <summary>
-    /// Returns the Git blob SHA for a file without downloading its content.
+    /// Returns the Git blob SHA for a file, from the cached repo tree
     /// </summary>
     Task<string> GetFileSha(string filePath);
     /// <summary>
     /// Downloads the raw content of a .cbl file by its repo path.
     /// </summary>
     Task<string> GetFileContent(string filePath);
-    /// <summary>
-    /// Invalidates all cached directory listings, forcing fresh fetches on next browse.
-    /// </summary>
-    void InvalidateCache();
 }

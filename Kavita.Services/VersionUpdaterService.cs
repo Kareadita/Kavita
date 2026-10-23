@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -54,7 +53,6 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     private readonly IEventHub _eventHub;
     private readonly IGithubApiService _githubApiService;
     private readonly IFileCacheService _fileCacheService;
-    private readonly IDirectoryService _directoryService;
     private readonly MarkdownPipeline _markdownPipeline = new MarkdownPipelineBuilder().UseGithub().Build();
 
     private const string KavitaRepo = "Kareadita/Kavita";
@@ -71,12 +69,11 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
     private static readonly TimeSpan PrCacheDuration = TimeSpan.FromDays(7);
 
-    public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IEventHub eventHub, IDirectoryService directoryService,
+    public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IEventHub eventHub,
         IGithubApiService githubApiService, IFileCacheService fileCacheService)
     {
         _logger = logger;
         _eventHub = eventHub;
-        _directoryService = directoryService;
         _githubApiService = githubApiService;
         _fileCacheService = fileCacheService;
     }
@@ -374,20 +371,6 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         _fileCacheService.Invalidate(ReleasesCacheKey, FileCacheService.VersionDirectory);
         // A /releases response cached before this version was published would make this build look like a nightly
         _githubApiService.ClearCache();
-
-        try
-        {
-            // Older versions kept their own GitHub caches here, including temp files whose move failed
-            var legacyCachePath = Path.Combine(_directoryService.LongTermCacheDirectory, "update");
-            if (Directory.Exists(legacyCachePath))
-            {
-                Directory.Delete(legacyCachePath, recursive: true);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to delete the legacy GitHub cache folder");
-        }
     }
 
     private UpdateNotificationDto? CreateDto(GithubReleaseMetadata? update)
