@@ -327,6 +327,8 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate<IOAuthService>(TaskSchedulerConstants.RefreshConnectedTokensId,
             service => service.RefreshTokens(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
+        // Enqueue in case of outdated tokens
+        BackgroundJob.Enqueue<IOAuthService>(s => s.RefreshTokens(CancellationToken.None));
     }
 
 
