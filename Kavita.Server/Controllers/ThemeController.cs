@@ -81,8 +81,15 @@ public class ThemeController(
     public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> BrowseThemes()
     {
         var ct = HttpContext.RequestAborted;
-        var themes = await themeService.GetDownloadableThemes(ct);
-        return Ok(themes.Where(t => !t.AlreadyDownloaded));
+        try
+        {
+            var themes = await themeService.GetDownloadableThemes(ct);
+            return Ok(themes.Where(t => !t.AlreadyDownloaded));
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
+        }
     }
 
     /// <summary>

@@ -22,6 +22,15 @@ public interface IGithubApiService
         where T : class;
 
     /// <summary>
+    /// Every folder and file in the repo at gitRef, in one API call
+    /// </summary>
+    /// <param name="repo">Owner/Name</param>
+    /// <param name="gitRef">Branch or commit sha</param>
+    /// <param name="ttl"></param>
+    /// <param name="ct"></param>
+    Task<GithubResult<GithubTree>> GetTreeAsync(string repo, string gitRef, TimeSpan ttl, CancellationToken ct = default);
+
+    /// <summary>
     /// Downloads a file from raw.githubusercontent.com, which does not count against the API rate limit.
     /// </summary>
     /// <param name="repo">Owner/Name</param>

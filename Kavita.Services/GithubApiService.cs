@@ -7,7 +7,6 @@ using Kavita.API.Services;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Misc;
 using Kavita.Models.Misc;
-using Kavita.Services.Extensions;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
@@ -50,10 +49,8 @@ public class GithubApiService : IGithubApiService
 
                 try
                 {
-                    var response = await (ApiBase + apiPath)
-                        .WithGithubHeaders()
-                        .GetAsync(cancellationToken: token);
-                    rateLimit = response.GetRateLimit();
+                    var response = await WithGithubHeaders(ApiBase + apiPath).GetAsync(cancellationToken: token);
+                    rateLimit = GetRateLimit(response);
                     if (rateLimit is {IsLow: true, IsExhausted: false})
                     {
                         _logger.LogWarning("GitHub API rate limit is low: {Remaining}/{Limit}, resets at {ResetsAt}",
@@ -86,6 +83,11 @@ public class GithubApiService : IGithubApiService
             RetryAtUtc = GetPausedUntil(),
             RateLimit = rateLimit
         };
+    }
+
+    public Task<GithubResult<GithubTree>> GetTreeAsync(string repo, string gitRef, TimeSpan ttl, CancellationToken ct = default)
+    {
+        return GetAsync<GithubTree>($"repos/{repo}/git/trees/{gitRef}?recursive=1", ttl, ct: ct);
     }
 
     public async Task<GithubResult<string>> DownloadRawAsync(string repo, string gitRef, string path, TimeSpan? cacheTtl = null,
@@ -125,9 +127,7 @@ public class GithubApiService : IGithubApiService
     {
         try
         {
-            return await url
-                .WithGithubHeaders()
-                .GetStringAsync(cancellationToken: ct);
+            return await WithGithubHeaders(url).GetStringAsync(cancellationToken: ct);
         }
         catch (FlurlHttpException ex)
         {
@@ -146,6 +146,25 @@ public class GithubApiService : IGithubApiService
         return _memoryCache.TryGetValue(PausedUntilKey, out DateTime until) && until > DateTime.UtcNow ? until : null;
     }
 
+    private static IFlurlRequest WithGithubHeaders(string url)
+    {
+        return url
+            .WithHeader("User-Agent", "Kavita")
+            .WithHeader("Accept", "application/vnd.github.v3+json");
+    }
+
+    private static GithubRateLimitDto GetRateLimit(IFlurlResponse response)
+    {
+        var resetEpoch = response.Headers.FirstOrDefault("X-RateLimit-Reset");
+
+        return new GithubRateLimitDto
+        {
+            Remaining = int.TryParse(response.Headers.FirstOrDefault("X-RateLimit-Remaining"), out var remaining) ? remaining : null,
+            Limit = int.TryParse(response.Headers.FirstOrDefault("X-RateLimit-Limit"), out var limit) ? limit : null,
+            ResetsAtUtc = long.TryParse(resetEpoch, out var epoch) ? DateTimeOffset.FromUnixTimeSeconds(epoch).UtcDateTime : null
+        };
+    }
+
     private static bool IsGithubUnavailable(FlurlHttpException ex)
     {
         return ex.StatusCode is null or 403 or 429 or >= 500;
@@ -159,7 +178,7 @@ public class GithubApiService : IGithubApiService
 
         if (ex is { StatusCode: 403 or 429, Call.Response: not null})
         {
-            var rateLimit = ex.Call.Response.GetRateLimit();
+            var rateLimit = GetRateLimit(ex.Call.Response);
             if (rateLimit.IsExhausted && rateLimit.ResetsAtUtc > now)
             {
                 until = rateLimit.ResetsAtUtc.Value;
