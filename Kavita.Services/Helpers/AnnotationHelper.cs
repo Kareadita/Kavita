@@ -102,8 +102,6 @@ public static partial class AnnotationHelper
             catch (Exception ex)
             {
                 Log.Logger.Debug(ex, "Failed to inject annotation into element");
-                /* Swallow */
-                return;
             }
         }
     }
