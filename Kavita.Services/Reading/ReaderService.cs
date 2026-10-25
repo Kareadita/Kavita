@@ -281,13 +281,14 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                         clientInfoAccessor.Current, clientInfoAccessor.CurrentDeviceId));
                 }
 
-                if (shouldSyncKoboSpan)
+                if (shouldSyncKoboSpan && !TaskScheduler.HasAlreadyEnqueuedTask<IKoboSyncService>(
+                        s => s.SyncXPathToKoboSpan(userProgress.Id, CancellationToken.None)))
                 {
-                    // TODO: Check if one is scheduled already. Waiting for new TaskScheduler code
-
+                    logger.LogTrace("Scheduling KoboSpan sync for {Id} - {ChapterId} - {UserId} in 5m",
+                        userProgress.Id, progressDto.ChapterId, userId);
                     BackgroundJob.Schedule<IKoboSyncService>(
                         s => s.SyncXPathToKoboSpan(userProgress.Id, CancellationToken.None)
-                     ,TimeSpan.FromMinutes(5));
+                        ,TimeSpan.FromMinutes(5));
                 }
 
                 await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
