@@ -46,7 +46,6 @@ public class KoboController(
     private const string KoboImageHost = "https://cdn.kobo.com/book-images/";
 
     private HttpClient KoboHttpClient => httpClientFactory.CreateClient("Kobo");
-    private HttpClient KoboReadingServicesClient => httpClientFactory.CreateClient("KoboReadingServices");
     private JsonSerializerOptions JsonSerializerOptions => KoboJsonAttribute.JsonSerializerOptions;
 
     #region Sync & State
@@ -72,9 +71,6 @@ public class KoboController(
             resources["image_host"] = instanceUrl.TrimEnd('/');
             resources["image_url_template"] = $"{koboBase}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/false/image.jpg";
             resources["image_url_quality_template"] = $"{koboBase}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/{{Quality}}/{{IsGreyscale}}/image.jpg";
-            // This is needed for annotations, but Kobo seems to strip the path and only use the host. So we can't inject
-            // our authentication.
-            //resources["reading_services_host"] = koboBase;
         }
         else
         {
@@ -509,79 +505,6 @@ public class KoboController(
                 }),
             TotalPageCount = 1
         });
-    }
-
-    #endregion
-
-    #region Annotations
-
-    [HttpGet("api/v3/content/{bookId}/annotations")]
-    public async Task<ActionResult> GetAnnotations(string bookId, [FromQuery] int limit = 100)
-    {
-        var ct = HttpContext.RequestAborted;
-
-        if (!int.TryParse(bookId, out var kavitaId))
-        {
-            return await ProxyRequestIfEnabled();
-        }
-
-        // TODO: Limit by query
-        var annotations = await koboSyncService.GetKoboAnnotationsAsync(UserId, [kavitaId], ct);
-
-        return Ok(annotations);
-    }
-
-    [HttpPost("api/v3/content/checkforchanges")]
-    public async Task<ActionResult> GetAnnotationsForBook()
-    {
-        var ct = HttpContext.RequestAborted;
-
-        var array = await JsonSerializer.DeserializeAsync<List<JsonNode>>(Request.Body, options: JsonSerializerOptions, cancellationToken: ct);
-        if (array is null)
-        {
-            return BadRequest();
-        }
-
-        var isKoboRequest = array.Any(book => !int.TryParse(book["id"]?.GetValue<string>(), out _));
-        if (isKoboRequest)
-        {
-            return await ProxyRequestIfEnabled(KoboReadingServicesClient, array);
-        }
-
-        var bookIds = array.Select(book => book["id"]?.GetValue<string>())
-            .Distinct()
-            .WhereNotNull()
-            .Select(int.Parse)
-            .ToList();
-
-        // It seems that this request is only made when opening a book (I.e. bookIds.Count == 1). For this reason we won't bother
-        // With the ETag nonsense
-        Response.Headers.ETag = "Kavita: I will ignore this";
-
-        var annotations = await koboSyncService.GetKoboAnnotationsAsync(UserId, bookIds, ct);
-
-        return Ok(annotations);
-    }
-
-    [HttpPatch("api/v3/content/{bookId}/annotations")]
-    public async Task<ActionResult> UpdateAnnotations(string bookId)
-    {
-        var ct = HttpContext.RequestAborted;
-
-        if (!int.TryParse(bookId, out var kavitaId))
-        {
-            return await ProxyRequestIfEnabled(KoboReadingServicesClient);
-        }
-
-        var koboAnnotations = await JsonSerializer.DeserializeAsync<KoboPatchAnnotationsDto>(Request.Body, options: JsonSerializerOptions , cancellationToken: ct);
-        if (koboAnnotations is null)
-        {
-            return BadRequest();
-        }
-
-        await koboSyncService.UpdateKoboAnnotationsAsync(UserId, kavitaId, koboAnnotations.UpdatedAnnotations, ct);
-
-        return Accepted();
     }
 
     #endregion
