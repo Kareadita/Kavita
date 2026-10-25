@@ -93,8 +93,10 @@ public static partial class AnnotationHelper
 
                 foreach (var item in sortedAnnotations)
                 {
+                    var normalizedSelectedText = NormalizeWhitespace(item.Annotation.SelectedText);
+
                     var decodedStart = MapNormalizedPositionToText(decodedText, item.StartPos);
-                    var decodedEnd = MapNormalizedPositionToText(decodedText, item.StartPos + item.Annotation.SelectedText.Length);
+                    var decodedEnd = MapNormalizedPositionToText(decodedText, item.StartPos + normalizedSelectedText.Length);
 
                     WrapTextRange(elem, rawStarts[decodedStart], rawStarts[decodedEnd], item.Annotation.Id, doc);
                 }
