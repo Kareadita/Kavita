@@ -32,7 +32,7 @@ namespace Kavita.Services;
 public class SettingsService(
     IUnitOfWork unitOfWork,
     IDirectoryService directoryService,
-    ILibraryWatcher libraryWatcher,
+    IFolderWatchService folderWatchService,
     ITaskScheduler taskScheduler,
     ILogger<SettingsService> logger,
     IOidcService oidcService,
@@ -529,11 +529,11 @@ public class SettingsService(
 
             if (updateSettingsDto.EnableFolderWatching)
             {
-                BackgroundJob.Enqueue(() => libraryWatcher.StartWatching());
+                BackgroundJob.Enqueue(() => folderWatchService.StartWatching());
             }
             else
             {
-                BackgroundJob.Enqueue(() => libraryWatcher.StopWatching());
+                BackgroundJob.Enqueue(() => folderWatchService.StopWatching());
             }
         }
         catch (Exception ex)

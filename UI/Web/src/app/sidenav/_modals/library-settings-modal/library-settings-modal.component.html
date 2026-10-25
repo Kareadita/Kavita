@@ -86,6 +86,53 @@
               {{t('browse')}}
             </button>
           </div>
+          <div class="mt-4 mb-3">
+            <label for="folder-watch-mode" class="form-label">{{t('folder-watch-mode-label')}}</label>
+            <app-setting-select inputId="folder-watch-mode" ariaDescribedBy="folder-watch-mode-help"
+                                [formField]="formGroup.folderWatchMode" [options]="folderWatchModes">
+              <ng-template #template let-mode>
+                {{ mode | folderWatchMode: true }}
+              </ng-template>
+            </app-setting-select>
+            <div class="text-muted mt-2" id="folder-watch-mode-help">
+              {{ formGroup.folderWatchMode().value() | folderWatchModeDescription }}
+            </div>
+            @if (showWatchStatus()) {
+              @let status = watchStatus();
+              <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+                <span class="fw-bold">{{t('watch-status-label')}}</span>
+                @if (status === null) {
+                  <app-loading [loading]="true" size="spinner-border-sm" />
+                } @else {
+                  <div class="d-flex flex-wrap align-items-center">
+                    <app-tag-badge [color]="watchBadgeColor()" [fillStyle]="watchBadgeFill()">{{ status | folderWatchStatus }}</app-tag-badge>
+                    @if (watchProblem() !== null) {
+                      <app-tag-badge color="error">{{ watchProblem() | folderWatchFallbackReason }}</app-tag-badge>
+                    }
+                  </div>
+                }
+              </div>
+              @if (status !== null) {
+                @let detail = status | folderWatchStatusDetail;
+                @if (detail || watchProblem() !== null) {
+                  <div class="d-flex flex-wrap align-items-center gap-2 text-muted mt-1">
+                    <span>{{ detail }}</span>
+                    @if (watchProblem() !== null) {
+                      <button type="button" class="btn btn-sm btn-outline-primary" [disabled]="isRetryingWatch()" (click)="retryFolderWatch()">
+                        @if (isRetryingWatch()) {
+                          <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                        }
+                        {{t('watch-status-retry')}}
+                      </button>
+                    }
+                  </div>
+                }
+                @if (isWatchPolling()) {
+                  <div class="text-muted mt-1">{{t('watch-status-replace-caveat')}}</div>
+                }
+              }
+            }
+          </div>
           <div class="row mt-2">
             <p>{{t('help-us-part-1')}}<a [href]="WikiLink.ManagingFiles" rel="noopener noreferrer" target="_blank" referrerpolicy="no-referrer">{{t('help-us-part-2')}}</a> {{t('help-us-part-3')}}</p>
           </div>
@@ -196,16 +243,6 @@
               <ng-template>
                 <div class="form-check form-switch float-end">
                   <input type="checkbox" role="switch" [formField]="formGroup.allowMetadataMatching" class="form-check-input">
-                </div>
-              </ng-template>
-            </app-setting-switch>
-          </div>
-
-          <div class="row g-0 mt-4 mb-4">
-            <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
-              <ng-template>
-                <div class="form-check form-switch float-end">
-                  <input type="checkbox" role="switch" [formField]="formGroup.folderWatching" class="form-check-input">
                 </div>
               </ng-template>
             </app-setting-switch>

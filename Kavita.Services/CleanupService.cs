@@ -37,10 +37,8 @@ public class CleanupService(
     [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail, DelaysInSeconds = [120, 300, 300])]
     public async Task Cleanup(CancellationToken ct = default)
     {
-        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToEncoding", [],
-                TaskScheduler.DefaultQueue, true) ||
-            TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToEncoding", [],
-                TaskScheduler.DefaultQueue, true))
+        if (TaskScheduler.HasAlreadyEnqueuedTask<IMediaConversionService>(s => s.ConvertAllManagedMediaToEncodingFormat(CancellationToken.None),
+                checkRunningJobs: true))
         {
             logger.LogInformation("Cleanup put on hold as a media conversion in progress");
             await eventHub.SendMessageAsync(MessageFactory.Info,

@@ -67,7 +67,6 @@ public class ScannerService(
     IMapper mapper)
     : IScannerService
 {
-    public const string Name = "ScannerService";
     private const int Timeout = 60 * 60 * 60; // 2.5 days
     // A retry waits in Scheduled, which IsScannerBusy does not count, so it would run beside a scan started meanwhile
     private const int RetryAttempts = 0;
@@ -274,7 +273,8 @@ public class ScannerService(
 
         logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var scanStarted = DateTime.Now;
-        var (scanElapsedTime, parsedSeries, savedIssues, unreadableFolders) = await ScanFiles(library, folderPaths,
+        var scanStartedUtc = DateTime.UtcNow;
+        var (scanElapsedTime, parsedSeries, savedIssues, unreadableFolders, _, readFolders) = await ScanFiles(library, folderPaths,
             false, bypassFolderOptimizationChecks, series.Id);
 
         if (unreadableFolders.Count > 0)
@@ -309,6 +309,8 @@ public class ScannerService(
                  {
                      logger.LogCritical(ex, "There was an error during ScanSeries to delete the series as no files could be found. Aborting scan");
                      await unitOfWork.RollbackAsync();
+                     await eventHub.SendMessageAsync(MessageFactory.Error,
+                         MessageFactory.DbWriteFailedEvent(series.LibraryId, series.Id, series.Name, ex.Message));
                      return;
                  }
              }
@@ -366,6 +368,11 @@ public class ScannerService(
             }
 
             seriesLeftToProcess--;
+        }
+
+        if (!bypassFolderOptimizationChecks)
+        {
+            await AuditFolderWatchAsync(library.Id, readFolders, scanStartedUtc, false);
         }
 
         var issues = await ReportScanIssuesAsync(library, savedIssues, series.Id);
@@ -644,20 +651,25 @@ public class ScannerService(
         var shouldUseLibraryScan = !(await unitOfWork.LibraryRepository.DoAnySeriesFoldersMatch(libraryFolderPaths));
         if (!shouldUseLibraryScan)
         {
-            logger.LogError("[ScannerService] Library {LibraryName} consists of one or more Series folders as a library root, using series scan", library.Name);
+            logger.LogDebug("[ScannerService] Library {LibraryName} consists of one or more Series folders as a library root, using series scan", library.Name);
         }
 
 
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 1: Scan & Parse Files", library.Name);
         var scanStarted = DateTime.Now;
-        var (scanElapsedTime, parsedSeries, savedIssues, unreadableFolders) = await ScanFiles(library, libraryFolderPaths,
+        var scanStartedUtc = DateTime.UtcNow;
+        var (scanElapsedTime, parsedSeries, savedIssues, unreadableFolders, scanRun, readFolders) = await ScanFiles(library, libraryFolderPaths,
             shouldUseLibraryScan, forceUpdate);
 
         // We need to remove any keys where there is no actual parser info
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 2: Process and Update Database", library.Name);
         var tally = await ProcessParsedSeries(forceUpdate, parsedSeries, library, scanElapsedTime, scanStarted);
 
-        UpdateLastScanned(library);
+        library.UpdateLastScanned(DateTime.Now);
+        scanRun = scanRun with { AtUtc = DateTime.UtcNow, DurationMs = sw.ElapsedMilliseconds };
+        library.ScanInfo = forceUpdate
+            ? library.ScanInfo with { Forced = scanRun }
+            : library.ScanInfo with { Normal = scanRun };
         unitOfWork.LibraryRepository.Update(library);
 
         logger.LogDebug("[ScannerService] Library {LibraryName} Step 3: Save Library", library.Name);
@@ -666,7 +678,7 @@ public class ScannerService(
             logger.LogDebug("[ScannerService] Library {LibraryName} Step 5: Remove Deleted Series", library.Name);
             tally.SeriesRemoved += await RemoveSeriesNotFound(parsedSeries, library);
 
-            if (!tally.HasChanges)
+            if (!tally.HasChanges && tally.SeriesFailed == 0)
             {
                 logger.LogInformation(
                     "[ScannerService] Finished library scan of {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}. There were no changes",
@@ -676,15 +688,20 @@ public class ScannerService(
             {
                 logger.LogInformation(
                     "[ScannerService] Finished library scan of {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}: " +
-                    "{SeriesAdded} series added, {SeriesRemoved} removed, {ChaptersAdded} chapters added, {ChaptersUpdated} updated, {ChaptersRemoved} removed",
+                    "{SeriesAdded} series added, {SeriesRemoved} removed, {SeriesFailed} failed, {ChaptersAdded} chapters added, {ChaptersUpdated} updated, {ChaptersRemoved} removed",
                     tally.TotalFiles, parsedSeries.Count, sw.ElapsedMilliseconds, library.Name,
-                    tally.SeriesAdded, tally.SeriesRemoved, tally.ChaptersAdded, tally.ChaptersUpdated, tally.ChaptersRemoved);
+                    tally.SeriesAdded, tally.SeriesRemoved, tally.SeriesFailed, tally.ChaptersAdded, tally.ChaptersUpdated, tally.ChaptersRemoved);
             }
         }
         else
         {
             logger.LogCritical(
                 "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
+        }
+
+        if (!forceUpdate)
+        {
+            await AuditFolderWatchAsync(library.Id, readFolders, scanStartedUtc, true);
         }
 
         var issues = await ReportScanIssuesAsync(library, savedIssues);
@@ -698,6 +715,24 @@ public class ScannerService(
         await metadataService.RemoveAbandonedMetadataKeys();
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanEndedEvent(tally.ToEventBody(library, issues, endsJob)));
+    }
+
+    /// <summary>
+    /// A failed audit is logged and never fails the scan
+    /// </summary>
+    private async Task AuditFolderWatchAsync(int libraryId, IReadOnlySet<string> readFolders, DateTime scanStartedUtc, bool isLibraryScan)
+    {
+        try
+        {
+            // Not a constructor dependency: FolderWatchService takes ITaskScheduler, which takes this service
+            using var scope = scopeFactory.CreateScope();
+            await scope.ServiceProvider.GetRequiredService<IFolderWatchService>()
+                .AuditScanAsync(libraryId, readFolders, scanStartedUtc, isLibraryScan);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "[ScannerService] Could not check the folder watcher against this scan");
+        }
     }
 
     /// <returns>How many series were removed</returns>
@@ -730,6 +765,8 @@ public class ScannerService(
         catch (Exception ex)
         {
             logger.LogCritical(ex, "[ScannerService] Error during series cleanup. Please check logs and rescan");
+            await eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.SeriesRemovalFailedEvent(library.Id, library.Name));
             return 0;
         }
     }
@@ -924,19 +961,8 @@ public class ScannerService(
         return tally;
     }
 
-    private static void UpdateLastScanned(Library library)
-    {
-        var time = DateTime.Now;
-        foreach (var folderPath in library.Folders)
-        {
-            folderPath.UpdateLastScanned(time);
-        }
-
-        library.UpdateLastScanned(time);
-    }
-
     /// <param name="seriesId">Loads only this series' known files, for a series scan</param>
-    /// <returns>How long the walk took, the parsed series, and the issues saved</returns>
+    /// <returns>How long the walk took, the parsed series, the issues saved, and the counts and step times for <see cref="Library.ScanInfo"/></returns>
     private async Task<ScanFilesResult> ScanFiles(Library library, IList<string> dirs, bool isLibraryScan, bool forceChecks = false,
         int? seriesId = null)
     {
@@ -985,7 +1011,16 @@ public class ScannerService(
             listMs, walkMs, parseMs, scanner.ParsedFileCount, scanner.KeptFileCount, groupMs, scanAndParseMs - listMs - walkMs - parseMs - groupMs,
             backfillMs, issuesMs, nameMatchesMs);
 
-        return new ScanFilesResult(scanElapsedTime, parsedSeries, savedIssues, scanner.UnreadableFolders);
+        var scanRun = new LibraryScanInfo.ScanRun
+        {
+            WalkedFolderCount = scanner.WalkedFolderCount,
+            FilesParsed = scanner.ParsedFileCount,
+            ListMs = listMs,
+            WalkMs = walkMs,
+            ParseMs = parseMs
+        };
+
+        return new ScanFilesResult(scanElapsedTime, parsedSeries, savedIssues, scanner.UnreadableFolders, scanRun, scanner.ReadFolders);
     }
 
     /// <summary>
@@ -1094,6 +1129,7 @@ public class ScannerService(
         public int TotalFiles { get; set; }
         public int SeriesAdded { get; private set; }
         public int SeriesRemoved { get; set; }
+        public int SeriesFailed { get; private set; }
         public int ChaptersAdded { get; private set; }
         public int ChaptersUpdated { get; private set; }
         public int ChaptersRemoved { get; private set; }
@@ -1105,18 +1141,24 @@ public class ScannerService(
             {
                 SeriesAdded++;
             }
+            if (result.Failed)
+            {
+                SeriesFailed++;
+            }
             ChaptersAdded += result.ChaptersAdded;
             ChaptersUpdated += result.ChaptersUpdated;
             ChaptersRemoved += result.ChaptersRemoved;
         }
 
         public LibraryScanEndedEventBodyDto ToEventBody(Library library, ScanIssueSummaryDto issues, bool endsJob) =>
-            new(library.Id, library.Name, SeriesAdded, SeriesRemoved, ChaptersAdded, ChaptersUpdated, ChaptersRemoved,
+            new(library.Id, library.Name, SeriesAdded, SeriesRemoved, SeriesFailed, ChaptersAdded, ChaptersUpdated, ChaptersRemoved,
                 issues.Count, issues.NewCount, issues.Issues, endsJob);
     }
 
+    /// <param name="ScanRun">Counts and step times; its time and duration are set when the library scan saves</param>
+    /// <param name="ReadFolders">Folders listed because they changed, which the folder watcher is audited against</param>
     private sealed record ScanFilesResult(long ElapsedMs, Dictionary<ParsedSeries, IList<ParserInfo>> ParsedSeries, SavedScanIssues SavedIssues,
-        IReadOnlyList<string> UnreadableFolders);
+        IReadOnlyList<string> UnreadableFolders, LibraryScanInfo.ScanRun ScanRun, IReadOnlySet<string> ReadFolders);
 
     private sealed record SavedScanIssues(int NewCount, IList<string> Paths, IReadOnlyDictionary<string, IList<string>> FilesByFolder);
 

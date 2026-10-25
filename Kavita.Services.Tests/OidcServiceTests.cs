@@ -640,7 +640,7 @@ public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(ou
         => new(
             unitOfWork,
             Substitute.For<IDirectoryService>(),
-            Substitute.For<ILibraryWatcher>(),
+            Substitute.For<IFolderWatchService>(),
             Substitute.For<ITaskScheduler>(),
             Substitute.For<ILogger<SettingsService>>(),
             Substitute.For<IOidcService>(),

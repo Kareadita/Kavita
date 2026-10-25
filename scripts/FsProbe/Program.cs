@@ -1,6 +1,9 @@
 using System.Text.Json;
 using FsProbe;
 
+const string tool = "fsprobe";
+const string probeVersion = "1";
+
 const string usage = """
     Kavita filesystem probe. Collects how a library folder reports file and folder times.
 
@@ -23,7 +26,7 @@ if (args.Length < 2 || args[0] is "-h" or "--help")
 
 var mode = args[0].ToLowerInvariant();
 var folder = args[1];
-var options = ParseOptions(args.Skip(2).ToArray());
+var options = ProbeCli.ParseOptions(args.Skip(2).ToArray());
 
 if (!Directory.Exists(folder))
 {
@@ -32,10 +35,8 @@ if (!Directory.Exists(folder))
 }
 
 var label = options.GetValueOrDefault("label");
-var environment = EnvironmentReader.Read(mode, folder, label);
-Console.WriteLine($"fsprobe v{EnvironmentReader.ProbeVersion} {mode} on {environment.Path}");
-Console.WriteLine($"  {environment.Os} | {environment.Rid} | container: {environment.InContainer}");
-Console.WriteLine($"  filesystem: {environment.FileSystem ?? "?"} {environment.DriveType} | mount: {environment.MountPoint} {environment.MountOptions}");
+var environment = EnvironmentReader.Read(probeVersion, mode, folder, label);
+ProbeCli.PrintEnvironment(tool, environment);
 
 var json = ProbeJsonContext.Default;
 string outPath;
@@ -84,30 +85,7 @@ switch (mode)
 Console.WriteLine($"Report written to {outPath}");
 return 0;
 
-string Save(string content)
-{
-    var path = options.GetValueOrDefault("out")
-               ?? Path.Combine(AppContext.BaseDirectory,
-                   $"fsprobe-{mode}-{Sanitize(label ?? Environment.MachineName)}-{DateTime.Now:yyyyMMdd-HHmmss}.json");
-    File.WriteAllText(path, content);
-    return path;
-}
-
-static string Sanitize(string value) =>
-    string.Concat(value.Select(c => char.IsLetterOrDigit(c) || c is '-' or '_' ? c : '-'));
-
-static Dictionary<string, string?> ParseOptions(string[] rest)
-{
-    var result = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-    for (var i = 0; i < rest.Length; i++)
-    {
-        if (!rest[i].StartsWith("--")) continue;
-        var key = rest[i][2..];
-        var hasValue = i + 1 < rest.Length && !rest[i + 1].StartsWith("--");
-        result[key] = hasValue ? rest[++i] : null;
-    }
-    return result;
-}
+string Save(string content) => ProbeCli.SaveReport(tool, environment, options.GetValueOrDefault("out"), content);
 
 static void PrintPassive(PassiveReport report)
 {

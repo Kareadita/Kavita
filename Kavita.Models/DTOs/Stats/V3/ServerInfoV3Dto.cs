@@ -113,6 +113,10 @@ public sealed record ServerInfoV3Dto
     /// Everything around Series Relationships between series
     /// </summary>
     public IList<RelationshipStatV3> Relationships { get; set; }
+    /// <summary>
+    /// Media errors by reason, empty when there are none
+    /// </summary>
+    public IList<MediaErrorStatV3> MediaErrors { get; set; }
     #endregion
 
     #region Server
@@ -120,6 +124,10 @@ public sealed record ServerInfoV3Dto
     /// Is OPDS enabled
     /// </summary>
     public bool OpdsEnabled { get; set; }
+    /// <summary>
+    /// Is the server's folder watching switch on
+    /// </summary>
+    public bool EnableFolderWatching { get; set; }
     /// <summary>
     /// The encoding the server is using to save media
     /// </summary>
@@ -134,6 +142,15 @@ public sealed record ServerInfoV3Dto
     /// </summary>
     public bool ActiveKavitaPlusSubscription { get; set; }
     /// <summary>
+    /// Null when the Kavita version does not send it, in which case <see cref="ActiveKavitaPlusSubscription"/> is used
+    /// </summary>
+    [EnumDataType(typeof(KavitaPlusState))]
+    public KavitaPlusState? KavitaPlusState { get; set; }
+    /// <summary>
+    /// Kavita+ effective price is 0, after coupons
+    /// </summary>
+    public bool? KavitaPlusIsFree { get; set; }
+    /// <summary>
     ///  Is OIDC enabled
     /// </summary>
     public bool OidcEnabled { get; set; }
@@ -144,6 +161,7 @@ public sealed record ServerInfoV3Dto
     /// If there is at least one user that is using an age restricted profile on the instance
     /// </summary>
     /// <remarks>Introduced in v0.6.0</remarks>
+    [Obsolete("Not sent since Stats V3; KavitaStats derives it from each user's AgeRestriction")]
     public bool UsingRestrictedProfiles { get; set; }
 
     public IList<UserStatV3> Users { get; set; }

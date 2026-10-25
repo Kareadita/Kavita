@@ -8,6 +8,7 @@ export interface LibraryScanSummary {
   libraryName: string;
   seriesAdded: number;
   seriesRemoved: number;
+  seriesFailed: number;
   chaptersAdded: number;
   /**
    * Existing chapters with a file that changed on disk

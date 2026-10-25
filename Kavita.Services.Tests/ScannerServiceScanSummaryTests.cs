@@ -5,6 +5,7 @@ using Kavita.Database.Tests;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.SignalR.Bodies;
 using Kavita.Models.Metadata;
+using Kavita.Services.Builders;
 using Kavita.Services.Scanner;
 using Kavita.Services.Tests.Helpers;
 using NSubstitute;
@@ -164,6 +165,30 @@ public class ScannerServiceScanSummaryTests(ITestOutputHelper testOutputHelper) 
 
         var summary = LastSummary();
         Assert.Equal(1, summary.SeriesRemoved);
+        Assert.Equal(0, summary.ChaptersAdded);
+    }
+
+    [Fact]
+    public async Task ScanSeries_DuplicateVolumes_CountsSeriesFailed()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, testOutputHelper);
+        var library = await scannerHelper.GenerateScannerData($"{nameof(ScanSeries_DuplicateVolumes_CountsSeriesFailed)} - Manga", Files,
+            new Dictionary<string, ComicInfo>());
+        var scanner = scannerHelper.CreateServices(eventHub: _eventHub);
+        await scanner.ScanLibrary(library.Id);
+        var scanned = LastScannedSeries();
+
+        var duplicate = new VolumeBuilder("1").Build();
+        duplicate.SeriesId = scanned.SeriesId;
+        context.Volume.Add(duplicate);
+        await context.SaveChangesAsync();
+        _eventHub.ClearReceivedCalls();
+
+        await scanner.ScanSeries(scanned.SeriesId);
+
+        var summary = LastSummary();
+        Assert.Equal(1, summary.SeriesFailed);
         Assert.Equal(0, summary.ChaptersAdded);
     }
 

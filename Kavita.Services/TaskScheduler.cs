@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
+using Hangfire.Common;
 using Hangfire.States;
 using Hangfire.Storage;
 using Hangfire.Storage.Monitoring;
@@ -45,7 +49,6 @@ public class TaskScheduler : ITaskScheduler
     private readonly IScannerService _scannerService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMetadataService _metadataService;
-    private readonly IBackupService _backupService;
     private readonly ICleanupService _cleanupService;
 
     private readonly IStatsService _statsService;
@@ -97,6 +100,14 @@ public class TaskScheduler : ITaskScheduler
 
     private static readonly Random Rnd = new Random();
     private const int ScanHourDelay = 3;
+    /// <summary>
+    /// A watcher scan runs once its folder has had no changes for this long
+    /// </summary>
+    internal static readonly TimeSpan WatcherQuietTime = TimeSpan.FromSeconds(30);
+    /// <summary>
+    /// A watcher scan runs by this long after its job was created, even while changes keep coming
+    /// </summary>
+    internal static readonly TimeSpan WatcherScanCap = TimeSpan.FromMinutes(10);
 
     private static readonly RecurringJobOptions RecurringJobOptions = new RecurringJobOptions()
     {
@@ -122,7 +133,6 @@ public class TaskScheduler : ITaskScheduler
         _scannerService = scannerService;
         _unitOfWork = unitOfWork;
         _metadataService = metadataService;
-        _backupService = backupService;
         _cleanupService = cleanupService;
         _statsService = statsService;
         _versionUpdaterService = versionUpdaterService;
@@ -383,12 +393,7 @@ public class TaskScheduler : ITaskScheduler
 
     public void ConvertAllCoversToEncoding()
     {
-        var defaultParams = Array.Empty<object>();
-        if (MediaConversionService.ConversionMethods.Any(method =>
-                HasAlreadyEnqueuedTask(MediaConversionService.Name, method, defaultParams, DefaultQueue, true)))
-        {
-            return;
-        }
+        if (HasAlreadyEnqueuedTask<IMediaConversionService>(s => s.ConvertAllManagedMediaToEncodingFormat(CancellationToken.None), checkRunningJobs: true)) return;
 
         BackgroundJob.Enqueue(() => _mediaConversionService.ConvertAllManagedMediaToEncodingFormat());
     }
@@ -404,18 +409,18 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => CheckForUpdate(CancellationToken.None));
     }
 
-    /// <param name="delay">Lets the events of one copy settle before the folder is looked at</param>
-    public async Task EnqueueScanFolderFromWatcherAsync(string changedPath, bool isDirectory, TimeSpan delay)
+    public async Task EnqueueScanFolderFromWatcherAsync(string changedPath, bool isDirectory)
     {
         var libraries = await _unitOfWork.LibraryRepository.GetLibraryDtosAsync();
         var target = ResolveScanFolder(changedPath, !isDirectory, libraries);
         if (target == null || target.Folder == target.Root)
         {
-            _logger.LogInformation("[LibraryWatcher] Change from {FilePath} could not find root level folder, ignoring change", changedPath);
+            _logger.LogTrace("[FolderWatchService] Change from {FilePath} could not find root level folder, ignoring change", changedPath);
             return;
         }
 
-        await EnqueueScanFolderAsync(new ScanFolderRequest(target.LibraryId, target.Folder, changedPath, true, false), delay);
+        var changedFolder = isDirectory ? changedPath : Path.GetDirectoryName(changedPath)!;
+        await EnqueueScanFolderAsync(new ScanFolderRequest(target.LibraryId, target.Folder, changedFolder, true, false));
     }
 
     public async Task EnqueueScanFolderFromApiAsync(string path, bool abortOnNoSeriesMatch)
@@ -428,7 +433,7 @@ public class TaskScheduler : ITaskScheduler
             return;
         }
 
-        await EnqueueScanFolderAsync(new ScanFolderRequest(target.LibraryId, target.Folder, path, false, abortOnNoSeriesMatch), TimeSpan.Zero);
+        await EnqueueScanFolderAsync(new ScanFolderRequest(target.LibraryId, target.Folder, path, false, abortOnNoSeriesMatch));
     }
 
     /// <summary>
@@ -458,13 +463,12 @@ public class TaskScheduler : ITaskScheduler
         return new ScanFolderTarget(libraryByRoot[root], root, folder);
     }
 
-    internal sealed record ScanFolderTarget(int LibraryId, string Root, string Folder);
-
     /// <summary>
-    /// Queues a <see cref="ScannerService.ScanFolder"/> job, unless the same request is already waiting
+    /// Queues a <see cref="ScannerService.ScanFolder"/> job. A watcher request goes through
+    /// <see cref="FolderValidationService.ValidateFolder"/> once its folder has been quiet for <see cref="WatcherQuietTime"/>, or by
+    /// <see cref="WatcherScanCap"/> while changes keep coming. Any other request runs now, unless the same request is already waiting
     /// </summary>
-    /// <param name="delay">Zero queues it now</param>
-    internal async Task EnqueueScanFolderAsync(ScanFolderRequest request, TimeSpan delay)
+    internal async Task EnqueueScanFolderAsync(ScanFolderRequest request)
     {
         var normalized = request with
         {
@@ -472,31 +476,64 @@ public class TaskScheduler : ITaskScheduler
             ChangedPath = string.IsNullOrEmpty(request.ChangedPath) ? string.Empty : Parser.NormalizePath(request.ChangedPath),
         };
 
-        bool isNewFolder;
+        // The activity widget re-reads waiting folder scans only on ScanRescheduled, so it is sent when a folder starts
+        // waiting or a waiting job's run time moves; otherwise the widget shows a time that has already passed
+        var widgetMustRefresh = QueueFolderJob(normalized);
+        if (!widgetMustRefresh) return;
+
+        await _eventHub.SendMessageAsync(MessageFactory.ScanRescheduled, ScanQueueChangedEvent());
+    }
+
+    /// <returns>True when a folder started waiting or a waiting job's run time moved</returns>
+    private bool QueueFolderJob(ScanFolderRequest request)
+    {
         lock (ScanRequestLock)
         {
             var folderJobs = ScanJobQueue.Read().FolderJobs;
-            if (folderJobs.Any(j => j.Request == normalized))
+            var waiting = FindWaitingJob(request, folderJobs.Where(j => j.Request == request).ToList());
+            if (waiting != WaitingJob.None)
             {
-                _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as the same request is queued", normalized.Folder);
-                return;
+                _logger.LogTrace("Skipped scheduling ScanFolder for {Folder} as the same request is waiting", request.Folder);
+                return waiting == WaitingJob.PushedBack;
             }
 
-            isNewFolder = folderJobs.All(j => j.Request.Folder != normalized.Folder);
+            var isNewFolder = folderJobs.All(j => j.Request.Folder != request.Folder);
+            if (!request.FromFolderWatcher)
+            {
+                _logger.LogTrace("Scheduling ScanFolder for {Folder}", request.Folder);
+                ScanJobQueue.Enqueue(() => _scannerService.ScanFolder(request));
+                return isNewFolder;
+            }
 
-            _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalized.Folder);
-            if (delay <= TimeSpan.Zero)
-            {
-                ScanJobQueue.Enqueue(() => _scannerService.ScanFolder(normalized));
-            }
-            else
-            {
-                ScanJobQueue.Schedule(() => _scannerService.ScanFolder(normalized), delay);
-            }
+            _logger.LogTrace("Scheduling ValidateFolder for {Folder}", request.Folder);
+            ScanJobQueue.Schedule<IFolderValidationService>(s => s.ValidateFolder(request, DateTime.UtcNow), WatcherQuietTime);
+            return isNewFolder;
         }
+    }
 
-        if (!isNewFolder) return;
-        await _eventHub.SendMessageAsync(MessageFactory.ScanRescheduled, ScanQueueChangedEvent());
+    /// <summary>
+    /// A watcher request's waiting validation is pushed back unless it has reached the cap
+    /// </summary>
+    private static WaitingJob FindWaitingJob(ScanFolderRequest request, List<ScanFolderJob> sameRequest)
+    {
+        if (!request.FromFolderWatcher) return sameRequest.Count > 0 ? WaitingJob.Covers : WaitingJob.None;
+
+        var validation = sameRequest.FirstOrDefault(j => j.RunAtUtc != null && j.FirstChangeUtc != null);
+        if (validation == null) return WaitingJob.None;
+
+        var delay = WatcherPushBack(validation.FirstChangeUtc!.Value, DateTime.UtcNow);
+        if (delay <= TimeSpan.Zero) return WaitingJob.Covers;
+
+        return ScanJobQueue.TryPushBack(validation.JobId, nameof(IFolderValidationService.ValidateFolder), delay)
+            ? WaitingJob.PushedBack
+            : WaitingJob.None;
+    }
+
+    /// <returns>How far from now a waiting watcher job moves; zero or less once it reached the cap</returns>
+    internal static TimeSpan WatcherPushBack(DateTime firstChangeUtc, DateTime nowUtc)
+    {
+        var untilCap = firstChangeUtc + WatcherScanCap - nowUtc;
+        return untilCap < WatcherQuietTime ? untilCap : WatcherQuietTime;
     }
 
     /// <summary>
@@ -587,11 +624,11 @@ public class TaskScheduler : ITaskScheduler
 
     public void RefreshMetadata(int libraryId, bool forceUpdate = true, bool forceColorscape = true)
     {
-        var alreadyEnqueued = HasAlreadyEnqueuedTask(MetadataService.Name, "GenerateCoversForLibrary",
-                                  [libraryId, true, true]) ||
-                              HasAlreadyEnqueuedTask("MetadataService", "GenerateCoversForLibrary",
-                                  [libraryId, false, false]);
-        if (alreadyEnqueued)
+        var coveredByQueuedJob = AtLeast(forceUpdate)
+            .SelectMany(force => AtLeast(forceColorscape).Select(colorscape => (force, colorscape)))
+            .Any(flags => HasAlreadyEnqueuedTask<IMetadataService>(s =>
+                s.GenerateCoversForLibrary(libraryId, flags.force, flags.colorscape, CancellationToken.None)));
+        if (coveredByQueuedJob)
         {
             _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
             return;
@@ -601,15 +638,19 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, forceUpdate, forceColorscape));
     }
 
+    /// <summary>
+    /// Flag values that do at least what was asked: a forced job also covers an unforced request
+    /// </summary>
+    private static bool[] AtLeast(bool requested) => requested ? [true] : [false, true];
+
     public async Task RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false)
     {
-        if (HasAlreadyEnqueuedTask(MetadataService.Name,"GenerateCoversForSeries", [libraryId, seriesId, forceUpdate, forceColorscape]))
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (HasAlreadyEnqueuedTask<IMetadataService>(s => s.GenerateCoversForSeries(serverSettings, libraryId, seriesId, forceUpdate, forceColorscape, CancellationToken.None)))
         {
             _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
             return;
         }
-
-        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
         _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
         BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(serverSettings, libraryId, seriesId, forceUpdate, forceColorscape));
@@ -700,7 +741,7 @@ public class TaskScheduler : ITaskScheduler
     /// <param name="forceUpdate"></param>
     public void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false)
     {
-        if (HasAlreadyEnqueuedTask("WordCountAnalyzerService", "ScanSeries", [libraryId, seriesId, forceUpdate]))
+        if (HasAlreadyEnqueuedTask<IWordCountAnalyzerService>(s => s.ScanSeries(libraryId, seriesId, forceUpdate, CancellationToken.None)))
         {
             _logger.LogInformation("A duplicate request to scan series occured. Skipping");
             return;
@@ -852,40 +893,33 @@ public class TaskScheduler : ITaskScheduler
     }
 
     /// <summary>
-    /// Checks if this same invocation is already enqueued or scheduled
+    /// Checks if the same call is already enqueued or scheduled. Pass the call exactly as it is enqueued:
+    /// <c>HasAlreadyEnqueuedTask&lt;IMetadataService&gt;(s => s.GenerateCoversForLibrary(libraryId, true, true, CancellationToken.None))</c>
     /// </summary>
-    /// <param name="methodName">Method name that was enqueued</param>
-    /// <param name="className">Class name the method resides on</param>
-    /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
-    /// <param name="queue">Queue to check against. Defaults to "default"</param>
-    /// <param name="checkRunningJobs">Check against running jobs. Defaults to false.</param>
-    /// <param name="checkArgs">Check against arguments. Defaults to true.</param>
-    /// <returns></returns>
-    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue, bool checkRunningJobs = false)
+    /// <remarks>
+    /// Arguments are compared as Hangfire serializes them, so a <see cref="CancellationToken"/> (stored as null) always
+    /// matches and a DTO compares by value
+    /// </remarks>
+    /// <param name="job">The enqueued call, on the interface or class the job runs on</param>
+    /// <param name="checkRunningJobs">Also match a job that is already running</param>
+    /// <param name="queue">Queue to look in for enqueued jobs</param>
+    public static bool HasAlreadyEnqueuedTask<T>(Expression<Func<T, Task>> job, bool checkRunningJobs = false, string queue = DefaultQueue)
     {
-        var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
-        var ret = enqueuedJobs.Exists(j => j.Value.InEnqueuedState &&
-                                           j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
-                                           j.Value.Job.Method.Name.Equals(methodName) &&
-                                           j.Value.Job.Method.DeclaringType.Name.Equals(className));
-        if (ret) return true;
+        var wanted = Job.FromExpression(job);
+        var wantedArgs = InvocationData.SerializeJob(wanted).Arguments;
+        var monitoring = JobStorage.Current.GetMonitoringApi();
 
-        var scheduledJobs = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue);
-        ret = scheduledJobs.Exists(j =>
-            j.Value.Job != null &&
-            j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
-            j.Value.Job.Method.Name.Equals(methodName) &&
-            j.Value.Job.Method.DeclaringType.Name.Equals(className));
+        if (monitoring.EnqueuedJobs(queue, 0, int.MaxValue).Exists(j => j.Value.InEnqueuedState && IsSameCall(j.Value.Job))) return true;
+        if (monitoring.ScheduledJobs(0, int.MaxValue).Exists(j => IsSameCall(j.Value.Job))) return true;
 
-        if (ret) return true;
+        return checkRunningJobs && monitoring.ProcessingJobs(0, int.MaxValue).Exists(j => IsSameCall(j.Value.Job));
 
-        if (!checkRunningJobs) return false;
-
-        var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
-        return runningJobs.Exists(j =>
-            j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
-            j.Value.Job.Method.Name.Equals(methodName) &&
-            j.Value.Job.Method.DeclaringType.Name.Equals(className));
+        // Hangfire stores the class DI resolved (MetadataService), not the interface the call names
+        bool IsSameCall(Job? stored) =>
+            stored != null &&
+            stored.Type.IsAssignableTo(typeof(T)) &&
+            stored.Method.Name == wanted.Method.Name &&
+            InvocationData.SerializeJob(stored).Arguments == wantedArgs;
     }
 
 
@@ -932,7 +966,8 @@ public class TaskScheduler : ITaskScheduler
     }
 
     /// <summary>
-    /// Waiting <see cref="ScannerService.ScanFolder"/> jobs, one entry per library and trigger, soonest first
+    /// Waiting <see cref="ScannerService.ScanFolder"/> and <see cref="FolderValidationService.ValidateFolder"/> jobs, one entry per
+    /// library and trigger, soonest first
     /// </summary>
     public static IList<ScheduledFolderScanDto> GetScheduledFolderScans(IEnumerable<LibraryDto> libraries)
     {
@@ -1006,5 +1041,29 @@ public class TaskScheduler : ITaskScheduler
             .FirstOrDefault(j => j.Id == jobId);
 
         return job?.NextExecution;
+    }
+
+    internal sealed record ScanFolderTarget(int LibraryId, string Root, string Folder);
+
+    /// <summary>
+    /// What a folder scan request found already waiting for the same request
+    /// </summary>
+    private enum WaitingJob
+    {
+        /// <summary>
+        /// Nothing waits for this request, or the waiting validation already started, so a new job is queued
+        /// </summary>
+        [Description("None")]
+        None = 0,
+        /// <summary>
+        /// A waiting job already covers the request: an identical API request, or a watcher validation at its 10 minute cap
+        /// </summary>
+        [Description("Covers")]
+        Covers = 1,
+        /// <summary>
+        /// A waiting watcher validation was moved back by the quiet time, so its run time changed
+        /// </summary>
+        [Description("Pushed Back")]
+        PushedBack = 2,
     }
 }

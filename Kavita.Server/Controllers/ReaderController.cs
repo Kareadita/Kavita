@@ -503,8 +503,6 @@ public class ReaderController(ICacheService cacheService,
         if (!await unitOfWork.UserRepository.HasAccessToSeries(user.Id, dto.SeriesId, ct))
             return NotFound();
 
-        user.Progresses ??= [];
-
         var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.SeriesId, dto.VolumeIds, ct);
 
         chapterIds.AddRange(await unitOfWork.ChapterRepository.GetChapterIdsInSeries(dto.SeriesId, dto.ChapterIds, ct));
@@ -546,8 +544,6 @@ public class ReaderController(ICacheService cacheService,
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesId, ct))
             return NotFound();
 
-        user.Progresses ??= [];
-
         var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.SeriesId, dto.VolumeIds, ct);
         chapterIds.AddRange(await unitOfWork.ChapterRepository.GetChapterIdsInSeries(dto.SeriesId, dto.ChapterIds, ct));
 
@@ -579,8 +575,6 @@ public class ReaderController(ICacheService cacheService,
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesIds, ct))
             return NotFound();
-
-        user.Progresses ??= [];
 
         Dictionary<int, Dictionary<int, int>> progressDictionaries = [];
 
@@ -630,8 +624,6 @@ public class ReaderController(ICacheService cacheService,
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesIds, ct))
             return NotFound();
-
-        user.Progresses ??= [];
 
         var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true, ct);
         foreach (var g in volumes.GroupBy(v => v.SeriesId))

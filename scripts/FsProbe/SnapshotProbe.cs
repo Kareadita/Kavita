@@ -9,7 +9,7 @@ public static class SnapshotProbe
     {
         var snapshot = new Snapshot { Environment = environment, MarkedTicks = DateTime.UtcNow.Ticks };
         snapshot.Entries.Add(ReadEntry(root, new DirectoryInfo(root), root));
-        snapshot.Entries.AddRange(WriteTime.Enumerate(root).Select(info => ReadEntry(root, info, info.FullName)));
+        snapshot.Entries.AddRange(FileListing.Enumerate(root).Select(info => ReadEntry(root, info, info.FullName)));
         Console.WriteLine($"  marked {snapshot.Entries.Count} entries");
         return snapshot;
     }
@@ -28,7 +28,7 @@ public static class SnapshotProbe
         var after = new Dictionary<string, SnapshotEntry>(StringComparer.Ordinal);
         var rootEntry = ReadEntry(root, new DirectoryInfo(root), root);
         after[rootEntry.Path] = rootEntry;
-        foreach (var info in WriteTime.Enumerate(root))
+        foreach (var info in FileListing.Enumerate(root))
         {
             var entry = ReadEntry(root, info, info.FullName);
             after[entry.Path] = entry;

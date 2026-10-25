@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.IO.Abstractions;
 using System.Net;
 using System.Net.Http;
+using System;
 using Kavita.API.Services;
 using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Metadata;
@@ -22,6 +23,7 @@ using Kavita.Services.ReadingLists;
 using Kavita.Services.Scanner;
 using Kavita.Services.SignalR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Extensions;
 
@@ -72,10 +74,17 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ICblImportService, CblImportService>();
 
         services.AddScoped<IScannerService, ScannerService>();
+        services.AddScoped<IFolderValidationService, FolderValidationService>();
         services.AddScoped<IProcessSeries, ProcessSeries>();
         services.AddScoped<IMetadataService, MetadataService>();
         services.AddScoped<IWordCountAnalyzerService, WordCountAnalyzerService>();
-        services.AddScoped<ILibraryWatcher, LibraryWatcher>();
+        services.AddScoped<IFolderWatchService, FolderWatchService>();
+        services.AddSingleton<IMountDetectorService, MountDetectorService>();
+        // IFileSystem is scoped; a singleton must not hold a scoped instance, and FileSystem keeps no state
+        services.AddSingleton<INativeFileWatcherService>(sp =>
+            new NativeFileWatcherService(new FileSystem(), sp.GetRequiredService<ILogger<NativeFileWatcherService>>(), TimeProvider.System));
+        services.AddSingleton<IFolderPollerService>(sp =>
+            new FolderPollerService(new FileSystem(), sp.GetRequiredService<ILogger<FolderPollerService>>()));
         services.AddScoped<ITachiyomiService, TachiyomiService>();
         services.AddScoped<ICollectionTagService, CollectionTagService>();
 

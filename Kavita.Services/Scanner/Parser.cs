@@ -1148,19 +1148,45 @@ public static partial class Parser
         return type != LibraryType.Image && IsCoverImage(filename);
     }
 
+    // Synology reports @eaDir in several casings (@eadir, @eaDIR)
+    private static readonly HashSet<string> ExcludedFolderNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // Synology
+        "@eaDir", "#recycle", "#snapshot",
+        // QNAP
+        "@Recycle", "@Recently-Snapshot", ".@__thumb", ".qpkg",
+        // Samba vfs_recycle default repository (TrueNAS, OpenMediaVault)
+        ".recycle",
+        // ZFS and snapper snapshots hold a full copy of the library each
+        ".zfs", ".snapshots",
+        // Windows
+        "$RECYCLE.BIN", "System Volume Information",
+        // macOS
+        "__MACOSX", ".Trashes", ".Spotlight-V100", ".fseventsd", ".TemporaryItems", ".DocumentRevisions-V100", ".AppleDouble",
+        // Linux
+        "lost+found", ".Trash",
+        // Syncthing
+        ".stversions", ".stfolder",
+        // WD My Cloud
+        ".wdmc",
+        // Readers
+        ".caltrash", ".yacreaderlibrary",
+    };
+
     /// <summary>
-    /// Validates that a Path doesn't start with certain blacklisted folders, like __MACOSX, @Recently-Snapshot, etc. and that if a full path, the filename
-    /// doesn't start with ._, which is a metadata file on MACOSX.
+    /// A NAS, OS, sync or reader folder that never holds library files
     /// </summary>
-    /// <param name="path"></param>
-    /// <returns></returns>
+    public static bool IsExcludedFolderName(string name)
+    {
+        return ExcludedFolderNames.Contains(name)
+               || name.StartsWith(MacOsMetadataFileStartsWith, StringComparison.Ordinal)
+               || name.StartsWith(".Trash-", StringComparison.OrdinalIgnoreCase);
+    }
+
+
     public static bool HasBlacklistedFolderInPath(string path)
     {
-        return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("@recycle")
-               || path.StartsWith("._") || Path.GetFileName(path).StartsWith("._") || path.Contains(".qpkg")
-               || path.StartsWith("#recycle")
-               || path.Contains(".yacreaderlibrary")
-               || path.Contains(".caltrash");
+        return path.Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries).Any(IsExcludedFolderName);
     }
 
 

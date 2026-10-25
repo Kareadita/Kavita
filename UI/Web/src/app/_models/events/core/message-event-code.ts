@@ -20,10 +20,14 @@ export enum MessageEventCode {
   ScanNoWork = 'scan-no-work',
   DbWriteFailed = 'db-write-failed',
   LibraryScanFailed = 'library-scan-failed',
+  SeriesUpdateFailed = 'series-update-failed',
+  SeriesRemovalFailed = 'series-removal-failed',
 
   ScanLibrariesDelayed = 'scan-libraries-delayed',
   ScanLibraryDelayed = 'scan-library-delayed',
   ScanSeriesDelayed = 'scan-series-delayed',
+
+  FolderWatchFallback = 'folder-watch-fallback',
 
   BackupFolderUnwritable = 'backup-folder-unwritable',
   BackupExists = 'backup-exists',

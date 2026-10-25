@@ -29,10 +29,7 @@ public sealed record LibraryDto : LiteLibraryDto
     /// An optional Cover Image or null
     /// </summary>
     public string? CoverImage { get; init; }
-    /// <summary>
-    /// If Folder Watching is enabled for this library
-    /// </summary>
-    public bool FolderWatching { get; set; } = true;
+    public FolderWatchMode FolderWatchMode { get; set; } = FolderWatchMode.Automatic;
     /// <summary>
     /// Include Library series on Dashboard Streams
     /// </summary>

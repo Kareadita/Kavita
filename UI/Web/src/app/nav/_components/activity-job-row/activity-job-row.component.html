@@ -46,7 +46,7 @@
       <div class="content flex-grow-1">
         <div class="d-flex align-items-center gap-2">
           @if (isEnded) {
-            <span class="dot flex-shrink-0" aria-hidden="true"></span>
+            <span class="dot flex-shrink-0" [class.failed]="hasFailedSeries()" aria-hidden="true"></span>
           }
           <span class="title flex-grow-1">
             @if (isMultiLibrary()) {

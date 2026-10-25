@@ -840,6 +840,44 @@
         "lightNovel": "Book library with special handling optimized for light novels"
     },
 
+    "folder-watch-mode-pipe": {
+        "off": "Off",
+        "automatic": "Automatic",
+        "automatic-recommended": "Automatic (Recommended)",
+        "file-watcher": "File Watcher",
+        "polling": "Polling"
+    },
+
+    "folder-watch-mode-description-pipe": {
+        "off": "Changes are picked up by the scheduled scan or a manual scan.",
+        "automatic": "Kavita picks the best way to detect changes for each folder.",
+        "file-watcher": "Uses native OS change events, but limited supported configurations. Docker on a network share, Docker Desktop host folders, or FUSE pools do not support.",
+        "polling": "Periodically checks the folders. Slower than File Watcher, but works everywhere."
+    },
+
+    "folder-watch-status-pipe": {
+        "server-off": "Off",
+        "off": "Not watched",
+        "trial": "Testing",
+        "watching": "Watching",
+        "polling": "Polling"
+    },
+
+    "folder-watch-status-detail-pipe": {
+        "server-off": "Folder watching is off for the server.",
+        "trial": "Watching, and checking the watcher against each scan. {{successes}} of {{needed}} changes caught so far. New files move this forward.",
+        "trial-waiting-scan": "{{successes}} of {{needed}} changes caught. Waiting for a full library scan.",
+        "missed-change": "The watcher missed a change in {{folder}}.",
+        "errors": "Too many errors watching {{folder}}.",
+        "polling": "Checks the folders on a schedule.",
+        "polling-network": "A folder is on a network share, so Kavita checks the folders on a schedule."
+    },
+
+    "folder-watch-fallback-reason-pipe": {
+        "errors": "Watcher failed",
+        "missed-change": "Missed a change"
+    },
+
     "age-rating-pipe": {
         "unknown": "Unknown",
         "early-childhood": "Early Childhood",
@@ -2030,8 +2068,11 @@
         "allow-scrobbling-tooltip": "Should Kavita scrobble reading events, want to read status, ratings, and reviews to configured providers. This will only occur if the server has an active Kavita+ Subscription.",
         "allow-metadata-matching-label": "Allow Metadata Matching",
         "allow-metadata-matching-tooltip": "Should Kavita download metadata for Series within this Library. This will only occur if the server has an active Kavita+ Subscription.",
-        "folder-watching-label": "Folder Watching",
-        "folder-watching-tooltip": "Override Server folder watching for this library. If off, folder watching won't run on the folders this library contains. If libraries share folders, then folders may still be ran against. Will always wait 10 minutes before triggering scan.",
+        "folder-watch-mode-label": "Folder Watching",
+        "watch-status-label": "Status",
+        "watch-status-retry": "Retry",
+        "watch-status-retried": "{{name}} is watching for changes again",
+        "watch-status-replace-caveat": "Files replaced in place show up at the next scheduled scan.",
         "include-in-dashboard-label": "Include in Dashboard",
         "include-in-dashboard-tooltip": "Should series from the library be included on the Dashboard. This affects all streams, like On Deck, Recently Updated, Recently Added, or any custom additions.",
         "include-in-search-label": "Include in Search",
@@ -2392,7 +2433,7 @@
         "delete-library": "Delete Library",
         "delete-library-by-name": "Delete {{name}}",
         "edit-library": "Edit",
-        "edit-library-by-name": "Delete {{name}}",
+        "edit-library-by-name": "Edit {{name}}",
         "folder-count": "{{num}} folders",
         "actions-header": "{{manage-users.actions-header}}",
         "name-header": "{{manage-users.name-header}}",
@@ -2504,7 +2545,7 @@
         "kobo-label": "Enable Kobo Sync",
         "kobo-tooltip": "Enable Kobo Sync support for all users on the server",
         "folder-watching-label": "Folder Watching",
-        "folder-watching-tooltip": "Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans. Will always wait 10 minutes before triggering scan.",
+        "folder-watching-tooltip": "Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans. A folder is scanned 30 seconds after its last change. Each library chooses how it watches on its Folder tab.",
         "enable-folder-watching": "Enable Folder Watching",
         "host-name-label": "{{manage-email-settings.host-name-label}}",
         "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}",
@@ -3116,6 +3157,7 @@
         "restoring-alt": "Restoring activity from before the refresh",
         "scan-series-added-label": "Series added: {{count}}",
         "scan-series-removed-label": "Series removed: {{count}}",
+        "scan-series-failed-label": "Series failed: {{count}}",
         "scan-chapters-added-label": "Chapters added: {{count}}",
         "scan-chapters-updated-label": "Chapters updated: {{count}}",
         "scan-chapters-removed-label": "Chapters removed: {{count}}",
@@ -3212,6 +3254,10 @@
         "scan-no-work-description": "No folders changed since the last scan.",
         "db-write-failed-label": "Couldn’t save {{seriesName}}",
         "library-scan-failed-label": "{{libraryName}} scan failed",
+        "series-update-failed-label": "Couldn’t update {{seriesName}}",
+        "series-update-failed-description": "An unexpected error stopped this series from updating. Check the logs for details.",
+        "series-removal-failed-label": "Couldn’t remove deleted series from {{libraryName}}",
+        "series-removal-failed-description": "Series whose files are gone are still in the library. The next scan tries again.",
         "scan-libraries-delayed-label": "Scan all libraries queued",
         "scan-library-delayed-label": "Scan {{libraryName}} queued",
         "scan-series-delayed-label": "Scan {{seriesName}} queued",
@@ -3223,7 +3269,10 @@
         "cleanup-on-hold-label": "Cleanup postponed",
         "cleanup-on-hold-description": "A media conversion is running. Cleanup runs after it.",
         "word-count-failed-label": "Couldn’t count words in {{seriesName}}",
-        "word-count-failed-description": "Can’t read {{filePath}}."
+        "word-count-failed-description": "Can’t read {{filePath}}.",
+        "folder-watch-fallback-label": "Library is now using Polling",
+        "folder-watch-fallback-errors-description": "Too many errors occurred watching {{folder}}, so {{libraryName}} was switched to Polling. Use Retry on the library’s Folder tab to watch again.",
+        "folder-watch-fallback-missed-change-description": "The watcher missed a change in {{folder}}, so {{libraryName}} was switched to Polling. Use Retry on the library’s Folder tab to watch again."
     },
 
     "event-action-pipe": {

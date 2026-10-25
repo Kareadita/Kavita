@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.14",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.15",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.1.14"
+    "version": "0.9.1.15"
   },
   "servers": [
     {
@@ -6400,6 +6400,86 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Library/folder-watch/retry": {
+      "post": {
+        "tags": [
+          "Library"
+        ],
+        "summary": "Watches the library again after its watcher missed a change or kept failing",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderWatchStatusDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderWatchStatusDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderWatchStatusDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Library/watch-status": {
+      "get": {
+        "tags": [
+          "Library"
+        ],
+        "summary": "How the library notices changes now and why",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderWatchStatusDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderWatchStatusDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderWatchStatusDto"
+                }
+              }
+            }
           }
         }
       }
@@ -25909,6 +25989,105 @@
           "Annotation"
         ]
       },
+      "FolderWatchFallbackReason": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Errors\n- `1` — MissedChange",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Errors",
+          "MissedChange"
+        ],
+        "x-enum-descriptions": [
+          "Errors",
+          "MissedChange"
+        ]
+      },
+      "FolderWatchMethod": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Off\n- `1` — File Watcher (FileWatcher)\n- `2` — Polling\n- `3` — Trial\n- `4` — Failed",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Off",
+          "FileWatcher",
+          "Polling",
+          "Trial",
+          "Failed"
+        ],
+        "x-enum-descriptions": [
+          "Off",
+          "File Watcher",
+          "Polling",
+          "Trial",
+          "Failed"
+        ]
+      },
+      "FolderWatchMode": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Off\n- `1` — Automatic\n- `2` — File Watcher (FileWatcher)\n- `3` — Polling",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Off",
+          "Automatic",
+          "FileWatcher",
+          "Polling"
+        ],
+        "x-enum-descriptions": [
+          "Off",
+          "Automatic",
+          "File Watcher",
+          "Polling"
+        ]
+      },
+      "FolderWatchStatusDto": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/FolderWatchMode"
+          },
+          "method": {
+            "$ref": "#/components/schemas/FolderWatchMethod"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/FolderWatchFallbackReason"
+          },
+          "folder": {
+            "type": "string",
+            "nullable": true
+          },
+          "successes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "successesNeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "needsLibraryScan": {
+            "type": "boolean"
+          },
+          "enableFolderWatching": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "FontDeleteResultDto": {
         "type": "object",
         "properties": {
@@ -27274,8 +27453,8 @@
             "type": "string",
             "nullable": true
           },
-          "folderWatching": {
-            "type": "boolean"
+          "folderWatchMode": {
+            "$ref": "#/components/schemas/FolderWatchMode"
           },
           "includeInDashboard": {
             "type": "boolean"
@@ -27370,6 +27549,10 @@
             "format": "int32"
           },
           "seriesRemoved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesFailed": {
             "type": "integer",
             "format": "int32"
           },
@@ -34128,7 +34311,6 @@
           "excludePatterns",
           "fileGroupTypes",
           "folders",
-          "folderWatching",
           "id",
           "includeInDashboard",
           "includeInSearch",
@@ -34158,8 +34340,8 @@
               "type": "string"
             }
           },
-          "folderWatching": {
-            "type": "boolean"
+          "folderWatchMode": {
+            "$ref": "#/components/schemas/FolderWatchMode"
           },
           "includeInDashboard": {
             "type": "boolean"

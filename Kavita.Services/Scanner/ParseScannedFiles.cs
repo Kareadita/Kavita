@@ -112,6 +112,11 @@ public partial class ParseScannedFiles
     public int KeptFileCount { get; private set; }
 
     /// <summary>
+    /// Folders below the roots walked by a library scan; a series scan walks none
+    /// </summary>
+    public int WalkedFolderCount => _walkedFolders.Count;
+
+    /// <summary>
     /// The folder was not read, walked, or inside a folder that could not be read this scan, so it may be gone
     /// </summary>
     public bool IsUnaccountedFor(string folder)
@@ -557,11 +562,18 @@ public partial class ParseScannedFiles
             try
             {
                 var rejection = TrackSeries(scannedSeries, index, info);
-                if (rejection != null && !string.IsNullOrEmpty(info.FullFilePath)) rejected.Add((info, rejection));
+                if (rejection != null && !info.IsPlaceholder)
+                {
+                    rejected.Add((info, rejection));
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[ScannerService] Exception occurred during tracking {FilePath}. Skipping this file", info?.FullFilePath);
+                _logger.LogError(ex, "[ScannerService] Exception occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
+                if (!info.IsPlaceholder)
+                {
+                    rejected.Add((info, new ParseIssue(MediaErrorReason.ParseFailed, ParseIssues.Describe(ex))));
+                }
             }
         }
 
@@ -578,9 +590,8 @@ public partial class ParseScannedFiles
     /// <param name="info"></param>
     /// <returns>Set when the file is turned away</returns>
     private ParseIssue? TrackSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, SeriesNameIndex index,
-        ParserInfo? info)
+        ParserInfo info)
     {
-        if (info == null) return null;
         if (info.Series == string.Empty) return ParseIssues.FromFailedParse(info);
 
         var normalizedSeries = info.Series.ToNormalized();

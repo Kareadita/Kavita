@@ -1,5 +1,6 @@
 import {FileTypeGroup} from "./file-type-group.enum";
 import {MetadataProvider} from "../kavitaplus/metadata-provider.enum";
+import {FolderWatchMode} from "./folder-watch-mode";
 
 export enum LibraryType {
     Manga = 0,
@@ -28,7 +29,7 @@ export interface Library extends LiteLibrary{
     lastScanned: string;
     folders: string[];
     coverImage?: string | null;
-    folderWatching: boolean;
+    folderWatchMode: FolderWatchMode;
     includeInDashboard: boolean;
     includeInRecommended: boolean;
     includeInSearch: boolean;
