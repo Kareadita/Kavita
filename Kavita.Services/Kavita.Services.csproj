@@ -19,7 +19,7 @@
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="MailKit" Version="4.18.2" />
-    <PackageReference Include="Markdig" Version="1.4.2" />
+    <PackageReference Include="Markdig" Version="1.5.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Docnet.Core" Version="2.6.0" />
     <PackageReference Include="EasyCaching.InMemory" Version="1.9.2" />
@@ -30,17 +30,17 @@
     <PackageReference Include="Hangfire.InMemory" Version="1.0.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.13.1" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.25" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.13" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.13" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.14" />
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.11.0" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
     <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
     <PackageReference Include="Nager.ArticleNumber" Version="1.0.8" />
     <PackageReference Include="NetVips" Version="3.2.0" />
     <PackageReference Include="NetVips.Native" Version="8.18.7" />
-    <PackageReference Include="Polly" Version="8.8.0" />
+    <PackageReference Include="Polly" Version="8.8.1" />
     <PackageReference Include="Serilog" Version="4.4.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
@@ -57,7 +57,7 @@
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="10.0.1" />
-    <PackageReference Include="System.Drawing.Common" Version="10.0.13" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.14" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
     <PackageReference Include="System.IO.Abstractions" Version="22.3.0" />
     <PackageReference Include="TimeZoneConverter" Version="8.0.0" />

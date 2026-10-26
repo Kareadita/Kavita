@@ -16,9 +16,9 @@
       <PackageReference Include="Hangfire.Core" Version="1.8.25" />
       <PackageReference Include="HtmlAgilityPack" Version="1.13.1" />
       <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.13" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.13" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
-      <PackageReference Include="Microsoft.Net.Http.Headers" Version="10.0.13" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.14" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
+      <PackageReference Include="Microsoft.Net.Http.Headers" Version="10.0.14" />
       <PackageReference Include="NetVips" Version="3.2.0" />
       <PackageReference Include="NetVips.Native" Version="8.18.7" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
