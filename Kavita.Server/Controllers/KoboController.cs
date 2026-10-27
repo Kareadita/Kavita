@@ -553,7 +553,7 @@ public class KoboController(
     {
         var targetUrl = GetKoboUrl();
 
-        logger.LogTrace("Going to proxy request to {targetUrl} for {UserId}", targetUrl, UserId);
+        logger.LogTrace("Going to proxy request to {targetUrl} for {UserId}", targetUrl.Sanitize(), UserId);
 
         using var upstreamRequest = new HttpRequestMessage(new HttpMethod(Request.Method), targetUrl);
 
@@ -574,7 +574,7 @@ public class KoboController(
         {
             if (!upstreamResponse.IsSuccessStatusCode)
             {
-                logger.LogWarning("Failed to proxy request to {Url}: {StatusCode} {ReasonPhrase}", targetUrl, upstreamResponse.StatusCode, upstreamResponse.ReasonPhrase);
+                logger.LogWarning("Failed to proxy request to {Url}: {StatusCode} {ReasonPhrase}", targetUrl.Sanitize(), upstreamResponse.StatusCode, upstreamResponse.ReasonPhrase);
             }
 
             await Response.CopyResponse(upstreamResponse, IsKoboHeader, ct);

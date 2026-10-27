@@ -244,7 +244,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             var shouldSyncKoboSpan = !string.IsNullOrEmpty(userProgress?.KoboSpan);
 
             logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum} - {BookScrollId} - {Kobo}",
-                progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum, progressDto.BookScrollId, progressDto.KoboSpan);
+                progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum, progressDto.BookScrollId?.Sanitize(), progressDto.KoboSpan?.Sanitize());
             if (userProgress == null)
             {
                 userProgress = new AppUserProgress
