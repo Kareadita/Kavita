@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -7,6 +8,13 @@ namespace Kavita.Database.Extensions;
 
 public static class KoboQueryExtensions
 {
+
+    // Note: This needs to be updated if we ever support auto conversion from CBZ to Epub
+    private static readonly List<MangaFormat> SupportedFormats =
+    [
+        MangaFormat.Epub
+    ];
+
     /// <param name="query"></param>
     extension(IQueryable<Chapter> query)
     {
@@ -17,7 +25,7 @@ public static class KoboQueryExtensions
         /// <returns></returns>
         public IQueryable<Chapter> FilterByKoboSyncSettings(AppUserKoboSyncPreferences preferences)
         {
-            if (preferences.SyncCollection != 0)
+            if (preferences.IsSyncingCollection)
             {
                 query = query.Where(c => c.Volume.Series.Collections.Any(c => c.Id == preferences.SyncCollection));
             }
@@ -26,8 +34,7 @@ public static class KoboQueryExtensions
                 query = query.Where(c => preferences.SyncLibraries.Contains(c.Volume.Series.LibraryId));
             }
 
-            // Note: This needs to be updated if we ever support auto conversion from CBZ to Epub
-            return query.Where(c => c.Volume.Series.Format == MangaFormat.Epub);
+            return query.Where(c => SupportedFormats.Contains(c.Volume.Series.Format));
         }
 
         /// <summary>
@@ -37,7 +44,7 @@ public static class KoboQueryExtensions
         /// <returns></returns>
         public IQueryable<Chapter> FilterAgainstKoboSyncSettings(AppUserKoboSyncPreferences preferences)
         {
-            if (preferences.SyncCollection != 0)
+            if (preferences.IsSyncingCollection)
             {
                 // Using All seems to be break the query. Do not change
                 query = query.Where(c => !c.Volume.Series.Collections.Any(uc => uc.Id == preferences.SyncCollection));
@@ -47,8 +54,7 @@ public static class KoboQueryExtensions
                 query = query.Where(c => !preferences.SyncLibraries.Contains(c.Volume.Series.LibraryId));
             }
 
-            // Note: This needs to be updated if we ever support auto conversion from CBZ to Epub
-            return query.Where(c => c.Volume.Series.Format == MangaFormat.Epub);
+            return query.Where(c => SupportedFormats.Contains(c.Volume.Series.Format));
         }
     }
 }

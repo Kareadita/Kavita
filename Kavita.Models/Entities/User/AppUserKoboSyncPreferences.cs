@@ -28,4 +28,6 @@ public class AppUserKoboSyncPreferences
     /// When set (!=0) only chapters from series in this collection are synced to Kobo
     /// </summary>
     public int SyncCollection { get; set; }
+
+    public bool IsSyncingCollection => SyncCollection > 0;
 }

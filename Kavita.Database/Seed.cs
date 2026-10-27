@@ -199,7 +199,7 @@ public static class Seed
                 new() {Key = ServerSettingKey.FirstInstallVersion, Value = BuildInfo.Version.ToString()},
                 new() {Key = ServerSettingKey.FirstInstallDate, Value = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)},
                 new() {Key = ServerSettingKey.StatsApiHits, Value = "0"},
-                // Will be resolved later on
+                // Will be set in KepubifyResolver at startup if empty
                 new() {Key = ServerSettingKey.KepubifyPath, Value = string.Empty},
                 new() {Key = ServerSettingKey.EnableKobo, Value = "true"},
             }.ToArray()

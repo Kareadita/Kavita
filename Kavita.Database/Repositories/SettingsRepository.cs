@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Kavita.API.Repositories;
+using Kavita.Common;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities;
@@ -32,11 +33,23 @@ public class SettingsRepository(DataContext context, IMapper mapper) : ISettings
         context.MetadataFieldMapping.RemoveRange(fieldMappings);
     }
 
-    public Task UpdateSettingAsync(ServerSettingKey key, string value, CancellationToken ct = default)
+    public async Task UpdateSettingAsync(ServerSettingKey key, string value, CancellationToken ct = default)
     {
-        return context.ServerSetting
-            .Where(s => s.Key == key)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(s => s.Value, value), ct);
+        var setting = await context.ServerSetting.FirstOrDefaultAsync(x => x.Key == key, cancellationToken: ct);
+        if (setting == null)
+        {
+            throw new KavitaNotFoundException();
+        }
+
+        if (setting.Value == value)
+        {
+            return;
+        }
+
+        setting.Value = value;
+        context.Entry(setting).State = EntityState.Modified;
+
+        await context.SaveChangesAsync(ct);
     }
 
 

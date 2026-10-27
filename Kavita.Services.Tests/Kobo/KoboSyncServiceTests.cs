@@ -46,7 +46,7 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
             Substitute.For<IReadingSessionService>(),
             userContext,
             Substitute.For<IHttpContextAccessor>(),
-            Substitute.For<IKepubifyConverter>(),
+            Substitute.For<IKepubifyConverterService>(),
             fileSystem ?? Substitute.For<IFileSystem>()
             );
     }

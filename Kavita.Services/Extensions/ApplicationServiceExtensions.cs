@@ -133,7 +133,7 @@ public static class ApplicationServiceExtensions
 
         services.AddScoped<IProcessRunner, ProcessRunner>();
         services.AddScoped<IFileCacheService, FileCacheService>();
-        services.AddSingleton<IKepubifyConverter, KepubifyConverter>();
+        services.AddSingleton<IKepubifyConverterService, KepubifyConverterService>();
         services.AddSingleton<IReadingSessionService, ReadingSessionService>();
         services.AddSingleton<IEntityNamingService, EntityNamingService>();
         services.AddSingleton<IProgressThrottle, ProgressThrottle>();

@@ -37,7 +37,7 @@ public class SettingsController(
     ISettingsService settingsService,
     IAuthenticationSchemeProvider authenticationSchemeProvider,
     IOidcService oidcService,
-    IKepubifyConverter kepubifyConverter)
+    IKepubifyConverterService kepubifyConverterService)
     : BaseApiController
 {
     /// <summary>
@@ -215,7 +215,7 @@ public class SettingsController(
     [HttpGet("kepubify-supported")]
     public ActionResult<bool> GetKepubifySupported()
     {
-        return Ok(kepubifyConverter.KepubifySupported);
+        return Ok(kepubifyConverterService.KepubifySupported);
     }
 
     /// <summary>

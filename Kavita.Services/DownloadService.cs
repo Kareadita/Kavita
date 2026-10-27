@@ -18,7 +18,7 @@ public class DownloadService(
     ICacheService cacheService,
     ILocalizationService localizationService,
     IDirectoryService directoryService,
-    IKepubifyConverter kepubifyConverter
+    IKepubifyConverterService kepubifyConverterService
     ) : IDownloadService
 {
     private readonly FileExtensionContentTypeProvider _fileTypeProvider = new();
@@ -107,9 +107,9 @@ public class DownloadService(
             throw new NotSupportedException();
         }
 
-        var outputPath = kepubifyConverter.BuildKepubifyPath(chapter.Id);
+        var outputPath = kepubifyConverterService.BuildKepubifyPath(chapter.Id);
 
-        await kepubifyConverter.ConvertEpubToKepub(chapter.Files.First().FilePath, outputPath, cancellationToken);
+        await kepubifyConverterService.ConvertEpubToKepub(chapter.Files.First().FilePath, outputPath, cancellationToken);
 
         return outputPath;
     }

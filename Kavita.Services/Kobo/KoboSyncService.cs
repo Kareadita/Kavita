@@ -49,7 +49,7 @@ public class KoboSyncService(
     IReadingSessionService readingSessionService,
     IUserContext userContext,
     IHttpContextAccessor httpContextAccessor,
-    IKepubifyConverter kepubifyConverter,
+    IKepubifyConverterService kepubifyConverterService,
     IFileSystem fileSystem
     ): IKoboSyncService
 {
@@ -266,7 +266,7 @@ public class KoboSyncService(
 
         return metadata.ToDictionary(m => m.Id, m =>
         {
-            var canKepubify = m.FileCount == 1 && kepubifyConverter.KepubifySupported;
+            var canKepubify = m.FileCount == 1 && kepubifyConverterService.KepubifySupported;
 
             return m with
             {
@@ -339,7 +339,7 @@ public class KoboSyncService(
 
     public async Task SyncXPathToKoboSpan(int progressId, CancellationToken cancellationToken)
     {
-        if (!kepubifyConverter.KepubifySupported)
+        if (!kepubifyConverterService.KepubifySupported)
         {
             logger.LogTrace("KoboSpan will not be synced, as kepubify is not supported");
             return;
@@ -357,10 +357,10 @@ public class KoboSyncService(
         }
 
         var epubPath = chapter.Files.First().FilePath;
-        var kepubPath = kepubifyConverter.BuildKepubifyPath(chapter.Id);
+        var kepubPath = kepubifyConverterService.BuildKepubifyPath(chapter.Id);
         if (!fileSystem.File.Exists(kepubPath))
         {
-            await kepubifyConverter.ConvertEpubToKepub(epubPath, kepubPath, cancellationToken);
+            await kepubifyConverterService.ConvertEpubToKepub(epubPath, kepubPath, cancellationToken);
         }
 
         var (readerDoc, _) = await bookService.GetDocumentAsync(epubPath, string.Empty, progress.PagesRead);
@@ -449,7 +449,7 @@ public class KoboSyncService(
             return;
         }
 
-        if (!kepubifyConverter.KepubifySupported)
+        if (!kepubifyConverterService.KepubifySupported)
         {
             logger.LogTrace("Kepubify is not supported, progress will be chapter at best");
             await SetFallbackProgress();
@@ -461,10 +461,10 @@ public class KoboSyncService(
             throw new KavitaException();
         }
 
-        var kepubPath = kepubifyConverter.BuildKepubifyPath(chapter.Id);
+        var kepubPath = kepubifyConverterService.BuildKepubifyPath(chapter.Id);
         if (!fileSystem.File.Exists(kepubPath))
         {
-            await kepubifyConverter.ConvertEpubToKepub(chapter.Files.First().FilePath, kepubPath, cancellationToken);
+            await kepubifyConverterService.ConvertEpubToKepub(chapter.Files.First().FilePath, kepubPath, cancellationToken);
         }
 
         var (kepubDoc, pageNum) = await bookService.GetDocumentAsync(kepubPath, file, null);

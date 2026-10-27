@@ -508,7 +508,7 @@ public class SettingsService(
 
             if (kepubifyUpdated)
             {
-                BackgroundJob.Enqueue<IKepubifyConverter>(kc => kc.CheckKepubifySupport(updateSettingsDto.KepubifyPath, CancellationToken.None));
+                BackgroundJob.Enqueue<IKepubifyConverterService>(kc => kc.CheckKepubifySupport(updateSettingsDto.KepubifyPath, CancellationToken.None));
             }
 
             if (updateTask)

@@ -17,7 +17,7 @@ public class KoboSyncPoint
     /// </summary>
     public List<int> ChapterIds { get; set; } = [];
     /// <summary>
-    /// Where in the <see cref="ChapterIds"/> list did we get. Will make jumps of <see cref="AppUserKoboSyncPreferences.SyncItemLimit"/>
+    /// Amount of already processed changes in the current sync.
     /// </summary>
     public int ChapterIndex { get; set; }
     /// <summary>

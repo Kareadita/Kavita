@@ -22,7 +22,7 @@ internal class KepubifyResolver(IServiceScopeFactory scopeFactory): IHostedServi
 
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<KepubifyResolver>>();
-        var kepubifyConverter = scope.ServiceProvider.GetRequiredService<IKepubifyConverter>();
+        var kepubifyConverter = scope.ServiceProvider.GetRequiredService<IKepubifyConverterService>();
         var fileSystem = scope.ServiceProvider.GetRequiredService<IFileSystem>();
 
         var kepubifyPath = (await unitOfWork.SettingsRepository

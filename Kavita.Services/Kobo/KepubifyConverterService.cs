@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Kobo;
 
-public class KepubifyConverter(ILogger<KepubifyConverter> logger, IServiceScopeFactory serviceScopeFactory): IKepubifyConverter
+public class KepubifyConverterService(ILogger<KepubifyConverterService> logger, IServiceScopeFactory serviceScopeFactory): IKepubifyConverterService
 {
     private string _kepubifyPath = string.Empty;
 

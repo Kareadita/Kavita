@@ -6,7 +6,7 @@ namespace Kavita.API.Services;
 /// <summary>
 /// This is a singleton
 /// </summary>
-public interface IKepubifyConverter
+public interface IKepubifyConverterService
 {
     bool KepubifySupported { get; }
 

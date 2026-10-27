@@ -279,7 +279,7 @@ public class KoboController(
         }
 
         var syncPreferences = await unitOfWork.UserRepository.GetKoboSyncPreferences(UserId, ct);
-        if (syncPreferences.SyncCollection == 0)
+        if (!syncPreferences.IsSyncingCollection)
         {
             // We cannot handle this for non collection syncs
             return Ok();
