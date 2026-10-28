@@ -183,11 +183,12 @@ public class ServerController(
     /// <summary>
     /// Checks for updates, if no updates that are > current version installed, returns null
     /// </summary>
+    /// <param name="forceRefresh">Ask GitHub even when the cached release list is fresh</param>
     [HttpGet("check-update")]
-    public async Task<ActionResult<UpdateNotificationDto?>> CheckForUpdates()
+    public async Task<ActionResult<UpdateNotificationDto?>> CheckForUpdates(bool forceRefresh = false)
     {
         var ct = HttpContext.RequestAborted;
-        return Ok(await versionUpdaterService.CheckForUpdate(ct));
+        return Ok(await versionUpdaterService.CheckForUpdate(forceRefresh, ct));
     }
 
     /// <summary>
