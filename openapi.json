@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.15",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.16",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.1.15"
+    "version": "0.9.1.16"
   },
   "servers": [
     {
@@ -16747,6 +16747,17 @@
           "Server"
         ],
         "summary": "Checks for updates, if no updates that are > current version installed, returns null",
+        "parameters": [
+          {
+            "name": "forceRefresh",
+            "in": "query",
+            "description": "Ask GitHub even when the cached release list is fresh",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -23688,7 +23699,7 @@
             },
             "nullable": true
           },
-          "rateLimitDto": {
+          "rateLimit": {
             "$ref": "#/components/schemas/GithubRateLimitDto"
           },
           "fromCache": {
@@ -28381,12 +28392,8 @@
           "field": {
             "$ref": "#/components/schemas/MetadataFieldChangeKind"
           },
-          "from": {
-            "nullable": true
-          },
-          "to": {
-            "nullable": true
-          },
+          "from": { },
+          "to": { },
           "note": {
             "type": "string",
             "nullable": true
@@ -32863,9 +32870,7 @@
         ],
         "type": "object",
         "properties": {
-          "body": {
-            "nullable": true
-          },
+          "body": { },
           "name": {
             "type": "string",
             "nullable": true
