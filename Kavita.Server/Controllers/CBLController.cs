@@ -8,6 +8,7 @@ using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.ReadingLists;
+using Kavita.Common;
 using Kavita.Common.Extensions;
 using Kavita.Database;
 using Kavita.Models.Constants;
@@ -156,7 +157,16 @@ public class CblController(IReadingListService readingListService, IDirectorySer
             var (isInvalid, actionResult) = await HasInvalidExtensionAsync(item.Name, item.Path);
             if (isInvalid) return actionResult!;
 
-            var content = await cblGithubService.GetFileContent(item.Path);
+            string content;
+            try
+            {
+                content = await cblGithubService.GetFileContent(item.Path);
+            }
+            catch (KavitaException ex)
+            {
+                return BadRequest(await localizationService.TranslateAsync(userId, ex.Message, item.Name));
+            }
+
             SaveCblFileFromContent(content, userId, item.Name);
 
             savedFiles.Add(new CblSavedFileDto
@@ -493,7 +503,15 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         var ct = HttpContext.RequestAborted;
         if (path.Contains("..") || path.Contains("http://")) return BadRequest();
 
-        var result = await cblGithubService.BrowseRepo(path);
+        CblRepoBrowseResultDto result;
+        try
+        {
+            result = await cblGithubService.BrowseRepo(path);
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message, path));
+        }
 
         var syncedPaths = await dataContext.ReadingList
             .Where(rl => rl.AppUserId == UserId

@@ -40,6 +40,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ICleanupService, CleanupService>();
         services.AddScoped<IBookService, BookService>();
         services.AddScoped<IVersionUpdaterService, VersionUpdaterService>();
+        services.AddScoped<IGithubApiService, GithubApiService>();
         services.AddScoped<IDownloadService, DownloadService>();
         services.AddScoped<IReaderService, ReaderService>();
         services.AddScoped<IReadingItemService, ReadingItemService>();

@@ -6,7 +6,7 @@ namespace Kavita.Models.DTOs.ReadingLists.CBL;
 public sealed record CblRepoBrowseResultDto
 {
     public IList<CblRepoItemDto> Items { get; set; } = [];
-    public GithubRateLimitDto RateLimitDto { get; set; } = new();
+    public GithubRateLimitDto RateLimit { get; set; } = new();
     /// <summary>
     /// True if this result was served from cache (no GitHub API call made)
     /// </summary>

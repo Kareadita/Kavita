@@ -42,19 +42,4 @@ public static class HashUtil
     {
         return AnonymousToken();
     }
-
-    /// <summary>
-    /// Generates a unique API key to this server instance
-    /// </summary>
-    /// <returns></returns>
-    public static string ApiKey()
-    {
-        var id = Guid.NewGuid();
-        if (id.Equals(Guid.Empty))
-        {
-            id = Guid.NewGuid();
-        }
-
-        return id.ToString();
-    }
 }

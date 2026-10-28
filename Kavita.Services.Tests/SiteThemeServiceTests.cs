@@ -1,4 +1,6 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
+using Flurl.Http.Testing;
+using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Extensions;
@@ -30,7 +32,7 @@ public class SiteThemeServiceTest(ITestOutputHelper outputHelper): AbstractDbTes
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var siteThemeService = new ThemeService(ds, unitOfWork, _messageHub,
-            Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
+            Substitute.For<ILogger<ThemeService>>(), Substitute.For<IGithubApiService>());
 
         context.SiteTheme.Add(new SiteTheme()
         {
@@ -59,7 +61,7 @@ public class SiteThemeServiceTest(ITestOutputHelper outputHelper): AbstractDbTes
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var siteThemeService = new ThemeService(ds, unitOfWork, _messageHub,
-            Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
+            Substitute.For<ILogger<ThemeService>>(), Substitute.For<IGithubApiService>());
 
         context.SiteTheme.Add(new SiteTheme()
         {
@@ -88,7 +90,7 @@ public class SiteThemeServiceTest(ITestOutputHelper outputHelper): AbstractDbTes
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var siteThemeService = new ThemeService(ds, unitOfWork, _messageHub,
-            Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
+            Substitute.For<ILogger<ThemeService>>(), Substitute.For<IGithubApiService>());
 
         context.SiteTheme.Add(new SiteTheme()
         {
@@ -110,5 +112,61 @@ public class SiteThemeServiceTest(ITestOutputHelper outputHelper): AbstractDbTes
         Assert.Equal(customTheme.Id, (await unitOfWork.SiteThemeRepository.GetDefaultTheme()).Id);
     }
 
+    [Fact]
+    public async Task BrowseAndSync_ShareOneGithubApiCall()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var themeNames = new[] { "Nord", "Dracula", "Light" };
+        foreach (var name in themeNames)
+        {
+            context.SiteTheme.Add(new SiteTheme
+            {
+                Name = name,
+                NormalizedName = name.ToNormalized(),
+                Provider = ThemeProvider.Custom,
+                FileName = $"{name}.css",
+                GitHubPath = $"Native Themes/{name}",
+                ShaHash = $"sha-{name}",
+                CompatibleVersion = "0.1.0",
+            });
+        }
+        await context.SaveChangesAsync();
+
+        var entries = themeNames.SelectMany(name => new[]
+        {
+            new { path = $"Native Themes/{name}", type = "tree", sha = $"tree-{name}" },
+            new { path = $"Native Themes/{name}/{name}.css", type = "blob", sha = $"sha-{name}" },
+            new { path = $"Native Themes/{name}/preview.png", type = "blob", sha = $"png-{name}" },
+        });
+
+        var cachePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(cachePath);
+        try
+        {
+            using var httpTest = new HttpTest();
+            httpTest.ForCallsTo("https://api.github.com/*").RespondWithJson(new { tree = entries });
+            httpTest.ForCallsTo("https://raw.githubusercontent.com/*").RespondWith("# Themes");
+
+            var cacheDirectoryService = Substitute.For<IDirectoryService>();
+            cacheDirectoryService.LongTermCacheDirectory.Returns(cachePath);
+            var fileCacheService = new FileCacheService(cacheDirectoryService, Substitute.For<ILogger<FileCacheService>>());
+            var githubApiService = new GithubApiService(fileCacheService, new MemoryCache(new MemoryCacheOptions()),
+                Substitute.For<ILogger<GithubApiService>>());
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateFileSystem());
+            var siteThemeService = new ThemeService(ds, unitOfWork, _messageHub, Substitute.For<ILogger<ThemeService>>(), githubApiService);
+
+            var browse = await siteThemeService.GetDownloadableThemes();
+            await siteThemeService.SyncThemes();
+
+            Assert.Equal(3, browse.Count);
+            Assert.All(browse, t => Assert.True(t.AlreadyDownloaded));
+            Assert.Single(httpTest.CallLog, c => c.Request.Url.ToString().StartsWith("https://api.github.com/"));
+        }
+        finally
+        {
+            Directory.Delete(cachePath, true);
+        }
+    }
 }
 

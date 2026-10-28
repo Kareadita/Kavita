@@ -55,8 +55,8 @@ export class ServerService {
     return this.http.post(this.baseUrl + 'server/sync-themes', {});
   }
 
-  checkForUpdate() {
-    return this.http.get<UpdateVersionEvent | null>(this.baseUrl + 'server/check-update');
+  checkForUpdate(forceRefresh: boolean = false) {
+    return this.http.get<UpdateVersionEvent | null>(this.baseUrl + `server/check-update?forceRefresh=${forceRefresh}`);
   }
 
   checkHowOutOfDate(stableOnly: boolean = true) {

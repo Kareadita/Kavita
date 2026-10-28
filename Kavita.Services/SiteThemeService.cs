@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -18,35 +17,14 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums.Theme;
+using Kavita.Models.Misc;
 using Kavita.Services.Extensions;
 using Kavita.Services.Scanner;
 using Markdig;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
 using Markdown = Markdig.Markdown;
 
 namespace Kavita.Services;
-
-internal class GitHubContent
-{
-    [JsonProperty("name")]
-    public string Name { get; set; }
-
-    [JsonProperty("path")]
-    public string Path { get; set; }
-
-    [JsonProperty("type")]
-    public string Type { get; set; }
-
-    [JsonPropertyName("download_url")]
-    [JsonProperty("download_url")]
-    public string DownloadUrl { get; set; }
-
-    [JsonProperty("sha")]
-    public string Sha { get; set; }
-}
 
 /// <summary>
 /// The readme of the Theme repo
@@ -64,21 +42,15 @@ public class ThemeService(
     IUnitOfWork unitOfWork,
     IEventHub eventHub,
     ILogger<ThemeService> logger,
-    IMemoryCache cache)
+    IGithubApiService githubApiService)
     : IThemeService
 {
     private readonly MarkdownPipeline _markdownPipeline = new MarkdownPipelineBuilder().UseGithub().Build();
 
-    private readonly MemoryCacheEntryOptions _cacheOptions = new MemoryCacheEntryOptions()
-        .SetSize(1)
-        .SetAbsoluteExpiration(TimeSpan.FromMinutes(30));
-
-    private const string GithubBaseUrl = "https://api.github.com";
-
-    /// <summary>
-    /// Used for refreshing metadata around themes
-    /// </summary>
-    private const string GithubReadme = "https://raw.githubusercontent.com/Kareadita/Themes/main/README.md";
+    private const string ThemesRepo = "Kareadita/Themes";
+    private const string Branch = "main";
+    private const string NativeThemesFolder = "Native Themes";
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromHours(4);
 
     /// <summary>
     /// Given a themeId, return the content inside that file
@@ -98,56 +70,36 @@ public class ThemeService(
 
     public async Task<List<DownloadableSiteThemeDto>> GetDownloadableThemes(CancellationToken ct = default)
     {
-        const string cacheKey = "browse";
         // Avoid a duplicate Dark issue some users faced during migration
         var existingThemes = (await unitOfWork.SiteThemeRepository.GetThemeDtos())
             .GroupBy(k => k.Name)
             .ToDictionary(g => g.Key, g => g.First());
 
-        if (cache.TryGetValue(cacheKey, out List<DownloadableSiteThemeDto>? themes) && themes != null)
-        {
-            foreach (var t in themes)
-            {
-                t.AlreadyDownloaded = existingThemes.ContainsKey(t.Name);
-            }
-            return themes;
-        }
+        var tree = await githubApiService.GetTreeAsync(ThemesRepo, Branch, CacheTtl, ct);
+        if (!tree.HasValue) throw new KavitaException("github-unavailable");
 
-        // Fetch contents of the Native Themes directory
-        var themesContents = await GetDirectoryContent("Native%20Themes", ct);
+        var themeDirectories = tree.Value.GetChildren(NativeThemesFolder).Where(e => e.IsFolder).ToList();
 
-        // Filter out directories
-        var themeDirectories = themesContents.Where(c => c.Type == "dir").ToList();
-
-        // Get the Readme and augment the theme data
-        var themeMetadata = await GetReadme();
+        var themeMetadata = await GetReadme(ct);
 
         var themeDtos = new List<DownloadableSiteThemeDto>();
         foreach (var themeDir in themeDirectories)
         {
             var themeName = themeDir.Name.Trim();
+            var themeContents = GetFiles(tree.Value, themeDir.Path);
 
-            // Fetch contents of the theme directory
-            var themeContents = await GetDirectoryContent(themeDir.Path, ct);
-
-
-            // Find css and preview files
             var cssFile = themeContents.FirstOrDefault(c => c.Name.EndsWith(".css"));
-            var previewUrls = GetPreviewUrls(themeContents);
-
             if (cssFile == null) continue;
-
-            var cssUrl = cssFile.DownloadUrl;
-
 
             var dto = new DownloadableSiteThemeDto()
             {
                 Name = themeName,
-                CssUrl = cssUrl,
+                CssUrl = GetRawUrl(cssFile),
                 CssFile = cssFile.Name,
-                PreviewUrls = previewUrls,
+                PreviewUrls = GetPreviewUrls(themeContents),
                 Sha = cssFile.Sha,
                 Path = themeDir.Path,
+                AlreadyDownloaded = existingThemes.ContainsKey(themeName),
             };
 
             if (themeMetadata.TryGetValue(themeName, out var metadata))
@@ -155,57 +107,47 @@ public class ThemeService(
                 dto.Author = metadata.Author;
                 dto.LastCompatibleVersion = metadata.LastCompatible.ToString();
                 dto.IsCompatible = BuildInfo.Version <= metadata.LastCompatible;
-                dto.AlreadyDownloaded = existingThemes.ContainsKey(themeName);
                 dto.Description = metadata.Description;
             }
 
             themeDtos.Add(dto);
         }
 
-        cache.Set(cacheKey, themeDtos, _cacheOptions);
-
         return themeDtos;
     }
 
-    private static List<string> GetPreviewUrls(IEnumerable<GitHubContent> themeContents)
+    private List<string> GetPreviewUrls(IEnumerable<GithubTree.Entry> themeContents)
     {
         return themeContents
-            .Where(c => Parser.IsImage(c.Name) )
-            .Select(p => p.DownloadUrl)
+            .Where(c => Parser.IsImage(c.Name))
+            .Select(GetRawUrl)
             .ToList();
     }
 
-    private static async Task<IList<GitHubContent>> GetDirectoryContent(string path, CancellationToken ct = default)
+    private static List<GithubTree.Entry> GetFiles(GithubTree tree, string folderPath)
     {
-        var json = await $"{GithubBaseUrl}/repos/Kareadita/Themes/contents/{path}"
-            .WithHeader(HeaderNames.Accept, "application/vnd.github+json")
-            .WithHeader(HeaderNames.UserAgent, "Kavita")
-            .GetStringAsync(cancellationToken: ct);
+        return tree.GetChildren(folderPath).Where(e => e.IsFile).ToList();
+    }
 
-        return string.IsNullOrEmpty(json) ? [] : JsonConvert.DeserializeObject<List<GitHubContent>>(json) ?? [];
+    private string GetRawUrl(GithubTree.Entry entry)
+    {
+        return githubApiService.GetRawUrl(ThemesRepo, Branch, entry.Path);
     }
 
     /// <summary>
     /// Returns a map of all Native Themes names mapped to their metadata
     /// </summary>
     /// <returns></returns>
-    private async Task<IDictionary<string, ThemeMetadata>> GetReadme()
+    private async Task<IDictionary<string, ThemeMetadata>> GetReadme(CancellationToken ct = default)
     {
-        // Try and delete a Readme file if it already exists
-        var existingReadmeFile = directoryService.FileSystem.Path.Join(directoryService.TempDirectory, "README.md");
-        if (directoryService.FileSystem.File.Exists(existingReadmeFile))
-        {
-            directoryService.DeleteFiles([existingReadmeFile]);
-        }
+        var themes = new Dictionary<string, ThemeMetadata>();
 
-        var tempDownloadFile = await GithubReadme.DownloadFileAsync(directoryService.TempDirectory);
+        var readme = await githubApiService.DownloadRawAsync(ThemesRepo, Branch, "README.md", CacheTtl, ct);
+        if (!readme.HasValue) return themes;
 
-        // Read file into Markdown
-        var htmlContent  = Markdown.ToHtml(await directoryService.FileSystem.File.ReadAllTextAsync(tempDownloadFile), _markdownPipeline);
+        var htmlContent  = Markdown.ToHtml(readme.Value, _markdownPipeline);
         var htmlDoc = new HtmlDocument();
         htmlDoc.LoadHtml(htmlContent);
-
-        var themes = new Dictionary<string, ThemeMetadata>();
 
         var table = htmlDoc.DocumentNode.SelectSingleNode("//h2[text()='Native Themes']/following-sibling::table[1]");
 
@@ -304,11 +246,18 @@ public class ThemeService(
 
     public async Task SyncThemes(CancellationToken ct = default)
     {
+        var tree = await githubApiService.GetTreeAsync(ThemesRepo, Branch, CacheTtl, ct);
+        if (!tree.HasValue)
+        {
+            logger.LogWarning("Skipping Sync Themes, GitHub is unavailable");
+            return;
+        }
+
         var themes = await unitOfWork.SiteThemeRepository.GetThemes();
-        var themeMetadata = await GetReadme();
+        var themeMetadata = await GetReadme(ct);
         foreach (var theme in themes)
         {
-            await SyncTheme(theme, themeMetadata);
+            await SyncTheme(theme, tree.Value, themeMetadata);
         }
         logger.LogInformation("Sync Themes complete");
     }
@@ -317,8 +266,9 @@ public class ThemeService(
     /// If the Theme is from the Theme repo, see if there is a new version that is compatible
     /// </summary>
     /// <param name="theme"></param>
+    /// <param name="tree">The Theme repo tree</param>
     /// <param name="themeMetadata">The Readme information</param>
-    private async Task SyncTheme(SiteTheme? theme, IDictionary<string, ThemeMetadata> themeMetadata)
+    private async Task SyncTheme(SiteTheme? theme, GithubTree tree, IDictionary<string, ThemeMetadata> themeMetadata)
     {
         // Given a theme, first validate that it is applicable
         if (theme == null || theme.Provider == ThemeProvider.System || string.IsNullOrEmpty(theme.GitHubPath))
@@ -334,7 +284,7 @@ public class ThemeService(
         }
 
 
-        var themeContents = await GetDirectoryContent(theme.GitHubPath);
+        var themeContents = GetFiles(tree, theme.GitHubPath);
         var cssFile = themeContents.FirstOrDefault(c => c.Name.EndsWith(".css"));
 
         if (cssFile == null) return;
@@ -356,7 +306,7 @@ public class ThemeService(
 
             directoryService.DeleteFiles([tempLocation]);
 
-            var location = await FlurlConfiguration.CreateSafeRequest(cssFile.DownloadUrl)
+            var location = await FlurlConfiguration.CreateSafeRequest(GetRawUrl(cssFile))
                 .DownloadFileAsync(directoryService.TempDirectory);
             if (directoryService.FileSystem.File.Exists(location))
             {

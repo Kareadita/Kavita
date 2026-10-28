@@ -1,24 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Flurl.Http;
 using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Extensions;
-using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.Update;
 using Kavita.Services.Extensions;
 using Markdig;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 using Markdown = Markdig.Markdown;
 
 namespace Kavita.Services;
@@ -56,88 +51,58 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 {
     private readonly ILogger<VersionUpdaterService> _logger;
     private readonly IEventHub _eventHub;
+    private readonly IGithubApiService _githubApiService;
+    private readonly IFileCacheService _fileCacheService;
     private readonly MarkdownPipeline _markdownPipeline = new MarkdownPipelineBuilder().UseGithub().Build();
 
-#pragma warning disable S1075
-    private const string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
-    private const string GithubAllReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases";
-    private const string GithubPullsUrl = "https://api.github.com/repos/Kareadita/Kavita/pulls/";
-    private const string GithubBranchCommitsUrl = "https://api.github.com/repos/Kareadita/Kavita/commits?sha=develop";
-#pragma warning restore S1075
+    private const string KavitaRepo = "Kareadita/Kavita";
+    private const string ReleasesPath = $"repos/{KavitaRepo}/releases";
+    private const string PullsPath = $"repos/{KavitaRepo}/pulls/";
+    private const string DevelopCommitsPath = $"repos/{KavitaRepo}/commits?sha=develop";
+    private const string ReleasesCacheKey = "releases";
 
     [GeneratedRegex(@"^\n*([\s\S]*?)\n+^#\s(Added|Fixed|Changed|Theme|API|Removed)", RegexOptions.Multiline | RegexOptions.Compiled)]
     private static partial Regex BlogPartRegex();
     [GeneratedRegex(@"Release changes for (\d+\.\d+\.\d+\.\d+)", RegexOptions.Multiline | RegexOptions.Compiled, 1_000)]
     private static partial Regex NightlyReleaseRegex();
 
-    private readonly string _cacheFilePath;
-    /// <summary>
-    /// The latest release cache
-    /// </summary>
-    private readonly string _cacheLatestReleaseFilePath;
-    private readonly string _cacheNightlyInfoFilePath;
-    private readonly string _cacheCommitsFilePath;
-    private readonly string _cachePrInfoDirectory;
-
     private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly TimeSpan PrCacheDuration = TimeSpan.FromDays(7);
 
-    public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IEventHub eventHub, IDirectoryService directoryService)
+    public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IEventHub eventHub,
+        IGithubApiService githubApiService, IFileCacheService fileCacheService)
     {
         _logger = logger;
         _eventHub = eventHub;
-
-        var updateScopePath = Path.Combine(directoryService.LongTermCacheDirectory, "update");
-        directoryService.ExistOrCreate(updateScopePath);
-
-        _cacheFilePath = Path.Combine(updateScopePath, "github_releases_cache.json");
-        _cacheLatestReleaseFilePath = Path.Combine(updateScopePath, "github_latest_release_cache.json");
-        _cacheNightlyInfoFilePath = Path.Combine(updateScopePath, "github_nightly_cache.json");
-        _cacheCommitsFilePath = Path.Combine(updateScopePath, "github_commits_cache.json");
-
-        _cachePrInfoDirectory = Path.Combine(updateScopePath, "pr_cache");
-        directoryService.ExistOrCreate(_cachePrInfoDirectory);
-
-        FlurlConfiguration.ConfigureClientForUrl(GithubLatestReleasesUrl);
-        FlurlConfiguration.ConfigureClientForUrl(GithubAllReleasesUrl);
+        _githubApiService = githubApiService;
+        _fileCacheService = fileCacheService;
     }
 
     /// <summary>
-    /// Fetches the latest (stable) release from GitHub. Does not do any extra nightly release parsing.
+    /// Returns the latest stable release, or null when GitHub cannot be reached and nothing is cached
     /// </summary>
+    /// <param name="forceRefresh">Ask GitHub even when the cache is fresh, for a release published within the hour</param>
     /// <param name="ct"></param>
     /// <returns>Latest update</returns>
-    public async Task<UpdateNotificationDto?> CheckForUpdate(CancellationToken ct = default)
+    public async Task<UpdateNotificationDto?> CheckForUpdate(bool forceRefresh = false, CancellationToken ct = default)
     {
-        // Attempt to fetch from cache
-        var cachedRelease = await TryGetCachedLatestRelease();
-        if (cachedRelease != null)
-        {
-            return cachedRelease;
-        }
-
-        var update = await GetGithubRelease();
-        var dto = CreateDto(update);
-
-        if (dto != null)
-        {
-            await CacheLatestReleaseAsync(dto);
-        }
-
-        return dto;
+        var releases = await GetReleases(forceRefresh, ct);
+        return releases.FirstOrDefault(r => !r.IsPrerelease);
     }
 
     /// <summary>
     /// Will add any extra (nightly) updates from the latest stable. Does not back-fill anything prior to the latest stable.
     /// </summary>
     /// <param name="dtos"></param>
-    private async Task EnrichWithNightlyInfo(List<UpdateNotificationDto> dtos)
+    /// <param name="forceRefresh"></param>
+    /// <param name="ct"></param>
+    private async Task EnrichWithNightlyInfo(List<UpdateNotificationDto> dtos, bool forceRefresh, CancellationToken ct)
     {
         var dto = dtos[0]; // Latest version
         try
         {
             var currentVersion = new Version(dto.CurrentVersion);
-            var nightlyReleases = await GetNightlyReleases(currentVersion, Version.Parse(dto.UpdateVersion));
+            var nightlyReleases = await GetNightlyReleases(currentVersion, Version.Parse(dto.UpdateVersion), forceRefresh, ct);
 
             if (nightlyReleases.Count == 0) return;
 
@@ -145,7 +110,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             var nightlyDtos = new List<UpdateNotificationDto>();
             foreach (var nightly in nightlyReleases)
             {
-                var prInfo = await FetchPullRequestInfo(nightly.PrNumber);
+                var prInfo = (await _githubApiService.GetAsync<PullRequestInfo>($"{PullsPath}{nightly.PrNumber}", PrCacheDuration, ct: ct)).Value;
                 if (prInfo == null) continue;
 
                 var sections = ParseReleaseBody(prInfo.Body);
@@ -190,58 +155,17 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     }
 
 
-    private async Task<PullRequestInfo?> FetchPullRequestInfo(int prNumber)
+    private async Task<List<NightlyInfo>> GetNightlyReleases(Version currentVersion, Version latestStableVersion,
+        bool forceRefresh, CancellationToken ct)
     {
-        var cacheFile = Path.Combine(_cachePrInfoDirectory, $"pr_{prNumber}.json");
-
-        if (File.Exists(cacheFile))
-        {
-            var fileInfo = new FileInfo(cacheFile);
-            if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= TimeSpan.FromDays(7)) // PRs don't change
-            {
-                var cachedData = await File.ReadAllTextAsync(cacheFile);
-                return JsonSerializer.Deserialize<PullRequestInfo>(cachedData);
-            }
-        }
-
-        try
-        {
-            var prInfo = await $"{GithubPullsUrl}{prNumber}"
-                .WithGithubHeaders()
-                .GetJsonAsync<PullRequestInfo>();
-
-            // Cache the result
-            var tempPath = $"{cacheFile}.{Guid.NewGuid():N}.tmp";
-            var json = JsonSerializer.Serialize(prInfo, JsonOptions);
-            await File.WriteAllTextAsync(tempPath, json);
-            File.Move(tempPath, cacheFile, overwrite: true);
-
-            return prInfo;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to fetch PR information for #{PrNumber}", prNumber);
-            return null;
-        }
-    }
-
-    private async Task<List<NightlyInfo>> GetNightlyReleases(Version currentVersion, Version latestStableVersion)
-    {
-        var cached = await TryGetCachedNightlyInfo();
-        if (cached != null)
-        {
-            return cached.Where(n => Version.Parse(n.Version) > latestStableVersion).ToList();
-        }
-
         try
         {
             var nightlyReleases = new List<NightlyInfo>();
 
-            var commits = await GithubBranchCommitsUrl
-                .WithGithubHeaders()
-                .GetJsonAsync<IList<CommitInfo>>();
+            var commits = await _githubApiService.GetAsync<List<CommitInfo>>(DevelopCommitsPath, CacheDuration, forceRefresh, ct);
+            if (!commits.HasValue) return [];
 
-            var commitList = commits.ToList();
+            var commitList = commits.Value;
             var foundLastStable = false;
 
             for (var i = 0; i < commitList.Count - 1; i++)
@@ -280,7 +204,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                         if (prNumber is null) continue;
 
                         // Get the version from AssemblyInfo.cs in this commit
-                        var version = await GetVersionFromCommit(commit.Sha);
+                        var version = await GetVersionFromCommit(commit.Sha, ct);
                         if (version == null) continue;
 
                         // Parse version and compare with current version
@@ -317,8 +241,6 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                 }
             }
 
-            await CacheNightlyInfoAsync(nightlyReleases);
-
             return nightlyReleases.OrderByDescending(x => x.Date).ToList();
         }
         catch (Exception ex)
@@ -344,29 +266,44 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         return int.TryParse(prNumber, out var result) ? result : null;
     }
 
+    /// <summary>
+    /// Returns releases newest first. When GitHub cannot be reached, serves the last cached copy at any age, or an empty list.
+    /// </summary>
     public async Task<IList<UpdateNotificationDto>> GetAllReleases(int count = 0, CancellationToken ct = default)
     {
-        // Attempt to fetch from cache
-        var cachedReleases = await TryGetCachedReleases();
-        // If there is a cached release and the current version is within it, use it, otherwise regenerate
-        if (cachedReleases != null && cachedReleases.Any(r => IsVersionEqual(r.UpdateVersion, BuildInfo.Version.ToString())))
-        {
-            if (count > 0)
-            {
-                // NOTE: We may want to allow the admin to clear Github cache
-                return cachedReleases.Take(count).ToList();
-            }
+        var releases = await GetReleases(forceRefresh: false, ct);
+        return count > 0 ? releases.Take(count).ToList() : releases;
+    }
 
-            return cachedReleases;
-        }
+    /// <summary>
+    /// The built release list is cached separately from the raw GitHub responses: it depends on this install's version,
+    /// and building it renders markdown and downloads csproj files for nightlies.
+    /// </summary>
+    private async Task<List<UpdateNotificationDto>> GetReleases(bool forceRefresh, CancellationToken ct)
+    {
+        var result = await _fileCacheService.GetOrFetchResultAsync(ReleasesCacheKey, FileCacheService.VersionDirectory,
+            CacheDuration,
+            token => BuildReleases(forceRefresh, token),
+            shouldCache: releases => releases is { Count: > 0 },
+            serveStaleOnFailure: true,
+            forceRefresh: forceRefresh,
+            ct: ct);
 
-        var updates = await GetGithubReleases();
-        var query = updates.Select(CreateDto)
+        return result.Value ?? [];
+    }
+
+    private async Task<List<UpdateNotificationDto>?> BuildReleases(bool forceRefresh, CancellationToken ct)
+    {
+        var releases = await _githubApiService.GetAsync<List<GithubReleaseMetadata>>(ReleasesPath, CacheDuration, forceRefresh, ct);
+
+        var updateDtos = (releases.Value ?? [])
+            .Select(CreateDto)
             .Where(d => d != null)
             .OrderByDescending(d => d!.PublishDate)
-            .Select(d => d!);
+            .Select(d => d!)
+            .ToList();
 
-        var updateDtos = query.ToList();
+        if (updateDtos.Count == 0) return null;
 
         // Sometimes a release can be 0.8.5.0 on disk, but 0.8.5 from Github
         var versionParts = updateDtos[0].UpdateVersion.Split('.');
@@ -375,131 +312,24 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             updateDtos[0].UpdateVersion += ".0"; // Append missing parts
         }
 
-        // If we're on a nightly build, enrich the information
-        if (updateDtos.Count != 0)
+        if (IsBuildNewerThan(new Version(updateDtos[0].UpdateVersion)))
         {
-            await EnrichWithNightlyInfo(updateDtos);
+            await EnrichWithNightlyInfo(updateDtos, forceRefresh, ct);
         }
 
-        // Find the latest dto
-        var latestRelease = updateDtos[0]!;
-        var updateVersion = new Version(latestRelease.UpdateVersion);
-        var isNightly = BuildInfo.Version > new Version(latestRelease.UpdateVersion);
-
-        // isNightly can be true when we compare something like v0.8.1 vs v0.8.1.0
-        if (IsVersionEqualToBuildVersion(updateVersion))
-        {
-            isNightly = false;
-        }
-
-
-        latestRelease.IsOnNightlyInRelease = isNightly;
-
-        // Cache the fetched data
-        if (updateDtos.Count > 0)
-        {
-            await CacheReleasesAsync(updateDtos);
-        }
-
-        if (count > 0)
-        {
-            return updateDtos.Take(count).ToList();
-        }
+        var latestRelease = updateDtos[0];
+        latestRelease.IsOnNightlyInRelease = IsBuildNewerThan(new Version(latestRelease.UpdateVersion));
 
         return updateDtos;
     }
 
     /// <summary>
-    /// Compares 2 versions and ensures that the minor is always there
+    /// True when this install is ahead of the given release, i.e. on a nightly. v0.8.1 and v0.8.1.0 count as equal.
     /// </summary>
-    /// <param name="v1"></param>
-    /// <param name="v2"></param>
-    /// <returns></returns>
-    private static bool IsVersionEqual(string v1, string v2)
+    private static bool IsBuildNewerThan(Version releaseVersion)
     {
-        var versionParts = v1.Split('.');
-        if (versionParts.Length < 4)
-        {
-            v1 += ".0"; // Append missing parts
-        }
-
-        versionParts = v2.Split('.');
-        if (versionParts.Length < 4)
-        {
-            v2 += ".0"; // Append missing parts
-        }
-
-        return string.Equals(v2, v2, StringComparison.OrdinalIgnoreCase);
+        return BuildInfo.Version > releaseVersion && !IsVersionEqualToBuildVersion(releaseVersion);
     }
-
-    private async Task<IList<UpdateNotificationDto>?> TryGetCachedReleases()
-    {
-        if (!File.Exists(_cacheFilePath)) return null;
-
-        var fileInfo = new FileInfo(_cacheFilePath);
-        if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
-        {
-            var cachedData = await File.ReadAllTextAsync(_cacheFilePath);
-            return JsonSerializer.Deserialize<IList<UpdateNotificationDto>>(cachedData);
-        }
-
-        return null;
-    }
-
-    private async Task<UpdateNotificationDto?> TryGetCachedLatestRelease()
-    {
-        if (!File.Exists(_cacheLatestReleaseFilePath)) return null;
-
-        var fileInfo = new FileInfo(_cacheLatestReleaseFilePath);
-        if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
-        {
-            var cachedData = await File.ReadAllTextAsync(_cacheLatestReleaseFilePath);
-            return JsonSerializer.Deserialize<UpdateNotificationDto>(cachedData);
-        }
-
-        return null;
-    }
-
-    private async Task CacheReleasesAsync(IList<UpdateNotificationDto> updates)
-    {
-        try
-        {
-            var tempPath = Path.Combine(
-                Path.GetDirectoryName(_cacheFilePath)!,
-                $"{Path.GetFileName(_cacheFilePath)}.{Guid.NewGuid():N}.tmp");
-
-            var json = JsonSerializer.Serialize(updates, JsonOptions);
-            await File.WriteAllTextAsync(tempPath, json);
-
-            // Atomic replace - handles file in use scenarios
-            // TODO: BUG: This can sometimes throw an System.UnauthorizedAccessException: Access to the path is denied.
-            File.Move(tempPath, _cacheFilePath, overwrite: true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to cache releases");
-        }
-    }
-
-    private async Task CacheLatestReleaseAsync(UpdateNotificationDto update)
-    {
-        try
-        {
-            var tempPath = Path.Combine(
-                Path.GetDirectoryName(_cacheLatestReleaseFilePath)!,
-                $"{Path.GetFileName(_cacheLatestReleaseFilePath)}.{Guid.NewGuid():N}.tmp");
-
-            var json = JsonSerializer.Serialize(update, JsonOptions);
-            await File.WriteAllTextAsync(tempPath, json);
-
-            File.Move(tempPath, _cacheLatestReleaseFilePath, overwrite: true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to cache latest release");
-        }
-    }
-
 
 
     private static bool IsVersionEqualToBuildVersion(Version updateVersion)
@@ -519,6 +349,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     public async Task<int> GetNumberOfReleasesBehind(bool stableOnly = false, CancellationToken ct = default)
     {
         var updates = await GetAllReleases(ct: ct);
+        if (updates.Count == 0) return 0;
 
         // If the user is on nightly, then we need to handle releases behind differently
         if (!stableOnly && (updates[0].IsPrerelease || updates[0].IsOnNightlyInRelease))
@@ -532,32 +363,24 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     }
 
     /// <summary>
-    /// Clears the Github cache
+    /// Clears the built release list and the cached GitHub responses
     /// </summary>
     /// <param name="ct"></param>
     public void BustGithubCache(CancellationToken ct = default)
     {
-        try
-        {
-            File.Delete(_cacheFilePath);
-            File.Delete(_cacheLatestReleaseFilePath);
-            File.Delete(_cacheNightlyInfoFilePath);
-            File.Delete(_cacheCommitsFilePath);
-
-            if (!Directory.Exists(_cachePrInfoDirectory)) return;
-
-            Directory.Delete(_cachePrInfoDirectory, recursive: true);
-            Directory.CreateDirectory(_cachePrInfoDirectory);
-        } catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to clear Github cache");
-        }
+        _fileCacheService.Invalidate(ReleasesCacheKey, FileCacheService.VersionDirectory);
+        // A /releases response cached before this version was published would make this build look like a nightly
+        _githubApiService.ClearCache();
     }
 
     private UpdateNotificationDto? CreateDto(GithubReleaseMetadata? update)
     {
         if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return null;
-        var updateVersion = new Version(update.Tag_Name.Replace("v", string.Empty));
+        if (!Version.TryParse(update.Tag_Name.Replace("v", string.Empty), out var updateVersion))
+        {
+            _logger.LogWarning("Skipping GitHub release with an unparseable tag {Tag}", update.Tag_Name);
+            return null;
+        }
         var currentVersion = BuildInfo.Version.ToString(4);
 
 
@@ -606,45 +429,15 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         }
     }
 
-    private async Task<string?> GetVersionFromCommit(string commitSha)
+    private async Task<string?> GetVersionFromCommit(string commitSha, CancellationToken ct)
     {
-        try
-        {
-            // Use the raw GitHub URL format for the csproj file
-            var content = await $"https://raw.githubusercontent.com/Kareadita/Kavita/{commitSha}/Kavita.Common/Kavita.Common.csproj"
-                .WithHeader(HeaderNames.UserAgent, "Kavita")
-                .GetStringAsync();
+        // Pinned to a commit sha, so the file never changes
+        var csproj = await _githubApiService.DownloadRawAsync(KavitaRepo, commitSha, "Kavita.Common/Kavita.Common.csproj",
+            TimeSpan.MaxValue, ct);
+        if (!csproj.HasValue) return null;
 
-            var versionMatch = Regex.Match(content, @"<AssemblyVersion>([0-9\.]+)</AssemblyVersion>");
-            return versionMatch.Success ? versionMatch.Groups[1].Value : null;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to get version from commit {Sha}: {Message}", commitSha, ex.Message);
-            return null;
-        }
-    }
-
-
-
-    private static async Task<GithubReleaseMetadata> GetGithubRelease()
-    {
-        var update = await GithubLatestReleasesUrl
-            .WithHeader(HeaderNames.Accept, "application/json")
-            .WithHeader(HeaderNames.UserAgent, "Kavita")
-            .GetJsonAsync<GithubReleaseMetadata>();
-
-        return update;
-    }
-
-    private static async Task<IList<GithubReleaseMetadata>> GetGithubReleases()
-    {
-        var update = await GithubAllReleasesUrl
-            .WithHeader(HeaderNames.Accept, "application/json")
-            .WithHeader(HeaderNames.UserAgent, "Kavita")
-            .GetJsonAsync<IList<GithubReleaseMetadata>>();
-
-        return update;
+        var versionMatch = Regex.Match(csproj.Value, @"<AssemblyVersion>([0-9\.]+)</AssemblyVersion>");
+        return versionMatch.Success ? versionMatch.Groups[1].Value : null;
     }
 
     private static string ExtractBlogPart(string body)
@@ -707,39 +500,6 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         }
 
         return item;
-    }
-
-    private async Task<List<NightlyInfo>?> TryGetCachedNightlyInfo()
-    {
-        if (!File.Exists(_cacheNightlyInfoFilePath)) return null;
-
-        var fileInfo = new FileInfo(_cacheNightlyInfoFilePath);
-        if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
-        {
-            var cachedData = await File.ReadAllTextAsync(_cacheNightlyInfoFilePath);
-            return JsonSerializer.Deserialize<List<NightlyInfo>>(cachedData);
-        }
-
-        return null;
-    }
-
-    private async Task CacheNightlyInfoAsync(List<NightlyInfo> nightlyInfo)
-    {
-        try
-        {
-            var tempPath = Path.Combine(
-                Path.GetDirectoryName(_cacheNightlyInfoFilePath)!,
-                $"{Path.GetFileName(_cacheNightlyInfoFilePath)}.{Guid.NewGuid():N}.tmp");
-
-            var json = JsonSerializer.Serialize(nightlyInfo, JsonOptions);
-            await File.WriteAllTextAsync(tempPath, json);
-
-            File.Move(tempPath, _cacheNightlyInfoFilePath, overwrite: true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to cache nightly info");
-        }
     }
 
     private sealed class PullRequestInfo

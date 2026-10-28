@@ -106,7 +106,7 @@ export class ManageTasksSettingsComponent implements OnInit {
     {
       name: 'check-for-updates-task',
       description: 'check-for-updates-task-desc',
-      api: this.serverService.checkForUpdate(),
+      api: this.serverService.checkForUpdate(true),
       successMessage: '',
       successFunction: (update) => {
         if (update === null) {

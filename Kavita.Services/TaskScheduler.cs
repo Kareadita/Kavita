@@ -271,6 +271,11 @@ public class TaskScheduler : ITaskScheduler
 
     public async Task ScheduleKavitaPlusTasks(CancellationToken cancellationToken = default)
     {
+        // Spread out license checks for the backend
+        var randomKPlusLicenseCheck = Rnd.Next(0, 60);
+        RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.GetLicenseInfo(false, CancellationToken.None),
+            $"{randomKPlusLicenseCheck} */9 * * *", RecurringJobOptions);
+
         if (!await _licenseService.HasActiveLicense(false, cancellationToken))
         {
             return;
@@ -284,11 +289,6 @@ public class TaskScheduler : ITaskScheduler
 
         // Get the License Info (and cache it) on first load. This will internally cache the Github releases for the Version Service
         BackgroundJob.Enqueue(() => _licenseService.GetLicenseInfo(true, CancellationToken.None));  // Kick this off first to cache it then let it refresh every 9 hours (8 hour cache)
-
-        // Spread out license checks for the backend
-        var randomKPlusLicenseCheck = Rnd.Next(0, 60);
-        RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.GetLicenseInfo(false, CancellationToken.None),
-            $"{randomKPlusLicenseCheck} */9 * * *", RecurringJobOptions);
 
         // KavitaPlus Scrobbling (every hour) - randomise minutes to spread requests out for K+
         var randomMinute = Rnd.Next(0, 60);
@@ -324,9 +324,15 @@ public class TaskScheduler : ITaskScheduler
             service => service.RunReadStatusTransitionRules(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
 
+        // Spread out token refreshes for the backend
+        var randomRefreshMinute = Rnd.Next(0, 60);
+        _logger.LogDebug("Token refreshes will happen at {Minutes}m past midnight", randomRefreshMinute);
         RecurringJob.AddOrUpdate<IOAuthService>(TaskSchedulerConstants.RefreshConnectedTokensId,
             service => service.RefreshTokens(CancellationToken.None),
-            Cron.Daily, RecurringJobOptions);
+            Cron.Daily(0, randomRefreshMinute), RecurringJobOptions);
+
+        // Enqueue in case of outdated tokens
+        BackgroundJob.Enqueue<IOAuthService>(s => s.RefreshTokens(CancellationToken.None));
     }
 
 
@@ -759,7 +765,7 @@ public class TaskScheduler : ITaskScheduler
     {
         await _defaultRetryPolicy.ExecuteAsync(async () =>
         {
-            var update = await _versionUpdaterService.CheckForUpdate(cancellationToken);
+            var update = await _versionUpdaterService.CheckForUpdate(ct: cancellationToken);
             if (update == null) return;
 
             await _versionUpdaterService.PushUpdate(update, cancellationToken);

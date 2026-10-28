@@ -52,6 +52,11 @@ public class StreamService(
         var smartFilter = await unitOfWork.AppUserSmartFilterRepository.GetById(smartFilterId, ct);
         if (smartFilter == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "smart-filter-doesnt-exist"));
 
+        if (smartFilter.AppUserId != userId)
+        {
+            throw new KavitaNotFoundException();
+        }
+
         var stream = user.DashboardStreams.FirstOrDefault(d => d.SmartFilter?.Id == smartFilterId);
         if (stream != null) throw new KavitaException(await localizationService.TranslateAsync(userId, "smart-filter-already-in-use"));
 
@@ -153,6 +158,11 @@ public class StreamService(
         var smartFilter = await unitOfWork.AppUserSmartFilterRepository.GetById(smartFilterId, ct);
         if (smartFilter == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "smart-filter-doesnt-exist"));
 
+        if (smartFilter.AppUserId != userId)
+        {
+            throw new KavitaNotFoundException();
+        }
+
         var stream = user.SideNavStreams.FirstOrDefault(d => d.SmartFilter?.Id == smartFilterId);
         if (stream != null) throw new KavitaException(await localizationService.TranslateAsync(userId, "smart-filter-already-in-use"));
 
@@ -196,6 +206,11 @@ public class StreamService(
 
         var externalSource = await unitOfWork.AppUserExternalSourceRepository.GetById(externalSourceId, ct);
         if (externalSource == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "external-source-doesnt-exist"));
+
+        if (externalSource.AppUserId != userId)
+        {
+            throw new KavitaNotFoundException();
+        }
 
         var stream = user?.SideNavStreams.FirstOrDefault(d => d.ExternalSourceId == externalSourceId);
         if (stream != null) throw new KavitaException(await localizationService.TranslateAsync(userId, "external-source-already-in-use"));
