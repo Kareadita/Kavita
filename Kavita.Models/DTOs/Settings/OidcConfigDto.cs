@@ -22,7 +22,6 @@ public sealed record OidcConfigDto: OidcPublicConfigDto
     /// <summary>
     /// Optional OpenID Connect ClientId, defaults to kavita. Not managed in DB. Managed in appsettings.json and synced to DB.
     /// </summary>
-    [ExportScrub(ExportScrubKind.Random)]
     public string ClientId { get; set; } = string.Empty;
     /// <summary>
     /// Optional OpenID Connect Secret. Not managed in DB. Managed in appsettings.json and synced to DB.

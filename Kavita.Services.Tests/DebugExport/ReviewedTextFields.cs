@@ -168,6 +168,7 @@ public static class ReviewedTextFields
         "MetadataSettings.GlobalLocalizedNameLanguages",
         "MetadataSettings.GlobalNameLanguages",
         "MetadataSettings.Whitelist",
+        "OidcConfigDto.ClientId",
         "OidcConfigDto.CustomScopes",
         "OidcConfigDto.DefaultRoles",
         "OidcConfigDto.ProviderName",

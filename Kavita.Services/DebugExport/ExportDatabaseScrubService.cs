@@ -62,6 +62,7 @@ public class ExportDatabaseScrubService(
             logger.LogDebug("Debug export scrubbed {Rows} rows in {Table}", changed, table.Table);
         }
         await run.ScrubSettings(context.Model, ct);
+        await run.ScrubText(ct);
 
         // After the scrub or the admin's own hash and keys would be replaced
         var admin = await InjectAdmin(context, ct);
@@ -121,6 +122,7 @@ public class ExportDatabaseScrubService(
     private sealed class ScrubRun(ExportScrubCatalog.Plan plan, ExportJunk junk, SqliteConnection connection, SqliteTransaction transaction)
     {
         private readonly Dictionary<string, string> _usernames = [];
+        private ExportTextScrubber? _text;
 
         public ExportScrubCatalog.Plan Plan => plan;
         public ExportJunk Junk => junk;
@@ -140,27 +142,31 @@ public class ExportDatabaseScrubService(
             }
 
             var columns = table.Columns;
-            var discriminators = columns.SelectMany(c => c.Selector?.Columns ?? []).Distinct().ToList();
-            var select = $"SELECT rowid, {string.Join(", ", columns.Select(c => c.Column).Concat(discriminators).Select(Quote))} " +
+            var extra = columns.SelectMany(c => c.Selector?.Columns ?? []).Append(table.UserColumn).OfType<string>().Distinct().ToList();
+            var userIndex = table.UserColumn == null ? -1 : extra.IndexOf(table.UserColumn);
+            var select = $"SELECT rowid, {string.Join(", ", columns.Select(c => c.Column).Concat(extra).Select(Quote))} " +
                          $"FROM {Quote(table.Table)} WHERE rowid > $after ORDER BY rowid LIMIT {BatchSize}";
             await using var update = Command($"UPDATE {Quote(table.Table)} SET " +
                                              $"{string.Join(", ", columns.Select((c, i) => $"{Quote(c.Column)} = $v{i}"))} WHERE rowid = $rowid");
-            var owner = OwnerLabel(table.EntityName);
+            var label = OwnerLabel(table.EntityName);
             var changedRows = 0;
             long after = 0;
 
             while (true)
             {
-                var rows = await ReadBatch(select, after, columns.Count + discriminators.Count, ct);
+                var rows = await ReadBatch(select, after, columns.Count + extra.Count, ct);
                 if (rows.Count == 0) break;
 
                 foreach (var row in rows)
                 {
+                    var extraValues = row.Values[columns.Count..];
+                    var userId = userIndex < 0 ? null : extraValues[userIndex];
+                    var owner = new RowOwner($"{label}-{row.RowId}", userId == null ? null : $"user-{userId}");
                     var changed = false;
                     for (var i = 0; i < columns.Count; i++)
                     {
-                        var jsonTypes = JsonTypes(columns[i], row.Values[columns.Count..], discriminators);
-                        var scrubbed = ScrubValue(columns[i].Kind, jsonTypes, row.Values[i], $"{owner}-{row.RowId}", table.Table, columns[i].Column);
+                        var jsonTypes = JsonTypes(columns[i], extraValues, extra);
+                        var scrubbed = ScrubValue(columns[i].Kind, jsonTypes, row.Values[i], owner, table.Table, columns[i].Column);
                         if (scrubbed == row.Values[i]) continue;
 
                         row.Values[i] = scrubbed;
@@ -199,7 +205,7 @@ public class ExportDatabaseScrubService(
                 foreach (var row in rows)
                 {
                     IReadOnlyList<Type> jsonTypes = setting.JsonType == null ? [] : [setting.JsonType];
-                    var scrubbed = ScrubValue(setting.Kind, jsonTypes, row.Values[0], $"setting-{row.RowId}", "ServerSetting", setting.Key.ToString());
+                    var scrubbed = ScrubValue(setting.Kind, jsonTypes, row.Values[0], new RowOwner($"setting-{row.RowId}", null), "ServerSetting", setting.Key.ToString());
                     if (scrubbed == row.Values[0]) continue;
 
                     row.Values[0] = scrubbed;
@@ -209,37 +215,54 @@ public class ExportDatabaseScrubService(
         }
 
         /// <summary>
-        /// A JSON value is parsed and scrubbed field by field, every other kind goes to <see cref="ExportJunk"/>
+        /// Runs every <see cref="ExportScrubKind.TextScrub"/> column through <see cref="ExportTextScrubber"/>. Called after every
+        /// other table, since a username first seen in a later table must already be known when an earlier table's text is scrubbed
         /// </summary>
-        /// <param name="owner">The row the value came from, <c>user-3</c>, used to name its replacement</param>
+        public async Task ScrubText(CancellationToken ct)
+        {
+            _text = new ExportTextScrubber(junk, _usernames);
+            foreach (var table in plan.Tables.Where(t => !t.Drop && t.Columns.Any(c => c.Kind == ExportScrubKind.TextScrub)))
+            {
+                await ScrubTable(table with { Columns = table.Columns.Where(c => c.Kind == ExportScrubKind.TextScrub).ToList() }, ct);
+            }
+        }
+
+        /// <summary>
+        /// A JSON value is parsed and scrubbed field by field, every other kind goes to <see cref="ExportJunk"/>.
+        /// <see cref="ExportScrubKind.TextScrub"/> is left for <see cref="ScrubText"/>
+        /// </summary>
+        /// <param name="owner">The row the value came from and its user, used to name the replacement</param>
         /// <param name="jsonTypes">For a JSON value, the types it can hold: each one's marked fields are scrubbed</param>
-        private string? ScrubValue(ExportScrubKind kind, IReadOnlyList<Type> jsonTypes, string? value, string owner, string table, string column)
+        private string? ScrubValue(ExportScrubKind kind, IReadOnlyList<Type> jsonTypes, string? value, RowOwner owner, string table, string column)
         {
             if (string.IsNullOrEmpty(value)) return value;
 
             switch (kind)
             {
                 case ExportScrubKind.TextScrub:
-                    return value;
+                    return _text?.Scrub(value) ?? value;
                 case ExportScrubKind.Json:
                     try
                     {
                         var node = JsonNode.Parse(value);
+                        // | not ||: every type must be scrubbed, even after an earlier one changed the node
+#pragma warning disable S2178
                         var changed = jsonTypes.Aggregate(false, (scrubbed, type) => ScrubNode(node, type, owner) | scrubbed);
+#pragma warning restore S2178
                         return changed ? node!.ToJsonString() : value;
                     }
                     catch (JsonException ex)
                     {
-                        throw new InvalidOperationException($"{table}.{column} on {owner} is not valid JSON, so it can't be scrubbed", ex);
+                        throw new InvalidOperationException($"{table}.{column} on {owner.Row} is not valid JSON, so it can't be scrubbed", ex);
                     }
                 default:
                     return Replace(kind, value, owner);
             }
         }
 
-        private string Replace(ExportScrubKind kind, string value, string owner)
+        private string Replace(ExportScrubKind kind, string value, RowOwner owner)
         {
-            var replaced = junk.Replace(kind, value, owner)!;
+            var replaced = junk.Replace(kind, value, kind == ExportScrubKind.Username ? owner.User : owner.Row)!;
             if (kind == ExportScrubKind.Username && replaced != value)
             {
                 _usernames.TryAdd(value, replaced);
@@ -249,11 +272,12 @@ public class ExportDatabaseScrubService(
         }
 
         /// <param name="type">The CLR type the node was serialized from: an object, a list of them, or a dictionary of them</param>
-        private bool ScrubNode(JsonNode? node, Type type, string owner)
+        private bool ScrubNode(JsonNode? node, Type type, RowOwner owner)
         {
             var objectType = ExportScrubCatalog.JsonObjectType(type);
             if (node == null || objectType == null) return false;
 
+            // | not ||: every item must be scrubbed, even after an earlier one changed
             return node switch
             {
                 JsonArray array => array.Aggregate(false, (changed, item) => ScrubNode(item, objectType, owner) | changed),
@@ -263,7 +287,7 @@ public class ExportDatabaseScrubService(
             };
         }
 
-        private bool ScrubObject(JsonObject obj, Type type, string owner)
+        private bool ScrubObject(JsonObject obj, Type type, RowOwner owner)
         {
             var changed = false;
             foreach (var property in ExportScrubCatalog.JsonProperties(type))
@@ -295,7 +319,7 @@ public class ExportDatabaseScrubService(
             return changed;
         }
 
-        private bool ReplaceLeaf(JsonNode? leaf, ExportScrubKind kind, string owner, Action<string> set)
+        private bool ReplaceLeaf(JsonNode? leaf, ExportScrubKind kind, RowOwner owner, Action<string> set)
         {
             if (leaf is not JsonValue value || !value.TryGetValue<string>(out var text) || string.IsNullOrEmpty(text)) return false;
 
@@ -369,6 +393,10 @@ public class ExportDatabaseScrubService(
         private static string OwnerLabel(string entityName) => entityName == nameof(AppUser) ? "user" : entityName.ToLowerInvariant();
 
         private sealed record RowValues(long RowId, string?[] Values);
+
+        /// <param name="Row">Names an email or a random value after its row: <c>device-7</c></param>
+        /// <param name="User">Names a username after the row's user: <c>user-3</c>. Null when the row has none</param>
+        private sealed record RowOwner(string Row, string? User);
     }
 
     private sealed record InjectedAdmin(string Password, string AuthKey);

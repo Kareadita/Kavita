@@ -122,6 +122,51 @@ public class ExportDatabaseScrubServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task UsernameIsNamedAfterTheRowsUser()
+    {
+        await SeedSnapshot();
+        await using (var context = OpenSnapshot())
+        {
+            context.KavitaPlusAuditLogs.AddRange(
+                Audit(KavitaPlusAuditCategory.System, KavitaPlusEventType.SystemProviderInfoSync,
+                    new AuditLogSystemProviderInfoSyncParamsDto { UserInfo = new KavitaPlusUserInfo { Username = "joe-on-mal" } }, userId: 1),
+                Audit(KavitaPlusAuditCategory.Sync, KavitaPlusEventType.SyncFailed, new AuditLogWantToReadSyncParamsDto { UserName = "nobody-on-anilist" }));
+            await context.SaveChangesAsync();
+        }
+
+        var result = await CreateService().ScrubAsync(_snapshotPath);
+
+        Assert.Equal("user-1", result.Usernames["joe-on-mal"]);
+        Assert.Equal("username-1", result.Usernames["nobody-on-anilist"]);
+    }
+
+    [Fact]
+    public async Task TextScrubColumnsSeeEveryUsername()
+    {
+        await SeedSnapshot();
+        await using (var context = OpenSnapshot())
+        {
+            context.KavitaPlusAuditLogs.Add(Audit(KavitaPlusAuditCategory.Sync, KavitaPlusEventType.SyncFailed,
+                new AuditLogWantToReadSyncParamsDto { UserName = "joe-on-anilist" }));
+            context.EmailHistory.Add(new EmailHistory
+            {
+                AppUserId = 1, EmailTemplate = "EmailTest", Body = "<p>hi</p>", DeliveryStatus = "Failed",
+                Subject = "Sync failed for joe-on-anilist",
+                ErrorMessage = $"Call failed: GET /api/v3/want-to-read?accessToken={JoeApiKey}",
+            });
+            await context.SaveChangesAsync();
+        }
+
+        await CreateService().ScrubAsync(_snapshotPath);
+
+        await using var after = OpenSnapshot();
+        var email = await after.EmailHistory.SingleAsync();
+        Assert.DoesNotContain("joe-on-anilist", email.Subject);
+        Assert.StartsWith("Sync failed for ", email.Subject);
+        Assert.DoesNotContain(JoeApiKey, email.ErrorMessage);
+    }
+
+    [Fact]
     public async Task NullAndEmptyStayAsTheyAre()
     {
         await SeedSnapshot();
@@ -250,8 +295,9 @@ public class ExportDatabaseScrubServiceTests : IDisposable
         File.Move(packed, _snapshotPath, true);
     }
 
-    private static KavitaPlusAuditLog Audit(KavitaPlusAuditCategory category, KavitaPlusEventType eventType, object payload) => new()
+    private static KavitaPlusAuditLog Audit(KavitaPlusAuditCategory category, KavitaPlusEventType eventType, object payload, int? userId = null) => new()
     {
+        UserId = userId,
         CreatedUtc = DateTime.UtcNow,
         Category = category,
         EventType = eventType,

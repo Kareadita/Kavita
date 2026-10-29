@@ -29,13 +29,15 @@ public sealed partial class ExportJunk
     private int _ipv6Count;
     private int _hostCount;
     private int _emailCount;
+    private int _usernameCount;
 
     /// <summary>
     /// Every original replaced so far, mapped to its replacement. Free text and fingerprints are left out
     /// </summary>
     public IReadOnlyDictionary<string, string> Replaced => _replaced;
 
-    /// <param name="owner">The row the value sits on, as <c>user-3</c> or <c>device-7</c>. Names an email, and is the username stand-in</param>
+    /// <param name="owner">The row the value sits on, as <c>user-3</c> or <c>device-7</c>. Names an email, and is the username stand-in.
+    /// Without one, an email becomes <c>email-n</c> and a username <c>username-n</c></param>
     public string? Replace(ExportScrubKind kind, string? value, string? owner = null)
     {
         if (string.IsNullOrEmpty(value)) return value;
@@ -47,7 +49,7 @@ public sealed partial class ExportJunk
             ExportScrubKind.IpAddress => IpAddressList(value),
             ExportScrubKind.Host => Host(value),
             ExportScrubKind.Email => MatchCase(value, Remember(kind, value, () => $"{owner ?? $"email-{++_emailCount}"}@scrubbed.invalid")),
-            ExportScrubKind.Username => MatchCase(value, Remember(kind, value, () => owner ?? throw new ArgumentNullException(nameof(owner)))),
+            ExportScrubKind.Username => MatchCase(value, Remember(kind, value, () => owner ?? $"username-{++_usernameCount}")),
             ExportScrubKind.Random => Remember(kind, value, () => RandomText(value.Length)),
             ExportScrubKind.Guid => Remember(kind, value, () => NewGuidLike(value)),
             ExportScrubKind.Phone => Remember(kind, value, () => new string(value.Select(c => char.IsDigit(c) ? (char)('0' + RandomNumberGenerator.GetInt32(10)) : c).ToArray())),
@@ -184,9 +186,17 @@ public sealed partial class ExportJunk
     private static string MatchCase(string original, string junk) =>
         original.Any(char.IsLetter) && original == original.ToUpperInvariant() ? junk.ToUpperInvariant() : junk;
 
+    /// <example>
+    /// <c>smtp://joe:pw@mail.example.com:587/path</c> splits into scheme <c>smtp://</c>, userinfo <c>joe:pw@</c>,
+    /// host <c>mail.example.com</c> and rest <c>:587/path</c>. A bare <c>mail.example.com</c> is host only
+    /// </example>
     [GeneratedRegex(@"^(?<scheme>[A-Za-z][A-Za-z0-9+.\-]*://)?(?<userinfo>[^@/?#\s]*@)?(?<host>\[[^\]]*\]|[^:/?#\s]+)(?<rest>.*)$", RegexOptions.Singleline)]
     private static partial Regex HostRegex();
 
+    /// <example>
+    /// In <c>&lt;p&gt;Great &amp;amp; 10/10&lt;/p&gt;</c> the tags and <c>&amp;amp;</c> match as markup, each letter as a letter and
+    /// each digit as a digit, giving <c>&lt;p&gt;xxxxx &amp;amp; 00/00&lt;/p&gt;</c>
+    /// </example>
     [GeneratedRegex(@"(?<markup><[^>]*>|&#?[A-Za-z0-9]+;)|(?<letter>\p{L})|(?<digit>\p{Nd})")]
     private static partial Regex FreeTextRegex();
 }

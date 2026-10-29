@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using Kavita.Models.Attributes;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.User;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -61,7 +62,7 @@ public static class ExportScrubCatalog
                 var name = $"{entityName}.{property.Name}";
                 if (dropped)
                 {
-                    entries.Add(new Entry(name, ExportScrubKind.DropTable, null, Source.Fallback, Area.Column, IsText(property.ClrType)));
+                    entries.Add(new Entry(name, ExportScrubKind.DropTable, null, Source.Fallback, Area.Column, IsTextType(property.ClrType)));
                     continue;
                 }
 
@@ -73,7 +74,7 @@ public static class ExportScrubCatalog
                 }
 
                 var attribute = property.PropertyInfo?.GetCustomAttribute<ExportScrubAttribute>();
-                var entry = Resolve(name, attribute, Area.Column, IsText(property.ClrType));
+                var entry = Resolve(name, attribute, Area.Column, IsTextType(property.ClrType));
                 entries.Add(entry);
                 if (entry.Kind == ExportScrubKind.Json)
                 {
@@ -99,7 +100,7 @@ public static class ExportScrubCatalog
             var scrubbed = columns.Where(c => c.Kind != ExportScrubKind.Json || c.StoredTypes.Any(t => HoldsScrubbedField(t, []))).ToList();
             if (dropped || scrubbed.Count > 0)
             {
-                tables.Add(new TableScrub(entityType.GetTableName()!, entityName, dropped, scrubbed));
+                tables.Add(new TableScrub(entityType.GetTableName()!, entityName, dropped, scrubbed, FindUserColumn(entityType)));
             }
         }
 
@@ -130,7 +131,7 @@ public static class ExportScrubCatalog
                 }
 
                 var attribute = property.GetCustomAttribute<ExportScrubAttribute>();
-                entries.Add(Resolve(FieldName(type, property.Name), attribute, Area.JsonField, IsText(property.PropertyType)));
+                entries.Add(Resolve(FieldName(type, property.Name), attribute, Area.JsonField, IsTextType(property.PropertyType)));
             }
         }
 
@@ -157,6 +158,18 @@ public static class ExportScrubCatalog
     }
 
     private static string FieldName(Type type, string property) => $"{TypeName(type)}.{property}";
+
+    /// <summary>
+    /// The column holding the row's <see cref="AppUser"/> id: the key on <c>AspNetUsers</c>, else the first foreign key to it
+    /// </summary>
+    private static string? FindUserColumn(IEntityType entityType)
+    {
+        if (entityType.ClrType == typeof(AppUser)) return entityType.FindPrimaryKey()!.Properties[0].GetColumnName();
+
+        return entityType.GetForeignKeys()
+            .FirstOrDefault(fk => fk.PrincipalEntityType.ClrType == typeof(AppUser))?
+            .Properties[0].GetColumnName();
+    }
 
     private static JsonTypeSelector? JsonSelector(IEntityType entityType, ExportScrubAttribute attribute)
     {
@@ -188,7 +201,7 @@ public static class ExportScrubCatalog
     /// <summary>
     /// A string, or a list or dictionary with strings in it. Only text can carry a token, an address or a name
     /// </summary>
-    private static bool IsText(Type type) => ElementTypes(type).Contains(typeof(string));
+    private static bool IsTextType(Type type) => ElementTypes(type).Contains(typeof(string));
 
     /// <summary>
     /// The type itself, or for a list its element, or for a dictionary its key then its value. Nullables unwrapped
@@ -255,7 +268,8 @@ public static class ExportScrubCatalog
     /// <param name="EntityName">As in <see cref="Entry.Name"/>, <c>AppUser</c> for the <c>AspNetUsers</c> table</param>
     /// <param name="Drop">Delete every row and ignore <paramref name="Columns"/></param>
     /// <param name="Columns">Only marked columns, and JSON columns whose stored type has a marked field</param>
-    public sealed record TableScrub(string Table, string EntityName, bool Drop, IReadOnlyList<ColumnScrub> Columns);
+    /// <param name="UserColumn">The row's <see cref="AppUser"/> id, so a username on it becomes <c>user-&lt;Id&gt;</c>. Null when the table has none</param>
+    public sealed record TableScrub(string Table, string EntityName, bool Drop, IReadOnlyList<ColumnScrub> Columns, string? UserColumn = null);
 
     /// <param name="JsonType">The property's CLR type when <paramref name="Kind"/> is <see cref="ExportScrubKind.Json"/></param>
     /// <param name="Selector">Set when the JSON type depends on other columns of the row, and then <paramref name="JsonType"/> is null</param>
