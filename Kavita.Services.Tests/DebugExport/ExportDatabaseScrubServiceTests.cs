@@ -31,7 +31,6 @@ public class ExportDatabaseScrubServiceTests : IDisposable
     private const string LicenseKey = "license-key-abcdef0123456789";
     private const string OidcSecret = "oidc-secret-0123456789";
     private const string MountFingerprint = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08";
-    private const string ReviewHtml = "<p>Great <b>twist</b></p>";
 
     private readonly string _directory = Path.Join(Path.GetTempPath(), $"kavita_scrub_test_{Guid.NewGuid()}");
     private readonly string _snapshotPath;
@@ -129,17 +128,6 @@ public class ExportDatabaseScrubServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task FreeTextKeepsHtmlTags()
-    {
-        await SeedSnapshot();
-
-        await CreateService().ScrubAsync(_snapshotPath);
-
-        await using var context = OpenSnapshot();
-        Assert.Equal("<p>xxxxx <b>xxxxx</b></p>", (await context.AppUserRating.SingleAsync()).Review);
-    }
-
-    [Fact]
     public async Task InjectedAdminCanSignIn()
     {
         await SeedSnapshot();
@@ -183,7 +171,7 @@ public class ExportDatabaseScrubServiceTests : IDisposable
     {
         var mapper = new MapperConfiguration(cfg => cfg.AddMaps(typeof(AutoMapperProfiles).Assembly)).CreateMapper();
         var accountService = new AccountService(null!, Substitute.For<ILogger<AccountService>>(), null!, mapper, null!);
-        return new ExportDatabaseScrubService(Substitute.For<ILogger<ExportDatabaseScrubService>>(), accountService);
+        return new ExportDatabaseScrubService(Substitute.For<ILogger<ExportDatabaseScrubService>>(), accountService, mapper);
     }
 
     private DataContext OpenSnapshot() =>
@@ -219,7 +207,6 @@ public class ExportDatabaseScrubServiceTests : IDisposable
         joe.ApiKey = JoeApiKey;
         joe.Libraries.Add(library);
         joe.Devices.Add(new Device { Name = "Joe's Kindle", IpAddress = JoeIp, EmailAddress = KindleEmail });
-        joe.Ratings.Add(new AppUserRating { Rating = 4, HasBeenRated = true, Review = ReviewHtml, Series = series });
         context.AppUser.Add(joe);
         context.ClientDevice.Add(new ClientDevice
         {

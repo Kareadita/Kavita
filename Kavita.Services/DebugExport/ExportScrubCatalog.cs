@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using Kavita.Models.Attributes;
 using Kavita.Models.Entities.Enums;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Kavita.Services.DebugExport;
@@ -33,15 +34,27 @@ public static class ExportScrubCatalog
 
     private static readonly HashSet<Type> DroppedTables = [typeof(DataProtectionKey)];
 
-    public static IReadOnlyList<Entry> Classify(IModel model)
+    /// <summary>
+    /// Every column, JSON field and server setting the catalog looked at, marked or not
+    /// </summary>
+    public static IReadOnlyList<Entry> Classify(IModel model) => Build(model).Entries;
+
+    /// <summary>
+    /// Reads the EF model and <see cref="ServerSettingKey"/>, then follows every JSON column and setting down into the
+    /// types it stores, to list what the scrub has to rewrite
+    /// </summary>
+    public static Plan Build(IModel model)
     {
         var entries = new List<Entry>();
+        var tables = new List<TableScrub>();
+        var settings = new List<SettingScrub>();
         var jsonTypes = new Queue<Type>();
 
         foreach (var entityType in model.GetEntityTypes())
         {
             var entityName = entityType.HasSharedClrType ? entityType.Name : TypeName(entityType.ClrType);
             var dropped = DroppedTables.Contains(entityType.ClrType);
+            var columns = new List<ColumnScrub>();
 
             foreach (var property in entityType.GetProperties())
             {
@@ -55,16 +68,29 @@ public static class ExportScrubCatalog
                 if (property.GetValueConverter() != null && JsonObjectType(property.ClrType) is { } storedType)
                 {
                     jsonTypes.Enqueue(storedType);
+                    columns.Add(new ColumnScrub(property.GetColumnName(), ExportScrubKind.Json, property.ClrType));
                     continue;
                 }
 
                 var attribute = property.PropertyInfo?.GetCustomAttribute<ExportScrubAttribute>();
-                entries.Add(Resolve(name, attribute, Area.Column, IsText(property.ClrType)));
+                var entry = Resolve(name, attribute, Area.Column, IsText(property.ClrType));
+                entries.Add(entry);
+                if (entry.Kind is { } kind)
+                {
+                    columns.Add(new ColumnScrub(property.GetColumnName(), kind, null));
+                }
             }
 
             foreach (var complexProperty in entityType.GetComplexProperties())
             {
                 jsonTypes.Enqueue(JsonObjectType(complexProperty.ClrType) ?? complexProperty.ClrType);
+                columns.Add(new ColumnScrub(complexProperty.ComplexType.GetContainerColumnName()!, ExportScrubKind.Json, complexProperty.ClrType));
+            }
+
+            var scrubbed = columns.Where(c => c.Kind != ExportScrubKind.Json || HoldsScrubbedField(c.JsonType!, [])).ToList();
+            if (dropped || scrubbed.Count > 0)
+            {
+                tables.Add(new TableScrub(entityType.GetTableName()!, entityName, dropped, scrubbed));
             }
         }
 
@@ -72,7 +98,10 @@ public static class ExportScrubCatalog
         {
             var attribute = field.GetCustomAttribute<ExportScrubAttribute>();
             entries.Add(Resolve($"{nameof(ServerSettingKey)}.{field.Name}", attribute, Area.ServerSetting, true));
-            if (attribute?.JsonType != null)
+            if (attribute == null) continue;
+
+            settings.Add(new SettingScrub((ServerSettingKey)field.GetValue(null)!, attribute.Kind, attribute.JsonType));
+            if (attribute.JsonType != null)
             {
                 jsonTypes.Enqueue(attribute.JsonType);
             }
@@ -83,9 +112,7 @@ public static class ExportScrubCatalog
         {
             if (!walked.Add(type)) continue;
 
-            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.CanRead && p.GetIndexParameters().Length == 0 && p.GetCustomAttribute<JsonIgnoreAttribute>() == null);
-            foreach (var property in properties)
+            foreach (var property in JsonProperties(type))
             {
                 if (JsonObjectType(property.PropertyType) is { } nested)
                 {
@@ -94,12 +121,33 @@ public static class ExportScrubCatalog
                 }
 
                 var attribute = property.GetCustomAttribute<ExportScrubAttribute>();
-                entries.Add(Resolve($"{TypeName(type)}.{property.Name}", attribute, Area.JsonField, IsText(property.PropertyType)));
+                entries.Add(Resolve(FieldName(type, property.Name), attribute, Area.JsonField, IsText(property.PropertyType)));
             }
         }
 
-        return entries;
+        var jsonKinds = entries
+            .Where(e => e.Area == Area.JsonField && e.Kind != null)
+            .ToDictionary(e => e.Name, e => e.Kind!.Value);
+        return new Plan(entries, tables, settings, jsonKinds);
     }
+
+    /// <summary>
+    /// The properties System.Text.Json writes for a stored type
+    /// </summary>
+    internal static IEnumerable<PropertyInfo> JsonProperties(Type type) =>
+        type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => p.CanRead && p.GetIndexParameters().Length == 0 && p.GetCustomAttribute<JsonIgnoreAttribute>() == null);
+
+    private static bool HoldsScrubbedField(Type type, HashSet<Type> visiting)
+    {
+        var objectType = JsonObjectType(type);
+        if (objectType == null || !visiting.Add(objectType)) return false;
+
+        return JsonProperties(objectType).Any(p =>
+            p.GetCustomAttribute<ExportScrubAttribute>() != null || HoldsScrubbedField(p.PropertyType, visiting));
+    }
+
+    private static string FieldName(Type type, string property) => $"{TypeName(type)}.{property}";
 
     private static Entry Resolve(string name, ExportScrubAttribute? attribute, Area area, bool isText)
     {
@@ -112,7 +160,7 @@ public static class ExportScrubCatalog
     /// <summary>
     /// The Kavita type a JSON value holds, looking through nullables, lists and dictionary values. Null for strings, primitives and enums
     /// </summary>
-    private static Type? JsonObjectType(Type type)
+    internal static Type? JsonObjectType(Type type)
     {
         var element = ElementTypes(type).Last();
         var isKavitaType = element.Namespace?.StartsWith("Kavita.", StringComparison.Ordinal) == true;
@@ -167,13 +215,44 @@ public static class ExportScrubCatalog
         return $"{prefix}{name}<{string.Join(",", type.GetGenericArguments().Select(a => a.Name))}>";
     }
 
+    /// <param name="Name"><c>AppUser.Email</c>, <c>ServerSettingKey.OidcConfiguration</c> or, for a JSON field, <c>OidcConfigDto.Secret</c></param>
     /// <param name="Kind">Null when the value is exported as is</param>
     /// <param name="IsText">A string or a collection of strings, the only values that can leak a secret</param>
     public sealed record Entry(string Name, ExportScrubKind? Kind, Type? JsonType, Source Source, Area Area, bool IsText);
 
+    /// <param name="Entries">Everything looked at, including values exported as is</param>
+    /// <param name="Tables">Only tables that are dropped or have a column to rewrite</param>
+    /// <param name="JsonFieldKinds">Keyed by <c>Type.Property</c>, read through <see cref="JsonFieldKind"/></param>
+    public sealed record Plan(
+        IReadOnlyList<Entry> Entries,
+        IReadOnlyList<TableScrub> Tables,
+        IReadOnlyList<SettingScrub> Settings,
+        IReadOnlyDictionary<string, ExportScrubKind> JsonFieldKinds)
+    {
+        /// <returns>Null when the field is exported as is</returns>
+        public ExportScrubKind? JsonFieldKind(Type type, string property) =>
+            JsonFieldKinds.TryGetValue(FieldName(type, property), out var kind) ? kind : null;
+    }
+
+    /// <param name="EntityName">As in <see cref="Entry.Name"/>, <c>AppUser</c> for the <c>AspNetUsers</c> table</param>
+    /// <param name="Drop">Delete every row and ignore <paramref name="Columns"/></param>
+    /// <param name="Columns">Only marked columns, and JSON columns whose stored type has a marked field</param>
+    public sealed record TableScrub(string Table, string EntityName, bool Drop, IReadOnlyList<ColumnScrub> Columns);
+
+    /// <param name="JsonType">The property's CLR type when <paramref name="Kind"/> is <see cref="ExportScrubKind.Json"/></param>
+    public sealed record ColumnScrub(string Column, ExportScrubKind Kind, Type? JsonType);
+
+    public sealed record SettingScrub(ServerSettingKey Key, ExportScrubKind Kind, Type? JsonType);
+
     public enum Source
     {
+        /// <summary>
+        /// <see cref="ExportScrubAttribute"/> on the property or setting key
+        /// </summary>
         Attribute,
+        /// <summary>
+        /// <see cref="FrameworkFallback"/> or <see cref="DroppedTables"/>, for types Kavita does not own
+        /// </summary>
         Fallback,
         Unmarked,
     }
