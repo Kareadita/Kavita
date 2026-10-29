@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Kavita.Models.Attributes;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Progress;
 
 namespace Kavita.Models.Entities.User;
@@ -24,6 +26,7 @@ public class ClientDevice
     /// User-friendly name, defaults to generated name like "Chrome on Windows"
     /// </summary>
     /// <remarks>Generated on first seen, user can customize after the fact</remarks>
+    [ExportScrub(ExportScrubKind.FreeText)]
     public string FriendlyName { get; set; } = string.Empty;
 
     /// <summary>

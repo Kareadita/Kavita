@@ -1,4 +1,5 @@
 ﻿using System;
+using Kavita.Models.Attributes;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
@@ -35,7 +36,9 @@ public class ScrobbleEvent : IEntityDate
     /// <summary>
     /// Review for the Series
     /// </summary>
+    [ExportScrub(ExportScrubKind.FreeText)]
     public string? ReviewBody { get; set; }
+    [ExportScrub(ExportScrubKind.FreeText)]
     public string? ReviewTitle { get; set; }
     public required PlusMediaFormat Format { get; set; }
     /// <summary>

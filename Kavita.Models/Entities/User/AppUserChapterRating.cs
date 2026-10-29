@@ -1,4 +1,6 @@
 using System;
+using Kavita.Models.Attributes;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.Entities.User;
@@ -21,6 +23,7 @@ public class AppUserChapterRating : IEntityDate
     /// <summary>
     /// A short summary the user can write when giving their review.
     /// </summary>
+    [ExportScrub(ExportScrubKind.FreeText)]
     public string? Review { get; set; }
 
     public DateTime Created { get; set; }

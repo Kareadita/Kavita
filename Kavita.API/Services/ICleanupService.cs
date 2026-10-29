@@ -14,7 +14,6 @@ public interface ICleanupService
     Task DeleteTagCoverImages(CancellationToken ct = default);
     Task CleanupBackups(CancellationToken ct = default);
     Task CleanupLogs(CancellationToken ct = default);
-    void CleanupTemp();
     Task EnsureChapterProgressIsCapped(CancellationToken ct = default);
     /// <summary>
     /// Responsible to remove Series from Want To Read when user's have fully read the series and the series has Publication Status of Completed or Cancelled.

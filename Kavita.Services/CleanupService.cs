@@ -285,7 +285,7 @@ public class CleanupService(
 
         if (expiredLogs.Count == allLogs.Count)
         {
-            logger.LogInformation("All expired backups are older than {Threshold} days. Removing all but last backup", dayThreshold);
+            logger.LogInformation("All logs are older than {Threshold} days. Removing all but the last log", dayThreshold);
             var toDelete = expiredLogs.OrderBy(f => f.CreationTime).ToList();
             directoryService.DeleteFiles(toDelete.Take(toDelete.Count - 1).Select(f => f.FullName));
         }
@@ -294,23 +294,6 @@ public class CleanupService(
             directoryService.DeleteFiles(expiredLogs.Select(f => f.FullName));
         }
         logger.LogInformation("Finished cleanup of logs at {Time}", DateTime.Now);
-    }
-
-    public void CleanupTemp()
-    {
-        logger.LogInformation("Performing cleanup of Temp directory");
-        directoryService.ExistOrCreate(directoryService.TempDirectory);
-
-        try
-        {
-            directoryService.ClearDirectory(directoryService.TempDirectory);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "There was an issue deleting one or more folders/files during cleanup");
-        }
-
-        logger.LogInformation("Temp directory purged");
     }
 
     /// <summary>

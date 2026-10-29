@@ -1,4 +1,5 @@
 ﻿using System;
+using Kavita.Models.Attributes;
 using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.Entities.Progress;
@@ -14,6 +15,7 @@ public class ClientInfoData
     /// <summary>
     /// Client IP address (respecting X-Forwarded-For if present)
     /// </summary>
+    [ExportScrub(ExportScrubKind.IpAddress)]
     public string IpAddress { get; set; } = string.Empty;
 
     /// <summary>

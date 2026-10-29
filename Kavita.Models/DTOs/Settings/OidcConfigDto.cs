@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
+using Kavita.Models.Attributes;
 using Kavita.Models.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
 
@@ -16,14 +17,17 @@ public sealed record OidcConfigDto: OidcPublicConfigDto
     /// <summary>
     /// Optional OpenID Connect Authority URL. Not managed in DB. Managed in appsettings.json and synced to DB.
     /// </summary>
+    [ExportScrub(ExportScrubKind.Host)]
     public string Authority { get; set; } = string.Empty;
     /// <summary>
     /// Optional OpenID Connect ClientId, defaults to kavita. Not managed in DB. Managed in appsettings.json and synced to DB.
     /// </summary>
+    [ExportScrub(ExportScrubKind.Random)]
     public string ClientId { get; set; } = string.Empty;
     /// <summary>
     /// Optional OpenID Connect Secret. Not managed in DB. Managed in appsettings.json and synced to DB.
     /// </summary>
+    [ExportScrub(ExportScrubKind.Random)]
     public string Secret { get; set; } = string.Empty;
     /// <summary>
     /// If true, auto creates a new account when someone logs in via OpenID Connect

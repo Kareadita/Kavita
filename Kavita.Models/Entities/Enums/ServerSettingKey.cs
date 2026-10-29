@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using Kavita.Models.Attributes;
+using Kavita.Models.DTOs.Settings;
 
 namespace Kavita.Models.Entities.Enums;
 
@@ -92,11 +94,13 @@ public enum ServerSettingKey
     /// The Host name (ie Reverse proxy domain name) for the server. Used for email link generation
     /// </summary>
     [Description("HostName")]
+    [ExportScrub(ExportScrubKind.Host)]
     HostName = 20,
     /// <summary>
     /// Ip addresses the server listens on. Not managed in DB. Managed in appsettings.json and synced to DB.
     /// </summary>
     [Description("IpAddresses")]
+    [ExportScrub(ExportScrubKind.IpAddress)]
     IpAddresses = 21,
     /// <summary>
     /// Encode all media as PNG/WebP/AVIF/etc.
@@ -108,6 +112,7 @@ public enum ServerSettingKey
     /// A Kavita+ Subscription license key
     /// </summary>
     [Description("LicenseKey")]
+    [ExportScrub(ExportScrubKind.Random)]
     LicenseKey = 23,
     /// <summary>
     /// The size in MB for Caching API data
@@ -136,6 +141,7 @@ public enum ServerSettingKey
     /// The address of the emailer host
     /// </summary>
     [Description("EmailSenderAddress")]
+    [ExportScrub(ExportScrubKind.Email)]
     EmailSenderAddress = 28,
     /// <summary>
     /// What the email name should be
@@ -143,10 +149,13 @@ public enum ServerSettingKey
     [Description("EmailSenderDisplayName")]
     EmailSenderDisplayName = 29,
     [Description("EmailAuthUserName")]
+    [ExportScrub(ExportScrubKind.Random)]
     EmailAuthUserName = 30,
     [Description("EmailAuthPassword")]
+    [ExportScrub(ExportScrubKind.Random)]
     EmailAuthPassword = 31,
     [Description("EmailHost")]
+    [ExportScrub(ExportScrubKind.Host)]
     EmailHost = 32,
     [Description("EmailPort")]
     EmailPort = 33,
@@ -182,6 +191,7 @@ public enum ServerSettingKey
     /// A Json object of type <see cref="Kavita.Models.DTOs.Settings.OidcConfigDto"/>
     /// </summary>
     [Description("OidcConfiguration")]
+    [ExportScrub(ExportScrubKind.Json, typeof(OidcConfigDto))]
     OidcConfiguration = 40,
     /// <summary>
     /// The resolution to render PDFs as when delivering them as images.

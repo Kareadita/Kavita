@@ -37,6 +37,7 @@ public class DirectoryService : IDirectoryService
     public string LongTermCacheDirectory { get; }
     public string EpubFontDirectory { get; }
     public string BackupDirectory { get; }
+    public string DebugExportDirectory { get; }
 
     private readonly ILogger<DirectoryService> _logger;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
@@ -80,6 +81,8 @@ public class DirectoryService : IDirectoryService
         ExistOrCreate(EpubFontDirectory);
         BackupDirectory = FileSystem.Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
         ExistOrCreate(BackupDirectory);
+        DebugExportDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "debug-exports");
+        ExistOrCreate(DebugExportDirectory);
     }
 
     /// <summary>
