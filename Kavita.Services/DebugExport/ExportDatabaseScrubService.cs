@@ -67,6 +67,14 @@ public class ExportDatabaseScrubService(
         var admin = await InjectAdmin(context, ct);
 
         await transaction.CommitAsync(ct);
+
+        // Re-vacuum so replaced fields don't leave their original bytes behind in the freed space of each page
+        await using (var vacuum = connection.CreateCommand())
+        {
+            vacuum.CommandText = "VACUUM";
+            await vacuum.ExecuteNonQueryAsync(ct);
+        }
+
         logger.LogInformation("Debug export scrubbed {Values} distinct values in {Tables} tables", run.Junk.Replaced.Count, run.Plan.Tables.Count);
 
         return new ExportScrubResult(run.Junk, run.Usernames, AdminUserName, admin.Password, admin.AuthKey);
@@ -132,8 +140,9 @@ public class ExportDatabaseScrubService(
             }
 
             var columns = table.Columns;
-            var select = $"SELECT rowid, {string.Join(", ", columns.Select(c => Quote(c.Column)))} FROM {Quote(table.Table)} " +
-                         $"WHERE rowid > $after ORDER BY rowid LIMIT {BatchSize}";
+            var discriminators = columns.SelectMany(c => c.Selector?.Columns ?? []).Distinct().ToList();
+            var select = $"SELECT rowid, {string.Join(", ", columns.Select(c => c.Column).Concat(discriminators).Select(Quote))} " +
+                         $"FROM {Quote(table.Table)} WHERE rowid > $after ORDER BY rowid LIMIT {BatchSize}";
             await using var update = Command($"UPDATE {Quote(table.Table)} SET " +
                                              $"{string.Join(", ", columns.Select((c, i) => $"{Quote(c.Column)} = $v{i}"))} WHERE rowid = $rowid");
             var owner = OwnerLabel(table.EntityName);
@@ -142,7 +151,7 @@ public class ExportDatabaseScrubService(
 
             while (true)
             {
-                var rows = await ReadBatch(select, after, columns.Count, ct);
+                var rows = await ReadBatch(select, after, columns.Count + discriminators.Count, ct);
                 if (rows.Count == 0) break;
 
                 foreach (var row in rows)
@@ -150,7 +159,8 @@ public class ExportDatabaseScrubService(
                     var changed = false;
                     for (var i = 0; i < columns.Count; i++)
                     {
-                        var scrubbed = ScrubValue(columns[i].Kind, columns[i].JsonType, row.Values[i], $"{owner}-{row.RowId}", table.Table, columns[i].Column);
+                        var jsonTypes = JsonTypes(columns[i], row.Values[columns.Count..], discriminators);
+                        var scrubbed = ScrubValue(columns[i].Kind, jsonTypes, row.Values[i], $"{owner}-{row.RowId}", table.Table, columns[i].Column);
                         if (scrubbed == row.Values[i]) continue;
 
                         row.Values[i] = scrubbed;
@@ -159,7 +169,7 @@ public class ExportDatabaseScrubService(
 
                     if (!changed) continue;
 
-                    await Write(update, row, ct);
+                    await Write(update, row, columns.Count, ct);
                     changedRows++;
                 }
 
@@ -188,11 +198,12 @@ public class ExportDatabaseScrubService(
 
                 foreach (var row in rows)
                 {
-                    var scrubbed = ScrubValue(setting.Kind, setting.JsonType, row.Values[0], $"setting-{row.RowId}", "ServerSetting", setting.Key.ToString());
+                    IReadOnlyList<Type> jsonTypes = setting.JsonType == null ? [] : [setting.JsonType];
+                    var scrubbed = ScrubValue(setting.Kind, jsonTypes, row.Values[0], $"setting-{row.RowId}", "ServerSetting", setting.Key.ToString());
                     if (scrubbed == row.Values[0]) continue;
 
                     row.Values[0] = scrubbed;
-                    await Write(update, row, ct);
+                    await Write(update, row, 1, ct);
                 }
             }
         }
@@ -201,7 +212,8 @@ public class ExportDatabaseScrubService(
         /// A JSON value is parsed and scrubbed field by field, every other kind goes to <see cref="ExportJunk"/>
         /// </summary>
         /// <param name="owner">The row the value came from, <c>user-3</c>, used to name its replacement</param>
-        private string? ScrubValue(ExportScrubKind kind, Type? jsonType, string? value, string owner, string table, string column)
+        /// <param name="jsonTypes">For a JSON value, the types it can hold: each one's marked fields are scrubbed</param>
+        private string? ScrubValue(ExportScrubKind kind, IReadOnlyList<Type> jsonTypes, string? value, string owner, string table, string column)
         {
             if (string.IsNullOrEmpty(value)) return value;
 
@@ -213,7 +225,8 @@ public class ExportDatabaseScrubService(
                     try
                     {
                         var node = JsonNode.Parse(value);
-                        return ScrubNode(node, jsonType!, owner) ? node!.ToJsonString() : value;
+                        var changed = jsonTypes.Aggregate(false, (scrubbed, type) => ScrubNode(node, type, owner) | scrubbed);
+                        return changed ? node!.ToJsonString() : value;
                     }
                     catch (JsonException ex)
                     {
@@ -317,11 +330,22 @@ public class ExportDatabaseScrubService(
             return rows;
         }
 
-        private static async Task Write(SqliteCommand update, RowValues row, CancellationToken ct)
+        /// <summary>
+        /// For a row whose type depends on others, the types its selector picks from the row's discriminator values
+        /// </summary>
+        private static IReadOnlyList<Type> JsonTypes(ExportScrubCatalog.ColumnScrub column, string?[] discriminatorValues, List<string> discriminators)
+        {
+            if (column.Selector is not { } selector) return column.StoredTypes;
+
+            return selector.Selector.TypesFor(selector.Columns.Select(c => discriminatorValues[discriminators.IndexOf(c)]).ToList());
+        }
+
+        /// <param name="columnCount">How many of the row's values are written back; the rest were read to choose a JSON type</param>
+        private static async Task Write(SqliteCommand update, RowValues row, int columnCount, CancellationToken ct)
         {
             update.Parameters.Clear();
             update.Parameters.AddWithValue("$rowid", row.RowId);
-            for (var i = 0; i < row.Values.Length; i++)
+            for (var i = 0; i < columnCount; i++)
             {
                 update.Parameters.AddWithValue($"$v{i}", (object?) row.Values[i] ?? DBNull.Value);
             }

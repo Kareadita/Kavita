@@ -38,6 +38,7 @@ public sealed record AuditLogCollectionStartedParamsDto
 
 public sealed record AuditLogWantToReadSyncParamsDto
 {
+    [ExportScrub(ExportScrubKind.Username)]
     public string UserName { get; init; } = string.Empty;
     [Obsolete("Use Providers instead")]
     public bool HasMal { get; init; }
@@ -49,6 +50,7 @@ public sealed record AuditLogWantToReadSyncParamsDto
 
 public sealed record AuditLogWantToReadSyncCompletedParamsDto
 {
+    [ExportScrub(ExportScrubKind.Username)]
     public string UserName { get; init; } = string.Empty;
     public int SeriesMatched { get; init; }
     [Obsolete("Use Providers instead")]

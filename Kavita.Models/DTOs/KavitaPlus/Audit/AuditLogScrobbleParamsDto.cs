@@ -1,4 +1,5 @@
-﻿using Kavita.Models.DTOs.Scrobbling;
+﻿using Kavita.Models.Attributes;
+using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Enums.UserPreferences;
@@ -22,6 +23,7 @@ public sealed record AuditLogScrobbleParamsDto
     public float? PercentRead { get; init; }
     public int? TotalReadCountForSeries { get; init; }
     public float? Rating { get; init; }
+    [ExportScrub(ExportScrubKind.FreeText)]
     public string? ReviewBody { get; init; }
     [EnumDataType(typeof(ScrobbleReadStatus))]
     public ScrobbleReadStatus ReadStatus { get; init; }

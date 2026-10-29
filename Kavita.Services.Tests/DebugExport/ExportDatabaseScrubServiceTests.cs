@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Kavita.API.Services;
@@ -8,14 +9,19 @@ using Kavita.Database;
 using Kavita.Models.AutoMapper;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
+using Kavita.Models.DTOs.KavitaPlus;
+using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
+using Kavita.Models.Entities.History;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
 using Kavita.Services.DebugExport;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -60,6 +66,59 @@ public class ExportDatabaseScrubServiceTests : IDisposable
         Assert.NotEqual(JoeIp, clientDevice.CurrentClientInfo.IpAddress);
         Assert.NotEqual(LicenseKey, license.Value);
         Assert.NotEqual(OidcSecret, JsonSerializer.Deserialize<OidcConfigDto>(oidc.Value)!.Secret);
+    }
+
+    [Fact]
+    public async Task ScrubbedFileHoldsNoOriginalBytes()
+    {
+        await SeedSnapshot();
+        // Rows have to share a packed page: a lone row that grows is rewritten over its old bytes, so it can't show the leak
+        var kindleEmails = Enumerable.Range(0, 40).Select(i => $"kindle-{i:D3}@kindle.example.com").ToList();
+        await using (var context = OpenSnapshot())
+        {
+            context.Device.AddRange(kindleEmails.Select(email => new Device { Name = "Kindle", EmailAddress = email, AppUserId = 1 }));
+            await context.SaveChangesAsync();
+        }
+        await PackSnapshot();
+
+        await CreateService().ScrubAsync(_snapshotPath);
+
+        var bytes = await File.ReadAllBytesAsync(_snapshotPath);
+        foreach (var original in new[] { JoeApiKey, JoeIp, KindleEmail, LicenseKey, OidcSecret, MountFingerprint }.Concat(kindleEmails))
+        {
+            Assert.True(bytes.AsSpan().IndexOf(Encoding.UTF8.GetBytes(original)) < 0, $"{original} is still in the file");
+        }
+    }
+
+    [Fact]
+    public async Task AuditPayloadIsScrubbedByEventType()
+    {
+        await SeedSnapshot();
+        await using (var context = OpenSnapshot())
+        {
+            context.KavitaPlusAuditLogs.AddRange(
+                Audit(KavitaPlusAuditCategory.Sync, KavitaPlusEventType.SyncFailed, new AuditLogWantToReadSyncParamsDto { UserName = "joe-on-anilist" }),
+                Audit(KavitaPlusAuditCategory.Scrobble, KavitaPlusEventType.ScrobbleEventCreated, new AuditLogScrobbleParamsDto { ReviewBody = "Loved the ending" }),
+                Audit(KavitaPlusAuditCategory.System, KavitaPlusEventType.SystemProviderInfoSync,
+                    new AuditLogSystemProviderInfoSyncParamsDto { UserInfo = new KavitaPlusUserInfo { Username = "joe-on-mal" } }),
+                Audit(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesMatchFailed, new AuditLogMatchFailureParamsDto { SeriesName = "Berserk", Reason = "no-match" }));
+            await context.SaveChangesAsync();
+        }
+
+        await CreateService().ScrubAsync(_snapshotPath);
+
+        await using var after = OpenSnapshot();
+        var payloads = await after.KavitaPlusAuditLogs.OrderBy(a => a.Id).Select(a => a.Payload!).ToListAsync();
+        var syncFailed = JsonSerializer.Deserialize<AuditLogWantToReadSyncParamsDto>(payloads[0])!;
+        var scrobble = JsonSerializer.Deserialize<AuditLogScrobbleParamsDto>(payloads[1])!;
+        var providerInfo = JsonSerializer.Deserialize<AuditLogSystemProviderInfoSyncParamsDto>(payloads[2])!;
+        var matchFailed = JsonSerializer.Deserialize<AuditLogMatchFailureParamsDto>(payloads[3])!;
+
+        Assert.NotEqual("joe-on-anilist", syncFailed.UserName);
+        Assert.Equal("xxxxx xxx xxxxxx", scrobble.ReviewBody);
+        Assert.NotEqual("joe-on-mal", providerInfo.UserInfo!.Username);
+        Assert.Equal("Berserk", matchFailed.SeriesName);
+        Assert.Equal("no-match", matchFailed.Reason);
     }
 
     [Fact]
@@ -173,6 +232,33 @@ public class ExportDatabaseScrubServiceTests : IDisposable
         var accountService = new AccountService(null!, Substitute.For<ILogger<AccountService>>(), null!, mapper, null!);
         return new ExportDatabaseScrubService(Substitute.For<ILogger<ExportDatabaseScrubService>>(), accountService, mapper);
     }
+
+    /// <summary>
+    /// Rewrites the snapshot with <c>VACUUM INTO</c>, as <see cref="IBackupService.SnapshotDatabase"/> makes it for a real export
+    /// </summary>
+    private async Task PackSnapshot()
+    {
+        var packed = Path.Join(_directory, "packed.db");
+        await using (var connection = new SqliteConnection($"Data Source={_snapshotPath};Pooling=False"))
+        {
+            await connection.OpenAsync();
+            await using var vacuum = connection.CreateCommand();
+            vacuum.CommandText = $"VACUUM INTO '{packed}'";
+            await vacuum.ExecuteNonQueryAsync();
+        }
+
+        File.Move(packed, _snapshotPath, true);
+    }
+
+    private static KavitaPlusAuditLog Audit(KavitaPlusAuditCategory category, KavitaPlusEventType eventType, object payload) => new()
+    {
+        CreatedUtc = DateTime.UtcNow,
+        Category = category,
+        EventType = eventType,
+        Status = AuditStatus.Info,
+        SubjectType = AuditSubjectType.Global,
+        Payload = JsonSerializer.Serialize(payload),
+    };
 
     private DataContext OpenSnapshot() =>
         new(new DbContextOptionsBuilder<DataContext>().UseSqlite($"Data Source={_snapshotPath};Pooling=False").Options);

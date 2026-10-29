@@ -75,7 +75,16 @@ public static class ExportScrubCatalog
                 var attribute = property.PropertyInfo?.GetCustomAttribute<ExportScrubAttribute>();
                 var entry = Resolve(name, attribute, Area.Column, IsText(property.ClrType));
                 entries.Add(entry);
-                if (entry.Kind is { } kind)
+                if (entry.Kind == ExportScrubKind.Json)
+                {
+                    var selector = JsonSelector(entityType, attribute!);
+                    foreach (var type in selector?.Selector.AllTypes ?? [attribute!.JsonType])
+                    {
+                        jsonTypes.Enqueue(type);
+                    }
+                    columns.Add(new ColumnScrub(property.GetColumnName(), ExportScrubKind.Json, attribute!.JsonType, selector));
+                }
+                else if (entry.Kind is { } kind)
                 {
                     columns.Add(new ColumnScrub(property.GetColumnName(), kind, null));
                 }
@@ -87,7 +96,7 @@ public static class ExportScrubCatalog
                 columns.Add(new ColumnScrub(complexProperty.ComplexType.GetContainerColumnName()!, ExportScrubKind.Json, complexProperty.ClrType));
             }
 
-            var scrubbed = columns.Where(c => c.Kind != ExportScrubKind.Json || HoldsScrubbedField(c.JsonType!, [])).ToList();
+            var scrubbed = columns.Where(c => c.Kind != ExportScrubKind.Json || c.StoredTypes.Any(t => HoldsScrubbedField(t, []))).ToList();
             if (dropped || scrubbed.Count > 0)
             {
                 tables.Add(new TableScrub(entityType.GetTableName()!, entityName, dropped, scrubbed));
@@ -148,6 +157,15 @@ public static class ExportScrubCatalog
     }
 
     private static string FieldName(Type type, string property) => $"{TypeName(type)}.{property}";
+
+    private static JsonTypeSelector? JsonSelector(IEntityType entityType, ExportScrubAttribute attribute)
+    {
+        if (attribute.JsonTypeSelector == null) return null;
+
+        var selector = (IExportJsonTypeSelector) Activator.CreateInstance(attribute.JsonTypeSelector)!;
+        var columns = selector.Discriminators.Select(p => entityType.FindProperty(p)!.GetColumnName()).ToList();
+        return new JsonTypeSelector(selector, columns);
+    }
 
     private static Entry Resolve(string name, ExportScrubAttribute? attribute, Area area, bool isText)
     {
@@ -240,7 +258,14 @@ public static class ExportScrubCatalog
     public sealed record TableScrub(string Table, string EntityName, bool Drop, IReadOnlyList<ColumnScrub> Columns);
 
     /// <param name="JsonType">The property's CLR type when <paramref name="Kind"/> is <see cref="ExportScrubKind.Json"/></param>
-    public sealed record ColumnScrub(string Column, ExportScrubKind Kind, Type? JsonType);
+    /// <param name="Selector">Set when the JSON type depends on other columns of the row, and then <paramref name="JsonType"/> is null</param>
+    public sealed record ColumnScrub(string Column, ExportScrubKind Kind, Type? JsonType, JsonTypeSelector? Selector = null)
+    {
+        public IReadOnlyList<Type> StoredTypes => Selector?.Selector.AllTypes ?? (JsonType == null ? [] : [JsonType]);
+    }
+
+    /// <param name="Columns">The column of each <see cref="IExportJsonTypeSelector.Discriminators"/> entry, in the same order</param>
+    public sealed record JsonTypeSelector(IExportJsonTypeSelector Selector, IReadOnlyList<string> Columns);
 
     public sealed record SettingScrub(ServerSettingKey Key, ExportScrubKind Kind, Type? JsonType);
 

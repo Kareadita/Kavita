@@ -40,6 +40,12 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
     {
         try
         {
+            if (payload != null && KavitaPlusAuditPayloads.TypesFor(eventType)?.Contains(payload.GetType()) != true)
+            {
+                logger.LogWarning("[Kavita+ Audit] {PayloadType} is not mapped for {EventType} in KavitaPlusAuditPayloads, so the debug export won't scrub it",
+                    payload.GetType().Name, eventType);
+            }
+
             var entry = new KavitaPlusAuditLog
             {
                 CreatedUtc = DateTime.UtcNow,
