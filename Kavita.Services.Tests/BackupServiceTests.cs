@@ -60,10 +60,10 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
 
     #endregion
 
-    #region BackupDatabaseFile
+    #region SnapshotDatabase
 
     [Fact]
-    public async Task BackupDatabaseFile_WithValidPath_CreatesBackup()
+    public async Task SnapshotDatabase_WithValidPath_CreatesBackup()
     {
         // Arrange - Create a file-based SQLite database for testing VACUUM INTO
         var tempDbPath = Path.Combine(Path.GetTempPath(), $"kavita_test_{Guid.NewGuid()}.db");
@@ -92,18 +92,9 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
 
             var backupService = new BackupService(_logger, unitOfWork, ds, _messageHub);
 
-            // Act - Use reflection to call the private method
-            var methodInfo = typeof(BackupService).GetMethod("BackupDatabaseFile",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-
-            Assert.NotNull(methodInfo);
-
-            var task = (Task?)methodInfo.Invoke(backupService, new object[] { tempBackupDir });
-            Assert.NotNull(task);
-            await task;
-
-            // Assert
             var backupPath = Path.Combine(tempBackupDir, "kavita.db");
+            await backupService.SnapshotDatabase(backupPath);
+
             Assert.True(File.Exists(backupPath), "Backup file should be created");
 
             // Verify the backup is a valid SQLite database
@@ -138,30 +129,16 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
     }
 
     [Fact]
-    public async Task BackupDatabaseFile_WithPathContainingSingleQuote_ThrowsArgumentException()
+    public async Task SnapshotDatabase_WithPathContainingSingleQuote_ThrowsArgumentException()
     {
-        // Arrange
         var (unitOfWork, context, _) = await CreateDatabase();
 
         var filesystem = CreateFileSystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var backupService = new BackupService(_logger, unitOfWork, ds, _messageHub);
 
-        // Act - Use reflection to call the private method with a path containing single quote
-        var methodInfo = typeof(BackupService).GetMethod("BackupDatabaseFile",
-            BindingFlags.NonPublic | BindingFlags.Instance);
-
-        Assert.NotNull(methodInfo);
-
-        var invalidPath = "/tmp/test'injection";
-
-        // Assert - The ArgumentException is thrown directly since the validation happens before async work
-        var exception = await Assert.ThrowsAsync<ArgumentException>(async () =>
-        {
-            var task = (Task?)methodInfo.Invoke(backupService, new object[] { invalidPath });
-            Assert.NotNull(task);
-            await task;
-        });
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            backupService.SnapshotDatabase("/tmp/test'injection/kavita.db"));
 
         Assert.Contains("invalid characters", exception.Message);
     }

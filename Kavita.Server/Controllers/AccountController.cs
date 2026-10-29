@@ -194,7 +194,8 @@ public class AccountController(UserManager<AppUser> userManager,
             var result = await userManager.CreateAsync(user, registerDto.Password);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            await accountService.SeedUser(user, ct);
+            accountService.SeedUser(user);
+            await unitOfWork.CommitAsync(ct);
 
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest(await localizationService.GetAsync("en", "confirm-token-gen"));
@@ -790,7 +791,7 @@ public class AccountController(UserManager<AppUser> userManager,
             var result = await userManager.CreateAsync(user);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            await accountService.SeedUser(user, ct);
+            accountService.SeedUser(user);
 
             // Assign Roles
             var roles = dto.Roles;

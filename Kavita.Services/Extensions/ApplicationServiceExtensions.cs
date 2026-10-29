@@ -9,6 +9,7 @@ using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
 using Kavita.Models.Entities.Enums;
+using Kavita.Services.DebugExport;
 using Kavita.Services.Helpers;
 using Kavita.Services.HostedServices;
 using Kavita.Services.Metadata;
@@ -37,6 +38,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IArchiveService, ArchiveService>();
         services.AddScoped<IBackupService, BackupService>();
+        services.AddScoped<IExportDatabaseScrubService, ExportDatabaseScrubService>();
         services.AddScoped<ICleanupService, CleanupService>();
         services.AddScoped<IBookService, BookService>();
         services.AddScoped<IVersionUpdaterService, VersionUpdaterService>();

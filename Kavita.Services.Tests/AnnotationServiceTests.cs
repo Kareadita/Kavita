@@ -188,19 +188,19 @@ public class AnnotationServiceTests(ITestOutputHelper outputHelper): AbstractDbT
             .WithRole(PolicyConstants.AdminRole)
             .Build();
 
-        context.AppUser.Add(user);
-        await unitOfWork.CommitAsync();
-
-        user = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id, AppUserIncludes.DashboardStreams);
-        Assert.NotNull(user);
-
-        await new AccountService(
+        new AccountService(
             null!,
             Substitute.For<ILogger<AccountService>>(),
             unitOfWork,
             mapper,
             Substitute.For<ILocalizationService>()
         ).SeedUser(user);
+
+        context.AppUser.Add(user);
+        await unitOfWork.CommitAsync();
+
+        user = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id, AppUserIncludes.DashboardStreams);
+        Assert.NotNull(user);
 
         var chapter = new ChapterBuilder("1")
             .Build();

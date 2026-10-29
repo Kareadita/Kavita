@@ -84,7 +84,7 @@ public class BackupService(
         directoryService.ClearDirectory(tempDirectory);
 
         await SendProgress(0.1F, "Backing up database", ct);
-        await BackupDatabaseFile(tempDirectory);
+        await SnapshotDatabase(directoryService.FileSystem.Path.Join(tempDirectory, "kavita.db"), ct);
 
         await SendProgress(0.15F, "Copying config files", ct);
         directoryService.CopyFilesToDirectory(
@@ -135,36 +135,25 @@ public class BackupService(
         directoryService.CopyFilesToDirectory(files, directoryService.FileSystem.Path.Join(tempDirectory, "logs"));
     }
 
-    /// <summary>
-    /// Creates a backup of the SQLite database using VACUUM INTO command.
-    /// This method safely backs up the database while it's in use, without locking issues.
-    /// </summary>
-    /// <param name="tempDirectory">The directory where the backup file will be created</param>
-    private async Task BackupDatabaseFile(string tempDirectory)
+    public async Task SnapshotDatabase(string path, CancellationToken ct = default)
     {
-        var backupPath = directoryService.FileSystem.Path.Join(tempDirectory, "kavita.db");
-
-        // Validate the backup path to prevent SQL injection
-        // The path must not contain single quotes which could break the SQL command
-        if (backupPath.Contains('\''))
+        if (path.Contains('\''))
         {
-            throw new ArgumentException("Backup path contains invalid characters", nameof(tempDirectory));
+            throw new ArgumentException("Backup path contains invalid characters", nameof(path));
         }
 
         try
         {
-            // Use VACUUM INTO to create a safe backup of the database while it's running
-            // This creates a consistent snapshot without locking the main database
-            // Note: VACUUM INTO requires a literal path and cannot use SQL parameters
-            #pragma warning disable EF1002 // The backup path is validated above to not contain SQL injection characters
-            await unitOfWork.DataContext.Database.ExecuteSqlRawAsync($"VACUUM INTO '{backupPath}'");
+            // VACUUM INTO takes a literal path, not a SQL parameter, hence the quote check above
+            #pragma warning disable EF1002
+            await unitOfWork.DataContext.Database.ExecuteSqlRawAsync($"VACUUM INTO '{path}'", ct);
             #pragma warning restore EF1002
-            logger.LogDebug("Database backup created successfully at {BackupPath}", backupPath);
+            logger.LogDebug("Database snapshot created at {SnapshotPath}", path);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to create database backup using VACUUM INTO at {BackupPath}", backupPath);
-            throw new InvalidOperationException($"Failed to create database backup at {backupPath}", ex);
+            logger.LogError(ex, "Failed to create database snapshot using VACUUM INTO at {SnapshotPath}", path);
+            throw new InvalidOperationException($"Failed to create database snapshot at {path}", ex);
         }
     }
 
