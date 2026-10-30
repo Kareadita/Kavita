@@ -474,7 +474,6 @@
         "library-name-unique": "Tên thư viện phải là duy nhất",
         "manage-reading-list-label": "Quản Lý Danh Sách Đang Đọc",
         "allow-scrobbling-tooltip": "Kavita có nên theo dõi các sự kiện đọc, trạng thái muốn đọc, xếp hạng và đánh giá cho các nhà cung cấp đã cấu hình. Điều này sẽ chỉ xảy ra nếu máy chủ có Đăng ký Kavita+ đang hoạt động.",
-        "folder-watching-label": "Theo Dõi Thư Mục",
         "force-scan-tooltip": "Thao tác này sẽ buộc hệ thống phải quét thư viện, xử lý như một lần quét mới",
         "file-type-group-label": "Loại Tệp",
         "exclude-patterns-label": "Loại Trừ Các Mẫu",
@@ -484,7 +483,6 @@
         "next": "Tiếp theo",
         "file-type-group-tooltip": "Kavita nên quét những loại tệp nào. Ví dụ: Archive sẽ bao gồm tất cả các tệp cb*, zip, rar, v.v.",
         "force-scan": "Bắt Buộc Quét",
-        "folder-watching-tooltip": "Ghi đè Theo Dõi Thư Mục cho thư viện này. Nếu tắt, chức năng theo dõi thư mục sẽ không chạy trên các thư mục mà thư viện này chứa. Nếu nhiều thư viện chia sẻ chung một thư mục, thì thư mục vẫn có thể được chạy. Sẽ luôn đợi 10 phút trước khi kích hoạt quét.",
         "include-in-dashboard-label": "Hiện ở Bảng Điều Khiển",
         "include-in-dashboard-tooltip": "Có nên đưa các series từ thư viện vào Dashboard không. Điều này ảnh hưởng đến tất cả các luồng, như Đang Đọc, Mới Cập Nhật, Mới Thêm hoặc bất kỳ mục bổ sung tùy chỉnh nào.",
         "include-in-search-label": "Hiện ở Tìm Kiếm",
@@ -614,13 +612,7 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "no-data": "Không có dữ liệu",
-        "description-part-2": "Wiki.",
-        "created-header": "Đã tạo",
-        "description-part-1": "Bảng này chứa các vấn đề được tìm thấy trong quá trình quét hoặc đọc phương tiện của bạn. Bạn có thể xóa bảng này bất kỳ lúc nào và sử dụng Quét thư viện (Bắt Buộc) để thực hiện phân tích. Danh sách một số lỗi thường gặp và ý nghĩa của chúng có thể được tìm thấy trên ",
-        "clear-alerts": "Xóa Cảnh Báo",
-        "file-header": "Tệp",
-        "comment-header": "Bình Luận"
+        "no-data": "Không có dữ liệu"
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",
@@ -774,8 +766,6 @@
         "bust-cache-task": "Xóa Bộ Nhớ Đệm",
         "bust-cache-task-desc": "Xóa bộ nhớ đệm Kavita+. chỉ nên sử dụng khi gỡ lỗi các kết quả không khớp.",
         "bust-cache-task-success": "Bộ nhớ đệm Kavita+ đã bị xóa",
-        "bust-locale-task": "Xóa Bộ Nhớ Đệm Ngôn Ngữ",
-        "bust-locale-task-success": "Bộ nhớ đệm ngôn ngữ đã bị xóa",
         "clear-reading-cache-task": "Xóa Bộ Nhớ Đệm Trình Đọc",
         "clear-reading-cache-task-success": "Bộ nhớ đệm đã bị xóa",
         "clean-up-want-to-read-task": "Dọn Dẹp Các Mục Muốn Đọc",
@@ -785,7 +775,6 @@
         "convert-media-task-desc": "Chạy một tác vụ dài để chuyển đổi tất cả tệp Media do kavita quản lý sang loại mã hóa đã chọn. Tác vụ này sẽ mất thời gian (đặc biệt là trên các thiết bị ARM).",
         "cron-header": "Cron",
         "action-header": "Hành Động",
-        "bust-locale-task-desc": "Xóa bộ nhớ đệm ngôn ngữ. Việc này có thể khắc phục sự cố với các chuỗi ký tự không hiển thị đúng sau khi cập nhật. Cần phải làm mới trình duyệt.",
         "clear-reading-cache-task-desc": "Xóa các tệp được lưu trong bộ nhớ đệm của trình đọc. Hữu ích khi bạn vừa cập nhật một tệp mà bạn đã đọc trước đó trong vòng 24 giờ qua.",
         "clean-up-want-to-read-task-desc": "Xóa bất kỳ Series nào mà người dùng đã đọc hết nằm trong mục Muốn đọc và có trạng thái xuất bản là Đã hoàn thành. Chạy sau mỗi 24 giờ.",
         "clean-up-task-desc": "Thực hiện các hoạt động dọn dẹp hàng đêm trên máy chủ. Tác vụ có thể sẽ nặng, khuyên không nên chạy với người dùng đang hoạt động hoặc đang quét. Chạy sau mỗi 24 giờ.",
@@ -935,17 +924,7 @@
         "read-options-alt": "Cài Đặt Đọc"
     },
     "events-widget": {
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} người dùng đang trực tuyến",
-        "download-in-queue": "{{num}} tải xuống trong hàng đợi",
-        "downloading-item": "Đang Tải Xuống {{item}}",
-        "more-info": "Click để hiển thị thêm thông tin",
-        "title-alt": "Hoạt Động",
-        "dismiss-all": "Bỏ Qua Tất Cả",
-        "update-available": "Bản Cập Nhật Khả Dụng",
-        "active-events-title": "Sự kiện đang diễn ra:",
-        "no-data": "Không có nhiều thứ đang diễn ra ở đây",
-        "left-to-process": "Đang chờ xử lý: {{leftToProcess}}"
+        "title-alt": "Hoạt Động"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}",

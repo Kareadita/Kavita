@@ -598,8 +598,6 @@
         "manage-reading-list-tooltip": "Moet Kavita leeslijsten maken van StoryArc/StoryArcNumber en AlternativeSeries/AlternativeCount-tags gevonden in ComicInfo.xml/opf-bestanden",
         "allow-scrobbling-label": "Scrobbelen toestaan",
         "allow-scrobbling-tooltip": "Mocht Kavita leesgebeurtenissen scrobblen, status, beoordelingen en recensies willen lezen voor geconfigureerde providers. Dit gebeurt alleen als de server een actief Kavita+ abonnement heeft.",
-        "folder-watching-label": "Mappen bekijken",
-        "folder-watching-tooltip": "Negeer het bewaken van servermappen voor deze bibliotheek. Indien uitgeschakeld, wordt mapbewaking niet uitgevoerd op de mappen die deze bibliotheek bevat. Als bibliotheken mappen delen, kunnen mappen nog steeds worden aangevallen.",
         "include-in-dashboard-label": "Opnemen in dashboard",
         "include-in-dashboard-tooltip": "Moeten series uit de bibliotheek worden opgenomen op het Dashboard. Dit is van invloed op alle streams, zoals Aan Het Lezen, Onlangs bijgewerkt, Onlangs toegevoegd of andere aangepaste toevoegingen.",
         "include-in-search-label": "Opnemen in Zoeken",
@@ -1026,15 +1024,7 @@
         "characters-title": "{{metadata-fields.characters-title}}"
     },
     "events-widget": {
-        "title-alt": "Activiteit",
-        "dismiss-all": "Alles afkeuren",
-        "update-available": "Update beschikbaar",
-        "downloading-item": "{{item}} downloaden",
-        "more-info": "Klik voor meer informatie",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Gebruikers online",
-        "active-events-title": "Actieve gebeurtenissen:",
-        "no-data": "Er gebeurt hier niet veel"
+        "title-alt": "Activiteit"
     },
     "shortcuts-modal": {
         "title": "Sneltoetsen",
