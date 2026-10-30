@@ -40,6 +40,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IBackupService, BackupService>();
         services.AddScoped<IExportDatabaseScrubService, ExportDatabaseScrubService>();
         services.AddScoped<IExportLogService, ExportLogService>();
+        services.AddScoped<IExportSystemInfoService, ExportSystemInfoService>();
         services.AddScoped<ICleanupService, CleanupService>();
         services.AddScoped<IBookService, BookService>();
         services.AddScoped<IVersionUpdaterService, VersionUpdaterService>();
