@@ -20,6 +20,7 @@ using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.User;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
+using Kavita.Server.Helpers;
 using Kavita.Server.Middleware;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers.Kobo;
