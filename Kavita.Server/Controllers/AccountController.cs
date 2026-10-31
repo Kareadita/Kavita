@@ -804,9 +804,10 @@ public class AccountController(UserManager<AppUser> userManager,
                 roles.Remove(PolicyConstants.ReadOnlyRole);
             }
 
-            foreach (var role in roles)
+            foreach (var role in roles.Distinct())
             {
                 if (!PolicyConstants.ValidRoles.Contains(role)) continue;
+
                 var roleResult = await userManager.AddToRoleAsync(user, role);
                 if (!roleResult.Succeeded)
                     return BadRequest(roleResult.Errors);
