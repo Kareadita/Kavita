@@ -33,4 +33,7 @@ export enum MessageEventCode {
   BackupExists = 'backup-exists',
   CleanupOnHold = 'cleanup-on-hold',
   WordCountFailed = 'word-count-failed',
+
+  DebugExportReady = 'debug-export-ready',
+  DebugExportFailed = 'debug-export-failed',
 }

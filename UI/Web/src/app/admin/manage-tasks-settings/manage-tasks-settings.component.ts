@@ -21,6 +21,7 @@ import {ServerService} from "../../_services/server.service";
 import {DownloadService} from "../../shared/_services/download.service";
 import {Job} from "../../_models/job/job";
 import {DownloadEntityType} from "../../shared/_models/download-queue-item";
+import {ConfirmService} from "../../shared/confirm.service";
 
 interface AdhocTask {
   name: string;
@@ -28,6 +29,7 @@ interface AdhocTask {
   api: Observable<any>;
   successMessage: string;
   successFunction?: (data: any) => void;
+  confirm?: string;
 }
 
 @Component({
@@ -47,6 +49,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly serverService = inject(ServerService);
   private readonly versionService = inject(VersionService);
+  private readonly confirmService = inject(ConfirmService);
   private readonly downloadService = inject(DownloadService);
 
   serverSettings!: ServerSettings;
@@ -96,6 +99,13 @@ export class ManageTasksSettingsComponent implements OnInit {
       description: 'download-logs-task-desc',
       api: defer(() => of(this.downloadService.download(DownloadEntityType.Logs, undefined, 0, 0))),
       successMessage: ''
+    },
+    {
+      name: 'debug-export-task',
+      description: 'debug-export-task-desc',
+      api: this.serverService.startDebugExport(),
+      successMessage: 'debug-export-task-success',
+      confirm: 'debug-export-task-confirm'
     },
     {
       name: 'sync-themes-task',
@@ -174,7 +184,9 @@ export class ManageTasksSettingsComponent implements OnInit {
     return modelSettings;
   }
 
-  runAdhoc(task: AdhocTask) {
+  async runAdhoc(task: AdhocTask) {
+    if (task.confirm && !await this.confirmService.confirm(translate('manage-tasks-settings.' + task.confirm))) return;
+
     task.api.subscribe((data: any) => {
       if (task.successMessage.length > 0) {
         this.toastr.success(translate('manage-tasks-settings.' + task.successMessage));

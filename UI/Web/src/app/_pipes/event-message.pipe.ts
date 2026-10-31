@@ -2,14 +2,20 @@ import {inject, Pipe, PipeTransform} from '@angular/core';
 import {TranslocoService} from '@jsverse/transloco';
 import {MessageEventCode} from '../_models/events/core/message-event-code';
 import {FolderWatchFallbackReason} from '../_models/events/core/folder-watch-fallback-reason';
+import {DateTime} from 'luxon';
+import {BytesPipe} from './bytes.pipe';
+import {UtcToLocalTimePipe} from './utc-to-local-time.pipe';
 
 const PREFIX = 'event-message-pipe';
+// CleanupService.CleanupDebugExports deletes an export 24 hours after it is written
+const DebugExportKeptHours = 24;
 
 export interface EventMessageSource {
   code: MessageEventCode | null;
   title: string;
   subTitle: string;
   body: unknown;
+  updatedUtc: string;
 }
 
 export type EventMessagePart = 'label' | 'description';
@@ -24,6 +30,7 @@ type MessageBody = Partial<{
   filePath: string;
   reason: FolderWatchFallbackReason;
   message: string | null;
+  bytes: number;
 }>;
 
 type Params = Record<string, string | undefined>;
@@ -38,6 +45,8 @@ type Params = Record<string, string | undefined>;
 })
 export class EventMessagePipe implements PipeTransform {
   private readonly translocoService = inject(TranslocoService);
+  private readonly bytesPipe = new BytesPipe();
+  private readonly utcToLocalTimePipe = new UtcToLocalTimePipe();
 
   transform(source: EventMessageSource, part: EventMessagePart): string {
     const body = (source.body ?? {}) as MessageBody;
@@ -96,6 +105,10 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.cleanup-on-hold-label`, {}, fallback);
       case MessageEventCode.WordCountFailed:
         return this.translate(`${PREFIX}.word-count-failed-label`, {seriesName}, fallback);
+      case MessageEventCode.DebugExportReady:
+        return this.translate(`${PREFIX}.debug-export-ready-label`, {}, fallback);
+      case MessageEventCode.DebugExportFailed:
+        return this.translate(`${PREFIX}.debug-export-failed-label`, {}, fallback);
       default:
         return fallback;
     }
@@ -129,6 +142,7 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.scan-no-work-description`, {}, fallback);
       case MessageEventCode.DbWriteFailed:
       case MessageEventCode.LibraryScanFailed:
+      case MessageEventCode.DebugExportFailed:
         // SubTitle is the raw exception message
         return source.subTitle;
       case MessageEventCode.SeriesUpdateFailed:
@@ -153,9 +167,20 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.cleanup-on-hold-description`, {}, fallback);
       case MessageEventCode.WordCountFailed:
         return this.translate(`${PREFIX}.word-count-failed-description`, {filePath: body.filePath}, fallback);
+      case MessageEventCode.DebugExportReady:
+        return this.debugExportReadyDescription(source, body, fallback);
       default:
         return fallback;
     }
+  }
+
+  private debugExportReadyDescription(source: EventMessageSource, body: MessageBody, fallback: string): string {
+    if (body.bytes === undefined) return fallback;
+
+    const size = this.bytesPipe.transform(body.bytes);
+    const keptUntilUtc = DateTime.fromISO(source.updatedUtc, {zone: 'utc'}).plus({hours: DebugExportKeptHours}).toISO();
+    const time = this.utcToLocalTimePipe.transform(keptUntilUtc, 'weekdayTime');
+    return this.translate(`${PREFIX}.debug-export-ready-description`, {size, time}, fallback);
   }
 
   private unreadableFoldersDescription(body: MessageBody, fallback: string): string {

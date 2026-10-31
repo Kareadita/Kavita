@@ -54,6 +54,8 @@ public static class MessageEventCode
     public const string BackupExists = "backup-exists";
     public const string CleanupOnHold = "cleanup-on-hold";
     public const string WordCountFailed = "word-count-failed";
+    public const string DebugExportReady = "debug-export-ready";
+    public const string DebugExportFailed = "debug-export-failed";
 
     #endregion
 }

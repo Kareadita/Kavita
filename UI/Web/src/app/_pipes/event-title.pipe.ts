@@ -65,6 +65,8 @@ export class EventTitlePipe implements PipeTransform {
         return this.translocoService.translate(`${PREFIX}.word-count-analyzer-progress`, {libraryName});
       case EVENTS.BackupDatabaseProgress:
         return this.translocoService.translate(`${PREFIX}.backup-database-progress`);
+      case EVENTS.DebugExportProgress:
+        return this.translocoService.translate(`${PREFIX}.debug-export-progress`);
       case EVENTS.CleanupProgress:
         return this.translocoService.translate(`${PREFIX}.cleanup-progress`);
       case EVENTS.ConvertBookmarksProgress:

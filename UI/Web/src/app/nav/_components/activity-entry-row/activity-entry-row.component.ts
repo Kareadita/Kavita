@@ -15,6 +15,8 @@ import {VersionService} from '../../../_services/version.service';
 import {ConfirmService} from '../../../shared/confirm.service';
 import {ConfirmConfig} from '../../../shared/confirm-dialog/_models/confirm-config';
 import {UpdateVersionEvent} from '../../../_models/events/update-version-event';
+import {DebugExportReadyEvent} from '../../../_models/events/debug-export-ready-event';
+import {DownloadService} from '../../../shared/_services/download.service';
 import {SettingsTabId} from '../../../sidenav/preference-nav/preference-nav.component';
 import {EventMessagePipe} from '../../../_pipes/event-message.pipe';
 import {EventTitlePipe} from '../../../_pipes/event-title.pipe';
@@ -47,6 +49,7 @@ export class ActivityEntryRowComponent {
   private readonly versionService = inject(VersionService);
   private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
+  private readonly downloadService = inject(DownloadService);
   private readonly eventMessagePipe = new EventMessagePipe();
   private readonly eventTitlePipe = new EventTitlePipe();
   private readonly utcToLocalTimePipe = new UtcToLocalTimePipe();
@@ -123,6 +126,8 @@ export class ActivityEntryRowComponent {
         return entry.libraryId !== null ? [EventAction.Rescan] : [];
       case MessageEventCode.SeriesCollision:
         return [EventAction.Details];
+      case MessageEventCode.DebugExportReady:
+        return [EventAction.Download];
     }
 
     if (SeriesCodes.includes(entry.code) && entry.libraryId !== null && entry.seriesId !== null) {
@@ -155,6 +160,9 @@ export class ActivityEntryRowComponent {
         break;
       case EventAction.ScanNow:
         this.scanNow();
+        break;
+      case EventAction.Download:
+        this.downloadService.downloadDebugExport((entry.body as DebugExportReadyEvent).exportId);
         break;
     }
   }

@@ -2613,6 +2613,11 @@
         "download-logs-task": "Download Logs",
         "download-logs-task-desc": "Compiles all log files into a zip and downloads it.",
 
+        "debug-export-task": "Create Debug Export",
+        "debug-export-task-desc": "A scrubbed copy of your database, logs and system info to send with a bug report.",
+        "debug-export-task-confirm": "This builds a zip of your database, the last 5 days of logs and some system information (OS, disk speed, Kavita+ status) for the Kavita team to debug with. Passwords, API keys, emails, usernames and IP addresses are replaced before anything is written. File paths, library and series names are kept as they are, since bugs often depend on them.",
+        "debug-export-task-success": "Debug export started. You’ll get a notification to download it when it’s ready.",
+
         "sync-themes-task": "Sync Themes",
         "sync-themes-task-desc": "Synchronize downloaded themes with upstream changes if version matches.",
         "sync-themes-success": "Synchronization of themes has been queued",
@@ -3192,6 +3197,7 @@
         "scan-series-progress": "Scanning {{seriesName}}",
         "scan-series-done": "Scanned {{seriesName}}",
         "backup-database-progress": "Backing up database",
+        "debug-export-progress": "Building debug export",
         "cleanup-progress": "Cleaning up",
         "cover-update-progress": "Refreshing covers: {{libraryName}}",
         "word-count-analyzer-progress": "Counting words: {{libraryName}}",
@@ -3250,6 +3256,9 @@
         "cleanup-on-hold-description": "A media conversion is running. Cleanup runs after it.",
         "word-count-failed-label": "Couldn’t count words in {{seriesName}}",
         "word-count-failed-description": "Can’t read {{filePath}}.",
+        "debug-export-ready-label": "Debug export ready",
+        "debug-export-ready-description": "{{size}}, kept until {{time}}",
+        "debug-export-failed-label": "Debug export failed",
         "folder-watch-fallback-label": "Library is now using Polling",
         "folder-watch-fallback-errors-description": "Too many errors occurred watching {{folder}}, so {{libraryName}} was switched to Polling. Use Retry on the library’s Folder tab to watch again.",
         "folder-watch-fallback-missed-change-description": "The watcher missed a change in {{folder}}, so {{libraryName}} was switched to Polling. Use Retry on the library’s Folder tab to watch again."
@@ -3265,7 +3274,8 @@
         "rescan": "Rescan",
         "scan-now": "Scan now",
         "details": "Details",
-        "open-media-issues": "Open Media Issues"
+        "open-media-issues": "Open Media Issues",
+        "download": "Download"
     },
 
     "activity-age-pipe": {

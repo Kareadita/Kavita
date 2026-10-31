@@ -291,6 +291,35 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
     #endregion
 
+    #region CleanupDebugExports
+
+    [Fact]
+    public async Task DebugExportsOlderThanADayAreDeleted()
+    {
+        var filesystem = CreateFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var old = DateTime.Now.AddHours(-25);
+        var stale = filesystem.Path.Join(ds.DebugExportDirectory, "20261030-1200PM-aaaa");
+        var recent = filesystem.Path.Join(ds.DebugExportDirectory, "20261030-1200PM-bbbb");
+        var empty = filesystem.Path.Join(ds.DebugExportDirectory, "20261030-1200PM-cccc");
+        filesystem.AddFile(filesystem.Path.Join(stale, "debug-export.zip"), new MockFileData("") { LastWriteTime = old });
+        filesystem.AddFile(filesystem.Path.Join(recent, "kavita.db"), new MockFileData("") { LastWriteTime = old });
+        filesystem.AddFile(filesystem.Path.Join(recent, "debug-export.zip.partial"), new MockFileData(""));
+        filesystem.AddDirectory(empty);
+        foreach (var folder in new[] { stale, recent, empty })
+        {
+            filesystem.Directory.SetCreationTime(folder, old);
+        }
+
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (logger, messageHub, _) = await Setup(unitOfWork, context);
+        await new CleanupService(logger, unitOfWork, messageHub, ds).CleanupDebugExports();
+
+        Assert.Equal([recent], filesystem.Directory.GetDirectories(ds.DebugExportDirectory));
+    }
+
+    #endregion
+
     #region CleanupLogs
 
     [Fact]

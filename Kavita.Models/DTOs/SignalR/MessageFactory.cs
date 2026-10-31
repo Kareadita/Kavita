@@ -65,6 +65,10 @@ public static class MessageFactory
     /// </summary>
     private const string CleanupProgress = "CleanupProgress";
     /// <summary>
+    /// Event sent out while a debug export is built
+    /// </summary>
+    private const string DebugExportProgress = "DebugExportProgress";
+    /// <summary>
     /// Event sent out during downloading of files
     /// </summary>
     public const string DownloadProgress = "DownloadProgress";
@@ -358,6 +362,25 @@ public static class MessageFactory
             Body = new BackupDatabaseProgressEventBodyDto(progress)
         };
     }
+    public static SignalRMessageDto DebugExportProgressEvent(float progress, string subtitle = "")
+    {
+        return new SignalRMessageDto()
+        {
+            Name = DebugExportProgress,
+            Priority = MessageEventPriority.Activity,
+            Title = "Building Debug Export",
+            SubTitle = subtitle,
+            EventType = progress switch
+            {
+                0f => "started",
+                1f => "ended",
+                _ => "updated"
+            },
+            Progress = ProgressType.Determinate,
+            Body = new DebugExportProgressEventBodyDto(progress)
+        };
+    }
+
     public static SignalRMessageDto CleanupProgressEvent(float progress, string subtitle = "")
     {
         return new SignalRMessageDto()
@@ -809,6 +832,22 @@ public static class MessageFactory
             Title = title,
             SubTitle = subtitle,
         });
+    }
+
+    public static SignalRMessageDto DebugExportReadyEvent(string exportId, long bytes)
+    {
+        const string title = "Debug export ready";
+
+        return CodedEvent(Info, MessageEventCode.DebugExportReady, title, exportId,
+            new DebugExportReadyEventBodyDto(Info, title, exportId, exportId, bytes));
+    }
+
+    public static SignalRMessageDto DebugExportFailedEvent(string exportId, string error)
+    {
+        const string title = "Debug export failed";
+
+        return CodedEvent(Error, MessageEventCode.DebugExportFailed, title, error,
+            new DebugExportFailedEventBodyDto(Error, title, error, exportId, error));
     }
 
     public static SignalRMessageDto WordCountFailedEvent(int libraryId, int seriesId, string seriesName, string filePath)
