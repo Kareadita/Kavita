@@ -14,7 +14,7 @@ public enum ExportScrubKind
     /// </summary>
     Email = 1,
     /// <summary>
-    /// An address from the RFC 5737 documentation range. One original address maps to one replacement everywhere
+    /// An address from a reserved range (RFC 5737, then RFC 2544). One original address maps to one replacement everywhere
     /// </summary>
     IpAddress = 2,
     /// <summary>

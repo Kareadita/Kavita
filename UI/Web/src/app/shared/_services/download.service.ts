@@ -1115,8 +1115,6 @@ export class DownloadService {
     setTimeout(() => this.processQueue(), 1500);
   }
 
-  // --- Blob-based downloads (bookmarks, logs, debug exports) ---
-
   downloadDebugExport(exportId: string) {
     this.httpClient.get(this.baseUrl + 'server/debug-export/' + encodeURIComponent(exportId),
       { observe: 'events', responseType: 'blob', reportProgress: true }

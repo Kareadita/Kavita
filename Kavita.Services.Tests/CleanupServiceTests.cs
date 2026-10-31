@@ -302,10 +302,14 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var stale = filesystem.Path.Join(ds.DebugExportDirectory, "20261030-1200PM-aaaa");
         var recent = filesystem.Path.Join(ds.DebugExportDirectory, "20261030-1200PM-bbbb");
         var empty = filesystem.Path.Join(ds.DebugExportDirectory, "20261030-1200PM-cccc");
+        var started = filesystem.Path.Join(ds.DebugExportDirectory, "20261030-1200PM-dddd");
+
         filesystem.AddFile(filesystem.Path.Join(stale, "debug-export.zip"), new MockFileData("") { LastWriteTime = old });
         filesystem.AddFile(filesystem.Path.Join(recent, "kavita.db"), new MockFileData("") { LastWriteTime = old });
         filesystem.AddFile(filesystem.Path.Join(recent, "debug-export.zip.partial"), new MockFileData(""));
         filesystem.AddDirectory(empty);
+        filesystem.AddDirectory(started);
+
         foreach (var folder in new[] { stale, recent, empty })
         {
             filesystem.Directory.SetCreationTime(folder, old);
@@ -315,7 +319,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (logger, messageHub, _) = await Setup(unitOfWork, context);
         await new CleanupService(logger, unitOfWork, messageHub, ds).CleanupDebugExports();
 
-        Assert.Equal([recent], filesystem.Directory.GetDirectories(ds.DebugExportDirectory));
+        Assert.Equal([recent, started], filesystem.Directory.GetDirectories(ds.DebugExportDirectory));
     }
 
     #endregion

@@ -162,6 +162,7 @@ export class ActivityEntryRowComponent {
         this.scanNow();
         break;
       case EventAction.Download:
+        this.toastr.info(translate('toasts.debug-export-downloading'));
         this.downloadService.downloadDebugExport((entry.body as DebugExportReadyEvent).exportId);
         break;
     }

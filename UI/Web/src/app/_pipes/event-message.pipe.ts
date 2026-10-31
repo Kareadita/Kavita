@@ -7,7 +7,7 @@ import {BytesPipe} from './bytes.pipe';
 import {UtcToLocalTimePipe} from './utc-to-local-time.pipe';
 
 const PREFIX = 'event-message-pipe';
-// CleanupService.CleanupDebugExports deletes an export 24 hours after it is written
+// Mirrors the 24-hour cutoff in CleanupService.CleanupDebugExports
 const DebugExportKeptHours = 24;
 
 export interface EventMessageSource {

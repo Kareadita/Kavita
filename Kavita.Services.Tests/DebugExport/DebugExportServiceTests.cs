@@ -87,11 +87,15 @@ public class DebugExportServiceTests : IDisposable
     [InlineData("snapshot")]
     [InlineData("scrub")]
     [InlineData("logs")]
+    [InlineData("cancelled")]
     public async Task FailedExportSendsFailedAndLeavesNothing(string failingStep)
     {
         var error = new IOException("There is not enough space on the disk");
         switch (failingStep)
         {
+            case "cancelled":
+                _scrubService.ScrubAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).ThrowsAsync(new OperationCanceledException());
+                break;
             case "snapshot":
                 _backupService.SnapshotDatabase(Arg.Any<string>(), Arg.Any<CancellationToken>()).ThrowsAsync(error);
                 break;
@@ -119,6 +123,8 @@ public class DebugExportServiceTests : IDisposable
     [InlineData("20261031-0102PM-a3f9", DebugExportService.ZipName + ".partial", false)]
     [InlineData("20261031-0102PM-A3F9", DebugExportService.ZipName, false)]
     [InlineData(@"..\..\config", DebugExportService.ZipName, false)]
+    [InlineData(@"20261031-0102PM-a3f9\..\20261031-0102PM-a3f9", DebugExportService.ZipName, false)]
+    [InlineData("20261031-0102PM-a3f9/../20261031-0102PM-a3f9", DebugExportService.ZipName, false)]
     [InlineData("20261031-0102PM-a3f9\n", DebugExportService.ZipName, false)]
     [InlineData("", DebugExportService.ZipName, false)]
     public void ZipPathOnlyForAFinishedExport(string exportId, string fileOnDisk, bool found)
