@@ -1353,6 +1353,8 @@ public class AccountController(UserManager<AppUser> userManager,
         unitOfWork.UserRepository.Delete(authKey);
         await unitOfWork.CommitAsync(ct);
 
+        await authKeyService.InvalidateAsync(authKey.Key, ct);
+
         await eventHub.SendMessageToAsync(MessageFactory.AuthKeyDeleted, MessageFactory.AuthKeyDeletedEvent(authKeyId), UserId, ct);
 
         return Ok();
