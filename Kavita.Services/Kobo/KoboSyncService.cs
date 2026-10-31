@@ -409,12 +409,8 @@ public class KoboSyncService(
 
         await readerService.SaveReadingProgress(userProgressDto, userId, false, cancellationToken);
 
-        // We are unable to track progress within a chapter from Kobo. So we can only generate sessions for chapter updates
-        if (startPage != userProgressDto.PageNum)
-        {
-            await readingSessionService.GenerateReadingSessionForChapters(userId, parentIds.Value.SeriesId,
-                new Dictionary<int, int> { [chapterId] = startPage }, cancellationToken);
-        }
+        await readingSessionService.GenerateReadingSessionForChapters(userId, parentIds.Value.SeriesId,
+            new Dictionary<int, int> { [chapterId] = startPage }, cancellationToken);
     }
 
     /// <summary>
@@ -439,9 +435,13 @@ public class KoboSyncService(
         }
 
         var file = readingState.CurrentBookmark.Location?.Source;
+        // Start of book
         if (string.IsNullOrEmpty(file))
         {
-            throw new KavitaException();
+            progress.PageNum = 0;
+            progress.BookScrollId = null;
+            progress.KoboSpan = null;
+            return;
         }
 
         if (chapter.Files.First().Format != MangaFormat.Epub)
