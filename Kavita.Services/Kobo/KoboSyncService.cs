@@ -58,6 +58,8 @@ public class KoboSyncService(
 
     public async Task<(List<KoboSyncItem>, bool)> GetChangesSinceAsync(int userId, AppUserKoboSyncPreferences syncPreferences, KoboSyncPoint syncPoint, CancellationToken cancellationToken)
     {
+        logger.LogTrace("GetChangesSinceAsync: {@SyncPoint}", syncPoint);
+
         var syncResults = new List<KoboSyncItem>();
 
         var ageRestriction = await unitOfWork.DataContext.AppUser.GetUserAgeRestriction(userId, cancellationToken);

@@ -56,7 +56,7 @@ public class KoboController(
     {
         var ct = HttpContext.RequestAborted;
 
-        var (json, hasWrittenResponse) = await ProxyRequest(false, ct, false);
+        var (json, hasWrittenResponse) = await ProxyRequest(null, ct, false);
         if (json is null)
         {
             return hasWrittenResponse ? new EmptyResult() : NotFound();
@@ -94,17 +94,12 @@ public class KoboController(
         var syncPoint = await unitOfWork.KoboSyncPointRepository.GetSyncPoint(UserId, syncToken.SyncPointId, ct);
 
         var (kavitaChanges, completedSync) = await koboSyncService.GetChangesSinceAsync(UserId, syncSettings, syncPoint, ct);
+        syncToken.SyncPointId = syncPoint.Id; // After since GetSyncPoint does not commit
 
         if (kavitaChanges.Count == 0 && completedSync && syncSettings.ForwardToKoboStore)
         {
-            var (jsonResponse, hasWrittenResponse) = await ProxyRequest(true, ct);
-            // Request failed
-            if (hasWrittenResponse)
-            {
-                return new EmptyResult();
-            }
-
-            return Ok(jsonResponse);
+            await ProxyRequest(syncToken, ct);
+            return new EmptyResult();
         }
 
         if (!completedSync || syncSettings.ForwardToKoboStore)
@@ -112,7 +107,6 @@ public class KoboController(
             Response.Headers[KoboHeaders.KoboSync] = "continue";
         }
 
-        syncToken.SyncPointId = syncPoint.Id;
         Response.Headers[KoboHeaders.KoboSyncToken] = KoboSyncTokenHelper.Encode(syncToken);
 
         return Ok(kavitaChanges);
@@ -529,26 +523,25 @@ public class KoboController(
         HeaderNames.ContentType,
     };
 
-    private static bool IsKoboHeader(string header) => header.StartsWith("x-kobo-", StringComparison.OrdinalIgnoreCase);
+    private static bool IsKoboHeader(string header) => header.StartsWith("x-kobo-", StringComparison.OrdinalIgnoreCase) && !header.Equals(KoboHeaders.KoboSyncToken);
 
     /// <summary>
     /// Defaults to <see cref="KoboHttpClient"/>
     /// </summary>
-    /// <param name="httpClient"></param>
     /// <param name="body"></param>
     /// <returns></returns>
     private async Task<ActionResult> ProxyRequestIfEnabled(object? body = null)
     {
         if ((await KoboSyncSettings).ForwardToKoboStore)
         {
-            await ProxyRequest(false, HttpContext.RequestAborted, body: body);
+            await ProxyRequest(null, HttpContext.RequestAborted, body: body);
             return new EmptyResult();
         }
 
         return NotFound();
     }
 
-    private async Task<(JsonNode?, bool)> ProxyRequest(bool includeSyncToken, CancellationToken ct, bool copyResponse = true, object? body = null)
+    private async Task<(JsonNode?, bool)> ProxyRequest(KoboSyncToken? syncToken, CancellationToken ct, bool copyResponse = true, object? body = null)
     {
         var targetUrl = GetKoboUrl();
 
@@ -561,26 +554,15 @@ public class KoboController(
         upstreamRequest.Headers.Remove(KoboHeaders.KoboSyncToken);
 
         // Add back if requested (Need to remove first so it doesn't have 2 values)
-        var syncToken = KoboSyncToken;
-        if (includeSyncToken && !string.IsNullOrEmpty(syncToken.KoboStoreSyncToken))
+        if (!string.IsNullOrEmpty(syncToken?.KoboStoreSyncToken))
         {
             upstreamRequest.Headers.TryAddWithoutValidation(KoboHeaders.KoboSyncToken, syncToken.KoboStoreSyncToken);
         }
 
         using var upstreamResponse = await KoboHttpClient.SendAsync(upstreamRequest, HttpCompletionOption.ResponseHeadersRead, ct);
-        if (!upstreamResponse.IsSuccessStatusCode || copyResponse)
-        {
-            if (!upstreamResponse.IsSuccessStatusCode)
-            {
-                logger.LogWarning("Failed to proxy request to {Url}: {StatusCode} {ReasonPhrase}", targetUrl.Sanitize(), upstreamResponse.StatusCode, upstreamResponse.ReasonPhrase);
-            }
-
-            await Response.CopyResponse(upstreamResponse, IsKoboHeader, ct);
-            return (null, true);
-        }
 
         // Copy sync tokens from Kobo Servers back over
-        if (includeSyncToken)
+        if (syncToken is not null)
         {
             if (upstreamResponse.Headers.TryGetValues(KoboHeaders.KoboSync, out var koboSyncHeader))
             {
@@ -593,9 +575,21 @@ public class KoboController(
                 if (!string.IsNullOrEmpty(koboSyncTokenValue))
                 {
                     syncToken.KoboStoreSyncToken = koboSyncTokenValue;
-                    Response.Headers[KoboHeaders.KoboSyncToken] = KoboSyncTokenHelper.Encode(syncToken);
                 }
             }
+
+            Response.Headers[KoboHeaders.KoboSyncToken] = KoboSyncTokenHelper.Encode(syncToken);
+        }
+
+        if (!upstreamResponse.IsSuccessStatusCode || copyResponse)
+        {
+            if (!upstreamResponse.IsSuccessStatusCode)
+            {
+                logger.LogWarning("Failed to proxy request to {Url}: {StatusCode} {ReasonPhrase}", targetUrl.Sanitize(), upstreamResponse.StatusCode, upstreamResponse.ReasonPhrase);
+            }
+
+            await Response.CopyResponse(upstreamResponse, IsKoboHeader, ct);
+            return (null, true);
         }
 
         return (await upstreamResponse.Content.ReadFromJsonAsync<JsonNode>(ct), false);
