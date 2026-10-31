@@ -15,6 +15,13 @@ img, .full-width {
     //height: auto; // This can cause (rarely) a small line between panels
 }
 
+// Work around reported webtoon panel seams without removing acceleration elsewhere.
+#scroller > img {
+    -webkit-transform: none;
+    -moz-transform: none;
+    transform: none;
+}
+
 // This is to force hardware acceleration to help address https://github.com/Kareadita/Kavita/issues/1848
 *:not(html) {
     -webkit-transform: translate3d(0, 0, 0);
