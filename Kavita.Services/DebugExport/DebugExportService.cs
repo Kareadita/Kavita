@@ -7,7 +7,6 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Hangfire;
 using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Models.DebugExport;
@@ -31,7 +30,6 @@ public partial class DebugExportService(
     private const string SystemInfoName = "system-info.json";
 
     /// <inheritdoc />
-    [AutomaticRetry(Attempts = 0)]
     public async Task ExportAsync(CancellationToken ct = default)
     {
         var fileSystem = directoryService.FileSystem;

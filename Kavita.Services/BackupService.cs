@@ -5,7 +5,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
@@ -50,11 +49,10 @@ public class BackupService(
     /// Will back up anything that needs to be backed up. This includes logs, setting files, bare minimum cover images (just locked and first cover).
     /// </summary>
     /// <param name="ct"></param>
-    [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
     public async Task BackupDatabase(CancellationToken ct = default)
     {
         logger.LogInformation("Beginning backup of Database at {BackupTime}", DateTime.Now);
-        var backupDirectory = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Value;
+        var backupDirectory = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory, ct)).Value;
 
         logger.LogDebug("Backing up to {BackupDirectory}", backupDirectory);
         if (!directoryService.ExistOrCreate(backupDirectory))
@@ -117,7 +115,7 @@ public class BackupService(
 
         try
         {
-            await ZipFile.CreateFromDirectoryAsync(tempDirectory, zipPath);
+            await ZipFile.CreateFromDirectoryAsync(tempDirectory, zipPath, ct);
         }
         catch (AggregateException ex)
         {

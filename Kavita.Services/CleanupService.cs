@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
@@ -35,7 +34,6 @@ public class CleanupService(
     /// Cleans up Temp, cache, deleted cover images,  and old database backups
     /// </summary>
     /// <param name="ct"></param>
-    [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail, DelaysInSeconds = [120, 300, 300])]
     public async Task Cleanup(CancellationToken ct = default)
     {
         if (TaskScheduler.HasAlreadyEnqueuedTask<IMediaConversionService>(s => s.ConvertAllManagedMediaToEncodingFormat(CancellationToken.None),

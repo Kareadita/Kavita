@@ -1,10 +1,13 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Hangfire;
 
 namespace Kavita.API.Services;
 
 public interface ICleanupService
 {
+    // Hangfire reads filters from the type a job is queued on, and TaskScheduler queues this on the interface
+    [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail, DelaysInSeconds = [120, 300, 300])]
     Task Cleanup(CancellationToken ct = default);
     Task CleanupDbEntries(CancellationToken ct = default);
     Task CleanupCacheAndTempDirectories(CancellationToken ct = default);

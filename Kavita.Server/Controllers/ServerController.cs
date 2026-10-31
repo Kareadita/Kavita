@@ -22,7 +22,6 @@ using Kavita.Models.DTOs.Stats;
 using Kavita.Models.DTOs.Update;
 using Kavita.Models.Entities.Enums;
 using Kavita.Server.Attributes;
-using Kavita.Services.DebugExport;
 using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -183,8 +182,7 @@ public class ServerController(
         }
 
         logger.LogInformation("{UserName} is starting a debug export from admin dashboard", Username!);
-        // On the class, so Hangfire reads its [AutomaticRetry] (it reads filters from the type the job names)
-        BackgroundJob.Enqueue<DebugExportService>(s => s.ExportAsync(CancellationToken.None));
+        BackgroundJob.Enqueue<IDebugExportService>(s => s.ExportAsync(CancellationToken.None));
         return Ok();
     }
 
