@@ -162,7 +162,9 @@ public sealed partial class ExportJunk
     }
 
     private static string FreeText(string value) => FreeTextRegex().Replace(value, m =>
-        m.Groups["markup"].Success ? m.Value : m.Groups["letter"].Success ? "x" : "0");
+        m.Groups["tag"].Success ? AttributeValueRegex().Replace(m.Value, v => $"{v.Groups["quote"]}{FreeText(v.Groups["value"].Value)}{v.Groups["quote"]}")
+        : m.Groups["entity"].Success ? m.Value
+        : m.Groups["letter"].Success ? "x" : "0");
 
     private static string NewGuidLike(string value)
     {
@@ -194,9 +196,15 @@ public sealed partial class ExportJunk
     private static partial Regex HostRegex();
 
     /// <example>
-    /// In <c>&lt;p&gt;Great &amp;amp; 10/10&lt;/p&gt;</c> the tags and <c>&amp;amp;</c> match as markup, each letter as a letter and
-    /// each digit as a digit, giving <c>&lt;p&gt;xxxxx &amp;amp; 00/00&lt;/p&gt;</c>
+    /// In <c>&lt;p&gt;Great &amp;amp; 10/10&lt;/p&gt;</c> the tags match as tags, <c>&amp;amp;</c> as an entity, each letter as a
+    /// letter and each digit as a digit, giving <c>&lt;p&gt;xxxxx &amp;amp; 00/00&lt;/p&gt;</c>
     /// </example>
-    [GeneratedRegex(@"(?<markup><[^>]*>|&#?[A-Za-z0-9]+;)|(?<letter>\p{L})|(?<digit>\p{Nd})")]
+    [GeneratedRegex(@"(?<tag><[^>]*>)|(?<entity>&#?[A-Za-z0-9]+;)|(?<letter>\p{L})|(?<digit>\p{Nd})")]
     private static partial Regex FreeTextRegex();
+
+    /// <example>
+    /// In <c>&lt;a href="https://joe.home" class='hl'&gt;</c> matches <c>"https://joe.home"</c> and <c>'hl'</c>, quote and value apart
+    /// </example>
+    [GeneratedRegex("""(?<quote>["'])(?<value>.*?)\k<quote>""")]
+    private static partial Regex AttributeValueRegex();
 }

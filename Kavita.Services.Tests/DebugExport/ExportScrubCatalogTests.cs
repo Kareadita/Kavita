@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Kavita.Database;
+using Kavita.Models.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Xunit;
@@ -57,6 +59,20 @@ public class ExportScrubCatalogTests
 
         Assert.NotNull(entry);
         Assert.NotNull(entry.Kind);
+    }
+
+    [Theory]
+    [InlineData(Area.JsonField, ExportScrubKind.TextScrub)]
+    [InlineData(Area.JsonField, ExportScrubKind.Json)]
+    [InlineData(Area.JsonField, ExportScrubKind.DropTable)]
+    [InlineData(Area.ServerSetting, ExportScrubKind.TextScrub)]
+    [InlineData(Area.ServerSetting, ExportScrubKind.DropTable)]
+    public void MisplacedKindThrows(Area area, ExportScrubKind kind)
+    {
+        var entry = new Entry("AuditLogExampleDto.Error", kind, null, Source.Attribute, area, true);
+
+        var ex = Assert.Throws<InvalidOperationException>(() => EnsureKindsFit([entry]));
+        Assert.Contains(entry.Name, ex.Message);
     }
 
     private static void AssertNoneUnreviewed(Area area)

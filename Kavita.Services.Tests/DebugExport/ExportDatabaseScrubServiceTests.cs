@@ -167,6 +167,29 @@ public class ExportDatabaseScrubServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task AccountNameIsNeverShared()
+    {
+        await SeedSnapshot();
+        await using (var context = OpenSnapshot())
+        {
+            var joe = await context.AppUser.SingleAsync(u => u.Id == 1);
+            joe.ScrobbleProviders = new()
+            {
+                [ScrobbleProvider.AniList] = new AppUserScrobbleProvider { Provider = ScrobbleProvider.AniList, UserName = "amelia" }
+            };
+            await context.SaveChangesAsync();
+        }
+
+        var result = await CreateService().ScrubAsync(_snapshotPath);
+
+        await using var after = OpenSnapshot();
+        var amelia = await after.AppUser.SingleAsync(u => u.Id == 2);
+        Assert.Equal("user-2", amelia.UserName);
+        Assert.Equal("USER-2", amelia.NormalizedUserName);
+        Assert.Equal("user-2", result.Usernames["amelia"]);
+    }
+
+    [Fact]
     public async Task NullAndEmptyStayAsTheyAre()
     {
         await SeedSnapshot();

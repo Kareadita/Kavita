@@ -28,7 +28,7 @@ public enum ExportScrubKind
     /// </summary>
     Username = 6,
     /// <summary>
-    /// Text a user wrote. Words become junk of the same length, HTML tags are kept
+    /// Text a user wrote. Words and HTML attribute values become junk of the same length, tag and attribute names are kept
     /// </summary>
     FreeText = 7,
     /// <summary>

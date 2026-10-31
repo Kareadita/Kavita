@@ -138,7 +138,26 @@ public static class ExportScrubCatalog
         var jsonKinds = entries
             .Where(e => e.Area == Area.JsonField && e.Kind != null)
             .ToDictionary(e => e.Name, e => e.Kind!.Value);
+        EnsureKindsFit(entries);
+
         return new Plan(entries, tables, settings, jsonKinds);
+    }
+
+    /// <summary>
+    /// Throws on a kind marked where the scrub never applies it: JSON fields and settings get no text pass, and a single value can't be
+    /// parsed as JSON or dropped like a table
+    /// </summary>
+    internal static void EnsureKindsFit(IEnumerable<Entry> entries)
+    {
+        var misplaced = entries
+            .Where(e => e.Kind is { } kind
+                        && (e.Area == Area.JsonField && kind is ExportScrubKind.TextScrub or ExportScrubKind.Json or ExportScrubKind.DropTable
+                            || e.Area == Area.ServerSetting && kind is ExportScrubKind.TextScrub or ExportScrubKind.DropTable))
+            .Select(e => $"{e.Name} ({e.Kind})")
+            .ToList();
+        if (misplaced.Count == 0) return;
+
+        throw new InvalidOperationException($"Marked with a kind the debug export can't apply there: {string.Join(", ", misplaced)}");
     }
 
     /// <summary>

@@ -19,6 +19,8 @@ public class ExportJunkTests
     [InlineData(ExportScrubKind.Host, "http://192.168.1.5:5000/api", "http://192.0.2.1:5000/api")]
     [InlineData(ExportScrubKind.Host, "http://localhost:5000", "http://localhost:5000")]
     [InlineData(ExportScrubKind.FreeText, "<p>Great &amp; <b>twist</b> in 2</p>", "<p>xxxxx &amp; <b>xxxxx</b> xx 0</p>")]
+    [InlineData(ExportScrubKind.FreeText, "<a href=\"https://wiki.joe.home/notes?id=7&amp;v=2\" class='hl'>notes</a>",
+        "<a href=\"xxxxx://xxxx.xxx.xxxx/xxxxx?xx=0&amp;x=0\" class='xx'>xxxxx</a>")]
     public void ReplacesByKind(ExportScrubKind kind, string original, string expected)
     {
         Assert.Equal(expected, new ExportJunk().Replace(kind, original));

@@ -40,7 +40,9 @@ public class ExportDatabaseScrubService(
 {
     private const int BatchSize = 1_000;
     private const string AdminUserName = "kavita-debug";
+#pragma warning disable S2068
     private const string PasswordCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+#pragma warning restore S2068
     private const int PasswordLength = 24;
 
     /// <inheritdoc />
@@ -56,6 +58,8 @@ public class ExportDatabaseScrubService(
         await context.Database.UseTransactionAsync(transaction, ct);
 
         var run = new ScrubRun(ExportScrubCatalog.Build(context.Model), new ExportJunk(), connection, transaction);
+        await run.ClaimAccountUsernames(context.Model, ct);
+
         foreach (var table in run.Plan.Tables)
         {
             var changed = await run.ScrubTable(table, ct);
@@ -127,6 +131,27 @@ public class ExportDatabaseScrubService(
         public ExportScrubCatalog.Plan Plan => plan;
         public ExportJunk Junk => junk;
         public IReadOnlyDictionary<string, string> Usernames => _usernames;
+
+        /// <summary>
+        /// Maps every account's name to its <c>user-&lt;Id&gt;</c> before any table is scrubbed. Otherwise the first column to
+        /// meet a name claims it: an AniList handle <c>amelia</c> on user 1 would make account <c>amelia</c> <c>user-1</c> too
+        /// </summary>
+        public async Task ClaimAccountUsernames(IModel model, CancellationToken ct)
+        {
+            var entityType = model.FindEntityType(typeof(AppUser))!;
+            var id = Quote(entityType.FindPrimaryKey()!.Properties[0].GetColumnName());
+            var userName = Quote(entityType.FindProperty(nameof(AppUser.UserName))!.GetColumnName());
+            await using var select = Command($"SELECT {id}, {userName} FROM {Quote(entityType.GetTableName()!)}");
+
+            await using var reader = await select.ExecuteReaderAsync(ct);
+            while (await reader.ReadAsync(ct))
+            {
+                if (reader.IsDBNull(1)) continue;
+
+                var user = $"user-{reader.GetInt64(0)}";
+                Replace(ExportScrubKind.Username, reader.GetString(1), new RowOwner(user, user));
+            }
+        }
 
         /// <summary>
         /// Deletes every row of a dropped table. Otherwise, reads <see cref="BatchSize"/> rows at a time in rowid order

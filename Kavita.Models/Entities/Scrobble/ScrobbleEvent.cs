@@ -84,6 +84,7 @@ public class ScrobbleEvent : IEntityDate
     /// <summary>
     /// The error details
     /// </summary>
+    [ExportScrub(ExportScrubKind.TextScrub)]
     public string? ErrorDetails { get; set; }
     /// <summary>
     /// The date this was processed
