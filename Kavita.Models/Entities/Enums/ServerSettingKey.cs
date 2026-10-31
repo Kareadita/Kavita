@@ -198,5 +198,15 @@ public enum ServerSettingKey
     /// When the CBL Sync task should run
     /// </summary>
     [Description("TaskCblSync")]
-    TaskCblSync = 43
+    TaskCblSync = 43,
+    /// <summary>
+    /// Path to the Kepubify executable. If not custom, synced on startup with your OS
+    /// </summary>
+    [Description("KepubifyPath")]
+    KepubifyPath = 44,
+    /// <summary>
+    /// Is KoboSync enabled on this server
+    /// </summary>
+    [Description("EnableKobo")]
+    EnableKobo = 45,
 }

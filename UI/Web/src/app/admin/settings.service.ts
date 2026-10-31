@@ -95,6 +95,14 @@ export class SettingsService {
     return httpResource<boolean>(() => this.baseUrl + 'settings/opds-enabled').asReadonly();
   }
 
+  getKoboEnabledResource() {
+    return httpResource<boolean>(() => this.baseUrl + 'settings/kobo-enabled').asReadonly();
+  }
+
+  getKepubifySupportedRsc() {
+    return httpResource<boolean>(() => this.baseUrl + 'settings/kepubify-supported');
+  }
+
   clearExternalIds() {
     return this.http.post(this.baseUrl + 'settings/reset-external-ids', {})
   }

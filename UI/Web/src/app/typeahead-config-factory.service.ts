@@ -15,6 +15,7 @@ import {SearchService} from "./_services/search.service";
 import {Tag} from "./_models/tag";
 import {Genre} from "./_models/metadata/genre";
 import {ReadingListTag} from "./_models/reading-list/reading-list-tag";
+import {UserCollection} from "./_models/collection-tag";
 
 /**
  * Partial configuration for overrides. All properties optional.
@@ -59,6 +60,10 @@ export interface TypeaheadFactorySearchResultParameters extends TypeaheadFactory
   excludeSeriesId?: number;
 }
 
+export interface TypeaheadFactoryCollectionParameters extends TypeaheadFactoryParameters<UserCollection> {
+  collections: UserCollection[];
+}
+
 export type TypeaheadFactoryTagParameters = TypeaheadFactoryParameters<Tag>;
 
 export type TypeaheadFactoryReadingListTagParameters = TypeaheadFactoryParameters<ReadingListTag>;
@@ -98,6 +103,32 @@ export class TypeaheadConfigFactoryService {
     settings.titleFn = (l) => l.name;
     settings.fetchFn = (filter) => of(settings.compareFn(libraries, filter));
     settings.selectionCompareFn = (a: Library, b: Library) => {
+      return a.id === b.id;
+    }
+
+    if (savedData !== undefined) {
+      settings.savedData = savedData;
+    }
+
+    return this.applyOverrides(settings, overrides);
+  }
+
+  forCollections(params: TypeaheadFactoryCollectionParameters) {
+    const {collections, savedData, overrides} = params;
+
+    const settings = new TypeaheadConfig<UserCollection>();
+    settings.multiple = true;
+    settings.unique = true;
+    settings.minCharacters = 0;
+    settings.addIfNonExisting = false;
+    settings.compareFn = (libs, filter) => libs.filter(l => l.title.toLowerCase().includes(filter.toLowerCase()));
+    settings.compareFnForAdd = (options: UserCollection[], filter: string) => {
+      return options.filter(l => this.utilityService.filterMatches(l.title, filter));
+    }
+    settings.trackByIdentityFn = (idx, l) => `${l.id}`;
+    settings.titleFn = (l) => l.title;
+    settings.fetchFn = (filter) => of(settings.compareFn(collections, filter));
+    settings.selectionCompareFn = (a: UserCollection, b: UserCollection) => {
       return a.id === b.id;
     }
 

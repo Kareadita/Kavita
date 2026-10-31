@@ -227,9 +227,24 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
 
             // Don't create an empty progress record if there isn't any progress. This prevents Last Read date from being updated when opening a chapter
             if (userProgress == null && progressDto.PageNum == 0) return true;
-            if (oldProgress == progressDto.PageNum && userProgress?.BookScrollId == progressDto.BookScrollId) return true;
 
-            logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum}", progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum);
+            // If a kobo span is present, always process updates
+            if (oldProgress == progressDto.PageNum && userProgress?.BookScrollId == progressDto.BookScrollId)
+            {
+                return true;
+            }
+
+            // Remove KoboSpan on chapter completion to reduce amount of needed KoboSpan Syncs
+            // We will only start syncing them again if the book is read on a kobo afterwards
+            if (progressDto.PageNum > totalPages)
+            {
+                progressDto.KoboSpan = null;
+            }
+
+            var shouldSyncKoboSpan = !string.IsNullOrEmpty(userProgress?.KoboSpan);
+
+            logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum} - {BookScrollId} - {Kobo}",
+                progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum, progressDto.BookScrollId?.Sanitize(), progressDto.KoboSpan?.Sanitize());
             if (userProgress == null)
             {
                 userProgress = new AppUserProgress
@@ -240,6 +255,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                     ChapterId = progressDto.ChapterId,
                     LibraryId = progressDto.LibraryId,
                     BookScrollId = progressDto.BookScrollId,
+                    KoboSpan = progressDto.KoboSpan,
                     AppUserId = userId,
                 };
 
@@ -252,6 +268,8 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                 userProgress.VolumeId = progressDto.VolumeId;
                 userProgress.LibraryId = progressDto.LibraryId;
                 userProgress.BookScrollId = progressDto.BookScrollId;
+                userProgress.KoboSpan = progressDto.KoboSpan;
+
                 unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
@@ -261,6 +279,16 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                 {
                     BackgroundJob.Enqueue(() => readingSessionService.UpdateProgress(userId, progressDto,
                         clientInfoAccessor.Current, clientInfoAccessor.CurrentDeviceId));
+                }
+
+                if (shouldSyncKoboSpan && !TaskScheduler.HasAlreadyEnqueuedTask<IKoboSyncService>(
+                        s => s.SyncXPathToKoboSpan(userProgress.Id, CancellationToken.None)))
+                {
+                    logger.LogTrace("Scheduling KoboSpan sync for {Id} - {ChapterId} - {UserId} in 5m",
+                        userProgress.Id, progressDto.ChapterId, userId);
+                    BackgroundJob.Schedule<IKoboSyncService>(
+                        s => s.SyncXPathToKoboSpan(userProgress.Id, CancellationToken.None)
+                        ,TimeSpan.FromMinutes(5));
                 }
 
                 await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
@@ -633,6 +661,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     public async Task<HourEstimateRangeDto> GetEstimateFromPageForChapter(int userId, int seriesId, int chapterId,
         int page, CancellationToken ct = default)
     {
+        // TODO: Pass down object instead of loading from DB
         var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId, ct);
         var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId, ct);
         if (series == null || chapter == null)

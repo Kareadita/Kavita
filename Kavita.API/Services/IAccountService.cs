@@ -49,6 +49,4 @@ public interface IAccountService
     /// <param name="ct"></param>
     /// <returns></returns>
     Task SeedUser(AppUser user, CancellationToken ct = default);
-    void AddDefaultStreamsToUser(AppUser user, CancellationToken ct = default);
-    Task AddDefaultReadingProfileToUser(AppUser user, CancellationToken ct = default);
 }

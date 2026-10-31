@@ -250,7 +250,8 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var filesystem = CreateFileSystem();
         var filesystemFile = new MockFileData("")
         {
-            CreationTime = DateTimeOffset.Now.Subtract(TimeSpan.FromDays(31))
+            // 32 so TimeZones never annoy us
+            CreationTime = DateTimeOffset.Now.Subtract(TimeSpan.FromDays(32))
         };
         filesystem.AddFile($"{BackupDirectory}kavita_backup_11_29_2021_12_00_13 AM.zip", filesystemFile);
         filesystem.AddFile($"{BackupDirectory}kavita_backup_12_3_2021_9_27_58 AM.zip", filesystemFile);

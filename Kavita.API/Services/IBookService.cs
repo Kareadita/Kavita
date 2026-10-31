@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -54,9 +55,11 @@ public interface IBookService
     /// <returns>Full epub HTML Page, scoped to Kavita's reader</returns>
     /// <exception cref="KavitaException">All exceptions throw this</exception>
     Task<string> GetBookPage(int userId, int page, int chapterId, string cachedEpubPath, string libraryFilePath, string baseUrl, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations, CancellationToken ct = default);
-    Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book, CancellationToken ct = default);
+    Task<int?> GetPageForFile(string filePath, string epubFile);
+    Task<string?> GetFileForPage(string filePath, int page);
     Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath, CancellationToken ct = default);
     Task<int> GetWordCountBetweenXPaths(string bookFilePath, string startXpath, int startPage, string endXpath, int endPage, CancellationToken ct = default);
     Task<string> CopyImageToTempFromBook(int chapterId, BookmarkDto bookmarkDto, string cachedBookPath, CancellationToken ct = default);
     Task<BookResourceResultDto> GetResourceAsync(string bookFilePath, string requestedKey, CancellationToken ct = default);
+    Task<(HtmlDocument?, int)> GetDocumentAsync(string filePath, string fileRef, int? filePos);
 }

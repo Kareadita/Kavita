@@ -29,6 +29,14 @@ BuildServer:
     - { From: "LICENSE", To: "LICENSE.txt" }
     - { From: "Kavita.Server/config/appsettings.json", To: "config/appsettings-init.json"}
   DeletePaths: ["BuildHost-net472", "BuildHost-netcore", "bin", "config/cache-long"]
+  IncludeExternalFiles:
+    "linux-x64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-64bit", To: "kepubify" }]
+    "linux-arm64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm64", To: "kepubify" }]
+    "linux-arm": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm", To: "kepubify" }]
+    "win-x64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-windows-64bit.exe", To: "kepubify.exe"}]
+    "win-x84": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-windows-324bit.exe", To: "kepubify.exe"}]
+    "osx-arm64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-darwin-arm64", To: "kepubify"}]
+    "osx-x64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-darwin-64bit", To: "kepubify"}]
 
 Docker:
   Disabled: true

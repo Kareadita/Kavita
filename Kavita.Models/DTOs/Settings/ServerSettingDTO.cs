@@ -103,6 +103,14 @@ public sealed record ServerSettingDto
     /// OIDC Configuration
     /// </summary>
     public OidcConfigDto OidcConfig { get; set; }
+    /// <summary>
+    /// Path to kepubify
+    /// </summary>
+    public string KepubifyPath { get; set; }
+    /// <summary>
+    /// Is KoboSync enabled on this server
+    /// </summary>
+    public bool EnableKobo { get; set; }
 
     /// <summary>
     /// The Date Kavita was first installed

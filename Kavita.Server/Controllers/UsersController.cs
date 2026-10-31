@@ -164,6 +164,10 @@ public class UsersController(
 
         existingPreferences.OpdsPreferences = preferencesDto.OpdsPreferences;
 
+        existingPreferences.KoboSyncPreferences = preferencesDto.KoboSyncPreferences;
+        existingPreferences.KoboSyncPreferences.SyncLibraries = existingPreferences.KoboSyncPreferences.SyncLibraries
+            .Where(allLibs.Contains).ToList();
+
         if (preferencesDto.Theme != null && existingPreferences.Theme.Id != preferencesDto.Theme?.Id)
         {
             var theme = await unitOfWork.SiteThemeRepository.GetTheme(preferencesDto.Theme!.Id);

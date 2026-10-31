@@ -804,9 +804,10 @@ public class AccountController(UserManager<AppUser> userManager,
                 roles.Remove(PolicyConstants.ReadOnlyRole);
             }
 
-            foreach (var role in roles)
+            foreach (var role in roles.Distinct())
             {
                 if (!PolicyConstants.ValidRoles.Contains(role)) continue;
+
                 var roleResult = await userManager.AddToRoleAsync(user, role);
                 if (!roleResult.Succeeded)
                     return BadRequest(roleResult.Errors);
@@ -1352,6 +1353,8 @@ public class AccountController(UserManager<AppUser> userManager,
 
         unitOfWork.UserRepository.Delete(authKey);
         await unitOfWork.CommitAsync(ct);
+
+        await authKeyService.InvalidateAsync(authKey.Key, ct);
 
         await eventHub.SendMessageToAsync(MessageFactory.AuthKeyDeleted, MessageFactory.AuthKeyDeletedEvent(authKeyId), UserId, ct);
 

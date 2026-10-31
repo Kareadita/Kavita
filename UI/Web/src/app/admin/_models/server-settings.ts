@@ -15,8 +15,10 @@ export interface ServerSettings {
   ipAddresses: string;
   allowStatCollection: boolean;
   enableOpds: boolean;
+  enableKobo: boolean;
   baseUrl: string;
   bookmarksDirectory: string;
+  kepubifyPath: string;
   emailServiceUrl: string;
   encodeMediaAs: EncodeFormat;
   totalBackups: number;

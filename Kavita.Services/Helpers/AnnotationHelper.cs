@@ -4,10 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
+using Kavita.Common.Extensions;
+using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Reader;
+using Kavita.Models.Entities;
+using Kavita.Models.Entities.User;
+using Kavita.Models.Extensions;
 using Serilog;
 
 namespace Kavita.Services.Helpers;
+
+public readonly record struct TextAnchor(HtmlNode Element, string Path, int Offset);
 
 public static partial class AnnotationHelper
 {
@@ -21,7 +28,7 @@ public static partial class AnnotationHelper
     /// If we don't do this; <p><em>foo</em></p> will have em selected as start and <see cref="GetElementsInRange"/>
     /// fails to select the correct elements
     /// </summary>
-    private static readonly HashSet<string> InlineTags = new(StringComparer.OrdinalIgnoreCase)
+    public static readonly HashSet<string> InlineTags = new(StringComparer.OrdinalIgnoreCase)
     {
         "em", "strong", "i", "b", "span", "a", "cite", "sup", "sub", "small", "mark", "code", "kbd", "samp",
         "var", "q", "abbr", "dfn", "u", "s", "del", "ins", "strike", "font", "big", "tt", "nobr", "ruby",
@@ -86,8 +93,10 @@ public static partial class AnnotationHelper
 
                 foreach (var item in sortedAnnotations)
                 {
+                    var normalizedSelectedText = NormalizeWhitespace(item.Annotation.SelectedText);
+
                     var decodedStart = MapNormalizedPositionToText(decodedText, item.StartPos);
-                    var decodedEnd = MapNormalizedPositionToText(decodedText, item.StartPos + item.Annotation.SelectedText.Length);
+                    var decodedEnd = MapNormalizedPositionToText(decodedText, item.StartPos + normalizedSelectedText.Length);
 
                     WrapTextRange(elem, rawStarts[decodedStart], rawStarts[decodedEnd], item.Annotation.Id, doc);
                 }
@@ -95,8 +104,6 @@ public static partial class AnnotationHelper
             catch (Exception ex)
             {
                 Log.Logger.Debug(ex, "Failed to inject annotation into element");
-                /* Swallow */
-                return;
             }
         }
     }
@@ -370,7 +377,7 @@ public static partial class AnnotationHelper
         return pos;
     }
 
-    private static HtmlNode? FindElementByXPath(HtmlDocument doc, string xpath)
+    public static HtmlNode? FindElementByXPath(HtmlDocument doc, string xpath)
     {
         var idMatch = IdXPathRegex().Match(xpath);
         if (!idMatch.Success) return doc.DocumentNode.SelectSingleNode(xpath.ToLowerInvariant());

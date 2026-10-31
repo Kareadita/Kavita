@@ -279,6 +279,85 @@
         </div>
       </ng-container>
 
+      <div class="setting-section-break"></div>
+      <h4>{{t('kobo-sync-settings-title')}}</h4>
+      @if (!koboEnabled()) {
+        <div class="alert alert-warning" role="alert">{{t('kobo-sync-disabled-alert')}}</div>
+      }
+
+      <ng-container>
+        <div class="row g-0 mt-4">
+          <app-setting-item [title]="t('sync-item-limit-label')" [subtitle]="t('sync-item-limit-tooltip')" [canEdit]="!isReadOnly() && koboEnabled()" [control]="formGroup.koboSyncPreferences.syncItemLimit" labelId="kobo-sync-item-limit">
+            <ng-template #view>
+              <span> {{formGroup.koboSyncPreferences.syncItemLimit().value()}} </span>
+            </ng-template>
+            <ng-template #edit>
+              <input type="number" id="kobo-sync-item-limit"
+                     [formField]="formGroup.koboSyncPreferences.syncItemLimit" class="form-control"
+                     [appFormField]="formGroup.koboSyncPreferences.syncItemLimit">
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+        <div class="row g-0 mt-4">
+          <app-setting-switch [title]="t('forward-to-kobo-store-label')" [subtitle]="t('forward-to-kobo-store-tooltip')" [control]="formGroup.koboSyncPreferences.forwardToKoboStore">
+            <ng-template>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch"
+                       [formField]="formGroup.koboSyncPreferences.forwardToKoboStore" class="form-check-input">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
+
+        <div class="row g-0 mt-4">
+          <app-setting-switch [title]="t('sync-all-libraries-label')" [subtitle]="t('sync-all-libraries-tooltip')" [control]="formGroup.koboSyncPreferences.allLibraries">
+            <ng-template>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch"
+                       [formField]="formGroup.koboSyncPreferences.allLibraries" class="form-check-input">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
+
+        <div class="row g-0 mt-4">
+          <app-setting-item [title]="t('sync-libraries-label')" [subtitle]="t('sync-libraries-tooltip')" [showEdit]="false" [canEdit]="false">
+            <ng-template #view>
+              @let koboLibsConfig = koboLibrariesTypeaheadSettings();
+              @if (koboLibsConfig) {
+                <app-typeahead [config]="koboLibsConfig" (selectedData)="syncKoboSyncLibrariesWithTypeahead($event)" [disabled]="isReadOnly() || formGroup.koboSyncPreferences.allLibraries().value() || !koboEnabled()">
+                  <ng-template #optionItem let-lib>
+                    {{lib.name}}
+                  </ng-template>
+                  <ng-template #badgeItem let-lib>
+                    {{lib.name}}
+                  </ng-template>
+                </app-typeahead>
+              }
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+        <div class="row g-0 mt-4">
+          <app-setting-item [title]="t('sync-collection-label')" [subtitle]="t('sync-collection-tooltip')" [showEdit]="false" [canEdit]="false">
+            <ng-template #view>
+              @let koboCollectionConfig = koboCollectionTypeaheadSettings();
+              @if (koboCollectionConfig) {
+                <app-typeahead [config]="koboCollectionConfig" (selectedData)="syncKoboSyncCollectionWithTypeahead($event)" [disabled]="isReadOnly() || !koboEnabled()">
+                  <ng-template #optionItem let-collection>
+                    {{collection.title}}
+                  </ng-template>
+                  <ng-template #badgeItem let-collection>
+                    {{collection.title}}
+                  </ng-template>
+                </app-typeahead>
+              }
+            </ng-template>
+          </app-setting-item>
+        </div>
+      </ng-container>
+
     </form>
   }
 

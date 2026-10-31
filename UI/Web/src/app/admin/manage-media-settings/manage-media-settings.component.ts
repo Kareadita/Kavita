@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ToastrService} from '@openng/ngx-toastr';
-import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap, timer} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {
@@ -20,10 +20,12 @@ import {ModalService} from "../../_services/modal.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 import {form, FormField, readonly, required} from "@angular/forms/signals";
 import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 interface FormModel {
   encodeMediaAs: EncodeFormat;
   bookmarksDirectory: string;
+  kepubifyPath: string;
   coverImageSize: CoverImageSize;
   pdfRenderResolution: PdfRenderResolution;
 }
@@ -34,7 +36,7 @@ interface FormModel {
   templateUrl: './manage-media-settings.component.html',
   styleUrls: ['./manage-media-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe, FormFieldDirective, FormField, SettingSelectComponent]
+  imports: [TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe, FormFieldDirective, FormField, SettingSelectComponent, NgbTooltip]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 
@@ -49,10 +51,15 @@ export class ManageMediaSettingsComponent implements OnInit {
 
   private serverSettings!: ServerSettings;
   protected readonly isLoaded = signal(false);
+  private readonly kepubifySupportedRsc = this.settingsService.getKepubifySupportedRsc();
+  protected readonly kepubifySupported = computed(() => {
+    return this.kepubifySupportedRsc.hasValue() && this.kepubifySupportedRsc.value();
+  });
 
   private readonly formModel = signal<FormModel>({
     encodeMediaAs: EncodeFormat.PNG,
     bookmarksDirectory: '',
+    kepubifyPath: '',
     coverImageSize: CoverImageSize.Default,
     pdfRenderResolution: PdfRenderResolution.Default
   });
@@ -94,6 +101,10 @@ export class ManageMediaSettingsComponent implements OnInit {
 
         this.resetForm();
       }),
+      /// Kepubify test command has a 3s timeout, so this will always be after it has been checked
+      switchMap(() => timer(3_100).pipe(
+        tap(() => this.kepubifySupportedRsc.reload())
+      )),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
   }
@@ -111,6 +122,7 @@ export class ManageMediaSettingsComponent implements OnInit {
     this.formModel.set({
       encodeMediaAs: settings.encodeMediaAs,
       bookmarksDirectory: settings.bookmarksDirectory,
+      kepubifyPath: settings.kepubifyPath,
       coverImageSize: (settings.coverImageSize || CoverImageSize.Default),
       pdfRenderResolution: (settings.pdfRenderResolution || PdfRenderResolution.Default),
     });
@@ -122,6 +134,7 @@ export class ManageMediaSettingsComponent implements OnInit {
     const modelSettings = Object.assign({}, this.serverSettings);
     modelSettings.encodeMediaAs = model.encodeMediaAs;
     modelSettings.bookmarksDirectory = model.bookmarksDirectory;
+    modelSettings.kepubifyPath = model.kepubifyPath;
     modelSettings.coverImageSize = model.coverImageSize;
     modelSettings.pdfRenderResolution = model.pdfRenderResolution;
 

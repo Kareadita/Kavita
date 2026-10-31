@@ -289,6 +289,19 @@
         "include-continue-from-label": "Include Continue From Entry",
         "include-continue-from-tooltip": "Insert a \"Continue From X\" entry in OPDS fields to avoid finding your last reading point (Emulates Kavita's Continue button)",
 
+        "kobo-sync-settings-title": "Kobo Sync",
+        "kobo-sync-disabled-alert": "Kobo Sync has been disabled by your administrator",
+        "sync-item-limit-label": "Sync Item Limit",
+        "sync-item-limit-tooltip": "Maximum number of items sent to the device per sync request. Between 25 and 100.",
+        "forward-to-kobo-store-label": "Forward to Kobo Store",
+        "forward-to-kobo-store-tooltip": "Forward requests for books outside your Kavita library to the official Kobo store. Disable to stop the device from talking to Kobo's servers.",
+        "sync-all-libraries-label": "All Libraries",
+        "sync-all-libraries-tooltip": "Sync books from every library. Disable to restrict sync to the libraries selected below.",
+        "sync-libraries-label": "Sync Libraries",
+        "sync-libraries-tooltip": "Only books from series in these libraries are synced. No selection is treated as all libraries.",
+        "sync-collection-label": "Sync Collection",
+        "sync-collection-tooltip": "When set, only books from series in this collection are synced. Takes precedence over the library selection.",
+
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Mihon users.",
         "clients-opds-description": "All 3rd Party clients will either use the OPDS Auth key or the Connection Url below. These are like passwords, keep it private.",
         "clients-opds-url-label": "OPDS URL",
@@ -2463,7 +2476,12 @@
         "pdf-render-resolution-label": "PDF Render Resolution",
         "pdf-render-resolution-tooltip": "Resolution at which PDFs will be rendered. Higher resolutions will take longer to render and consume more memory. If you experience issues with PDF rendering, try lowering this.",
         "cover-image-size-label": "Cover Image Size",
-        "cover-image-size-tooltip": "How large should cover images generate as. Note: Anything larger than the default will incur longer page load times."
+        "cover-image-size-tooltip": "How large should cover images generate as. Note: Anything larger than the default will incur longer page load times.",
+
+        "kepubify-path-label": "Kepubify Path",
+        "kepubify-path-tooltip": "Path to the kepubify executable",
+        "kepubify-not-supported": "Kavita was unable to use the kepubify executable. Double check your path",
+        "kepubify-supported": "Kavita can use the kepubify executable. Epubs will be converted"
     },
 
     "pdf-render-resolution": {
@@ -2524,6 +2542,8 @@
         "opds-label": "OPDS",
         "opds-tooltip": "OPDS support will allow all users to use OPDS to read and download content from the server.",
         "enable-opds": "Enable OPDS",
+        "kobo-label": "Enable Kobo Sync",
+        "kobo-tooltip": "Enable Kobo Sync support for all users on the server",
         "folder-watching-label": "Folder Watching",
         "folder-watching-tooltip": "Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans. A folder is scanned 30 seconds after its last change. Each library chooses how it watches on its Folder tab.",
         "enable-folder-watching": "Enable Folder Watching",

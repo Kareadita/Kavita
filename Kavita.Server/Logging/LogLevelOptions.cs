@@ -51,6 +51,7 @@ public static class LogLevelOptions
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Error)
             .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Error)
             .MinimumLevel.Override("Kavita.Server.Middleware.AuthKeyAuthenticationHandler", LogEventLevel.Error)
+            .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Error)
             .Enrich.FromLogContext()
             .Enrich.WithThreadId()
             .Enrich.With(new ApiKeyEnricher())

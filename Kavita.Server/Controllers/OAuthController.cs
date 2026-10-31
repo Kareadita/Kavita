@@ -9,6 +9,8 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs.KavitaPlus.OAuth;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Server.Attributes;
+using Kavita.Server.Extensions;
+using Kavita.Services.Extensions;
 using Kavita.Services.Plus;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -49,7 +51,7 @@ public class OAuthController(
         var apiKey = user.GetOpdsAuthKey();
 
         var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
-        var instanceUrl = GetInstanceUrl(HttpContext.Request, serverSettings);
+        var instanceUrl = HttpContext.Request.GetInstanceUrl(serverSettings);
 
         var jwt = await kavitaPlusApiService.StartOAuthFlow(upstream, instanceUrl, apiKey, HttpContext.RequestAborted);
         if (!jwt.IsSuccess)
@@ -103,17 +105,6 @@ public class OAuthController(
         }
 
         return Redirect($"{Configuration.BaseUrl}settings?loading=true#scrobble-settings");
-    }
-
-    private static string GetInstanceUrl(HttpRequest request, ServerSettingDto serverSettings)
-    {
-        var origin = string.IsNullOrEmpty(serverSettings.HostName)
-            ?  request.Scheme + "://" + request.Host.Value
-            : serverSettings.HostName.TrimEnd('/');
-
-        origin += string.IsNullOrEmpty(serverSettings.BaseUrl) ? string.Empty : serverSettings.BaseUrl.TrimEnd('/');
-
-        return origin + "/";
     }
 
 }
