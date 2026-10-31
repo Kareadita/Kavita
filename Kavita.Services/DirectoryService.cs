@@ -760,6 +760,10 @@ public class DirectoryService : IDirectoryService
             stampTicks += Stopwatch.GetTimestamp() - stampStart;
         }
 
+        // Linux file systems list entries in no fixed order and the scanner groups files in the order it meets them
+        subfolders.Sort(CompareNames);
+        files.Sort((a, b) => CompareNames(a.Path, b.Path));
+
         var elapsed = Stopwatch.GetTimestamp() - start;
         timings.StampTicks += stampTicks;
         timings.EntryTicks += elapsed - stampTicks;
@@ -774,6 +778,12 @@ public class DirectoryService : IDirectoryService
         }
 
         return new FolderListing(subfolders, files);
+    }
+
+    private static int CompareNames(string a, string b)
+    {
+        var ignoringCase = StringComparer.OrdinalIgnoreCase.Compare(a, b);
+        return ignoringCase != 0 ? ignoringCase : StringComparer.Ordinal.Compare(a, b);
     }
 
     private void LogListing(FolderTree tree, long elapsedMs, ListingTimings timings)
