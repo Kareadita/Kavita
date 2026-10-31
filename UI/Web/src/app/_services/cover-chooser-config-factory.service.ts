@@ -126,8 +126,9 @@ export class CoverChooserConfigFactoryService {
         return items.map(i => {
           return {
             url: this.imageService.getChapterCoverImage(i.chapterId),
-            title: i.title
-          }
+            title: i.title,
+            chapterId: i.chapterId,
+          } as CoverImageOption
         })
       }))
     };
