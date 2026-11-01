@@ -194,6 +194,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly doubleRenderer = viewChild(DoubleRendererComponent);
   readonly doubleReverseRenderer = viewChild(DoubleReverseRendererComponent);
   readonly doubleNoCoverRenderer = viewChild(DoubleNoCoverRendererComponent);
+  readonly infiniteScroller = viewChild(InfiniteScrollerComponent);
 
   readonly imageElement = computed(() =>
     this.singleRenderer()?.imageElement()
@@ -1256,7 +1257,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   exitReader() {
     if (this.readerService.closeRateReviewModal()) return;
 
-    const onLastPage = this.pageNum() === this.maxPages() - 1;
+    const onLastPage = this.isReaderModeWebtoon()
+      ? !!this.infiniteScroller()?.isLastPageInView()
+      : this.pageNum() === this.maxPages() - 1;
     if (this.bookmarkMode() || !onLastPage || !this.chapterInfo()) {
       this.closeReader();
       return;

@@ -483,6 +483,20 @@ export class InfiniteScrollerComponent implements OnInit {
           );
   }
 
+  // pageNum can't be used: a short last page never becomes the image closest to the top
+  isLastPageInView() {
+    const lastPage = this.totalPages() - 1;
+    if (this.pendingPages().has(lastPage)) return false;
+
+    const img = this.document.querySelector('img#page-' + lastPage);
+    if (!img) return false;
+
+    const rect = img.getBoundingClientRect();
+    const [innerHeight] = this.getInnerDimensions();
+    // 1px covers fractional layout heights
+    return rect.bottom > 0 && rect.bottom <= innerHeight + 1;
+  }
+
   /**
    * Find the closest visible image within the viewport.
    * @param images An array of HTML Image Elements
