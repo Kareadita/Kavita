@@ -18,7 +18,7 @@ namespace Kavita.Database.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
             modelBuilder.Entity("AppUserCollectionSeries", b =>
                 {
@@ -2794,9 +2794,6 @@ namespace Kavita.Database.Migrations
                     b.Property<int>("HighlightCount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("KoboId")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
 
@@ -3243,7 +3240,7 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("KoboSyncPreferences")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue("{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"AllLibraries\":false,\"SyncLibraries\":[],\"SyncCollection\":0}");
+                        .HasDefaultValue("{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"AllLibraries\":false,\"SyncLibraries\":[],\"SyncCollection\":0,\"IsSyncingCollection\":false}");
 
                     b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");

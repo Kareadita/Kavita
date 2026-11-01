@@ -14,14 +14,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20261022101107_KoboSyncChanges")]
+    [Migration("20261101092313_KoboSyncChanges")]
     partial class KoboSyncChanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
             modelBuilder.Entity("AppUserCollectionSeries", b =>
                 {
@@ -551,9 +551,6 @@ namespace Kavita.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("LastScanned")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("LibraryId")
                         .HasColumnType("INTEGER");
 
@@ -789,8 +786,14 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
 
-                    b.Property<bool>("FolderWatching")
+                    b.Property<int>("FolderWatchMode")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("FolderWatchState")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{\"Mounts\":[],\"Downgrade\":null}");
 
                     b.Property<bool>("IncludeInDashboard")
                         .HasColumnType("INTEGER");
@@ -830,6 +833,12 @@ namespace Kavita.Database.Migrations
 
                     b.Property<bool>("RemovePrefixForSortName")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ScanInfo")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{\"Normal\":null,\"Forced\":null}");
 
                     b.Property<string>("SecondaryColor")
                         .HasColumnType("TEXT");
@@ -2788,9 +2797,6 @@ namespace Kavita.Database.Migrations
                     b.Property<int>("HighlightCount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("KoboId")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
 
@@ -3237,7 +3243,7 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("KoboSyncPreferences")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue("{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"AllLibraries\":false,\"SyncLibraries\":[],\"SyncCollection\":0}");
+                        .HasDefaultValue("{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"AllLibraries\":false,\"SyncLibraries\":[],\"SyncCollection\":0,\"IsSyncingCollection\":false}");
 
                     b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");
