@@ -39,8 +39,8 @@ public class ReadingHistoryService(IDataContext context, ILogger<ReadingHistoryS
     private async Task<List<int>> GetUsersPendingAggregation(DateTime start, DateTime end, DateTime reportDate, CancellationToken ct = default)
     {
         var needAggregationUserIds = await context.AppUserReadingSession
-            .Where(s => s.StartTime >= start && s.StartTime <= end)
-            .Where(s => !s.IsActive && s.EndTime != null)
+            .Where(s => s.StartTimeUtc >= start && s.StartTimeUtc <= end)
+            .Where(s => !s.IsActive && s.EndTimeUtc != null)
             .Select(s => s.AppUserId)
             .Distinct()
             .ToListAsync(ct);
@@ -58,8 +58,8 @@ public class ReadingHistoryService(IDataContext context, ILogger<ReadingHistoryS
         var sessions = await context.AppUserReadingSession
             .Include(s => s.ActivityData)
             .Where(s => s.AppUserId == userId &&
-                        s.StartTime >= start && s.StartTime <= end &&
-                        !s.IsActive && s.EndTime != null)
+                        s.StartTimeUtc >= start && s.StartTimeUtc <= end &&
+                        !s.IsActive && s.EndTimeUtc != null)
             .ToListAsync(ct);
 
         if (sessions.Count == 0) return;
@@ -112,7 +112,7 @@ public class ReadingHistoryService(IDataContext context, ILogger<ReadingHistoryS
 
         foreach (var session in sessions)
         {
-            var duration = (int)(session.EndTime!.Value - session.StartTime).TotalMinutes;
+            var duration = (int)(session.EndTimeUtc!.Value - session.StartTimeUtc).TotalMinutes;
             totalMinutes += duration;
             longestSession = Math.Max(longestSession, duration);
 

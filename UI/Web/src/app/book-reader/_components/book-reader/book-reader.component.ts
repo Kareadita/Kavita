@@ -424,7 +424,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   /**
    * Disables the Left most button
    */
-  isPrevDisabled = computed(() => {
+  // Not computed: the inputs (scroll position, chapter id fields) are not signals, so a computed would never refresh
+  isPrevDisabled() {
     const readingDirection = this.readingDirection();
 
     if (readingDirection === ReadingDirection.LeftToRight) {
@@ -434,9 +435,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
     // Acting as a Next button
     return this.isNextPageDisabled();
-  });
+  }
 
-  isNextDisabled = computed(() => {
+  isNextDisabled() {
     const readingDirection = this.readingDirection();
 
     if (readingDirection === ReadingDirection.LeftToRight) {
@@ -445,7 +446,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     }
     // Acting as Previous button
     return this.isPrevPageDisabled();
-  });
+  }
 
   shouldShowMenu = computed(() => {
     const immersiveMode = this.immersiveMode();
@@ -1624,7 +1625,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       return;
     }
 
-    const pageSize = this.pageSize();
+    const pageSize = this.measuredPageSize();
+    if (pageSize <= 0) return;
     let [_, totalScroll] = this.getScrollOffsetAndTotalScroll();
 
     if (oldEmptyGap) totalScroll -= pageSize/2;
@@ -1832,7 +1834,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     if (!this.bookContentElemRef() || !this.readingSectionElemRef()) return [1, 1, 0];
 
     const [scrollOffset, totalScroll] = this.getScrollOffsetAndTotalScroll();
-    const pageSize = this.pageSize();
+    const pageSize = this.measuredPageSize();
 
     if (pageSize <= 0 || totalScroll <= 0) return [1, 1, pageSize];
 
@@ -1874,6 +1876,23 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       ? height
       : width;
   });
+
+  private measuredPageSize() {
+    if (this.layoutMode() === BookPageLayoutMode.Default) return this.pageSize();
+
+    const bookContent = this.bookContentElemRef()?.nativeElement;
+    if (!bookContent) return 0;
+
+    // Columns sit on the fractional box size; offsetWidth/clientWidth round it, which drifts a little more every page
+    const box = bookContent.getBoundingClientRect();
+    const style = getComputedStyle(bookContent);
+    const contentSize = this.writingStyle() === WritingStyle.Vertical
+      ? box.height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)
+      : box.width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    if (contentSize <= 0) return 0;
+
+    return contentSize + parseFloat(style.columnGap);
+  }
 
 
   getFirstVisibleElementXPath() {

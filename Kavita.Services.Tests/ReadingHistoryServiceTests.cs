@@ -81,40 +81,87 @@ public class ReadingHistoryServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         await dataContext.SaveChangesAsync();
 
-        // Create an active session dated for yesterday
-        var yesterday= DateTime.Now.Date.AddDays(-1);
-        var yesterdayUtc = yesterday.ToUniversalTime();
+        var yesterdayUtc = DateTime.SpecifyKind(DateTime.UtcNow.Date.AddDays(-1).AddHours(12), DateTimeKind.Utc);
+        await AddFinishedSession(dataContext, yesterdayUtc, yesterdayUtc.ToLocalTime());
+
+        await service.AggregateYesterdaysActivity();
+
+        var historyItems = await dataContext.AppUserReadingHistory.ToListAsync();
+        Assert.Single(historyItems);
+        Assert.Single(historyItems[0].Data.Activities);
+    }
+
+    [Fact]
+    public async Task CreatesForYesterdaySessions_OnServerAheadOfUtc()
+    {
+        var (_, dataContext, _) = await CreateDatabase();
+        var service = Setup(dataContext);
+
+        var lib = await dataContext.Library.Includes(LibraryIncludes.Series).FirstAsync();
+        lib.Series.Add(new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("1").WithChapter(new ChapterBuilder("1").WithPages(2).Build()).Build())
+            .Build());
+        await dataContext.AppUser.AddAsync(new AppUser() { UserName = "Test" });
+        await dataContext.SaveChangesAsync();
+
+        // UTC+14 (Pacific/Kiribati): noon yesterday in UTC is 2:00 AM today on the server's clock
+        var yesterdayUtc = DateTime.SpecifyKind(DateTime.UtcNow.Date.AddDays(-1).AddHours(12), DateTimeKind.Utc);
+        await AddFinishedSession(dataContext, yesterdayUtc, DateTime.SpecifyKind(yesterdayUtc.AddHours(14), DateTimeKind.Local));
+
+        await service.AggregateYesterdaysActivity();
+
+        var history = Assert.Single(await dataContext.AppUserReadingHistory.ToListAsync());
+        Assert.Equal(DateTime.UtcNow.Date.AddDays(-1), history.DateUtc);
+    }
+
+    [Fact]
+    public async Task SessionDuration_UsesUtcElapsed_AcrossDaylightSavingChange()
+    {
+        var (_, dataContext, _) = await CreateDatabase();
+        var service = Setup(dataContext);
+
+        var lib = await dataContext.Library.Includes(LibraryIncludes.Series).FirstAsync();
+        lib.Series.Add(new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("1").WithChapter(new ChapterBuilder("1").WithPages(2).Build()).Build())
+            .Build());
+        await dataContext.AppUser.AddAsync(new AppUser() { UserName = "Test" });
+        await dataContext.SaveChangesAsync();
+
+        // Spring forward: the local clock jumps from 1:30 AM to 3:30 AM during a 1 hour session
+        var startUtc = DateTime.SpecifyKind(DateTime.UtcNow.Date.AddDays(-1).AddHours(6).AddMinutes(30), DateTimeKind.Utc);
+        var startLocal = DateTime.SpecifyKind(startUtc.Date.AddHours(1).AddMinutes(30), DateTimeKind.Local);
+        await AddFinishedSession(dataContext, startUtc, startLocal, TimeSpan.FromHours(2));
+
+        await service.AggregateYesterdaysActivity();
+
+        var history = Assert.Single(await dataContext.AppUserReadingHistory.ToListAsync());
+        Assert.Equal(60, history.Data.TotalMinutesRead);
+        Assert.Equal(60, history.Data.LongestSessionMinutes);
+    }
+
+    private static async Task AddFinishedSession(DataContext dataContext, DateTime startUtc, DateTime startLocal,
+        TimeSpan? localElapsed = null)
+    {
         var activityData = new AppUserReadingSessionActivityData(new ProgressDto()
         {
             ChapterId = 1, VolumeId = 1, LibraryId = 1, PageNum = 1, SeriesId = 1
         }, 1, MangaFormat.Archive);
 
-        activityData.StartTime = yesterday;
-        activityData.StartTimeUtc = yesterdayUtc;
+        activityData.StartTime = startLocal;
+        activityData.StartTimeUtc = startUtc;
 
         await dataContext.AppUserReadingSession.AddAsync(new AppUserReadingSession()
         {
-            ActivityData =
-            [
-                activityData
-            ],
+            ActivityData = [activityData],
             AppUserId = 1,
-            StartTime = yesterday,
-            StartTimeUtc = yesterdayUtc,
-            EndTime = yesterday.AddHours(1),
-            EndTimeUtc = yesterdayUtc.AddHours(1),
+            StartTime = startLocal,
+            StartTimeUtc = startUtc,
+            EndTime = startLocal + (localElapsed ?? TimeSpan.FromHours(1)),
+            EndTimeUtc = startUtc.AddHours(1),
             IsActive = false,
         });
 
         await dataContext.SaveChangesAsync();
-
-        // Run the service
-        await service.AggregateYesterdaysActivity();
-
-        // Check that there is exactly one item
-        var historyItems = await dataContext.AppUserReadingHistory.ToListAsync();
-        Assert.Single(historyItems);
-        Assert.Single(historyItems[0].Data.Activities);
     }
 }
 
