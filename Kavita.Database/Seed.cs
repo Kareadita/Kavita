@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -157,7 +158,7 @@ public static class Seed
     public static async Task SeedSettings(IDataContext context, IDirectoryService directoryService)
     {
         await context.Database.EnsureCreatedAsync();
-        Defaults.DefaultSettings = [
+        ImmutableArray<ServerSetting> defaultSettings = [
             ..new List<ServerSetting>()
             {
                 new() {Key = ServerSettingKey.CacheDirectory, Value = directoryService.CacheDirectory},
@@ -212,8 +213,9 @@ public static class Seed
                 new() {Key = ServerSettingKey.StatsApiHits, Value = "0"},
             }.ToArray()
         ];
+        Defaults.DefaultSettings = defaultSettings;
 
-        foreach (var defaultSetting in Defaults.DefaultSettings)
+        foreach (var defaultSetting in defaultSettings)
         {
             var existing = await context.ServerSetting.FirstOrDefaultAsync(s => s.Key == defaultSetting.Key);
             if (existing == null)
