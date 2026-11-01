@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Kavita.Common.Helpers;
+using Kavita.Models.Attributes;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Progress;
@@ -58,10 +59,12 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// An API Key to interact with external services, like OPDS
     /// </summary>
     [Obsolete("Migrated to AuthKey in v0.8.9")]
+    [ExportScrub(ExportScrubKind.Random)]
     public string? ApiKey { get; set; }
     /// <summary>
     /// The confirmation token for the user (invite). This will be set to null after the user confirms.
     /// </summary>
+    [ExportScrub(ExportScrubKind.Random)]
     public string? ConfirmationToken { get; set; }
     /// <summary>
     /// The highest age rating the user has access to. Not applicable for admins
@@ -79,17 +82,20 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// </summary>
     /// <remarks>Requires Kavita+ Subscription</remarks>
     [Obsolete("Tracked in ScrobbleProviders")]
+    [ExportScrub(ExportScrubKind.Random)]
     public string? AniListAccessToken { get; set; }
 
     /// <summary>
     /// The Username of the MAL user
     /// </summary>
     [Obsolete("Tracked in ScrobbleProviders")]
+    [ExportScrub(ExportScrubKind.Username)]
     public string? MalUserName { get; set; }
     /// <summary>
     /// The Client ID for the user's MAL account. User should create a client on MAL for this.
     /// </summary>
     [Obsolete("Tracked in ScrobbleProviders")]
+    [ExportScrub(ExportScrubKind.Random)]
     public string? MalAccessToken { get; set; }
 
     /// <summary>
@@ -115,6 +121,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// <summary>
     /// The sub returned the by OIDC provider
     /// </summary>
+    [ExportScrub(ExportScrubKind.Guid)]
     public string? OidcId { get; set; }
     /// <summary>
     /// The IdentityProvider for the user, default to <see cref="Enums.IdentityProvider.Kavita"/>

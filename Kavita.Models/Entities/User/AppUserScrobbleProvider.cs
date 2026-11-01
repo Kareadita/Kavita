@@ -1,4 +1,5 @@
 using System;
+using Kavita.Models.Attributes;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.Entities.Enums;
 
@@ -12,16 +13,19 @@ public class AppUserScrobbleProvider
     /// <summary>
     /// Username on the provider's platform
     /// </summary>
+    [ExportScrub(ExportScrubKind.Username)]
     public string UserName { get; set; } = string.Empty;
 
     /// <summary>
     /// Authentication Token for the provider
     /// </summary>
+    [ExportScrub(ExportScrubKind.Random)]
     public string AuthenticationToken { get; set; } = string.Empty;
 
     /// <summary>
     /// Refresh Token for the provider, not used for all providers
     /// </summary>
+    [ExportScrub(ExportScrubKind.Random)]
     public string RefreshToken { get; set; } = string.Empty;
 
     /// <summary>

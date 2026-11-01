@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyCaching.Core;
 using Hangfire;
@@ -44,7 +45,8 @@ public class ServerController(
     IEasyCachingProviderFactory cachingProviderFactory,
     IThemeService themeService,
     ILocalizationService localizationService,
-    IActivityTracker activityTracker)
+    IActivityTracker activityTracker,
+    IDebugExportService debugExportService)
     : BaseApiController
 {
     /// <summary>
@@ -166,6 +168,35 @@ public class ServerController(
         {
             return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
         }
+    }
+
+    /// <summary>
+    /// Starts building a scrubbed debug export. Admins get <c>DebugExportReady</c> with the export id when it is done
+    /// </summary>
+    [HttpPost("debug-export")]
+    public async Task<ActionResult> StartDebugExport()
+    {
+        if (TaskScheduler.HasAlreadyEnqueuedTask<IDebugExportService>(s => s.ExportAsync(CancellationToken.None), checkRunningJobs: true))
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, "job-already-running"));
+        }
+
+        logger.LogInformation("{UserName} is starting a debug export from admin dashboard", Username!);
+        BackgroundJob.Enqueue<IDebugExportService>(s => s.ExportAsync(CancellationToken.None));
+        return Ok();
+    }
+
+    /// <summary>
+    /// Downloads a finished debug export
+    /// </summary>
+    /// <param name="exportId">From the <c>DebugExportReady</c> event</param>
+    [HttpGet("debug-export/{exportId}")]
+    public ActionResult DownloadDebugExport(string exportId)
+    {
+        var zipPath = debugExportService.GetZipPath(exportId);
+        if (zipPath == null) return NotFound();
+
+        return PhysicalFile(zipPath, "application/zip", $"kavita-debug-export-{exportId}.zip", true);
     }
 
     /// <summary>

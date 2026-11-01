@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
@@ -34,7 +34,6 @@ public class CleanupService(
     /// Cleans up Temp, cache, deleted cover images,  and old database backups
     /// </summary>
     /// <param name="ct"></param>
-    [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail, DelaysInSeconds = [120, 300, 300])]
     public async Task Cleanup(CancellationToken ct = default)
     {
         if (TaskScheduler.HasAlreadyEnqueuedTask<IMediaConversionService>(s => s.ConvertAllManagedMediaToEncodingFormat(CancellationToken.None),
@@ -52,6 +51,7 @@ public class CleanupService(
         {
             (CleanupCacheAndTempDirectories, "Cleaning cache and temp directories"),
             (CleanupBackups, "Cleaning old database backups"),
+            (CleanupDebugExports, "Cleaning old debug exports"),
             (ConsolidateProgress, "Consolidating Progress Events"),
             (CleanupDbEntries, "Cleaning abandoned database rows"), // Cleanup DB before removing files linked to DB entries
             (DeleteSeriesCoverImages, "Cleaning deleted series cover images"),
@@ -218,6 +218,38 @@ public class CleanupService(
     }
 
     /// <summary>
+    /// Deletes each debug export whose newest file is over 24 hours old, finished, cut off by a restart or never downloaded
+    /// </summary>
+    public Task CleanupDebugExports(CancellationToken ct = default)
+    {
+        var fileSystem = directoryService.FileSystem;
+        if (!directoryService.Exists(directoryService.DebugExportDirectory)) return Task.CompletedTask;
+
+        var cutoff = DateTime.UtcNow.AddHours(-24);
+        foreach (var folder in fileSystem.Directory.EnumerateDirectories(directoryService.DebugExportDirectory).ToList())
+        {
+            // The folder's creation time keeps an export started a moment ago, still empty, from being deleted
+            var newest = fileSystem.Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories)
+                .Select(f => fileSystem.File.GetLastWriteTimeUtc(f))
+                .Append(fileSystem.Directory.GetCreationTimeUtc(folder))
+                .Max();
+
+            if (newest >= cutoff) continue;
+
+            try
+            {
+                fileSystem.Directory.Delete(folder, true);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                logger.LogWarning(ex, "Could not delete the debug export {Folder}", folder);
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
     /// Find any progress events that have duplicate, find the highest page read event, then copy over information from that and delete others, to leave one.
     /// </summary>
     public async Task ConsolidateProgress(CancellationToken ct = default)
@@ -285,7 +317,7 @@ public class CleanupService(
 
         if (expiredLogs.Count == allLogs.Count)
         {
-            logger.LogInformation("All expired backups are older than {Threshold} days. Removing all but last backup", dayThreshold);
+            logger.LogInformation("All logs are older than {Threshold} days. Removing all but the last log", dayThreshold);
             var toDelete = expiredLogs.OrderBy(f => f.CreationTime).ToList();
             directoryService.DeleteFiles(toDelete.Take(toDelete.Count - 1).Select(f => f.FullName));
         }
@@ -294,23 +326,6 @@ public class CleanupService(
             directoryService.DeleteFiles(expiredLogs.Select(f => f.FullName));
         }
         logger.LogInformation("Finished cleanup of logs at {Time}", DateTime.Now);
-    }
-
-    public void CleanupTemp()
-    {
-        logger.LogInformation("Performing cleanup of Temp directory");
-        directoryService.ExistOrCreate(directoryService.TempDirectory);
-
-        try
-        {
-            directoryService.ClearDirectory(directoryService.TempDirectory);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "There was an issue deleting one or more folders/files during cleanup");
-        }
-
-        logger.LogInformation("Temp directory purged");
     }
 
     /// <summary>

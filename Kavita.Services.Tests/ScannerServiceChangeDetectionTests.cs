@@ -1121,11 +1121,15 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     public async Task Rescan_WithAmbiguousFile_SkipsItsFolder()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
+        // Three series sharing one LocalizedSeries, else MergeLocalizedSeriesAcrossScanResults folds Spice and Wolf into Accel World
         var (scanner, reader, libraryId, root) = await ScanOnceWithFailing(unitOfWork, context, "Ambiguous File - Manga",
-            ["Spice and Wolf/Spice and Wolf Vol. 1.cbz", "Accel World/Accel World Vol. 1.cbz", "Accel World/Accel World Vol. 2.cbz"],
+            ["Spice and Wolf/Spice and Wolf Vol. 1.cbz", "Accel World/Accel World Vol. 1.cbz", "Accel World/Accel World Vol. 2.cbz",
+                "Berserk/Berserk Vol. 1.cbz", "Monster/Monster Vol. 1.cbz"],
             [], comicInfos: new Dictionary<string, ComicInfo>
             {
-                ["Accel World Vol. 2.cbz"] = new() { Series = "Accel World", SeriesSort = "Spice and Wolf", Volume = "2" },
+                ["Accel World Vol. 2.cbz"] = new() { Series = "Accel World", LocalizedSeries = "Spice and Wolf", Volume = "2" },
+                ["Berserk Vol. 1.cbz"] = new() { Series = "Berserk", LocalizedSeries = "Spice and Wolf", Volume = "1" },
+                ["Monster Vol. 1.cbz"] = new() { Series = "Monster", LocalizedSeries = "Spice and Wolf", Volume = "1" },
             });
 
         var row = await context.MediaError.AsNoTracking().SingleAsync();
@@ -1135,6 +1139,22 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
         await scanner.ScanLibrary(libraryId);
 
         Assert.Empty(reader.Parsed);
+    }
+
+    [Fact]
+    public async Task ScanLibrary_SeriesSortNamingAnotherSeries_JoinsItsOwnSeries()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, _, libraryId, _) = await ScanOnceWithFailing(unitOfWork, context, "Series Sort Other Series - Manga",
+            ["Spice and Wolf/Spice and Wolf Vol. 1.cbz", "Accel World/Accel World Vol. 1.cbz", "Accel World/Accel World Vol. 2.cbz"],
+            [], comicInfos: new Dictionary<string, ComicInfo>
+            {
+                ["Accel World Vol. 2.cbz"] = new() { Series = "Accel World", SeriesSort = "Spice and Wolf", Volume = "2" },
+            });
+
+        Assert.Empty(await context.MediaError.ToListAsync());
+        Assert.Equal(2, await SeriesFileCount(context, await SeriesId(context, libraryId, "Accel World")));
+        Assert.Equal(1, await SeriesFileCount(context, await SeriesId(context, libraryId, "Spice and Wolf")));
     }
 
     [Fact]

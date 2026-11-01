@@ -19,7 +19,8 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             UserPreferences = new AppUserPreferences
             {
                 Theme = theme ?? Defaults.DefaultThemes.First(),
-                Locale = "en"
+                Locale = "en",
+                BookReaderHighlightSlots = []
             },
             ReadingLists = [],
             Bookmarks = [],

@@ -1,4 +1,6 @@
 ﻿using System;
+using Kavita.Models.Attributes;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.Entities.Scrobble;
@@ -13,10 +15,12 @@ public class ScrobbleError : IEntityDate
     /// <summary>
     /// Developer defined string
     /// </summary>
+    [ExportScrub(ExportScrubKind.TextScrub)]
     public string Comment { get; set; }
     /// <summary>
     /// List of providers that could not
     /// </summary>
+    [ExportScrub(ExportScrubKind.TextScrub)]
     public string Details { get; set; }
 
     public int SeriesId { get; set; }

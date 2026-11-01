@@ -43,12 +43,7 @@ public interface IAccountService
     Task<(IEnumerable<IdentityError>, bool)> UpdateRolesForUser(AppUser user, IList<string> roles, CancellationToken ct = default);
 
     /// <summary>
-    /// Seeds all information necessary for a new user
+    /// Fills in everything a new account needs. Saves nothing: the caller saves on its own context
     /// </summary>
-    /// <param name="user"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    Task SeedUser(AppUser user, CancellationToken ct = default);
-    void AddDefaultStreamsToUser(AppUser user, CancellationToken ct = default);
-    Task AddDefaultReadingProfileToUser(AppUser user, CancellationToken ct = default);
+    void SeedUser(AppUser user);
 }

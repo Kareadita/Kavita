@@ -9,4 +9,5 @@ export enum EventAction {
   ScanNow = 7,
   Details = 8,
   OpenMediaIssues = 9,
+  Download = 10,
 }

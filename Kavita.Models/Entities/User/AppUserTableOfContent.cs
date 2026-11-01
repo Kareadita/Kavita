@@ -1,4 +1,6 @@
 ﻿using System;
+using Kavita.Models.Attributes;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.Entities.User;
@@ -17,6 +19,7 @@ public class AppUserTableOfContent : IEntityDate
     /// <summary>
     /// The title of the bookmark. Defaults to Page {PageNumber} if not set
     /// </summary>
+    [ExportScrub(ExportScrubKind.FreeText)]
     public required string Title { get; set; }
     /// <summary>
     /// For Book Reader, represents the nearest passed anchor on the screen that can be used to resume scroll point. If empty, the ToC point is the beginning of the page

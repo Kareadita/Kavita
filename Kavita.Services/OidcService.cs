@@ -293,7 +293,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         user.OidcId = externalId;
         user.IdentityProvider = IdentityProvider.OpenIdConnect;
 
-        await accountService.SeedUser(user);
+        accountService.SeedUser(user);
 
         await SyncUserSettings(request, settings, claimsPrincipal, user);
         await SetDefaults(settings, user);

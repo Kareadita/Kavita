@@ -582,7 +582,7 @@ public partial class ParseScannedFiles
 
 
     /// <summary>
-    /// Adds the info to the series whose normalized name matches its series, sort or localized name, else to a new series.
+    /// Adds the info to the series whose normalized name matches its series or localized name, else to a new series.
     /// A match keeps the series' spelling, as punctuation or capitalization may differ between files
     /// </summary>
     /// <param name="scannedSeries">A localized list of a series' parsed infos</param>
@@ -610,7 +610,7 @@ public partial class ParseScannedFiles
         }
 
         // BUG: This will fail for Solo Leveling & Solo Leveling (Manga)
-        var matches = index.Find(info.Format, normalizedSeries, info.SeriesSort.ToNormalized(), info.LocalizedSeries.ToNormalized());
+        var matches = index.Find(info.Format, normalizedSeries, info.LocalizedSeries.ToNormalized());
         if (matches.Count > 1)
         {
             var names = matches.Select(m => m.Name).ToList();
@@ -674,12 +674,10 @@ public partial class ParseScannedFiles
         }
 
         /// <returns>Each distinct series of this format named by any of the normalized names</returns>
-        public List<ParsedSeries> Find(MangaFormat format, string normalizedName, string normalizedSortName,
-            string normalizedLocalizedName)
+        public List<ParsedSeries> Find(MangaFormat format, string normalizedName, string normalizedLocalizedName)
         {
             var matches = new List<ParsedSeries>(1);
             AddMatch(matches, format, normalizedName);
-            AddMatch(matches, format, normalizedSortName);
             AddMatch(matches, format, normalizedLocalizedName);
             return matches;
         }

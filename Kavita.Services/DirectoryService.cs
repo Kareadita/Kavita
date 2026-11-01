@@ -37,6 +37,7 @@ public class DirectoryService : IDirectoryService
     public string LongTermCacheDirectory { get; }
     public string EpubFontDirectory { get; }
     public string BackupDirectory { get; }
+    public string DebugExportDirectory { get; }
 
     private readonly ILogger<DirectoryService> _logger;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
@@ -80,6 +81,8 @@ public class DirectoryService : IDirectoryService
         ExistOrCreate(EpubFontDirectory);
         BackupDirectory = FileSystem.Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
         ExistOrCreate(BackupDirectory);
+        DebugExportDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "debug-exports");
+        ExistOrCreate(DebugExportDirectory);
     }
 
     /// <summary>
@@ -757,6 +760,10 @@ public class DirectoryService : IDirectoryService
             stampTicks += Stopwatch.GetTimestamp() - stampStart;
         }
 
+        // Linux file systems list entries in no fixed order and the scanner groups files in the order it meets them
+        subfolders.Sort(CompareNames);
+        files.Sort((a, b) => CompareNames(a.Path, b.Path));
+
         var elapsed = Stopwatch.GetTimestamp() - start;
         timings.StampTicks += stampTicks;
         timings.EntryTicks += elapsed - stampTicks;
@@ -771,6 +778,12 @@ public class DirectoryService : IDirectoryService
         }
 
         return new FolderListing(subfolders, files);
+    }
+
+    private static int CompareNames(string a, string b)
+    {
+        var ignoringCase = StringComparer.OrdinalIgnoreCase.Compare(a, b);
+        return ignoringCase != 0 ? ignoringCase : StringComparer.Ordinal.Compare(a, b);
     }
 
     private void LogListing(FolderTree tree, long elapsedMs, ListingTimings timings)

@@ -1,10 +1,13 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Hangfire;
 
 namespace Kavita.API.Services;
 
 public interface ICleanupService
 {
+    // Hangfire reads filters from the type a job is queued on, and TaskScheduler queues this on the interface
+    [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail, DelaysInSeconds = [120, 300, 300])]
     Task Cleanup(CancellationToken ct = default);
     Task CleanupDbEntries(CancellationToken ct = default);
     Task CleanupCacheAndTempDirectories(CancellationToken ct = default);
@@ -14,7 +17,7 @@ public interface ICleanupService
     Task DeleteTagCoverImages(CancellationToken ct = default);
     Task CleanupBackups(CancellationToken ct = default);
     Task CleanupLogs(CancellationToken ct = default);
-    void CleanupTemp();
+    Task CleanupDebugExports(CancellationToken ct = default);
     Task EnsureChapterProgressIsCapped(CancellationToken ct = default);
     /// <summary>
     /// Responsible to remove Series from Want To Read when user's have fully read the series and the series has Publication Status of Completed or Cancelled.

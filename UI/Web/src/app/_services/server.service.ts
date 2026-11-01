@@ -51,6 +51,10 @@ export class ServerService {
     return this.http.post(this.baseUrl + 'server/backup-db', {});
   }
 
+  startDebugExport() {
+    return this.http.post(this.baseUrl + 'server/debug-export', {});
+  }
+
   syncThemes() {
     return this.http.post(this.baseUrl + 'server/sync-themes', {});
   }
