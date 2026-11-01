@@ -69,7 +69,7 @@ public class AutoMapperKoboProfile: Profile
             .ForMemberSimple(d => d.Language, c => c.Language ?? "en")
             .ForMember(d => d.Locale, opt => opt.MapFrom(c => new KoboLocaleDto
             {
-                LanguageCode = ToIso6392((c.Language ?? "en"))
+                LanguageCode = ToIso6392(c.Language)
             }))
             .ForMember(d => d.PublisherName, opt => opt.MapFrom(c => c.People
                 .Where(p => p.Role == PersonRole.Publisher)
@@ -95,10 +95,10 @@ public class AutoMapperKoboProfile: Profile
             .ForMemberSimple(d => d.ImageId, c => c.Id.ToString())
             .ForMemberSimple(d => d.Title, c => c.TitleName)
             .ForMemberSimple(d => d.Description, c => c.Summary)
-            .ForMemberSimple(d => d.Language, c => c.Language ?? "en")
+            .ForMemberSimple(d => d.Language, c => string.IsNullOrEmpty(c.Language) ? "en" : c.Language)
             .ForMemberSimple(d => d.Locale, c => new KoboLocaleDto
             {
-                LanguageCode = ToIso6392((c.Language ?? "en"))
+                LanguageCode = ToIso6392(c.Language)
             })
             .ForMemberSimple(d => d.ISBN, c => c.ISBN ?? string.Empty)
             .ForMember(d => d.Contributors, opt => opt.MapFrom(c => string.Join(", ",
@@ -139,7 +139,7 @@ public class AutoMapperKoboProfile: Profile
     /// Maps a 2-letter language code to a 3-letter ISO 639-2 code.
     /// Used to populate <see cref="KoboLocaleDto.LanguageCode"/>.
     /// </summary>
-    private static string ToIso6392(string twoLetter) => twoLetter.ToLowerInvariant() switch
+    private static string ToIso6392(string? twoLetter) => (twoLetter?.ToLowerInvariant() ?? "") switch
     {
         "fr" => "fre",
         "en" => "eng",
@@ -151,6 +151,7 @@ public class AutoMapperKoboProfile: Profile
         "ko" => "kor",
         "zh" => "chi",
         "ru" => "rus",
+        "" => "eng",
         _ => twoLetter,
     };
 }
