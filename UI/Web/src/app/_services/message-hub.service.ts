@@ -25,6 +25,7 @@ export enum EVENTS {
    */
   Error = 'Error',
   BackupDatabaseProgress = 'BackupDatabaseProgress',
+  DebugExportProgress = 'DebugExportProgress',
   /**
    * A subtype of NotificationProgress that represents maintenance cleanup on server-owned resources
    */

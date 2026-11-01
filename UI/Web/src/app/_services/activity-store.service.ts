@@ -5,6 +5,7 @@ import {EVENTS, Message, MessageHubService} from './message-hub.service';
 import {AccountService} from './account.service';
 import {SignalRMessage} from '../_models/events/core/signalr-message';
 import {MessageEventPriority} from '../_models/events/core/message-event-priority';
+import {MessageEventCode} from '../_models/events/core/message-event-code';
 import {ActivityRow} from '../_models/activity/activity-row';
 import {ActivityRowKind} from '../_models/activity/activity-row-kind';
 import {ActivityJob} from '../_models/activity/activity-job';
@@ -28,6 +29,7 @@ const TextThrottleMs = 750;
 const WriteDebounceMs = 1000;
 // FileScan ends before ScanProgress's first update, and CoverUpdate ends once per series, so all-ended is not yet done
 const FinishGraceMs = 10_000;
+const AnnouncedInfoCodes: (MessageEventCode | null)[] = [MessageEventCode.DebugExportReady];
 const RateLimitWindowMs = 30 * 60 * 1000;
 
 const ActionNames: string[] = [EVENTS.UpdateAvailable, EVENTS.ScrobblingKeyExpired, EVENTS.ExternalMatchRateLimitError];
@@ -356,7 +358,7 @@ export class ActivityStoreService {
 
     this._rows.update(rows => [...rows, entry]);
     this.scheduleWrite();
-    if (announce && entry.priority >= MessageEventPriority.Action) {
+    if (announce && (entry.priority >= MessageEventPriority.Action || AnnouncedInfoCodes.includes(entry.code))) {
       this._problemFilesAnnouncement.set(null);
       this._announcement.set(entry);
     }

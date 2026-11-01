@@ -39,6 +39,7 @@ public interface IDirectoryService
     string AssetsDirectory { get; }
     string EpubFontDirectory { get; }
     string BackupDirectory { get; }
+    string DebugExportDirectory { get; }
 
     /// <summary>
     /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.

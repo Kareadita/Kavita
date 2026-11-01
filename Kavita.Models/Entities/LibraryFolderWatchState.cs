@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
+using Kavita.Models.Attributes;
 using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.Entities;
@@ -35,6 +36,7 @@ public sealed record LibraryFolderWatchState
         /// <summary>
         /// SHA-256 of the mount's source and type, so a share's address is not stored
         /// </summary>
+        [ExportScrub(ExportScrubKind.Fingerprint)]
         public required string Fingerprint { get; init; }
         public MountResult Result { get; init; }
         /// <summary>
@@ -58,6 +60,7 @@ public sealed record LibraryFolderWatchState
     {
         public DowngradeReason Reason { get; init; }
         public required string Folder { get; init; }
+        [ExportScrub(ExportScrubKind.Fingerprint)]
         public string? Fingerprint { get; init; }
         public DateTime AtUtc { get; init; }
     }

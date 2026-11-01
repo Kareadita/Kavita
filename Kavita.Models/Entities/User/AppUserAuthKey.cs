@@ -1,4 +1,6 @@
 ﻿using System;
+using Kavita.Models.Attributes;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +15,7 @@ public class AppUserAuthKey
     /// Actual key
     /// </summary>
     /// <remarks>This is a variable string length from [6-32] alphanumeric characters</remarks>
+    [ExportScrub(ExportScrubKind.Random)]
     public required string Key { get; set; }
     /// <summary>
     /// Name of the key

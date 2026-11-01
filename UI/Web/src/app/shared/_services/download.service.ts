@@ -1115,7 +1115,17 @@ export class DownloadService {
     setTimeout(() => this.processQueue(), 1500);
   }
 
-  // --- Blob-based downloads (bookmarks, logs) ---
+  downloadDebugExport(exportId: string) {
+    this.httpClient.get(this.baseUrl + 'server/debug-export/' + encodeURIComponent(exportId),
+      { observe: 'events', responseType: 'blob', reportProgress: true }
+    ).pipe(
+      throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
+      download((blob, filename) => {
+        this.save(blob, decodeURIComponent(filename));
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+  }
 
   private downloadBookmarksBlob(bookmarks: PageBookmark[]) {
     this.httpClient.post(this.baseUrl + 'download/bookmarks', { bookmarks },

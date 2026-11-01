@@ -208,21 +208,16 @@ public partial class AccountService(
         return ([], false);
     }
 
-    public async Task SeedUser(AppUser user, CancellationToken ct = default)
+    public void SeedUser(AppUser user)
     {
-        AddDefaultStreamsToUser(user, ct);
+        AddDefaultStreamsToUser(user);
         AddDefaultHighlightSlotsToUser(user);
         AddAuthKeys(user);
         AddScrobbleProvidersToUser(user);
-        await AddDefaultReadingProfileToUser(user, ct); // Commits
+        AddDefaultReadingProfileToUser(user);
     }
 
-    /// <summary>
-    /// Assign default streams
-    /// </summary>
-    /// <param name="user"></param>
-    /// <param name="ct"></param>
-    public void AddDefaultStreamsToUser(AppUser user, CancellationToken ct = default)
+    private void AddDefaultStreamsToUser(AppUser user)
     {
         foreach (var newStream in Defaults.DefaultStreams.Select(mapper.Map<AppUserDashboardStream, AppUserDashboardStream>))
         {
@@ -235,37 +230,28 @@ public partial class AccountService(
         }
     }
 
-    private void AddDefaultHighlightSlotsToUser(AppUser user)
+    private static void AddDefaultHighlightSlotsToUser(AppUser user)
     {
         if (user.UserPreferences.BookReaderHighlightSlots.Any()) return;
 
         user.UserPreferences.BookReaderHighlightSlots = Defaults.DefaultHighlightSlots.ToList();
-        unitOfWork.UserRepository.Update(user);
     }
 
-    private void AddAuthKeys(AppUser user)
+    private static void AddAuthKeys(AppUser user)
     {
         if (user.AuthKeys.Any()) return;
 
         user.AuthKeys = Defaults.CreateDefaultAuthKeys();
-        unitOfWork.UserRepository.Update(user);
     }
 
-    /// <summary>
-    /// Assign default reading profile
-    /// </summary>
-    /// <param name="user"></param>
-    /// <param name="ct"></param>
-    public async Task AddDefaultReadingProfileToUser(AppUser user, CancellationToken ct = default)
+    private static void AddDefaultReadingProfileToUser(AppUser user)
     {
         var profile = new AppUserReadingProfileBuilder(user.Id)
             .WithName("Default Profile")
             .WithKind(ReadingProfileKind.Default)
             .Build();
 
-        unitOfWork.AppUserReadingProfileRepository.Add(profile);
-
-        await unitOfWork.CommitAsync(ct);
+        user.ReadingProfiles.Add(profile);
     }
 
     public static void AddScrobbleProvidersToUser(AppUser user)

@@ -1214,6 +1214,24 @@ public class DirectoryServiceTests: AbstractFsTest
     }
 
     [Fact]
+    public async Task ListFolderTree_ListsFilesAndFoldersByName()
+    {
+        var testDirectory = Root + "manga/base/";
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddFile(fileSystem.Path.Join(testDirectory, "zeta", "c.cbz"), new MockFileData(string.Empty));
+        fileSystem.AddFile(fileSystem.Path.Join(testDirectory, "zeta", "a.cbz"), new MockFileData(string.Empty));
+        fileSystem.AddFile(fileSystem.Path.Join(testDirectory, "zeta", "B.cbz"), new MockFileData(string.Empty));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "beta"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "Alpha"));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var tree = await ListTree(ds, testDirectory);
+
+        Assert.Equal([testDirectory + "Alpha", testDirectory + "beta", testDirectory + "zeta"], tree.Folders);
+        Assert.Equal(["a.cbz", "B.cbz", "c.cbz"], tree.FilesIn(testDirectory + "zeta").Select(s => Path.GetFileName(s.Path)));
+    }
+
+    [Fact]
     public async Task ListFolderTree_SkipsExcludedAndGlobbedFolders()
     {
         var fileSystem = CreateStampLibrary();

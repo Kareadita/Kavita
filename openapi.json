@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.16",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.17",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.1.16"
+    "version": "0.9.1.17"
   },
   "servers": [
     {
@@ -16720,6 +16720,43 @@
           "Server"
         ],
         "summary": "Downloads all the log files via a zip",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Server/debug-export": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Starts building a scrubbed debug export. Admins get `DebugExportReady` with the export id when it is done",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Server/debug-export/{exportId}": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Downloads a finished debug export",
+        "parameters": [
+          {
+            "name": "exportId",
+            "in": "path",
+            "description": "From the `DebugExportReady` event",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
