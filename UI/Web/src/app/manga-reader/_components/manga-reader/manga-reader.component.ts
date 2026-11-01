@@ -60,7 +60,7 @@ import {InfiniteScrollerComponent} from '../infinite-scroller/infinite-scroller.
 import {SwipeDirective} from '../../../ng-swipe/ng-swipe.directive';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {shareReplay, take} from "rxjs/operators";
+import {shareReplay} from "rxjs/operators";
 import {DblClickDirective} from "../../../_directives/dbl-click.directive";
 import {
   layoutModes,
@@ -86,18 +86,11 @@ import {LibraryType} from "../../../_models/library/library";
 import {MangaFormat} from "../../../_models/manga-format";
 import {Stack} from "../../../shared/data-structures/stack";
 import {SwipeEvent} from "../../../ng-swipe/ag-swipe.core";
-import {ModalService} from "../../../_services/modal.service";
-import {
-  RateAndReviewSeriesModalComponent
-} from "../rate-and-review-series-modal/rate-and-review-series-modal.component";
-import {editModal} from "../../../_models/modal/modal-options";
-import {ReviewService} from "../../../_services/review.service";
 import {disabled, form, FormField, FormRoot, max, min} from "@angular/forms/signals";
 import {
   EnumOption,
   SettingSelectComponent
 } from "../../../settings/_components/setting-enum-select/setting-select.component";
-import {PublicationStatus} from "../../../_models/metadata/publication-status";
 
 
 const PREFETCH_PAGES = 10;
@@ -225,8 +218,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly mangaReaderService = inject(MangaReaderService);
   private readonly keyBindService = inject(KeyBindService);
   private readonly entityTitleService = inject(EntityTitleService);
-  private readonly modalService = inject(ModalService);
-  private readonly reviewService = inject(ReviewService);
 
 
   libraryId!: number;
@@ -680,7 +671,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               this.toggleMenu();
               return;
             }
-            this.closeReader();
+            this.exitReader();
             break;
           case KeyBindTarget.PageLeft:
             this.handlePageLeft();
@@ -1262,6 +1253,29 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.bookmarks.set(map);
   }
 
+  exitReader() {
+    if (this.readerService.closeRateReviewModal()) return;
+
+    const onLastPage = this.pageNum() === this.maxPages() - 1;
+    if (this.bookmarkMode() || !onLastPage || !this.chapterInfo()) {
+      this.closeReader();
+      return;
+    }
+
+    this.promptRateAndReview().subscribe(() => this.closeReader());
+  }
+
+  private promptRateAndReview() {
+    const chapterInfo = this.chapterInfo()!;
+    return this.readerService.promptRateAndReview({
+      seriesId: this.seriesId,
+      volumeId: this.volumeId,
+      chapterId: this.chapterId(),
+      seriesName: chapterInfo.seriesName,
+      publicationStatus: chapterInfo.seriesPublicationStatus,
+    });
+  }
+
   closeReader() {
     this.readerService.closeShortCutModal();
     this.readerService.closeReader(this.libraryId, this.seriesId, this.chapterId(), this.readingListMode, this.readingListId);
@@ -1564,30 +1578,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-      const publicationStatus = this.chapterInfo()!.seriesPublicationStatus;
-      if (publicationStatus !== PublicationStatus.Completed && publicationStatus !== PublicationStatus.Cancelled) {
+      this.promptRateAndReview().subscribe(() => {
         this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
-        return;
-      }
-
-      this.reviewService.getMyRatingAndReview(this.seriesId).subscribe((res) => {
-        if (res.hasBeenRated) {
-          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
-          return;
-        }
-        const ref = this.modalService.open(RateAndReviewSeriesModalComponent, editModal());
-        ref.setInput('seriesId', this.seriesId);
-        ref.setInput('ratingReview', res);
-        ref.setInput('seriesName', this.chapterInfo()!.seriesName);
-
-        // Navigation after dismissal may cause recursion. Only do it once
-        ref.dismissed.pipe(take(1)).subscribe(res => {
-          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
-        });
-        ref.closed.pipe(take(1)).subscribe(res => {
-          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
-        });
-      })
+      });
 
       return;
      }
