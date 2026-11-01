@@ -109,7 +109,7 @@
                         <ng-container [ngTemplateOutlet]="immersiveModeTooltip" />
                     </span>
                 <div class="form-check form-switch">
-                  <input type="checkbox" id="immersive-mode" [formField]="settingsForm.bookReaderImmersiveMode" class="form-check-input" aria-labelledby="immersiveMode-help" switch>
+                  <input type="checkbox" id="immersive-mode" [formField]="settingsForm.bookReaderImmersiveMode" (change)="readerSettingsService().updateImmersiveMode($any($event.target).checked)" class="form-check-input" aria-labelledby="immersiveMode-help" switch>
                   <label>{{settingsForm.bookReaderImmersiveMode().value() ? t('on') : t('off')}} </label>
                 </div>
               </div>
