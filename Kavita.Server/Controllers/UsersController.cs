@@ -164,6 +164,12 @@ public class UsersController(
 
         existingPreferences.OpdsPreferences = preferencesDto.OpdsPreferences;
 
+        if (preferencesDto.KoboSyncPreferences.IsSyncingCollection && !await unitOfWork.UserRepository.HasAccessToCollection(user.Id,
+                preferencesDto.KoboSyncPreferences.SyncCollection, false, ct))
+        {
+            return BadRequest();
+        }
+
         existingPreferences.KoboSyncPreferences = preferencesDto.KoboSyncPreferences;
         existingPreferences.KoboSyncPreferences.SyncLibraries = existingPreferences.KoboSyncPreferences.SyncLibraries
             .Where(allLibs.Contains).ToList();

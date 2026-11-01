@@ -291,6 +291,7 @@
 
         "kobo-sync-settings-title": "Kobo Sync",
         "kobo-sync-disabled-alert": "Kobo Sync has been disabled by your administrator",
+        "kobo-sync-no-download-role": "Kobo Sync requires the Download Role, ask your administrator for help",
         "sync-item-limit-label": "Sync Item Limit",
         "sync-item-limit-tooltip": "Maximum number of items sent to the device per sync request. Between 25 and 100.",
         "forward-to-kobo-store-label": "Forward to Kobo Store",

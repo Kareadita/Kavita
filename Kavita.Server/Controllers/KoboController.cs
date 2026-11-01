@@ -13,6 +13,7 @@ using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.Common.Extensions;
 using Kavita.Models.Builders;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -24,6 +25,7 @@ using Kavita.Server.Helpers;
 using Kavita.Server.Middleware;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers.Kobo;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
@@ -34,6 +36,7 @@ namespace Kavita.Server.Controllers;
 [KoboJson]
 [Route("[controller]/{apiKey}")]
 [ApiExplorerSettings(IgnoreApi = true)]
+[Authorize(PolicyGroups.DownloadPolicy)]
 [ServerSettingEnabled(ServerSettingKey.EnableKobo, "kobo-sync-disabled")]
 public class KoboController(
     ILogger<KoboController> logger,
@@ -154,6 +157,7 @@ public class KoboController(
     }
 
     [HttpPut("v1/library/{bookId}/state")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> UpdateBookState(string bookId)
     {
@@ -185,6 +189,7 @@ public class KoboController(
     }
 
     [ChapterAccess(chapterIdKey: "bookId")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [HttpGet("v1/library/{bookId:int}/file/epub")]
     public async Task<ActionResult> GetBookFile(int bookId, [FromQuery] bool convert = true)
     {
@@ -202,9 +207,9 @@ public class KoboController(
         return PhysicalFile(path, downloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
     }
 
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "thumbnailId")]
     [HttpGet("v1/books/{thumbnailId}/thumbnail/{width}/{height}/{isGreyScale}/image.jpg")]
     [HttpGet("v1/books/{thumbnailId}/thumbnail/{width}/{height}/{quality}/{isGreyScale}/image.jpg")]
-    [ChapterAccess(failOnMissing: false, chapterIdKey: "thumbnailId")]
     public async Task<ActionResult> GetBookCover(string thumbnailId, string width, string height, string quality, bool isGreyScale = false)
     {
         var ct = HttpContext.RequestAborted;
@@ -252,6 +257,7 @@ public class KoboController(
     }
 
     [HttpDelete("v1/library/{bookId}")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> DeleteBook(string bookId)
     {
@@ -265,6 +271,7 @@ public class KoboController(
     }
 
     [HttpPost("v1/library/{bookId}")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> AddBook(string bookId)
     {
@@ -286,7 +293,7 @@ public class KoboController(
         if (seriesId is null) return NotFound();
 
         var userCollection = await unitOfWork.CollectionTagRepository.GetCollectionAsync(syncPreferences.SyncCollection, CollectionIncludes.Series, ct: ct);
-        if (userCollection is null) return NotFound();
+        if (userCollection is null || userCollection.AppUserId != UserId) return NotFound();
 
         if (userCollection.Items.Any(i => i.Id == seriesId))
         {
@@ -397,7 +404,6 @@ public class KoboController(
     }
 
     [HttpGet("v1/products/{bookIds}/prices")]
-    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> GetPrices(string bookIds)
     {
         var isKoboRequest = bookIds.Split(',').Any(id => !int.TryParse(id, out _));
@@ -419,6 +425,7 @@ public class KoboController(
     }
 
     [HttpPut("v1/products/{bookId}/reviews")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> UpdateReview(string bookId)
     {
@@ -597,13 +604,13 @@ public class KoboController(
 
     private string GetKoboUrl()
     {
-        var path = Request.Path.ToString();
+        var path = Request.Path.ToString().TrimStart('/');
         var queryString = Request.QueryString;
 
         var apiKey = AuthKeyAuthenticationHandler.ExtractAuthKey(Request);
         var prefix = $"/kobo/{apiKey}";
 
-        return $"{path[prefix.Length..]}{queryString}";
+        return $"/{path[prefix.Length..]}{queryString}";
     }
 
     #endregion

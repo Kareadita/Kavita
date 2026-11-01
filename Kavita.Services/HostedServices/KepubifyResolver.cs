@@ -34,6 +34,7 @@ internal class KepubifyResolver(IServiceScopeFactory scopeFactory): IHostedServi
             !kepubifyPath.Equals(DefaultWindowsPath))
         {
             logger.LogTrace("User has configured a custom kepubify path, will not reconcile");
+            await kepubifyConverter.CheckKepubifySupport(kepubifyPath, cancellationToken);
             return;
         }
 

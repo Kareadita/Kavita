@@ -124,6 +124,7 @@ public interface IUserRepository
     Task<bool> HasAccessToAllChapters(int userId, IEnumerable<int> chapterIds, CancellationToken ct = default);
     Task<bool> HasAccessToPerson(int userId, int personId, CancellationToken ct = default);
     Task<bool> HasAccessToReadingList(int userId, int readingListId, bool allowPromoted = true, CancellationToken ct = default);
+    Task<bool> HasAccessToCollection(int userId, int collectionId, bool allowPromoted, CancellationToken ct = default);
     #endregion
 
     #region Scrobbling & Holds

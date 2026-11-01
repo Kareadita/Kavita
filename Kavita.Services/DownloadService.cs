@@ -122,7 +122,7 @@ public class DownloadService(
         }
 
         var format = chapter.Files.First().Format;
-        if (format is not MangaFormat.Archive)
+        if (format is not MangaFormat.Archive && format is not MangaFormat.Image)
         {
             // We currently do not support downloading multipart non Archive files
             throw new NotSupportedException();

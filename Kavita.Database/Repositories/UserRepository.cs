@@ -198,7 +198,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
     public Task<AppUserKoboSyncPreferences> GetKoboSyncPreferences(int userId, CancellationToken ct = default)
     {
         return context.AppUserPreferences
-            .Where(p => p.Id == userId)
+            .Where(p => p.AppUserId == userId)
             .Select(p => p.KoboSyncPreferences)
             .FirstAsync(ct);
     }
@@ -319,6 +319,13 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
         return context.ReadingList
             .Where(rl => rl.AppUserId == userId || (rl.Promoted && allowPromoted))
             .AnyAsync(rl => rl.Id == readingListId, ct);
+    }
+
+    public Task<bool> HasAccessToCollection(int userId, int collectionId, bool allowPromoted, CancellationToken ct = default)
+    {
+        return context.AppUserCollection
+            .Where(c => c.AppUserId == userId || (c.Promoted && allowPromoted))
+            .AnyAsync(c => c.Id == collectionId, ct);
     }
 
     public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None, bool track = true, CancellationToken ct = default)

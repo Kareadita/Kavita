@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.IO.Abstractions;
 using System.Threading;
@@ -13,7 +14,6 @@ namespace Kavita.Services.Kobo;
 public class KepubifyConverterService(ILogger<KepubifyConverterService> logger, IServiceScopeFactory serviceScopeFactory): IKepubifyConverterService
 {
     private string _kepubifyPath = string.Empty;
-
     public bool KepubifySupported { get; private set; }
 
     public string BuildKepubifyPath(int chapterId)
@@ -77,6 +77,8 @@ public class KepubifyConverterService(ILogger<KepubifyConverterService> logger, 
             return;
         }
 
+        var tmpPath = kepubPath + ".tmp";
+
         var command = new ProcessCommand.Builder(processRunner)
             .WithTimeout(TimeSpan.FromSeconds(10))
             .WithExecutable(_kepubifyPath)
@@ -87,5 +89,7 @@ public class KepubifyConverterService(ILogger<KepubifyConverterService> logger, 
 
         var result = await command.ExecuteAsync(cancellationToken);
         result.ThrowIfFailed();
+
+        fileSystem.File.Move(tmpPath, kepubPath);
     }
 }

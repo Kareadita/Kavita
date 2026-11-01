@@ -284,6 +284,9 @@
       @if (!koboEnabled()) {
         <div class="alert alert-warning" role="alert">{{t('kobo-sync-disabled-alert')}}</div>
       }
+      @if (!hasDownloadRole()) {
+        <div class="alert alert-warning" role="alert">{{t('kobo-sync-no-download-role')}}</div>
+      }
 
       <ng-container>
         <div class="row g-0 mt-4">

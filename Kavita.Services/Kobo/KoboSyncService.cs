@@ -13,6 +13,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.API.Store;
 using Kavita.Common;
+using Kavita.Common.Extensions;
 using Kavita.Database.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Kobo;
@@ -50,7 +51,8 @@ public class KoboSyncService(
     IUserContext userContext,
     IHttpContextAccessor httpContextAccessor,
     IKepubifyConverterService kepubifyConverterService,
-    IFileSystem fileSystem
+    IFileSystem fileSystem,
+    ILocalizationService localizationService
     ): IKoboSyncService
 {
 
@@ -94,6 +96,7 @@ public class KoboSyncService(
         CancellationToken cancellationToken)
     {
         var limit = syncPreferences.SyncItemLimit;
+        var alreadySeenChapters = syncPoint.ChapterIds.ToHashSet();
 
         var eligible = await KoboEligibleChapters(userId, ageRestriction, syncPreferences)
             .Select(c => new { c.Id, c.LastModifiedUtc }) // Reduce memory
@@ -101,14 +104,14 @@ public class KoboSyncService(
 
         var changes = new List<KoboSyncItem>();
 
-        var deletedIds = syncPoint.ChapterIds.Except(eligible.Keys).ToList();
+        var deletedIds = alreadySeenChapters.Except(eligible.Keys).ToList();
         var deletedBatch = deletedIds.Take(limit).ToList();
 
         changes.AddRange(deletedBatch.Select(BuildDeletedItem));
         deletedBatch.ForEach(id => syncPoint.ChapterIds.Remove(id));
 
         var pendingIds = eligible
-            .Where(kv => !syncPoint.ChapterIds.Contains(kv.Key) || kv.Value > syncPoint.ChapterSyncTime)
+            .Where(kv => !alreadySeenChapters.Contains(kv.Key) || kv.Value > syncPoint.ChapterSyncTime)
             .OrderBy(kv => kv.Value)
             .ThenBy(kv => kv.Key)
             .Skip(syncPoint.ChapterIndex)
@@ -121,7 +124,6 @@ public class KoboSyncService(
             return new SyncAccumulationResult(changes, !hasMore);
         }
 
-        // All deletions have been done. We can update chapterids now
         syncPoint.ChapterIds = [.. eligible.Keys];
 
         var idsToFetch = pendingIds.Take(limit - changes.Count).ToList();
@@ -154,7 +156,7 @@ public class KoboSyncService(
                 ReadingState = await BuildKoboReadingStateDto(sync.Chapter, sync.ReadingProgress),
             };
 
-            changes.Add(sync.Chapter.Created > syncPoint.ChapterSyncTime
+            changes.Add(sync.Chapter.CreatedUtc > syncPoint.ChapterSyncTime
                 ? new KoboSyncItem { NewEntitlement = entitlement }
                 : new KoboSyncItem { ChangedEntitlement = entitlement });
         }
@@ -198,7 +200,7 @@ public class KoboSyncService(
         }
 
         syncPoint.ProgressSyncedUntilId = progressToSync[^1].Chapter.Id;
-        syncPoint.ProgressSyncedUntilId += progressToSync.Count;
+        syncPoint.ProgressSyncedUntilIndex += progressToSync.Count;
 
         logger.LogDebug("Adding {Count} progress update changes", progressToSync.Count);
 
@@ -348,7 +350,7 @@ public class KoboSyncService(
         }
 
         var progress = await unitOfWork.DataContext.AppUserProgresses.FirstOrDefaultAsync(p => p.Id  == progressId, cancellationToken);
-        if (progress == null || progress.BookScrollId is null) return;
+        if (progress == null || string.IsNullOrEmpty(progress.BookScrollId)) return;
 
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(progress.ChapterId, ct: cancellationToken);
         if (chapter == null || chapter.Files.Count == 0) return;
@@ -373,7 +375,7 @@ public class KoboSyncService(
 
         progress.KoboSpan = KoboPositionHelper.Encode(readerDoc, kepubDoc, progress.BookScrollId);
 
-        logger.LogTrace("Sync KoboSpan with XPath. {XPath} => {KoboSpan}", progress.BookScrollId, progress.KoboSpan);
+        logger.LogTrace("Sync KoboSpan with XPath. {XPath} => {KoboSpan}", progress.BookScrollId.Sanitize(), progress.KoboSpan.Sanitize());
 
         await unitOfWork.CommitAsync(cancellationToken);
     }
@@ -407,7 +409,11 @@ public class KoboSyncService(
 
         await UpdateProgressDto(userProgressDto, readingStateDto, chapter, cancellationToken);
 
-        await readerService.SaveReadingProgress(userProgressDto, userId, false, cancellationToken);
+        var success = await readerService.SaveReadingProgress(userProgressDto, userId, false, cancellationToken);
+        if (!success)
+        {
+            throw new KavitaException(await localizationService.TranslateAsync(userId, "generic-read-progress"));
+        }
 
         await readingSessionService.GenerateReadingSessionForChapters(userId, parentIds.Value.SeriesId,
             new Dictionary<int, int> { [chapterId] = startPage }, cancellationToken);
@@ -490,7 +496,7 @@ public class KoboSyncService(
         if (progress.KoboSpan is not null)
         {
             progress.BookScrollId = KoboPositionHelper.Decode(kepubDoc, readerDoc, progress.KoboSpan);
-            logger.LogTrace("Synced XPath with KoboSpan. {KoboSpan} => {XPath}", progress.KoboSpan, progress.BookScrollId);
+            logger.LogTrace("Synced XPath with KoboSpan. {KoboSpan} => {XPath}", progress.KoboSpan.Sanitize(), progress.BookScrollId.Sanitize());
         }
 
         return;
@@ -585,7 +591,7 @@ public class KoboSyncService(
 
     private async Task<KoboLocationDto> GetKoboPosition(AppUserProgress? progress, Chapter chapter)
     {
-        if (progress == null || progress.PagesRead == 0)
+        if (progress == null || progress.PagesRead == 0 || chapter.Files.Count <= 0)
         {
             return new KoboLocationDto();
         }

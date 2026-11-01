@@ -79,19 +79,23 @@
       <app-setting-item [title]="t('kepubify-path-label')" [subtitle]="t('kepubify-path-tooltip')"
                         [control]="kepubifyPath" labelId="settings-kepubify-path">
         <ng-template #view>
+          @let tooltip = kepubifySupported() ? t('kepubify-supported') : t('kepubify-not-supported');
+
           <span>
             {{kepubifyPath().value()}}
             <i class="fa"
                [class.fa-check-circle]="kepubifySupported()"
                [class.fa-circle-xmark]="!kepubifySupported()"
                [class.text-danger]="!kepubifySupported()"
-               [ngbTooltip]="kepubifySupported() ? t('kepubify-supported') : t('kepubify-not-supported')"
+               [ngbTooltip]="tooltip"
+               aria-hidden="true"
             ></i>
+            <span class="visually-hidden">{{tooltip}}</span>
           </span>
         </ng-template>
         <ng-template #edit>
           <div class="input-group">
-            <input id="settings-kepubify-path" class="form-control" [formField]="kepubifyPath" type="text" aria-describedby="change-bookmarks-dir" [appFormField]="kepubifyPath">
+            <input id="settings-kepubify-path" class="form-control" [formField]="kepubifyPath" type="text" [appFormField]="kepubifyPath">
           </div>
         </ng-template>
       </app-setting-item>

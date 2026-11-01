@@ -1,17 +1,17 @@
 using System.IO.Abstractions;
 using AutoMapper;
-using ExCSS;
 using Kavita.API.Database;
+using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.API.Store;
-using Kavita.Common.Extensions;
+using Kavita.Database.Extensions;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
-using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Kobo;
+using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Builders;
 using Kavita.Services.Kobo;
@@ -47,7 +47,8 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
             userContext,
             Substitute.For<IHttpContextAccessor>(),
             Substitute.For<IKepubifyConverterService>(),
-            fileSystem ?? Substitute.For<IFileSystem>()
+            fileSystem ?? Substitute.For<IFileSystem>(),
+            Substitute.For<ILocalizationService>()
             );
     }
 
@@ -124,7 +125,7 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         collection.Items = [];
         await ctx.SaveChangesAsync();
 
-        (changes, _)  = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+        (changes, exhausted)  = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
 
         Assert.Single(changes);
         Assert.True(exhausted);
@@ -148,12 +149,112 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
 
         await Task.Delay(TimeSpan.FromSeconds(1));
 
-        (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+        (changes, exhausted) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
 
         Assert.Single(changes);
         Assert.True(exhausted);
         var change3 = changes[0];
         Assert.NotNull(change3.NewEntitlement);
         Assert.Equal("2", change3.NewEntitlement.BookEntitlement.Id);
+    }
+
+    [Fact]
+    public async Task AccumulateProgressChanges_DoesntLoop()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        await SetupCollection(ctx);
+
+        var syncPreferences = new AppUserKoboSyncPreferences {SyncItemLimit = 1};
+
+        var series1 = await ctx.Series.Includes(SeriesIncludes.Chapters).FirstAsync();
+        var series2 = new SeriesBuilder("The Moon on a Rainy Night")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
+                    .Build())
+                .Build())
+            .Build();
+        ctx.Series.Add(series2);
+        await ctx.SaveChangesAsync();
+
+        ctx.AppUserProgresses.Add(new AppUserProgress
+        {
+            PagesRead = 2,
+            VolumeId = series1.Volumes.First().Id,
+            SeriesId = series1.Id,
+            LibraryId = 1,
+            ChapterId = series2.Volumes.First().Chapters.First().Id,
+            AppUserId = 1
+        });
+        ctx.AppUserProgresses.Add(new AppUserProgress
+        {
+            PagesRead = 2,
+            VolumeId = series2.Volumes.First().Id,
+            SeriesId = series2.Id,
+            LibraryId = 1,
+            ChapterId = series2.Volumes.First().Chapters.First().Id,
+            AppUserId = 1
+        });
+
+        await ctx.SaveChangesAsync();
+
+        var syncPoint = new KoboSyncPoint();
+
+        var (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Single(changes, c => c.ChangedReadingState != null);
+
+        (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Single(changes, c => c.ChangedReadingState != null);
+
+        (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.DoesNotContain(changes, c => c.ChangedReadingState != null);
+    }
+
+    [Fact]
+    public async Task AccumulateChapterChanges_LargeChangeSet()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        await SetupCollection(ctx);
+
+        var syncPreferences = new AppUserKoboSyncPreferences {SyncItemLimit = 1};
+
+        var syncPoint = new KoboSyncPoint
+        {
+            UserId = 1,
+            ChapterIds = [],
+            ChapterIndex = 0,
+            ChapterSyncTime = DateTime.MinValue,
+            ProgressSyncTime = DateTime.MinValue,
+            ProgressSyncedUntilId = 0,
+            ProgressSyncedUntilIndex = 0
+        };
+
+        var series2 = new SeriesBuilder("The Moon on a Rainy Night")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
+                    .Build())
+                .Build())
+            .Build();
+        ctx.Series.Add(series2);
+        await ctx.SaveChangesAsync();
+
+        await Task.Delay(TimeSpan.FromSeconds(1));
+
+        var (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Single(changes, c => c.NewEntitlement != null);
+
+        (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Single(changes, c => c.NewEntitlement != null);
+
+        (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.DoesNotContain(changes, c => c.NewEntitlement != null);
+
     }
 }

@@ -32,8 +32,9 @@ public class KoboSyncPoint
     public void Reset()
     {
         ChapterIndex = 0;
+        ProgressSyncedUntilIndex = 0;
         ChapterSyncTime = DateTime.UtcNow;
-        ProgressSyncTime = DateTime.Now;
+        ProgressSyncTime = DateTime.UtcNow;
     }
 
 }

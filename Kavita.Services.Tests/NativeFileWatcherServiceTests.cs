@@ -62,9 +62,11 @@ public class NativeFileWatcherServiceTests : WatchedLibraryFoldersTest
         Assert.All(changes, c => Assert.False(c.IsDirectory));
     }
 
-    [Fact(Skip = "Fails on macOS")]
+    [Fact]
     public async Task Changed_Folder_EnqueuesNothing()
     {
+        if (OperatingSystem.IsMacOS()) return;
+
         var folder = SeriesFolder("Vol. 1");
         await StartWatching();
 

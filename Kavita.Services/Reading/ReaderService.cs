@@ -229,19 +229,22 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             if (userProgress == null && progressDto.PageNum == 0) return true;
 
             // If a kobo span is present, always process updates
-            if (oldProgress == progressDto.PageNum && userProgress?.BookScrollId == progressDto.BookScrollId)
+            if (oldProgress == progressDto.PageNum
+                && userProgress?.BookScrollId == progressDto.BookScrollId
+                && userProgress?.KoboSpan == progressDto.KoboSpan)
             {
                 return true;
             }
 
             // Remove KoboSpan on chapter completion to reduce amount of needed KoboSpan Syncs
             // We will only start syncing them again if the book is read on a kobo afterwards
-            if (progressDto.PageNum > totalPages)
+            if (progressDto.PageNum >= totalPages)
             {
                 progressDto.KoboSpan = null;
             }
 
-            var shouldSyncKoboSpan = !string.IsNullOrEmpty(userProgress?.KoboSpan);
+            // Reconcile Kobo if we had Kobo progress and the update (UI) does not
+            var shouldSyncKoboSpan = string.IsNullOrEmpty(progressDto.KoboSpan) && !string.IsNullOrEmpty(userProgress?.KoboSpan);
 
             logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum} - {BookScrollId} - {Kobo}",
                 progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum, progressDto.BookScrollId?.Sanitize(), progressDto.KoboSpan?.Sanitize());

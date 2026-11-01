@@ -60,6 +60,9 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
 
   protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
+  protected readonly hasDownloadRole = computed(() => {
+    return this.accountService.hasAdminRole() || this.accountService.hasDownloadRole();
+  });
   protected readonly koboEnabledRsc = this.settingsService.getKoboEnabledResource();
 
   loading = signal(true);
@@ -70,7 +73,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   koboCollectionTypeaheadSettings = signal<TypeaheadConfig<UserCollection> | null>(null);
 
   koboEnabled = computed(() => {
-    return this.koboEnabledRsc.hasValue() && this.koboEnabledRsc.value();
+    return this.koboEnabledRsc.isLoading() || (this.koboEnabledRsc.hasValue() && this.koboEnabledRsc.value());
   });
 
   formModel = signal<Preferences>({
