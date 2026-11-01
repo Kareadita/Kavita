@@ -114,7 +114,33 @@ public class ReadingHistoryServiceTests(ITestOutputHelper testOutputHelper) : Ab
         Assert.Equal(DateTime.UtcNow.Date.AddDays(-1), history.DateUtc);
     }
 
-    private static async Task AddFinishedSession(DataContext dataContext, DateTime startUtc, DateTime startLocal)
+    [Fact]
+    public async Task SessionDuration_UsesUtcElapsed_AcrossDaylightSavingChange()
+    {
+        var (_, dataContext, _) = await CreateDatabase();
+        var service = Setup(dataContext);
+
+        var lib = await dataContext.Library.Includes(LibraryIncludes.Series).FirstAsync();
+        lib.Series.Add(new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("1").WithChapter(new ChapterBuilder("1").WithPages(2).Build()).Build())
+            .Build());
+        await dataContext.AppUser.AddAsync(new AppUser() { UserName = "Test" });
+        await dataContext.SaveChangesAsync();
+
+        // Spring forward: the local clock jumps from 1:30 AM to 3:30 AM during a 1 hour session
+        var startUtc = DateTime.SpecifyKind(DateTime.UtcNow.Date.AddDays(-1).AddHours(6).AddMinutes(30), DateTimeKind.Utc);
+        var startLocal = DateTime.SpecifyKind(startUtc.Date.AddHours(1).AddMinutes(30), DateTimeKind.Local);
+        await AddFinishedSession(dataContext, startUtc, startLocal, TimeSpan.FromHours(2));
+
+        await service.AggregateYesterdaysActivity();
+
+        var history = Assert.Single(await dataContext.AppUserReadingHistory.ToListAsync());
+        Assert.Equal(60, history.Data.TotalMinutesRead);
+        Assert.Equal(60, history.Data.LongestSessionMinutes);
+    }
+
+    private static async Task AddFinishedSession(DataContext dataContext, DateTime startUtc, DateTime startLocal,
+        TimeSpan? localElapsed = null)
     {
         var activityData = new AppUserReadingSessionActivityData(new ProgressDto()
         {
@@ -130,7 +156,7 @@ public class ReadingHistoryServiceTests(ITestOutputHelper testOutputHelper) : Ab
             AppUserId = 1,
             StartTime = startLocal,
             StartTimeUtc = startUtc,
-            EndTime = startLocal.AddHours(1),
+            EndTime = startLocal + (localElapsed ?? TimeSpan.FromHours(1)),
             EndTimeUtc = startUtc.AddHours(1),
             IsActive = false,
         });
