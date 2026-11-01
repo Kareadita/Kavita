@@ -1008,8 +1008,6 @@ public partial class BookService(
             var counter = 0;
             foreach (var contentFileRef in await book.GetReadingOrderAsync())
             {
-                if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) continue;
-
                 if (contentFileRef.FilePath.Equals(epubFile, StringComparison.InvariantCultureIgnoreCase) ||
                     contentFileRef.Key.Equals(epubFile, StringComparison.InvariantCultureIgnoreCase))
                 {
@@ -1037,8 +1035,6 @@ public partial class BookService(
             var counter = 0;
             foreach (var contentFileRef in await book.GetReadingOrderAsync())
             {
-                if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) continue;
-
                 if (counter == page)
                 {
                     return contentFileRef.FilePath;
