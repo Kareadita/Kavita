@@ -424,7 +424,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   /**
    * Disables the Left most button
    */
-  isPrevDisabled = computed(() => {
+  // Not computed: the inputs (scroll position, chapter id fields) are not signals, so a computed would never refresh
+  isPrevDisabled() {
     const readingDirection = this.readingDirection();
 
     if (readingDirection === ReadingDirection.LeftToRight) {
@@ -434,9 +435,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
     // Acting as a Next button
     return this.isNextPageDisabled();
-  });
+  }
 
-  isNextDisabled = computed(() => {
+  isNextDisabled() {
     const readingDirection = this.readingDirection();
 
     if (readingDirection === ReadingDirection.LeftToRight) {
@@ -445,7 +446,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     }
     // Acting as Previous button
     return this.isPrevPageDisabled();
-  });
+  }
 
   shouldShowMenu = computed(() => {
     const immersiveMode = this.immersiveMode();
