@@ -17,4 +17,6 @@ public sealed record BookInfoDto : IChapterInfoDto
     public int Pages { get; set; }
     public bool IsSpecial { get; set; }
     public string ChapterTitle { get; set; } = default! ;
+    [EnumDataType(typeof(PublicationStatus))]
+    public PublicationStatus? SeriesPublicationStatus { get; set; }
 }

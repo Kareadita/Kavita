@@ -211,9 +211,6 @@ public class ReaderController(ICacheService cacheService,
         var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(dto.SeriesId, UserId, ct);
         if (series == null) return NotFound();
 
-        var publicationStatus = await unitOfWork.SeriesRepository.GetPublicationStatusAsync(dto.SeriesId, ct);
-        if (publicationStatus == null) return NotFound();
-
         var info = new ChapterInfoDto()
         {
             ChapterNumber = dto.ChapterNumber,
@@ -228,7 +225,7 @@ public class ReaderController(ICacheService cacheService,
             Pages = dto.Pages,
             SeriesTotalPages = series.Pages,
             SeriesTotalPagesRead = series.PagesRead,
-            SeriesPublicationStatus = publicationStatus.Value,
+            SeriesPublicationStatus = dto.SeriesPublicationStatus,
             ChapterTitle = dto.ChapterTitle ?? string.Empty,
             Subtitle = string.Empty,
             Title = dto.SeriesName,

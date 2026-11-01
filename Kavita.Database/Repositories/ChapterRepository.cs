@@ -81,7 +81,8 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
                 SeriesFormat = series.Format,
                 SeriesName = series.Name,
                 series.LibraryId,
-                LibraryType = series.Library.Type
+                LibraryType = series.Library.Type,
+                SeriesPublicationStatus = (PublicationStatus?) series.Metadata.PublicationStatus
             })
             .AsNoTracking()
             .AsSplitQuery()
@@ -102,7 +103,8 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             LibraryId = data.LibraryId,
             Pages = data.Pages,
             ChapterTitle = data.TitleName,
-            LibraryType = data.LibraryType
+            LibraryType = data.LibraryType,
+            SeriesPublicationStatus = data.SeriesPublicationStatus
         };
     }
 

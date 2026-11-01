@@ -77,7 +77,11 @@ public sealed record ChapterInfoDto : IChapterInfoDto
     /// Total pages read for the series
     /// </summary>
     public int SeriesTotalPagesRead { get; set; }
-    public PublicationStatus SeriesPublicationStatus { get; set; }
+    /// <summary>
+    /// Series publication status. Null if not set.
+    /// </summary>
+    [EnumDataType(typeof(PublicationStatus))]
+    public PublicationStatus? SeriesPublicationStatus { get; set; }
 
     /// <summary>
     /// List of all files with their inner archive structure maintained in filename and dimensions

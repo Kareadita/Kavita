@@ -89,6 +89,7 @@ public class BookController(
             LibraryId = dto.LibraryId,
             IsSpecial = dto.IsSpecial,
             Pages = dto.Pages,
+            SeriesPublicationStatus = dto.SeriesPublicationStatus,
         };
 
 
