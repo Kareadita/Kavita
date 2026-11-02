@@ -4986,7 +4986,7 @@
         "io-error": "File could not be accessed (disk, network or permissions)",
         "metadata-unreadable": "Embedded metadata could not be read, imported without it",
         "epub-not-strict": "Epub has structural errors, imported in lenient mode",
-        "ambiguous-series": "Matches more than one series, edit its SeriesSort/LocalizedSeries tag"
+        "ambiguous-series": "Matches more than one series, edit its LocalizedSeries tag"
     },
 
     "validation": {
