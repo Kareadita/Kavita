@@ -1,5 +1,5 @@
 import {computed, DestroyRef, effect, inject, Injectable, signal, untracked} from '@angular/core';
-import {firstValueFrom, Observable, skip, Subject} from 'rxjs';
+import {firstValueFrom, Observable, Subject} from 'rxjs';
 import {bookColorThemes, PageStyle} from "../book-reader/_components/reader-settings/reader-settings.component";
 import {ReadingDirection} from '../_models/preferences/reading-direction';
 import {WritingStyle} from '../_models/preferences/writing-style';
@@ -8,7 +8,7 @@ import {FormControl, FormGroup, NonNullableFormBuilder} from "@angular/forms";
 import {ReadingProfile, ReadingProfileKind} from "../_models/preferences/reading-profiles";
 import {ThemeService} from './theme.service';
 import {ReadingProfileService} from "./reading-profile.service";
-import {debounceTime, distinctUntilChanged, filter, tap} from "rxjs/operators";
+import {debounceTime, filter, map, tap} from "rxjs/operators";
 import {BookTheme} from "../_models/preferences/book-theme";
 import {DOCUMENT} from "@angular/common";
 import {translate} from "@jsverse/transloco";
@@ -61,6 +61,8 @@ export class EpubReaderSettingsService {
   private readonly _epubFonts = signal<EpubFont[]>([]);
   private readonly _activeTheme = signal<BookTheme | undefined>(undefined);
   private readonly _isFullscreen = signal<boolean>(false);
+  /** A cache of the saved settings in JSON form for checking if we should save implicit profile */
+  private savedSettings = '';
 
   formModel = signal<BookReadingProfileFormModel>({
     bookReaderDisableBookmarkIcon: false,
@@ -153,9 +155,12 @@ export class EpubReaderSettingsService {
 
     toObservable(this.formGroup().value).pipe(
       debounceTime(500),
-      distinctUntilChanged(),
-      skip(1), // Data loaded
-      tap(() => this.updateImplicitProfile()),
+      map(value => JSON.stringify(value)),
+      filter(settings => this._isInitialized() && settings !== this.savedSettings),
+      tap(settings => {
+        this.savedSettings = settings;
+        this.updateImplicitProfile();
+      }),
     ).subscribe();
   }
 
@@ -189,6 +194,7 @@ export class EpubReaderSettingsService {
     // Set initial theme
     const themeName = readingProfile.bookReaderThemeName || this.themeService.defaultBookTheme;
     this.setTheme(themeName, false);
+    this.savedSettings = JSON.stringify(this.formModel());
 
     // Mark as initialized - this will trigger effects to emit initial values
     this._isInitialized.set(true);

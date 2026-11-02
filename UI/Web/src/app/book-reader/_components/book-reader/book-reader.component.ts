@@ -32,6 +32,7 @@ import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.c
 import {BookInfo} from "../../_models/book-info";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
+import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
 import {EpubReaderSettingsService, ReaderSettingUpdate} from "../../../_services/epub-reader-settings.service";
@@ -146,6 +147,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   private readonly router = inject(Router);
   private readonly seriesService = inject(SeriesService);
   private readonly readerService = inject(ReaderService);
+  private readonly readingProfileService = inject(ReadingProfileService);
   private readonly epubHighlightService = inject(EpubHighlightService);
   private readonly renderer = inject(Renderer2);
   private readonly navService = inject(NavService);
@@ -1023,6 +1025,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
         return;
       }
 
+      const seriesChanged = !firstLoad && info.seriesId !== this.seriesId;
       this.bookInfo.set(info);
       this.seriesId = info.seriesId;
       this.libraryId = info.libraryId;
@@ -1033,7 +1036,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       this.kavitaTitleStrategy.setFormattedTitle(this.bookTitle() + ' Reader');
       this.cdRef.markForCheck();
 
+      if (seriesChanged) {
+        this.readingProfile = await firstValueFrom(this.readingProfileService.getForSeries(this.libraryId, this.seriesId));
+      }
+
       await this.readerSettingsService.initialize(this.libraryId, this.seriesId, this.readingProfile);
+
+      if (seriesChanged) {
+        this.readerService.showReadingProfileSwitch(this.readingProfile, info.seriesName);
+      }
 
       this.setupReaderSettingEffects(this.injector);
 

@@ -4587,6 +4587,8 @@
         "no-prev-chapter": "Could not find previous {{entity}}",
         "load-next-chapter": "Next {{entity}} loaded",
         "load-prev-chapter": "Previous {{entity}} loaded",
+        "reading-profile-switched": "Using reading profile {{name}}",
+        "reading-profile-switched-series": "Using your settings for {{seriesName}}",
         "account-registration-complete": "Account registration complete",
         "account-migration-complete": "Account migration complete",
         "password-reset": "Password reset",

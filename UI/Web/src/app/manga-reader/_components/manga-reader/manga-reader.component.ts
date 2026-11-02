@@ -25,7 +25,6 @@ import {
   catchError,
   concat,
   debounceTime,
-  distinctUntilChanged,
   EMPTY,
   filter,
   forkJoin,
@@ -33,7 +32,6 @@ import {
   map,
   Observable,
   ReplaySubject,
-  skip,
   Subject,
   switchMap,
   tap
@@ -276,6 +274,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * pipeline that would otherwise POST the defaults back on every page load.
    */
   formSeeded = signal<boolean>(false);
+  private savedSettings = '';
   /**
    * Portrait/narrow viewport, where the double renderer doesn't fit.
    */
@@ -758,10 +757,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.router.navigateByUrl('/home');
         return;
       }
-      const readingProfile = data['readingProfile'] as ReadingProfile;
-      this.readingProfile.set(readingProfile);
-      this.formModel.set(toFormModel(readingProfile, this.mangaReaderService));
       // Requires seriesId to be set
+      this.applyReadingProfile(data['readingProfile'] as ReadingProfile);
       this.setupReaderSettings();
       this.formSeeded.set(true);
       this.cdRef.markForCheck();
@@ -787,10 +784,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Use persistableSettings over effectiveModel in case the reader forces Single from Double, we dont save Single
     toObservable(this.persistableSettings, {injector: this.injector}).pipe(
       filter(() => this.formSeeded()),
-      skip(1), // This skips the seeded value, needed for proper auto-save
       debounceTime(300),
       map(() => this.packReadingProfile()),
-      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+      filter(profile => JSON.stringify(profile) !== this.savedSettings),
+      tap(profile => this.savedSettings = JSON.stringify(profile)),
       takeUntilDestroyed(this.destroyRef),
       switchMap(newProfile => this.readingProfileService.updateImplicit(this.libraryId, this.seriesId, newProfile).pipe(
         catchError(err => {
@@ -798,7 +795,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           return EMPTY;
         })
       )),
-    ).subscribe(updatedProfile => this.readingProfile.set(updatedProfile));
+    ).subscribe(updatedProfile => {
+      this.readingProfile.set(updatedProfile);
+      this.savedSettings = JSON.stringify(this.packReadingProfile());
+    });
 
     this.currentImage$.pipe(
       filter(() => this.readerMode() !== ReaderMode.Webtoon),
@@ -874,9 +874,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.screenTooSmall.set(window.innerWidth <= window.innerHeight);
   }
 
-  setupReaderSettings() {
-
-    const readingProfile = this.readingProfile()!;
+  private applyReadingProfile(readingProfile: ReadingProfile) {
+    this.readingProfile.set(readingProfile);
+    this.formModel.set(toFormModel(readingProfile, this.mangaReaderService));
+    this.formGroup().reset();
 
     if (readingProfile.kind === ReadingProfileKind.Implicit) {
       this.readingProfileService.getForSeries(this.libraryId, this.seriesId, true).subscribe(parent => {
@@ -893,7 +894,21 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.readerModeSubject.next(this.readerMode());
     this.pagingDirectionSubject.next(this.pagingDirection());
+    this.savedSettings = JSON.stringify(this.packReadingProfile());
+  }
 
+  private switchReadingProfile(seriesName: string) {
+    this.readingProfileService.getForSeries(this.libraryId, this.seriesId).subscribe(readingProfile => {
+      const darkness = this.formModel().darkness;
+      this.applyReadingProfile(readingProfile);
+      this.formModel.update(model => ({...model, darkness}));
+      this.pushReaderSettings();
+      this.renderForReaderMode();
+      this.readerService.showReadingProfileSwitch(readingProfile, seriesName);
+    });
+  }
+
+  setupReaderSettings() {
     // Send the current width override value to the label
     this.widthOverrideLabel$ = this.readerSettings$.pipe(
       map(values => values.widthSlider <= 0 ? '' : values.widthSlider + '%'),
@@ -1161,11 +1176,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
+      const seriesChanged = !firstLoad && results.chapterInfo.seriesId !== this.seriesId;
       this.chapterInfo.set(results.chapterInfo);
       this.seriesId = results.chapterInfo.seriesId;
       this.libraryId = results.chapterInfo.libraryId;
       if (!firstLoad) {
         this.replaceReaderUrl();
+      }
+      if (seriesChanged) {
+        this.switchReadingProfile(results.chapterInfo.seriesName);
       }
 
       this.mangaReaderService.load(results.chapterInfo);
@@ -1931,6 +1950,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         break;
     }
 
+    this.renderForReaderMode();
+  }
+
+  private renderForReaderMode() {
     // We must set this here because loadPage from render doesn't call if we aren't page splitting
     if (this.readerMode() !== ReaderMode.Webtoon) {
       this.canvasImage = this.getPage(this.pageNum());

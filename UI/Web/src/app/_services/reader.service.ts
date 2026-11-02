@@ -37,6 +37,7 @@ import {
   RateAndReviewSeriesModalComponent
 } from "../reader-shared/_modals/rate-and-review-series-modal/rate-and-review-series-modal.component";
 import {RateReviewPrompt} from "../_models/readers/rate-review-prompt";
+import {ReadingProfile, ReadingProfileKind} from "../_models/preferences/reading-profiles";
 import {PublicationStatus} from "../_models/metadata/publication-status";
 import {ReviewService} from "./review.service";
 
@@ -367,6 +368,13 @@ export class ReaderService {
     if (imageSrc === undefined || imageSrc === '') { return -1; }
     const params = new URLSearchParams(new URL(imageSrc).search);
     return parseInt(params.get('chapterId') || '-1', 10);
+  }
+
+  showReadingProfileSwitch(profile: ReadingProfile, seriesName: string) {
+    const message = profile.kind === ReadingProfileKind.Implicit
+      ? translate('toasts.reading-profile-switched-series', {seriesName})
+      : translate('toasts.reading-profile-switched', {name: profile.name});
+    this.toastr.info(message, '', {timeOut: 1000});
   }
 
   /**
