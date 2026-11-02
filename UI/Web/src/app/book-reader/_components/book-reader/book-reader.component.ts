@@ -1278,35 +1278,29 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
     // This will only happen if no actual chapter can be found
     this.isLoading.set(false);
+    const entity = this.entityTitleService.formatChapterName(this.libraryType).toLowerCase();
+
     if (direction === 'Prev') {
       this.prevPageDisabled = true;
-    } else {
-      this.nextPageDisabled = true;
+      this.toastr.warning(translate('toasts.no-prev-chapter', {entity}));
+      return;
     }
-    this.cdRef.markForCheck();
 
-    if (direction === 'Next' && this.readingListMode) {
+    // Only prompt the rate and review when on the last page (and clicking NextChapter), otherwise show the prompt
+    if (!this.isOnLastPage()) {
+      this.toastr.warning(translate('toasts.no-next-chapter', {entity}));
+      return;
+    }
+
+    this.nextPageDisabled = true;
+    if (this.readingListMode) {
       this.closeReader();
       return;
     }
 
-    if (direction === 'Next' && this.isOnLastPage()) {
-      this.promptRateAndReview().subscribe(prompted => {
-        if (prompted) {
-          this.closeReader();
-          return;
-        }
-        this.showNoChapterToast(direction);
-      });
-      return;
-    }
-
-    this.showNoChapterToast(direction);
-  }
-
-  private showNoChapterToast(direction: 'Next' | 'Prev') {
-    const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter', {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()});
-    this.toastr.warning(msg);
+    this.promptRateAndReview().subscribe(() => {
+      this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
+    });
   }
 
   /**

@@ -1262,15 +1262,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   exitReader() {
     if (this.readerService.closeRateReviewModal() || this.readerService.closeShortCutModal()) return;
 
-    const onLastPage = this.isReaderModeWebtoon()
-      ? !!this.infiniteScroller()?.isLastPageInView()
-      : this.pageNum() === this.maxPages() - 1;
-    if (this.bookmarkMode() || !onLastPage || !this.chapterInfo()) {
+    if (this.bookmarkMode() || !this.isOnLastPage() || !this.chapterInfo()) {
       this.closeReader();
       return;
     }
 
     this.promptRateAndReview().subscribe(() => this.closeReader());
+  }
+
+  private isOnLastPage() {
+    if (this.isReaderModeWebtoon()) return !!this.infiniteScroller()?.isLastPageInView();
+    return this.pageNum() === this.maxPages() - 1;
   }
 
   private promptRateAndReview() {
@@ -1589,6 +1591,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Open a Modal to ask for a review then close out the reader when they haven't rated it
       if (this.bookmarkMode()) {
         this.router.navigate(['library', this.libraryId, 'series', this.seriesId], {fragment: 'review-tab'});
+        return;
+      }
+
+      // Don't show the rate and review modal unless explictly on last page (aka fully read)
+      if (!this.isOnLastPage()) {
+        this.toastr.warning(translate('toasts.no-next-chapter', {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()}));
         return;
       }
 
