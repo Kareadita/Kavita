@@ -29,6 +29,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { Tooltip } from 'bootstrap';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.component";
+import {BookInfo} from "../../_models/book-info";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {ConfirmService} from "../../../shared/confirm.service";
@@ -237,6 +238,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
    * Title of the book. Rendered in action bar
    */
   bookTitle = signal<string>('');
+  private bookInfo = signal<BookInfo | null>(null);
   /**
    * Authors of the book. Rendered in action bar
    */
@@ -482,14 +484,29 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
 
   isNextPageDisabled() {
-    const condition = (this.nextPageDisabled || this.nextChapterId === CHAPTER_ID_DOESNT_EXIST) && this.pageNum() + 1 > this.maxPages() - 1;
+    return (this.nextPageDisabled || this.nextChapterId === CHAPTER_ID_DOESNT_EXIST) && this.isOnLastPage();
+  }
 
-    if (this.layoutMode() !== BookPageLayoutMode.Default) {
-      const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
-      return condition && currentVirtualPage === totalVirtualPages;
+  private isOnLastPage() {
+    if (this.pageNum() + 1 < this.maxPages()) return false;
+    if (this.layoutMode() === BookPageLayoutMode.Default) return true;
+
+    const [currentVirtualPage, totalVirtualPages] = this.getVirtualPage();
+    return currentVirtualPage === totalVirtualPages;
+  }
+
+  private isScrolledToEnd() {
+    // Column layouts end on the last virtual page, which isOnLastPage already checks
+    if (this.layoutMode() !== BookPageLayoutMode.Default) return true;
+
+    const content = this.bookContentElemRef().nativeElement.getBoundingClientRect();
+    const viewport = this.reader().nativeElement.getBoundingClientRect();
+
+    // 1px: fractional layout leaves the end edge up to a pixel past the viewport at full scroll
+    if (this.writingStyle() === WritingStyle.Vertical) {
+      return content.left >= viewport.left - 1;
     }
-
-    return condition;
+    return content.bottom <= viewport.bottom + 1;
   }
 
   isPrevPageDisabled() {
@@ -694,7 +711,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
             const isHighlighting = window.getSelection()?.toString() != '';
             if (isHighlighting && this.isLineOverlayOpen()) return;
 
-            this.closeReader();
+            this.exitReader();
             break;
           }
           case KeyBindTarget.GoTo:
@@ -991,6 +1008,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     this.nextChapterDisabled = false;
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
+    this.bookInfo.set(null);
     this.cdRef.markForCheck();
 
     this.loadImageBookmarks();
@@ -1004,6 +1022,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
         return;
       }
 
+      this.bookInfo.set(info);
       this.bookTitle.set(info.bookTitle);
       this.kavitaTitleStrategy.setFormattedTitle(this.bookTitle() + ' Reader');
       this.cdRef.markForCheck();
@@ -1138,6 +1157,30 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     }
 }
 
+  exitReader() {
+    if (this.readerService.closeRateReviewModal()) return;
+
+    if (!this.isOnLastPage() || !this.isScrolledToEnd()) {
+      this.closeReader();
+      return;
+    }
+
+    this.promptRateAndReview().subscribe(() => this.closeReader());
+  }
+
+  private promptRateAndReview() {
+    const info = this.bookInfo();
+    if (!info) return of(false);
+
+    return this.readerService.promptRateAndReview({
+      seriesId: info.seriesId,
+      volumeId: info.volumeId,
+      chapterId: this.chapterId,
+      seriesName: info.seriesName,
+      publicationStatus: info.seriesPublicationStatus,
+    });
+  }
+
   closeReader() {
     this.readerService.closeShortCutModal();
     this.readerService.closeReader(this.libraryId, this.seriesId, this.chapterId, this.readingListMode, this.readingListId);
@@ -1227,8 +1270,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     }
 
     // This will only happen if no actual chapter can be found
-    const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter', {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()});
-    this.toastr.warning(msg);
     this.isLoading.set(false);
     if (direction === 'Prev') {
       this.prevPageDisabled = true;
@@ -1236,6 +1277,24 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       this.nextPageDisabled = true;
     }
     this.cdRef.markForCheck();
+
+    if (direction === 'Next' && this.isOnLastPage()) {
+      this.promptRateAndReview().subscribe(prompted => {
+        if (prompted) {
+          this.closeReader();
+          return;
+        }
+        this.showNoChapterToast(direction);
+      });
+      return;
+    }
+
+    this.showNoChapterToast(direction);
+  }
+
+  private showNoChapterToast(direction: 'Next' | 'Prev') {
+    const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter', {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()});
+    this.toastr.warning(msg);
   }
 
   /**
