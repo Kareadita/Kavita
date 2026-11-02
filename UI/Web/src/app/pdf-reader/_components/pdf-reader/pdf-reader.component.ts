@@ -41,6 +41,7 @@ import {SeriesService} from "../../../_services/series.service";
 import {NavService} from "../../../_services/nav.service";
 import {BookService} from "../../../book-reader/_services/book.service";
 import {BookInfo} from "../../../book-reader/_models/book-info";
+import {MangaFormat} from "../../../_models/manga-format";
 import {ThemeService} from "../../../_services/theme.service";
 import {AccountService} from "../../../_services/account.service";
 import {CHAPTER_ID_DOESNT_EXIST, ReaderService} from "../../../_services/reader.service";
@@ -349,8 +350,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
    */
    turnOffIncognito() {
     this.incognitoMode = false;
-    const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
-    window.history.replaceState({}, '', newRoute);
+    this.readerService.replaceReaderUrl(this.libraryId, this.seriesId, this.chapterId, MangaFormat.PDF,
+      this.incognitoMode, this.readingListMode, this.readingListId);
     this.toastr.info(translate('toasts.incognito-off'));
     this.saveProgress();
     this.cdRef.markForCheck();
@@ -426,6 +427,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       chapterId: this.chapterId,
       seriesName: this.bookInfo.seriesName,
       publicationStatus: this.bookInfo.seriesPublicationStatus,
+      readingListMode: this.readingListMode,
     }).subscribe(() => this.closeReader());
   }
 

@@ -1162,6 +1162,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       this.chapterInfo.set(results.chapterInfo);
+      this.seriesId = results.chapterInfo.seriesId;
+      this.libraryId = results.chapterInfo.libraryId;
+      if (!firstLoad) {
+        this.replaceReaderUrl();
+      }
 
       this.mangaReaderService.load(results.chapterInfo);
 
@@ -1276,7 +1281,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       chapterId: this.chapterId(),
       seriesName: chapterInfo.seriesName,
       publicationStatus: chapterInfo.seriesPublicationStatus,
+      readingListMode: this.readingListMode,
     });
+  }
+
+  private replaceReaderUrl() {
+    this.readerService.replaceReaderUrl(this.libraryId, this.seriesId, this.chapterId(),
+      this.chapterInfo()?.seriesFormat ?? MangaFormat.ARCHIVE, this.incognitoMode(), this.readingListMode, this.readingListId);
   }
 
   closeReader() {
@@ -1581,6 +1592,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
+      if (this.readingListMode) {
+        this.closeReader();
+        return;
+      }
+
       this.promptRateAndReview().subscribe(() => {
         this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
       });
@@ -1635,9 +1651,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.chapterId.set(chapterId);
       this.continuousChaptersStack.push(chapterId);
-      // Load chapter Id onto route but don't reload
-      const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId(), this.incognitoMode(), this.readingListMode, this.readingListId);
-      window.history.replaceState({}, '', newRoute);
       this.init(false, direction);
       const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.info(msg, '', {timeOut: 3000});
@@ -1994,8 +2007,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   turnOffIncognito() {
     this.incognitoMode.set(false);
-    const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId(), this.incognitoMode(), this.readingListMode, this.readingListId);
-    window.history.replaceState({}, '', newRoute);
+    this.replaceReaderUrl();
     this.toastr.info(translate('toasts.incognito-off'));
     if (!this.bookmarkMode()) {
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId(), this.pageNum()).subscribe(() => {/* No operation */});

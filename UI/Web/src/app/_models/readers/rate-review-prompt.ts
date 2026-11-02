@@ -6,4 +6,5 @@ export interface RateReviewPrompt {
   chapterId: number;
   seriesName: string;
   publicationStatus: PublicationStatus | null;
+  readingListMode: boolean;
 }

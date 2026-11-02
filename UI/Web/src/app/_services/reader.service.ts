@@ -114,13 +114,13 @@ export class ReaderService {
    */
   promptRateAndReview(prompt: RateReviewPrompt): Observable<boolean> {
     if (this.rateReviewPromptActive) return EMPTY;
+    if (prompt.readingListMode) return of(false);
 
     const status = prompt.publicationStatus;
     if (status === null || !RATE_REVIEW_PROMPT_STATUSES.includes(status)) return of(false);
 
     this.rateReviewPromptActive = true;
 
-    // No readingListId: the end of a reading list is not the end of the series
     return this.getNextChapter(prompt.seriesId, prompt.volumeId, prompt.chapterId).pipe(
       switchMap(nextChapterId => nextChapterId === CHAPTER_ID_DOESNT_EXIST
         ? this.reviewService.getMyRatingAndReview(prompt.seriesId)
@@ -369,13 +369,15 @@ export class ReaderService {
     return parseInt(params.get('chapterId') || '-1', 10);
   }
 
-  getNextChapterUrl(url: string, nextChapterId: number, incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
-    const lastSlashIndex = url.lastIndexOf('/');
-    let newRoute = url.substring(0, lastSlashIndex + 1) + nextChapterId + '';
-    newRoute += this.getQueryParams(incognitoMode, readingListMode, readingListId);
-    return newRoute;
+  /**
+   * Points the address bar at the chapter the reader now shows, without navigating
+   */
+  replaceReaderUrl(libraryId: number, seriesId: number, chapterId: number, format: MangaFormat,
+                   incognitoMode: boolean, readingListMode: boolean, readingListId: number) {
+    const tree = this.router.createUrlTree(this.getNavigationArray(libraryId, seriesId, chapterId, format),
+      {queryParams: this.getQueryParamsObject(incognitoMode, readingListMode, readingListId)});
+    this.location.replaceState(this.router.serializeUrl(tree));
   }
-
 
   getQueryParamsObject(incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
     const params: {[key: string]: any} = {};
@@ -385,21 +387,6 @@ export class ReaderService {
       params['readingListId'] = readingListId;
     }
 
-    return params;
-  }
-
-  getQueryParams(incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
-    let params = '';
-    if (incognitoMode) {
-      params += '?incognitoMode=true';
-    }
-    if (readingListMode) {
-      if (params.indexOf('?') > 0) {
-        params += '&readingListId=' + readingListId;
-      } else {
-        params += '?readingListId=' + readingListId;
-      }
-    }
     return params;
   }
 

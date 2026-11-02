@@ -975,6 +975,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       this.readingListMode = true;
       this.readingListId = parseInt(readingListId, 10);
     }
+    this.continuousChaptersStack.push(this.chapterId);
     this.cdRef.markForCheck();
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(async (data) => {
@@ -1023,6 +1024,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       }
 
       this.bookInfo.set(info);
+      this.seriesId = info.seriesId;
+      this.libraryId = info.libraryId;
+      if (!firstLoad) {
+        this.replaceReaderUrl();
+      }
       this.bookTitle.set(info.bookTitle);
       this.kavitaTitleStrategy.setFormattedTitle(this.bookTitle() + ' Reader');
       this.cdRef.markForCheck();
@@ -1061,8 +1067,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       // Don't descope here as document hasn't loaded
       this.lastSeenScrollPartPath = progress.bookScrollId;
     }
-
-    this.continuousChaptersStack.push(this.chapterId);
 
     this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
       this.libraryType = type;
@@ -1178,7 +1182,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       chapterId: this.chapterId,
       seriesName: info.seriesName,
       publicationStatus: info.seriesPublicationStatus,
+      readingListMode: this.readingListMode,
     });
+  }
+
+  private replaceReaderUrl() {
+    this.readerService.replaceReaderUrl(this.libraryId, this.seriesId, this.chapterId, MangaFormat.EPUB,
+      this.incognitoMode(), this.readingListMode, this.readingListId);
   }
 
   closeReader() {
@@ -1259,9 +1269,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       // Ensure all scroll locks are undone
       this.scrollService.unlock();
 
-      // Load chapter Id onto route but don't reload
-      const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode(), this.readingListMode, this.readingListId);
-      window.history.replaceState({}, '', newRoute);
       const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.info(msg, '', {timeOut: 3000});
       this.cdRef.markForCheck();
@@ -1277,6 +1284,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       this.nextPageDisabled = true;
     }
     this.cdRef.markForCheck();
+
+    if (direction === 'Next' && this.readingListMode) {
+      this.closeReader();
+      return;
+    }
 
     if (direction === 'Next' && this.isOnLastPage()) {
       this.promptRateAndReview().subscribe(prompted => {
@@ -2329,8 +2341,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
    */
    turnOffIncognito() {
     this.incognitoMode.set(false);
-    const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode(), this.readingListMode, this.readingListId);
-    window.history.replaceState({}, '', newRoute);
+    this.replaceReaderUrl();
     this.toastr.info(translate('toasts.incognito-off'));
     this.saveProgress();
   }
