@@ -96,11 +96,17 @@ export class ReaderService {
     if (this.shortCutModalOpen()) return;
 
     this.shortCutModalOpen.set(true);
-    this.shortCutModalRef = this.modalService.open(ShortcutsModalComponent, mediumModal());
-    this.shortCutModalRef.setInput('shortcuts', shortcuts);
-    this.shortCutModalRef.setInput('inBookReader', inBookReader);
+    const ref = this.modalService.open(ShortcutsModalComponent, mediumModal());
+    this.shortCutModalRef = ref;
+    ref.setInput('shortcuts', shortcuts);
+    ref.setInput('inBookReader', inBookReader);
 
-    merge(this.shortCutModalRef.closed, this.shortCutModalRef.dismissed).subscribe(() => this.shortCutModalOpen.set(false));
+    merge(ref.closed, ref.dismissed).subscribe(() => {
+      this.shortCutModalOpen.set(false);
+      if (this.shortCutModalRef === ref) {
+        this.shortCutModalRef = undefined;
+      }
+    });
   }
 
   /**

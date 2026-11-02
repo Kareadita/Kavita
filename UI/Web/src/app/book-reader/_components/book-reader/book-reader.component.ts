@@ -1158,7 +1158,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 }
 
   exitReader() {
-    if (this.readerService.closeRateReviewModal()) return;
+    if (this.readerService.closeRateReviewModal() || this.readerService.closeShortCutModal()) return;
 
     if (!this.isOnLastPage() || !this.isScrolledToEnd()) {
       this.closeReader();

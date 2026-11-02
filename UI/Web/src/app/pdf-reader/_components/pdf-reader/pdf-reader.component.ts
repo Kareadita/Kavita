@@ -40,6 +40,7 @@ import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.servi
 import {SeriesService} from "../../../_services/series.service";
 import {NavService} from "../../../_services/nav.service";
 import {BookService} from "../../../book-reader/_services/book.service";
+import {BookInfo} from "../../../book-reader/_models/book-info";
 import {ThemeService} from "../../../_services/theme.service";
 import {AccountService} from "../../../_services/account.service";
 import {CHAPTER_ID_DOESNT_EXIST, ReaderService} from "../../../_services/reader.service";
@@ -115,6 +116,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
    */
   maxPages: number = 1;
   bookTitle: string = '';
+  private bookInfo: BookInfo | null = null;
 
   zoomSetting: string | number = 'auto';
 
@@ -156,7 +158,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
         (e) => {
           switch (e.target) {
             case KeyBindTarget.Escape:
-              this.closeReader();
+              this.exitReader();
               break;
             case KeyBindTarget.FirstPage:
               this.currentPage = 0;
@@ -319,6 +321,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.calcScrollbarNeeded();
 
     this.bookService.getBookInfo(this.chapterId).subscribe(info => {
+      this.bookInfo = info;
       this.volumeId = info.volumeId;
       this.bookTitle = info.bookTitle;
       this.cdRef.markForCheck();
@@ -407,6 +410,41 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   saveProgress() {
     if (this.incognitoMode) return;
     this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.currentPage).subscribe();
+  }
+
+  exitReader() {
+    if (this.readerService.closeRateReviewModal() || this.readerService.closeShortCutModal()) return;
+
+    if (!this.bookInfo || !this.isLastPageEndInView()) {
+      this.closeReader();
+      return;
+    }
+
+    this.readerService.promptRateAndReview({
+      seriesId: this.bookInfo.seriesId,
+      volumeId: this.bookInfo.volumeId,
+      chapterId: this.chapterId,
+      seriesName: this.bookInfo.seriesName,
+      publicationStatus: this.bookInfo.seriesPublicationStatus,
+    }).subscribe(() => this.closeReader());
+  }
+
+  // Not currentPage: the viewer reports the first fully visible page, so with 278-282 on screen it stays on 279
+  private isLastPageEndInView() {
+    const lastPage = this.document.querySelector(`.page[data-page-number="${this.maxPages}"]`);
+    const viewer = this.document.querySelector('#viewerContainer');
+    if (!lastPage || !viewer) return false;
+
+    // Page mode keeps only the current page or spread in the DOM, so the element existing means it is showing
+    if (this.scrollMode === ScrollModeType.page) return true;
+
+    const page = lastPage.getBoundingClientRect();
+    const view = viewer.getBoundingClientRect();
+
+    // 1px: fractional layout leaves the edge up to a pixel past the viewer at full scroll
+    return this.scrollMode === ScrollModeType.horizontal
+      ? page.right <= view.right + 1
+      : page.bottom <= view.bottom + 1;
   }
 
   closeReader() {

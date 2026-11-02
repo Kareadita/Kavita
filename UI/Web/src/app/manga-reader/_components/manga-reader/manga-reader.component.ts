@@ -1255,7 +1255,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   exitReader() {
-    if (this.readerService.closeRateReviewModal()) return;
+    if (this.readerService.closeRateReviewModal() || this.readerService.closeShortCutModal()) return;
 
     const onLastPage = this.isReaderModeWebtoon()
       ? !!this.infiniteScroller()?.isLastPageInView()
