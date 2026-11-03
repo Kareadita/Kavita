@@ -1516,7 +1516,10 @@
 
         "force-selected-one-column": "Layout mode switched to One Column due to insufficient space to render Two Columns",
         "forced-vertical-switch": "Layout mode switched as Two Column layout doesn't work with Vertical Writing Style",
-        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}",
+        "bookmarks-alt": "{{view-bookmark-drawer.title}}",
+        "annotations-alt": "{{view-annotations-drawer.title}}",
+        "toc-alt": "{{view-toc-drawer.title}}"
     },
 
     "personal-table-of-contents": {
@@ -3562,7 +3565,11 @@
         "toggle-incognito": "Turn off Incognito Mode",
         "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}",
         "prev-chapter-alt": "Previous Chapter",
-        "next-chapter-alt": "Next Chapter"
+        "next-chapter-alt": "Next Chapter",
+        "first-page-alt": "{{manga-reader.first-page-tooltip}}",
+        "prev-page-alt": "{{manga-reader.prev-page-tooltip}}",
+        "next-page-alt": "{{manga-reader.next-page-tooltip}}",
+        "last-page-alt": "{{manga-reader.last-page-tooltip}}"
     },
 
     "pdf-layout-mode-pipe": {
@@ -4585,8 +4592,8 @@
         "k+-reset-key-success": "Your license has been un-registered. Use Edit button to re-register your instance and re-activate Kavita+",
         "library-deleted": "Library {{name}} has been removed",
         "copied-to-clipboard": "Copied to clipboard",
-        "no-next-chapter": "Could not find next {{entity}}",
-        "no-prev-chapter": "Could not find previous {{entity}}",
+        "no-next-chapter": "No next {{entity}}",
+        "no-prev-chapter": "No previous {{entity}}",
         "load-next-chapter": "Next {{entity}} loaded",
         "load-prev-chapter": "Previous {{entity}} loaded",
         "reading-profile-switched": "Using reading profile {{name}}",

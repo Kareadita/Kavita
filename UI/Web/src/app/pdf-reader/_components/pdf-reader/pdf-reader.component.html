@@ -63,7 +63,25 @@
               <i class="toolbar-icon fa fa-fast-backward" [ngStyle]="{color: fontColor()}" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('prev-chapter-alt')}}</span>
             </button>
-            <pdf-paging-area />
+            <button type="button" class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" (click)="goToPage(1)"
+                    [disabled]="currentPage() <= 1" [ngbTooltip]="t('first-page-alt')">
+              <i class="toolbar-icon fa fa-step-backward" [ngStyle]="{color: fontColor()}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('first-page-alt')}}</span>
+            </button>
+            <button type="button" class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" (click)="prevPage()" [ngbTooltip]="t('prev-page-alt')">
+              <i class="toolbar-icon fa fa-angle-left" [ngStyle]="{color: fontColor()}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('prev-page-alt')}}</span>
+            </button>
+            <pdf-page-number />
+            <button type="button" class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" (click)="nextPage()" [ngbTooltip]="t('next-page-alt')">
+              <i class="toolbar-icon fa fa-angle-right" [ngStyle]="{color: fontColor()}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('next-page-alt')}}</span>
+            </button>
+            <button type="button" class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" (click)="goToPage(maxPages())"
+                    [disabled]="currentPage() >= maxPages()" [ngbTooltip]="t('last-page-alt')">
+              <i class="toolbar-icon fa fa-step-forward" [ngStyle]="{color: fontColor()}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('last-page-alt')}}</span>
+            </button>
             <button type="button" class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" (click)="loadNextChapter()"
                     [disabled]="nextChapterDisabled()" [ngbTooltip]="t('next-chapter-alt')">
               <i class="toolbar-icon fa fa-fast-forward" [ngStyle]="{color: fontColor()}" aria-hidden="true"></i>

@@ -14,16 +14,18 @@ import {
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
+  IPDFViewer,
   NgxExtendedPdfViewerModule,
   NgxExtendedPdfViewerService,
   PageViewModeType,
   pdfDefaultOptions,
+  PDFNotificationService,
   ProgressBarEvent,
   ScrollModeType,
   SpreadType
 } from 'ngx-extended-pdf-viewer';
 import {ToastrService} from '@openng/ngx-toastr';
-import {auditTime, catchError, filter, forkJoin, fromEvent, merge, of, take} from 'rxjs';
+import {auditTime, catchError, filter, forkJoin, fromEvent, merge, of, switchMap, take} from 'rxjs';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {DOCUMENT, NgStyle} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -67,6 +69,9 @@ const KEYBIND_TARGETS = [
 const PREFETCH_PAGE_WINDOW = 10;
 const END_OF_CHAPTER_CHECK_MS = 250;
 
+// pdf.js has these, ngx's IPDFViewer typing leaves them out. Both turn by a whole spread and return false at the first/last page
+type PdfJsViewer = IPDFViewer & {nextPage(): boolean, previousPage(): boolean};
+
 const THEME_COLORS: {[key: string]: {background: string, font: string}} = {
   'dark': {'background': '#292929', 'font': '#d9d9d9'},
   'light': {'background': '#f9f9f9', 'font': '#5a5a5a'}
@@ -99,6 +104,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   private readonly libraryService = inject(LibraryService);
   private readonly readingProfileService = inject(ReadingProfileService);
   private readonly pdfViewerService = inject(NgxExtendedPdfViewerService);
+  private readonly pdfNotificationService = inject(PDFNotificationService);
   protected readonly breakpointService = inject(BreakpointService);
 
 
@@ -134,14 +140,29 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
    */
   readingListMode: boolean = false;
 
+  /**
+   * The page the reader sends the viewer to (open, swap, first/last page). Only bound one way to [page]: with [(page)]
+   * the viewer's own reports fed back into it, and horizontal mode, which reports page N as N+1, crept forward
+   */
   protected targetPage = signal(1);
+  /**
+   * The page the viewer reports. Drives saving, prefetch and the first/last page buttons, never moves the viewer
+   */
   protected currentPage = signal(1);
   protected maxPages = signal(1);
   protected bookTitle = signal('');
   private bookInfo: BookInfo | null = null;
   private lastSavedProgress: {chapterId: number, page: number} | null = null;
   private viewerScrollWatched = false;
+  /**
+   * True from a document load until the reader's first key, wheel, pointer or touch. A new document reports pages
+   * the reader did not turn to (a reset to page 1, a neighbour of targetPage), so nothing is saved until then
+   */
   private awaitingReaderInput = false;
+  /**
+   * Paged forward into a fully read chapter. Its first save resets progress to 0 before saving the page, like the manga reader
+   */
+  private isReRead = false;
 
   protected zoomSetting = signal<string | number>('auto');
 
@@ -184,19 +205,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
               this.exitReader();
               break;
             case KeyBindTarget.PageRight:
-              if (!this.isLastPageEndInView()) {
-                // Not triggered, so the key is not preventDefaulted and pdf.js still scrolls with it
-                e.triggered = false;
-                break;
-              }
-              this.loadNextChapter();
+              this.nextPage();
               break;
             case KeyBindTarget.PageLeft:
-              if (!this.isFirstPageStartInView()) {
-                e.triggered = false;
-                break;
-              }
-              this.loadPrevChapter();
+              this.prevPage();
               break;
             case KeyBindTarget.NextChapter:
               this.loadNextChapter();
@@ -278,13 +290,13 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     window.addEventListener('keydown', this.downloadHandler, { capture: true });
 
+    // Any input means that the page reports from here on, are the reader's own. see awaitingReaderInput
     merge(
       fromEvent(this.document, 'keydown'),
       fromEvent(this.document, 'wheel', {passive: true}),
       fromEvent(this.document, 'pointerdown'),
       fromEvent(this.document, 'touchstart', {passive: true}),
-    ).pipe(takeUntilDestroyed(this.destroyRef)
-    ).subscribe(() => this.awaitingReaderInput = false);
+    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.awaitingReaderInput = false);
 
     this.continuousChaptersStack.push(this.chapterId());
     this.init(true);
@@ -368,6 +380,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.prevChapterDisabled.set(false);
     this.nextChapterPrefetched = false;
     this.prevChapterPrefetched = false;
+    this.isReRead = false;
     this.calcScrollbarNeeded();
 
     const chapterId = this.chapterId();
@@ -383,6 +396,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
         this.volumeId = info.volumeId;
         this.bookTitle.set(info.bookTitle);
         this.maxPages.set(chapter.pages);
+        this.isReRead = direction === 'Next' && progress.pageNum >= chapter.pages;
         const startingPage = this.getStartingPage(progress.pageNum, direction);
         this.awaitingReaderInput = true;
         this.targetPage.set(startingPage);
@@ -491,10 +505,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.currentPage.set(page);
     this.prefetchAdjacentChapters();
 
-    // A new document reports a neighbour of the page it was sent to (horizontal N+1, wrapped next in row, spreads the left page)
+    // A new document reports a page near the one it was sent to, not that page (horizontal reports 62 with 62-64 on screen)
     if (this.awaitingReaderInput) {
       // Horizontal mode also resets a new document to its first page after [page] was applied, and does not reapply it
-      if (Math.abs(page - this.targetPage()) > 1) {
+      if (!this.pdfViewerService.getCurrentlyVisiblePageNumbers().includes(this.targetPage())) {
         this.pdfViewerService.scrollPageIntoView(this.targetPage());
       }
       return;
@@ -503,7 +517,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.saveProgress();
   }
 
-  private goToPage(page: number) {
+  protected goToPage(page: number) {
     this.targetPage.set(page);
     // [page] is only re-pushed when targetPage changes, and the viewer may have scrolled away from it
     this.pdfViewerService.scrollPageIntoView(page);
@@ -518,7 +532,13 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     const saved = {chapterId, page};
     this.lastSavedProgress = saved;
-    this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, chapterId, page).subscribe({
+    const save$ = this.isReRead
+      ? this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, chapterId, 0).pipe(
+          switchMap(() => this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, chapterId, page)))
+      : this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, chapterId, page);
+    this.isReRead = false;
+
+    save$.subscribe({
       error: () => {
         if (this.lastSavedProgress === saved) {
           this.lastSavedProgress = null;
@@ -754,7 +774,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.goToPage(Math.max(this.currentPage() - 1, 1));
+    if (this.getPdfViewer()?.previousPage()) return;
+
+    // pdf.js is already on page 1, but its start is cut off
+    this.scrollViewerOneScreen(-1);
   }
 
   nextPage() {
@@ -763,7 +786,25 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.goToPage(Math.min(this.currentPage() + 1, this.maxPages()));
+    if (this.getPdfViewer()?.nextPage()) return;
+
+    this.scrollViewerOneScreen(1);
+  }
+
+  private getPdfViewer() {
+    return this.pdfNotificationService.onPDFJSInitSignal()?.pdfViewer as PdfJsViewer | undefined;
+  }
+
+  private scrollViewerOneScreen(direction: 1 | -1) {
+    const viewer = this.document.querySelector('#viewerContainer');
+    if (!viewer) return;
+
+    if (this.scrollMode() === ScrollModeType.horizontal) {
+      viewer.scrollBy({left: direction * viewer.clientWidth});
+      return;
+    }
+
+    viewer.scrollBy({top: direction * viewer.clientHeight});
   }
 
 
