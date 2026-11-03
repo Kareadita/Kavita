@@ -1,0 +1,43 @@
+:host {
+  display: block;
+  --chapter-preview-background-color: var(--bs-body-bg);
+  --chapter-preview-text-color: var(--body-text-color);
+}
+
+.preview {
+  width: 15rem;
+  font-size: 1.125rem;
+  color: var(--chapter-preview-text-color);
+  background: var(--chapter-preview-background-color);
+  cursor: pointer;
+  outline: 1px solid color-mix(in srgb, var(--chapter-preview-text-color) 25%, transparent);
+
+  &:hover, &:focus-visible {
+    outline: 0.125rem solid var(--primary-color);
+  }
+
+  &.with-cover {
+    aspect-ratio: 2 / 3;
+
+    app-image {
+      display: block;
+      height: 100%;
+    }
+
+    .text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding-bottom: 4rem !important;
+      background: linear-gradient(to bottom,
+        color-mix(in srgb, var(--chapter-preview-background-color) 95%, transparent) 40%,
+        transparent);
+    }
+  }
+}
+
+.hint {
+  font-size: 0.875rem;
+  opacity: 0.8;
+}

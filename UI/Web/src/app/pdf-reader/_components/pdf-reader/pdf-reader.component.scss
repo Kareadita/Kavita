@@ -19,6 +19,26 @@
     color: lightblue !important;
 }
 
+.chapter-cap {
+  display: block;
+
+  &.start {
+    padding-bottom: 2rem;
+  }
+
+  &.end {
+    padding-top: 2rem;
+  }
+
+  // pdf.js lays horizontal pages out as inline-blocks in a nowrap row, a block would wrap below them
+  &.horizontal {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0 2rem;
+    white-space: normal;
+  }
+}
+
 .loading-message-container {
   text-align: center;
   min-width: 12.5rem;

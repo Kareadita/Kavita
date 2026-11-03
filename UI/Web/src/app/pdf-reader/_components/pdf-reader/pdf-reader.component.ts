@@ -54,6 +54,9 @@ import {EntityTitleService} from "../../../_services/entity-title.service";
 import {LibraryService} from "../../../_services/library.service";
 import {LibraryType} from "../../../_models/library/library";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
+import {ChapterPreviewComponent} from "../../../shared/_components/chapter-preview/chapter-preview.component";
+import {PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
+import {ChapterInfo} from "../../../manga-reader/_models/chapter-info";
 
 const KEYBIND_TARGETS = [
   {keyBindTarget: KeyBindTarget.PageLeft, description: 'prev-page'},
@@ -83,7 +86,7 @@ const THEME_COLORS: {[key: string]: {background: string, font: string}} = {
   styleUrls: ['./pdf-reader.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, TranslocoDirective,
-    PdfScrollModeTypePipe, PdfSpreadTypePipe]
+    PdfScrollModeTypePipe, PdfSpreadTypePipe, ChapterPreviewComponent, PullToLoadComponent]
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
 
@@ -109,6 +112,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
 
   readonly container = viewChild.required<ElementRef>('container');
+  private readonly startCap = viewChild<ElementRef<HTMLElement>>('startCap');
+  private readonly endCap = viewChild<ElementRef<HTMLElement>>('endCap');
 
   libraryId!: number;
   seriesId!: number;
@@ -164,6 +169,12 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
    */
   private isReRead = false;
 
+  protected prevChapter = signal<{chapterId: number, info: ChapterInfo} | null>(null);
+  protected nextChapter = signal<{chapterId: number, info: ChapterInfo} | null>(null);
+  protected viewerContainer = signal<HTMLElement | undefined>(undefined);
+  private capsObserver: MutationObserver | null = null;
+  private capsViewer: Element | null = null;
+
   protected zoomSetting = signal<string | number>('auto');
 
   protected theme = signal<'dark' | 'light'>('light');
@@ -191,6 +202,11 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   protected readonly canDownload = computed(() =>
     this.accountService.hasDownloadRole()
   );
+
+  private readonly capsAllowed = computed(() => !this.isLoading() && this.scrollMode() !== ScrollModeType.page);
+  protected readonly showStartCap = computed(() => this.capsAllowed() && this.prevChapter() !== null);
+  protected readonly showEndCap = computed(() => this.capsAllowed()
+    && (this.nextChapter() !== null || this.nextChapterDisabled()));
 
   constructor() {
       this.navService.hideNavBar();
@@ -253,6 +269,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.navService.showNavBar();
     this.navService.showSideNav();
     this.readerService.disableWakeLock();
+    this.capsObserver?.disconnect();
 
     window.removeEventListener('keydown', this.downloadHandler, { capture: true });
   }
@@ -381,6 +398,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.nextChapterPrefetched = false;
     this.prevChapterPrefetched = false;
     this.isReRead = false;
+    this.prevChapter.set(null);
+    this.nextChapter.set(null);
     this.calcScrollbarNeeded();
 
     const chapterId = this.chapterId();
@@ -439,11 +458,19 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     const currentPage = this.currentPage();
     if (!this.nextChapterPrefetched && this.nextChapterId > 0 && currentPage >= this.maxPages() - PREFETCH_PAGE_WINDOW) {
       this.nextChapterPrefetched = true;
-      this.readerService.getChapterInfo(this.nextChapterId).pipe(catchError(() => of(null))).subscribe();
+      const nextChapterId = this.nextChapterId;
+      this.readerService.getChapterInfo(nextChapterId).pipe(catchError(() => of(null))).subscribe(info => {
+        if (!info || nextChapterId !== this.nextChapterId) return;
+        this.nextChapter.set({chapterId: nextChapterId, info});
+      });
     }
     if (!this.prevChapterPrefetched && this.prevChapterId > 0 && currentPage <= PREFETCH_PAGE_WINDOW) {
       this.prevChapterPrefetched = true;
-      this.readerService.getChapterInfo(this.prevChapterId).pipe(catchError(() => of(null))).subscribe();
+      const prevChapterId = this.prevChapterId;
+      this.readerService.getChapterInfo(prevChapterId).pipe(catchError(() => of(null))).subscribe(info => {
+        if (!info || prevChapterId !== this.prevChapterId) return;
+        this.prevChapter.set({chapterId: prevChapterId, info});
+      });
     }
   }
 
@@ -550,6 +577,31 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   onPdfLoaded() {
     this.isLoading.set(false);
     this.watchViewerScroll();
+    this.keepChapterCapsInViewer();
+  }
+
+  // pdf.js empties #viewer for every new document and spread change, which takes the caps with it
+  private keepChapterCapsInViewer() {
+    const viewer = this.document.querySelector('#viewer');
+    const startCap = this.startCap()?.nativeElement;
+    const endCap = this.endCap()?.nativeElement;
+    if (!viewer || !startCap || !endCap || viewer === this.capsViewer) return;
+
+    this.viewerContainer.set(viewer.parentElement ?? undefined);
+    this.capsObserver?.disconnect();
+    this.capsViewer = viewer;
+
+    const placeCaps = () => {
+      if (viewer.firstElementChild !== startCap) {
+        viewer.prepend(startCap);
+      }
+      if (viewer.lastElementChild !== endCap) {
+        viewer.append(endCap);
+      }
+    };
+    this.capsObserver = new MutationObserver(placeCaps);
+    this.capsObserver.observe(viewer, {childList: true});
+    placeCaps();
   }
 
   // pageChange stops firing near the end: with pages 278-282 on screen the viewer stays on 279, so the end is caught from scroll
@@ -722,7 +774,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     // Page mode keeps only the current page or spread in the DOM, so the element existing means it is showing
     if (this.scrollMode() === ScrollModeType.page) return true;
 
-    const page = lastPage.getBoundingClientRect();
+    const page = this.getPageContentRect(lastPage);
     const view = viewer.getBoundingClientRect();
 
     // 1px: fractional layout leaves the edge up to a pixel past the viewer at full scroll
@@ -738,12 +790,19 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     if (this.scrollMode() === ScrollModeType.page) return true;
 
-    const page = firstPage.getBoundingClientRect();
+    const page = this.getPageContentRect(firstPage);
     const view = viewer.getBoundingClientRect();
 
     return this.scrollMode() === ScrollModeType.horizontal
       ? page.left >= view.left - 1
       : page.top >= view.top - 1;
+  }
+
+  // pdf.js draws each page inside a transparent border (about 9px) and scrolls a page to the edge inside it
+  private getPageContentRect(page: Element) {
+    const rect = page.getBoundingClientRect();
+    const border = parseFloat(getComputedStyle(page).borderTopWidth) || 0;
+    return {top: rect.top + border, bottom: rect.bottom - border, left: rect.left + border, right: rect.right - border};
   }
 
   closeReader() {

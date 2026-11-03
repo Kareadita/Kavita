@@ -3569,7 +3569,13 @@
         "first-page-alt": "{{manga-reader.first-page-tooltip}}",
         "prev-page-alt": "{{manga-reader.prev-page-tooltip}}",
         "next-page-alt": "{{manga-reader.next-page-tooltip}}",
-        "last-page-alt": "{{manga-reader.last-page-tooltip}}"
+        "last-page-alt": "{{manga-reader.last-page-tooltip}}",
+        "next-scroll-hint": "Scroll or click to read",
+        "prev-scroll-hint": "Scroll up or click to read",
+        "click-hint": "Click to read",
+        "finish-hint": "Click to finish",
+        "end-of-series": "End of series",
+        "end-of-reading-list": "End of reading list"
     },
 
     "pdf-layout-mode-pipe": {

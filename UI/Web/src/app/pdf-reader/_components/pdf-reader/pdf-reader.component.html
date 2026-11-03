@@ -46,6 +46,45 @@
         (findbarVisibleChange)="updateSearchOpen($event)"
        />
 
+      @let isHorizontal = scrollMode() === ScrollModeType.horizontal;
+      <div #startCap class="chapter-cap start" [class.horizontal]="isHorizontal" [class.d-none]="!showStartCap()"
+           [style.color]="fontColor()">
+        @if (prevChapter(); as prev) {
+          @if (!isHorizontal) {
+            <app-pull-to-load [direction]="'down'" [scrollContainer]="viewerContainer()" [disabled]="!showStartCap()"
+                              (triggered)="loadPrevChapter()" />
+          }
+
+          <app-chapter-preview [chapterId]="prev.chapterId" [heading]="prev.info.subtitle" [subheading]="prev.info.chapterTitle"
+                               [hint]="isHorizontal ? t('click-hint') : t('prev-scroll-hint')"
+                               [style.--chapter-preview-background-color]="backgroundColor()"
+                               [style.--chapter-preview-text-color]="fontColor()"
+                               (activated)="loadPrevChapter()" />
+        }
+      </div>
+
+      <div #endCap class="chapter-cap end" [class.horizontal]="isHorizontal" [class.d-none]="!showEndCap()"
+           [style.color]="fontColor()">
+        @if (nextChapter(); as next) {
+          <app-chapter-preview [chapterId]="next.chapterId" [heading]="next.info.subtitle" [subheading]="next.info.chapterTitle"
+                               [hint]="isHorizontal ? t('click-hint') : t('next-scroll-hint')"
+                               [style.--chapter-preview-background-color]="backgroundColor()"
+                               [style.--chapter-preview-text-color]="fontColor()"
+                               (activated)="loadNextChapter()" />
+
+          @if (!isHorizontal) {
+            <app-pull-to-load [direction]="'up'" [scrollContainer]="viewerContainer()" [disabled]="!showEndCap()"
+                              (triggered)="loadNextChapter()" />
+          }
+        } @else if (nextChapterDisabled()) {
+          <app-chapter-preview [heading]="readingListMode ? t('end-of-reading-list') : t('end-of-series')"
+                               [hint]="t('finish-hint')"
+                               [style.--chapter-preview-background-color]="backgroundColor()"
+                               [style.--chapter-preview-text-color]="fontColor()"
+                               (activated)="loadNextChapter()" />
+        }
+      </div>
+
       @if (scrollMode() === ScrollModeType.page && !isLoading()) {
         @if (!isSearchOpen()) {
           <div class="left" (click)="prevPage()"></div>
