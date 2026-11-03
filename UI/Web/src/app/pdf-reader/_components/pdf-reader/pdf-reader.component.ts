@@ -15,6 +15,7 @@ import {
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   NgxExtendedPdfViewerModule,
+  NgxExtendedPdfViewerService,
   PageViewModeType,
   pdfDefaultOptions,
   ProgressBarEvent,
@@ -22,7 +23,7 @@ import {
   SpreadType
 } from 'ngx-extended-pdf-viewer';
 import {ToastrService} from '@openng/ngx-toastr';
-import {auditTime, catchError, filter, forkJoin, fromEvent, of, take} from 'rxjs';
+import {auditTime, catchError, filter, forkJoin, fromEvent, merge, of, take} from 'rxjs';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {DOCUMENT, NgStyle} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -97,6 +98,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   private readonly entityTitleService = inject(EntityTitleService);
   private readonly libraryService = inject(LibraryService);
   private readonly readingProfileService = inject(ReadingProfileService);
+  private readonly pdfViewerService = inject(NgxExtendedPdfViewerService);
   protected readonly breakpointService = inject(BreakpointService);
 
 
@@ -132,12 +134,14 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
    */
   readingListMode: boolean = false;
 
+  protected targetPage = signal(1);
   protected currentPage = signal(1);
   protected maxPages = signal(1);
   protected bookTitle = signal('');
   private bookInfo: BookInfo | null = null;
   private lastSavedProgress: {chapterId: number, page: number} | null = null;
   private viewerScrollWatched = false;
+  private awaitingReaderInput = false;
 
   protected zoomSetting = signal<string | number>('auto');
 
@@ -201,10 +205,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
               this.loadPrevChapter();
               break;
             case KeyBindTarget.FirstPage:
-              this.currentPage.set(1);
+              this.goToPage(1);
               break;
             case KeyBindTarget.LastPage:
-              this.currentPage.set(this.maxPages());
+              this.goToPage(this.maxPages());
               break;
             case KeyBindTarget.OpenHelp:
               this.openShortcutModal();
@@ -273,6 +277,14 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     }
 
     window.addEventListener('keydown', this.downloadHandler, { capture: true });
+
+    merge(
+      fromEvent(this.document, 'keydown'),
+      fromEvent(this.document, 'wheel', {passive: true}),
+      fromEvent(this.document, 'pointerdown'),
+      fromEvent(this.document, 'touchstart', {passive: true}),
+    ).pipe(takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => this.awaitingReaderInput = false);
 
     this.continuousChaptersStack.push(this.chapterId());
     this.init(true);
@@ -365,21 +377,19 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       chapter: this.seriesService.getChapter(chapterId),
     }).subscribe({
       next: ({info, progress, chapter}) => {
-        const seriesChanged = !firstLoad && info.seriesId !== this.seriesId;
         this.bookInfo = info;
         this.seriesId = info.seriesId;
         this.libraryId = info.libraryId;
         this.volumeId = info.volumeId;
         this.bookTitle.set(info.bookTitle);
         this.maxPages.set(chapter.pages);
-        // Setting the page from code does not fire pageChange, so opening a chapter saves nothing
-        this.currentPage.set(this.getStartingPage(progress.pageNum, direction));
+        const startingPage = this.getStartingPage(progress.pageNum, direction);
+        this.awaitingReaderInput = true;
+        this.targetPage.set(startingPage);
+        this.currentPage.set(startingPage);
 
         if (!firstLoad) {
           this.replaceReaderUrl();
-        }
-        if (seriesChanged) {
-          this.switchReadingProfile(info.seriesName);
         }
 
         this.libraryService.getLibraryType(this.libraryId).subscribe(type => this.libraryType = type);
@@ -423,14 +433,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  private switchReadingProfile(seriesName: string) {
-    this.readingProfileService.getForSeries(this.libraryId, this.seriesId).subscribe(readingProfile => {
-      this.readingProfile = readingProfile;
-      this.setupReaderSettings();
-      this.readerService.showReadingProfileSwitch(readingProfile, seriesName);
-    });
-  }
-
   private replaceReaderUrl() {
     this.readerService.replaceReaderUrl(this.libraryId, this.seriesId, this.chapterId(), MangaFormat.PDF,
       this.incognitoMode(), this.readingListMode, this.readingListId);
@@ -460,7 +462,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     const currPage = this.currentPage();
 
     setTimeout(() => {
-      this.currentPage.set(currPage);
+      this.goToPage(currPage);
     }, 100);
   }
 
@@ -484,9 +486,27 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  onPageChange() {
-    this.saveProgress();
+  onPageChange(page: number | undefined) {
+    if (page === undefined) return;
+    this.currentPage.set(page);
     this.prefetchAdjacentChapters();
+
+    // A new document reports a neighbour of the page it was sent to (horizontal N+1, wrapped next in row, spreads the left page)
+    if (this.awaitingReaderInput) {
+      // Horizontal mode also resets a new document to its first page after [page] was applied, and does not reapply it
+      if (Math.abs(page - this.targetPage()) > 1) {
+        this.pdfViewerService.scrollPageIntoView(this.targetPage());
+      }
+      return;
+    }
+
+    this.saveProgress();
+  }
+
+  private goToPage(page: number) {
+    this.targetPage.set(page);
+    // [page] is only re-pushed when targetPage changes, and the viewer may have scrolled away from it
+    this.pdfViewerService.scrollPageIntoView(page);
   }
 
   saveProgress() {
@@ -521,7 +541,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.viewerScrollWatched = true;
     fromEvent(viewer, 'scroll', {passive: true}).pipe(
       auditTime(END_OF_CHAPTER_CHECK_MS),
-      filter(() => this.isLastPageEndInView()),
+      filter(() => !this.awaitingReaderInput && this.isLastPageEndInView()),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(() => this.saveProgress());
   }
@@ -631,8 +651,20 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.chapterId.set(chapterId);
-        this.init(false, direction);
+        // Before src changes: the viewer opens a document in the scroll mode it holds, then reports that mode back
+        const readingProfile$ = info.seriesId === this.seriesId
+          ? of(null)
+          : this.readingProfileService.getForSeries(info.libraryId, info.seriesId).pipe(catchError(() => of(null)));
+        readingProfile$.subscribe(readingProfile => {
+          if (readingProfile) {
+            this.readingProfile = readingProfile;
+            this.setupReaderSettings();
+            this.readerService.showReadingProfileSwitch(readingProfile, info.seriesName);
+          }
+
+          this.chapterId.set(chapterId);
+          this.init(false, direction);
+        });
       },
       error: () => {
         this.bookInfo = currentBookInfo;
@@ -722,7 +754,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.currentPage.update(page => Math.max(page - 1, 1));
+    this.goToPage(Math.max(this.currentPage() - 1, 1));
   }
 
   nextPage() {
@@ -731,7 +763,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.currentPage.update(page => Math.min(page + 1, this.maxPages()));
+    this.goToPage(Math.min(this.currentPage() + 1, this.maxPages()));
   }
 
 

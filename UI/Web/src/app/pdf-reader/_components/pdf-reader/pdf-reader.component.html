@@ -19,7 +19,7 @@
         [src]="pdfSrc()"
         [authorization]="user.token ? 'Bearer ' + user.token : ''"
         height="100vh"
-        [(page)]="currentPage"
+        [page]="targetPage()"
         [textLayer]="true"
         [showHandToolButton]="true"
         [showOpenFileButton]="false"
@@ -38,7 +38,7 @@
         [pageViewMode]="pageLayoutMode()"
         [spread]="spreadMode()"
 
-        (pageChange)="onPageChange()"
+        (pageChange)="onPageChange($event)"
         (pdfLoadingStarts)="updateLoading(true)"
         (pdfLoaded)="onPdfLoaded()"
         (progress)="updateLoadProgress($event)"
