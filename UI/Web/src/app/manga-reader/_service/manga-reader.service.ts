@@ -34,7 +34,6 @@ export class MangaReaderService {
       };
     });
     this.pairs = chapterInfo.doublePairs!;
-    this.hasPageOffset = false;
   }
 
   adjustForDoubleReader(page: number) {
