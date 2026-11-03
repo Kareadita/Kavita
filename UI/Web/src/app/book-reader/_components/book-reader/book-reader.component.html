@@ -105,17 +105,21 @@
                 <span class="visually-hidden">{{t('shortcuts-menu-alt')}}</span>
               </button>
 
-              <button class="btn btn-secondary btn-icon me-1" (click)="viewBookmarkImages()">
+              <button class="btn btn-secondary btn-icon me-1" [ngbTooltip]="t('bookmarks-alt')" (click)="viewBookmarkImages()">
                 <i class="fa-solid fa-book-bookmark" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('bookmarks-alt')}}</span>
               </button>
-              <button class="btn btn-secondary btn-icon me-1" (click)="viewAnnotations()">
+              <button class="btn btn-secondary btn-icon me-1" [ngbTooltip]="t('annotations-alt')" (click)="viewAnnotations()">
                 <i class="fa-solid fa-highlighter" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('annotations-alt')}}</span>
               </button>
-              <button class="btn btn-secondary btn-icon me-1" (click)="viewToCDrawer()">
+              <button class="btn btn-secondary btn-icon me-1" [ngbTooltip]="t('toc-alt')" (click)="viewToCDrawer()">
                 <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('toc-alt')}}</span>
               </button>
-              <button class="btn btn-secondary btn-icon me-1" (click)="exitReader()">
+              <button class="btn btn-secondary btn-icon me-1" [ngbTooltip]="t('close-reader-alt')" (click)="exitReader()">
                 <i class="fa fa-times-circle" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('close-reader-alt')}}</span>
               </button>
             </div>
           </div>
