@@ -58,7 +58,17 @@
           <div id="toolbarViewerLeft">
             <pdf-toggle-sidebar />
             <pdf-find-button [textLayer]='true' />
+            <button type="button" class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" (click)="loadPrevChapter()"
+                    [disabled]="prevChapterDisabled()" [ngbTooltip]="t('prev-chapter-alt')">
+              <i class="toolbar-icon fa fa-fast-backward" [ngStyle]="{color: fontColor()}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('prev-chapter-alt')}}</span>
+            </button>
             <pdf-paging-area />
+            <button type="button" class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" (click)="loadNextChapter()"
+                    [disabled]="nextChapterDisabled()" [ngbTooltip]="t('next-chapter-alt')">
+              <i class="toolbar-icon fa fa-fast-forward" [ngStyle]="{color: fontColor()}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('next-chapter-alt')}}</span>
+            </button>
 
             @if (breakpointService.isTabletOrAbove()) {
               <button class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" [ngbTooltip]="bookTitle()">

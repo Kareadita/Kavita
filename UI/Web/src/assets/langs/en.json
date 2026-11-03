@@ -3560,7 +3560,9 @@
         "dark-theme-alt": "Dark Theme",
         "close-reader-alt": "Close Reader",
         "toggle-incognito": "Turn off Incognito Mode",
-        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}",
+        "prev-chapter-alt": "Previous Chapter",
+        "next-chapter-alt": "Next Chapter"
     },
 
     "pdf-layout-mode-pipe": {
