@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
@@ -10,6 +9,7 @@ import {
   inject,
   OnDestroy,
   OnInit,
+  signal,
   viewChild
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -22,7 +22,7 @@ import {
   SpreadType
 } from 'ngx-extended-pdf-viewer';
 import {ToastrService} from '@openng/ngx-toastr';
-import {take} from 'rxjs';
+import {auditTime, catchError, filter, forkJoin, fromEvent, of, take} from 'rxjs';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {DOCUMENT, NgStyle} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -44,17 +44,32 @@ import {BookInfo} from "../../../book-reader/_models/book-info";
 import {MangaFormat} from "../../../_models/manga-format";
 import {ThemeService} from "../../../_services/theme.service";
 import {AccountService} from "../../../_services/account.service";
-import {CHAPTER_ID_DOESNT_EXIST, ReaderService} from "../../../_services/reader.service";
+import {CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService} from "../../../_services/reader.service";
 import {UtilityService} from "../../../shared/_services/utility.service";
-import {Chapter} from "../../../_models/chapter";
-import {User} from "../../../_models/user/user";
+import {Stack} from "../../../shared/data-structures/stack";
+import {EntityTitleService} from "../../../_services/entity-title.service";
+import {LibraryService} from "../../../_services/library.service";
+import {LibraryType} from "../../../_models/library/library";
+import {ReadingProfileService} from "../../../_services/reading-profile.service";
 
 const KEYBIND_TARGETS = [
+  {keyBindTarget: KeyBindTarget.PageLeft, description: 'prev-page'},
+  {keyBindTarget: KeyBindTarget.PageRight, description: 'next-page'},
   {keyBindTarget: KeyBindTarget.OpenHelp},
   {keyBindTarget: KeyBindTarget.Escape},
+  {keyBindTarget: KeyBindTarget.PreviousChapter, description: 'previous-chapter'},
+  {keyBindTarget: KeyBindTarget.NextChapter, description: 'next-chapter'},
   {keyBindTarget: KeyBindTarget.FirstPage, description: 'first-page'},
   {keyBindTarget: KeyBindTarget.LastPage, description: 'last-page'},
 ];
+
+const PREFETCH_PAGE_WINDOW = 10;
+const END_OF_CHAPTER_CHECK_MS = 250;
+
+const THEME_COLORS: {[key: string]: {background: string, font: string}} = {
+  'dark': {'background': '#292929', 'font': '#d9d9d9'},
+  'light': {'background': '#f9f9f9', 'font': '#5a5a5a'}
+};
 
 @Component({
   selector: 'app-pdf-reader',
@@ -73,13 +88,15 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   private readonly toastr = inject(ToastrService);
   private readonly bookService = inject(BookService);
   private readonly themeService = inject(ThemeService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   public readonly accountService = inject(AccountService);
   public readonly readerService = inject(ReaderService);
   public readonly utilityService = inject(UtilityService);
   public readonly destroyRef = inject(DestroyRef);
   public readonly document = inject(DOCUMENT);
   private readonly keyBindService = inject(KeyBindService);
+  private readonly entityTitleService = inject(EntityTitleService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly readingProfileService = inject(ReadingProfileService);
   protected readonly breakpointService = inject(BreakpointService);
 
 
@@ -88,10 +105,17 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   libraryId!: number;
   seriesId!: number;
   volumeId!: number;
-  chapterId!: number;
-  chapter!: Chapter;
-  user!: User;
+  protected chapterId = signal<number>(0);
   readingProfile!: ReadingProfile;
+  libraryType: LibraryType = LibraryType.Manga;
+
+  continuousChaptersStack: Stack<number> = new Stack();
+  nextChapterId: number = CHAPTER_ID_NOT_FETCHED;
+  prevChapterId: number = CHAPTER_ID_NOT_FETCHED;
+  protected nextChapterDisabled = signal(false);
+  protected prevChapterDisabled = signal(false);
+  nextChapterPrefetched: boolean = false;
+  prevChapterPrefetched: boolean = false;
 
   /**
    * Reading List id. Defaults to -1.
@@ -101,51 +125,45 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   /**
    * If this is true, no progress will be saved.
    */
-  incognitoMode: boolean = false;
+  protected incognitoMode = signal(false);
 
   /**
    * If this is true, chapters will be fetched in the order of a reading list, rather than natural series order.
    */
   readingListMode: boolean = false;
 
-  /**
-   * Current Page number
-   */
-  currentPage: number = 1;
-  /**
-   * Total pages
-   */
-  maxPages: number = 1;
-  bookTitle: string = '';
+  protected currentPage = signal(1);
+  protected maxPages = signal(1);
+  protected bookTitle = signal('');
   private bookInfo: BookInfo | null = null;
+  private lastSavedProgress: {chapterId: number, page: number} | null = null;
+  private viewerScrollWatched = false;
 
-  zoomSetting: string | number = 'auto';
+  protected zoomSetting = signal<string | number>('auto');
 
-  theme: 'dark' | 'light' = 'light';
-  themeMap: {[key:string]: {background: string, font: string}} = {
-    'dark': {'background': '#292929', 'font': '#d9d9d9'},
-    'light': {'background': '#f9f9f9', 'font': '#5a5a5a'}
-  }
-  backgroundColor: string = this.themeMap[this.theme].background;
-  fontColor: string = this.themeMap[this.theme].font;
+  protected theme = signal<'dark' | 'light'>('light');
+  protected readonly backgroundColor = computed(() => THEME_COLORS[this.theme()].background);
+  protected readonly fontColor = computed(() => THEME_COLORS[this.theme()].font);
+
+  protected readonly pdfSrc = computed(() => this.readerService.downloadPdf(this.chapterId()));
 
   /**
    * True if Preferences.DataSaver is true
    */
-  disableLoadingIndicator = computed(() => this.accountService.userPreferences()?.dataSaver);
-  isLoading: boolean = true;
+  protected readonly disableLoadingIndicator = computed(() => this.accountService.userPreferences()?.dataSaver);
+  protected isLoading = signal(true);
   /**
    * How much of the current document is loaded
    */
-  loadPercent: number = 0;
-  scrollbarNeeded = false;
+  protected loadPercent = signal(0);
+  protected scrollbarNeeded = signal(false);
 
-  pageLayoutMode: PageViewModeType = 'multiple';
-  scrollMode: ScrollModeType = ScrollModeType.vertical;
-  spreadMode: SpreadType = 'off';
-  isSearchOpen: boolean = false;
+  protected pageLayoutMode = signal<PageViewModeType>('multiple');
+  protected scrollMode = signal<ScrollModeType>(ScrollModeType.vertical);
+  protected spreadMode = signal<SpreadType>('off');
+  protected isSearchOpen = signal(false);
 
-  canDownload = computed(() =>
+  protected readonly canDownload = computed(() =>
     this.accountService.hasDownloadRole()
   );
 
@@ -161,13 +179,32 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
             case KeyBindTarget.Escape:
               this.exitReader();
               break;
+            case KeyBindTarget.PageRight:
+              if (!this.isLastPageEndInView()) {
+                // Not triggered, so the key is not preventDefaulted and pdf.js still scrolls with it
+                e.triggered = false;
+                break;
+              }
+              this.loadNextChapter();
+              break;
+            case KeyBindTarget.PageLeft:
+              if (!this.isFirstPageStartInView()) {
+                e.triggered = false;
+                break;
+              }
+              this.loadPrevChapter();
+              break;
+            case KeyBindTarget.NextChapter:
+              this.loadNextChapter();
+              break;
+            case KeyBindTarget.PreviousChapter:
+              this.loadPrevChapter();
+              break;
             case KeyBindTarget.FirstPage:
-              this.currentPage = 0;
-              this.cdRef.markForCheck();
+              this.currentPage.set(1);
               break;
             case KeyBindTarget.LastPage:
-              this.currentPage = this.maxPages;
-              this.cdRef.markForCheck();
+              this.currentPage.set(this.maxPages());
               break;
             case KeyBindTarget.OpenHelp:
               this.openShortcutModal();
@@ -181,7 +218,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
         const prefs = this.accountService.userPreferences();
         if (prefs) {
           pdfDefaultOptions.disableAutoFetch = prefs.dataSaver;
-          this.cdRef.markForCheck();
         }
       });
   }
@@ -217,8 +253,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
-    this.chapterId = parseInt(chapterId, 10);
-    this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
+    this.chapterId.set(parseInt(chapterId, 10));
+    this.incognitoMode.set(this.route.snapshot.queryParamMap.get('incognitoMode') === 'true');
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.readingProfile = data['readingProfile'];
@@ -227,7 +263,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
         return;
       }
       this.setupReaderSettings();
-      this.cdRef.markForCheck();
     });
 
 
@@ -237,11 +272,11 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       this.readingListId = parseInt(readingListId, 10);
     }
 
-    this.cdRef.markForCheck();
-
     window.addEventListener('keydown', this.downloadHandler, { capture: true });
 
-    this.init();
+    this.continuousChaptersStack.push(this.chapterId());
+    this.init(true);
+    setTimeout(() => this.readerService.enableWakeLock(this.container().nativeElement), 1000);
   }
 
   private downloadHandler = (event: KeyboardEvent) => {
@@ -257,8 +292,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   calcScrollbarNeeded() {
     const viewContainer = this.document.querySelector('#viewerContainer');
     if (viewContainer == null) return;
-    this.scrollbarNeeded = viewContainer.scrollHeight > this.container()?.nativeElement?.clientHeight;
-    this.cdRef.markForCheck();
+    this.scrollbarNeeded.set(viewContainer.scrollHeight > this.container()?.nativeElement?.clientHeight);
   }
 
   convertPdfLayoutMode(mode: PdfLayoutMode) {
@@ -309,108 +343,187 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   }
 
   setupReaderSettings() {
-    this.pageLayoutMode = this.convertPdfLayoutMode(PdfLayoutMode.Multiple);
-    this.scrollMode = this.convertPdfScrollMode(this.readingProfile.pdfScrollMode || PdfScrollMode.Vertical);
-    this.spreadMode = this.convertPdfSpreadMode(this.readingProfile.pdfSpreadMode || PdfSpreadMode.None);
-    this.theme = this.convertPdfTheme(this.readingProfile.pdfTheme || PdfTheme.Dark);
+    this.pageLayoutMode.set(this.convertPdfLayoutMode(PdfLayoutMode.Multiple));
+    this.scrollMode.set(this.convertPdfScrollMode(this.readingProfile.pdfScrollMode || PdfScrollMode.Vertical));
+    this.spreadMode.set(this.convertPdfSpreadMode(this.readingProfile.pdfSpreadMode || PdfSpreadMode.None));
+    this.theme.set(this.convertPdfTheme(this.readingProfile.pdfTheme || PdfTheme.Dark));
   }
 
-  init() {
-    this.backgroundColor = this.themeMap[this.theme].background;
-    this.fontColor = this.themeMap[this.theme].font; // TODO: Move this to an observable or something
-
+  init(firstLoad: boolean, direction: 'Next' | 'Prev' | 'None' = 'None') {
+    this.nextChapterId = CHAPTER_ID_NOT_FETCHED;
+    this.prevChapterId = CHAPTER_ID_NOT_FETCHED;
+    this.nextChapterDisabled.set(false);
+    this.prevChapterDisabled.set(false);
+    this.nextChapterPrefetched = false;
+    this.prevChapterPrefetched = false;
     this.calcScrollbarNeeded();
 
-    this.bookService.getBookInfo(this.chapterId).subscribe(info => {
-      this.bookInfo = info;
-      this.volumeId = info.volumeId;
-      this.bookTitle = info.bookTitle;
-      this.cdRef.markForCheck();
-    });
+    const chapterId = this.chapterId();
+    forkJoin({
+      info: this.bookService.getBookInfo(chapterId),
+      progress: this.readerService.getProgress(chapterId),
+      chapter: this.seriesService.getChapter(chapterId),
+    }).subscribe({
+      next: ({info, progress, chapter}) => {
+        const seriesChanged = !firstLoad && info.seriesId !== this.seriesId;
+        this.bookInfo = info;
+        this.seriesId = info.seriesId;
+        this.libraryId = info.libraryId;
+        this.volumeId = info.volumeId;
+        this.bookTitle.set(info.bookTitle);
+        this.maxPages.set(chapter.pages);
+        // Setting the page from code does not fire pageChange, so opening a chapter saves nothing
+        this.currentPage.set(this.getStartingPage(progress.pageNum, direction));
 
-    this.readerService.getProgress(this.chapterId).subscribe(progress => {
-      this.currentPage = progress.pageNum || 1;
-      this.cdRef.markForCheck();
-    });
+        if (!firstLoad) {
+          this.replaceReaderUrl();
+        }
+        if (seriesChanged) {
+          this.switchReadingProfile(info.seriesName);
+        }
 
-    this.seriesService.getChapter(this.chapterId).subscribe(chapter => {
-      this.maxPages = chapter.pages;
-
-      if (this.currentPage >= this.maxPages) {
-        this.currentPage = this.maxPages - 1;
-        // Don't save progress on first load to avoid session creation, wait for a page change event
+        this.libraryService.getLibraryType(this.libraryId).subscribe(type => this.libraryType = type);
+        this.fetchAdjacentChapters(chapterId);
+      },
+      error: () => {
+        setTimeout(() => this.closeReader(), 200);
       }
-      this.cdRef.markForCheck();
     });
-    setTimeout(() => this.readerService.enableWakeLock(this.container().nativeElement), 1000);
+  }
+
+  private getStartingPage(savedPage: number, direction: 'Next' | 'Prev' | 'None') {
+    if (savedPage < this.maxPages()) return Math.max(savedPage, 1);
+    return direction === 'Next' ? 1 : this.maxPages();
+  }
+
+  private fetchAdjacentChapters(chapterId: number) {
+    this.readerService.getNextChapter(this.seriesId, this.volumeId, chapterId, this.readingListId).subscribe(nextId => {
+      if (chapterId !== this.chapterId()) return;
+      this.nextChapterId = nextId;
+      this.nextChapterDisabled.set(nextId === CHAPTER_ID_DOESNT_EXIST || nextId === chapterId);
+      this.prefetchAdjacentChapters();
+    });
+    this.readerService.getPrevChapter(this.seriesId, this.volumeId, chapterId, this.readingListId).subscribe(prevId => {
+      if (chapterId !== this.chapterId()) return;
+      this.prevChapterId = prevId;
+      this.prevChapterDisabled.set(prevId === CHAPTER_ID_DOESNT_EXIST || prevId === chapterId);
+      this.prefetchAdjacentChapters();
+    });
+  }
+
+  private prefetchAdjacentChapters() {
+    const currentPage = this.currentPage();
+    if (!this.nextChapterPrefetched && this.nextChapterId > 0 && currentPage >= this.maxPages() - PREFETCH_PAGE_WINDOW) {
+      this.nextChapterPrefetched = true;
+      this.readerService.getChapterInfo(this.nextChapterId).pipe(catchError(() => of(null))).subscribe();
+    }
+    if (!this.prevChapterPrefetched && this.prevChapterId > 0 && currentPage <= PREFETCH_PAGE_WINDOW) {
+      this.prevChapterPrefetched = true;
+      this.readerService.getChapterInfo(this.prevChapterId).pipe(catchError(() => of(null))).subscribe();
+    }
+  }
+
+  private switchReadingProfile(seriesName: string) {
+    this.readingProfileService.getForSeries(this.libraryId, this.seriesId).subscribe(readingProfile => {
+      this.readingProfile = readingProfile;
+      this.setupReaderSettings();
+      this.readerService.showReadingProfileSwitch(readingProfile, seriesName);
+    });
+  }
+
+  private replaceReaderUrl() {
+    this.readerService.replaceReaderUrl(this.libraryId, this.seriesId, this.chapterId(), MangaFormat.PDF,
+      this.incognitoMode(), this.readingListMode, this.readingListId);
   }
 
   /**
    * Turns off Incognito mode. This can only happen once if the user clicks the icon. This will modify URL state
    */
    turnOffIncognito() {
-    this.incognitoMode = false;
-    this.readerService.replaceReaderUrl(this.libraryId, this.seriesId, this.chapterId, MangaFormat.PDF,
-      this.incognitoMode, this.readingListMode, this.readingListId);
+    this.incognitoMode.set(false);
+    this.replaceReaderUrl();
     this.toastr.info(translate('toasts.incognito-off'));
     this.saveProgress();
-    this.cdRef.markForCheck();
   }
 
   toggleTheme() {
-    if (this.theme === 'dark') {
-      this.theme = 'light';
-    } else {
-      this.theme = 'dark';
-    }
-    this.backgroundColor = this.themeMap[this.theme].background;
-    this.fontColor = this.themeMap[this.theme].font;
-    this.cdRef.markForCheck();
+    this.theme.update(theme => theme === 'dark' ? 'light' : 'dark');
   }
 
   toggleScrollMode() {
     const options: Array<ScrollModeType> = [ScrollModeType.vertical, ScrollModeType.horizontal, ScrollModeType.page];
-    let index = options.indexOf(this.scrollMode) + 1;
+    let index = options.indexOf(this.scrollMode()) + 1;
     if (index >= options.length) index = 0;
-    this.scrollMode = options[index];
+    this.scrollMode.set(options[index]);
 
     this.calcScrollbarNeeded();
-    const currPage = this.currentPage;
-    this.cdRef.markForCheck();
+    const currPage = this.currentPage();
 
     setTimeout(() => {
-      this.currentPage = currPage;
-      this.cdRef.markForCheck();
+      this.currentPage.set(currPage);
     }, 100);
   }
 
   toggleSpreadMode() {
      const options: Array<SpreadType> = ['off', 'odd', 'even'];
-     let index = options.indexOf(this.spreadMode) + 1;
+     let index = options.indexOf(this.spreadMode()) + 1;
      if (index >= options.length) index = 0;
-     this.spreadMode = options[index];
-
-
-    this.cdRef.markForCheck();
+     this.spreadMode.set(options[index]);
   }
 
   toggleBookPageMode() {
-    if (this.pageLayoutMode === 'book') {
-      this.pageLayoutMode = 'multiple';
+    if (this.pageLayoutMode() === 'book') {
+      this.pageLayoutMode.set('multiple');
     } else {
       if (this.breakpointService.activeBreakpoint() < Breakpoint.Tablet) {
         this.toastr.info(translate('toasts.pdf-book-mode-screen-size'));
         return;
       }
-      this.pageLayoutMode = 'book';
+      this.pageLayoutMode.set('book');
       // If the fit is automatic, let's adjust to 100% to ensure it renders correctly (can't do this, but it doesn't always happen)
     }
-    this.cdRef.markForCheck();
+  }
+
+  onPageChange() {
+    this.saveProgress();
+    this.prefetchAdjacentChapters();
   }
 
   saveProgress() {
-    if (this.incognitoMode) return;
-    this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.currentPage).subscribe();
+    if (this.incognitoMode() || !this.bookInfo) return;
+
+    const chapterId = this.chapterId();
+    const page = this.isLastPageEndInView() ? this.maxPages() : this.currentPage();
+    if (this.lastSavedProgress?.chapterId === chapterId && this.lastSavedProgress.page === page) return;
+
+    const saved = {chapterId, page};
+    this.lastSavedProgress = saved;
+    this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, chapterId, page).subscribe({
+      error: () => {
+        if (this.lastSavedProgress === saved) {
+          this.lastSavedProgress = null;
+        }
+      }
+    });
+  }
+
+  onPdfLoaded() {
+    this.isLoading.set(false);
+    this.watchViewerScroll();
+  }
+
+  // pageChange stops firing near the end: with pages 278-282 on screen the viewer stays on 279, so the end is caught from scroll
+  private watchViewerScroll() {
+    if (this.viewerScrollWatched) return;
+    const viewer = this.document.querySelector('#viewerContainer');
+    if (!viewer) return;
+
+    this.viewerScrollWatched = true;
+    fromEvent(viewer, 'scroll', {passive: true}).pipe(
+      auditTime(END_OF_CHAPTER_CHECK_MS),
+      filter(() => this.isLastPageEndInView()),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(() => this.saveProgress());
   }
 
   exitReader() {
@@ -421,37 +534,169 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.readerService.promptRateAndReview({
-      seriesId: this.bookInfo.seriesId,
-      volumeId: this.bookInfo.volumeId,
-      chapterId: this.chapterId,
-      seriesName: this.bookInfo.seriesName,
-      publicationStatus: this.bookInfo.seriesPublicationStatus,
+    this.promptRateAndReview(this.bookInfo).subscribe(() => this.closeReader());
+  }
+
+  private promptRateAndReview(bookInfo: BookInfo) {
+    return this.readerService.promptRateAndReview({
+      seriesId: bookInfo.seriesId,
+      volumeId: bookInfo.volumeId,
+      chapterId: this.chapterId(),
+      seriesName: bookInfo.seriesName,
+      publicationStatus: bookInfo.seriesPublicationStatus,
       readingListMode: this.readingListMode,
-    }).subscribe(() => this.closeReader());
+    });
+  }
+
+  loadNextChapter() {
+    if (!this.bookInfo) return;
+
+    if (this.isLastPageEndInView()) {
+      this.saveProgress();
+    }
+
+    if (this.nextChapterDisabled()) {
+      this.handleNoNextChapter(this.bookInfo);
+      return;
+    }
+
+    if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED) {
+      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId(), this.readingListId).subscribe(nextId => {
+        this.nextChapterId = nextId;
+        this.loadChapter(nextId, 'Next');
+      });
+      return;
+    }
+
+    this.loadChapter(this.nextChapterId, 'Next');
+  }
+
+  loadPrevChapter() {
+    if (!this.bookInfo) return;
+
+    if (this.prevChapterDisabled()) {
+      this.toastr.warning(translate('toasts.no-prev-chapter', {entity: this.chapterEntityName()}));
+      return;
+    }
+
+    this.continuousChaptersStack.pop();
+    const stackedChapterId = this.continuousChaptersStack.peek();
+    if (stackedChapterId !== undefined && stackedChapterId !== this.chapterId()) {
+      this.swapToChapter(stackedChapterId, 'Prev');
+      return;
+    }
+
+    if (this.prevChapterId === CHAPTER_ID_NOT_FETCHED) {
+      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId(), this.readingListId).subscribe(prevId => {
+        this.prevChapterId = prevId;
+        this.loadChapter(prevId, 'Prev');
+      });
+      return;
+    }
+
+    this.loadChapter(this.prevChapterId, 'Prev');
+  }
+
+  private loadChapter(chapterId: number, direction: 'Next' | 'Prev') {
+    if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId()) {
+      if (direction === 'Next') {
+        this.nextChapterDisabled.set(true);
+        if (this.bookInfo) {
+          this.handleNoNextChapter(this.bookInfo);
+        }
+      } else {
+        this.prevChapterDisabled.set(true);
+        this.toastr.warning(translate('toasts.no-prev-chapter', {entity: this.chapterEntityName()}));
+      }
+      return;
+    }
+
+    this.continuousChaptersStack.push(chapterId);
+    this.swapToChapter(chapterId, direction);
+    const key = direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter';
+    this.toastr.info(translate(key, {entity: this.chapterEntityName()}), '', {timeOut: 3000});
+  }
+
+  private swapToChapter(chapterId: number, direction: 'Next' | 'Prev') {
+    const currentBookInfo = this.bookInfo;
+    this.bookInfo = null;
+    this.isLoading.set(true);
+
+    // The viewer must never get a non-PDF as src: it goes blank, with the error only in the console
+    this.bookService.getBookInfo(chapterId).subscribe({
+      next: info => {
+        if (info.seriesFormat !== MangaFormat.PDF) {
+          const params = this.readerService.getQueryParamsObject(this.incognitoMode(), this.readingListMode, this.readingListId);
+          this.router.navigate(this.readerService.getNavigationArray(info.libraryId, info.seriesId, chapterId, info.seriesFormat), {queryParams: params});
+          return;
+        }
+
+        this.chapterId.set(chapterId);
+        this.init(false, direction);
+      },
+      error: () => {
+        this.bookInfo = currentBookInfo;
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  private handleNoNextChapter(bookInfo: BookInfo) {
+    if (!this.isLastPageEndInView()) {
+      this.toastr.warning(translate('toasts.no-next-chapter', {entity: this.chapterEntityName()}));
+      return;
+    }
+
+    if (this.readingListMode) {
+      this.closeReader();
+      return;
+    }
+
+    this.promptRateAndReview(bookInfo).subscribe(() => {
+      this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
+    });
+  }
+
+  private chapterEntityName() {
+    return this.entityTitleService.formatChapterName(this.libraryType).toLowerCase();
   }
 
   // Not currentPage: the viewer reports the first fully visible page, so with 278-282 on screen it stays on 279
   private isLastPageEndInView() {
-    const lastPage = this.document.querySelector(`.page[data-page-number="${this.maxPages}"]`);
+    const lastPage = this.document.querySelector(`.page[data-page-number="${this.maxPages()}"]`);
     const viewer = this.document.querySelector('#viewerContainer');
     if (!lastPage || !viewer) return false;
 
     // Page mode keeps only the current page or spread in the DOM, so the element existing means it is showing
-    if (this.scrollMode === ScrollModeType.page) return true;
+    if (this.scrollMode() === ScrollModeType.page) return true;
 
     const page = lastPage.getBoundingClientRect();
     const view = viewer.getBoundingClientRect();
 
     // 1px: fractional layout leaves the edge up to a pixel past the viewer at full scroll
-    return this.scrollMode === ScrollModeType.horizontal
+    return this.scrollMode() === ScrollModeType.horizontal
       ? page.right <= view.right + 1
       : page.bottom <= view.bottom + 1;
   }
 
+  private isFirstPageStartInView() {
+    const firstPage = this.document.querySelector('.page[data-page-number="1"]');
+    const viewer = this.document.querySelector('#viewerContainer');
+    if (!firstPage || !viewer) return false;
+
+    if (this.scrollMode() === ScrollModeType.page) return true;
+
+    const page = firstPage.getBoundingClientRect();
+    const view = viewer.getBoundingClientRect();
+
+    return this.scrollMode() === ScrollModeType.horizontal
+      ? page.left >= view.left - 1
+      : page.top >= view.top - 1;
+  }
+
   closeReader() {
      if (this.readerService.closeShortCutModal()) return;
-     this.readerService.closeReader(this.libraryId, this.seriesId, this.chapterId, this.readingListMode, this.readingListId);
+     this.readerService.closeReader(this.libraryId, this.seriesId, this.chapterId(), this.readingListMode, this.readingListId);
   }
 
   openShortcutModal() {
@@ -459,31 +704,34 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   }
 
   updateLoading(state: boolean) {
-    this.isLoading = state;
-    this.cdRef.markForCheck();
+    this.isLoading.set(state);
   }
 
   updateLoadProgress(event: ProgressBarEvent) {
-    this.loadPercent = event.percent;
-    this.cdRef.markForCheck();
+    this.loadPercent.set(event.percent);
   }
 
 
   updateSearchOpen(event: boolean) {
-     this.isSearchOpen = event;
-     this.cdRef.markForCheck();
+     this.isSearchOpen.set(event);
   }
 
   prevPage() {
-     this.currentPage--;
-     if (this.currentPage < 0) this.currentPage = 0;
-     this.cdRef.markForCheck();
+    if (this.isFirstPageStartInView()) {
+      this.loadPrevChapter();
+      return;
+    }
+
+    this.currentPage.update(page => Math.max(page - 1, 1));
   }
 
   nextPage() {
-    this.currentPage++;
-    if (this.currentPage > this.maxPages) this.currentPage = this.maxPages;
-    this.cdRef.markForCheck();
+    if (this.isLastPageEndInView()) {
+      this.loadNextChapter();
+      return;
+    }
+
+    this.currentPage.update(page => Math.min(page + 1, this.maxPages()));
   }
 
 
