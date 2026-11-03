@@ -23,7 +23,7 @@ import {
 import {DOCUMENT, NgClass, NgStyle, NgTemplateOutlet, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from '@openng/ngx-toastr';
-import {firstValueFrom, forkJoin, fromEvent, merge, of, switchMap} from 'rxjs';
+import {EMPTY, firstValueFrom, forkJoin, fromEvent, merge, of, switchMap} from 'rxjs';
 import {catchError, debounceTime, distinctUntilChanged, filter, take, tap} from 'rxjs/operators';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { Tooltip } from 'bootstrap';
@@ -1017,7 +1017,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     this.loadImageBookmarks();
 
 
-    this.bookService.getBookInfo(this.chapterId, true).subscribe(async (info) => {
+    this.bookService.getBookInfo(this.chapterId, true).pipe(
+      catchError(() => {
+        setTimeout(() => this.closeReader(), 200);
+        return EMPTY;
+      })
+    ).subscribe(async (info) => {
       if (this.readingListMode && info.seriesFormat !== MangaFormat.EPUB) {
         // Redirect to the manga reader.
         const params = this.readerService.getQueryParamsObject(this.incognitoMode(), this.readingListMode, this.readingListId);
