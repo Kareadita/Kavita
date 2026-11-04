@@ -275,7 +275,7 @@ public class BookServiceTests
         var bookFilePath = Path.Join(testDirectory, "duplicate-spine-entry.epub");
 
         var book = await EpubReader.OpenBookAsync(bookFilePath);
-        var pageMapping = await _bookService.CreateKeyToPageMappingAsync(book);
+        var pageMapping = await BookService.CreateKeyToPageMappingAsync(book);
 
         Assert.Equal(
             new Dictionary<string, int> { { "text00000.html", 0 } },

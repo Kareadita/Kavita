@@ -982,7 +982,7 @@ public partial class BookService(
         return key.Replace("../", string.Empty);
     }
 
-    private static async Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book)
+    public static async Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book)
     {
         var dict = new Dictionary<string, int>();
         var pageCount = 0;
