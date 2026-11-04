@@ -1303,7 +1303,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     }
 
     // Only prompt the rate and review when on the last page (and clicking NextChapter), otherwise show the prompt
-    if (!this.isOnLastPage()) {
+    if (!this.isOnLastPage() || !this.isScrolledToEnd()) {
       this.toastr.warning(translate('toasts.no-next-chapter', {entity}));
       return;
     }

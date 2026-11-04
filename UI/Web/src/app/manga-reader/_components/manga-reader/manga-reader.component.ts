@@ -795,10 +795,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           return EMPTY;
         })
       )),
-    ).subscribe(updatedProfile => {
-      this.readingProfile.set(updatedProfile);
-      this.savedSettings = JSON.stringify(this.packReadingProfile());
-    });
+    ).subscribe(updatedProfile => this.readingProfile.set(updatedProfile));
 
     this.currentImage$.pipe(
       filter(() => this.readerMode() !== ReaderMode.Webtoon),
@@ -903,6 +900,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.applyReadingProfile(readingProfile);
       this.formModel.update(model => ({...model, darkness}));
       this.pushReaderSettings();
+      this.switchToWebtoonReaderIfPagesLikelyWebtoon();
       this.renderForReaderMode();
       this.readerService.showReadingProfileSwitch(readingProfile, seriesName);
     });
@@ -1235,7 +1233,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.inSetup.set(false);
 
-      this.switchToWebtoonReaderIfPagesLikelyWebtoon();
+      // On a series switch this runs once the new series' profile has loaded, see switchReadingProfile
+      if (!seriesChanged) {
+        this.switchToWebtoonReaderIfPagesLikelyWebtoon();
+      }
       this.cdRef.markForCheck();
 
       // From bookmarks, create map of pages to make lookup time O(1)

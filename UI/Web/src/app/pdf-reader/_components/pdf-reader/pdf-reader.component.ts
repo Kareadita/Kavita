@@ -168,6 +168,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
    * Paged forward into a fully read chapter. Its first save resets progress to 0 before saving the page, like the manga reader
    */
   private isReRead = false;
+  private focusViewerOnLoad = false;
 
   protected prevChapter = signal<{chapterId: number, info: ChapterInfo} | null>(null);
   protected nextChapter = signal<{chapterId: number, info: ChapterInfo} | null>(null);
@@ -578,6 +579,18 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.isLoading.set(false);
     this.watchViewerScroll();
     this.keepChapterCapsInViewer();
+
+    // Loading hides the caps, which drops a focused card's focus to <body>
+    if (this.focusViewerOnLoad) {
+      this.focusViewerOnLoad = false;
+      this.viewerContainer()?.focus({preventScroll: true});
+    }
+  }
+
+  private isFocusInChapterCap() {
+    const active = this.document.activeElement;
+    if (!active) return false;
+    return !!(this.startCap()?.nativeElement.contains(active) || this.endCap()?.nativeElement.contains(active));
   }
 
   // pdf.js empties #viewer for every new document and spread change, which takes the caps with it
@@ -588,6 +601,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     if (!viewer || !startCap || !endCap || viewer === this.capsViewer) return;
 
     this.viewerContainer.set(viewer.parentElement ?? undefined);
+    // Without a tabindex a div only takes focus while it overflows, and never in Safari
+    viewer.parentElement?.setAttribute('tabindex', '-1');
     this.capsObserver?.disconnect();
     this.capsViewer = viewer;
 
@@ -626,6 +641,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.saveProgress();
     this.promptRateAndReview(this.bookInfo).subscribe(() => this.closeReader());
   }
 
@@ -712,6 +728,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   private swapToChapter(chapterId: number, direction: 'Next' | 'Prev') {
     const currentBookInfo = this.bookInfo;
     this.bookInfo = null;
+    this.focusViewerOnLoad = this.isFocusInChapterCap();
     this.isLoading.set(true);
 
     // The viewer must never get a non-PDF as src: it goes blank, with the error only in the console
@@ -740,6 +757,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.bookInfo = currentBookInfo;
+        this.focusViewerOnLoad = false;
         this.isLoading.set(false);
       }
     });
