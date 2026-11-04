@@ -60,6 +60,8 @@ public class KoreaderService(
         // Update the bookScrollId if possible
         var reportedProgress = koreaderBookDto.progress;
         KoreaderHelper.UpdateProgressDto(userProgressDto, koreaderBookDto.progress);
+        // readerService.SaveReadingProgress will sync it to the new BookScrollId
+        userProgressDto.KoboSpan = null;
 
         logger.LogDebug("Converted KOReader progress from {ProgressEncoding} to Page {PageNum} with ScrollId: {ScrollId}. For Chapter {ChapterId} in Series {SeriesId}",
             reportedProgress.Sanitize(), userProgressDto.PageNum, userProgressDto.BookScrollId?.Sanitize() ?? string.Empty,

@@ -186,7 +186,7 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
             VolumeId = series1.Volumes.First().Id,
             SeriesId = series1.Id,
             LibraryId = 1,
-            ChapterId = series2.Volumes.First().Chapters.First().Id,
+            ChapterId = series1.Volumes.First().Chapters.First().Id,
             AppUserId = 1
         });
         ctx.AppUserProgresses.Add(new AppUserProgress
@@ -204,13 +204,21 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         var syncPoint = new KoboSyncPoint();
 
         var (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
-        Assert.Single(changes, c => c.ChangedReadingState != null);
+        var readingChanges = changes.Where(c => c.ChangedReadingState != null).ToList();
+
+        Assert.Single(readingChanges);
+        Assert.Equal("1", readingChanges.First().ChangedReadingState.ReadingState.EntitlementId);
 
         (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
-        Assert.Single(changes, c => c.ChangedReadingState != null);
+        readingChanges = changes.Where(c => c.ChangedReadingState != null).ToList();
+
+        Assert.Single(readingChanges);
+        Assert.Equal("2", readingChanges.First().ChangedReadingState.ReadingState.EntitlementId);
 
         (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
-        Assert.DoesNotContain(changes, c => c.ChangedReadingState != null);
+        readingChanges = changes.Where(c => c.ChangedReadingState != null).ToList();
+
+        Assert.Empty(readingChanges);
     }
 
     [Fact]
@@ -221,7 +229,46 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
 
         await SetupCollection(ctx);
 
-        var syncPreferences = new AppUserKoboSyncPreferences {SyncItemLimit = 1};
+        var series2 = new SeriesBuilder("The Moon on a Rainy Night")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
+                    .Build())
+                .Build())
+            .Build();
+        ctx.Series.Add(series2);
+
+        var series3 = new SeriesBuilder("The Executioner and Her Way of Life")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
+                    .Build())
+                .Build())
+            .Build();
+        var series4 = new SeriesBuilder("There, Beneath the Water")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
+                    .Build())
+                .Build())
+            .Build();
+
+        ctx.Series.Add(series3);
+        ctx.Series.Add(series4);
+
+        await ctx.SaveChangesAsync();
+
+        var col = await ctx.AppUserCollection.Includes(CollectionIncludes.Series).FirstAsync();
+        col.Items.Add(series2);
+
+        await ctx.SaveChangesAsync();
+
+        await Task.Delay(TimeSpan.FromSeconds(1));
+
+        var syncPreferences = new AppUserKoboSyncPreferences {SyncItemLimit = 1, SyncCollection = 1};
 
         var syncPoint = new KoboSyncPoint
         {
@@ -234,27 +281,31 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
             ProgressSyncedUntilIndex = 0
         };
 
-        var series2 = new SeriesBuilder("The Moon on a Rainy Night")
-            .WithLibraryId(1)
-            .WithFormat(MangaFormat.Epub)
-            .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
-                    .Build())
-                .Build())
-            .Build();
-        ctx.Series.Add(series2);
-        await ctx.SaveChangesAsync();
-
-        await Task.Delay(TimeSpan.FromSeconds(1));
-
-        var (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+        var (changes, exhausted) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
         Assert.Single(changes, c => c.NewEntitlement != null);
+        Assert.Equal("1", changes.First().NewEntitlement.BookEntitlement.Id);
+        Assert.False(exhausted);
 
         (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
         Assert.Single(changes, c => c.NewEntitlement != null);
+        Assert.Equal("2", changes.First().NewEntitlement.BookEntitlement.Id);
 
         (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
         Assert.DoesNotContain(changes, c => c.NewEntitlement != null);
 
+        await Task.Delay(TimeSpan.FromSeconds(1));
+
+        col.Items.Add(series3);
+        col.Items.Add(series4);
+        await ctx.SaveChangesAsync();
+
+        (changes,  _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Single(changes, c => c.NewEntitlement != null);
+        Assert.Equal("3", changes.First().NewEntitlement.BookEntitlement.Id);
+
+        (changes, exhausted) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Single(changes, c => c.NewEntitlement != null);
+        Assert.Equal("4", changes.First().NewEntitlement.BookEntitlement.Id);
+        Assert.True(exhausted);
     }
 }

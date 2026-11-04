@@ -30,13 +30,13 @@ BuildServer:
     - { From: "Kavita.Server/config/appsettings.json", To: "config/appsettings-init.json"}
   DeletePaths: ["BuildHost-net472", "BuildHost-netcore", "bin", "config/cache-long"]
   IncludeExternalFiles:
-    "linux-x64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-64bit", To: "kepubify" }]
-    "linux-arm64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm64", To: "kepubify" }]
-    "linux-arm": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm", To: "kepubify" }]
-    "win-x64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-windows-64bit.exe", To: "kepubify.exe"}]
-    "win-x84": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-windows-32bit.exe", To: "kepubify.exe"}]
-    "osx-arm64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-darwin-arm64", To: "kepubify"}]
-    "osx-x64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-darwin-64bit", To: "kepubify"}]
+    "linux-x64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-64bit", To: "kepubify", "Sha256": "37d7628d26c5c906f607f24b36f781f306075e7073a6fe7820a751bb60431fc5" }]
+    "linux-arm64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm64", To: "kepubify", "Sha256": "5a15b8f6f6a96216c69330601bca29638cfee50f7bf48712795cff88ae2d03a3" }]
+    "linux-arm": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm", To: "kepubify", "Sha256": "07f23275c4e674093443f01a591aa0980b0b87dbb0a10986d5001e9d56b0e1e7" }]
+    "win-x64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-windows-64bit.exe", To: "kepubify.exe", "Sha256": "f3dee3ece063329661fef474262fe403812335bf1676eab35b672565bf195738" }]
+    "win-x86": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-windows-32bit.exe", To: "kepubify.exe", "Sha256": "5aa6be67f468e50e1b552a2eb1d1ac1afc375d1e7cb359e344f2e71d2dacdefb" }]
+    "osx-arm64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-darwin-arm64", To: "kepubify", "Sha256": "6467d44439ee899113c7f710b509ef9e5ce65e8df711c85192b9ea5b683594b7" }]
+    "osx-x64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-darwin-64bit", To: "kepubify", "Sha256": "851afab0b83ecaf11f6965c901483eed3e74a6b41a3ab0a68f7321bc48bac4a3" }]
 
 Docker:
   Disabled: true

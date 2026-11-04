@@ -160,12 +160,17 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
     {
         var ct = HttpContext.RequestAborted;
         // This needs to take into account owner as I can select other users cards
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections, ct);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections | AppUserIncludes.UserPreferences, ct);
         if (user == null) return Unauthorized();
 
         user.Collections = user.Collections.Where(uc => !dto.CollectionIds.Contains(uc.Id)).ToList();
         unitOfWork.UserRepository.Update(user);
 
+        if (dto.CollectionIds.Contains(user.UserPreferences.KoboSyncPreferences.SyncCollection))
+        {
+            user.UserPreferences.KoboSyncPreferences.SyncCollection = 0;
+            logger.LogWarning("User {UserId} is deleting their Kobo Sync collection. Updating preferences", user.Id);
+        }
 
         if (!unitOfWork.HasChanges()) return Ok();
         await unitOfWork.CommitAsync(ct);
@@ -262,11 +267,17 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         var ct = HttpContext.RequestAborted;
         try
         {
-            var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections, ct);
+            var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections | AppUserIncludes.UserPreferences, ct);
             if (user == null) return Unauthorized();
 
             if (user.Collections.All(c => c.Id != tagId))
                 return BadRequest(await localizationService.TranslateAsync(user.Id, "access-denied"));
+
+            if (user.UserPreferences.KoboSyncPreferences.SyncCollection == tagId)
+            {
+                user.UserPreferences.KoboSyncPreferences.SyncCollection = 0;
+                logger.LogWarning("User {UserId} is deleting their Kobo Sync collection. Updating preferences", user.Id);
+            }
 
             if (await collectionService.DeleteTag(tagId, user, ct))
             {

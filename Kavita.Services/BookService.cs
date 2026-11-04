@@ -1486,7 +1486,7 @@ public partial class BookService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to read document {FileRef}@{FilePos} in {Path}", fileRef, filePos, filePath);
+            logger.LogError(ex, "Failed to read document {FileRef}@{FilePos} in {Path}", fileRef.Sanitize(), filePos, filePath.Sanitize());
         }
 
         return (null, 0);

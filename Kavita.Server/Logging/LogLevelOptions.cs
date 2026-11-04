@@ -141,7 +141,7 @@ public partial class ApiKeyEnricher : ILogEventEnricher
 
         var censored = SensitiveRegex().Replace(path, m =>
             m.Groups["prefix"].Success
-                ? $"/{m.Groups["prefix"].Value}/******REDACTED******/"
+                ? $"/{m.Groups["prefix"].Value}/******REDACTED******"
                 : "apiKey=******REDACTED******");
 
         var enrichedProperty = propertyFactory.CreateProperty("RequestPath", censored);
@@ -149,7 +149,7 @@ public partial class ApiKeyEnricher : ILogEventEnricher
     }
 
     [GeneratedRegex(
-        @"(?<path>/(?<prefix>kobo|opds)/[^/]+/)|(?<query>\bapiKey=[^&\s]+\b)",
+        @"/(?<prefix>kobo|opds|koreader)/[^/?]+(?=/|\?|$)|\bapiKey=[^&\s]+",
         RegexOptions.IgnoreCase)]
     private static partial Regex SensitiveRegex();
 }

@@ -21,7 +21,13 @@ public class ApiKeyEnricherTests
     [Theory]
     [InlineData("/kobo/abc123/v1/library/sync", "/kobo/******REDACTED******/v1/library/sync")]
     [InlineData("/api/opds/abc123/", "/api/opds/******REDACTED******/")]
+    [InlineData("/api/opds/abc123", "/api/opds/******REDACTED******")]
+    [InlineData("/api/opds/abc123?pageNumber=1", "/api/opds/******REDACTED******?pageNumber=1")]
+    [InlineData("/api/koreader/abc123/syncs/progress", "/api/koreader/******REDACTED******/syncs/progress")]
+    [InlineData("/api/koreader/abc123", "/api/koreader/******REDACTED******")]
     [InlineData("/api/series?apiKey=abc&foo=1", "/api/series?apiKey=******REDACTED******&foo=1")]
+    [InlineData("/api/series?foo=1&apikey=abc-", "/api/series?foo=1&apiKey=******REDACTED******")]
+    [InlineData("/kobo/abc123", "/kobo/******REDACTED******")]
     public void RedactsSensitivePaths(string input, string expected)
     {
         var logEvent = CreateEvent(input);
