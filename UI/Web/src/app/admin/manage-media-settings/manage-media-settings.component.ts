@@ -77,7 +77,8 @@ export class ManageMediaSettingsComponent implements OnInit {
       distinctUntilChanged((a, b) => a.encodeMediaAs === b.encodeMediaAs
         && a.bookmarksDirectory === b.bookmarksDirectory
         && a.coverImageSize === b.coverImageSize
-        && a.pdfRenderResolution === b.pdfRenderResolution),
+        && a.pdfRenderResolution === b.pdfRenderResolution
+        && a.kepubifyPath === b.kepubifyPath),
       filter(() => this.settingsForm().dirty() && this.settingsForm().valid()),
       switchMap(() => this.settingsService.updateServerSettings(this.packData()).pipe(catchError(err => {
         console.error(err);

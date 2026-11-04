@@ -157,7 +157,6 @@ public class KoboController(
     }
 
     [HttpPut("v1/library/{bookId}/state")]
-    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> UpdateBookState(string bookId)
     {
@@ -189,7 +188,6 @@ public class KoboController(
     }
 
     [ChapterAccess(chapterIdKey: "bookId")]
-    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [HttpGet("v1/library/{bookId:int}/file/epub")]
     public async Task<ActionResult> GetBookFile(int bookId, [FromQuery] bool convert = true)
     {
@@ -210,7 +208,7 @@ public class KoboController(
     [ChapterAccess(failOnMissing: false, chapterIdKey: "thumbnailId")]
     [HttpGet("v1/books/{thumbnailId}/thumbnail/{width}/{height}/{isGreyScale}/image.jpg")]
     [HttpGet("v1/books/{thumbnailId}/thumbnail/{width}/{height}/{quality}/{isGreyScale}/image.jpg")]
-    public async Task<ActionResult> GetBookCover(string thumbnailId, string width, string height, string quality, bool isGreyScale = false)
+    public async Task<ActionResult> GetBookCover(string thumbnailId, string width, string height, string? quality, bool isGreyScale = false)
     {
         var ct = HttpContext.RequestAborted;
 
@@ -530,7 +528,9 @@ public class KoboController(
         HeaderNames.ContentType,
     };
 
-    private static bool IsKoboHeader(string header) => header.StartsWith("x-kobo-", StringComparison.OrdinalIgnoreCase) && !header.Equals(KoboHeaders.KoboSyncToken);
+    private static bool IsKoboHeader(string header) =>
+        header.StartsWith("x-kobo-", StringComparison.OrdinalIgnoreCase)
+        && !header.Equals(KoboHeaders.KoboSyncToken, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Defaults to <see cref="KoboHttpClient"/>

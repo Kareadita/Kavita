@@ -680,7 +680,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
 
             // Sum character counts for unread pages
             var toReadCharacters = pageCounts
-                .Where(kvp => kvp.Key >= page)
+                .Where(kvp => kvp.Key >= page && kvp.Key < chapter.PagesRead)
                 .Sum(kvp => kvp.Value);
 
             var progressCount = WordCountAnalyzerService.GetWordCount(toReadCharacters);

@@ -232,8 +232,8 @@ public class KoboSyncService(
                         Chapter = c,
                         ReadingProgress = p,
                     })
-                .Where(sync => sync.ReadingProgress!.LastModified > after)
-                .OrderBy(sync => sync.ReadingProgress!.LastModified);
+                .Where(sync => sync.ReadingProgress!.LastModifiedUtc > after)
+                .OrderBy(sync => sync.ReadingProgress!.LastModifiedUtc);
         }
     }
 
