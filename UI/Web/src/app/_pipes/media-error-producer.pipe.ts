@@ -16,7 +16,8 @@ export class MediaErrorProducerPipe implements PipeTransform {
         return this.translocoService.translate('media-error-producer-pipe.archive-service');
       case MediaErrorProducer.Scanner:
         return this.translocoService.translate('media-error-producer-pipe.scanner');
-
+      case MediaErrorProducer.Kepubify:
+        return this.translocoService.translate('media-error-producer-pipe.kepubify');
     }
   }
 }

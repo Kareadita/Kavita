@@ -109,9 +109,9 @@ public class DownloadService(
 
         var outputPath = kepubifyConverterService.BuildKepubifyPath(chapter.Id);
 
-        await kepubifyConverterService.ConvertEpubToKepub(chapter.Files.First().FilePath, outputPath, cancellationToken);
+        var converted = await kepubifyConverterService.ConvertEpubToKepub(chapter.Files.First().FilePath, outputPath, cancellationToken);
 
-        return outputPath;
+        return converted ? outputPath : await ConvertToEpub(chapter, cancellationToken);
     }
 
     private async Task<string> CollectFiles(Chapter chapter, CancellationToken cancellationToken)

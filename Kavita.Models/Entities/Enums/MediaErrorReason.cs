@@ -29,6 +29,8 @@ public enum MediaErrorReason
     EpubNotStrict = 11,
     [Description("Ambiguous Series")]
     AmbiguousSeries = 12,
+    [Description("Kepub Conversion Failed")]
+    KepubConversionFailed = 13,
 }
 
 public static class MediaErrorReasons

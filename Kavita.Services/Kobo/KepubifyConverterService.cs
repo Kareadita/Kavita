@@ -5,14 +5,27 @@ using System.IO.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Services;
+using Kavita.Common.Extensions;
+using Kavita.Models.Entities.Enums;
 using Kavita.Services.Helpers;
+using Kavita.Services.Scanner;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Kobo;
 
-public class KepubifyConverterService(ILogger<KepubifyConverterService> logger, IServiceScopeFactory serviceScopeFactory): IKepubifyConverterService
+public class KepubifyConverterService(
+    ILogger<KepubifyConverterService> logger,
+    IServiceScopeFactory serviceScopeFactory,
+    IHostApplicationLifetime applicationLifetime): IKepubifyConverterService
 {
+    // 3 times the 100 s measured for a 1.35 GB epub with 1000 chapters
+    private static readonly TimeSpan ConversionTimeout = TimeSpan.FromMinutes(5);
+
+    private readonly ConcurrentDictionary<string, Lazy<Task<bool>>> _conversions = new();
+    private readonly SemaphoreSlim _conversionSlots = new(2, 2);
+
     private string _kepubifyPath = string.Empty;
     public bool KepubifySupported { get; private set; }
 
@@ -61,31 +74,82 @@ public class KepubifyConverterService(ILogger<KepubifyConverterService> logger, 
         _kepubifyPath = kepubifyPath;
     }
 
-    public async Task ConvertEpubToKepub(string epubPath, string kepubPath, CancellationToken cancellationToken)
+    public async Task<bool> ConvertEpubToKepub(string epubPath, string kepubPath, CancellationToken cancellationToken)
     {
-        if (!KepubifySupported)
+        if (!KepubifySupported) return false;
+
+        var conversion = _conversions.GetOrAdd(kepubPath,
+            _ => new Lazy<Task<bool>>(() => RunConversion(epubPath, kepubPath)));
+
+        return await conversion.Value.WaitAsync(cancellationToken);
+    }
+
+    private async Task<bool> RunConversion(string epubPath, string kepubPath)
+    {
+        var stopping = applicationLifetime.ApplicationStopping;
+
+        try
         {
-            throw new NotSupportedException("Kepubify is not supported");
+            using var scope = serviceScopeFactory.CreateScope();
+            var processRunner = scope.ServiceProvider.GetRequiredService<IProcessRunner>();
+            var fileSystem = scope.ServiceProvider.GetRequiredService<IFileSystem>();
+
+            if (fileSystem.File.Exists(kepubPath)) return true;
+
+            await _conversionSlots.WaitAsync(stopping);
+            try
+            {
+                var command = new ProcessCommand.Builder(processRunner)
+                    .WithTimeout(ConversionTimeout)
+                    .WithExecutable(_kepubifyPath)
+                    .AppendArgument(epubPath)
+                    .AppendArgument("-o")
+                    .AppendArgument(kepubPath)
+                    .Build();
+
+                var result = await command.ExecuteAsync(stopping);
+                result.ThrowIfFailed();
+                return true;
+            }
+            finally
+            {
+                _conversionSlots.Release();
+            }
         }
-
-        using var scope = serviceScopeFactory.CreateScope();
-        var processRunner = scope.ServiceProvider.GetRequiredService<IProcessRunner>();
-        var fileSystem = scope.ServiceProvider.GetRequiredService<IFileSystem>();
-
-        if (fileSystem.File.Exists(kepubPath))
+        catch (OperationCanceledException) when (stopping.IsCancellationRequested)
         {
-            return;
+            return false;
         }
+        catch (OperationCanceledException)
+        {
+            await ReportFailure(epubPath, $"Timed out after {ConversionTimeout.TotalMinutes} minutes");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            await ReportFailure(epubPath, ParseIssues.Describe(ex));
+            return false;
+        }
+        finally
+        {
+            _conversions.TryRemove(kepubPath, out _);
+        }
+    }
 
-        var command = new ProcessCommand.Builder(processRunner)
-            .WithTimeout(TimeSpan.FromSeconds(10))
-            .WithExecutable(_kepubifyPath)
-            .AppendArgument(epubPath)
-            .AppendArgument("-o")
-            .AppendArgument(kepubPath)
-            .Build();
+    private async Task ReportFailure(string epubPath, string details)
+    {
+        logger.LogError("Kepub conversion failed for {FilePath}: {Details}", epubPath.Sanitize(), details.Sanitize());
 
-        var result = await command.ExecuteAsync(cancellationToken);
-        result.ThrowIfFailed();
+        try
+        {
+            using var scope = serviceScopeFactory.CreateScope();
+            var mediaErrorService = scope.ServiceProvider.GetRequiredService<IMediaErrorService>();
+            await mediaErrorService.ReportMediaIssueAsync(epubPath, MediaErrorProducer.Kepubify,
+                MediaErrorReason.KepubConversionFailed, details, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Could not save the media error for {FilePath}", epubPath.Sanitize());
+        }
     }
 }

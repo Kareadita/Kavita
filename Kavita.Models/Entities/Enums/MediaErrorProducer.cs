@@ -5,4 +5,5 @@ public enum MediaErrorProducer
     BookService = 0,
     ArchiveService = 1,
     Scanner = 2,
+    Kepubify = 3,
 }

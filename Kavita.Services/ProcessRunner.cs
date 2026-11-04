@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Services;
+using Kavita.Common.Extensions;
 using Kavita.Models.Misc;
 using Microsoft.Extensions.Logging;
 
@@ -54,18 +55,18 @@ public class ProcessRunner(ILogger<ProcessRunner> logger, IFileSystem fileSystem
             if (args.Data is null) return;
 
             standardOutput.AppendLine(args.Data);
-            logger.LogTrace("{Line}", args.Data);
+            logger.LogTrace("{Line}", args.Data.Sanitize());
         };
         process.ErrorDataReceived += (_, args) =>
         {
             if (args.Data is null) return;
 
             standardError.AppendLine(args.Data);
-            logger.LogTrace("{Line}", args.Data);
+            logger.LogTrace("{Line}", args.Data.Sanitize());
         };
 
-        logger.LogDebug("Running {Executable} {Arguments} in {WorkingDirectory}", executable, string.Join(' ', arguments),
-            workingDirectory ?? "(current directory)");
+        logger.LogDebug("Running {Executable} {Arguments} in {WorkingDirectory}", executable.Sanitize(), string.Join(' ', arguments).Sanitize(),
+            workingDirectory?.Sanitize() ?? "(current directory)");
 
         process.Start();
         process.BeginOutputReadLine();
@@ -76,7 +77,10 @@ public class ProcessRunner(ILogger<ProcessRunner> logger, IFileSystem fileSystem
             await process.WaitForExitAsync(ct);
 
             // WaitForExitAsync returns before the output handlers have drained
+#pragma warning disable S6966
+            // ReSharper disable once MethodHasAsyncOverloadWithCancellation
             process.WaitForExit();
+#pragma warning restore S6966
         }
         catch (OperationCanceledException)
         {

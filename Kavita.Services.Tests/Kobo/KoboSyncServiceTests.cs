@@ -9,6 +9,8 @@ using Kavita.Database.Extensions;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
+using Kavita.Models.DTOs.Kobo;
+using Kavita.Models.DTOs.Progress;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.Progress;
@@ -30,7 +32,8 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         IMapper mapper,
         IReaderService? readerService = null,
         IBookService? bookService = null,
-        IFileSystem? fileSystem = null
+        IFileSystem? fileSystem = null,
+        IKepubifyConverterService? kepubifyConverterService = null
         )
     {
         var userContext = Substitute.For<IUserContext>();
@@ -46,7 +49,7 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
             Substitute.For<IReadingSessionService>(),
             userContext,
             Substitute.For<IHttpContextAccessor>(),
-            Substitute.For<IKepubifyConverterService>(),
+            kepubifyConverterService ?? Substitute.For<IKepubifyConverterService>(),
             fileSystem ?? Substitute.For<IFileSystem>(),
             Substitute.For<ILocalizationService>()
             );
@@ -156,6 +159,47 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         var change3 = changes[0];
         Assert.NotNull(change3.NewEntitlement);
         Assert.Equal("2", change3.NewEntitlement.BookEntitlement.Id);
+    }
+
+    [Fact]
+    public async Task UpdateProgress_ConversionFails_UsesFallbackProgress()
+    {
+        var kepubify = Substitute.For<IKepubifyConverterService>();
+        kepubify.ConvertEpubToKepub(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(false);
+
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        await SetupCollection(ctx);
+
+        var chapter = await ctx.Chapter.Include(c => c.Files).FirstAsync();
+        chapter.Files.Add(new MangaFileBuilder("/books/a.epub", MangaFormat.Epub).Build());
+        await ctx.SaveChangesAsync();
+
+        var reader = Substitute.For<IReaderService>();
+        reader.SaveReadingProgress(Arg.Any<ProgressDto>(), Arg.Any<int>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(true);
+        var book = Substitute.For<IBookService>();
+        book.GetPageForFile("/books/a.epub", "OEBPS/chapter.xhtml").Returns(5);
+
+        kepubify.KepubifySupported.Returns(true);
+        kepubify.BuildKepubifyPath(Arg.Any<int>()).Returns("/temp/a.kepub.epub");
+
+        var state = new KoboReadingStateDto
+        {
+            EntitlementId = chapter.Id.ToString(),
+            StatusInfo = new KoboStatusInfoDto { Status = KoboReadStatus.Reading },
+            CurrentBookmark = new KoboBookmarkDto
+            {
+                Location = new KoboLocationDto { Source = "OEBPS/chapter.xhtml", Value = "kobo.1.1" },
+            },
+        };
+
+        var service = SetupSyncService(unitOfWork, mapper, reader, book, kepubifyConverterService: kepubify);
+
+        var result = await service.SaveProgress(1, chapter.Id, state, CancellationToken.None);
+
+        Assert.Equal(KoboRequestResult.Success, result.RequestResult);
+        await book.DidNotReceive().GetDocumentAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<int?>());
+        await reader.Received(1).SaveReadingProgress(Arg.Is<ProgressDto>(p => p.PageNum == 5 && p.BookScrollId == null && p.KoboSpan == "kobo.1.1"),
+            1, false, Arg.Any<CancellationToken>());
     }
 
     [Fact]

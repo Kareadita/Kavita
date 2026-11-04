@@ -55,6 +55,7 @@ public class KoboSyncService(
     ILocalizationService localizationService
     ): IKoboSyncService
 {
+    private static readonly TimeSpan ProgressConversionWait = TimeSpan.FromSeconds(30);
 
     #region Sync
 
@@ -369,10 +370,7 @@ public class KoboSyncService(
 
         var epubPath = chapter.Files.First().FilePath;
         var kepubPath = kepubifyConverterService.BuildKepubifyPath(chapter.Id);
-        if (!fileSystem.File.Exists(kepubPath))
-        {
-            await kepubifyConverterService.ConvertEpubToKepub(epubPath, kepubPath, cancellationToken);
-        }
+        if (!fileSystem.File.Exists(kepubPath) && !await kepubifyConverterService.ConvertEpubToKepub(epubPath, kepubPath, cancellationToken)) return;
 
         var (readerDoc, _) = await bookService.GetDocumentAsync(epubPath, string.Empty, progress.PagesRead);
         if (readerDoc == null) return;
@@ -477,9 +475,10 @@ public class KoboSyncService(
         }
 
         var kepubPath = kepubifyConverterService.BuildKepubifyPath(chapter.Id);
-        if (!fileSystem.File.Exists(kepubPath))
+        if (!fileSystem.File.Exists(kepubPath) && !await WaitForKepub(chapter.Files.First().FilePath, kepubPath, cancellationToken))
         {
-            await kepubifyConverterService.ConvertEpubToKepub(chapter.Files.First().FilePath, kepubPath, cancellationToken);
+            await SetFallbackProgress();
+            return;
         }
 
         var (kepubDoc, pageNum) = await bookService.GetDocumentAsync(kepubPath, file, null);
@@ -520,6 +519,21 @@ public class KoboSyncService(
             // Reset if we can't translate
             progress.BookScrollId = null;
             progress.KoboSpan = readingState.CurrentBookmark.Location?.Value;
+        }
+    }
+
+    private async Task<bool> WaitForKepub(string epubPath, string kepubPath, CancellationToken cancellationToken)
+    {
+        using var wait = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        wait.CancelAfter(ProgressConversionWait);
+
+        try
+        {
+            return await kepubifyConverterService.ConvertEpubToKepub(epubPath, kepubPath, wait.Token);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            return false;
         }
     }
 
