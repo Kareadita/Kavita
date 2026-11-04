@@ -183,7 +183,7 @@ public class KoboSyncService(
         var progressAtIndex = await ProgressSyncQueryable(syncPoint.ProgressSyncTime)
             .Skip(syncPoint.ProgressSyncedUntilIndex - 1)
             .Take(1)
-            .Select(p => p.ReadingProgress!.Id)
+            .Select(p => p.Chapter.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
         var useIndex = progressAtIndex == syncPoint.ProgressSyncedUntilId;
@@ -207,9 +207,10 @@ public class KoboSyncService(
         List<KoboSyncItem> changes = [];
         foreach (var sync in progressToSync)
         {
-         changes.Add(new KoboSyncItem { ChangedReadingState = new KoboWrappedReadingStateDto {
-             ReadingState = await BuildKoboReadingStateDto(sync.Chapter,  sync.ReadingProgress),
-         }});
+            changes.Add(new KoboSyncItem { ChangedReadingState = new KoboWrappedReadingStateDto
+            {
+                ReadingState = await BuildKoboReadingStateDto(sync.Chapter,  sync.ReadingProgress),
+            }});
         }
 
         return new SyncAccumulationResult(changes, progressToSync.Count < syncPreferences.SyncItemLimit);

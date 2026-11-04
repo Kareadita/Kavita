@@ -186,7 +186,7 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
             VolumeId = series1.Volumes.First().Id,
             SeriesId = series1.Id,
             LibraryId = 1,
-            ChapterId = series2.Volumes.First().Chapters.First().Id,
+            ChapterId = series1.Volumes.First().Chapters.First().Id,
             AppUserId = 1
         });
         ctx.AppUserProgresses.Add(new AppUserProgress
@@ -204,13 +204,21 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         var syncPoint = new KoboSyncPoint();
 
         var (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
-        Assert.Single(changes, c => c.ChangedReadingState != null);
+        var readingChanges = changes.Where(c => c.ChangedReadingState != null).ToList();
+
+        Assert.Single(readingChanges);
+        Assert.Equal("1", readingChanges.First().ChangedReadingState.ReadingState.EntitlementId);
 
         (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
-        Assert.Single(changes, c => c.ChangedReadingState != null);
+        readingChanges = changes.Where(c => c.ChangedReadingState != null).ToList();
+
+        Assert.Single(readingChanges);
+        Assert.Equal("2", readingChanges.First().ChangedReadingState.ReadingState.EntitlementId);
 
         (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
-        Assert.DoesNotContain(changes, c => c.ChangedReadingState != null);
+        readingChanges = changes.Where(c => c.ChangedReadingState != null).ToList();
+
+        Assert.Empty(readingChanges);
     }
 
     [Fact]
@@ -249,9 +257,11 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
 
         var (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
         Assert.Single(changes, c => c.NewEntitlement != null);
+        Assert.Equal("1", changes.First().NewEntitlement.BookEntitlement.Id);
 
         (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
         Assert.Single(changes, c => c.NewEntitlement != null);
+        Assert.Equal("2", changes.First().NewEntitlement.BookEntitlement.Id);
 
         (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
         Assert.DoesNotContain(changes, c => c.NewEntitlement != null);
