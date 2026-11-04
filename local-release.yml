@@ -34,7 +34,7 @@ BuildServer:
     "linux-arm64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm64", To: "kepubify" }]
     "linux-arm": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm", To: "kepubify" }]
     "win-x64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-windows-64bit.exe", To: "kepubify.exe"}]
-    "win-x84": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-windows-32bit.exe", To: "kepubify.exe"}]
+    "win-x86": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-windows-32bit.exe", To: "kepubify.exe"}]
     "osx-arm64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-darwin-arm64", To: "kepubify"}]
     "osx-x64": [{ From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-darwin-64bit", To: "kepubify"}]
 
