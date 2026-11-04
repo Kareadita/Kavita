@@ -1042,10 +1042,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       this.cdRef.markForCheck();
 
       if (seriesChanged) {
-        this.readingProfile = await firstValueFrom(this.readingProfileService.getForSeries(this.libraryId, this.seriesId));
+        this.readingProfile = await firstValueFrom(this.readingProfileService.getForSeries(this.libraryId, this.seriesId).pipe(
+          catchError(() => of(this.readingProfile))
+        ));
       }
 
-      await this.readerSettingsService.initialize(this.libraryId, this.seriesId, this.readingProfile);
+      // this.readingProfile is from when the reader opened, re-initializing in the same series would undo the edits since
+      if (firstLoad || seriesChanged) {
+        await this.readerSettingsService.initialize(this.libraryId, this.seriesId, this.readingProfile);
+      }
 
       if (seriesChanged) {
         this.readerService.showReadingProfileSwitch(this.readingProfile, info.seriesName);

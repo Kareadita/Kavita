@@ -19,6 +19,18 @@
     color: lightblue !important;
 }
 
+// #viewerContainer takes focus after a chapter-cap swap, but #viewer's opaque background paints over its own outline,
+// so the ring is drawn on an overlay above the viewer (z-index clears the pdf.js toolbar's 9999)
+::ng-deep ngx-extended-pdf-viewer #mainContainer:has(> #viewerContainer:focus-visible)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  outline: 0.125rem solid var(--primary-color);
+  outline-offset: -0.125rem;
+  pointer-events: none;
+  z-index: 10000;
+}
+
 .chapter-cap {
   display: block;
 

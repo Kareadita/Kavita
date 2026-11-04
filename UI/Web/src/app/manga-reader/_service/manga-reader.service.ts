@@ -26,6 +26,7 @@ export class MangaReaderService {
   }
 
   load(chapterInfo: ChapterInfo | BookmarkInfo) {
+    this.pageDimensions = {};
     chapterInfo.pageDimensions!.forEach(d => {
       this.pageDimensions[d.pageNumber] = {
         height: d.height,

@@ -168,6 +168,9 @@ export class EpubReaderSettingsService {
    * Initialize the service with a reading profile and series ID
    */
   async initialize(libraryId: number, seriesId: number, readingProfile: ReadingProfile): Promise<void> {
+    // On a series switch, the form holds the old series' profile until setFormModelFromReadingProfile. Autosave needs to be denied
+    this._isInitialized.set(false);
+
     const fonts = await firstValueFrom(this.fontService.getFonts());
     this._epubFonts.set([...new Map(fonts.map(font => [`${font.family}`, font])).values()]);
 

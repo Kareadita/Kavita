@@ -276,6 +276,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   formSeeded = signal<boolean>(false);
   private savedSettings = '';
   /**
+   * seriesId already points at the new series but the form still holds the old one's profile
+   */
+  private profileSwitchPending = false;
+  /**
    * Portrait/narrow viewport, where the double renderer doesn't fit.
    */
   screenTooSmall = signal<boolean>(window.innerWidth <= window.innerHeight);
@@ -785,6 +789,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     toObservable(this.persistableSettings, {injector: this.injector}).pipe(
       filter(() => this.formSeeded()),
       debounceTime(300),
+      filter(() => !this.profileSwitchPending),
       map(() => this.packReadingProfile()),
       filter(profile => JSON.stringify(profile) !== this.savedSettings),
       tap(profile => this.savedSettings = JSON.stringify(profile)),
@@ -895,14 +900,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private switchReadingProfile(seriesName: string) {
-    this.readingProfileService.getForSeries(this.libraryId, this.seriesId).subscribe(readingProfile => {
-      const darkness = this.formModel().darkness;
-      this.applyReadingProfile(readingProfile);
-      this.formModel.update(model => ({...model, darkness}));
-      this.pushReaderSettings();
-      this.switchToWebtoonReaderIfPagesLikelyWebtoon();
-      this.renderForReaderMode();
-      this.readerService.showReadingProfileSwitch(readingProfile, seriesName);
+    this.readingProfileService.getForSeries(this.libraryId, this.seriesId).subscribe({
+      next: readingProfile => {
+        const darkness = this.formModel().darkness;
+        this.applyReadingProfile(readingProfile);
+        this.formModel.update(model => ({...model, darkness}));
+        this.profileSwitchPending = false;
+        this.pushReaderSettings();
+        this.switchToWebtoonReaderIfPagesLikelyWebtoon();
+        this.renderForReaderMode();
+        this.readerService.showReadingProfileSwitch(readingProfile, seriesName);
+      },
+      error: () => this.profileSwitchPending = false,
     });
   }
 
@@ -1175,6 +1184,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       const seriesChanged = !firstLoad && results.chapterInfo.seriesId !== this.seriesId;
+      if (seriesChanged) {
+        this.profileSwitchPending = true;
+      }
       this.chapterInfo.set(results.chapterInfo);
       this.seriesId = results.chapterInfo.seriesId;
       this.libraryId = results.chapterInfo.libraryId;

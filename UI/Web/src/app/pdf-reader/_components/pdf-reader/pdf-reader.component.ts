@@ -576,6 +576,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   }
 
   onPdfLoaded() {
+    // Input during the pdf download must not let the post-load reset (horizontal jumps back to page 1) be saved
+    this.awaitingReaderInput = true;
     this.isLoading.set(false);
     this.watchViewerScroll();
     this.keepChapterCapsInViewer();
@@ -687,8 +689,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.continuousChaptersStack.pop();
-    const stackedChapterId = this.continuousChaptersStack.peek();
+    const stack = this.continuousChaptersStack.items;
+    const stackedChapterId = stack.length > 1 ? stack[stack.length - 2] : undefined;
     if (stackedChapterId !== undefined && stackedChapterId !== this.chapterId()) {
       this.swapToChapter(stackedChapterId, 'Prev');
       return;
@@ -706,6 +708,9 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   }
 
   private loadChapter(chapterId: number, direction: 'Next' | 'Prev') {
+    // A second press before the next/prev id arrived lands here after the first swap started
+    if (!this.bookInfo) return;
+
     if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId()) {
       if (direction === 'Next') {
         this.nextChapterDisabled.set(true);
@@ -719,10 +724,21 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.continuousChaptersStack.push(chapterId);
     this.swapToChapter(chapterId, direction);
     const key = direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter';
     this.toastr.info(translate(key, {entity: this.chapterEntityName()}), '', {timeOut: 3000});
+  }
+
+  private updateChapterStack(chapterId: number, direction: 'Next' | 'Prev') {
+    if (direction === 'Next') {
+      this.continuousChaptersStack.push(chapterId);
+      return;
+    }
+
+    this.continuousChaptersStack.pop();
+    if (this.continuousChaptersStack.peek() !== chapterId) {
+      this.continuousChaptersStack.push(chapterId);
+    }
   }
 
   private swapToChapter(chapterId: number, direction: 'Next' | 'Prev') {
@@ -751,6 +767,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
             this.readerService.showReadingProfileSwitch(readingProfile, info.seriesName);
           }
 
+          this.updateChapterStack(chapterId, direction);
           this.chapterId.set(chapterId);
           this.init(false, direction);
         });
