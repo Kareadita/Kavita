@@ -106,6 +106,11 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
       const formData = this.formModel();
       untracked(() => this.packData(formData));
     });
+
+    effect(() => {
+      this.filterSettings();
+      untracked(() => this.loadFromPresetsAndSetup());
+    });
   }
 
 
@@ -114,8 +119,6 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
     this.filterOpen()?.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(openState => {
       this.toggleService.set(openState);
     });
-
-    this.loadFromPresetsAndSetup();
   }
 
 

@@ -72,6 +72,7 @@ export const routes: Routes = [
         pathMatch: 'full',
         title: 'title.reading-lists',
         loadComponent: () => import('./reading-list/_components/reading-lists/reading-lists.component').then(c => c.ReadingListsComponent),
+        runGuardsAndResolvers: 'always',
         resolve: {
           filter: UrlFilterResolver
         }
