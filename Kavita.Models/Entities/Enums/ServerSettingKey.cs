@@ -212,7 +212,6 @@ public enum ServerSettingKey
     /// <summary>
     /// Path to the Kepubify executable. If not custom, synced on startup with your OS
     /// </summary>
-    [ExportScrub(ExportScrubKind.Random)]
     [Description("KepubifyPath")]
     KepubifyPath = 44,
     /// <summary>

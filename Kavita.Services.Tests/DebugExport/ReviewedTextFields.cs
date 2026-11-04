@@ -259,6 +259,7 @@ public static class ReviewedTextFields
         "ServerSettingKey.TotalBackups",
         "ServerSettingKey.TotalLogs",
         "ServerSettingKey.EnableKobo",
+        "ServerSettingKey.KepubifyPath",
         "SiteTheme.Author",
         "SiteTheme.CompatibleVersion",
         "SiteTheme.Description",
