@@ -157,7 +157,6 @@ public class KoboController(
     }
 
     [HttpPut("v1/library/{bookId}/state")]
-    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> UpdateBookState(string bookId)
     {
@@ -189,7 +188,6 @@ public class KoboController(
     }
 
     [ChapterAccess(chapterIdKey: "bookId")]
-    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [HttpGet("v1/library/{bookId:int}/file/epub")]
     public async Task<ActionResult> GetBookFile(int bookId, [FromQuery] bool convert = true)
     {
