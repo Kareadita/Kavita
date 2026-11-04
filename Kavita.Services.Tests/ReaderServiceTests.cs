@@ -2904,7 +2904,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
-                    .WithPages(1)
+                    .WithPages(3)
                     .Build())
                 .Build())
             .Build();
@@ -2924,7 +2924,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         {
             VolumeId = 1,
             ChapterId = 1,
-            PageNum = 0,
+            PageNum = 1,
             SeriesId = 1,
             LibraryId = 1,
             KoboSpan = "ABC"
@@ -2935,7 +2935,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         {
             VolumeId = 1,
             ChapterId = 1,
-            PageNum = 1,
+            PageNum = 2,
             SeriesId = 1,
             LibraryId = 1,
         }, 1, false);
