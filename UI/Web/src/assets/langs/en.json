@@ -4604,6 +4604,7 @@
         "load-prev-chapter": "Previous {{entity}} loaded",
         "reading-profile-switched": "Using reading profile {{name}}",
         "reading-profile-switched-series": "Using your settings for {{seriesName}}",
+        "reading-profile-switch-failed": "The reading profile for {{seriesName}} failed to load, settings will not save",
         "account-registration-complete": "Account registration complete",
         "account-migration-complete": "Account migration complete",
         "password-reset": "Password reset",

@@ -377,6 +377,10 @@ export class ReaderService {
     this.toastr.info(message, '', {timeOut: 1000});
   }
 
+  showReadingProfileSwitchFailed(seriesName: string) {
+    this.toastr.error(translate('toasts.reading-profile-switch-failed', {seriesName}));
+  }
+
   /**
    * Points the address bar at the chapter the reader now shows, without navigating
    */

@@ -1273,7 +1273,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private isOnLastPage() {
     if (this.isReaderModeWebtoon()) return !!this.infiniteScroller()?.isLastPageInView();
-    return this.pageNum() === this.maxPages() - 1;
+    return this.pageNum() === this.maxPages() - 1 && !this.isOnFirstSplitHalf();
+  }
+
+  private isOnFirstSplitHalf() {
+    return this.isSplitPage(this.pageNum()) && this.canvasRenderer()?.shouldMoveNext() === false;
+  }
+
+  private isSplitPage(pageNum: number) {
+    return !this.mangaReaderService.isNoSplit(this.effectiveModel().pageSplitOption) && this.mangaReaderService.isWidePage(pageNum);
   }
 
   private promptRateAndReview() {
@@ -1518,16 +1526,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
                                 this.doubleReverseRenderer()!.getPageAmount(PAGING_DIRECTION.FORWARD),
                                 this.doubleNoCoverRenderer()!.getPageAmount(PAGING_DIRECTION.FORWARD)
                               );
-    // If we are on last page with split mode, we need to be able to progress, hence why we check if we could move backwards or not
-    const isSplitRendering = [PageSplitOption.SplitRightToLeft, PageSplitOption.SplitRightToLeft].includes(this.effectiveModel().pageSplitOption);
-    const notInSplit = this.canvasRenderer()!.getPageAmount(PAGING_DIRECTION.BACKWARDS) === 0;
-    const isASpread = this.mangaReaderService.isWidePage(this.pageNum());
 
-
-    if ((this.pageNum() + pageAmount >= this.maxPages() && (!isASpread || !isSplitRendering || notInSplit))) {
+    if (this.pageNum() + pageAmount >= this.maxPages()) {
       // Move to next volume/chapter automatically
       this.loadNextChapter();
       return;
+    }
+
+    // Paging to the second half of a split last page stays on the same page, which setPageNum does not save
+    if (this.pageNum() === this.maxPages() - 1 && this.isOnFirstSplitHalf() && !this.incognitoMode() && !this.bookmarkMode()) {
+      this.saveProgress(this.maxPages());
     }
 
     this.setPageNum(this.pageNum() + pageAmount);
@@ -1806,7 +1814,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Due to the fact that we start at image 0, but page 1, we need the last page to have progress as page + 1 to be completed
     let tempPageNum = this.pageNum();
-    if (this.pageNum() == this.maxPages() - 1 && this.pagingDirection() === PAGING_DIRECTION.FORWARD) {
+    // A split last page opens on its first half, nextPage saves completion on the second
+    if (this.pageNum() == this.maxPages() - 1 && this.pagingDirection() === PAGING_DIRECTION.FORWARD && !this.isSplitPage(this.pageNum())) {
       tempPageNum = this.pageNum() + 1;
     }
 
