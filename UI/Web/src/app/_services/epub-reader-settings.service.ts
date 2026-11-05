@@ -1,5 +1,5 @@
 import {computed, DestroyRef, effect, inject, Injectable, signal, untracked} from '@angular/core';
-import {firstValueFrom, Observable, Subject} from 'rxjs';
+import {catchError, EMPTY, firstValueFrom, Observable, Subject, switchMap} from 'rxjs';
 import {bookColorThemes, PageStyle} from "../book-reader/_components/reader-settings/reader-settings.component";
 import {ReadingDirection} from '../_models/preferences/reading-direction';
 import {WritingStyle} from '../_models/preferences/writing-style';
@@ -49,6 +49,7 @@ export class EpubReaderSettingsService {
   private readonly toastr = inject(ToastrService);
   private readonly document = inject(DOCUMENT);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly destroyRef = inject(DestroyRef);
 
   //#region State
 
@@ -157,11 +158,11 @@ export class EpubReaderSettingsService {
       debounceTime(500),
       map(value => JSON.stringify(value)),
       filter(settings => this._isInitialized() && settings !== this.savedSettings),
-      tap(settings => {
-        this.savedSettings = settings;
-        this.updateImplicitProfile();
-      }),
-    ).subscribe();
+      tap(settings => this.savedSettings = settings),
+      // Before switchMap, so closing the reader lets a save in flight finish
+      takeUntilDestroyed(this.destroyRef),
+      switchMap(() => this.updateImplicitProfile()),
+    ).subscribe(newProfile => this._currentReadingProfile.set(newProfile));
   }
 
   /**
@@ -410,18 +411,18 @@ export class EpubReaderSettingsService {
   }
 
 
-  private updateImplicitProfile(): void {
-    if (!this._currentReadingProfile() || !this._currentSeriesId()) return;
+  private updateImplicitProfile() {
+    const seriesId = this._currentSeriesId();
+    if (!this._currentReadingProfile() || !seriesId) return EMPTY;
 
-    this.readingProfileService.updateImplicit(this._currentLibraryId()!, this._currentSeriesId()!, this.packReadingProfile())
-      .subscribe({
-        next: newProfile => {
-          this._currentReadingProfile.set(newProfile);
-        },
-        error: err => {
-          console.error('Failed to update implicit profile:', err);
-        }
-      });
+    return this.readingProfileService.updateImplicit(this._currentLibraryId()!, seriesId, this.packReadingProfile()).pipe(
+      // A reading list can cross into another series before this returns
+      filter(() => this._currentSeriesId() === seriesId),
+      catchError(err => {
+        console.error('Failed to update implicit profile:', err);
+        return EMPTY;
+      }),
+    );
   }
 
   /**

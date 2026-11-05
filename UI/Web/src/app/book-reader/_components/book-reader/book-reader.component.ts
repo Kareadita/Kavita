@@ -57,6 +57,7 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
 import {KavitaTitleStrategy} from "../../../_services/kavita-title.strategy";
 import {EntityTitleService} from "../../../_services/entity-title.service";
 import {CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService} from "../../../_services/reader.service";
+import {ReaderProgressService} from '../../../_services/reader-progress.service';
 import {NavService} from "../../../_services/nav.service";
 import {Chapter} from "../../../_models/chapter";
 import {SeriesService} from "../../../_services/series.service";
@@ -139,7 +140,7 @@ const KEYBIND_TARGETS = [
   imports: [NgTemplateOutlet, NgStyle, NgClass, NgbTooltip,
     BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe,
     WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule],
-  providers: [EpubReaderSettingsService, LayoutMeasurementService],
+  providers: [EpubReaderSettingsService, LayoutMeasurementService, ReaderProgressService],
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
 
@@ -147,6 +148,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   private readonly router = inject(Router);
   private readonly seriesService = inject(SeriesService);
   private readonly readerService = inject(ReaderService);
+  private readonly readerProgressService = inject(ReaderProgressService);
   private readonly readingProfileService = inject(ReadingProfileService);
   private readonly epubHighlightService = inject(EpubHighlightService);
   private readonly renderer = inject(Renderer2);
@@ -905,8 +907,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
         tempPageNum = this.pageNum() + 1;
       }
 
-      const descopedPath = this.readerService.descopeBookReaderXpath(this.lastSeenScrollPartPath);
-      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum, descopedPath).subscribe();
+      this.readerProgressService.save({
+        libraryId: this.libraryId,
+        seriesId: this.seriesId,
+        volumeId: this.volumeId,
+        chapterId: this.chapterId,
+        page: tempPageNum,
+        bookScrollId: this.readerService.descopeBookReaderXpath(this.lastSeenScrollPartPath),
+      });
     }
 
   }
@@ -1021,7 +1029,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       catchError(() => {
         setTimeout(() => this.closeReader(), 200);
         return EMPTY;
-      })
+      }),
+      takeUntilDestroyed(this.destroyRef),
     ).subscribe(async (info) => {
       if (this.readingListMode && info.seriesFormat !== MangaFormat.EPUB) {
         // Redirect to the manga reader.

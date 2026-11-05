@@ -493,8 +493,8 @@ export class InfiniteScrollerComponent implements OnInit {
 
     const rect = img.getBoundingClientRect();
     const [innerHeight] = this.getInnerDimensions();
-    // 1px covers fractional layout heights
-    return rect.bottom > 0 && rect.bottom <= innerHeight + 1;
+    // 1px covers fractional layout heights. A bottom above the viewport means it was scrolled past, still read
+    return rect.height > 0 && rect.bottom <= innerHeight + 1;
   }
 
   /**

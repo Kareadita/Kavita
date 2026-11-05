@@ -25,7 +25,19 @@ import {
   SpreadType
 } from 'ngx-extended-pdf-viewer';
 import {ToastrService} from '@openng/ngx-toastr';
-import {auditTime, catchError, filter, forkJoin, fromEvent, merge, of, switchMap, take} from 'rxjs';
+import {
+  auditTime,
+  catchError,
+  EMPTY,
+  filter,
+  forkJoin,
+  fromEvent,
+  map,
+  merge,
+  of,
+  switchMap,
+  take
+} from 'rxjs';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {DOCUMENT, NgStyle} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -57,6 +69,7 @@ import {ReadingProfileService} from "../../../_services/reading-profile.service"
 import {ChapterPreviewComponent} from "../../../shared/_components/chapter-preview/chapter-preview.component";
 import {PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
 import {ChapterInfo} from "../../../manga-reader/_models/chapter-info";
+import {ReaderProgressService} from '../../../_services/reader-progress.service';
 
 const KEYBIND_TARGETS = [
   {keyBindTarget: KeyBindTarget.PageLeft, description: 'prev-page'},
@@ -86,7 +99,8 @@ const THEME_COLORS: {[key: string]: {background: string, font: string}} = {
   styleUrls: ['./pdf-reader.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, TranslocoDirective,
-    PdfScrollModeTypePipe, PdfSpreadTypePipe, ChapterPreviewComponent, PullToLoadComponent]
+    PdfScrollModeTypePipe, PdfSpreadTypePipe, ChapterPreviewComponent, PullToLoadComponent],
+  providers: [ReaderProgressService],
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
 
@@ -99,6 +113,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService);
   public readonly accountService = inject(AccountService);
   public readonly readerService = inject(ReaderService);
+  private readonly readerProgressService = inject(ReaderProgressService);
   public readonly utilityService = inject(UtilityService);
   public readonly destroyRef = inject(DestroyRef);
   public readonly document = inject(DOCUMENT);
@@ -157,7 +172,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   protected maxPages = signal(1);
   protected bookTitle = signal('');
   private bookInfo: BookInfo | null = null;
-  private lastSavedProgress: {chapterId: number, page: number} | null = null;
   private viewerScrollWatched = false;
   /**
    * True from a document load until the reader's first key, wheel, pointer or touch. A new document reports pages
@@ -217,6 +231,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       this.keyBindService.registerListener(
         this.destroyRef,
         (e) => {
+          // A controller reaches here through GamePadService, without the DOM events that otherwise end the wait
+          this.awaitingReaderInput = false;
           switch (e.target) {
             case KeyBindTarget.Escape:
               this.exitReader();
@@ -408,7 +424,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       info: this.bookService.getBookInfo(chapterId),
       progress: this.readerService.getProgress(chapterId),
       chapter: this.seriesService.getChapter(chapterId),
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ({info, progress, chapter}) => {
         this.bookInfo = info;
         this.seriesId = info.seriesId;
@@ -554,25 +570,15 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   saveProgress() {
     if (this.incognitoMode() || !this.bookInfo) return;
 
-    const chapterId = this.chapterId();
-    const page = this.isLastPageEndInView() ? this.maxPages() : this.currentPage();
-    if (this.lastSavedProgress?.chapterId === chapterId && this.lastSavedProgress.page === page) return;
-
-    const saved = {chapterId, page};
-    this.lastSavedProgress = saved;
-    const save$ = this.isReRead
-      ? this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, chapterId, 0).pipe(
-          switchMap(() => this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, chapterId, page)))
-      : this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, chapterId, page);
-    this.isReRead = false;
-
-    save$.subscribe({
-      error: () => {
-        if (this.lastSavedProgress === saved) {
-          this.lastSavedProgress = null;
-        }
-      }
+    this.readerProgressService.save({
+      libraryId: this.libraryId,
+      seriesId: this.seriesId,
+      volumeId: this.volumeId,
+      chapterId: this.chapterId(),
+      page: this.isLastPageEndInView() ? this.maxPages() : this.currentPage(),
+      resetFirst: this.isReRead,
     });
+    this.isReRead = false;
   }
 
   onPdfLoaded() {
@@ -671,7 +677,9 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     }
 
     if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED) {
-      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId(), this.readingListId).subscribe(nextId => {
+      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId(), this.readingListId).pipe(
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe(nextId => {
         this.nextChapterId = nextId;
         this.loadChapter(nextId, 'Next');
       });
@@ -697,7 +705,9 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     }
 
     if (this.prevChapterId === CHAPTER_ID_NOT_FETCHED) {
-      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId(), this.readingListId).subscribe(prevId => {
+      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId(), this.readingListId).pipe(
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe(prevId => {
         this.prevChapterId = prevId;
         this.loadChapter(prevId, 'Prev');
       });
@@ -748,29 +758,32 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
 
     // The viewer must never get a non-PDF as src: it goes blank, with the error only in the console
-    this.bookService.getBookInfo(chapterId).subscribe({
-      next: info => {
+    this.bookService.getBookInfo(chapterId).pipe(
+      switchMap(info => {
         if (info.seriesFormat !== MangaFormat.PDF) {
           const params = this.readerService.getQueryParamsObject(this.incognitoMode(), this.readingListMode, this.readingListId);
           this.router.navigate(this.readerService.getNavigationArray(info.libraryId, info.seriesId, chapterId, info.seriesFormat), {queryParams: params});
-          return;
+          return EMPTY;
         }
 
         // Before src changes: the viewer opens a document in the scroll mode it holds, then reports that mode back
         const readingProfile$ = info.seriesId === this.seriesId
           ? of(null)
           : this.readingProfileService.getForSeries(info.libraryId, info.seriesId).pipe(catchError(() => of(null)));
-        readingProfile$.subscribe(readingProfile => {
-          if (readingProfile) {
-            this.readingProfile = readingProfile;
-            this.setupReaderSettings();
-            this.readerService.showReadingProfileSwitch(readingProfile, info.seriesName);
-          }
+        return readingProfile$.pipe(map(readingProfile => ({info, readingProfile})));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: ({info, readingProfile}) => {
+        if (readingProfile) {
+          this.readingProfile = readingProfile;
+          this.setupReaderSettings();
+          this.readerService.showReadingProfileSwitch(readingProfile, info.seriesName);
+        }
 
-          this.updateChapterStack(chapterId, direction);
-          this.chapterId.set(chapterId);
-          this.init(false, direction);
-        });
+        this.updateChapterStack(chapterId, direction);
+        this.chapterId.set(chapterId);
+        this.init(false, direction);
       },
       error: () => {
         this.bookInfo = currentBookInfo;
