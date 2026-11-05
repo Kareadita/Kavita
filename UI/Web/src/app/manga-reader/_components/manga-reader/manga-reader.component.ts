@@ -22,10 +22,8 @@ import {AsyncPipe, NgClass, NgStyle, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   BehaviorSubject,
-  catchError,
   concat,
   debounceTime,
-  EMPTY,
   filter,
   forkJoin,
   fromEvent,
@@ -33,7 +31,6 @@ import {
   Observable,
   ReplaySubject,
   Subject,
-  switchMap,
   tap
 } from 'rxjs';
 import {ChangeContext, LabelType, NgxSliderModule, Options} from '@angular-slider/ngx-slider';
@@ -66,7 +63,6 @@ import {
   ReadingProfile,
   ReadingProfileKind
 } from "../../../_models/preferences/reading-profiles";
-import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {KeyBindEvent, KeyBindService} from "../../../_services/key-bind.service";
@@ -77,6 +73,7 @@ import {NavService} from "../../../_services/nav.service";
 import {MemberService} from "../../../_services/member.service";
 import {ReaderService} from "../../../_services/reader.service";
 import {ReaderProgressService} from '../../../_services/reader-progress.service';
+import {ReadingProfileSessionService} from '../../../_services/reading-profile-session.service';
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {ReaderMode} from "../../../_models/preferences/reader-mode";
 import {ReadingDirection} from "../../../_models/preferences/reading-direction";
@@ -176,7 +173,7 @@ function toFormModel(readingProfile: ReadingProfile, mangaReaderService: MangaRe
   templateUrl: './manga-reader.component.html',
   styleUrls: ['./manga-reader.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [MangaReaderService, ReaderProgressService],
+  providers: [MangaReaderService, ReaderProgressService, ReadingProfileSessionService],
   imports: [NgStyle, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
     DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent,
     NgxSliderModule, FormRoot, FormField, SettingSelectComponent, FittingIconPipe, ReaderModeIconPipe,
@@ -211,7 +208,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly memberService = inject(MemberService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
-  private readonly readingProfileService = inject(ReadingProfileService);
+  private readonly profileSession = inject(ReadingProfileSessionService);
   private readonly confirmService = inject(ConfirmService);
   protected readonly readerService = inject(ReaderService);
   private readonly readerProgressService = inject(ReaderProgressService);
@@ -254,11 +251,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   maxPages = signal<number>(1);
   totalSeriesPages = signal<number>(0);
   totalSeriesPagesRead = signal<number>(0);
-  readingProfile = signal<ReadingProfile | null>(null);
+  protected readonly readingProfile = this.profileSession.profile;
   /**
    * The reading profile itself, unless readingProfile is implicit
    */
-  parentReadingProfile = signal<ReadingProfile | null>(null);
+  protected readonly parentReadingProfile = this.profileSession.parent;
   formModel = signal<FormModel>({
     autoCloseMenu: true,
     darkness: DEFAULT_DARKNESS,
@@ -272,16 +269,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     widthSlider: 0,
   });
   /**
-   * Has formModel been seeded from the reading profile yet. Guards the template, and the autosave
-   * pipeline that would otherwise POST the defaults back on every page load.
+   * Has formModel been seeded from the reading profile yet. Guards the template
    */
   formSeeded = signal<boolean>(false);
-  private savedSettings = '';
-  /**
-   * seriesId already points at the new series but the form still holds the old one's profile
-   */
-  private profileSwitchPending = false;
-  private readonly profileSwitch$ = new Subject<string>();
   /**
    * Portrait/narrow viewport, where the double renderer doesn't fit.
    */
@@ -759,16 +749,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.incognitoMode.set(this.route.snapshot.queryParamMap.get('incognitoMode') === 'true');
     this.bookmarkMode.set(this.route.snapshot.queryParamMap.get('bookmarkMode') === 'true');
 
+    this.profileSession.attach({
+      apply: (profile, kind) => kind === 'open' ? this.openReadingProfile(profile) : this.switchReadingProfile(profile),
+      pack: () => this.packReadingProfile(),
+      loadParent: true,
+    });
+
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       if (data['readingProfile'] == null) {
         this.router.navigateByUrl('/home');
         return;
       }
-      // Requires seriesId to be set
-      this.applyReadingProfile(data['readingProfile'] as ReadingProfile);
-      this.setupReaderSettings();
-      this.formSeeded.set(true);
-      this.cdRef.markForCheck();
+      this.profileSession.open({libraryId: this.libraryId, seriesId: this.seriesId}, data['readingProfile'] as ReadingProfile);
     });
 
     const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
@@ -789,37 +781,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.init(true);
 
     // Use persistableSettings over effectiveModel in case the reader forces Single from Double, we dont save Single
-    toObservable(this.persistableSettings, {injector: this.injector}).pipe(
-      filter(() => this.formSeeded()),
-      debounceTime(300),
-      filter(() => !this.profileSwitchPending),
-      map(() => this.packReadingProfile()),
-      filter(profile => JSON.stringify(profile) !== this.savedSettings),
-      tap(profile => this.savedSettings = JSON.stringify(profile)),
-      takeUntilDestroyed(this.destroyRef),
-      switchMap(newProfile => {
-        const seriesId = this.seriesId;
-        return this.readingProfileService.updateImplicit(this.libraryId, seriesId, newProfile).pipe(
-          // A reading list can cross into another series before this returns
-          filter(() => this.seriesId === seriesId),
-          catchError(err => {
-            console.error(err);
-            return EMPTY;
-          })
-        );
-      }),
-    ).subscribe(updatedProfile => this.readingProfile.set(updatedProfile));
-
-    this.profileSwitch$.pipe(
-      switchMap(seriesName => this.readingProfileService.getForSeries(this.libraryId, this.seriesId).pipe(
-        map(readingProfile => ({readingProfile, seriesName})),
-        catchError(() => {
-          this.profileSwitchPending = false;
-          return EMPTY;
-        }),
-      )),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(({readingProfile, seriesName}) => this.switchReadingProfile(readingProfile, seriesName));
+    this.profileSession.autosave(toObservable(this.persistableSettings, {injector: this.injector}), 300);
 
     this.currentImage$.pipe(
       filter(() => this.readerMode() !== ReaderMode.Webtoon),
@@ -895,20 +857,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.screenTooSmall.set(window.innerWidth <= window.innerHeight);
   }
 
+  private openReadingProfile(readingProfile: ReadingProfile) {
+    this.applyReadingProfile(readingProfile);
+    this.setupReaderSettings();
+    this.formSeeded.set(true);
+    this.cdRef.markForCheck();
+  }
+
   private applyReadingProfile(readingProfile: ReadingProfile) {
-    this.readingProfile.set(readingProfile);
     this.formModel.set(toFormModel(readingProfile, this.mangaReaderService));
     this.formGroup().reset();
-
-    if (readingProfile.kind === ReadingProfileKind.Implicit) {
-      const seriesId = this.seriesId;
-      this.readingProfileService.getForSeries(this.libraryId, seriesId, true).pipe(
-        filter(() => this.seriesId === seriesId),
-        takeUntilDestroyed(this.destroyRef),
-      ).subscribe(parent => this.parentReadingProfile.set(parent));
-    } else {
-      this.parentReadingProfile.set(readingProfile);
-    }
 
     this.readingDirection.set(readingProfile.readingDirection);
     this.readerMode.set(readingProfile.readerMode);
@@ -917,18 +875,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.readerModeSubject.next(this.readerMode());
     this.pagingDirectionSubject.next(this.pagingDirection());
-    this.savedSettings = JSON.stringify(this.packReadingProfile());
   }
 
-  private switchReadingProfile(readingProfile: ReadingProfile, seriesName: string) {
+  private switchReadingProfile(readingProfile: ReadingProfile) {
     const darkness = this.formModel().darkness;
     this.applyReadingProfile(readingProfile);
     this.formModel.update(model => ({...model, darkness}));
-    this.profileSwitchPending = false;
     this.pushReaderSettings();
     this.switchToWebtoonReaderIfPagesLikelyWebtoon();
     this.renderForReaderMode();
-    this.readerService.showReadingProfileSwitch(readingProfile, seriesName);
   }
 
   setupReaderSettings() {
@@ -1200,9 +1155,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       const seriesChanged = !firstLoad && results.chapterInfo.seriesId !== this.seriesId;
-      if (seriesChanged) {
-        this.profileSwitchPending = true;
-      }
       this.chapterInfo.set(results.chapterInfo);
       this.seriesId = results.chapterInfo.seriesId;
       this.libraryId = results.chapterInfo.libraryId;
@@ -1210,7 +1162,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.replaceReaderUrl();
       }
       if (seriesChanged) {
-        this.profileSwitch$.next(results.chapterInfo.seriesName);
+        const {libraryId, seriesId, seriesName} = results.chapterInfo;
+        this.profileSession.switchTo$({libraryId, seriesId, seriesName}).subscribe();
       }
 
       this.mangaReaderService.load(results.chapterInfo);
@@ -2079,25 +2032,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   // menu only code
   updateParentPref() {
-    if (this.readingProfile()!.kind !== ReadingProfileKind.Implicit) {
-      return;
-    }
-
-    this.readingProfileService.updateParentProfile(this.libraryId, this.seriesId, this.packReadingProfile()).subscribe(newProfile => {
-      this.readingProfile.set(newProfile);
+    this.profileSession.updateParent().subscribe(() => {
       this.toastr.success(translate('manga-reader.reading-profile-updated'));
     });
   }
 
   createNewProfileFromImplicit() {
-    if (this.readingProfile()!.kind! !== ReadingProfileKind.Implicit) {
-      return;
-    }
-
-    this.readingProfileService.promoteProfile(this.readingProfile()!.id).subscribe(newProfile => {
-      this.readingProfile.set(newProfile);
-      this.parentReadingProfile.set(newProfile); // Profile is no longer implicit
-      this.toastr.success(translate("manga-reader.reading-profile-promoted"));
+    this.profileSession.promote().subscribe(() => {
+      this.toastr.success(translate('manga-reader.reading-profile-promoted'));
     });
   }
 

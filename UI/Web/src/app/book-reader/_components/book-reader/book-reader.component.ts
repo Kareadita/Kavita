@@ -32,7 +32,7 @@ import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.c
 import {BookInfo} from "../../_models/book-info";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
-import {ReadingProfileService} from "../../../_services/reading-profile.service";
+import {ReadingProfileSessionService} from '../../../_services/reading-profile-session.service';
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
 import {EpubReaderSettingsService, ReaderSettingUpdate} from "../../../_services/epub-reader-settings.service";
@@ -140,7 +140,7 @@ const KEYBIND_TARGETS = [
   imports: [NgTemplateOutlet, NgStyle, NgClass, NgbTooltip,
     BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe,
     WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule],
-  providers: [EpubReaderSettingsService, LayoutMeasurementService, ReaderProgressService],
+  providers: [EpubReaderSettingsService, LayoutMeasurementService, ReaderProgressService, ReadingProfileSessionService],
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
 
@@ -149,7 +149,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   private readonly seriesService = inject(SeriesService);
   private readonly readerService = inject(ReaderService);
   private readonly readerProgressService = inject(ReaderProgressService);
-  private readonly readingProfileService = inject(ReadingProfileService);
+  private readonly profileSession = inject(ReadingProfileSessionService);
   private readonly epubHighlightService = inject(EpubHighlightService);
   private readonly renderer = inject(Renderer2);
   private readonly navService = inject(NavService);
@@ -181,7 +181,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   volumeId!: number;
   chapterId!: number;
   chapter!: Chapter;
-  readingProfile!: ReadingProfile;
+  /**
+   * From the route resolver, applied once on the first load. The live profile is profileSession.profile()
+   */
+  private openingReadingProfile: ReadingProfile | null = null;
 
   /**
    * Reading List id. Defaults to -1.
@@ -989,10 +992,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     this.cdRef.markForCheck();
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(async (data) => {
-      this.readingProfile = data['readingProfile'];
+      this.openingReadingProfile = data['readingProfile'];
       this.cdRef.markForCheck();
 
-      if (this.readingProfile == null) {
+      if (this.openingReadingProfile == null) {
         this.router.navigateByUrl('/home');
         return;
       }
@@ -1050,19 +1053,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       this.kavitaTitleStrategy.setFormattedTitle(this.bookTitle() + ' Reader');
       this.cdRef.markForCheck();
 
-      if (seriesChanged) {
-        this.readingProfile = await firstValueFrom(this.readingProfileService.getForSeries(this.libraryId, this.seriesId).pipe(
-          catchError(() => of(this.readingProfile))
-        ));
-      }
-
-      // this.readingProfile is from when the reader opened, re-initializing in the same series would undo the edits since
-      if (firstLoad || seriesChanged) {
-        await this.readerSettingsService.initialize(this.libraryId, this.seriesId, this.readingProfile);
-      }
-
-      if (seriesChanged) {
-        this.readerService.showReadingProfileSwitch(this.readingProfile, info.seriesName);
+      if (firstLoad) {
+        await this.readerSettingsService.initialize(this.libraryId, this.seriesId, this.openingReadingProfile!);
+      } else if (seriesChanged) {
+        const switched = await firstValueFrom(
+          this.profileSession.switchTo$({libraryId: this.libraryId, seriesId: this.seriesId, seriesName: info.seriesName}),
+          {defaultValue: null},
+        );
+        // A later chapter load started its own switch, that one carries on
+        if (switched === null) return;
       }
 
       this.setupReaderSettingEffects(this.injector);
@@ -2296,7 +2295,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     if (drawerIsOpen) {
       this.epubMenuService.closeAll();
     } else {
-      this.epubMenuService.openSettingsDrawer(this.chapterId, this.seriesId, this.libraryId, this.readingProfile, this.readerSettingsService);
+      this.epubMenuService.openSettingsDrawer(this.chapterId, this.seriesId, this.libraryId, this.profileSession.profile() ?? this.openingReadingProfile!, this.readerSettingsService);
     }
 
     if (this.immersiveMode()) { // NOTE: Shouldn't this check if drawer is open?

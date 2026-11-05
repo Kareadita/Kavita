@@ -65,7 +65,7 @@ import {Stack} from "../../../shared/data-structures/stack";
 import {EntityTitleService} from "../../../_services/entity-title.service";
 import {LibraryService} from "../../../_services/library.service";
 import {LibraryType} from "../../../_models/library/library";
-import {ReadingProfileService} from "../../../_services/reading-profile.service";
+import {ReadingProfileSessionService} from '../../../_services/reading-profile-session.service';
 import {ChapterPreviewComponent} from "../../../shared/_components/chapter-preview/chapter-preview.component";
 import {PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
 import {ChapterInfo} from "../../../manga-reader/_models/chapter-info";
@@ -100,7 +100,7 @@ const THEME_COLORS: {[key: string]: {background: string, font: string}} = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, TranslocoDirective,
     PdfScrollModeTypePipe, PdfSpreadTypePipe, ChapterPreviewComponent, PullToLoadComponent],
-  providers: [ReaderProgressService],
+  providers: [ReaderProgressService, ReadingProfileSessionService],
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
 
@@ -120,7 +120,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   private readonly keyBindService = inject(KeyBindService);
   private readonly entityTitleService = inject(EntityTitleService);
   private readonly libraryService = inject(LibraryService);
-  private readonly readingProfileService = inject(ReadingProfileService);
+  private readonly profileSession = inject(ReadingProfileSessionService);
   private readonly pdfViewerService = inject(NgxExtendedPdfViewerService);
   private readonly pdfNotificationService = inject(PDFNotificationService);
   protected readonly breakpointService = inject(BreakpointService);
@@ -134,7 +134,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   seriesId!: number;
   volumeId!: number;
   protected chapterId = signal<number>(0);
-  readingProfile!: ReadingProfile;
   libraryType: LibraryType = LibraryType.Manga;
 
   continuousChaptersStack: Stack<number> = new Stack();
@@ -306,13 +305,15 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.chapterId.set(parseInt(chapterId, 10));
     this.incognitoMode.set(this.route.snapshot.queryParamMap.get('incognitoMode') === 'true');
 
+    this.profileSession.attach({apply: () => this.setupReaderSettings()});
+
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      this.readingProfile = data['readingProfile'];
-      if (this.readingProfile == null) {
+      const readingProfile = data['readingProfile'] as ReadingProfile | null;
+      if (readingProfile == null) {
         this.router.navigateByUrl('/home');
         return;
       }
-      this.setupReaderSettings();
+      this.profileSession.open({libraryId: this.libraryId, seriesId: this.seriesId}, readingProfile);
     });
 
 
@@ -402,9 +403,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   setupReaderSettings() {
     this.pageLayoutMode.set(this.convertPdfLayoutMode(PdfLayoutMode.Multiple));
-    this.scrollMode.set(this.convertPdfScrollMode(this.readingProfile.pdfScrollMode || PdfScrollMode.Vertical));
-    this.spreadMode.set(this.convertPdfSpreadMode(this.readingProfile.pdfSpreadMode || PdfSpreadMode.None));
-    this.theme.set(this.convertPdfTheme(this.readingProfile.pdfTheme || PdfTheme.Dark));
+    const readingProfile = this.profileSession.profile()!;
+    this.scrollMode.set(this.convertPdfScrollMode(readingProfile.pdfScrollMode || PdfScrollMode.Vertical));
+    this.spreadMode.set(this.convertPdfSpreadMode(readingProfile.pdfSpreadMode || PdfSpreadMode.None));
+    this.theme.set(this.convertPdfTheme(readingProfile.pdfTheme || PdfTheme.Dark));
   }
 
   init(firstLoad: boolean, direction: 'Next' | 'Prev' | 'None' = 'None') {
@@ -767,20 +769,14 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
         }
 
         // Before src changes: the viewer opens a document in the scroll mode it holds, then reports that mode back
-        const readingProfile$ = info.seriesId === this.seriesId
-          ? of(null)
-          : this.readingProfileService.getForSeries(info.libraryId, info.seriesId).pipe(catchError(() => of(null)));
-        return readingProfile$.pipe(map(readingProfile => ({info, readingProfile})));
+        if (info.seriesId === this.seriesId) return of(info);
+
+        const {libraryId, seriesId, seriesName} = info;
+        return this.profileSession.switchTo$({libraryId, seriesId, seriesName}).pipe(map(() => info));
       }),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
-      next: ({info, readingProfile}) => {
-        if (readingProfile) {
-          this.readingProfile = readingProfile;
-          this.setupReaderSettings();
-          this.readerService.showReadingProfileSwitch(readingProfile, info.seriesName);
-        }
-
+      next: () => {
         this.updateChapterStack(chapterId, direction);
         this.chapterId.set(chapterId);
         this.init(false, direction);

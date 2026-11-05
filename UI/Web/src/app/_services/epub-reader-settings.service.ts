@@ -1,21 +1,17 @@
-import {computed, DestroyRef, effect, inject, Injectable, signal, untracked} from '@angular/core';
-import {catchError, EMPTY, firstValueFrom, Observable, Subject, switchMap} from 'rxjs';
+import {computed, effect, inject, Injectable, signal, untracked} from '@angular/core';
+import {firstValueFrom} from 'rxjs';
 import {bookColorThemes, PageStyle} from "../book-reader/_components/reader-settings/reader-settings.component";
 import {ReadingDirection} from '../_models/preferences/reading-direction';
 import {WritingStyle} from '../_models/preferences/writing-style';
 import {BookPageLayoutMode} from "../_models/readers/book-page-layout-mode";
-import {FormControl, FormGroup, NonNullableFormBuilder} from "@angular/forms";
 import {ReadingProfile, ReadingProfileKind} from "../_models/preferences/reading-profiles";
 import {ThemeService} from './theme.service';
-import {ReadingProfileService} from "./reading-profile.service";
-import {debounceTime, filter, map, tap} from "rxjs/operators";
+import {ReadingProfileSessionService} from './reading-profile-session.service';
 import {BookTheme} from "../_models/preferences/book-theme";
 import {DOCUMENT} from "@angular/common";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from '@openng/ngx-toastr';
-import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
-import {UtilityService} from "../shared/_services/utility.service";
-import {environment} from "../../environments/environment";
+import {toObservable} from '@angular/core/rxjs-interop';
 import {EpubFont, FontProvider} from "../_models/preferences/epub-font";
 import {FontService} from "./font.service";
 import {BreakpointService} from "./breakpoint.service";
@@ -45,25 +41,18 @@ export class EpubReaderSettingsService {
 
   private readonly fontService = inject(FontService);
   private readonly themeService = inject(ThemeService);
-  private readonly readingProfileService = inject(ReadingProfileService);
+  private readonly profileSession = inject(ReadingProfileSessionService);
   private readonly toastr = inject(ToastrService);
   private readonly document = inject(DOCUMENT);
   protected readonly breakpointService = inject(BreakpointService);
-  private readonly destroyRef = inject(DestroyRef);
 
   //#region State
 
-  // Core signals - these will be the single source of truth
-  private readonly _currentReadingProfile = signal<ReadingProfile | null>(null);
-  private readonly _parentReadingProfile = signal<ReadingProfile | null>(null);
-  private readonly _currentSeriesId = signal<number | null>(null);
-  private readonly _currentLibraryId = signal<number | null>(null);
   private readonly _isInitialized = signal<boolean>(false);
   private readonly _epubFonts = signal<EpubFont[]>([]);
   private readonly _activeTheme = signal<BookTheme | undefined>(undefined);
   private readonly _isFullscreen = signal<boolean>(false);
-  /** A cache of the saved settings in JSON form for checking if we should save implicit profile */
-  private savedSettings = '';
+  private fontsLoaded = false;
 
   formModel = signal<BookReadingProfileFormModel>({
     bookReaderDisableBookmarkIcon: false,
@@ -88,8 +77,8 @@ export class EpubReaderSettingsService {
   });
 
   // Public readonly signals
-  public readonly currentReadingProfile = this._currentReadingProfile.asReadonly();
-  public readonly parentReadingProfile = this._parentReadingProfile.asReadonly();
+  public readonly currentReadingProfile = this.profileSession.profile;
+  public readonly parentReadingProfile = this.profileSession.parent;
 
   // Settings as readonly signals
   public readonly pageStyles = computed<PageStyle>(() => {
@@ -127,12 +116,12 @@ export class EpubReaderSettingsService {
   });
 
   public readonly canPromoteProfile = computed(() => {
-    const profile = this._currentReadingProfile();
+    const profile = this.profileSession.profile();
     return profile !== null && profile.kind === ReadingProfileKind.Implicit;
   });
 
   public readonly hasParentProfile = computed(() => {
-    return this._parentReadingProfile() !== null;
+    return this.profileSession.parent() !== null;
   });
 
   //#endregion
@@ -154,53 +143,36 @@ export class EpubReaderSettingsService {
       }
     });
 
-    toObservable(this.formGroup().value).pipe(
-      debounceTime(500),
-      map(value => JSON.stringify(value)),
-      filter(settings => this._isInitialized() && settings !== this.savedSettings),
-      tap(settings => this.savedSettings = settings),
-      // Before switchMap, so closing the reader lets a save in flight finish
-      takeUntilDestroyed(this.destroyRef),
-      switchMap(() => this.updateImplicitProfile()),
-    ).subscribe(newProfile => this._currentReadingProfile.set(newProfile));
+    this.profileSession.attach({
+      apply: profile => this.applyReadingProfile(profile),
+      pack: () => this.packReadingProfile(),
+      loadParent: true,
+    });
+    this.profileSession.autosave(toObservable(this.formGroup().value), 500);
   }
 
   /**
-   * Initialize the service with a reading profile and series ID
+   * First open of the reader. A series switch goes through ReadingProfileSessionService.switchTo$ instead
    */
   async initialize(libraryId: number, seriesId: number, readingProfile: ReadingProfile): Promise<void> {
-    // On a series switch, the form holds the old series' profile until setFormModelFromReadingProfile. Autosave needs to be denied
-    this._isInitialized.set(false);
-
-    const fonts = await firstValueFrom(this.fontService.getFonts());
-    this._epubFonts.set([...new Map(fonts.map(font => [`${font.family}`, font])).values()]);
-
-    this._currentSeriesId.set(seriesId);
-    this._currentLibraryId.set(libraryId);
-    this._currentReadingProfile.set(readingProfile);
-
-    // Load parent profile if needed, otherwise profile is its own parent
-    if (readingProfile.kind === ReadingProfileKind.Implicit) {
-      try {
-        const parent = await firstValueFrom(this.readingProfileService.getForSeries(libraryId, seriesId, true));
-        this._parentReadingProfile.set(parent || null);
-      } catch (error) {
-        console.error('Failed to load parent reading profile:', error);
-      }
-    } else {
-      this._parentReadingProfile.set(readingProfile);
+    // pageStyles resolves user fonts through _epubFonts, so they must be here before the first apply
+    if (!this.fontsLoaded) {
+      const fonts = await firstValueFrom(this.fontService.getFonts());
+      this._epubFonts.set([...new Map(fonts.map(font => [`${font.family}`, font])).values()]);
+      this.fontsLoaded = true;
     }
 
-    // Setup defaults and update signals
-    this.correctInvalidReadingProfileOptions(readingProfile);
-    this.setFormModelFromReadingProfile();
+    this.profileSession.open({libraryId, seriesId}, readingProfile);
+  }
 
-    // Set initial theme
+  private applyReadingProfile(readingProfile: ReadingProfile) {
+    this.correctInvalidReadingProfileOptions(readingProfile);
+    this.setFormModelFromReadingProfile(readingProfile);
+
     const themeName = readingProfile.bookReaderThemeName || this.themeService.defaultBookTheme;
     this.setTheme(themeName, false);
-    this.savedSettings = JSON.stringify(this.formModel());
 
-    // Mark as initialized - this will trigger effects to emit initial values
+    // Triggers effects to emit initial values
     this._isInitialized.set(true);
   }
 
@@ -243,7 +215,7 @@ export class EpubReaderSettingsService {
    * Get current reading profile
    */
   getCurrentReadingProfile(): ReadingProfile | null {
-    return this._currentReadingProfile();
+    return this.profileSession.profile();
   }
 
   /**
@@ -338,43 +310,12 @@ export class EpubReaderSettingsService {
    * Update parent reading profile preferences
    */
   updateParentProfile(): void {
-    const currentRp = this._currentReadingProfile();
-    const seriesId = this._currentSeriesId();
-    const libraryId = this._currentLibraryId();
-    if (!currentRp || currentRp.kind !== ReadingProfileKind.Implicit || !seriesId || !libraryId) {
-      return;
-    }
-
-    this.readingProfileService.updateParentProfile(libraryId, seriesId, this.packReadingProfile())
-      .subscribe(newProfile => {
-        this._currentReadingProfile.set(newProfile);
-        this.toastr.success(translate('manga-reader.reading-profile-updated'));
-      });
+    this.profileSession.updateParent().subscribe(() => {
+      this.toastr.success(translate('manga-reader.reading-profile-updated'));
+    });
   }
 
-  /**
-   * Promote implicit profile to named profile
-   */
-  promoteProfile(): Observable<ReadingProfile> {
-    const currentRp = this._currentReadingProfile();
-    if (!currentRp || currentRp.kind !== ReadingProfileKind.Implicit) {
-      throw new Error('Can only promote implicit profiles');
-    }
-
-    return this.readingProfileService.promoteProfile(currentRp.id).pipe(
-      tap(newProfile => {
-        this._currentReadingProfile.set(newProfile);
-      })
-    );
-  }
-
-  /**
-   * Sets up the reactive form and bidirectional binding with signals
-   */
-  private setFormModelFromReadingProfile(): void {
-    const profile = this._currentReadingProfile();
-    if (!profile) return;
-
+  private setFormModelFromReadingProfile(profile: ReadingProfile): void {
     this.formModel.set({
       bookReaderDisableBookmarkIcon: profile.bookReaderDisableBookmarkIcon,
       bookReaderFontFamily: profile.bookReaderFontFamily,
@@ -411,25 +352,11 @@ export class EpubReaderSettingsService {
   }
 
 
-  private updateImplicitProfile() {
-    const seriesId = this._currentSeriesId();
-    if (!this._currentReadingProfile() || !seriesId) return EMPTY;
-
-    return this.readingProfileService.updateImplicit(this._currentLibraryId()!, seriesId, this.packReadingProfile()).pipe(
-      // A reading list can cross into another series before this returns
-      filter(() => this._currentSeriesId() === seriesId),
-      catchError(err => {
-        console.error('Failed to update implicit profile:', err);
-        return EMPTY;
-      }),
-    );
-  }
-
   /**
    * Packs current settings into a ReadingProfile object
    */
   private packReadingProfile(): ReadingProfile {
-    const currentProfile = this._currentReadingProfile();
+    const currentProfile = this.profileSession.profile();
     if (!currentProfile) {
       throw new Error('No current reading profile');
     }
@@ -501,15 +428,8 @@ export class EpubReaderSettingsService {
 
 
   createNewProfileFromImplicit() {
-    const rp = this.getCurrentReadingProfile();
-    if (rp === null || rp.kind !== ReadingProfileKind.Implicit) {
-      return;
-    }
-
-    this.promoteProfile().subscribe(newProfile => {
-      this._currentReadingProfile.set(newProfile);
-      this._parentReadingProfile.set(newProfile);
-      this.toastr.success(translate("manga-reader.reading-profile-promoted"));
+    this.profileSession.promote().subscribe(() => {
+      this.toastr.success(translate('manga-reader.reading-profile-promoted'));
     });
   }
 }
