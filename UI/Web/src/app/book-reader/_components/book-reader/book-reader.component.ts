@@ -23,14 +23,16 @@ import {
 import {DOCUMENT, NgClass, NgStyle, NgTemplateOutlet, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from '@openng/ngx-toastr';
-import {firstValueFrom, forkJoin, fromEvent, merge, of, switchMap} from 'rxjs';
+import {EMPTY, firstValueFrom, forkJoin, fromEvent, merge, of, switchMap} from 'rxjs';
 import {catchError, debounceTime, distinctUntilChanged, filter, take, tap} from 'rxjs/operators';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { Tooltip } from 'bootstrap';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.component";
+import {BookInfo} from "../../_models/book-info";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
+import {ReadingProfileSessionService} from '../../../_services/reading-profile-session.service';
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
 import {EpubReaderSettingsService, ReaderSettingUpdate} from "../../../_services/epub-reader-settings.service";
@@ -55,6 +57,7 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
 import {KavitaTitleStrategy} from "../../../_services/kavita-title.strategy";
 import {EntityTitleService} from "../../../_services/entity-title.service";
 import {CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService} from "../../../_services/reader.service";
+import {ReaderProgressService} from '../../../_services/reader-progress.service';
 import {NavService} from "../../../_services/nav.service";
 import {Chapter} from "../../../_models/chapter";
 import {SeriesService} from "../../../_services/series.service";
@@ -137,7 +140,7 @@ const KEYBIND_TARGETS = [
   imports: [NgTemplateOutlet, NgStyle, NgClass, NgbTooltip,
     BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe,
     WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule],
-  providers: [EpubReaderSettingsService, LayoutMeasurementService],
+  providers: [EpubReaderSettingsService, LayoutMeasurementService, ReaderProgressService, ReadingProfileSessionService],
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
 
@@ -145,6 +148,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   private readonly router = inject(Router);
   private readonly seriesService = inject(SeriesService);
   private readonly readerService = inject(ReaderService);
+  private readonly readerProgressService = inject(ReaderProgressService);
+  private readonly profileSession = inject(ReadingProfileSessionService);
   private readonly epubHighlightService = inject(EpubHighlightService);
   private readonly renderer = inject(Renderer2);
   private readonly navService = inject(NavService);
@@ -176,7 +181,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   volumeId!: number;
   chapterId!: number;
   chapter!: Chapter;
-  readingProfile!: ReadingProfile;
+  /**
+   * From the route resolver, applied once on the first load. The live profile is profileSession.profile()
+   */
+  private openingReadingProfile: ReadingProfile | null = null;
 
   /**
    * Reading List id. Defaults to -1.
@@ -237,6 +245,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
    * Title of the book. Rendered in action bar
    */
   bookTitle = signal<string>('');
+  private bookInfo = signal<BookInfo | null>(null);
   /**
    * Authors of the book. Rendered in action bar
    */
@@ -482,14 +491,29 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
 
   isNextPageDisabled() {
-    const condition = (this.nextPageDisabled || this.nextChapterId === CHAPTER_ID_DOESNT_EXIST) && this.pageNum() + 1 > this.maxPages() - 1;
+    return (this.nextPageDisabled || this.nextChapterId === CHAPTER_ID_DOESNT_EXIST) && this.isOnLastPage();
+  }
 
-    if (this.layoutMode() !== BookPageLayoutMode.Default) {
-      const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
-      return condition && currentVirtualPage === totalVirtualPages;
+  private isOnLastPage() {
+    if (this.pageNum() + 1 < this.maxPages()) return false;
+    if (this.layoutMode() === BookPageLayoutMode.Default) return true;
+
+    const [currentVirtualPage, totalVirtualPages] = this.getVirtualPage();
+    return currentVirtualPage === totalVirtualPages;
+  }
+
+  private isScrolledToEnd() {
+    // Column layouts end on the last virtual page, which isOnLastPage already checks
+    if (this.layoutMode() !== BookPageLayoutMode.Default) return true;
+
+    const content = this.bookContentElemRef().nativeElement.getBoundingClientRect();
+    const viewport = this.reader().nativeElement.getBoundingClientRect();
+
+    // 1px: fractional layout leaves the end edge up to a pixel past the viewport at full scroll
+    if (this.writingStyle() === WritingStyle.Vertical) {
+      return content.left >= viewport.left - 1;
     }
-
-    return condition;
+    return content.bottom <= viewport.bottom + 1;
   }
 
   isPrevPageDisabled() {
@@ -694,7 +718,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
             const isHighlighting = window.getSelection()?.toString() != '';
             if (isHighlighting && this.isLineOverlayOpen()) return;
 
-            this.closeReader();
+            this.exitReader();
             break;
           }
           case KeyBindTarget.GoTo:
@@ -886,8 +910,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
         tempPageNum = this.pageNum() + 1;
       }
 
-      const descopedPath = this.readerService.descopeBookReaderXpath(this.lastSeenScrollPartPath);
-      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum, descopedPath).subscribe();
+      this.readerProgressService.save({
+        libraryId: this.libraryId,
+        seriesId: this.seriesId,
+        volumeId: this.volumeId,
+        chapterId: this.chapterId,
+        page: tempPageNum,
+        bookScrollId: this.readerService.descopeBookReaderXpath(this.lastSeenScrollPartPath),
+      });
     }
 
   }
@@ -958,13 +988,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       this.readingListMode = true;
       this.readingListId = parseInt(readingListId, 10);
     }
+    this.continuousChaptersStack.push(this.chapterId);
     this.cdRef.markForCheck();
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(async (data) => {
-      this.readingProfile = data['readingProfile'];
+      this.openingReadingProfile = data['readingProfile'];
       this.cdRef.markForCheck();
 
-      if (this.readingProfile == null) {
+      if (this.openingReadingProfile == null) {
         this.router.navigateByUrl('/home');
         return;
       }
@@ -991,12 +1022,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     this.nextChapterDisabled = false;
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
+    this.bookInfo.set(null);
     this.cdRef.markForCheck();
 
     this.loadImageBookmarks();
 
 
-    this.bookService.getBookInfo(this.chapterId, true).subscribe(async (info) => {
+    this.bookService.getBookInfo(this.chapterId, true).pipe(
+      catchError(() => {
+        setTimeout(() => this.closeReader(), 200);
+        return EMPTY;
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(async (info) => {
       if (this.readingListMode && info.seriesFormat !== MangaFormat.EPUB) {
         // Redirect to the manga reader.
         const params = this.readerService.getQueryParamsObject(this.incognitoMode(), this.readingListMode, this.readingListId);
@@ -1004,11 +1042,27 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
         return;
       }
 
+      const seriesChanged = !firstLoad && info.seriesId !== this.seriesId;
+      this.bookInfo.set(info);
+      this.seriesId = info.seriesId;
+      this.libraryId = info.libraryId;
+      if (!firstLoad) {
+        this.replaceReaderUrl();
+      }
       this.bookTitle.set(info.bookTitle);
       this.kavitaTitleStrategy.setFormattedTitle(this.bookTitle() + ' Reader');
       this.cdRef.markForCheck();
 
-      await this.readerSettingsService.initialize(this.libraryId, this.seriesId, this.readingProfile);
+      if (firstLoad) {
+        await this.readerSettingsService.initialize(this.libraryId, this.seriesId, this.openingReadingProfile!);
+      } else if (seriesChanged) {
+        const switched = await firstValueFrom(
+          this.profileSession.switchTo$({libraryId: this.libraryId, seriesId: this.seriesId, seriesName: info.seriesName}),
+          {defaultValue: null},
+        );
+        // A later chapter load started its own switch, that one carries on
+        if (switched === null) return;
+      }
 
       this.setupReaderSettingEffects(this.injector);
 
@@ -1042,8 +1096,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       // Don't descope here as document hasn't loaded
       this.lastSeenScrollPartPath = progress.bookScrollId;
     }
-
-    this.continuousChaptersStack.push(this.chapterId);
 
     this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
       this.libraryType = type;
@@ -1138,6 +1190,36 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     }
 }
 
+  exitReader() {
+    if (this.readerService.closeRateReviewModal() || this.readerService.closeShortCutModal()) return;
+
+    if (!this.isOnLastPage() || !this.isScrolledToEnd()) {
+      this.closeReader();
+      return;
+    }
+
+    this.promptRateAndReview().subscribe(() => this.closeReader());
+  }
+
+  private promptRateAndReview() {
+    const info = this.bookInfo();
+    if (!info) return of(false);
+
+    return this.readerService.promptRateAndReview({
+      seriesId: info.seriesId,
+      volumeId: info.volumeId,
+      chapterId: this.chapterId,
+      seriesName: info.seriesName,
+      publicationStatus: info.seriesPublicationStatus,
+      readingListMode: this.readingListMode,
+    });
+  }
+
+  private replaceReaderUrl() {
+    this.readerService.replaceReaderUrl(this.libraryId, this.seriesId, this.chapterId, MangaFormat.EPUB,
+      this.incognitoMode(), this.readingListMode, this.readingListId);
+  }
+
   closeReader() {
     this.readerService.closeShortCutModal();
     this.readerService.closeReader(this.libraryId, this.seriesId, this.chapterId, this.readingListMode, this.readingListId);
@@ -1216,9 +1298,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       // Ensure all scroll locks are undone
       this.scrollService.unlock();
 
-      // Load chapter Id onto route but don't reload
-      const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode(), this.readingListMode, this.readingListId);
-      window.history.replaceState({}, '', newRoute);
       const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.info(msg, '', {timeOut: 3000});
       this.cdRef.markForCheck();
@@ -1227,15 +1306,30 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     }
 
     // This will only happen if no actual chapter can be found
-    const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter', {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()});
-    this.toastr.warning(msg);
     this.isLoading.set(false);
+    const entity = this.entityTitleService.formatChapterName(this.libraryType).toLowerCase();
+
     if (direction === 'Prev') {
       this.prevPageDisabled = true;
-    } else {
-      this.nextPageDisabled = true;
+      this.toastr.warning(translate('toasts.no-prev-chapter', {entity}));
+      return;
     }
-    this.cdRef.markForCheck();
+
+    // Only prompt the rate and review when on the last page (and clicking NextChapter), otherwise show the prompt
+    if (!this.isOnLastPage() || !this.isScrolledToEnd()) {
+      this.toastr.warning(translate('toasts.no-next-chapter', {entity}));
+      return;
+    }
+
+    this.nextPageDisabled = true;
+    if (this.readingListMode) {
+      this.closeReader();
+      return;
+    }
+
+    this.promptRateAndReview().subscribe(() => {
+      this.router.navigate(['library', this.libraryId, 'series', this.seriesId]).catch(console.error);
+    });
   }
 
   /**
@@ -2201,7 +2295,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     if (drawerIsOpen) {
       this.epubMenuService.closeAll();
     } else {
-      this.epubMenuService.openSettingsDrawer(this.chapterId, this.seriesId, this.libraryId, this.readingProfile, this.readerSettingsService);
+      this.epubMenuService.openSettingsDrawer(this.chapterId, this.seriesId, this.libraryId, this.profileSession.profile() ?? this.openingReadingProfile!, this.readerSettingsService);
     }
 
     if (this.immersiveMode()) { // NOTE: Shouldn't this check if drawer is open?
@@ -2270,8 +2364,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
    */
    turnOffIncognito() {
     this.incognitoMode.set(false);
-    const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode(), this.readingListMode, this.readingListId);
-    window.history.replaceState({}, '', newRoute);
+    this.replaceReaderUrl();
     this.toastr.info(translate('toasts.incognito-off'));
     this.saveProgress();
   }

@@ -45,8 +45,8 @@ export class PullToLoadComponent {
   /** Which direction the user drags to trigger – "up" places the strip at the bottom of content. */
   readonly direction = input.required<'up' | 'down'>();
 
-  /** Label shown inside the strip (e.g. "Read Next Chapter"). */
-  readonly title = input.required<string>();
+  /** Label shown inside the strip (e.g. "Read Next Chapter"). Without one, the arrows sit either side of the bar */
+  readonly title = input<string>('');
 
   /** Scroll container to monitor. Falls back to the document body when omitted. */
   readonly scrollContainer = input<ElementRef | HTMLElement | undefined>(undefined);

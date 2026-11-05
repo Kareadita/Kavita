@@ -22,17 +22,24 @@ import {translate} from "@jsverse/transloco";
 import {ToastrService} from '@openng/ngx-toastr';
 import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {ModalService, TypedModalRef} from "./modal.service";
-import {catchError, map, merge, Observable, of, switchMap, tap} from "rxjs";
+import {catchError, EMPTY, finalize, map, merge, Observable, of, switchMap, tap} from "rxjs";
 import {ListSelectModalComponent} from "../shared/_components/list-select-modal/list-select-modal.component";
 import {take, takeUntil} from "rxjs/operators";
 import {SeriesService} from "./series.service";
 import {Series} from "../_models/series";
 import {RereadPrompt} from "../_models/readers/reread-prompt";
-import {mediumModal} from "../_models/modal/modal-options";
+import {editModal, mediumModal} from "../_models/modal/modal-options";
 import {
   KeyboardShortcut,
   ShortcutsModalComponent
 } from "../reader-shared/_modals/shortcuts-modal/shortcuts-modal.component";
+import {
+  RateAndReviewSeriesModalComponent
+} from "../reader-shared/_modals/rate-and-review-series-modal/rate-and-review-series-modal.component";
+import {RateReviewPrompt} from "../_models/readers/rate-review-prompt";
+import {ReadingProfile, ReadingProfileKind} from "../_models/preferences/reading-profiles";
+import {PublicationStatus} from "../_models/metadata/publication-status";
+import {ReviewService} from "./review.service";
 
 enum RereadPromptResult {
   Cancel = 0,
@@ -43,6 +50,8 @@ enum RereadPromptResult {
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
+
+const RATE_REVIEW_PROMPT_STATUSES = [PublicationStatus.Completed, PublicationStatus.Hiatus, PublicationStatus.Cancelled];
 
 
 @Injectable({
@@ -58,6 +67,7 @@ export class ReaderService {
   private readonly document = inject(DOCUMENT);
   private readonly modalService = inject(ModalService);
   private readonly seriesService = inject(SeriesService);
+  private readonly reviewService = inject(ReviewService);
 
   baseUrl = environment.apiUrl;
   encodedKey: string = '';
@@ -69,6 +79,8 @@ export class ReaderService {
   private noSleep: NoSleep = new NoSleep();
   shortCutModalOpen = signal(false);
   shortCutModalRef: TypedModalRef<ShortcutsModalComponent> | undefined;
+  private rateReviewPromptActive = false;
+  private rateReviewModalRef: TypedModalRef<RateAndReviewSeriesModalComponent> | undefined;
 
 
 
@@ -85,11 +97,60 @@ export class ReaderService {
     if (this.shortCutModalOpen()) return;
 
     this.shortCutModalOpen.set(true);
-    this.shortCutModalRef = this.modalService.open(ShortcutsModalComponent, mediumModal());
-    this.shortCutModalRef.setInput('shortcuts', shortcuts);
-    this.shortCutModalRef.setInput('inBookReader', inBookReader);
+    const ref = this.modalService.open(ShortcutsModalComponent, mediumModal());
+    this.shortCutModalRef = ref;
+    ref.setInput('shortcuts', shortcuts);
+    ref.setInput('inBookReader', inBookReader);
 
-    merge(this.shortCutModalRef.closed, this.shortCutModalRef.dismissed).subscribe(() => this.shortCutModalOpen.set(false));
+    merge(ref.closed, ref.dismissed).subscribe(() => {
+      this.shortCutModalOpen.set(false);
+      if (this.shortCutModalRef === ref) {
+        this.shortCutModalRef = undefined;
+      }
+    });
+  }
+
+  /**
+   * Emits true once the modal closes, false when no prompt is due, and nothing while a prompt is already open
+   */
+  promptRateAndReview(prompt: RateReviewPrompt): Observable<boolean> {
+    if (this.rateReviewPromptActive) return EMPTY;
+    if (prompt.readingListMode) return of(false);
+
+    const status = prompt.publicationStatus;
+    if (status === null || !RATE_REVIEW_PROMPT_STATUSES.includes(status)) return of(false);
+
+    this.rateReviewPromptActive = true;
+
+    return this.getNextChapter(prompt.seriesId, prompt.volumeId, prompt.chapterId).pipe(
+      switchMap(nextChapterId => nextChapterId === CHAPTER_ID_DOESNT_EXIST
+        ? this.reviewService.getMyRatingAndReview(prompt.seriesId)
+        : of(null)),
+      switchMap(ratingReview => {
+        if (ratingReview === null || ratingReview.hasBeenRated) return of(false);
+
+        const ref = this.modalService.open(RateAndReviewSeriesModalComponent, editModal());
+        ref.setInput('seriesId', prompt.seriesId);
+        ref.setInput('ratingReview', ratingReview);
+        ref.setInput('seriesName', prompt.seriesName);
+        this.rateReviewModalRef = ref;
+
+        return merge(ref.closed, ref.dismissed).pipe(take(1), map(() => true));
+      }),
+      catchError(() => of(false)),
+      finalize(() => {
+        this.rateReviewPromptActive = false;
+        this.rateReviewModalRef = undefined;
+      }),
+    );
+  }
+
+  // KeyBindService calls preventDefault on Escape, which blocks ng-bootstrap's own Escape dismiss
+  closeRateReviewModal() {
+    if (!this.rateReviewModalRef) return false;
+
+    this.rateReviewModalRef.dismiss();
+    return true;
   }
 
   closeShortCutModal() {
@@ -309,13 +370,26 @@ export class ReaderService {
     return parseInt(params.get('chapterId') || '-1', 10);
   }
 
-  getNextChapterUrl(url: string, nextChapterId: number, incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
-    const lastSlashIndex = url.lastIndexOf('/');
-    let newRoute = url.substring(0, lastSlashIndex + 1) + nextChapterId + '';
-    newRoute += this.getQueryParams(incognitoMode, readingListMode, readingListId);
-    return newRoute;
+  showReadingProfileSwitch(profile: ReadingProfile, seriesName: string) {
+    const message = profile.kind === ReadingProfileKind.Implicit
+      ? translate('toasts.reading-profile-switched-series', {seriesName})
+      : translate('toasts.reading-profile-switched', {name: profile.name});
+    this.toastr.info(message, '', {timeOut: 1000});
   }
 
+  showReadingProfileSwitchFailed(seriesName: string) {
+    this.toastr.error(translate('toasts.reading-profile-switch-failed', {seriesName}));
+  }
+
+  /**
+   * Points the address bar at the chapter the reader now shows, without navigating
+   */
+  replaceReaderUrl(libraryId: number, seriesId: number, chapterId: number, format: MangaFormat,
+                   incognitoMode: boolean, readingListMode: boolean, readingListId: number) {
+    const tree = this.router.createUrlTree(this.getNavigationArray(libraryId, seriesId, chapterId, format),
+      {queryParams: this.getQueryParamsObject(incognitoMode, readingListMode, readingListId)});
+    this.location.replaceState(this.router.serializeUrl(tree));
+  }
 
   getQueryParamsObject(incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
     const params: {[key: string]: any} = {};
@@ -325,21 +399,6 @@ export class ReaderService {
       params['readingListId'] = readingListId;
     }
 
-    return params;
-  }
-
-  getQueryParams(incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
-    let params = '';
-    if (incognitoMode) {
-      params += '?incognitoMode=true';
-    }
-    if (readingListMode) {
-      if (params.indexOf('?') > 0) {
-        params += '&readingListId=' + readingListId;
-      } else {
-        params += '?readingListId=' + readingListId;
-      }
-    }
     return params;
   }
 

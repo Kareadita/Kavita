@@ -28,5 +28,5 @@ export interface ChapterInfo {
     doublePairs?: {[key: number]: number};
     seriesTotalPagesRead: number;
     seriesTotalPages: number;
-    seriesPublicationStatus: PublicationStatus;
+    seriesPublicationStatus: PublicationStatus | null;
 }

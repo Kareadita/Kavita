@@ -26,6 +26,7 @@ export class MangaReaderService {
   }
 
   load(chapterInfo: ChapterInfo | BookmarkInfo) {
+    this.pageDimensions = {};
     chapterInfo.pageDimensions!.forEach(d => {
       this.pageDimensions[d.pageNumber] = {
         height: d.height,
@@ -34,7 +35,6 @@ export class MangaReaderService {
       };
     });
     this.pairs = chapterInfo.doublePairs!;
-    this.hasPageOffset = false;
   }
 
   adjustForDoubleReader(page: number) {

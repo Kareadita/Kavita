@@ -532,7 +532,7 @@ Kavita.Server/config/*.csv
 Kavita.Services.Tests/TestResults/
 UI/Web/.vscode/settings.json
 /Kavita.Services.Tests/Test Data/ArchiveService/CoverImages/output/*
-UI/Web/.angular/
+.angular/
 BenchmarkDotNet.Artifacts
 .claude/
 Kavita.Server/config/*backup.zip
