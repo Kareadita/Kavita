@@ -64,6 +64,7 @@ import {addToModal, editModal} from "../_models/modal/modal-options";
 import {ModalService, TypedModalRef} from "./modal.service";
 import {DashboardService} from "./dashboard.service";
 import {FilterService} from "./filter.service";
+import {AccountService} from "./account.service";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -103,6 +104,7 @@ export class ActionService {
   private readonly sideNavService = inject(NavService);
   private readonly filterService = inject(FilterService);
   private readonly dashboardService = inject(DashboardService);
+  private readonly accountService = inject(AccountService);
 
   private readingListModalRef: TypedModalRef<BulkSetReadingProfileModalComponent> |  TypedModalRef<ListSelectModalComponent<ReadingList>> | null = null;
   private collectionModalRef: TypedModalRef<ListSelectModalComponent<UserCollection>> | null = null;
@@ -706,13 +708,19 @@ export class ActionService {
    */
   handleCollectionAction(action: ActionItem<UserCollection>, collection: UserCollection) {
     switch (action.action) {
-      case Action.Delete:
-        return from(this.confirmService.confirm(translate('toasts.confirm-delete-collection'))).pipe(
+      case Action.Delete: {
+        const isKoboSyncCollection = this.accountService.currentUser()?.preferences.koboSyncPreferences.syncCollection == collection.id;
+        const content = isKoboSyncCollection
+          ? translate('toasts.confirm-delete-kobo-collection')
+          : translate('toasts.confirm-delete-collection');
+
+        return from(this.confirmService.confirm(content)).pipe(
           filter(confirmed => confirmed),
           switchMap(() => this.collectionService.deleteTag(collection.id)),
           tap(() => this.toastr.success(translate('toasts.collection-tag-deleted'))),
           map(() => this.fromAction(action, collection, 'remove'))
         );
+      }
 
       case Action.Edit:
         const ref = this.modalService.open(EditCollectionTagsModalComponent, editModal());
@@ -1248,13 +1256,21 @@ export class ActionService {
           map(() => this.fromAction(action, collections.map(c => ({...c, promoted: false})), 'update'))
         );
 
-      case Action.Delete:
-        return from(this.confirmService.confirm(translate('toasts.confirm-delete-collections'))).pipe(
+      case Action.Delete: {
+        const isKoboSyncCollection = collections.some(collection => {
+          return this.accountService.currentUser()?.preferences.koboSyncPreferences.syncCollection === collection.id;
+        });
+        const content = isKoboSyncCollection
+          ? translate('toasts.confirm-delete-collections-kobo')
+          : translate('toasts.confirm-delete-collections')
+
+        return from(this.confirmService.confirm(content)).pipe(
           filter(confirmed => confirmed),
           switchMap(() => this.collectionTagService.deleteMultipleCollections(collections.map(c => c.id))),
           tap(() => this.toastr.success(translate('toasts.collections-deleted'))),
           map(() => this.fromAction(action, collections, 'remove'))
         );
+      }
 
       case Action.Download:
         for (let c of collections) this.downloadService.download(DownloadEntityType.Collection, c, 0, 0);
