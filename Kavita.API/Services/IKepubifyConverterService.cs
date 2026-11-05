@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Kavita.Models.DTOs.Settings;
 
 namespace Kavita.API.Services;
 
@@ -8,11 +9,22 @@ namespace Kavita.API.Services;
 /// </summary>
 public interface IKepubifyConverterService
 {
+    KepubifyStatusDto Status { get; }
+
     bool KepubifySupported { get; }
 
     string BuildKepubifyPath(int chapterId);
 
-    Task CheckKepubifySupport(string kepubifyPath, CancellationToken cancellationToken);
+    /// <summary>
+    /// Sets the status to Checking, so kepub is off until the queued check sends its result to admins
+    /// </summary>
+    KepubifyStatusDto QueueCheck();
+
+    /// <summary>
+    /// Picks the binary (KepubifyPath in appsettings.json, else the shipped one), checks it and sends the result to admins.
+    /// A check started while one is running waits for it
+    /// </summary>
+    Task<KepubifyStatusDto> CheckKepubifySupport(CancellationToken cancellationToken);
 
     /// <summary>
     /// Waits for the book's conversion, starting it if none is running. Cancelling only stops this caller's wait

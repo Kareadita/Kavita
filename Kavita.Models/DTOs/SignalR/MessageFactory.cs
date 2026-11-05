@@ -6,6 +6,7 @@ using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Reader;
+using Kavita.Models.DTOs.Settings;
 using Kavita.Models.DTOs.SignalR.Bodies;
 using Kavita.Models.DTOs.Update;
 using Kavita.Models.Entities.Enums;
@@ -476,12 +477,13 @@ public static class MessageFactory
 
     // Body repeats Name, Title and SubTitle because the current widget reads them from the payload.
     // A LibraryId or SeriesId in Body narrows the audience of an onlyAdmins: false send to users with access
-    private static SignalRMessageDto CodedEvent(string name, string code, string title, string subtitle, object body)
+    private static SignalRMessageDto CodedEvent(string name, string code, string title, string subtitle, object body,
+        MessageEventPriority? priority = null)
     {
         return new SignalRMessageDto
         {
             Name = name,
-            Priority = name == Error ? MessageEventPriority.Error : MessageEventPriority.Info,
+            Priority = priority ?? (name == Error ? MessageEventPriority.Error : MessageEventPriority.Info),
             Code = code,
             Title = title,
             SubTitle = subtitle,
@@ -865,6 +867,26 @@ public static class MessageFactory
             SeriesName = seriesName,
             FilePath = filePath,
         });
+    }
+
+    /// <summary>Error when the check failed, so the widget shows it. Silent when kepub works or was unticked on purpose</summary>
+    public static SignalRMessageDto KepubifyCheckedEvent(KepubifyStatusDto status)
+    {
+        var failed = status.Status == KepubifyCheckStatus.NotSupported && status.Reason != KepubifyOffReason.Disabled;
+        var name = failed ? Error : Info;
+        var title = failed ? "Kepubify is off" : "Kepubify checked";
+        var subtitle = status.Reason switch
+        {
+            KepubifyOffReason.FileMissing => $"{status.Path} does not exist. Books sync to Kobo as plain epub",
+            KepubifyOffReason.HashMismatch => $"{status.Path} does not match any known kepubify release, so the kepub setting was turned off. Books sync to Kobo as plain epub",
+            KepubifyOffReason.VersionCheckFailed => $"{status.Path} did not report a kepubify version. Books sync to Kobo as plain epub",
+            KepubifyOffReason.Disabled => "Kepubify is unticked in settings. Books sync to Kobo as plain epub",
+            _ => $"Using {status.Path}",
+        };
+
+        return CodedEvent(name, MessageEventCode.KepubifyChecked, title, subtitle,
+            new KepubifyCheckedEventBodyDto(name, title, subtitle, status),
+            failed ? MessageEventPriority.Error : MessageEventPriority.Silent);
     }
 
     #endregion

@@ -282,7 +282,6 @@ public class SettingsService(
         var currentSettings = await unitOfWork.SettingsRepository.GetSettingsAsync(ct);
         var updateBookmarks = false;
         var originalBookmarkDirectory = directoryService.BookmarkDirectory;
-        var kepubifyUpdated = false;
 
         var bookmarkDirectory = updateSettingsDto.BookmarksDirectory;
         if (!updateSettingsDto.BookmarksDirectory.EndsWith("bookmarks") &&
@@ -469,15 +468,6 @@ public class SettingsService(
                 unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.KepubifyPath &&
-                updateSettingsDto.KepubifyPath != setting.Value)
-            {
-                setting.Value = updateSettingsDto.KepubifyPath;
-                unitOfWork.SettingsRepository.Update(setting);
-
-                kepubifyUpdated = true;
-            }
-
             if (setting.Key == ServerSettingKey.EnableKobo &&
                 updateSettingsDto.EnableKobo + string.Empty != setting.Value)
             {
@@ -504,11 +494,6 @@ public class SettingsService(
             if (updateBookmarks)
             {
                 UpdateBookmarkDirectory(originalBookmarkDirectory ?? string.Empty, bookmarkDirectory);
-            }
-
-            if (kepubifyUpdated)
-            {
-                BackgroundJob.Enqueue<IKepubifyConverterService>(kc => kc.CheckKepubifySupport(updateSettingsDto.KepubifyPath, CancellationToken.None));
             }
 
             if (updateTask)

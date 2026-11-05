@@ -149,7 +149,7 @@ public static class ApplicationServiceExtensions
         services.AddHostedService(sp => sp.GetRequiredService<ActiveUserTrackerService>());
 
         services.AddHostedService<StartupTasksHostedService>();
-        services.AddHostedService<KepubifyResolver>();
+        services.AddHostedService<KepubifyCheckHostedService>();
     }
 
 }
