@@ -75,6 +75,8 @@ export class ManageUserPreferencesComponent implements OnInit {
   koboEnabled = computed(() => {
     return this.koboEnabledRsc.isLoading() || (this.koboEnabledRsc.hasValue() && this.koboEnabledRsc.value());
   });
+  protected readonly koboOff = computed(() => this.koboEnabledRsc.hasValue() && !this.koboEnabledRsc.value());
+  protected readonly koboEditable = computed(() => this.koboEnabled() && this.hasDownloadRole());
 
   formModel = signal<Preferences>({
     aniListScrobblingEnabled: false,
@@ -134,7 +136,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     min(path.onDeckUpdateDays, 1);
     required(path.promptForRereadsAfter);
 
-    disabled(path.koboSyncPreferences, {when: () => !this.koboEnabled()})
+    disabled(path.koboSyncPreferences, {when: () => !this.koboEditable()})
     min(path.koboSyncPreferences.syncItemLimit, 25);
     max(path.koboSyncPreferences.syncItemLimit, 100);
     disabled(path.koboSyncPreferences.syncLibraries, {when: () => this.formModel().koboSyncPreferences.allLibraries})

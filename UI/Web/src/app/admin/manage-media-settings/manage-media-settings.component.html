@@ -78,7 +78,7 @@
     <h4>{{t('kepubify-title')}}</h4>
 
     <div>
-      <div class="alert alert-warning" role="alert">
+      <div class="alert alert-warning">
         <strong>{{t('notice')}}</strong> {{t('kepubify-restart-required')}}
       </div>
 
@@ -95,8 +95,8 @@
         </app-setting-switch>
       </div>
 
-      @if (kepubifyStatus(); as status) {
-        <div class="d-flex align-items-baseline gap-2 mt-2" aria-live="polite">
+      <div class="d-flex align-items-baseline gap-2 mt-2" aria-live="polite">
+        @if (kepubifyStatus(); as status) {
           @switch (status.status) {
             @case (KepubifyCheckStatus.Checking) {
               <span class="spinner-border spinner-border-sm flex-shrink-0" aria-hidden="true"></span>
@@ -115,11 +115,11 @@
               </span>
             }
           }
-        </div>
-      }
+        }
+      </div>
 
       @if (kepubifyOff()) {
-        <div class="alert alert-warning mt-3" role="alert">
+        <div class="alert alert-warning mt-3">
           {{t('kepubify-off-alert')}}
         </div>
       }
