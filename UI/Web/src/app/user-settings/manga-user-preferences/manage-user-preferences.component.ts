@@ -83,6 +83,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     blurUnreadSummaries: false,
     bookReaderHighlightSlots: [],
     collapseSeriesRelationships: false,
+    showSeriesItemCount: false,
     colorScapeEnabled: false,
     customKeyBinds: {},
     dataSaver: false,

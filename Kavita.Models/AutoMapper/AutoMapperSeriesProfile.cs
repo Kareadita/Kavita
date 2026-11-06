@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AutoMapper;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.Entities;
 
@@ -42,6 +43,16 @@ public class AutoMapperSeriesProfile : Profile
             .ForMember(dest => dest.HasUserRated,
                 opt => opt.MapFrom(src =>
                     src.Ratings
-                        .Any(r => r.AppUserId == userId && r.HasBeenRated)));
+                        .Any(r => r.AppUserId == userId && r.HasBeenRated)))
+            // Excludes both non-real volume buckets: the loose-leaf volume (ungrouped chapters) and the
+            // Special volume
+            .ForMember(dest => dest.VolumeCount,
+                opt => opt.MapFrom(src => src.Volumes.Count(v =>
+                    v.MinNumber != ParserConstants.LooseLeafVolumeNumber &&
+                    v.MinNumber != ParserConstants.SpecialVolumeNumber)))
+            // Unfiltered on purpose: specials all share Chapter.MinNumber == DefaultChapterNumber by design
+            // so filtering it out would silently undercount any series made up of multiple specials.
+            .ForMember(dest => dest.ChapterCount,
+                opt => opt.MapFrom(src => src.Volumes.SelectMany(v => v.Chapters).Count()));
     }
 }

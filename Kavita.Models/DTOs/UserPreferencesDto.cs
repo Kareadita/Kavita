@@ -32,6 +32,9 @@ public sealed record UserPreferencesDto
     /// <inheritdoc cref="AppUserPreferences.CollapseSeriesRelationships"/>
     [Required]
     public bool CollapseSeriesRelationships { get; set; } = false;
+    /// <inheritdoc cref="AppUserPreferences.ShowSeriesItemCount"/>
+    [Required]
+    public bool ShowSeriesItemCount { get; set; } = false;
     /// <inheritdoc cref="AppUserPreferences.Locale"/>
     [Required]
     public string Locale { get; set; }
