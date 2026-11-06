@@ -97,6 +97,10 @@ export const BookPaperTheme = `
   --br-actionbar-button-hover-border-color: #6c757d;
   --br-actionbar-bg-color: #F1E4D5;
 
+  /* Scrollbar */
+  --primary-color-scrollbar: rgba(0, 0, 0, 0.45);
+  --default-state-scrollbar: rgba(0, 0, 0, 0.25);
+
   /* Drawer */
   --drawer-pagination-horizontal-rule: inset 0 -1px 0 rgb(0 0 0 / 13%);
 

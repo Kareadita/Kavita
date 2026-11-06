@@ -13,6 +13,8 @@ $primary-color: #0062cc;
 $action-bar-height: 2.375rem;
 
 .reader-container {
+  scrollbar-color: var(--primary-color-scrollbar) transparent;
+
   &::-webkit-scrollbar {
     background-color: transparent;  /*make scrollbar space invisible */
     width: inherit;
