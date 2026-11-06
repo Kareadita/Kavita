@@ -71,6 +71,6 @@ public sealed record KoboSeriesDto
 {
     public string Id { get; set; }
     public string Name { get; set; }
-    public string Number { get; set; }
+    public string Number => NumberFloat == 0 ? string.Empty : NumberFloat.ToString();
     public float NumberFloat { get; set; }
 }
