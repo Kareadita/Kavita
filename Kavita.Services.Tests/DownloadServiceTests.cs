@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Kavita.API.Services;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Builders;
@@ -16,7 +17,7 @@ public class DownloadServiceTests
         kepubify.ConvertEpubToKepub(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(false);
 
         var service = new DownloadService(Substitute.For<ICacheService>(), Substitute.For<ILocalizationService>(),
-            Substitute.For<IDirectoryService>(), kepubify);
+            Substitute.For<IDirectoryService>(), kepubify, Substitute.For<IFileSystem>());
         var chapter = new ChapterBuilder("1")
             .WithFile(new MangaFileBuilder(epubPath, MangaFormat.Epub).Build())
             .Build();

@@ -12,7 +12,7 @@ public static class KoboQueryExtensions
     // Note: This needs to be updated if we ever support auto conversion from CBZ to Epub
     private static readonly List<MangaFormat> SupportedFormats =
     [
-        MangaFormat.Epub
+        MangaFormat.Epub, MangaFormat.Archive, MangaFormat.Image
     ];
 
     /// <param name="query"></param>
