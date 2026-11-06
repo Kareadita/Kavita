@@ -154,6 +154,7 @@ interface FormModel {
   emulateBook: boolean;
   swipeToPaginate: boolean;
   pageOffset: boolean;
+  separateLastPages: boolean;
   readingDirection: ReadingDirection;
 }
 
@@ -175,6 +176,7 @@ function toFormModel(readingProfile: ReadingProfile, mangaReaderService: MangaRe
     emulateBook: readingProfile.emulateBook,
     swipeToPaginate: readingProfile.swipeToPaginate,
     pageOffset: false,
+    separateLastPages: true,
     readingDirection: readingProfile.readingDirection,
   };
 }
@@ -274,6 +276,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     fittingOption: FITTING_OPTION.ORIGINAL,
     layoutMode: LayoutMode.Single,
     pageOffset: false,
+    separateLastPages: true,
     pageSplitOption: PageSplitOption.NoSplit,
     readingDirection: ReadingDirection.LeftToRight,
     swipeToPaginate: false,
@@ -336,6 +339,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     disabled(p.pageSplitOption, {when: () => this.splitAndFitDisabled()});
     disabled(p.fittingOption, {when: () => this.splitAndFitDisabled()});
     disabled(p.pageOffset, {when: () => this.isReaderModeWebtoon() || this.effectiveLayoutMode() === LayoutMode.Single});
+    disabled(p.separateLastPages, {when: () => this.isReaderModeWebtoon() || this.effectiveLayoutMode() === LayoutMode.Single});
     disabled(p.widthSlider, {when: () => !this.widthOverrideEnabled()});
   });
 
@@ -968,6 +972,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         this.mangaReaderService.setPageOffset(model.pageOffset);
+        this.mangaReaderService.setSeparateLastPages(model.separateLastPages);
         const adjustedPage = this.mangaReaderService.adjustForDoubleReader(this.pageNum());
         this.pageNumSubject.next({pageNum: adjustedPage, maxPages: this.maxPages()});
         this.pageNum.set(adjustedPage);

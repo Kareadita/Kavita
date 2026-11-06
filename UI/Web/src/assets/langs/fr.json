@@ -1529,7 +1529,9 @@
         "reading-profile-updated": "Profil de lecture mis à jour",
         "reading-profile-promoted": "Profil de lecture promu",
         "page-offset-label": "Décalage de page",
-        "offset-only-double": "Le décalage de page ne peut être utilisé qu'avec la mise en page double"
+        "offset-only-double": "Le décalage de page ne peut être utilisé qu'avec la mise en page double",
+        "separate-last-pages-label": "Séparer les dernières pages",
+        "separate-last-pages-only-double": "Les dernières pages ne peuvent être séparées qu'avec la mise en page double",
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
