@@ -467,6 +467,13 @@ public class SettingsService(
                 setting.Value = updateSettingsDto.EnableFolderWatching + string.Empty;
                 unitOfWork.SettingsRepository.Update(setting);
             }
+
+            if (setting.Key == ServerSettingKey.EnableKobo &&
+                updateSettingsDto.EnableKobo + string.Empty != setting.Value)
+            {
+                setting.Value = updateSettingsDto.EnableKobo + string.Empty;
+                unitOfWork.SettingsRepository.Update(setting);
+            }
         }
 
         if (!unitOfWork.HasChanges()) return updateSettingsDto;
@@ -481,17 +488,17 @@ public class SettingsService(
             }
             else
             {
-                await taskScheduler.ScheduleStatsTasks();
+                await taskScheduler.ScheduleStatsTasks(ct);
             }
 
             if (updateBookmarks)
             {
-                UpdateBookmarkDirectory(originalBookmarkDirectory, bookmarkDirectory);
+                UpdateBookmarkDirectory(originalBookmarkDirectory ?? string.Empty, bookmarkDirectory);
             }
 
             if (updateTask)
             {
-                BackgroundJob.Enqueue(() => taskScheduler.ScheduleTasks());
+                BackgroundJob.Enqueue(() => taskScheduler.ScheduleTasks(CancellationToken.None));
             }
 
             if (updatedOidcSettings)

@@ -34,6 +34,8 @@ export class MediaErrorReasonPipe implements PipeTransform {
         return this.t('epub-not-strict');
       case MediaErrorReason.AmbiguousSeries:
         return this.t('ambiguous-series');
+      case MediaErrorReason.KepubConversionFailed:
+        return this.t('kepub-conversion-failed');
     }
   }
 

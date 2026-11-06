@@ -211,6 +211,8 @@ public static class Seed
                 new() {Key = ServerSettingKey.FirstInstallVersion, Value = BuildInfo.Version.ToString()},
                 new() {Key = ServerSettingKey.FirstInstallDate, Value = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)},
                 new() {Key = ServerSettingKey.StatsApiHits, Value = "0"},
+                new() {Key = ServerSettingKey.EnableKobo, Value = "true"},
+                new() {Key = ServerSettingKey.EnableKepubify, Value = "true"},
             }.ToArray()
         ];
         Defaults.DefaultSettings = defaultSettings;

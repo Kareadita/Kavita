@@ -58,4 +58,10 @@ public static class MessageEventCode
     public const string DebugExportFailed = "debug-export-failed";
 
     #endregion
+
+    #region Kobo
+
+    public const string KepubifyChecked = "kepubify-checked";
+
+    #endregion
 }

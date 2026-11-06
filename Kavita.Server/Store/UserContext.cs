@@ -12,6 +12,7 @@ public class UserContext : IUserContext
     private int? _userId;
     private string? _username;
     private AuthenticationType _authType;
+    private string? _authKey;
     private List<string> _roles = new();
 
     public int? GetUserId() => _userId;
@@ -22,6 +23,7 @@ public class UserContext : IUserContext
     }
 
     public string? GetUsername() => _username;
+    public string? AuthKey() => _authKey;
 
     public AuthenticationType GetAuthenticationType() => _authType;
 
@@ -29,13 +31,14 @@ public class UserContext : IUserContext
     public IReadOnlyList<string> Roles => _roles.AsReadOnly();
 
     // Internal method used by middleware to set context
-    internal void SetUserContext(int userId, string username, AuthenticationType authType, IEnumerable<string> roles)
+    internal void SetUserContext(int userId, string username, AuthenticationType authType, IEnumerable<string> roles, string? authKey = null)
     {
         _userId = userId;
         _username = username;
         _authType = authType;
         IsAuthenticated = true;
         _roles = roles?.ToList() ?? [];
+        _authKey = authType == AuthenticationType.AuthKey ? authKey : null;
     }
 
     internal void Clear()

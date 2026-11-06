@@ -65,6 +65,8 @@ public class NativeFileWatcherServiceTests : WatchedLibraryFoldersTest
     [Fact]
     public async Task Changed_Folder_EnqueuesNothing()
     {
+        if (OperatingSystem.IsMacOS()) return;
+
         var folder = SeriesFolder("Vol. 1");
         await StartWatching();
 

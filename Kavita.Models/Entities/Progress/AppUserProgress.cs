@@ -38,6 +38,7 @@ public class AppUserProgress : IEntityDate
     /// on next load
     /// </summary>
     public string? BookScrollId { get; set; }
+    public string? KoboSpan { get; set; }
     /// <summary>
     /// When this was first created
     /// </summary>

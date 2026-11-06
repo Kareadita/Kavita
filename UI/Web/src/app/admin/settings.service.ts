@@ -9,6 +9,7 @@ import {MetadataMappingsExport} from "./manage-metadata-mappings/manage-metadata
 import {FieldMappingsImportResult, ImportSettings} from "../_models/import-field-mappings";
 import {AuthorityValidationResult, OidcPublicConfig} from "./_models/oidc-config";
 import {RunMetadataMappingsRequest} from "../_models/metadata/run-metadata-mappings-request";
+import {KepubifyStatus} from "./_models/kepubify-status";
 
 /**
  * Used only for the Test Email Service call
@@ -93,6 +94,21 @@ export class SettingsService {
 
   getOpdsEnabledResource() {
     return httpResource<boolean>(() => this.baseUrl + 'settings/opds-enabled').asReadonly();
+  }
+
+  getKoboEnabledResource() {
+    return httpResource<boolean>(() => this.baseUrl + 'settings/kobo-enabled').asReadonly();
+  }
+
+  getKepubifyStatus() {
+    return this.http.get<KepubifyStatus>(this.baseUrl + 'settings/kepubify-supported');
+  }
+
+  /**
+   * Returns Checking at once. The result comes as a kepubify-checked event
+   */
+  updateKepubify(enabled: boolean) {
+    return this.http.post<KepubifyStatus>(this.baseUrl + 'settings/kepubify', {enabled});
   }
 
   clearExternalIds() {

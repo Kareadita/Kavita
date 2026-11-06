@@ -17,6 +17,8 @@ public class EndpointAccessTests
         ["seriesId"] = typeof(SeriesAccessAttribute),
         ["volumeId"] = typeof(VolumeAccessAttribute),
         ["chapterId"] = typeof(ChapterAccessAttribute),
+        ["bookId"] = typeof(ChapterAccessAttribute), // Kobo
+        ["thumbnailId"] = typeof(ChapterAccessAttribute), // Kobo
         ["libraryId"] = typeof(LibraryAccessAttribute),
         ["personId"] = typeof(PersonAccessAttribute),
         ["readingListId"] = typeof(ReadingListAccessAttribute),
@@ -62,6 +64,7 @@ public class EndpointAccessTests
         ["StatsController.GetReadingHistoryItemsForSeries(Int32, String, UserParams):seriesId"] = "Query filtered to the caller's own reading sessions",
         ["UsersController.HasLibraryAccess(Int32):libraryId"] = "Compares against the caller's own libraries",
         ["UsersController.HasReadingProgress(Int32):libraryId"] = "Only reads the library type, progress is the caller's own",
+        ["KoboController.GetPrices(String):bookIds"] = "No access check needed. Bounces empty dtos back",
     };
 
     // Key: Controller.Action(paramTypes):Dto.Property. An entry means a human reviewed it, not that it is safe

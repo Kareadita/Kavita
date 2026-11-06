@@ -24,6 +24,7 @@ export enum MediaErrorProducer {
   BookService = 0,
   ArchiveService = 1,
   Scanner = 2,
+  Kepubify = 3,
 }
 
 export enum MediaErrorReason {
@@ -39,6 +40,7 @@ export enum MediaErrorReason {
   MetadataUnreadable = 10,
   EpubNotStrict = 11,
   AmbiguousSeries = 12,
+  KepubConversionFailed = 13,
 }
 
 export const allMediaErrorReasons = allEnums(MediaErrorReason);

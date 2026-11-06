@@ -36,4 +36,6 @@ export enum MessageEventCode {
 
   DebugExportReady = 'debug-export-ready',
   DebugExportFailed = 'debug-export-failed',
+
+  KepubifyChecked = 'kepubify-checked',
 }

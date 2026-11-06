@@ -76,6 +76,11 @@ public static class Configuration
 
     public static bool AllowIFraming => GetAllowIFraming(GetAppSettingFilename());
 
+    /// <summary>
+    /// A custom kepubify binary. Empty means the shipped one. Never written by Kavita, only the host sets it
+    /// </summary>
+    public static string KepubifyPath => GetKepubifyPath(GetAppSettingFilename());
+
     private static string GetAppSettingFilename()
     {
         if (!string.IsNullOrEmpty(AppSettingsFilename))
@@ -336,6 +341,24 @@ public static class Configuration
     }
     #endregion
 
+    #region KepubifyPath
+    private static string GetKepubifyPath(string filePath)
+    {
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            return jsonObj?.KepubifyPath ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error reading app settings: " + ex.Message);
+        }
+
+        return string.Empty;
+    }
+    #endregion
+
     #region OIDC
 
     private static OpenIdConnectSettings GetOpenIdConnectSettings(string filePath)
@@ -387,6 +410,8 @@ public static class Configuration
         public long Cache { get; set; } = DefaultCacheMemory;
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public bool AllowIFraming { get; init; } = false;
+        // ReSharper disable once MemberHidesStaticFromOuterClass
+        public string KepubifyPath { get; init; } = string.Empty;
         public OpenIdConnectSettings OpenIdConnectSettings { get; set; } = new();
         [JsonExtensionData]
         public Dictionary<string, JsonElement> ExtensionData { get; set; }

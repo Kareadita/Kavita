@@ -289,6 +289,20 @@
         "include-continue-from-label": "Include Continue From Entry",
         "include-continue-from-tooltip": "Insert a \"Continue From X\" entry in OPDS fields to avoid finding your last reading point (Emulates Kavita's Continue button)",
 
+        "kobo-sync-settings-title": "Kobo Sync",
+        "kobo-sync-disabled-alert": "Kobo Sync has been disabled by your administrator",
+        "kobo-sync-no-download-role": "Kobo Sync requires the Download Role, ask your administrator for help",
+        "sync-item-limit-label": "Sync Item Limit",
+        "sync-item-limit-tooltip": "Maximum number of items sent to the device per sync request. Between 25 and 100.",
+        "forward-to-kobo-store-label": "Forward to Kobo Store",
+        "forward-to-kobo-store-tooltip": "Forward requests for books outside your Kavita library to the official Kobo store. Disable to stop the device from talking to Kobo's servers.",
+        "sync-all-libraries-label": "All Libraries",
+        "sync-all-libraries-tooltip": "Sync books from every library. Disable to restrict sync to the libraries selected below.",
+        "sync-libraries-label": "Sync Libraries",
+        "sync-libraries-tooltip": "Only books from series in these libraries are synced. No selection is treated as all libraries.",
+        "sync-collection-label": "Sync Collection",
+        "sync-collection-tooltip": "When set, only books from series in this collection are synced. Takes precedence over the library selection.",
+
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Mihon users.",
         "clients-opds-description": "All 3rd Party clients will either use the OPDS Auth key or the Connection Url below. These are like passwords, keep it private.",
         "clients-opds-url-label": "OPDS URL",
@@ -2463,7 +2477,33 @@
         "pdf-render-resolution-label": "PDF Render Resolution",
         "pdf-render-resolution-tooltip": "Resolution at which PDFs will be rendered. Higher resolutions will take longer to render and consume more memory. If you experience issues with PDF rendering, try lowering this.",
         "cover-image-size-label": "Cover Image Size",
-        "cover-image-size-tooltip": "How large should cover images generate as. Note: Anything larger than the default will incur longer page load times."
+        "cover-image-size-tooltip": "How large should cover images generate as. Note: Anything larger than the default will incur longer page load times.",
+
+        "kepubify-title": "Kepubify",
+        "notice": "{{manage-settings.notice}}",
+        "kepubify-restart-required": "A custom kepubify can be set as KepubifyPath in appsettings.json. Changing it requires a manual restart of Kavita to take effect.",
+        "enable-kepubify-label": "Convert Epubs to Kepub for Kobo",
+        "enable-kepubify-tooltip": "Kobo devices get kepub files, which let reading progress sync to the exact position. When off, books sync to Kobo as plain epub, and reading progress only syncs to the chapter.",
+        "kepubify-off-alert": "Kepub conversion is off. Books sync to Kobo as plain epub, and reading progress only syncs to the chapter.",
+        "kepubify-status-label": "{{source}}: {{path}}"
+    },
+
+    "kepubify-source-pipe": {
+        "shipped": "Shipped kepubify",
+        "custom": "Custom kepubify from appsettings.json"
+    },
+
+    "kepubify-check-status-pipe": {
+        "checking": "Checking kepubify…",
+        "supported": "Kepub conversion is working",
+        "not-supported": "Kepub conversion is off"
+    },
+
+    "kepubify-off-reason-pipe": {
+        "disabled": "Turned off in settings",
+        "file-missing": "The kepubify file does not exist",
+        "hash-mismatch": "The shipped kepubify does not match any known release, so it was turned off. Replace the file or set KepubifyPath in appsettings.json, then turn it back on",
+        "version-check-failed": "The file did not report a kepubify version"
     },
 
     "pdf-render-resolution": {
@@ -2524,6 +2564,8 @@
         "opds-label": "OPDS",
         "opds-tooltip": "OPDS support will allow all users to use OPDS to read and download content from the server.",
         "enable-opds": "Enable OPDS",
+        "kobo-label": "Enable Kobo Sync",
+        "kobo-tooltip": "Enable Kobo Sync support for all users on the server",
         "folder-watching-label": "Folder Watching",
         "folder-watching-tooltip": "Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans. A folder is scanned 30 seconds after its last change. Each library chooses how it watches on its Folder tab.",
         "enable-folder-watching": "Enable Folder Watching",
@@ -3261,7 +3303,9 @@
         "debug-export-failed-label": "Debug export failed",
         "folder-watch-fallback-label": "Library is now using Polling",
         "folder-watch-fallback-errors-description": "Too many errors occurred watching {{folder}}, so {{libraryName}} was switched to Polling. Use Retry on the library’s Folder tab to watch again.",
-        "folder-watch-fallback-missed-change-description": "The watcher missed a change in {{folder}}, so {{libraryName}} was switched to Polling. Use Retry on the library’s Folder tab to watch again."
+        "folder-watch-fallback-missed-change-description": "The watcher missed a change in {{folder}}, so {{libraryName}} was switched to Polling. Use Retry on the library’s Folder tab to watch again.",
+        "kepubify-checked-failed-label": "Kepubify is off",
+        "kepubify-checked-failed-description": "{{path}}: {{reason}}. Books sync to Kobo as plain epub."
     },
 
     "event-action-pipe": {
@@ -4630,7 +4674,9 @@
         "reading-list-promoted": "Reading List promoted",
         "reading-list-unpromoted": "Reading List un-promoted",
         "confirm-delete-collection": "Are you sure you want to delete the collection? This cannot be undone.",
+        "confirm-delete-kobo-collection": "Are you sure you want to delete the collection? It is being used to sync media to your Kobo. Deleting it will sync all your libraries next.",
         "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
+        "confirm-delete-collections-kobo": "Are you sure you want to delete multiple collections? One of these is used to sync your media to your Kobo. Deleting it will sync all your libraries next.",
         "collections-deleted": "Collections deleted",
         "confirm-delete-annotations": "Are you sure you want to delete the annotations? This cannot be undone.",
         "annotations-deleted": "Annotation deleted",
@@ -4971,7 +5017,8 @@
     "media-error-producer-pipe": {
         "book-service": "Book processing",
         "archive-service": "Archive processing",
-        "scanner": "Scanner"
+        "scanner": "Scanner",
+        "kepubify": "Kepub conversion"
     },
 
     "media-error-reason-pipe": {
@@ -4986,7 +5033,8 @@
         "io-error": "File could not be accessed (disk, network or permissions)",
         "metadata-unreadable": "Embedded metadata could not be read, imported without it",
         "epub-not-strict": "Epub has structural errors, imported in lenient mode",
-        "ambiguous-series": "Matches more than one series, edit its SeriesSort/LocalizedSeries tag"
+        "ambiguous-series": "Matches more than one series, edit its SeriesSort/LocalizedSeries tag",
+        "kepub-conversion-failed": "Could not be converted to kepub, Kobo devices get the plain epub instead"
     },
 
     "validation": {

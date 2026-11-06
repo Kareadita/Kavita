@@ -71,7 +71,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             localizationService, Substitute.For<IReadingListService>(), namingService);
 
         var opdsService = new OpdsService(unitOfWork, localizationService,
-            seriesService, Substitute.For<DownloadService>(),
+            seriesService, Substitute.For<IDownloadService>(),
             ds, readerService, namingService, readingListService);
 
         return new Tuple<IOpdsService, IReaderService>(opdsService, readerService);
