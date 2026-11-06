@@ -67,11 +67,6 @@ export class ManageMediaSettingsComponent implements OnInit {
   protected kepubifyEnabled = signal(false);
   protected kepubifyStatus = signal<KepubifyStatus | null>(null);
   protected readonly kepubifyChecking = computed(() => this.kepubifyStatus()?.status === KepubifyCheckStatus.Checking);
-  protected readonly kepubifyOff = computed(() => {
-    const status = this.kepubifyStatus();
-    if (status === null || status.status === KepubifyCheckStatus.Checking) return false;
-    return !this.kepubifyEnabled() || status.status === KepubifyCheckStatus.NotSupported;
-  });
 
   private readonly formModel = signal<FormModel>({
     encodeMediaAs: EncodeFormat.PNG,
