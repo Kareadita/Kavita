@@ -642,7 +642,6 @@
         "include-in-search-label": "在搜索中顯示",
         "force-scan-tooltip": "這將對書庫強制進行掃描，並將其視為全新掃描",
         "last-scanned-label": "最後掃描時間：",
-        "folder-watching-label": "資料夾監控",
         "exclude-patterns-label": "排除模式",
         "exclude-patterns-tooltip": "配置一組模式（Glob 語法），讓 Kavita 在掃描資料夾時匹配並從掃描結果中排除。",
         "edit-title": "編輯 {{name}}",
@@ -654,7 +653,6 @@
         "manage-reading-list-tooltip": "Kavita 可以用 ComicInfo.xml 或 opf 文件中的 StoryArc、StoryArcNumber 和 AlternativeSeries、AlternativeCount 標籤來創建書單",
         "allow-scrobbling-label": "允許Scrobbling",
         "allow-scrobbling-tooltip": "是否允許Kavita將閱讀事件、想讀狀態、評分和評論記錄至已配置的Scrobble服務提供者？這僅在伺服器具有有效的 Kavita+ 訂閱時才會生效。",
-        "folder-watching-tooltip": "覆蓋此書庫的伺服器資料夾監控。如果關閉此功能，則不會監控此書庫包含的資料夾。如果多個書庫共享同一資料夾，那麼這些資料夾仍可能被監控。在每次觸發掃描之前，需等待10分鐘。",
         "include-in-dashboard-tooltip": "是否應將書庫中的系列包含在儀表板上？ 這會影響所有串流，例如「繼續閱讀」、「最近更新」、「最近新增」或任何自訂新增的內容。",
         "force-scan": "強制掃描",
         "next": "下一步",
@@ -814,12 +812,6 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "description-part-2": "wiki 中找到。",
-        "comment-header": "評論",
-        "file-header": "檔案",
-        "clear-alerts": "清除警示",
-        "description-part-1": "這張表格包含了掃描或閱讀媒體時發現的問題。您可以隨時清除它，並使用書庫（強制）掃描來進行分析。有關一些常見錯誤及其含義的列表，可以在 ",
-        "created-header": "創建",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -972,7 +964,6 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "cleanup-label": "清理",
-        "bust-locale-task-desc": "清除區域快取。這可以解決更新後字串未正確顯示的問題。需要刷新瀏覽器。",
         "convert-media-task-desc": "執行一個長時間運行的任務，將所有由Kavita管理的媒體轉換為目標編碼。這個過程較慢（特別是在ARM設備上）。",
         "adhoc-tasks-title": "臨時任務",
         "last-executed-header": "上次執行時間",
@@ -984,8 +975,6 @@
         "library-database-backup-tooltip": "Kavita 要多久備份一次書庫及其他相關檔案。",
         "recurring-tasks-title": "{{title}}",
         "bust-cache-task-desc": "清除 Kavita+ 快取 - 僅應在調試錯誤匹配時使用。",
-        "bust-locale-task": "清除區域快取",
-        "bust-locale-task-success": "已清除區域快取",
         "clear-reading-cache-task-success": "快取已被清除",
         "backup-database-task": "備份數據庫",
         "backup-database-task-desc": "備份數據庫、書籤、主題、手動上傳的封面和配置檔案。",
@@ -1167,17 +1156,7 @@
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
-        "close": "{{common.close}}",
-        "left-to-process": "待處理：{{leftToProcess}}／{{totalToProcess}}",
-        "download-in-queue": "{{num}} 個下載在排隊中",
-        "active-events-title": "活躍事件：",
         "title-alt": "活動紀錄",
-        "dismiss-all": "忽略全部",
-        "downloading-item": "正在下載 {{item}}",
-        "users-online-count": "{{num}} 位使用者在線",
-        "no-data": "沒有任何內容",
-        "update-available": "有可用的更新",
-        "more-info": "點擊以獲取更多資訊",
         "reading-now": "目前有 {{num}} 人正在閱讀"
     },
     "shortcuts-modal": {
