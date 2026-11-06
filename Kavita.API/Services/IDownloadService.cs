@@ -20,5 +20,5 @@ public interface IDownloadService
     /// <param name="format"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<string> DownloadChapter(Chapter chapter, DownloadFormat format, CancellationToken cancellationToken);
+    Task<string> DownloadChapter(int userId, Chapter chapter, DownloadFormat format, CancellationToken cancellationToken);
 }

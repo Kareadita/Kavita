@@ -200,7 +200,7 @@ public class KoboController(
         }
 
         var downloadFormat = convert ? DownloadFormat.Kepub : DownloadFormat.Epub;
-        var path = await downloadService.DownloadChapter(chapter, downloadFormat, ct);
+        var path = await downloadService.DownloadChapter(UserId, chapter, downloadFormat, ct);
 
         return PhysicalFile(path, downloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
     }

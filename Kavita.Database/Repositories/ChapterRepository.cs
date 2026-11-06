@@ -410,6 +410,14 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
         return ids == null ? null : (ids.VolumeId, ids.SeriesId, ids.LibraryId);
     }
 
+    public Task<LibraryType?> GetLibraryTypeAsync(int chapterId, CancellationToken ct = default)
+    {
+        return context.Chapter
+            .Where(c => c.Id == chapterId)
+            .Select(c => (LibraryType?) c.Volume.Series.Library.Type)
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<int?> GetSeriesIdForChapter(int chapterId, CancellationToken ct = default)
     {
         return await context.Chapter

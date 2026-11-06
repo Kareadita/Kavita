@@ -59,6 +59,7 @@ public interface IChapterRepository
     Task<IList<ChapterDto>> GetChapterDtosAsync(IEnumerable<int> chapterIds, int userId, CancellationToken ct = default);
     Task<int?> GetSeriesIdForChapter(int chapterId, CancellationToken ct = default);
     Task<(int VolumeId, int SeriesId, int LibraryId)?> GetParentIdsForChapter(int chapterId, CancellationToken ct = default);
+    Task<LibraryType?> GetLibraryTypeAsync(int chapterId, CancellationToken ct = default);
     Task<IEnumerable<int>> GetChapterIdsInSeries(int seriesId, IEnumerable<int> chapterIds, CancellationToken ct = default);
     Task<KoboBookDetailsDto?> GetKoboBookDetailsAsync(int chapterId, CancellationToken ct = default);
     /// <summary>

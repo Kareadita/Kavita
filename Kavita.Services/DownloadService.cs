@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Models.Entities;
@@ -21,7 +22,9 @@ public class DownloadService(
     ILocalizationService localizationService,
     IDirectoryService directoryService,
     IKepubifyConverterService kepubifyConverterService,
-    IFileSystem fileSystem
+    IFileSystem fileSystem,
+    IEntityNamingService namingService,
+    IUnitOfWork unitOfWork
     ) : IDownloadService
 {
     private readonly FileExtensionContentTypeProvider _fileTypeProvider = new();
@@ -68,7 +71,7 @@ public class DownloadService(
         return contentType!;
     }
 
-    public async Task<string> DownloadChapter(Chapter chapter, DownloadFormat format, CancellationToken cancellationToken)
+    public async Task<string> DownloadChapter(int userId, Chapter chapter, DownloadFormat format, CancellationToken cancellationToken)
     {
         if (chapter.Files is null)
         {
@@ -83,31 +86,31 @@ public class DownloadService(
         return format switch
         {
             DownloadFormat.Default => await CollectFiles(chapter, cancellationToken),
-            DownloadFormat.Kepub => await ConvertToKepub(chapter, cancellationToken),
-            DownloadFormat.Epub => await ConvertToEpub(chapter, cancellationToken),
+            DownloadFormat.Kepub => await ConvertToKepub(userId, chapter, cancellationToken),
+            DownloadFormat.Epub => await ConvertToEpub(userId, chapter, cancellationToken),
             _ => throw new NotImplementedException($"Download format {format} not implemented")
         };
     }
 
-    private async Task<string> ConvertToEpub(Chapter chapter, CancellationToken cancellationToken)
+    private async Task<string> ConvertToEpub(int userId, Chapter chapter, CancellationToken cancellationToken)
     {
         var format = chapter.Files.First().Format;
         return format switch
         {
             MangaFormat.Epub => await CollectFiles(chapter, cancellationToken),
-            MangaFormat.Archive or MangaFormat.Image => await ConvertImagesToEpub(chapter.Id, cancellationToken),
+            MangaFormat.Archive or MangaFormat.Image => await ConvertImagesToEpub(userId, chapter.Id, cancellationToken),
             _ => throw new NotSupportedException()
         };
     }
 
-    private async Task<string> ConvertToKepub(Chapter chapter, CancellationToken cancellationToken)
+    private async Task<string> ConvertToKepub(int userId, Chapter chapter, CancellationToken cancellationToken)
     {
         var format = chapter.Files.First().Format;
         var filePath = chapter.Files.First().FilePath;
 
         if (format is MangaFormat.Archive or MangaFormat.Image)
         {
-            filePath = await ConvertImagesToEpub(chapter.Id, cancellationToken);
+            filePath = await ConvertImagesToEpub(userId, chapter.Id, cancellationToken);
         }
         else if (format is not MangaFormat.Epub || chapter.Files.Count != 1 )
         {
@@ -118,7 +121,7 @@ public class DownloadService(
 
         var converted = await kepubifyConverterService.ConvertEpubToKepub(filePath, outputPath, cancellationToken);
 
-        return converted ? outputPath : await ConvertToEpub(chapter, cancellationToken);
+        return converted ? outputPath : await ConvertToEpub(userId, chapter, cancellationToken);
     }
 
     private async Task<string> CollectFiles(Chapter chapter, CancellationToken cancellationToken)
@@ -153,7 +156,7 @@ public class DownloadService(
         return outputPath;
     }
 
-    private async Task<string> ConvertImagesToEpub(int chapterId, CancellationToken cancellationToken)
+    private async Task<string> ConvertImagesToEpub(int userId, int chapterId, CancellationToken cancellationToken)
     {
         var outputPath = kepubifyConverterService.BuildKepubifyPath(chapterId).Replace(".kepub", string.Empty);
         if (fileSystem.File.Exists(outputPath))
@@ -167,20 +170,28 @@ public class DownloadService(
             throw new KavitaException(await localizationService.TranslateAsync("cache-file-find"));
         }
 
-        var epub = new Epub($"Chapter {chapterId}", "Kavita");
+        var libraryType = await unitOfWork.ChapterRepository.GetLibraryTypeAsync(chapter.Id, cancellationToken);
+        var chapterDto = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId, cancellationToken);
+        var volumeDto = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, userId, cancellationToken);
+        if (libraryType is null || chapterDto is null || volumeDto is null)
+            throw new KavitaException();
+
+        var namingCtx = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType.Value);
+
+        var epub = new Epub(namingCtx.BuildChapterTitle(volumeDto, chapterDto), chapterDto.Writers.FirstOrDefault()?.Name ?? "Kavita");
         var openFiles = new List<Stream>();
-
-        var path = fileSystem.Path.Join(directoryService.CoverImageDirectory, chapter.CoverImage);
-        if (fileSystem.File.Exists(path))
-        {
-            var fs = fileSystem.File.OpenRead(path);
-            openFiles.Add(fs);
-
-            epub.AddResource(chapter.CoverImage, EpubResourceType.JPEG, fs, true);
-        }
 
         try
         {
+            var path = fileSystem.Path.Join(directoryService.CoverImageDirectory, chapter.CoverImage);
+            if (fileSystem.File.Exists(path))
+            {
+                var fs = fileSystem.File.OpenRead(path);
+                openFiles.Add(fs);
+
+                epub.AddResource(chapter.CoverImage, EpubResourceType.JPEG, fs, true);
+            }
+
             var index = 0;
             foreach (var cachedPage in cacheService.GetCachedPages(chapterId))
             {
