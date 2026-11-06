@@ -5,6 +5,9 @@ import {FolderWatchFallbackReason} from '../_models/events/core/folder-watch-fal
 import {DateTime} from 'luxon';
 import {BytesPipe} from './bytes.pipe';
 import {UtcToLocalTimePipe} from './utc-to-local-time.pipe';
+import {KepubifyOffReasonPipe} from './kepubify-off-reason.pipe';
+import {KepubifyStatus} from '../admin/_models/kepubify-status';
+import {KepubifyCheckStatus} from '../admin/_models/kepubify-check-status';
 
 const PREFIX = 'event-message-pipe';
 // Mirrors the 24-hour cutoff in CleanupService.CleanupDebugExports
@@ -31,6 +34,7 @@ type MessageBody = Partial<{
   reason: FolderWatchFallbackReason;
   message: string | null;
   bytes: number;
+  status: KepubifyStatus;
 }>;
 
 type Params = Record<string, string | undefined>;
@@ -47,6 +51,7 @@ export class EventMessagePipe implements PipeTransform {
   private readonly translocoService = inject(TranslocoService);
   private readonly bytesPipe = new BytesPipe();
   private readonly utcToLocalTimePipe = new UtcToLocalTimePipe();
+  private readonly kepubifyOffReasonPipe = new KepubifyOffReasonPipe();
 
   transform(source: EventMessageSource, part: EventMessagePart): string {
     const body = (source.body ?? {}) as MessageBody;
@@ -109,6 +114,10 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.debug-export-ready-label`, {}, fallback);
       case MessageEventCode.DebugExportFailed:
         return this.translate(`${PREFIX}.debug-export-failed-label`, {}, fallback);
+      case MessageEventCode.KepubifyChecked:
+        return body.status?.status === KepubifyCheckStatus.NotSupported
+          ? this.translate(`${PREFIX}.kepubify-checked-failed-label`, {}, fallback)
+          : fallback;
       default:
         return fallback;
     }
@@ -169,6 +178,13 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.word-count-failed-description`, {filePath: body.filePath}, fallback);
       case MessageEventCode.DebugExportReady:
         return this.debugExportReadyDescription(source, body, fallback);
+      case MessageEventCode.KepubifyChecked: {
+        const status = body.status;
+        if (status?.status !== KepubifyCheckStatus.NotSupported) return fallback;
+
+        const reason = this.kepubifyOffReasonPipe.transform(status.reason);
+        return this.translate(`${PREFIX}.kepubify-checked-failed-description`, {path: status.path, reason}, fallback);
+      }
       default:
         return fallback;
     }

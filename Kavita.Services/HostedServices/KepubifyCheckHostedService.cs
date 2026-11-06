@@ -17,10 +17,7 @@ internal class KepubifyCheckHostedService(
         {
             await kepubifyConverter.CheckKepubifySupport(stoppingToken);
         }
-        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-        {
-        }
-        catch (Exception ex)
+        catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
         {
             logger.LogError(ex, "The startup kepubify check failed, kepub conversion stays off");
         }

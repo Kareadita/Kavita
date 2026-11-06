@@ -195,7 +195,7 @@ public class KepubifyConverterService(
 
         var executable = Status.Path;
         var conversion = _conversions.GetOrAdd(kepubPath,
-            _ => new Lazy<Task<bool>>(() => RunConversion(executable, epubPath, kepubPath)));
+            key => new Lazy<Task<bool>>(() => RunConversion(executable, epubPath, key)));
 
         return await conversion.Value.WaitAsync(cancellationToken);
     }

@@ -74,31 +74,55 @@
       </app-setting-item>
     </div>
 
-    @let kepubifyPath = settingsForm.kepubifyPath;
-    <div class="row g-0 my-2">
-      <app-setting-item [title]="t('kepubify-path-label')" [subtitle]="t('kepubify-path-tooltip')"
-                        [control]="kepubifyPath" labelId="settings-kepubify-path">
-        <ng-template #view>
-          @let tooltip = kepubifySupported() ? t('kepubify-supported') : t('kepubify-not-supported');
+    <div class="setting-section-break"></div>
+    <h4>{{t('kepubify-title')}}</h4>
 
-          <span>
-            {{kepubifyPath().value()}}
-            <i class="fa"
-               [class.fa-check-circle]="kepubifySupported()"
-               [class.fa-circle-xmark]="!kepubifySupported()"
-               [class.text-danger]="!kepubifySupported()"
-               [ngbTooltip]="tooltip"
-               aria-hidden="true"
-            ></i>
-            <span class="visually-hidden">{{tooltip}}</span>
-          </span>
-        </ng-template>
-        <ng-template #edit>
-          <div class="input-group">
-            <input id="settings-kepubify-path" class="form-control" [formField]="kepubifyPath" type="text" [appFormField]="kepubifyPath">
-          </div>
-        </ng-template>
-      </app-setting-item>
+    <div>
+      <div class="alert alert-warning" role="alert">
+        <strong>{{t('notice')}}</strong> {{t('kepubify-restart-required')}}
+      </div>
+
+      <div class="row g-0 mt-2">
+        <app-setting-switch [title]="t('enable-kepubify-label')" [subtitle]="t('enable-kepubify-tooltip')">
+          <ng-template>
+            <div class="form-check form-switch float-end">
+              <input id="settings-enable-kepubify" type="checkbox" class="form-check-input" role="switch"
+                     [attr.aria-label]="t('enable-kepubify-label')"
+                     [checked]="kepubifyEnabled()" [disabled]="kepubifyChecking()"
+                     (change)="toggleKepubify($any($event.target).checked)">
+            </div>
+          </ng-template>
+        </app-setting-switch>
+      </div>
+
+      @if (kepubifyStatus(); as status) {
+        <div class="d-flex align-items-baseline gap-2 mt-2" aria-live="polite">
+          @switch (status.status) {
+            @case (KepubifyCheckStatus.Checking) {
+              <span class="spinner-border spinner-border-sm flex-shrink-0" aria-hidden="true"></span>
+              <span>{{status.status | kepubifyCheckStatus}}</span>
+            }
+            @case (KepubifyCheckStatus.Supported) {
+              <i class="fa fa-check-circle text-success flex-shrink-0" aria-hidden="true"></i>
+              <span>
+                {{status.status | kepubifyCheckStatus}}<span class="mx-1 dot-separator"></span>{{t('kepubify-status-label', {source: status.source | kepubifySource, path: status.path})}}
+              </span>
+            }
+            @case (KepubifyCheckStatus.NotSupported) {
+              <i class="fa fa-circle-xmark text-danger flex-shrink-0" aria-hidden="true"></i>
+              <span>
+                {{status.reason | kepubifyOffReason}}<span class="mx-1 dot-separator"></span>{{t('kepubify-status-label', {source: status.source | kepubifySource, path: status.path})}}
+              </span>
+            }
+          }
+        </div>
+      }
+
+      @if (kepubifyOff()) {
+        <div class="alert alert-warning mt-3" role="alert">
+          {{t('kepubify-off-alert')}}
+        </div>
+      }
     </div>
   }
 </ng-container>
