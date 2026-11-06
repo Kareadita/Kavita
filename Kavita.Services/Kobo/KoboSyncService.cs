@@ -457,8 +457,13 @@ public class KoboSyncService(
 
         if (chapter.Files.First().Format != MangaFormat.Epub)
         {
-            // TODO: Decode our custom cbz page mapping
-            //progress.PageNum = int.Parse(file);
+            var page = fileSystem.Path.GetFileNameWithoutExtension(file).TrimPrefix("section");
+            if (int.TryParse(page, out var pageNumber))
+            {
+                progress.PageNum = pageNumber - 1; // sections are 1 indexed
+                progress.BookScrollId = null;
+                progress.KoboSpan = null;
+            }
             return;
         }
 
@@ -615,6 +620,15 @@ public class KoboSyncService(
         if (progress == null || progress.PagesRead == 0 || chapter.Files.Count <= 0)
         {
             return new KoboLocationDto();
+        }
+
+        if (chapter.Files.First().Format is MangaFormat.Archive or MangaFormat.Image)
+        {
+            return new KoboLocationDto
+            {
+                Value = string.Empty,
+                Source = $"EPUB/section{progress.PagesRead + 1}.html"
+            };
         }
 
         var source = await bookService.GetFileForPage(chapter.Files.First().FilePath, progress.PagesRead);
