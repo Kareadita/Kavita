@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.18",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.19",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.1.18"
+    "version": "0.9.1.19"
   },
   "servers": [
     {
@@ -17631,6 +17631,113 @@
         }
       }
     },
+    "/api/Settings/kobo-enabled": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/kepubify-supported": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KepubifyStatusDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KepubifyStatusDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KepubifyStatusDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/kepubify": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Saves EnableKepubify and queues the check. Returns Checking, the result comes as a kepubify-checked event",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKepubifyDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKepubifyDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKepubifyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KepubifyStatusDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KepubifyStatusDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KepubifyStatusDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Settings/is-valid-cron": {
       "get": {
         "tags": [
@@ -22639,6 +22746,40 @@
         },
         "additionalProperties": false
       },
+      "AppUserKoboSyncPreferences": {
+        "type": "object",
+        "properties": {
+          "syncItemLimit": {
+            "maximum": 100,
+            "minimum": 25,
+            "type": "integer",
+            "format": "int32"
+          },
+          "forwardToKoboStore": {
+            "type": "boolean"
+          },
+          "allLibraries": {
+            "type": "boolean"
+          },
+          "syncLibraries": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "syncCollection": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isSyncingCollection": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AppUserOpdsPreferences": {
         "type": "object",
         "properties": {
@@ -27365,6 +27506,85 @@
         },
         "additionalProperties": false
       },
+      "KepubifyCheckStatus": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Checking\n- `1` — Supported\n- `2` — NotSupported",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Checking",
+          "Supported",
+          "NotSupported"
+        ],
+        "x-enum-descriptions": [
+          "Checking",
+          "Supported",
+          "NotSupported"
+        ]
+      },
+      "KepubifyOffReason": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Disabled\n- `1` — FileMissing\n- `2` — HashMismatch\n- `3` — VersionCheckFailed",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Disabled",
+          "FileMissing",
+          "HashMismatch",
+          "VersionCheckFailed"
+        ],
+        "x-enum-descriptions": [
+          "Disabled",
+          "FileMissing",
+          "HashMismatch",
+          "VersionCheckFailed"
+        ]
+      },
+      "KepubifySource": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Shipped\n- `1` — Custom",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Shipped",
+          "Custom"
+        ],
+        "x-enum-descriptions": [
+          "Shipped",
+          "Custom"
+        ]
+      },
+      "KepubifyStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/KepubifyCheckStatus"
+          },
+          "source": {
+            "$ref": "#/components/schemas/KepubifySource"
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "$ref": "#/components/schemas/KepubifyOffReason"
+          }
+        },
+        "additionalProperties": false
+      },
       "KeyBind": {
         "required": [
           "key"
@@ -28225,20 +28445,23 @@
         "enum": [
           0,
           1,
-          2
+          2,
+          3
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — BookService\n- `1` — ArchiveService\n- `2` — Scanner",
+        "description": "Members:\n- `0` — BookService\n- `1` — ArchiveService\n- `2` — Scanner\n- `3` — Kepubify",
         "format": "int32",
         "x-enum-varnames": [
           "BookService",
           "ArchiveService",
-          "Scanner"
+          "Scanner",
+          "Kepubify"
         ],
         "x-enum-descriptions": [
           "BookService",
           "ArchiveService",
-          "Scanner"
+          "Scanner",
+          "Kepubify"
         ]
       },
       "MediaErrorReason": {
@@ -28254,10 +28477,11 @@
           9,
           10,
           11,
-          12
+          12,
+          13
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — Unknown\n- `1` — Parse Failed (ParseFailed)\n- `2` — No Series Name (NoSeriesName)\n- `3` — Unreadable Archive (UnreadableArchive)\n- `5` — Corrupt Epub (CorruptEpub)\n- `6` — No Pages (NoPages)\n- `7` — Cover Failed (CoverFailed)\n- `8` — Word Count Failed (WordCountFailed)\n- `9` — I/O Error (IoError)\n- `10` — Metadata Unreadable (MetadataUnreadable)\n- `11` — Epub Not Strict (EpubNotStrict)\n- `12` — Ambiguous Series (AmbiguousSeries)",
+        "description": "Members:\n- `0` — Unknown\n- `1` — Parse Failed (ParseFailed)\n- `2` — No Series Name (NoSeriesName)\n- `3` — Unreadable Archive (UnreadableArchive)\n- `5` — Corrupt Epub (CorruptEpub)\n- `6` — No Pages (NoPages)\n- `7` — Cover Failed (CoverFailed)\n- `8` — Word Count Failed (WordCountFailed)\n- `9` — I/O Error (IoError)\n- `10` — Metadata Unreadable (MetadataUnreadable)\n- `11` — Epub Not Strict (EpubNotStrict)\n- `12` — Ambiguous Series (AmbiguousSeries)\n- `13` — Kepub Conversion Failed (KepubConversionFailed)",
         "format": "int32",
         "x-enum-varnames": [
           "Unknown",
@@ -28271,7 +28495,8 @@
           "IoError",
           "MetadataUnreadable",
           "EpubNotStrict",
-          "AmbiguousSeries"
+          "AmbiguousSeries",
+          "KepubConversionFailed"
         ],
         "x-enum-descriptions": [
           "Unknown",
@@ -28285,7 +28510,8 @@
           "I/O Error",
           "Metadata Unreadable",
           "Epub Not Strict",
-          "Ambiguous Series"
+          "Ambiguous Series",
+          "Kepub Conversion Failed"
         ]
       },
       "MemberDto": {
@@ -29562,6 +29788,10 @@
             "format": "int32"
           },
           "bookScrollId": {
+            "type": "string",
+            "nullable": true
+          },
+          "koboSpan": {
             "type": "string",
             "nullable": true
           },
@@ -32748,6 +32978,12 @@
           "oidcConfig": {
             "$ref": "#/components/schemas/OidcConfigDto"
           },
+          "enableKobo": {
+            "type": "boolean"
+          },
+          "enableKepubify": {
+            "type": "boolean"
+          },
           "firstInstallDate": {
             "type": "string",
             "format": "date-time",
@@ -34345,6 +34581,15 @@
         },
         "additionalProperties": false
       },
+      "UpdateKepubifyDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "UpdateLibraryDto": {
         "required": [
           "allowMetadataMatching",
@@ -35412,6 +35657,7 @@
           "colorScapeEnabled",
           "customKeyBinds",
           "dataSaver",
+          "koboSyncPreferences",
           "locale",
           "noTransitions",
           "onDeckProgressDays",
@@ -35607,6 +35853,9 @@
           },
           "opdsPreferences": {
             "$ref": "#/components/schemas/AppUserOpdsPreferences"
+          },
+          "koboSyncPreferences": {
+            "$ref": "#/components/schemas/AppUserKoboSyncPreferences"
           }
         },
         "additionalProperties": false
