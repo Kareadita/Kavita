@@ -210,11 +210,10 @@ public enum ServerSettingKey
     [Description("TaskCblSync")]
     TaskCblSync = 43,
     /// <summary>
-    /// Path to the Kepubify executable. If not custom, synced on startup with your OS
+    /// Is kepub conversion enabled. Turned off by the server when the shipped kepubify fails its hash check
     /// </summary>
-    [ExportScrub(ExportScrubKind.Random)]
-    [Description("KepubifyPath")]
-    KepubifyPath = 44,
+    [Description("EnableKepubify")]
+    EnableKepubify = 44,
     /// <summary>
     /// Is KoboSync enabled on this server
     /// </summary>

@@ -22,10 +22,10 @@ using Kavita.Models.Entities.User;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Server.Helpers;
-using Kavita.Server.Middleware;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers.Kobo;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
@@ -55,7 +55,7 @@ public class KoboController(
     #region Sync & State
 
     [HttpGet("v1/initialization")]
-    public async Task<ActionResult> Initialization(string apiKey)
+    public async Task<ActionResult> Initialization()
     {
         var ct = HttpContext.RequestAborted;
 
@@ -67,7 +67,7 @@ public class KoboController(
 
         var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         var instanceUrl = HttpContext.Request.GetInstanceUrl(serverSettings);
-        var koboBase = $"{instanceUrl}kobo/{apiKey}";
+        var koboBase = $"{instanceUrl}kobo/{AuthKey}";
 
         var resources = json["Resources"];
         if (resources is not null)
@@ -550,9 +550,10 @@ public class KoboController(
 
     private async Task<(JsonNode?, bool)> ProxyRequest(KoboSyncToken? syncToken, CancellationToken ct, bool copyResponse = true, object? body = null)
     {
-        var targetUrl = GetKoboUrl();
+        var targetUrl = KoboStoreUrl.Build(Request.Path, Request.QueryString);
+        var safeTargetUrl = targetUrl.AbsoluteUri.Sanitize();
 
-        logger.LogTrace("Going to proxy request to {targetUrl} for {UserId}", targetUrl.Sanitize(), UserId);
+        logger.LogTrace("Going to proxy request to {targetUrl} for {UserId}", safeTargetUrl, UserId);
 
         using var upstreamRequest = new HttpRequestMessage(new HttpMethod(Request.Method), targetUrl);
 
@@ -567,6 +568,9 @@ public class KoboController(
         }
 
         using var upstreamResponse = await KoboHttpClient.SendAsync(upstreamRequest, HttpCompletionOption.ResponseHeadersRead, ct);
+
+        logger.LogDebug("Proxied {Method} {Url} returned {StatusCode} {ContentType}",
+            Request.Method.Sanitize(), safeTargetUrl, (int) upstreamResponse.StatusCode, upstreamResponse.Content.Headers.ContentType?.MediaType?.Sanitize());
 
         // Copy sync tokens from Kobo Servers back over
         if (syncToken is not null)
@@ -592,25 +596,18 @@ public class KoboController(
         {
             if (!upstreamResponse.IsSuccessStatusCode)
             {
-                logger.LogWarning("Failed to proxy request to {Url}: {StatusCode} {ReasonPhrase}", targetUrl.Sanitize(), upstreamResponse.StatusCode, upstreamResponse.ReasonPhrase);
+                logger.LogWarning("Failed to proxy request to {Url}: {StatusCode} {ReasonPhrase}", safeTargetUrl, upstreamResponse.StatusCode, upstreamResponse.ReasonPhrase);
             }
+
+            Response.Headers.XContentTypeOptions = "nosniff";
+            // Append, assigning would drop the frame-ancestors policy Startup already set on this response
+            Response.Headers.Append(HeaderNames.ContentSecurityPolicy, "sandbox");
 
             await Response.CopyResponse(upstreamResponse, IsKoboHeader, ct);
             return (null, true);
         }
 
         return (await upstreamResponse.Content.ReadFromJsonAsync<JsonNode>(ct), false);
-    }
-
-    private string GetKoboUrl()
-    {
-        var path = Request.Path.ToString().TrimStart('/');
-        var queryString = Request.QueryString;
-
-        var apiKey = AuthKeyAuthenticationHandler.ExtractAuthKey(Request);
-        var prefix = $"/kobo/{apiKey}";
-
-        return $"/{path[prefix.Length..]}{queryString}";
     }
 
     #endregion

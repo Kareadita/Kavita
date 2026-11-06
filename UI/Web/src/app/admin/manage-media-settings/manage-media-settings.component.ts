@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ToastrService} from '@openng/ngx-toastr';
-import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap, timer} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, filter, map, of, skip, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {
@@ -20,12 +20,20 @@ import {ModalService} from "../../_services/modal.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
 import {form, FormField, readonly, required} from "@angular/forms/signals";
 import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import {MessageHubService} from "../../_services/message-hub.service";
+import {MessageEventCode} from "../../_models/events/core/message-event-code";
+import {KepubifyCheckedBody} from "../../_models/events/bodies/kepubify-checked-body";
+import {KepubifyStatus} from "../_models/kepubify-status";
+import {KepubifyCheckStatus} from "../_models/kepubify-check-status";
+import {KepubifyOffReason} from "../_models/kepubify-off-reason";
+import {KepubifySourcePipe} from "../../_pipes/kepubify-source.pipe";
+import {KepubifyCheckStatusPipe} from "../../_pipes/kepubify-check-status.pipe";
+import {KepubifyOffReasonPipe} from "../../_pipes/kepubify-off-reason.pipe";
 
 interface FormModel {
   encodeMediaAs: EncodeFormat;
   bookmarksDirectory: string;
-  kepubifyPath: string;
   coverImageSize: CoverImageSize;
   pdfRenderResolution: PdfRenderResolution;
 }
@@ -36,30 +44,38 @@ interface FormModel {
   templateUrl: './manage-media-settings.component.html',
   styleUrls: ['./manage-media-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe, FormFieldDirective, FormField, SettingSelectComponent, NgbTooltip]
+  imports: [TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe,
+    FormFieldDirective, FormField, SettingSelectComponent, SettingSwitchComponent, KepubifySourcePipe,
+    KepubifyCheckStatusPipe, KepubifyOffReasonPipe]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
   private readonly modalService = inject(ModalService);
+  private readonly messageHub = inject(MessageHubService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly allEncodeFormats = allEncodeFormats;
   protected readonly allCoverImageSizes = allCoverImageSizes;
   protected readonly allPdfRenderResolutions = allPdfRenderResolutions;
+  protected readonly KepubifyCheckStatus = KepubifyCheckStatus;
 
   private serverSettings!: ServerSettings;
-  protected readonly isLoaded = signal(false);
-  private readonly kepubifySupportedRsc = this.settingsService.getKepubifySupportedRsc();
-  protected readonly kepubifySupported = computed(() => {
-    return this.kepubifySupportedRsc.hasValue() && this.kepubifySupportedRsc.value();
+  protected isLoaded = signal(false);
+
+  protected kepubifyEnabled = signal(false);
+  protected kepubifyStatus = signal<KepubifyStatus | null>(null);
+  protected readonly kepubifyChecking = computed(() => this.kepubifyStatus()?.status === KepubifyCheckStatus.Checking);
+  protected readonly kepubifyOff = computed(() => {
+    const status = this.kepubifyStatus();
+    if (status === null || status.status === KepubifyCheckStatus.Checking) return false;
+    return !this.kepubifyEnabled() || status.status === KepubifyCheckStatus.NotSupported;
   });
 
   private readonly formModel = signal<FormModel>({
     encodeMediaAs: EncodeFormat.PNG,
     bookmarksDirectory: '',
-    kepubifyPath: '',
     coverImageSize: CoverImageSize.Default,
     pdfRenderResolution: PdfRenderResolution.Default
   });
@@ -77,8 +93,7 @@ export class ManageMediaSettingsComponent implements OnInit {
       distinctUntilChanged((a, b) => a.encodeMediaAs === b.encodeMediaAs
         && a.bookmarksDirectory === b.bookmarksDirectory
         && a.coverImageSize === b.coverImageSize
-        && a.pdfRenderResolution === b.pdfRenderResolution
-        && a.kepubifyPath === b.kepubifyPath),
+        && a.pdfRenderResolution === b.pdfRenderResolution),
       filter(() => this.settingsForm().dirty() && this.settingsForm().valid()),
       switchMap(() => this.settingsService.updateServerSettings(this.packData()).pipe(catchError(err => {
         console.error(err);
@@ -102,20 +117,58 @@ export class ManageMediaSettingsComponent implements OnInit {
 
         this.resetForm();
       }),
-      /// Kepubify test command has a 3s timeout, so this will always be after it has been checked
-      switchMap(() => timer(3_100).pipe(
-        tap(() => this.kepubifySupportedRsc.reload())
-      )),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
+
+    this.messageHub.messages$.pipe(
+      filter(message => message.meta?.code === MessageEventCode.KepubifyChecked),
+      map(message => (message.payload as KepubifyCheckedBody).status),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(status => this.applyKepubifyStatus(status));
+
+    // The check can finish while a server restart has the hub down, so its event never arrives
+    toObservable(this.messageHub.isConnectedSignal).pipe(
+      distinctUntilChanged(),
+      filter(connected => !!connected),
+      skip(1),
+      switchMap(() => this.settingsService.getKepubifyStatus()),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(status => this.applyKepubifyStatus(status));
   }
 
   ngOnInit(): void {
     this.settingsService.getServerSettings().subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
+      this.kepubifyEnabled.set(settings.enableKepubify);
       this.resetForm();
       this.isLoaded.set(true);
     });
+
+    this.settingsService.getKepubifyStatus().subscribe(status => this.applyKepubifyStatus(status));
+  }
+
+  toggleKepubify(enabled: boolean) {
+    this.kepubifyEnabled.set(enabled);
+    this.kepubifyStatus.update(s => s && {...s, status: KepubifyCheckStatus.Checking, reason: null});
+
+    // The response is not applied: the queued check's event can arrive before it, and its Checking would overwrite the result
+    this.settingsService.updateKepubify(enabled).pipe(
+      catchError(() => this.settingsService.getKepubifyStatus()),
+    ).subscribe(status => {
+      if (status.status !== KepubifyCheckStatus.Checking) {
+        this.applyKepubifyStatus(status);
+      }
+    });
+  }
+
+  private applyKepubifyStatus(status: KepubifyStatus) {
+    this.kepubifyStatus.set(status);
+
+    if (status.reason === KepubifyOffReason.Disabled || status.reason === KepubifyOffReason.HashMismatch) {
+      this.kepubifyEnabled.set(false);
+    } else if (status.status === KepubifyCheckStatus.Supported) {
+      this.kepubifyEnabled.set(true);
+    }
   }
 
   resetForm() {
@@ -123,7 +176,6 @@ export class ManageMediaSettingsComponent implements OnInit {
     this.formModel.set({
       encodeMediaAs: settings.encodeMediaAs,
       bookmarksDirectory: settings.bookmarksDirectory,
-      kepubifyPath: settings.kepubifyPath,
       coverImageSize: (settings.coverImageSize || CoverImageSize.Default),
       pdfRenderResolution: (settings.pdfRenderResolution || PdfRenderResolution.Default),
     });
@@ -135,7 +187,6 @@ export class ManageMediaSettingsComponent implements OnInit {
     const modelSettings = Object.assign({}, this.serverSettings);
     modelSettings.encodeMediaAs = model.encodeMediaAs;
     modelSettings.bookmarksDirectory = model.bookmarksDirectory;
-    modelSettings.kepubifyPath = model.kepubifyPath;
     modelSettings.coverImageSize = model.coverImageSize;
     modelSettings.pdfRenderResolution = model.pdfRenderResolution;
 

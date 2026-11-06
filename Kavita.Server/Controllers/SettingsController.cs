@@ -213,9 +213,22 @@ public class SettingsController(
 
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("kepubify-supported")]
-    public ActionResult<bool> GetKepubifySupported()
+    public ActionResult<KepubifyStatusDto> GetKepubifySupported()
     {
-        return Ok(kepubifyConverterService.KepubifySupported);
+        return Ok(kepubifyConverterService.Status);
+    }
+
+    /// <summary>
+    /// Saves EnableKepubify and queues the check. Returns Checking, the result comes as a kepubify-checked event
+    /// </summary>
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpPost("kepubify")]
+    public async Task<ActionResult<KepubifyStatusDto>> UpdateKepubify(UpdateKepubifyDto dto)
+    {
+        var ct = HttpContext.RequestAborted;
+        await unitOfWork.SettingsRepository.UpdateSettingAsync(ServerSettingKey.EnableKepubify, dto.Enabled.ToString(), ct);
+
+        return Ok(kepubifyConverterService.QueueCheck());
     }
 
     /// <summary>

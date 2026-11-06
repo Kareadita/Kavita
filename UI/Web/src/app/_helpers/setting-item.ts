@@ -18,8 +18,20 @@ export interface SettingControlOptions {
  */
 export function wireSettingControl(opts: SettingControlOptions): {hasControl: Signal<boolean>} {
   const hasControl = signal(false);
+  const contentVersion = signal(0);
+
+  // A projected control can be removed and recreated without a re-render here (app-typeahead does it when disabled)
+  afterRenderEffect(onCleanup => {
+    const scope = opts.scope();
+    if (!scope) return;
+
+    const observer = new MutationObserver(() => contentVersion.update(v => v + 1));
+    observer.observe(scope, {childList: true, subtree: true});
+    onCleanup(() => observer.disconnect());
+  });
 
   afterRenderEffect(() => {
+    contentVersion();
     const scope = opts.scope();
     if (!scope) return;
 

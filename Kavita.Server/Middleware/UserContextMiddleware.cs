@@ -37,7 +37,7 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
                 if (userId.HasValue && username != null)
                 {
                     var authType = TryParseAuthTypeClaim(context.User) ?? AuthenticationType.Unknown;
-                    var authKey = context.Request.RouteValues["apiKey"]?.ToString();
+                    var authKey = context.User.FindFirst("AuthKey")?.Value;
 
                     userContext.SetUserContext(userId.Value, username, authType, roles, authKey);
                 }

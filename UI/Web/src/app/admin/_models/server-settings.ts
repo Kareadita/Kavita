@@ -16,9 +16,9 @@ export interface ServerSettings {
   allowStatCollection: boolean;
   enableOpds: boolean;
   enableKobo: boolean;
+  enableKepubify: boolean;
   baseUrl: string;
   bookmarksDirectory: string;
-  kepubifyPath: string;
   emailServiceUrl: string;
   encodeMediaAs: EncodeFormat;
   totalBackups: number;
