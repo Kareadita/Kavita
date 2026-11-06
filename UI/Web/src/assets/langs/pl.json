@@ -679,8 +679,6 @@
         "manage-reading-list-tooltip": "Czy Kavita powinna tworzyć listy czytelnicze z tagów StoryArc/StoryArcNumber i AlternativeSeries/AlternativeCount znajdujących się w plikach ComicInfo.xml/opf?",
         "allow-scrobbling-label": "Zezwalaj na scrobblowanie",
         "allow-scrobbling-tooltip": "Czy Kavita powinna scrobble'ować zdarzenia odczytu, chcieć odczytać status, oceny i recenzje skonfigurowanym dostawcom. Stanie się tak tylko wtedy, gdy serwer ma aktywną subskrypcję Kavita+.",
-        "folder-watching-label": "Obserwacja folderów",
-        "folder-watching-tooltip": "Zastępuje obserwowanie folderów przez serwer dla tej biblioteki. Jeśli wyłączone, obserwowanie folderów nie będzie uruchamiane na folderach zawartych w tej bibliotece. Jeśli biblioteki współdzielą foldery, mogą być one nadal sprawdzane. Zawsze będzie czekać 10 minut przed uruchomieniem skanowania.",
         "include-in-dashboard-label": "Dodaj do Panelu Nawigacyjnego",
         "include-in-dashboard-tooltip": "Czy serie z biblioteki powinny być uwzględnione w panelu nawigacyjnym? Dotyczy to wszystkich strumieni, takich jak Czytaj dalej, Ostatnio zaktualizowane, Nowo dodane lub innych niestandardowych dodatków.",
         "include-in-search-label": "Uwzględnij w wyszukiwaniu",
@@ -898,13 +896,7 @@
         "open-external": "Otwórz zewnętrzny"
     },
     "manage-media-issues": {
-        "description-part-1": "Ta tabela zawiera wszystkie błędy wykryte podczas skanowania twoich mediów. Możesz w każdej chwili ją wyczyścić u użyć Wymuszonego Skanowania aby przeprowadzić analizę. Listę niektórych typowych błędów i ich znaczenie można znaleźć na ",
-        "description-part-2": "wiki.",
         "filter-label": "{{common.filter}}",
-        "clear-alerts": "Wyczyść alerty",
-        "file-header": "Plik",
-        "comment-header": "Komentarz",
-        "created-header": "Utworzono",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -1101,9 +1093,6 @@
         "bust-cache-task": "Odśwież pamięć podręczną",
         "bust-cache-task-desc": "Odświeża pamięć podręczną Kavita+ - używaj tylko podczas debugowania błędnych dopasowań.",
         "bust-cache-task-success": "Pamięć podręczna Kavita+ odświeżona",
-        "bust-locale-task": "Odśwież pamięć podręczną tłumaczeń",
-        "bust-locale-task-desc": "Odświeża pamięć podręczną tłumaczeń. Może to naprawić problemy z niepoprawnym wyświetlaniem ciągów po aktualizacji. Konieczne jest odświeżenie strony.",
-        "bust-locale-task-success": "Pamięć podręczna tłumaczeń odświeżona",
         "clear-reading-cache-task": "Wyczyść pamięć podręczną",
         "clear-reading-cache-task-desc": "Czyści buforowane pliki do odczytu. Przydatne, gdy właśnie zaktualizowałeś plik, który wcześniej czytałeś w ciągu ostatnich 24 godzin.",
         "clear-reading-cache-task-success": "Pamięć podręczna została wyczyszczona",
@@ -1295,18 +1284,7 @@
     },
     "events-widget": {
         "title-alt": "Aktywność",
-        "dismiss-all": "Odrzuć wszystko",
-        "update-available": "Aktualizacja dostępna",
-        "downloading-item": "Pobieram {{item}}",
-        "more-info": "Kliknij, aby uzyskać więcej informacji",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Użytkowników online",
-        "active-events-title": "Aktywne wydarzenia:",
-        "no-data": "Niewiele się tu dzieje",
-        "left-to-process": "Pozostało do przetworzenia: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} pobrań w kolejce",
-        "reading-now": "{{num}} czyta teraz",
-        "downloads-active": "{{count}} pobrań w toku"
+        "reading-now": "{{num}} czyta teraz"
     },
     "shortcuts-modal": {
         "title": "Skróty klawiszowe",

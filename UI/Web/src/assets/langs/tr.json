@@ -539,11 +539,7 @@
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
-        "no-data": "{{common.no-data}}",
-        "comment-header": "Yorum",
-        "file-header": "Dosya",
-        "created-header": "Oluşturuldu",
-        "clear-alerts": "Uyarıları Temizle"
+        "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",
@@ -723,9 +719,6 @@
         "items-title": "Öğeler",
         "edit-label": "Düzenleme Modu",
         "no-data": "Hiçbir şey eklenmedi"
-    },
-    "events-widget": {
-        "close": "{{common.close}}"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}",

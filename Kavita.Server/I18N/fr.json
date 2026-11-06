@@ -287,5 +287,10 @@
     "scrobble-provider-not-setup": "Le fournisseur de Scrobble {0} n'est pas configuré",
     "mappings-re-run-in-progress": "Une demande de mappages de métadonnées est en cours de traitement. Attendez qu'il soit complet pour faire la demande",
     "mappings-re-run-no-libraries-selected": "Votre demande doit inclure au moins 1 bibliothèque",
-    "mappings-re-run-libraries-overlap": "ExcludedLibraries et IncludedLibraries ne peut pas contenir les mêmes bibliothèques"
+    "mappings-re-run-libraries-overlap": "ExcludedLibraries et IncludedLibraries ne peut pas contenir les mêmes bibliothèques",
+    "email.token-invalidated.subject": "Kavita - Votre jeton {{Provider}} a été invalidé et la synchronisation (scrobbling) a été arrêtée",
+    "email.token-invalidated.header": "Votre jeton {{Provider}} a été invalidé en raison d'échecs de rafraîchissement répétés !",
+    "email.token-invalidated.description": "Kavita ne se synchronisera plus avec {{Provider}} jusqu'au renouvellement de votre connexion.",
+    "email.token-invalidated.cta": "RENOUVELER",
+    "email.token-invalidated.fallback-link-label": "Si le bouton ci-dessus ne fonctionne pas, veuillez trouver le lien ici :"
 }
