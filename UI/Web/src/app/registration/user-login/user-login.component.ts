@@ -1,11 +1,21 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, OnInit, signal} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ToastrService} from '@openng/ngx-toastr';
 import {AccountService} from '../../_services/account.service';
 import {MemberService} from '../../_services/member.service';
 import {NavService} from '../../_services/nav.service';
 import {SplashContainerComponent} from '../_components/splash-container/splash-container.component';
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {LocalizationService} from "../../_services/localization.service";
+import {KavitaLocale} from "../../_models/metadata/language";
+import {
+  displayLocaleName,
+  safeSet,
+  KavitaLocaleKey,
+  KavitaLocaleSourceKey,
+  LocaleSourceExplicit
+} from "../../../libs/locale-utils";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {environment} from "../../../environments/environment";
 import {ImageComponent} from "../../shared/image/image.component";
 import {OidcPublicConfig} from "../../admin/_models/oidc-config";
@@ -36,6 +46,9 @@ export class UserLoginComponent implements OnInit {
   private readonly navService = inject(NavService);
   private readonly route = inject(ActivatedRoute);
   protected readonly settingsService = inject(SettingsService);
+  private readonly localizationService = inject(LocalizationService);
+  private readonly translocoService = inject(TranslocoService);
+  private readonly destroyRef = inject(DestroyRef);
 
   baseUrl = environment.apiUrl.substring(0, environment.apiUrl.indexOf('api'));
 
@@ -74,6 +87,34 @@ export class UserLoginComponent implements OnInit {
   });
   showOidcButton = computed(() => this.oidcConfig()?.enabled ?? false);
 
+  /**
+   * Pre-login language picker. The locale endpoint allows anonymous access,
+   * so this works logged out. It only writes local storage; persisting to the
+   * account happens once in the login sync below.
+   */
+  locales = signal<KavitaLocale[]>([]);
+  selectedLocale = signal<string>('en');
+  // Plain field (not a signal) so the effect below runs exactly once per login
+  private localeSynced = false;
+
+  /** Chinese entries render native names (backend RenderName is always English) */
+  localeDisplayName = displayLocaleName;
+
+  changeLocale(event: Event) {
+    const lang = (event.target as HTMLSelectElement).value;
+    // Whitelist against server locales so a bad value can never reach the loader URL
+    if (!lang || !this.locales().some(l => l.fileName === lang)) return;
+    const previous = this.selectedLocale();
+    this.selectedLocale.set(lang);
+    safeSet(KavitaLocaleKey, lang);
+    safeSet(KavitaLocaleSourceKey, LocaleSourceExplicit);
+    this.localizationService.refreshTranslations(lang).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      error: () => this.selectedLocale.set(previous)
+    });
+  }
+
   constructor() {
     this.navService.hideNavBar();
     this.navService.hideSideNav();
@@ -91,12 +132,36 @@ export class UserLoginComponent implements OnInit {
 
     effect(() => {
       const user = this.accountService.currentUser();
-      if (!user) return;
-      this.navService.handleLogin();
+      if (!user) {
+        this.localeSynced = false;
+        return;
+      }
+      if (this.localeSynced) {
+        this.navService.handleLogin();
+        return;
+      }
+      this.localeSynced = true;
+      // Serialize locale sync before navigating home to avoid language flashing.
+      // The sync observable always completes (one-shot HTTP or empty), so no teardown needed.
+      this.accountService.syncLocaleAfterLogin().subscribe({
+        next: () => this.navService.handleLogin(),
+        error: () => this.navService.handleLogin()
+      });
     });
   }
 
   ngOnInit(): void {
+    this.localizationService.getLocales().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: locales => {
+        this.locales.set([...locales].sort((a, b) => a.renderName.localeCompare(b.renderName, undefined, {sensitivity: 'base'})));
+        this.selectedLocale.set(this.translocoService.getActiveLang());
+      },
+      // A failed locale list must never block login; fall back to the active language
+      error: () => this.selectedLocale.set(this.translocoService.getActiveLang())
+    });
+
     this.settingsService.getPublicOidcConfig().subscribe(config => {
       this.oidcConfig.set(config);
     });
@@ -139,12 +204,11 @@ export class UserLoginComponent implements OnInit {
 
     this.isSubmitting.set(true);
     this.accountService.login(model).subscribe({
-      next: () => {
-          this.formGroup().reset();
-          this.navService.handleLogin()
-
-          this.isSubmitting.set(false);
-      },
+       next: () => {
+           this.formGroup().reset();
+           // 跳转由 currentUser effect 统一处理（先完成语言同步再进首页）
+           this.isSubmitting.set(false);
+       },
       error: (err) => {
         this.toastr.error(err.error);
         this.isSubmitting.set(false);
