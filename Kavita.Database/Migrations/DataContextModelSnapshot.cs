@@ -729,6 +729,9 @@ namespace Kavita.Database.Migrations
                     b.Property<DateTime>("ChapterSyncTime")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("KoboDeviceId")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("ProgressSyncTime")
                         .HasColumnType("TEXT");
 

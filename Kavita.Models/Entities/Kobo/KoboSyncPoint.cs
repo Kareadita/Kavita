@@ -12,6 +12,8 @@ public class KoboSyncPoint
     public int UserId { get; set; }
     public AppUser User { get; set; }
 
+    public string KoboDeviceId { get; set; }
+
     /// <summary>
     /// All chapter ids in the last sync
     /// </summary>
