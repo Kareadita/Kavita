@@ -18,7 +18,8 @@ export enum ClientDeviceType {
   KoReader = 3,
   Panels = 4,
   Librera = 5,
-  OpdsClient = 6
+  OpdsClient = 6,
+  Kobo = 7,
 }
 
 export interface ClientInfo {

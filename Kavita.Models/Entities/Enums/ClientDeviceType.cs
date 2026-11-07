@@ -23,5 +23,7 @@ public enum ClientDeviceType
     /// Generic fallback to anything consuming opds/ url
     /// </summary>
     [Description("OPDS Client")]
-    OpdsClient = 6
+    OpdsClient = 6,
+    [Description("Kobo")]
+    Kobo = 7,
 }

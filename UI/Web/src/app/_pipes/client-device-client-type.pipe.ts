@@ -25,7 +25,8 @@ export class ClientDeviceClientTypePipe implements PipeTransform {
         return translate('client-device-client-type-pipe.librera');
       case ClientDeviceType.OpdsClient:
         return translate('client-device-client-type-pipe.opds-client');
-
+      case ClientDeviceType.Kobo:
+        return translate('client-device-client-type-pipe.kobo');
     }
   }
 
