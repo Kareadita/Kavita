@@ -401,6 +401,20 @@ public class KoboController(
         return Ok();
     }
 
+    [HttpGet("v1/products/books/series/{bookId}")]
+    [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
+    public async Task<ActionResult> GetSeries(string bookId)
+    {
+        if (!int.TryParse(bookId, out _))
+        {
+            return await ProxyRequestIfEnabled();
+        }
+
+        // TODO: Figure out what this returns and implement
+
+        return Ok();
+    }
+
     [HttpGet("v1/products/{bookIds}/prices")]
     public async Task<ActionResult> GetPrices(string bookIds)
     {
@@ -569,7 +583,7 @@ public class KoboController(
 
         using var upstreamResponse = await KoboHttpClient.SendAsync(upstreamRequest, HttpCompletionOption.ResponseHeadersRead, ct);
 
-        logger.LogDebug("Proxied {Method} {Url} returned {StatusCode} {ContentType}",
+        logger.LogTrace("Proxied {Method} {Url} returned {StatusCode} {ContentType}",
             Request.Method.Sanitize(), safeTargetUrl, (int) upstreamResponse.StatusCode, upstreamResponse.Content.Headers.ContentType?.MediaType?.Sanitize());
 
         // Copy sync tokens from Kobo Servers back over
