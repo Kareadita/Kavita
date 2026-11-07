@@ -2477,15 +2477,7 @@
         "pdf-render-resolution-label": "PDF Render Resolution",
         "pdf-render-resolution-tooltip": "Resolution at which PDFs will be rendered. Higher resolutions will take longer to render and consume more memory. If you experience issues with PDF rendering, try lowering this.",
         "cover-image-size-label": "Cover Image Size",
-        "cover-image-size-tooltip": "How large should cover images generate as. Note: Anything larger than the default will incur longer page load times.",
-
-        "kepubify-title": "Kepubify",
-        "notice": "{{manage-settings.notice}}",
-        "kepubify-restart-required": "A custom kepubify can be set as KepubifyPath in appsettings.json. Changing it requires a manual restart of Kavita to take effect.",
-        "enable-kepubify-label": "Convert Epubs to Kepub for Kobo",
-        "enable-kepubify-tooltip": "Kobo devices get kepub files, which let reading progress sync to the exact position. When off, books sync to Kobo as plain epub, and reading progress only syncs to the chapter.",
-        "kepubify-off-alert": "Kepub conversion is off. Books sync to Kobo as plain epub, and reading progress only syncs to the chapter.",
-        "kepubify-status-label": "{{source}}: {{path}}"
+        "cover-image-size-tooltip": "How large should cover images generate as. Note: Anything larger than the default will incur longer page load times."
     },
 
     "kepubify-source-pipe": {
@@ -2565,7 +2557,13 @@
         "opds-tooltip": "OPDS support will allow all users to use OPDS to read and download content from the server.",
         "enable-opds": "Enable OPDS",
         "kobo-label": "Enable Kobo Sync",
-        "kobo-tooltip": "Enable Kobo Sync support for all users on the server",
+        "kobo-tooltip": "Enable Kobo Sync support for all users on the server. Covers and downloads may fail if your hostname is not set",
+        "kepubify-restart-required": "A custom kepubify can be set as KepubifyPath in appsettings.json. Changing it requires a manual restart of Kavita to take effect.",
+        "enable-kepubify-label": "Convert Epubs to Kepub for Kobo",
+        "enable-kepubify-tooltip": "Kobo devices get kepub files, which let reading progress sync to the exact position. When off, books sync to Kobo as plain epub, and reading progress only syncs to the chapter.",
+        "kepubify-off-alert": "Kepub conversion is off. Books sync to Kobo as plain epub, and reading progress only syncs to the chapter.",
+        "kepubify-status-label": "{{source}}: {{path}}",
+        "kobo-no-hostname-warning": "You have no hostname set, this may cause issues while using Kobo Sync",
         "folder-watching-label": "Folder Watching",
         "folder-watching-tooltip": "Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans. A folder is scanned 30 seconds after its last change. Each library chooses how it watches on its Folder tab.",
         "enable-folder-watching": "Enable Folder Watching",
