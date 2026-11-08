@@ -1,4 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
 using HtmlAgilityPack;
+using Kavita.Models.Entities;
+using Kavita.Models.Entities.User;
 using Kavita.Services.Helpers;
 
 namespace Kavita.Services.Tests.Helpers;
@@ -39,10 +43,10 @@ public class AnnotationHelperKoboTests
         Assert.True(result);
 
         // "“It’s done, then!” " is all kobo.3.1, so the start lands at the very beginning of kobo.3.2
-        Assert.Equal("span#kobo.3.2", start.Path);
+        Assert.Equal(@"span#kobo\.3\.2", start.Path);
         Assert.Equal(0, start.Offset);
 
-        Assert.Equal("span#kobo.4.2", end.Path);
+        Assert.Equal(@"span#kobo\.4\.2", end.Path);
         Assert.Equal("You’re a merchant, too—there may be no chance for me to talk".Length, end.Offset);
     }
 
@@ -54,9 +58,9 @@ public class AnnotationHelperKoboTests
         var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[1]", "//body/p[1]", "Holo seemed confident", out var start, out var end);
 
         Assert.True(result);
-        Assert.Equal("span#kobo.1.2", start.Path);
+        Assert.Equal(@"span#kobo\.1\.2", start.Path);
         Assert.Equal(0, start.Offset);
-        Assert.Equal("span#kobo.1.2", end.Path);
+        Assert.Equal(@"span#kobo\.1\.2", end.Path);
         Assert.Equal("Holo seemed confident".Length, end.Offset);
     }
 
@@ -68,9 +72,9 @@ public class AnnotationHelperKoboTests
         var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[1]", "//body/p[1]", "mulled it over. Holo seemed", out var start, out var end);
 
         Assert.True(result);
-        Assert.Equal("span#kobo.1.1", start.Path);
+        Assert.Equal(@"span#kobo\.1\.1", start.Path);
         Assert.Equal("Lawrence ".Length, start.Offset);
-        Assert.Equal("span#kobo.1.2", end.Path);
+        Assert.Equal(@"span#kobo\.1\.2", end.Path);
         Assert.Equal("Holo seemed".Length, end.Offset);
     }
 
@@ -82,9 +86,9 @@ public class AnnotationHelperKoboTests
         var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[5]", "//body/p[6]", "modest of you.”\n\n“Wisdom is knowing", out var start, out var end);
 
         Assert.True(result);
-        Assert.Equal("span#kobo.5.1", start.Path);
+        Assert.Equal(@"span#kobo\.5\.1", start.Path);
         Assert.Equal("“How ".Length, start.Offset);
-        Assert.Equal("span#kobo.6.1", end.Path);
+        Assert.Equal(@"span#kobo\.6\.1", end.Path);
         Assert.Equal("“Wisdom is knowing".Length, end.Offset);
     }
 
@@ -97,8 +101,8 @@ public class AnnotationHelperKoboTests
         var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[5]", "//body/p[6]", "you.” “Wisdom", out var start, out var end);
 
         Assert.True(result);
-        Assert.Equal("span#kobo.5.1", start.Path);
-        Assert.Equal("span#kobo.6.1", end.Path);
+        Assert.Equal(@"span#kobo\.5\.1", start.Path);
+        Assert.Equal(@"span#kobo\.6\.1", end.Path);
         Assert.Equal("“Wisdom".Length, end.Offset);
     }
 
@@ -110,7 +114,7 @@ public class AnnotationHelperKoboTests
         var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[1]", "//body/p[1]", "Wolf", out var start, out var end);
 
         Assert.True(result);
-        Assert.Equal("span#kobo.1.1", start.Path);
+        Assert.Equal(@"span#kobo\.1\.1", start.Path);
         // "&amp;" is a single character, so "Spice & " is 6 characters, not 10
         Assert.Equal("Spice & ".Length, start.Offset);
         Assert.Equal("Spice & Wolf".Length, end.Offset);
@@ -153,6 +157,45 @@ public class AnnotationHelperKoboTests
     }
 
     [Fact]
+    public void BuildKoboAnnotations_UsesHighlightAndNoteTypes()
+    {
+        var doc = Load();
+        var slots = new List<HighlightSlot>
+        {
+            new() { Id = 1, SlotNumber = 0, Color = new RgbaColor { R = 255, A = 1 } }
+        };
+
+        var result = AnnotationHelper.BuildKoboAnnotations("file.xhtml", doc,
+            [MakeAnnotation(1, null), MakeAnnotation(2, "a note")], slots).ToList();
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal("highlight", result[0].Type);
+        Assert.Equal("note", result[1].Type);
+        Assert.True(Guid.TryParse(result[0].Id, out _));
+        Assert.Empty(result[0].Attachments);
+        Assert.Null(result[0].Context);
+
+        static AppUserAnnotation MakeAnnotation(int id, string? comment)
+        {
+            return new AppUserAnnotation
+            {
+                Id = id,
+                KoboId = "11111111-1111-4111-8111-111111111111",
+                XPath = "//body/p[1]",
+                EndingXPath = "//body/p[1]",
+                SelectedText = "Holo seemed confident",
+                SelectedSlotIndex = 0,
+                CommentPlainText = comment,
+                LibraryId = 1,
+                SeriesId = 1,
+                VolumeId = 1,
+                ChapterId = 1,
+                AppUserId = 1,
+            };
+        }
+    }
+
+    [Fact]
     public void Test_TryResolveAnchors_WithKepubWrapper()
     {
         const string kepub = """
@@ -165,6 +208,6 @@ public class AnnotationHelperKoboTests
         var result = AnnotationHelper.TryResolveAnchors(doc, "//body/div[1]/section[1]/p[1]", "//body/div[1]/section[1]/p[1]", "Nico & Tucker", out var start, out _);
 
         Assert.True(result);
-        Assert.Equal("span#kobo.1.1", start.Path);
+        Assert.Equal(@"span#kobo\.1\.1", start.Path);
     }
 }

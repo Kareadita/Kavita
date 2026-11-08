@@ -190,6 +190,7 @@ public static partial class AnnotationHelper
                 HighlightColor = highlightSlots[annotation.SelectedSlotIndex].Color.ToHex(false).ToUpper(),
                 HighlightedText = annotation.SelectedText,
                 Id = string.IsNullOrEmpty(annotation.KoboId) ? annotation.Id.ToString() : annotation.KoboId,
+                Type = string.IsNullOrWhiteSpace(annotation.CommentPlainText) ? "highlight" : "note",
                 Location = new KoboAnnotationLocationDto
                 {
                     Span = new KoboAnnotationLocationSpanDto
@@ -268,9 +269,9 @@ private static TextAnchor CreateAnchor(HtmlNode textNode, int rawOffsetInNode)
     var idx = Array.BinarySearch(starts, rawOffsetInNode);
     var decodedOffset = idx >= 0 ? idx : ~idx;
 
-    // Kobo-style "span#kobo.3.2" when there's an id, otherwise a real xpath
+    // Kobo-style "span#kobo\.3\.2" when there's an id, otherwise a real xpath
     var id = element.GetAttributeValue("id", string.Empty);
-    var path = string.IsNullOrEmpty(id) ? element.XPath : $"{element.Name}#{id}";
+    var path = string.IsNullOrEmpty(id) ? element.XPath : $"{element.Name}#{id.Replace(".", "\\.")}";
 
     return new TextAnchor(element, path, decodedOffset);
 }

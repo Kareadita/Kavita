@@ -32,6 +32,10 @@ public interface IKoboSyncService
     Task<Dictionary<int, KoboBookMetadataDto>> BuildBookMetadata(int userId, IEnumerable<int> chapterIds, CancellationToken cancellationToken);
 
     Task<IList<KoboAnnotationDto>> GetKoboAnnotationsAsync(int userId, IEnumerable<int> chapterIds, CancellationToken cancellationToken);
+    /// <summary>
+    /// ETags for the user's annotations per chapter, used by Kobo's annotation sync
+    /// </summary>
+    Task<IReadOnlyDictionary<int, string>> GetKoboAnnotationETagsAsync(int userId, IEnumerable<int> chapterIds, CancellationToken cancellationToken);
     Task UpdateKoboAnnotationsAsync(int userId, int chapterId, KoboPatchAnnotationsDto patch, CancellationToken cancellationToken);
 
     Task<KoboReadingStateDto?> GetProgress(int userId, int chapterId, CancellationToken cancellationToken);
@@ -46,5 +50,5 @@ public interface IKoboSyncService
     /// <param name="body"></param>
     Task<ActionResult> ProxyRequestIfEnabled(HttpClient? httpClient = null, object? body = null);
 
-    Task<(JsonNode?, bool)> ProxyRequest(KoboSyncToken? syncToken, CancellationToken ct, bool copyResponse = true, object? body = null, HttpClient? httpClient = null);
+    Task<(JsonNode?, bool)> ProxyRequest(KoboSyncToken? syncToken, CancellationToken ct, bool copyResponse = true, object? body = null, HttpClient? httpClient = null, bool writeResponseOnError = true);
 }

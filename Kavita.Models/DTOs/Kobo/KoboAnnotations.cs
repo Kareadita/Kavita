@@ -15,7 +15,9 @@ public sealed record KoboPatchAnnotationsDto
 
 public sealed record KoboAnnotationDto
 {
+    public Dictionary<string, object> Attachments { get; set; } = new();
     public DateTime ClientLastModifiedUtc { get; set; }
+    public string? Context { get; set; }
     public string HighlightColor { get; set; }
     public string HighlightedText { get; set; }
     public string Id { get; set; }

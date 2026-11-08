@@ -189,25 +189,80 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
 
         Assert.Empty(await ctx.AppUserAnnotation.ToListAsync());
 
-        var webAnnotation = new AppUserAnnotation
+        var webByUuid = MakeWebAnnotation(chapter.Id, "Hello world");
+        var webByNumber = MakeWebAnnotation(chapter.Id, "Hello again");
+        ctx.AppUserAnnotation.AddRange(webByUuid, webByNumber);
+        await ctx.SaveChangesAsync();
+
+        await service.UpdateKoboAnnotationsAsync(1, chapter.Id,
+            new KoboPatchAnnotationsDto { DeletedAnnotationIds = [webByUuid.KoboId] }, CancellationToken.None);
+        await service.UpdateKoboAnnotationsAsync(1, chapter.Id,
+            new KoboPatchAnnotationsDto { DeletedAnnotationIds = [webByNumber.Id.ToString()] }, CancellationToken.None);
+
+        Assert.Empty(await ctx.AppUserAnnotation.ToListAsync());
+
+        static AppUserAnnotation MakeWebAnnotation(int chapterId, string text)
+        {
+            return new AppUserAnnotation
+            {
+                KoboId = Guid.NewGuid().ToString(),
+                XPath = "//body/p[1]",
+                EndingXPath = "//body/p[1]",
+                SelectedText = text,
+                HighlightCount = text.Length,
+                LibraryId = 1,
+                SeriesId = 1,
+                VolumeId = 1,
+                ChapterId = chapterId,
+                AppUserId = 1,
+            };
+        }
+    }
+
+    [Fact]
+    public async Task GetKoboAnnotationETagsAsync_TracksAddEditAndDelete()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        await SetupCollection(ctx);
+
+        var chapter = await ctx.Chapter.FirstAsync();
+        var service = SetupSyncService(unitOfWork, mapper);
+
+        var empty = await service.GetKoboAnnotationETagsAsync(1, [chapter.Id], CancellationToken.None);
+        Assert.Equal($"W/\"{KoboSyncService.EtagVersion}-0-0\"", empty[chapter.Id]);
+
+        var annotation = new AppUserAnnotation
         {
             XPath = "//body/p[1]",
             EndingXPath = "//body/p[1]",
-            SelectedText = "Hello world",
-            HighlightCount = 11,
+            SelectedText = "Hello",
+            HighlightCount = 5,
             LibraryId = 1,
             SeriesId = 1,
             VolumeId = 1,
             ChapterId = chapter.Id,
             AppUserId = 1,
         };
-        ctx.AppUserAnnotation.Add(webAnnotation);
+        ctx.AppUserAnnotation.Add(annotation);
         await ctx.SaveChangesAsync();
 
-        await service.UpdateKoboAnnotationsAsync(1, chapter.Id,
-            new KoboPatchAnnotationsDto { DeletedAnnotationIds = [webAnnotation.Id.ToString()] }, CancellationToken.None);
+        var added = await service.GetKoboAnnotationETagsAsync(1, [chapter.Id], CancellationToken.None);
+        Assert.StartsWith($"W/\"{KoboSyncService.EtagVersion}-1-", added[chapter.Id]);
 
-        Assert.Empty(await ctx.AppUserAnnotation.ToListAsync());
+        var stable = await service.GetKoboAnnotationETagsAsync(1, [chapter.Id], CancellationToken.None);
+        Assert.Equal(added[chapter.Id], stable[chapter.Id]);
+
+        annotation.SelectedText = "Hello world";
+        await ctx.SaveChangesAsync();
+
+        var edited = await service.GetKoboAnnotationETagsAsync(1, [chapter.Id], CancellationToken.None);
+        Assert.NotEqual(added[chapter.Id], edited[chapter.Id]);
+
+        ctx.AppUserAnnotation.Remove(annotation);
+        await ctx.SaveChangesAsync();
+
+        var deleted = await service.GetKoboAnnotationETagsAsync(1, [chapter.Id], CancellationToken.None);
+        Assert.Equal($"W/\"{KoboSyncService.EtagVersion}-0-0\"", deleted[chapter.Id]);
     }
 
     [Fact]

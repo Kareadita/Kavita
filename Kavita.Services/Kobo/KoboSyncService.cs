@@ -349,6 +349,32 @@ public class KoboSyncService(
         return koboAnnotations;
     }
 
+    public async Task<IReadOnlyDictionary<int, string>> GetKoboAnnotationETagsAsync(int userId, IEnumerable<int> chapterIds, CancellationToken cancellationToken)
+    {
+        var ids = chapterIds.Distinct().ToList();
+
+        var rows = await unitOfWork.DataContext.AppUserAnnotation
+            .Where(an => an.AppUserId == userId && ids.Contains(an.ChapterId))
+            .Select(an => new { an.ChapterId, an.LastModifiedUtc })
+            .ToListAsync(cancellationToken);
+
+        var etags = ids.ToDictionary(id => id, _ => BuildKoboAnnotationETag(0, DateTime.MinValue));
+        foreach (var grouping in rows.GroupBy(row => row.ChapterId))
+        {
+            etags[grouping.Key] = BuildKoboAnnotationETag(grouping.Count(), grouping.Max(row => row.LastModifiedUtc));
+        }
+
+        return etags;
+    }
+
+    // Bump when the served annotation shape or ids change, so devices pull again
+    internal const int EtagVersion = 3;
+
+    private static string BuildKoboAnnotationETag(int count, DateTime maxLastModifiedUtc)
+    {
+        return $"W/\"{EtagVersion}-{count}-{(count == 0 ? 0 : maxLastModifiedUtc.Ticks)}\"";
+    }
+
     public async Task UpdateKoboAnnotationsAsync(int userId, int chapterId, KoboPatchAnnotationsDto patch, CancellationToken cancellationToken)
     {
         if (patch is null) return;
@@ -502,7 +528,7 @@ public class KoboSyncService(
             annotation.CommentPlainText = string.IsNullOrWhiteSpace(dto.noteText) ? null : dto.noteText;
             if (string.IsNullOrEmpty(annotation.KoboId))
             {
-                annotation.KoboId = dto.Id;
+                annotation.KoboId = string.IsNullOrEmpty(dto.Id) ? Guid.NewGuid().ToString() : dto.Id;
             }
 
             if (!isNew)
@@ -1003,7 +1029,7 @@ public class KoboSyncService(
         return new NotFoundResult();
     }
 
-    public async Task<(JsonNode?, bool)> ProxyRequest(KoboSyncToken? syncToken, CancellationToken ct, bool copyResponse = true, object? body = null, HttpClient? httpClient = null)
+    public async Task<(JsonNode?, bool)> ProxyRequest(KoboSyncToken? syncToken, CancellationToken ct, bool copyResponse = true, object? body = null, HttpClient? httpClient = null, bool writeResponseOnError = true)
     {
         var client = httpClient ?? KoboHttpClient;
         var request = Context.Request;
@@ -1029,6 +1055,12 @@ public class KoboSyncService(
 
         logger.LogTrace("Proxied {Method} {Url} returned {StatusCode} {ContentType}",
             request.Method.Sanitize(), safeTargetUrl, (int) upstreamResponse.StatusCode, upstreamResponse.Content.Headers.ContentType?.MediaType?.Sanitize());
+
+        if (!upstreamResponse.IsSuccessStatusCode && !writeResponseOnError)
+        {
+            logger.LogWarning("Failed to proxy request to {Url}: {StatusCode} {ReasonPhrase}", safeTargetUrl, upstreamResponse.StatusCode, upstreamResponse.ReasonPhrase);
+            return (null, false);
+        }
 
         // Copy sync tokens from Kobo Servers back over
         if (syncToken is not null)

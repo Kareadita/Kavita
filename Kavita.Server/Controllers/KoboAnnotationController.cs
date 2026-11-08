@@ -1,10 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common.Extensions;
 using Kavita.Models.Constants;
@@ -13,6 +13,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Server.Attributes;
 using Kavita.Services.Helpers.Kobo;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -24,11 +25,8 @@ namespace Kavita.Server.Controllers;
 [ServerSettingEnabled(ServerSettingKey.EnableKobo, "kobo-sync-disabled")]
 public class KoboAnnotationController(
     ILogger<KoboAnnotationController> logger,
-    IUnitOfWork unitOfWork,
     IKoboSyncService koboSyncService,
-    IHttpClientFactory httpClientFactory,
-    IDirectoryService directoryService,
-    IDownloadService downloadService): BaseApiController
+    IHttpClientFactory httpClientFactory): BaseApiController
 {
 
     private HttpClient KoboReadingServicesClient => httpClientFactory.CreateClient("KoboReadingServices");
@@ -41,13 +39,25 @@ public class KoboAnnotationController(
 
         if (!int.TryParse(bookId, out var kavitaId))
         {
-            return await koboSyncService.ProxyRequestIfEnabled();
+            return await koboSyncService.ProxyRequestIfEnabled(KoboReadingServicesClient);
         }
 
-        // TODO: Limit by query
+        var etags = await koboSyncService.GetKoboAnnotationETagsAsync(UserId, [kavitaId], ct);
+        var etag = etags[kavitaId];
+        Response.Headers.ETag = etag;
+
+        if (Request.Headers.IfNoneMatch.Any(value => string.Equals(value, etag, StringComparison.Ordinal)))
+        {
+            return StatusCode(StatusCodes.Status304NotModified);
+        }
+
         var annotations = await koboSyncService.GetKoboAnnotationsAsync(UserId, [kavitaId], ct);
 
-        return Ok(annotations);
+        return Ok(new
+        {
+            Annotations = annotations,
+            NextPageOffsetToken = (string?) null,
+        });
     }
 
     [HttpPost("checkforchanges")]
@@ -61,28 +71,52 @@ public class KoboAnnotationController(
             return BadRequest();
         }
 
-        var isKoboRequest = array.Any(book => !int.TryParse(book["ContentId"]?.GetValue<string>(), out _));
-        if (isKoboRequest)
+        var local = new List<(int ChapterId, string ContentId, string? ETag)>();
+        var remote = new List<JsonNode>();
+
+        foreach (var entry in array)
         {
-            return await koboSyncService.ProxyRequestIfEnabled(KoboReadingServicesClient, array);
+            if (entry is not JsonObject json) continue;
+
+            var contentId = json["ContentId"].GetString() ?? json["contentId"].GetString();
+            if (string.IsNullOrEmpty(contentId)) continue;
+
+            if (int.TryParse(contentId, out var chapterId))
+            {
+                local.Add((chapterId, contentId, json["etag"].GetString() ?? json["ETag"].GetString() ?? json["Etag"].GetString()));
+            }
+            else
+            {
+                remote.Add(json);
+            }
         }
 
-        var bookIds = array.Select(book => book["ContentId"]?.GetValue<string>())
-            .Distinct()
-            .WhereNotNull()
-            .Select(int.Parse)
-            .ToList();
+        var changed = new List<string>();
 
-        // It seems that this request is only made when opening a book (I.e. bookIds.Count == 1). For this reason we won't bother
-        // With the ETag nonsense
-        Response.Headers.ETag = "Kavita: I will ignore this";
-
-        var annotations = await koboSyncService.GetKoboAnnotationsAsync(UserId, bookIds, ct);
-
-        return Ok(new
+        if (local.Count > 0)
         {
-            Annotations = annotations,
-        });
+            var etags = await koboSyncService.GetKoboAnnotationETagsAsync(UserId, local.Select(item => item.ChapterId), ct);
+            foreach (var (chapterId, contentId, reportedEtag) in local)
+            {
+                if (string.IsNullOrEmpty(reportedEtag) || !string.Equals(reportedEtag, etags[chapterId], StringComparison.Ordinal))
+                {
+                    changed.Add(contentId);
+                }
+            }
+        }
+
+        if (remote.Count > 0)
+        {
+            var (remoteJson, _) = await koboSyncService.ProxyRequest(null, ct, copyResponse: false, body: remote,
+                httpClient: KoboReadingServicesClient, writeResponseOnError: false);
+
+            if (remoteJson is JsonArray remoteArray)
+            {
+                changed.AddRange(remoteArray.Select(node => node.GetString()).WhereNotNull());
+            }
+        }
+
+        return Ok(changed.Distinct());
     }
 
     [HttpPatch("{bookId}/annotations")]
