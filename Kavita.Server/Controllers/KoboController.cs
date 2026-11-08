@@ -502,7 +502,7 @@ public class KoboController(
 
         // TODO: Implement
 
-        return Ok();
+        return Ok(new List<object>());
     }
 
     /// <summary>
@@ -523,7 +523,10 @@ public class KoboController(
 
         // TODO: Figure out what this returns and implement
 
-        return Ok();
+        return Ok(new {
+            TotalResultCount = 0,
+            SearchResults = new List<object>(),
+        });
     }
 
     /// <summary>
