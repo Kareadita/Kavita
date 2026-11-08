@@ -61,13 +61,13 @@ public class KoboAnnotationController(
             return BadRequest();
         }
 
-        var isKoboRequest = array.Any(book => !int.TryParse(book["id"]?.GetValue<string>(), out _));
+        var isKoboRequest = array.Any(book => !int.TryParse(book["ContentId"]?.GetValue<string>(), out _));
         if (isKoboRequest)
         {
             return await koboSyncService.ProxyRequestIfEnabled(KoboReadingServicesClient, array);
         }
 
-        var bookIds = array.Select(book => book["id"]?.GetValue<string>())
+        var bookIds = array.Select(book => book["ContentId"]?.GetValue<string>())
             .Distinct()
             .WhereNotNull()
             .Select(int.Parse)
