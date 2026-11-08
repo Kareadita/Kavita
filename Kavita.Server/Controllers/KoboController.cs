@@ -32,9 +32,11 @@ using NetVips;
 
 namespace Kavita.Server.Controllers;
 
+/// <summary>
+/// Kobo sync implementation. Not intended for use beyond Kobo devices
+/// </summary>
 [KoboJson]
 [Route("[controller]/{apiKey}")]
-[ApiExplorerSettings(IgnoreApi = true)]
 [Authorize(PolicyGroups.DownloadPolicy)]
 [ServerSettingEnabled(ServerSettingKey.EnableKobo, "kobo-sync-disabled")]
 public class KoboController(
@@ -56,6 +58,8 @@ public class KoboController(
     /// <summary>
     /// First request when starting the sync flow. Returns all config for the Kobo to make request. We inject some
     /// redirect to the Kavita instance
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <returns></returns>
     [HttpGet("v1/initialization")]
@@ -92,6 +96,8 @@ public class KoboController(
 
     /// <summary>
     /// Returns changes since last sync
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <returns></returns>
     [HttpGet("v1/library/sync")]
@@ -130,6 +136,8 @@ public class KoboController(
 
     /// <summary>
     /// Metadata for the given book. Called when opening information, and sometimes during sync but not always
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookId"></param>
     /// <returns></returns>
@@ -156,6 +164,8 @@ public class KoboController(
 
     /// <summary>
     /// Gets progress. Called on book open to sync
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookId"></param>
     /// <returns></returns>
@@ -181,7 +191,9 @@ public class KoboController(
 
     /// <summary>
     /// Updates progress. Call on book close and when switching chapters via ToC while connected to the internet.
-    /// Otherwise during sync
+    /// Otherwise, during sync
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookId"></param>
     /// <returns></returns>
@@ -218,6 +230,8 @@ public class KoboController(
 
     /// <summary>
     /// Gets the (k)epub file
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookId"></param>
     /// <param name="convert"></param>
@@ -242,6 +256,8 @@ public class KoboController(
 
     /// <summary>
     /// Gets the cover. Called during sync, and on extra info when missing
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="thumbnailId"></param>
     /// <param name="width"></param>
@@ -300,6 +316,8 @@ public class KoboController(
 
     /// <summary>
     /// Called when a book is deleted from the Kobo. No-Op for Kavita books
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookId"></param>
     /// <returns></returns>
@@ -320,6 +338,8 @@ public class KoboController(
     /// <summary>
     /// Called when clicking on a recommendation. Adds the series to the Kobo sync collection if enabled
     /// Otherwise No-Op
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookId"></param>
     /// <returns></returns>
@@ -389,6 +409,8 @@ public class KoboController(
 
     /// <summary>
     /// Returns reviews for the book. Implemented to reduce upstream bad requests.
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookId"></param>
     /// <returns></returns>
@@ -414,6 +436,8 @@ public class KoboController(
     /// <summary>
     /// Returns the first books in a series that's recommended to the series the book belongs to
     /// Requires Kavita+ and Collection Sync
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookId"></param>
     /// <returns></returns>
@@ -435,6 +459,8 @@ public class KoboController(
 
     /// <summary>
     /// Book metadata when viewing recommendations
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookId"></param>
     /// <returns></returns>
@@ -460,6 +486,8 @@ public class KoboController(
 
     /// <summary>
     /// Implemented to reduce upstream bad requests. Called during sync, and sometimes otherwise
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookId"></param>
     /// <returns></returns>
@@ -479,6 +507,8 @@ public class KoboController(
 
     /// <summary>
     /// Implemented to reduce upstream bad requests. Called during sync, and sometimes otherwise
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookId"></param>
     /// <returns></returns>
@@ -498,6 +528,8 @@ public class KoboController(
 
     /// <summary>
     /// Implemented to reduce upstream bad requests. Always returns FREE
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookIds"></param>
     /// <returns></returns>
@@ -524,6 +556,8 @@ public class KoboController(
 
     /// <summary>
     /// Updates review for a book. Doesn't work 100%. Reviews are a bit weird on Kobo, needs more work
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="bookId"></param>
     /// <returns></returns>
@@ -574,7 +608,9 @@ public class KoboController(
     #region User
 
     /// <summary>
-    /// Retuens a list of reviews
+    /// Returns a list of reviews
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <param name="productIds"></param>
     /// <returns></returns>
@@ -619,6 +655,8 @@ public class KoboController(
 
     /// <summary>
     /// Catch all fallback
+    ///
+    /// Not intended for use beyond Kobo devices
     /// </summary>
     /// <returns></returns>
     [Route("{**catchAll}")]
