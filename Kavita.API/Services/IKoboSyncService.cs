@@ -1,9 +1,12 @@
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.User;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.API.Services;
 
@@ -35,4 +38,13 @@ public interface IKoboSyncService
     Task<KoboStateUpdateResultDto> SaveProgress(int userId, int chapterId, KoboReadingStateDto readingStateDto, CancellationToken cancellationToken);
 
     Task SyncXPathToKoboSpan(int progressId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Proxies the current request to the Kobo store if the user has forwarding enabled
+    /// </summary>
+    /// <param name="httpClient">Defaults to the Kobo store client</param>
+    /// <param name="body"></param>
+    Task<ActionResult> ProxyRequestIfEnabled(HttpClient? httpClient = null, object? body = null);
+
+    Task<(JsonNode?, bool)> ProxyRequest(KoboSyncToken? syncToken, CancellationToken ct, bool copyResponse = true, object? body = null, HttpClient? httpClient = null);
 }

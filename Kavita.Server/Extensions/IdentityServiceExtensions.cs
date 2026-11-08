@@ -149,6 +149,9 @@ public static class IdentityServiceExtensions
             AuthKeyAuthenticationOptions.SchemeName,
             _ => { });
 
+        auth.AddScheme<KoboDeviceAuthenticationOptions, KoboDeviceAuthenticationHandler>(
+            KoboDeviceAuthenticationOptions.SchemeName,
+            _ => { });
 
         services.AddAuthorizationBuilder()
             .AddPolicy(PolicyGroups.AdminPolicy, policy => policy.RequireRole(PolicyConstants.AdminRole))

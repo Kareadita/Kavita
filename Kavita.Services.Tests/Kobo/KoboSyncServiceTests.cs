@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.Net.Http;
 using AutoMapper;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -49,6 +50,7 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
             Substitute.For<IReadingSessionService>(),
             userContext,
             Substitute.For<IHttpContextAccessor>(),
+            Substitute.For<IHttpClientFactory>(),
             kepubifyConverterService ?? Substitute.For<IKepubifyConverterService>(),
             fileSystem ?? Substitute.For<IFileSystem>(),
             Substitute.For<ILocalizationService>()

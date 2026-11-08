@@ -81,4 +81,5 @@ public enum AuthenticationType
     JWT = 1,
     AuthKey = 2,
     OIDC = 3,
+    KoboDevice = 4,
 }
