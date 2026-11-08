@@ -20,7 +20,7 @@ public class BrowserHelperTests
     [InlineData("Mozilla/5.0 (Linux; Android 11; Pixel 5) KOReader/2023.10", ClientDeviceType.KoReader)]
     [InlineData("koreader/1.0", ClientDeviceType.KoReader)]
     [InlineData("KOREADER", ClientDeviceType.KoReader)]
-    [InlineData("Mozilla/5.0 (Linux; U; Android 2.0; en-us;) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1 (Kobo Touch)", ClientDeviceType.KoReader)]
+    [InlineData("Mozilla/5.0 (Linux; U; Android 2.0; en-us;) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1 (Kobo Touch)", ClientDeviceType.Kobo)]
     public void DetermineClientType_ReturnsKOReader_ForKOReaderUserAgents(string userAgent, ClientDeviceType expected)
     {
         var result = BrowserHelper.DetermineClientType(userAgent);

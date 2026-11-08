@@ -34,4 +34,11 @@ public class KoboSyncPointRepository(DataContext context): IKoboSyncPointReposit
 
         return syncPoint;
     }
+
+    public Task DeleteOthersForDeviceId(int userId, int syncPointId, string koboDeviceId, CancellationToken cancellationToken)
+    {
+        return context.KoboSyncPoints
+            .Where(sp => sp.UserId == userId && sp.Id != syncPointId && sp.KoboDeviceId == koboDeviceId)
+            .ExecuteDeleteAsync(cancellationToken);
+    }
 }

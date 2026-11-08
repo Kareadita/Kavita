@@ -14,4 +14,5 @@ public interface IKoboSyncPointRepository
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<KoboSyncPoint> GetSyncPoint(int userId, int? syncPointId, CancellationToken cancellationToken);
+    Task DeleteOthersForDeviceId(int userId, int syncPointId, string koboDeviceId, CancellationToken cancellationToken);
 }

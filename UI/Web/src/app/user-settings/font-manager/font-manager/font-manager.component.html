@@ -89,7 +89,7 @@
               <span class="small text-muted">
                 {{group.provider === FontProvider.User ? t('provider-note-custom') : t('provider-note-system')}}
               </span>
-              @if (group.provider === FontProvider.User) {
+              @if (group.provider === FontProvider.User && isAdmin()) {
                 <button class="btn btn-danger btn-sm ms-auto" (click)="deleteFamily(group)" [disabled]="isReadOnly()">{{t('delete')}}</button>
               }
             </div>

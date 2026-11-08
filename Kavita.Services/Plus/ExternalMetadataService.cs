@@ -1021,13 +1021,16 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         // Volume and MangaBaka chapter covers are not returned inline in the Series detail response, so fetch and apply them separately
-        try
+        if (result.Series is not null)
         {
-            await ApplyExternalCovers(series, metadataSettings, ct);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "[Covers] Failed to apply external covers for Series {SeriesId}", series.Id);
+            try
+            {
+                await ApplyExternalCovers(series, metadataSettings, result.Series, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[Covers] Failed to apply external covers for Series {SeriesId}", series.Id);
+            }
         }
 
         return new SeriesDetailPlusDto
@@ -1165,13 +1168,17 @@ public class ExternalMetadataService : IExternalMetadataService
     /// are not.
     /// </summary>
     /// <remarks>Not run for ComicBookRoundup, whose covers come from chapter/issue metadata already.</remarks>
-    private async Task ApplyExternalCovers(Series series, MetadataSettingsDto settings, CancellationToken ct = default)
+    private async Task ApplyExternalCovers(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, CancellationToken ct = default)
     {
         if (!settings.EnableVolumeCoverImage && !settings.EnableChapterCoverImage) return;
         if (series.GetEffectiveMetadataProvider() == MetadataProvider.ComicBookRoundup) return;
 
         // Prefer the cover based on Series/Library locale
         var locale = series.Metadata.Language ?? series.Library?.DefaultLanguage;
+        var nativeLocale = externalMetadata.LocalizedTitles
+            .Where(kv => kv.Value.Any(t => t.Title.Equals(externalMetadata.Titles.NativeTitle, StringComparison.OrdinalIgnoreCase)))
+            .Select(kv => kv.Key)
+            .FirstOrDefault();
 
         // All volumes: manga chapters can live in the loose-leaf volume, so we filter loose-leaf/specials only for volume covers
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(series.Id, ct)).ToList();
@@ -1196,7 +1203,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 foreach (var chapter in nonSpecialChapters)
                 {
-                    var chapterMatch = chapterCovers.FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber));
+                    var chapterMatch = PickCover(chapterCovers, volumeCovers, chapter.MinNumber, null, locale, nativeLocale);
                     if (chapterMatch == null) continue;
 
                     try
@@ -1225,25 +1232,8 @@ public class ExternalMetadataService : IExternalMetadataService
                     // Single-chapter volume reuses its chapter's cover
                     var chapter = nonSpecialChapters[0];
 
-                    // Try and get the locale variant, else fallback to whatever we can
-
-
                     // Prefer a chapter-scoped cover, fall back to the volume-scoped one
-                    var match = chapterCovers
-                                    .Where(c => c.Language == locale)
-                                    .FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber))
-                                ?? volumeCovers
-                                    .Where(c => c.Language == locale)
-                                    .FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
-
-                    if (match == null)
-                    {
-                        match = chapterCovers
-                                    .FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber))
-                                ?? volumeCovers
-                                    .FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
-                    }
-
+                    var match = PickCover(chapterCovers, volumeCovers, chapter.MinNumber, volume.MinNumber, locale, nativeLocale);
                     if (match == null) continue;
 
                     // If the chapter loop didn't already write it, download onto the chapter now (bypassing the chapter-cover setting)
@@ -1260,7 +1250,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 }
                 else
                 {
-                    var match = volumeCovers.FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
+                    var match = PickCover(chapterCovers, volumeCovers, null, volume.MinNumber, locale, nativeLocale);
                     if (match == null) continue;
 
                     // Only choose the better image the first time; once K+ owns the cover, overwrite freely
@@ -1281,6 +1271,43 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             await _unitOfWork.CommitAsync(ct);
         }
+    }
+
+    /// <summary>
+    /// Picks the best external cover for the given chapter and/or volume number.
+    /// Ordered by: series locale, then native locale, then scope (chapter-scoped before volume-scoped).
+    /// Pass null for a number to exclude that scope from consideration.
+    /// </summary>
+    internal static ExternalCoverResponseDto? PickCover(
+        IEnumerable<ExternalCoverResponseDto> chapterCovers,
+        IEnumerable<ExternalCoverResponseDto> volumeCovers,
+        float? chapterNumber,
+        float? volumeNumber,
+        string? locale,
+        string? nativeLocale)
+    {
+        var candidates = Enumerable.Empty<(ExternalCoverResponseDto Cover, int Scope)>();
+
+        if (chapterNumber.HasValue)
+        {
+            candidates = candidates.Concat(chapterCovers
+                .Where(c => c.Number.Is(chapterNumber.Value))
+                .Select(c => (Cover: c, Scope: 0)));
+        }
+
+        if (volumeNumber.HasValue)
+        {
+            candidates = candidates.Concat(volumeCovers
+                .Where(c => c.Number.Is(volumeNumber.Value))
+                .Select(c => (Cover: c, Scope: 1)));
+        }
+
+        return candidates
+            .OrderByDescending(x => locale != null && x.Cover.Language == locale)
+            .ThenByDescending(x => nativeLocale != null && x.Cover.Language == nativeLocale)
+            .ThenBy(x => x.Scope) // Chapter-scoped before volume-scoped
+            .Select(x => x.Cover)
+            .FirstOrDefault();
     }
 
     private async Task LogVolumeCoverAudit(int seriesId, Volume volume, string coverUrl, CancellationToken ct)

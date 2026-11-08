@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Kavita.Models.Attributes;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities.Kobo;
@@ -11,6 +13,9 @@ public class KoboSyncPoint
 
     public int UserId { get; set; }
     public AppUser User { get; set; }
+
+    [ExportScrub(ExportScrubKind.Random)]
+    public string KoboDeviceId { get; set; }
 
     /// <summary>
     /// All chapter ids in the last sync

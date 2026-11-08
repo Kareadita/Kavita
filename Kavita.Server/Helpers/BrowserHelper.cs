@@ -18,7 +18,8 @@ public static class BrowserHelper
 
         // ua contains "web-app" keyword, it's Kavita web app
         if (ua.Contains("web-app")) return ClientDeviceType.WebApp;
-        if (ua.Contains("koreader") || ua.Contains("kobo touch")) return ClientDeviceType.KoReader;
+        if (ua.Contains("koreader")) return ClientDeviceType.KoReader;
+        if (ua.Contains("kobo touch")) return ClientDeviceType.Kobo;
         if (ua.Contains("panels")) return ClientDeviceType.Panels;
         if (ua.Contains("librera")) return ClientDeviceType.Librera;
 

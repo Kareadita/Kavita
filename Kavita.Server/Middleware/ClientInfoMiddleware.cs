@@ -56,6 +56,12 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
 
         // Fallback to basic UA parsing
         var clientType = BrowserHelper.DetermineClientType(userAgent, context.Request.Path.Value);
+        // Kobo sends Linux; U; Android 2.0; as compat for Web Browser but it's actually Linux
+        if (clientType == ClientDeviceType.Kobo)
+        {
+            platform = ClientDevicePlatform.Linux;
+        }
+
         return new ClientInfoData
         {
             UserAgent = userAgent,

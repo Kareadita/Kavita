@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ToastrService} from '@openng/ngx-toastr';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
@@ -7,8 +7,8 @@ import {WikiLink} from "../../_models/wiki";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {ConfirmService} from "../../shared/confirm.service";
-import {catchError, debounceTime, distinctUntilChanged, EMPTY, filter, of, switchMap, tap} from "rxjs";
-import {toObservable} from "@angular/core/rxjs-interop";
+import {catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, of, skip, switchMap, tap} from "rxjs";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
 import {LogLevelPipe} from "../../_pipes/log-level.pipe";
@@ -18,6 +18,16 @@ import {FormFieldDirective} from "../../_directives/form-field.directive";
 import {disabled, form, FormField, max, min, pattern, required} from "@angular/forms/signals";
 import {emptyOrPattern} from "../../_validators/empty-or-pattern.validator";
 import {url} from "../../_validators/url.validator";
+import {KepubifyCheckStatusPipe} from "../../_pipes/kepubify-check-status.pipe";
+import {KepubifyOffReasonPipe} from "../../_pipes/kepubify-off-reason.pipe";
+import {KepubifySourcePipe} from "../../_pipes/kepubify-source.pipe";
+import {KepubifyCheckStatus} from "../_models/kepubify-check-status";
+import {KepubifyStatus} from "../_models/kepubify-status";
+import {KepubifyOffReason} from "../_models/kepubify-off-reason";
+import {MessageEventCode} from "../../_models/events/core/message-event-code";
+import {KepubifyCheckedBody} from "../../_models/events/bodies/kepubify-checked-body";
+import {MessageHubService} from "../../_services/message-hub.service";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
@@ -47,7 +57,7 @@ interface FormModel {
     templateUrl: './manage-settings.component.html',
     styleUrls: ['./manage-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, EnterBlurDirective, LogLevelPipe, ValidationErrorsComponent, FormFieldDirective, FormField]
+  imports: [TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, EnterBlurDirective, LogLevelPipe, ValidationErrorsComponent, FormFieldDirective, FormField, KepubifyCheckStatusPipe, KepubifyOffReasonPipe, KepubifySourcePipe, NgbTooltip]
 })
 export class ManageSettingsComponent implements OnInit {
 
@@ -56,6 +66,9 @@ export class ManageSettingsComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly serverService = inject(ServerService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly destroyRef = inject(DestroyRef);
+
   protected readonly WikiLink = WikiLink;
 
   formModel = signal<FormModel>({
@@ -107,6 +120,10 @@ export class ManageSettingsComponent implements OnInit {
   logLevels = signal<string[]>([]);
   isDocker = signal<boolean>(false);
 
+  protected kepubifyEnabled = signal(false);
+  protected kepubifyStatus = signal<KepubifyStatus | null>(null);
+  protected readonly kepubifyChecking = computed(() => this.kepubifyStatus()?.status === KepubifyCheckStatus.Checking);
+
   allowStatsTooltip = translate('manage-settings.allow-stats-tooltip-part-1') + ' <a href="' +
     WikiLink.DataCollection +
     '" rel="noopener noreferrer" target="_blank">wiki</a> ' +
@@ -133,6 +150,21 @@ export class ManageSettingsComponent implements OnInit {
         }));
       }),
     ).subscribe();
+
+    this.messageHub.messages$.pipe(
+      filter(message => message.meta?.code === MessageEventCode.KepubifyChecked),
+      map(message => (message.payload as KepubifyCheckedBody).status),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(status => this.applyKepubifyStatus(status));
+
+    // The check can finish while a server restart has the hub down, so its event never arrives
+    toObservable(this.messageHub.isConnectedSignal).pipe(
+      distinctUntilChanged(),
+      filter(connected => !!connected),
+      skip(1),
+      switchMap(() => this.settingsService.getKepubifyStatus()),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(status => this.applyKepubifyStatus(status));
   }
 
   ngOnInit(): void {
@@ -144,11 +176,38 @@ export class ManageSettingsComponent implements OnInit {
     });
     this.settingsService.getServerSettings().subscribe((settings: ServerSettings) => {
       this.serverSettings.set(settings);
+      this.kepubifyEnabled.set(settings.enableKepubify);
       this.formModel.set(settings);
     });
     this.serverService.getServerInfo().subscribe(info => {
       this.isDocker.set(info.isDocker);
     });
+
+    this.settingsService.getKepubifyStatus().subscribe(status => this.applyKepubifyStatus(status));
+  }
+
+  toggleKepubify(enabled: boolean) {
+    this.kepubifyEnabled.set(enabled);
+    this.kepubifyStatus.update(s => s && {...s, status: KepubifyCheckStatus.Checking, reason: null});
+
+    // The response is not applied: the queued check's event can arrive before it, and its Checking would overwrite the result
+    this.settingsService.updateKepubify(enabled).pipe(
+      catchError(() => this.settingsService.getKepubifyStatus()),
+    ).subscribe(status => {
+      if (status.status !== KepubifyCheckStatus.Checking) {
+        this.applyKepubifyStatus(status);
+      }
+    });
+  }
+
+  private applyKepubifyStatus(status: KepubifyStatus) {
+    this.kepubifyStatus.set(status);
+
+    if (status.reason === KepubifyOffReason.Disabled || status.reason === KepubifyOffReason.HashMismatch) {
+      this.kepubifyEnabled.set(false);
+    } else if (status.status === KepubifyCheckStatus.Supported) {
+      this.kepubifyEnabled.set(true);
+    }
   }
 
   resetForm() {
@@ -202,4 +261,5 @@ export class ManageSettingsComponent implements OnInit {
     ).subscribe();
   }
 
+  protected readonly KepubifyCheckStatus = KepubifyCheckStatus;
 }

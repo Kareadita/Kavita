@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Globalization;
+using AutoMapper;
 using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -11,6 +12,7 @@ using Kavita.Database;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.DTOs.Scrobbling;
@@ -4353,7 +4355,30 @@ public class ExternalMetadataServiceTests: AbstractDbTest
     #endregion
 
     #region Series Cover
-    // Not sure how to test this
+
+    [Theory]
+    [InlineData(new[] { "Volume|1|en|vol", "Chapter|1|en|chap" }, 1f, 1f, "en", null, "chap")]
+    [InlineData(new[] { "Chapter|1|ja|chap", "Volume|1|en|vol" }, 1f, 1f, "en", "ja", "vol")]
+    [InlineData(new[] { "Chapter|1|fr|chap", "Volume|1|ja|vol" }, 1f, 1f, "en", "ja", "vol")]
+    [InlineData(new[] { "Chapter|1|ja|native", "Chapter|1|en|local" }, 1f, null, "en", "ja", "local")]
+    [InlineData(new[] { "Volume|1|fr|vol", "Chapter|1|de|chap" }, 1f, 1f, "en", "ja", "chap")]
+    [InlineData(new[] { "Chapter|1|en|first", "Chapter|1|en|second" }, 1f, null, "en", null, "first")]
+    [InlineData(new[] { "Chapter|2|en|chap", "Volume|3|en|vol" }, 1f, 1f, "en", null, null)]
+    [InlineData(new[] { "Chapter|1|en|chap", "Volume|1|en|vol" }, null, 1f, "en", null, "vol")]
+    [InlineData(new[] { "Chapter|1|en|chap", "Volume|1|en|vol" }, 1f, null, "en", null, "chap")]
+    [InlineData(new[] { "Chapter|1||nolang", "Chapter|1|ja|native" }, 1f, null, null, "ja", "native")]
+    [InlineData(new[] { "Chapter|1||nolang", "Chapter|1|en|local" }, 1f, null, "en", null, "local")]
+    [InlineData(new[] { "Chapter|1||first", "Chapter|1|en|second" }, 1f, null, null, null, "first")]
+    public void PickCover_ReturnsExpectedCover(string[] coverSpecs, float? chapterNumber, float? volumeNumber, string? locale, string? nativeLocale, string? expectedUrl)
+    {
+        var covers = coverSpecs.Select(CreateCoverFromSpec).ToList();
+        var chapterCovers = covers.Where(c => c.Type == ExternalCoverImageType.Chapter).ToList();
+        var volumeCovers = covers.Where(c => c.Type == ExternalCoverImageType.Volume).ToList();
+
+        var result = ExternalMetadataService.PickCover(chapterCovers, volumeCovers, chapterNumber, volumeNumber, locale, nativeLocale);
+        Assert.Equal(expectedUrl, result?.Url);
+    }
+
     #endregion
 
     #region Relationships
@@ -5472,5 +5497,17 @@ public class ExternalMetadataServiceTests: AbstractDbTest
     private static SeriesCharacter CreateCharacter(string first, string last, CharacterRole role)
     {
         return new SeriesCharacter() {Name = $"{first} {last}", Description = "", Url = "", ImageUrl = "", Role = role};
+    }
+
+    private static ExternalCoverResponseDto CreateCoverFromSpec(string spec)
+    {
+        var parts = spec.Split('|');
+        return new ExternalCoverResponseDto
+        {
+            Type = Enum.Parse<ExternalCoverImageType>(parts[0]),
+            Number = float.Parse(parts[1], CultureInfo.InvariantCulture),
+            Language = string.IsNullOrEmpty(parts[2]) ? null : parts[2],
+            Url = parts[3]
+        };
     }
 }

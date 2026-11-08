@@ -45,15 +45,13 @@ interface FormModel {
   styleUrls: ['./manage-media-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe,
-    FormFieldDirective, FormField, SettingSelectComponent, SettingSwitchComponent, KepubifySourcePipe,
-    KepubifyCheckStatusPipe, KepubifyOffReasonPipe]
+    FormFieldDirective, FormField, SettingSelectComponent]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
   private readonly modalService = inject(ModalService);
-  private readonly messageHub = inject(MessageHubService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly allEncodeFormats = allEncodeFormats;
@@ -63,10 +61,6 @@ export class ManageMediaSettingsComponent implements OnInit {
 
   private serverSettings!: ServerSettings;
   protected isLoaded = signal(false);
-
-  protected kepubifyEnabled = signal(false);
-  protected kepubifyStatus = signal<KepubifyStatus | null>(null);
-  protected readonly kepubifyChecking = computed(() => this.kepubifyStatus()?.status === KepubifyCheckStatus.Checking);
 
   private readonly formModel = signal<FormModel>({
     encodeMediaAs: EncodeFormat.PNG,
@@ -114,56 +108,14 @@ export class ManageMediaSettingsComponent implements OnInit {
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
-
-    this.messageHub.messages$.pipe(
-      filter(message => message.meta?.code === MessageEventCode.KepubifyChecked),
-      map(message => (message.payload as KepubifyCheckedBody).status),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(status => this.applyKepubifyStatus(status));
-
-    // The check can finish while a server restart has the hub down, so its event never arrives
-    toObservable(this.messageHub.isConnectedSignal).pipe(
-      distinctUntilChanged(),
-      filter(connected => !!connected),
-      skip(1),
-      switchMap(() => this.settingsService.getKepubifyStatus()),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(status => this.applyKepubifyStatus(status));
   }
 
   ngOnInit(): void {
     this.settingsService.getServerSettings().subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
-      this.kepubifyEnabled.set(settings.enableKepubify);
       this.resetForm();
       this.isLoaded.set(true);
     });
-
-    this.settingsService.getKepubifyStatus().subscribe(status => this.applyKepubifyStatus(status));
-  }
-
-  toggleKepubify(enabled: boolean) {
-    this.kepubifyEnabled.set(enabled);
-    this.kepubifyStatus.update(s => s && {...s, status: KepubifyCheckStatus.Checking, reason: null});
-
-    // The response is not applied: the queued check's event can arrive before it, and its Checking would overwrite the result
-    this.settingsService.updateKepubify(enabled).pipe(
-      catchError(() => this.settingsService.getKepubifyStatus()),
-    ).subscribe(status => {
-      if (status.status !== KepubifyCheckStatus.Checking) {
-        this.applyKepubifyStatus(status);
-      }
-    });
-  }
-
-  private applyKepubifyStatus(status: KepubifyStatus) {
-    this.kepubifyStatus.set(status);
-
-    if (status.reason === KepubifyOffReason.Disabled || status.reason === KepubifyOffReason.HashMismatch) {
-      this.kepubifyEnabled.set(false);
-    } else if (status.status === KepubifyCheckStatus.Supported) {
-      this.kepubifyEnabled.set(true);
-    }
   }
 
   resetForm() {

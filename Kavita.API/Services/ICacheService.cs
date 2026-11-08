@@ -22,6 +22,12 @@ public interface ICacheService
     /// </summary>
     /// <param name="chapterIds">Volumes that belong to that library. Assume the library might have been deleted before this invocation.</param>
     void CleanupChapters(IEnumerable<int> chapterIds);
+    /// <summary>
+    /// Wipes the whole page cache directory, except chapters tied to currently active
+    /// reading sessions. Used after a scan so cached pages are never deleted out from
+    /// under a live reader.
+    /// </summary>
+    Task CleanupCacheExceptActiveChaptersAsync();
     void CleanupBookmarks(IEnumerable<int> seriesIds);
     string GetCachedPagePath(int chapterId, int page);
     string GetCachePath(int chapterId);

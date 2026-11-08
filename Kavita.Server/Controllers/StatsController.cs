@@ -207,7 +207,7 @@ public class StatsController(
     public async Task<ActionResult<IList<StatCount<DayOfWeek>>>> GetDayBreakdown(int userId = 0)
     {
         var ct = HttpContext.RequestAborted;
-        if (userId == 0)
+        if (userId != 0)
         {
             var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, ct: ct);
             var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user, ct);

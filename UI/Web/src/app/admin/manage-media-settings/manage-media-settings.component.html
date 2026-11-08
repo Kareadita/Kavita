@@ -73,50 +73,5 @@
         </ng-template>
       </app-setting-item>
     </div>
-
-    <div class="setting-section-break"></div>
-    <h4>{{t('kepubify-title')}}</h4>
-
-    <div>
-      <div class="alert alert-warning">
-        <strong>{{t('notice')}}</strong> {{t('kepubify-restart-required')}}
-      </div>
-
-      <div class="row g-0 mt-2">
-        <app-setting-switch [title]="t('enable-kepubify-label')" [subtitle]="t('enable-kepubify-tooltip')">
-          <ng-template>
-            <div class="form-check form-switch float-end">
-              <input id="settings-enable-kepubify" type="checkbox" class="form-check-input" role="switch"
-                     [attr.aria-label]="t('enable-kepubify-label')"
-                     [checked]="kepubifyEnabled()" [disabled]="kepubifyChecking()"
-                     (change)="toggleKepubify($any($event.target).checked)">
-            </div>
-          </ng-template>
-        </app-setting-switch>
-      </div>
-
-      <div class="d-flex align-items-baseline gap-2 mt-2" aria-live="polite">
-        @if (kepubifyStatus(); as status) {
-          @switch (status.status) {
-            @case (KepubifyCheckStatus.Checking) {
-              <span class="spinner-border spinner-border-sm flex-shrink-0" aria-hidden="true"></span>
-              <span>{{status.status | kepubifyCheckStatus}}</span>
-            }
-            @case (KepubifyCheckStatus.Supported) {
-              <i class="fa fa-check-circle text-success flex-shrink-0" aria-hidden="true"></i>
-              <span>
-                {{status.status | kepubifyCheckStatus}}<span class="mx-1 dot-separator"></span>{{t('kepubify-status-label', {source: status.source | kepubifySource, path: status.path})}}
-              </span>
-            }
-            @case (KepubifyCheckStatus.NotSupported) {
-              <i class="fa fa-circle-xmark text-danger flex-shrink-0" aria-hidden="true"></i>
-              <span>
-                {{status.reason | kepubifyOffReason}}<span class="mx-1 dot-separator"></span>{{t('kepubify-status-label', {source: status.source | kepubifySource, path: status.path})}}
-              </span>
-            }
-          }
-        }
-      </div>
-    </div>
   }
 </ng-container>

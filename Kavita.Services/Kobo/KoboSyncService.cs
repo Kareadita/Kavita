@@ -39,7 +39,7 @@ internal sealed record KoboChapterSyncData
     public AppUserProgress? ReadingProgress { get; init; }
 }
 
-internal sealed record SyncAccumulationResult(IEnumerable<KoboSyncItem> Results, bool Exhausted);
+internal sealed record SyncAccumulationResult(List<KoboSyncItem> Results, bool Exhausted);
 
 public class KoboSyncService(
     ILogger<KoboSyncService> logger,
@@ -85,6 +85,9 @@ public class KoboSyncService(
         {
             await unitOfWork.CommitAsync(cancellationToken);
         }
+
+        logger.LogDebug("GetChangesSinceAsync: Accumulated {ChapterChanges} chapter changes and {ProgressChanges} progress changes",
+            chapterChanges.Count, progressChanges.Count);
 
         return (syncResults, localChangesExhausted);
     }
@@ -139,12 +142,12 @@ public class KoboSyncService(
         {
             syncPoint.ChapterIds = [.. eligible.Keys];
 
-            logger.LogDebug("No book changes since {BooksSyncTime}", syncPoint.ChapterSyncTime);
+            logger.LogTrace("No book changes since {BooksSyncTime}", syncPoint.ChapterSyncTime);
             return new SyncAccumulationResult(changes, true);
         }
 
         syncPoint.ChapterIndex += chapters.Count;
-        logger.LogDebug("Adding {Count} book changes.", chapters.Count);
+        logger.LogTrace("Adding {Count} book changes.", chapters.Count);
 
         var metadata = await BuildBookMetadata(userId, chapters.Select(s => s.Chapter.Id), cancellationToken);
 
@@ -202,14 +205,14 @@ public class KoboSyncService(
 
         if (progressToSync.Count == 0)
         {
-            logger.LogDebug("No changes since {ProgressSyncTime}", syncPoint.ProgressSyncTime);
+            logger.LogTrace("No changes since {ProgressSyncTime}", syncPoint.ProgressSyncTime);
             return new SyncAccumulationResult([], true);
         }
 
         syncPoint.ProgressSyncedUntilId = progressToSync[^1].Chapter.Id;
         syncPoint.ProgressSyncedUntilIndex += progressToSync.Count;
 
-        logger.LogDebug("Adding {Count} progress update changes", progressToSync.Count);
+        logger.LogTrace("Adding {Count} progress update changes", progressToSync.Count);
 
         List<KoboSyncItem> changes = [];
         foreach (var sync in progressToSync)

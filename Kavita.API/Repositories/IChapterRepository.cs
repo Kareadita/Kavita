@@ -54,6 +54,11 @@ public interface IChapterRepository
     Task<IList<RatingDto>> GetExternalChapterRatingDtos(int chapterId, CancellationToken ct = default);
     Task<IList<ExternalRating>> GetExternalChapterRatings(int chapterId, CancellationToken ct = default);
     Task<ChapterDto?> GetCurrentlyReadingChapterAsync(int seriesId, int userId, CancellationToken ct = default);
+    /// <summary>
+    /// Chapter ids referenced by currently active reading sessions. These chapters are
+    /// being read right now, so their page cache must not be wiped by maintenance jobs.
+    /// </summary>
+    Task<IList<int>> GetActiveReadingChapterIdsAsync(CancellationToken ct = default);
     Task<ChapterDto?> GetFirstChapterForSeriesAsync(int seriesId, int userId, CancellationToken ct = default);
     Task<ChapterDto?> GetFirstChapterForVolumeAsync(int volumeId, int userId, CancellationToken ct = default);
     Task<IList<ChapterDto>> GetChapterDtosAsync(IEnumerable<int> chapterIds, int userId, CancellationToken ct = default);
