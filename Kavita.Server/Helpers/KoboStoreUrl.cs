@@ -8,14 +8,15 @@ public static class KoboStoreUrl
 {
     private const string StoreHost = "storeapi.kobo.com";
     private const string ApiKeyQueryName = "apiKey";
+    private static readonly Uri StoreBaseAddress = new($"https://{StoreHost}");
 
-    public static Uri Build(PathString path, QueryString query)
+    public static Uri Build(PathString path, QueryString query, Uri? baseAddress = null)
     {
         // Skips by segment, not key length: the authenticating key can arrive by header or query and differ from the route's
         var segments = path.ToUriComponent().Split('/', 4);
         var rest = segments.Length == 4 ? segments[3].TrimStart('/') : string.Empty;
 
-        return new UriBuilder(Uri.UriSchemeHttps, StoreHost)
+        return new UriBuilder(baseAddress ?? StoreBaseAddress)
         {
             Path = rest,
             Query = WithoutApiKey(query)
