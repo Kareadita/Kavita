@@ -11,6 +11,7 @@ public static class KoboJsonOptions
     public static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         PropertyNamingPolicy = new PascalJsonNamingPolicy(),
+        PropertyNameCaseInsensitive = true,
         TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
         Converters =
         {

@@ -1,6 +1,9 @@
 using System.IO.Abstractions;
 using System.Net.Http;
 using AutoMapper;
+using HtmlAgilityPack;
+using Kavita.Models.DTOs.Reader;
+using Kavita.Models.Entities;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
@@ -88,6 +91,123 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         collection.Items = [series];
 
         await ctx.SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task UpdateKoboAnnotationsAsync_CreatesThenUpdatesTheSameAnnotation()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        await SetupCollection(ctx);
+
+        var chapter = await ctx.Chapter.Include(c => c.Files).FirstAsync();
+        chapter.Files.Add(new MangaFileBuilder("/books/a.epub", MangaFormat.Epub).Build());
+
+        var preferences = await ctx.AppUserPreferences.FirstAsync();
+        preferences.BookReaderHighlightSlots =
+        [
+            new HighlightSlot { Id = 1, SlotNumber = 0, Color = new RgbaColor { R = 255, A = 1 } },
+            new HighlightSlot { Id = 2, SlotNumber = 1, Color = new RgbaColor { G = 255, A = 1 } },
+        ];
+        await ctx.SaveChangesAsync();
+
+        const string kepubPath = "/tmp/test.kepub.epub";
+        const string chapterFilename = "OEBPS/Text/ch1.xhtml";
+
+        var kepubDoc = new HtmlDocument();
+        kepubDoc.LoadHtml("""
+                           <html><body><div id="book-columns"><div id="book-inner">
+                           <p><span class="koboSpan" id="kobo.1.1">Hello world</span></p>
+                           </div></div></body></html>
+                           """);
+        var readerDoc = new HtmlDocument();
+        readerDoc.LoadHtml("<html><body><p>Hello world</p></body></html>");
+
+        var bookService = Substitute.For<IBookService>();
+        bookService.GenerateTableOfContents(Arg.Any<Chapter>(), Arg.Any<CancellationToken>())
+            .Returns([new BookChapterItem { Page = 0, Title = "Chapter One" }]);
+        bookService.GetDocumentAsync(kepubPath, chapterFilename, null).Returns((kepubDoc, 0));
+        bookService.GetDocumentAsync("/books/a.epub", chapterFilename, 0).Returns((readerDoc, 0));
+
+        var kepubify = Substitute.For<IKepubifyConverterService>();
+        kepubify.BuildKepubifyPath(chapter.Id).Returns(kepubPath);
+
+        var file = Substitute.For<IFile>();
+        file.Exists(Arg.Any<string>()).Returns(true);
+        var fileSystem = Substitute.For<IFileSystem>();
+        fileSystem.File.Returns(file);
+
+        var service = SetupSyncService(unitOfWork, mapper, bookService: bookService,
+            fileSystem: fileSystem, kepubifyConverterService: kepubify);
+
+        var dto = new KoboAnnotationDto
+        {
+            Id = "kobo-1",
+            ClientLastModifiedUtc = DateTime.UtcNow,
+            HighlightColor = "#00FF00",
+            HighlightedText = "Hello world",
+            Location = new KoboAnnotationLocationDto
+            {
+                Span = new KoboAnnotationLocationSpanDto
+                {
+                    ChapterFilename = chapterFilename,
+                    StartPath = @"span#kobo\.1\.1",
+                    EndPath = @"span#kobo\.1\.1",
+                }
+            },
+            noteText = "A note",
+        };
+
+        await service.UpdateKoboAnnotationsAsync(1, chapter.Id,
+            new KoboPatchAnnotationsDto { UpdatedAnnotations = [dto] }, CancellationToken.None);
+
+        var created = await ctx.AppUserAnnotation.SingleAsync();
+        Assert.Equal("kobo-1", created.KoboId);
+        Assert.Equal("//body/p[1]", created.XPath);
+        Assert.Equal("//body/p[1]", created.EndingXPath);
+        Assert.Equal("Hello world", created.SelectedText);
+        Assert.Equal(11, created.HighlightCount);
+        Assert.Equal(1, created.SelectedSlotIndex);
+        Assert.Equal(0, created.PageNumber);
+        Assert.Equal("Chapter One", created.ChapterTitle);
+        Assert.Equal("A note", created.CommentPlainText);
+        Assert.Contains("A note", created.Comment);
+        Assert.Equal(1, created.AppUserId);
+        Assert.Equal(chapter.Id, created.ChapterId);
+
+        dto.noteText = "Edited note";
+        dto.HighlightColor = "#FF0000";
+        await service.UpdateKoboAnnotationsAsync(1, chapter.Id,
+            new KoboPatchAnnotationsDto { UpdatedAnnotations = [dto] }, CancellationToken.None);
+
+        var updated = await ctx.AppUserAnnotation.SingleAsync();
+        Assert.Equal(created.Id, updated.Id);
+        Assert.Equal("Edited note", updated.CommentPlainText);
+        Assert.Equal(0, updated.SelectedSlotIndex);
+
+        await service.UpdateKoboAnnotationsAsync(1, chapter.Id,
+            new KoboPatchAnnotationsDto { DeletedAnnotationIds = ["kobo-1"] }, CancellationToken.None);
+
+        Assert.Empty(await ctx.AppUserAnnotation.ToListAsync());
+
+        var webAnnotation = new AppUserAnnotation
+        {
+            XPath = "//body/p[1]",
+            EndingXPath = "//body/p[1]",
+            SelectedText = "Hello world",
+            HighlightCount = 11,
+            LibraryId = 1,
+            SeriesId = 1,
+            VolumeId = 1,
+            ChapterId = chapter.Id,
+            AppUserId = 1,
+        };
+        ctx.AppUserAnnotation.Add(webAnnotation);
+        await ctx.SaveChangesAsync();
+
+        await service.UpdateKoboAnnotationsAsync(1, chapter.Id,
+            new KoboPatchAnnotationsDto { DeletedAnnotationIds = [webAnnotation.Id.ToString()] }, CancellationToken.None);
+
+        Assert.Empty(await ctx.AppUserAnnotation.ToListAsync());
     }
 
     [Fact]

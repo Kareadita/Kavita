@@ -4,6 +4,8 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,11 +23,13 @@ using Kavita.Database.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Progress;
+using Kavita.Models.DTOs.Reader;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Extensions;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers;
 using Kavita.Services.Helpers.Kobo;
@@ -345,9 +349,225 @@ public class KoboSyncService(
         return koboAnnotations;
     }
 
-    public Task UpdateKoboAnnotationsAsync(int userId, int chapterId, List<KoboAnnotationDto> annotationDtos, CancellationToken cancellationToken)
+    public async Task UpdateKoboAnnotationsAsync(int userId, int chapterId, KoboPatchAnnotationsDto patch, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        if (patch is null) return;
+
+        var annotationDtos = patch.UpdatedAnnotations ?? [];
+        var deletedAnnotationIds = patch.DeletedAnnotationIds ?? [];
+        if (annotationDtos.Count == 0 && deletedAnnotationIds.Count == 0) return;
+
+        if (!await unitOfWork.UserRepository.HasAccessToChapter(userId, chapterId, cancellationToken))
+        {
+            logger.LogWarning("User {UserId} does not have access to chapter {ChapterId} for Kobo annotations", userId, chapterId);
+            return;
+        }
+
+        var annotations = await unitOfWork.DataContext.AppUserAnnotation
+            .Where(an => an.ChapterId == chapterId && an.AppUserId == userId)
+            .ToListAsync(cancellationToken);
+
+        var changed = false;
+
+        foreach (var deletedId in deletedAnnotationIds)
+        {
+            var annotation = FindAnnotation(annotations, deletedId);
+            if (annotation is null) continue;
+
+            annotations.Remove(annotation);
+            unitOfWork.AnnotationRepository.Remove(annotation);
+            changed = true;
+        }
+
+        if (annotationDtos.Count > 0)
+        {
+            changed |= await ApplyKoboAnnotationUpdates(userId, chapterId, annotationDtos, annotations, cancellationToken);
+        }
+
+        if (changed)
+        {
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+    }
+
+    private async Task<bool> ApplyKoboAnnotationUpdates(int userId, int chapterId, List<KoboAnnotationDto> annotationDtos,
+        List<AppUserAnnotation> annotations, CancellationToken cancellationToken)
+    {
+        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId, ct: cancellationToken);
+        if (chapter is null || chapter.Files.Count != 1)
+        {
+            logger.LogWarning("Chapter {ChapterId} must have exactly one file to sync Kobo annotations", chapterId);
+            return false;
+        }
+
+        var parentIds = await unitOfWork.ChapterRepository.GetParentIdsForChapter(chapterId, cancellationToken);
+        if (parentIds is null) return false;
+
+        var epubPath = chapter.Files.First().FilePath;
+        var kepubPath = kepubifyConverterService.BuildKepubifyPath(chapterId);
+        if (!fileSystem.File.Exists(kepubPath)
+            && !await kepubifyConverterService.ConvertEpubToKepub(epubPath, kepubPath, cancellationToken))
+        {
+            logger.LogWarning("Could not build a kepub for chapter {ChapterId}, Kobo annotations were not synced", chapterId);
+            return false;
+        }
+
+        var highlightSlots = await unitOfWork.DataContext.AppUserPreferences
+            .Where(p => p.AppUserId == userId)
+            .Select(p => p.BookReaderHighlightSlots)
+            .FirstAsync(cancellationToken);
+
+        ICollection<BookChapterItem> toc = [];
+        try
+        {
+            toc = await bookService.GenerateTableOfContents(chapter, cancellationToken);
+        }
+        catch (KavitaException)
+        {
+            /* Swallow */
+        }
+
+        var (volumeId, seriesId, libraryId) = parentIds.Value;
+        var documentsByFile = new Dictionary<string, (HtmlDocument Kepub, HtmlDocument Reader, int PageNumber)>(StringComparer.Ordinal);
+        var changed = false;
+
+        foreach (var dto in annotationDtos)
+        {
+            var span = dto.Location?.Span;
+            if (span is null || string.IsNullOrWhiteSpace(span.ChapterFilename)
+                || string.IsNullOrWhiteSpace(span.StartPath) || string.IsNullOrWhiteSpace(span.EndPath)
+                || string.IsNullOrWhiteSpace(dto.HighlightedText))
+            {
+                logger.LogDebug("Skipping Kobo annotation {AnnotationId}: missing location or highlighted text", dto.Id);
+                continue;
+            }
+
+            if (!documentsByFile.TryGetValue(span.ChapterFilename, out var documents))
+            {
+                var (kepubDoc, pageNumber) = await bookService.GetDocumentAsync(kepubPath, span.ChapterFilename, null);
+                if (kepubDoc is null)
+                {
+                    logger.LogWarning("Kobo annotation {AnnotationId} references unknown file {File} in chapter {ChapterId}",
+                        dto.Id, span.ChapterFilename, chapterId);
+                    continue;
+                }
+
+                var (readerDoc, _) = await bookService.GetDocumentAsync(epubPath, span.ChapterFilename, pageNumber);
+                if (readerDoc is null)
+                {
+                    logger.LogWarning("Kobo annotation {AnnotationId} could not be matched to {File} in the original epub",
+                        dto.Id, span.ChapterFilename);
+                    continue;
+                }
+
+                documents = (kepubDoc, readerDoc, pageNumber);
+                documentsByFile[span.ChapterFilename] = documents;
+            }
+
+            var startXPath = KoboPositionHelper.Decode(documents.Kepub, documents.Reader, GetKoboSpanId(span.StartPath));
+            var endXPath = KoboPositionHelper.Decode(documents.Kepub, documents.Reader, GetKoboSpanId(span.EndPath));
+            if (string.IsNullOrEmpty(startXPath) || string.IsNullOrEmpty(endXPath))
+            {
+                logger.LogDebug("Skipping Kobo annotation {AnnotationId}: could not translate its spans", dto.Id);
+                continue;
+            }
+
+            var annotation = FindAnnotation(annotations, dto.Id);
+
+            var isNew = annotation is null;
+            if (isNew)
+            {
+                annotation = new AppUserAnnotation
+                {
+                    ChapterId = chapterId,
+                    VolumeId = volumeId,
+                    SeriesId = seriesId,
+                    LibraryId = libraryId,
+                    AppUserId = userId,
+                    XPath = startXPath,
+                };
+                annotations.Add(annotation);
+                unitOfWork.AnnotationRepository.Attach(annotation);
+            }
+
+            annotation.XPath = startXPath;
+            annotation.EndingXPath = endXPath;
+            annotation.SelectedText = dto.HighlightedText;
+            annotation.HighlightCount = dto.HighlightedText.Length;
+            annotation.SelectedSlotIndex = GetHighlightSlotIndex(highlightSlots, dto.HighlightColor);
+            annotation.PageNumber = documents.PageNumber;
+            annotation.ChapterTitle = GetChapterTitle(toc, documents.PageNumber);
+            annotation.Comment = BuildComment(dto.noteText);
+            annotation.CommentHtml = BuildCommentHtml(dto.noteText);
+            annotation.CommentPlainText = string.IsNullOrWhiteSpace(dto.noteText) ? null : dto.noteText;
+            if (string.IsNullOrEmpty(annotation.KoboId))
+            {
+                annotation.KoboId = dto.Id;
+            }
+
+            if (!isNew)
+            {
+                unitOfWork.AnnotationRepository.Update(annotation);
+            }
+
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static AppUserAnnotation? FindAnnotation(List<AppUserAnnotation> annotations, string? annotationId)
+    {
+        if (string.IsNullOrEmpty(annotationId)) return null;
+
+        return annotations.FirstOrDefault(a => a.KoboId == annotationId)
+               ?? annotations.FirstOrDefault(a => a.Id.ToString() == annotationId);
+    }
+
+    private static string GetKoboSpanId(string path)
+    {
+        var hashIndex = path.LastIndexOf('#');
+        var spanId = hashIndex >= 0 ? path[(hashIndex + 1)..] : path;
+        return spanId.Replace("\\", string.Empty);
+    }
+
+    private static int GetHighlightSlotIndex(List<HighlightSlot> highlightSlots, string? koboColor)
+    {
+        if (string.IsNullOrEmpty(koboColor)) return 0;
+
+        // Kobo sends #RRGGBB, tolerate an alpha suffix
+        var color = koboColor.Length == 9 ? koboColor[..7] : koboColor;
+
+        for (var i = 0; i < highlightSlots.Count; i++)
+        {
+            if (highlightSlots[i].Color.ToHex(false).Equals(color, StringComparison.OrdinalIgnoreCase))
+            {
+                return i;
+            }
+        }
+
+        return 0;
+    }
+
+    private static string GetChapterTitle(ICollection<BookChapterItem> toc, int pageNumber)
+    {
+        var pageTocs = BookChapterItemHelper.GetTocForPage(toc, pageNumber);
+        return pageTocs.Count > 0 ? pageTocs[0].Title : string.Empty;
+    }
+
+    private static string? BuildComment(string? noteText)
+    {
+        if (string.IsNullOrWhiteSpace(noteText)) return null;
+
+        return JsonSerializer.Serialize(new
+        {
+            ops = new[] { new { insert = noteText + "\n" } }
+        });
+    }
+
+    private static string? BuildCommentHtml(string? noteText)
+    {
+        return string.IsNullOrWhiteSpace(noteText) ? null : $"<p>{HtmlEncoder.Default.Encode(noteText)}</p>";
     }
 
     private async Task<List<KoboAnnotationDto>> EncodeAnnotations(int chapterId, IEnumerable<AppUserAnnotation> annotations, List<HighlightSlot> highlightSlots, CancellationToken cancellationToken)

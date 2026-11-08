@@ -79,7 +79,10 @@ public class KoboAnnotationController(
 
         var annotations = await koboSyncService.GetKoboAnnotationsAsync(UserId, bookIds, ct);
 
-        return Ok(annotations);
+        return Ok(new
+        {
+            Annotations = annotations,
+        });
     }
 
     [HttpPatch("{bookId}/annotations")]
@@ -98,7 +101,7 @@ public class KoboAnnotationController(
             return BadRequest();
         }
 
-        await koboSyncService.UpdateKoboAnnotationsAsync(UserId, kavitaId, koboAnnotations.UpdatedAnnotations, ct);
+        await koboSyncService.UpdateKoboAnnotationsAsync(UserId, kavitaId, koboAnnotations, ct);
 
         return Accepted();
     }
