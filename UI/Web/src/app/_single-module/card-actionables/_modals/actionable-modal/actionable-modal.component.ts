@@ -6,18 +6,15 @@ import {
   inject,
   input,
   OnInit,
-  signal,
-  output
+  signal
 } from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {UtilityService} from "../../../../shared/_services/utility.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {AccountService} from "../../../../_services/account.service";
-import {Observable} from "rxjs";
 import {ActionableEntity} from "../../../../_services/action-factory.service";
 import {ActionItem} from "../../../../_models/actionables/action-item";
 import {Action} from "../../../../_models/actionables/action";
-import {ActionResult} from "../../../../_models/actionables/action-result";
 
 @Component({
     selector: 'app-actionable-modal',
@@ -40,7 +37,6 @@ export class ActionableModalComponent implements OnInit {
   entity = input<ActionableEntity>(null);
   /** This assumes these are filtered actions */
   filteredActions = input<ActionItem<any>[]>([]);
-  readonly actionPerformed = output<ActionItem<any> | ActionResult<any>>();
 
   currentItems = signal<ActionItem<any>[]>([]);
   currentLevel = signal<string[]>([]);
@@ -73,15 +69,7 @@ export class ActionableModalComponent implements OnInit {
       return;
     }
 
-    const result = item.callback(item, this.entity());
-
-    if (result && typeof (result as any).subscribe === 'function') {
-      (result as Observable<ActionResult<any>>).subscribe(actionResult => {
-        this.actionPerformed.emit(actionResult);
-        this.modal.close(actionResult);
-      });
-      return;
-    }
+    // Close immediately to prevent double submission; CardActionablesComponent performs the action on close
     this.modal.close(item);
   }
 
