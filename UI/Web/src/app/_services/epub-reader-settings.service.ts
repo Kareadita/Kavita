@@ -143,14 +143,6 @@ export class EpubReaderSettingsService {
       }
     });
 
-    effect(() => {
-      const immersiveMode = this.immersiveMode();
-
-      if (immersiveMode && !untracked(this.clickToPaginate)) {
-        this.formGroup.bookReaderTapToPaginate().value.set(true);
-      }
-    });
-
     toObservable(this.formGroup().value).pipe(
       debounceTime(500),
       distinctUntilChanged(),
