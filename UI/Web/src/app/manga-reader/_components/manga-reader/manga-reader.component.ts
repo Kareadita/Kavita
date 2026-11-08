@@ -22,6 +22,7 @@ import {AsyncPipe, NgClass, NgStyle, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   BehaviorSubject,
+  catchError,
   concat,
   debounceTime,
   filter,
@@ -29,6 +30,7 @@ import {
   fromEvent,
   map,
   Observable,
+  of,
   ReplaySubject,
   Subject,
   tap
@@ -97,12 +99,6 @@ const CHAPTER_ID_DOESNT_EXIST = -1;
 const OVERLAY_AUTO_CLOSE_TIME = 3000;
 const CLICK_OVERLAY_TIMEOUT = 3000;
 
-enum ChapterInfoPosition {
-  Previous = 0,
-  Current = 1,
-  Next = 2
-}
-
 enum KeyDirection {
   Right = 0,
   Left = 1,
@@ -147,6 +143,7 @@ interface FormModel {
 }
 
 const DEFAULT_DARKNESS = 100;
+const PREFETCH_PAGE_WINDOW = 10;
 
 // TODO: Can I make this a helper with T for all pages?
 function formModelsEqual(a: FormModel, b: FormModel): boolean {
@@ -393,8 +390,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   continuousChaptersStack: Stack<number> = new Stack();
 
-  continuousChapterInfos: Array<ChapterInfo | undefined> = [undefined, undefined, undefined];
-
   /**
    * An event emitter when a page change occurs. Used solely by the webtoon reader.
    */
@@ -467,6 +462,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Previous Chapter ID. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
    */
   prevChapterId: number = CHAPTER_ID_NOT_FETCHED;
+  protected prevChapter = signal<{chapterId: number, info: ChapterInfo} | null>(null);
+  protected nextChapter = signal<{chapterId: number, info: ChapterInfo} | null>(null);
   /**
    * Is there a next chapter. If not, this will disable UI controls.
    */
@@ -831,7 +828,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private handlePageLeft() {
     if (this.isReaderLeftRight() && this.checkIfPaginationAllowed(KeyDirection.Left)) {
-      this.isReadingDirectionLeftToRight() ? this.prevPage() : this.nextPage();
+      if (this.isReadingDirectionLeftToRight()) {
+        this.prevPage();
+        return;
+      }
+      this.nextPage();
     }
   }
 
@@ -847,7 +848,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private handlePageRight() {
     if (this.isReaderLeftRight() && this.checkIfPaginationAllowed(KeyDirection.Right)) {
-      this.isReadingDirectionLeftToRight() ? this.nextPage() : this.prevPage();
+      if (this.isReadingDirectionLeftToRight()) {
+        this.nextPage()
+        return;
+      }
+      this.prevPage();
     }
   }
 
@@ -1104,8 +1109,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.prevChapterId = CHAPTER_ID_NOT_FETCHED;
     this.nextChapterDisabled.set(false);
     this.prevChapterDisabled.set(false);
+    this.prevChapterPrefetched = false;
     this.nextChapterPrefetched = false;
     this.isReRead = false;
+    this.prevChapter.set(null);
+    this.nextChapter.set(null);
     this.pageNum.set(0);
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
     this.inSetup.set(true);
@@ -1168,7 +1176,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.mangaReaderService.load(results.chapterInfo);
 
-      this.continuousChapterInfos[ChapterInfoPosition.Current] = results.chapterInfo;
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages.set(results.chapterInfo.pages);
 
@@ -1223,33 +1230,50 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // From bookmarks, create map of pages to make lookup time O(1)
       this.setupBookmarks(results.bookmarks);
 
-
-      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId(), this.readingListId).subscribe(chapterId => {
-        this.nextChapterId = chapterId;
-        if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId()) {
-          this.nextChapterDisabled.set(true);
-        } else {
-          // Fetch the first page of next chapter
-          this.getPage(0, this.nextChapterId);
-
-        }
-      });
-      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId(), this.readingListId).subscribe(chapterId => {
-        this.prevChapterId = chapterId;
-        if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId()) {
-          this.prevChapterDisabled.set(true);
-        } else {
-          // Fetch the last page of prev chapter
-          this.getPage(1000000, this.prevChapterId);
-        }
-      });
-
+      this.fetchAdjacentChapters(this.chapterId());
       this.render();
     }, () => {
       setTimeout(() => {
         this.closeReader();
       }, 200);
     });
+  }
+
+  private fetchAdjacentChapters(chapterId: number) {
+    this.readerService.getNextChapter(this.seriesId, this.volumeId, chapterId, this.readingListId).subscribe(nextId => {
+      if (chapterId !== this.chapterId()) return;
+      this.nextChapterId = nextId;
+      this.nextChapterDisabled.set(nextId === CHAPTER_ID_DOESNT_EXIST || nextId === chapterId);
+      this.prefetchAdjacentChapters();
+    });
+    this.readerService.getPrevChapter(this.seriesId, this.volumeId, chapterId, this.readingListId).subscribe(prevId => {
+      if (chapterId !== this.chapterId()) return;
+      this.prevChapterId = prevId;
+      this.prevChapterDisabled.set(prevId === CHAPTER_ID_DOESNT_EXIST || prevId === chapterId);
+      this.prefetchAdjacentChapters();
+    });
+  }
+
+  private prefetchAdjacentChapters() {
+    const currentPage = this.pageNum();
+    if (!this.nextChapterPrefetched && this.nextChapterId > 0 && currentPage >= this.maxPages() - PREFETCH_PAGE_WINDOW) {
+      this.nextChapterPrefetched = true;
+      const nextChapterId = this.nextChapterId;
+      this.readerService.getChapterInfo(nextChapterId).pipe(catchError(() => of(null))).subscribe(info => {
+        if (!info || nextChapterId !== this.nextChapterId) return;
+        this.nextChapter.set({chapterId: nextChapterId, info});
+        this.prefetchStartOfChapter(nextChapterId, info.pages, PAGING_DIRECTION.FORWARD);
+      });
+    }
+    if (!this.prevChapterPrefetched && this.prevChapterId > 0 && currentPage <= PREFETCH_PAGE_WINDOW) {
+      this.prevChapterPrefetched = true;
+      const prevChapterId = this.prevChapterId;
+      this.readerService.getChapterInfo(prevChapterId).pipe(catchError(() => of(null))).subscribe(info => {
+        if (!info || prevChapterId !== this.prevChapterId) return;
+        this.prevChapter.set({chapterId: prevChapterId, info});
+        this.prefetchStartOfChapter(prevChapterId, info.pages, PAGING_DIRECTION.BACKWARDS);
+      });
+    }
   }
 
   private setupBookmarks(bookmarks: PageBookmark[]) {
@@ -1793,24 +1817,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pageNum.set(clampedPageNum);
     this.pageNumSubject.next({pageNum: clampedPageNum, maxPages: this.maxPages()});
 
-    if (this.pageNum() >= this.maxPages() - 10) {
-      // Tell server to cache the next chapter
-      if (this.nextChapterId > 0 && !this.nextChapterPrefetched) {
-        this.readerService.getChapterInfo(this.nextChapterId).subscribe(res => {
-          this.continuousChapterInfos[ChapterInfoPosition.Next] = res;
-          this.nextChapterPrefetched = true;
-          this.prefetchStartOfChapter(this.nextChapterId, PAGING_DIRECTION.FORWARD);
-        });
-      }
-    } else if (this.pageNum() <= 10) {
-      if (this.prevChapterId > 0 && !this.prevChapterPrefetched) {
-        this.readerService.getChapterInfo(this.prevChapterId).subscribe(res => {
-          this.continuousChapterInfos[ChapterInfoPosition.Previous] = res;
-          this.prevChapterPrefetched = true;
-          this.prefetchStartOfChapter(this.prevChapterId, PAGING_DIRECTION.BACKWARDS);
-        });
-      }
-    }
+    this.prefetchAdjacentChapters();
 
     // Due to the fact that we start at image 0, but page 1, we need the last page to have progress as page + 1 to be completed
     let tempPageNum = this.pageNum();
@@ -1845,25 +1852,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Loads the first 5 images (throwaway cache) from the given chapterId
    * @param chapterId
+   * @param totalPages - Number of pages in the chapterId
    * @param direction Used to indicate if the chapter is behind or ahead of current chapter
    */
-  prefetchStartOfChapter(chapterId: number, direction: PAGING_DIRECTION) {
-    let pages = [];
+  prefetchStartOfChapter(chapterId: number, totalPages: number, direction: PAGING_DIRECTION) {
+    const pages = direction === PAGING_DIRECTION.BACKWARDS ?
+      Array.from({ length: Math.min(totalPages, 5) }, (_, i) => totalPages - 1 - i)
+      : [0, 1, 2, 3, 4];
 
-    if (direction === PAGING_DIRECTION.BACKWARDS) {
-      if (this.continuousChapterInfos[ChapterInfoPosition.Previous] === undefined) return;
-      const n = this.continuousChapterInfos[ChapterInfoPosition.Previous]!.pages;
-      // Ensure we only load up to 5 pages backward
-      pages = Array.from({ length: Math.min(n + 1, 5) }, (v, k) => n - k);
-    } else {
-      pages = [0, 1, 2, 3, 4];
-    }
-
-    const images = [];
-    pages.forEach((_, i: number) => {
+    pages.forEach(page => {
       const img = new Image();
-      img.src = this.getPageUrl(i, chapterId);
-      images.push(img)
+      img.src = this.getPageUrl(page, chapterId);
     });
   }
 
