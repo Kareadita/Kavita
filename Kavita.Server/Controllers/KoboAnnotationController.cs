@@ -32,6 +32,14 @@ public class KoboAnnotationController(
     private HttpClient KoboReadingServicesClient => httpClientFactory.CreateClient("KoboReadingServices");
     private JsonSerializerOptions JsonSerializerOptions => KoboJsonOptions.JsonSerializerOptions;
 
+    /// <summary>
+    /// Returns annotations for the given book
+    ///
+    /// Not intended for use beyond Kobo devices
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <param name="limit"></param>
+    /// <returns></returns>
     [HttpGet("{bookId}/annotations")]
     public async Task<ActionResult> GetAnnotations(string bookId, [FromQuery] int limit = 100)
     {
@@ -60,6 +68,12 @@ public class KoboAnnotationController(
         });
     }
 
+    /// <summary>
+    /// Check if the given books have had any changes since their last ETag
+    ///
+    /// Not intended for use beyond Kobo devices
+    /// </summary>
+    /// <returns></returns>
     [HttpPost("checkforchanges")]
     public async Task<ActionResult> GetAnnotationsForBook()
     {
@@ -119,6 +133,13 @@ public class KoboAnnotationController(
         return Ok(changed.Distinct());
     }
 
+    /// <summary>
+    /// Update an annotation
+    ///
+    /// Not intended for use beyond Kobo devices
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     [HttpPatch("{bookId}/annotations")]
     public async Task<ActionResult> UpdateAnnotations(string bookId)
     {
