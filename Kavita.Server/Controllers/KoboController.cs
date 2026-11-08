@@ -17,7 +17,6 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.User;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
@@ -30,7 +29,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using NetVips;
-using Org.BouncyCastle.Ocsp;
 
 namespace Kavita.Server.Controllers;
 
@@ -55,6 +53,11 @@ public class KoboController(
 
     #region Sync & State
 
+    /// <summary>
+    /// First request when starting the sync flow. Returns all config for the Kobo to make request. We inject some
+    /// redirect to the Kavita instance
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("v1/initialization")]
     public async Task<ActionResult> Initialization()
     {
@@ -87,6 +90,10 @@ public class KoboController(
         return Ok(json);
     }
 
+    /// <summary>
+    /// Returns changes since last sync
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("v1/library/sync")]
     public async Task<ActionResult> SyncLibrary()
     {
@@ -121,6 +128,11 @@ public class KoboController(
         return Ok(kavitaChanges);
     }
 
+    /// <summary>
+    /// Metadata for the given book. Called when opening information, and sometimes during sync but not always
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     [HttpGet("v1/library/{bookId}/metadata")]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> GetBookMetadata(string bookId)
@@ -142,6 +154,11 @@ public class KoboController(
         return NotFound();
     }
 
+    /// <summary>
+    /// Gets progress. Called on book open to sync
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     [HttpGet("v1/library/{bookId}/state")]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> GetBookState(string bookId)
@@ -162,6 +179,12 @@ public class KoboController(
         return Ok(new List<KoboReadingStateDto> { progress });
     }
 
+    /// <summary>
+    /// Updates progress. Call on book close and when switching chapters via ToC while connected to the internet.
+    /// Otherwise during sync
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     [HttpPut("v1/library/{bookId}/state")]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> UpdateBookState(string bookId)
@@ -193,6 +216,12 @@ public class KoboController(
         return Ok(await koboSyncService.SaveProgress(UserId, kavitaId, update, ct));
     }
 
+    /// <summary>
+    /// Gets the (k)epub file
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <param name="convert"></param>
+    /// <returns></returns>
     [ChapterAccess(chapterIdKey: "bookId")]
     [HttpGet("v1/library/{bookId:int}/file/epub")]
     public async Task<ActionResult> GetBookFile(int bookId, [FromQuery] bool convert = true)
@@ -211,6 +240,15 @@ public class KoboController(
         return PhysicalFile(path, downloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
     }
 
+    /// <summary>
+    /// Gets the cover. Called during sync, and on extra info when missing
+    /// </summary>
+    /// <param name="thumbnailId"></param>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    /// <param name="quality"></param>
+    /// <param name="isGreyScale"></param>
+    /// <returns></returns>
     [ChapterAccess(failOnMissing: false, chapterIdKey: "thumbnailId")]
     [HttpGet("v1/books/{thumbnailId}/thumbnail/{width}/{height}/{isGreyScale}/image.jpg")]
     [HttpGet("v1/books/{thumbnailId}/thumbnail/{width}/{height}/{quality}/{isGreyScale}/image.jpg")]
@@ -260,6 +298,11 @@ public class KoboController(
         return File(bytes, "image/jpeg");
     }
 
+    /// <summary>
+    /// Called when a book is deleted from the Kobo. No-Op for Kavita books
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     [HttpDelete("v1/library/{bookId}")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
@@ -274,6 +317,12 @@ public class KoboController(
         return await ProxyRequestIfEnabled();
     }
 
+    /// <summary>
+    /// Called when clicking on a recommendation. Adds the series to the Kobo sync collection if enabled
+    /// Otherwise No-Op
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     [HttpPost("v1/library/{bookId}")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
@@ -338,6 +387,11 @@ public class KoboController(
 
     #region Products
 
+    /// <summary>
+    /// Returns reviews for the book. Implemented to reduce upstream bad requests.
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     [HttpGet("v1/products/{bookId}/reviews")]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> GetReviews(string bookId)
@@ -357,6 +411,12 @@ public class KoboController(
         });
     }
 
+    /// <summary>
+    /// Returns the first books in a series that's recommended to the series the book belongs to
+    /// Requires Kavita+ and Collection Sync
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     [HttpGet("v1/products/{bookId}/recommendations")]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> GetRecommendations(string bookId)
@@ -373,6 +433,11 @@ public class KoboController(
         return Ok(rec);
     }
 
+    /// <summary>
+    /// Book metadata when viewing recommendations
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     [HttpGet("v1/products/books/{bookId}/")]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> GetBook(string bookId)
@@ -393,6 +458,11 @@ public class KoboController(
         return Ok(detail);
     }
 
+    /// <summary>
+    /// Implemented to reduce upstream bad requests. Called during sync, and sometimes otherwise
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     [HttpGet("v1/products/{bookId}/nextread")]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> GetNextRead(string bookId)
@@ -407,6 +477,11 @@ public class KoboController(
         return Ok();
     }
 
+    /// <summary>
+    /// Implemented to reduce upstream bad requests. Called during sync, and sometimes otherwise
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     [HttpGet("v1/products/books/series/{bookId}")]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> GetSeries(string bookId)
@@ -421,6 +496,11 @@ public class KoboController(
         return Ok();
     }
 
+    /// <summary>
+    /// Implemented to reduce upstream bad requests. Always returns FREE
+    /// </summary>
+    /// <param name="bookIds"></param>
+    /// <returns></returns>
     [HttpGet("v1/products/{bookIds}/prices")]
     public async Task<ActionResult> GetPrices(string bookIds)
     {
@@ -442,6 +522,11 @@ public class KoboController(
         });
     }
 
+    /// <summary>
+    /// Updates review for a book. Doesn't work 100%. Reviews are a bit weird on Kobo, needs more work
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     [HttpPut("v1/products/{bookId}/reviews")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
@@ -488,6 +573,11 @@ public class KoboController(
 
     #region User
 
+    /// <summary>
+    /// Retuens a list of reviews
+    /// </summary>
+    /// <param name="productIds"></param>
+    /// <returns></returns>
     [HttpGet("v1/user/reviews")]
     public async Task<ActionResult> GetReviews([FromQuery(Name = "ProductIds")] List<string> productIds)
     {
@@ -527,6 +617,10 @@ public class KoboController(
 
     #endregion
 
+    /// <summary>
+    /// Catch all fallback
+    /// </summary>
+    /// <returns></returns>
     [Route("{**catchAll}")]
     public Task<ActionResult> ProxyFallback()
     {
