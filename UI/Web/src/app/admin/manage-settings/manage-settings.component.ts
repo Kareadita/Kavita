@@ -31,6 +31,7 @@ interface FormModel {
   loggingLevel: string;
   allowStatCollection: boolean;
   enableOpds: boolean;
+  enableKobo: boolean;
   baseUrl: string;
   totalBackups: number;
   cacheSize: number;
@@ -64,6 +65,7 @@ export class ManageSettingsComponent implements OnInit {
     cacheSize: 0,
     enableFolderWatching: false,
     enableOpds: false,
+    enableKobo: false,
     hostName: "",
     ipAddresses: "",
     loggingLevel: "information",

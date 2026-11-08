@@ -208,5 +208,15 @@ public enum ServerSettingKey
     /// When the CBL Sync task should run
     /// </summary>
     [Description("TaskCblSync")]
-    TaskCblSync = 43
+    TaskCblSync = 43,
+    /// <summary>
+    /// Is kepub conversion enabled. Turned off by the server when the shipped kepubify fails its hash check
+    /// </summary>
+    [Description("EnableKepubify")]
+    EnableKepubify = 44,
+    /// <summary>
+    /// Is KoboSync enabled on this server
+    /// </summary>
+    [Description("EnableKobo")]
+    EnableKobo = 45,
 }

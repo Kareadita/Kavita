@@ -103,6 +103,14 @@ public sealed record ServerSettingDto
     /// OIDC Configuration
     /// </summary>
     public OidcConfigDto OidcConfig { get; set; }
+    /// <summary>
+    /// Is KoboSync enabled on this server
+    /// </summary>
+    public bool EnableKobo { get; set; }
+    /// <summary>
+    /// Is kepub conversion enabled. Read only here, saved through settings/kepubify
+    /// </summary>
+    public bool EnableKepubify { get; set; }
 
     /// <summary>
     /// The Date Kavita was first installed

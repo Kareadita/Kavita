@@ -112,9 +112,12 @@ export class SettingMultiCheckBox<T> implements FormValueControl<T[]> {
 
   onCheckboxChange(item: MultiCheckBoxItem<T>, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
+    const hasItem = this.value().includes(item.value);
 
     if (checked) {
-      this.value.update(x => [...x, item.value]);
+      if (!hasItem) {
+        this.value.update(x => [...x, item.value]);
+      }
     } else {
       this.value.update(x => x.filter(t => t !== item.value));
     }
@@ -122,6 +125,7 @@ export class SettingMultiCheckBox<T> implements FormValueControl<T[]> {
 
   onContainerClick(item: MultiCheckBoxItem<T>) {
     const selected = this.value().includes(item.value);
+
     if (selected) {
       this.value.update(x => x.filter(t => t !== item.value));
       return;

@@ -2887,4 +2887,63 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     }
 
     #endregion
+
+    #region Kobo
+
+    [Fact]
+    public async Task SaveReadingProgress_LastPage_ResetsKoboSpan()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
+        var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder(Parser.DefaultChapter)
+                    .WithPages(3)
+                    .Build())
+                .Build())
+            .Build();
+
+
+        context.Series.Add(series);
+
+        context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            Libraries = [library]
+        });
+
+        await context.SaveChangesAsync();
+
+        var success = await readerService.SaveReadingProgress(new ProgressDto
+        {
+            VolumeId = 1,
+            ChapterId = 1,
+            PageNum = 1,
+            SeriesId = 1,
+            LibraryId = 1,
+            KoboSpan = "ABC"
+        }, 1, false);
+        Assert.True(success);
+
+        success = await readerService.SaveReadingProgress(new ProgressDto
+        {
+            VolumeId = 1,
+            ChapterId = 1,
+            PageNum = 2,
+            SeriesId = 1,
+            LibraryId = 1,
+        }, 1, false);
+        Assert.True(success);
+
+        var progress = await context.AppUserProgresses.FirstAsync();
+        Assert.True(string.IsNullOrEmpty(progress.KoboSpan));
+    }
+
+    #endregion
 }

@@ -14,6 +14,7 @@ using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
+using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.SeriesDetail;
@@ -194,6 +195,14 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
     }
 
 
+    public Task<AppUserKoboSyncPreferences> GetKoboSyncPreferences(int userId, CancellationToken ct = default)
+    {
+        return context.AppUserPreferences
+            .Where(p => p.AppUserId == userId)
+            .Select(p => p.KoboSyncPreferences)
+            .FirstAsync(ct);
+    }
+
     public async Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId, CancellationToken ct = default)
     {
         return await context.AppUserPreferences
@@ -310,6 +319,13 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
         return context.ReadingList
             .Where(rl => rl.AppUserId == userId || (rl.Promoted && allowPromoted))
             .AnyAsync(rl => rl.Id == readingListId, ct);
+    }
+
+    public Task<bool> HasAccessToCollection(int userId, int collectionId, bool allowPromoted, CancellationToken ct = default)
+    {
+        return context.AppUserCollection
+            .Where(c => c.AppUserId == userId || (c.Promoted && allowPromoted))
+            .AnyAsync(c => c.Id == collectionId, ct);
     }
 
     public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None, bool track = true, CancellationToken ct = default)
@@ -756,6 +772,21 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .ThenBy(r => r.Rating)
             .AsSplitQuery()
             .ProjectTo<UserReviewDto>(mapper.ConfigurationProvider)
+            .ToListAsync(ct);
+    }
+
+    public async Task<List<KoboReviewDto>> GetKoboReviewsForChapterAsync(int userId, IEnumerable<int> chapterIds, CancellationToken ct = default)
+    {
+        var userPreferences = await context.AppUserPreferences.ToListAsync(ct);
+
+        return await context.AppUserChapterRating
+            .Include(r => r.AppUser)
+            .Where(r => chapterIds.Contains(r.ChapterId))
+            .RestrictBySocialPreferences(userId, userPreferences)
+            .OrderBy(r => r.AppUserId == userId)
+            .ThenBy(r => r.Rating)
+            .AsSplitQuery()
+            .ProjectTo<KoboReviewDto>(mapper.ConfigurationProvider)
             .ToListAsync(ct);
     }
 

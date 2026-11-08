@@ -30,6 +30,7 @@ export interface Preferences {
   socialPreferences: SocialPreferences;
 
   opdsPreferences: OpdsPreferences;
+  koboSyncPreferences: KoboSyncPreferences;
 }
 
 export interface SocialPreferences {
@@ -45,6 +46,14 @@ export interface SocialPreferences {
 export interface OpdsPreferences {
   embedProgressIndicator: boolean;
   includeContinueFrom: boolean;
+}
+
+export interface KoboSyncPreferences {
+  syncItemLimit: number;
+  forwardToKoboStore: boolean;
+  allLibraries: boolean;
+  syncLibraries: number[];
+  syncCollection: number;
 }
 
 export interface KeyBind {

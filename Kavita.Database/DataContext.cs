@@ -13,6 +13,7 @@ using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.History;
 using Kavita.Models.Entities.Interfaces;
+using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Person;
@@ -98,6 +99,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ClientDevice> ClientDevice { get; set; } = null!;
     public DbSet<ClientDeviceHistory> ClientDeviceHistory { get; set; } = null!;
     public DbSet<AppUserAuthKey> AppUserAuthKey { get; set; } = null!;
+    public DbSet<KoboSyncPoint> KoboSyncPoints { get; set; } = null!;
 
     public DbSet<ReadingListTag> ReadingListTag { get; set; } = null!;
     public DbSet<ReadingListRemapRule> ReadingListRemapRule { get; set; } = null!;
@@ -112,6 +114,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.ApplyJsonColumns();
 
         builder.Entity<SeriesRelation>()
             .HasOne(pt => pt.Series)

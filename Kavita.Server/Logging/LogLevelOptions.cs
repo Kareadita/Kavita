@@ -51,6 +51,7 @@ public static class LogLevelOptions
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Error)
             .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Error)
             .MinimumLevel.Override("Kavita.Server.Middleware.AuthKeyAuthenticationHandler", LogEventLevel.Error)
+            .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Error)
             .Enrich.FromLogContext()
             .Enrich.WithThreadId()
             .Enrich.With(new ApiKeyEnricher())
@@ -132,15 +133,23 @@ public partial class ApiKeyEnricher : ILogEventEnricher
                                          e.Properties["SourceContext"].ToString().Replace("\"", string.Empty) ==
                                          "Serilog.AspNetCore.RequestLoggingMiddleware";
         if (!isRequestLoggingMiddleware) return;
-        if (!e.Properties.ContainsKey("RequestPath") ||
-            !e.Properties["RequestPath"].ToString().Contains("apiKey=")) return;
 
-        // Check if the log message contains "apiKey=" and censor it
-        var censoredMessage = MyRegex().Replace(e.Properties["RequestPath"].ToString(), "apiKey=******REDACTED******");
-        var enrichedProperty = propertyFactory.CreateProperty("RequestPath", censoredMessage);
+        if (!e.Properties.TryGetValue("RequestPath", out var property) ||
+            property is not ScalarValue { Value: string path }) return;
+
+        if (!SensitiveRegex().IsMatch(path)) return;
+
+        var censored = SensitiveRegex().Replace(path, m =>
+            m.Groups["prefix"].Success
+                ? $"/{m.Groups["prefix"].Value}/******REDACTED******"
+                : "apiKey=******REDACTED******");
+
+        var enrichedProperty = propertyFactory.CreateProperty("RequestPath", censored);
         e.AddOrUpdateProperty(enrichedProperty);
     }
 
-    [GeneratedRegex(@"\bapiKey=[^&\s]+\b")]
-    private static partial Regex MyRegex();
+    [GeneratedRegex(
+        @"/(?<prefix>kobo|opds|koreader)/[^/?]+(?=/|\?|$)|\bapiKey=[^&\s]+",
+        RegexOptions.IgnoreCase)]
+    private static partial Regex SensitiveRegex();
 }

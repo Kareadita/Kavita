@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
-using Kavita.Models.DTOs.Metadata;
+using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities;
@@ -59,7 +59,17 @@ public interface IChapterRepository
     Task<IList<ChapterDto>> GetChapterDtosAsync(IEnumerable<int> chapterIds, int userId, CancellationToken ct = default);
     Task<int?> GetSeriesIdForChapter(int chapterId, CancellationToken ct = default);
     Task<(int VolumeId, int SeriesId, int LibraryId)?> GetParentIdsForChapter(int chapterId, CancellationToken ct = default);
+    Task<LibraryType?> GetLibraryTypeAsync(int chapterId, CancellationToken ct = default);
     Task<IEnumerable<int>> GetChapterIdsInSeries(int seriesId, IEnumerable<int> chapterIds, CancellationToken ct = default);
+    Task<KoboBookDetailsDto?> GetKoboBookDetailsAsync(int chapterId, CancellationToken ct = default);
+    /// <summary>
+    /// Returns recommendations for a chapter. These are the first chapters for the recommended series
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="chapterId"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<KoboRecommendationResponseDto> GetKoboRecommendationAsync(int userId, int chapterId, CancellationToken ct = default);
 
     /// <summary>
     /// Fetches chapters matching by ComicVineId or MetronId, with Volume and Series included.

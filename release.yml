@@ -43,6 +43,10 @@ BuildServer:
     - { From: "LICENSE", To: "LICENSE.txt" }
     - { From: "Kavita.Server/config/appsettings.json", To: "config/appsettings-init.json"}
   DeletePaths: ["BuildHost-net472", "BuildHost-netcore", "bin", "config/cache-long"]
+  IncludeExternalFiles:
+    "linux-x64": [ { From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-64bit", To: "kepubify", "Sha256": "37d7628d26c5c906f607f24b36f781f306075e7073a6fe7820a751bb60431fc5" } ]
+    "linux-arm64": [ { From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm64", To: "kepubify", "Sha256": "5a15b8f6f6a96216c69330601bca29638cfee50f7bf48712795cff88ae2d03a3" } ]
+    "linux-arm": [ { From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm", To: "kepubify", "Sha256": "07f23275c4e674093443f01a591aa0980b0b87dbb0a10986d5001e9d56b0e1e7" } ]
 
 Docker:
   Push: true
