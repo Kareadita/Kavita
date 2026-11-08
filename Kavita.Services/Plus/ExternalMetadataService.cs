@@ -1021,13 +1021,16 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         // Volume and MangaBaka chapter covers are not returned inline in the Series detail response, so fetch and apply them separately
-        try
+        if (result.Series is not null)
         {
-            await ApplyExternalCovers(series, metadataSettings, ct);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "[Covers] Failed to apply external covers for Series {SeriesId}", series.Id);
+            try
+            {
+                await ApplyExternalCovers(series, metadataSettings, result.Series, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[Covers] Failed to apply external covers for Series {SeriesId}", series.Id);
+            }
         }
 
         return new SeriesDetailPlusDto
@@ -1165,13 +1168,17 @@ public class ExternalMetadataService : IExternalMetadataService
     /// are not.
     /// </summary>
     /// <remarks>Not run for ComicBookRoundup, whose covers come from chapter/issue metadata already.</remarks>
-    private async Task ApplyExternalCovers(Series series, MetadataSettingsDto settings, CancellationToken ct = default)
+    private async Task ApplyExternalCovers(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, CancellationToken ct = default)
     {
         if (!settings.EnableVolumeCoverImage && !settings.EnableChapterCoverImage) return;
         if (series.GetEffectiveMetadataProvider() == MetadataProvider.ComicBookRoundup) return;
 
         // Prefer the cover based on Series/Library locale
         var locale = series.Metadata.Language ?? series.Library?.DefaultLanguage;
+        var nativeLocale = externalMetadata.LocalizedTitles
+            .Where(kv => kv.Value.Any(t => t.Title.Equals(externalMetadata.Titles.NativeTitle, StringComparison.OrdinalIgnoreCase)))
+            .Select(kv => kv.Key)
+            .FirstOrDefault();
 
         // All volumes: manga chapters can live in the loose-leaf volume, so we filter loose-leaf/specials only for volume covers
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(series.Id, ct)).ToList();
@@ -1225,24 +1232,16 @@ public class ExternalMetadataService : IExternalMetadataService
                     // Single-chapter volume reuses its chapter's cover
                     var chapter = nonSpecialChapters[0];
 
-                    // Try and get the locale variant, else fallback to whatever we can
-
-
                     // Prefer a chapter-scoped cover, fall back to the volume-scoped one
-                    var match = chapterCovers
-                                    .Where(c => c.Language == locale)
-                                    .FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber))
-                                ?? volumeCovers
-                                    .Where(c => c.Language == locale)
-                                    .FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
-
-                    if (match == null)
-                    {
-                        match = chapterCovers
-                                    .FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber))
-                                ?? volumeCovers
-                                    .FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
-                    }
+                    var match = chapterCovers.Where(c => c.Number!.Value.Is(chapter.MinNumber))
+                        .Select(c => (Cover: c, Scope: 0))
+                        .Concat(volumeCovers.Where(c => c.Number!.Value.Is(volume.MinNumber))
+                            .Select(c => (Cover: c, Scope: 1)))
+                        .OrderByDescending(x => x.Cover.Language == locale)
+                        .ThenByDescending(x => x.Cover.Language == nativeLocale)
+                        .ThenBy(x => x.Scope) // Chapter before cover
+                        .Select(x => x.Cover)
+                        .FirstOrDefault();
 
                     if (match == null) continue;
 
