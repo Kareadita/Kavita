@@ -66,6 +66,7 @@ export class FontManagerComponent implements OnInit {
   protected readonly fontService = inject(FontService);
 
   protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
+  protected readonly isAdmin = this.accountService.hasAdminRole;
 
   fonts = signal<EpubFont[]>([]);
   hideSystemFonts = signal(false);
@@ -234,7 +235,7 @@ export class FontManagerComponent implements OnInit {
   }
 
   async deleteFamily(group: FontFamilyGroup) {
-    if (group.provider === FontProvider.System) return;
+    if (group.provider === FontProvider.System || !this.isAdmin()) return;
 
     if (!await this.confirmService.confirm(translate('toasts.confirm-delete-font'))) {
       return;
