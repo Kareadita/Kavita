@@ -246,7 +246,7 @@ export class BarChartComponent {
       grid: {
         left: '10%',
         right: this.axisLabelsOther() ? '10%' : '5%',
-        top: '5%',
+        top: this.labelPosition().includes('top') ? '10%' : '5%',
         bottom: '5%'
       },
       xAxis: this.xAxisOption(),
