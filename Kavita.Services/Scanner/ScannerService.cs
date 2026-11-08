@@ -383,7 +383,7 @@ public class ScannerService(
             MessageFactory.LibraryScanEndedEvent(tally.ToEventBody(library, issues, true), series.Name));
 
         BackgroundJob.Enqueue(() => cacheService.CleanupChapters(existingChapterIdsToClean));
-        BackgroundJob.Enqueue(() => directoryService.ClearDirectory(directoryService.CacheDirectory));
+        BackgroundJob.Enqueue(() => cacheService.CleanupCacheExceptActiveChaptersAsync());
     }
 
     private static Dictionary<ParsedSeries, IList<ParserInfo>> TrackFoundSeriesAndFiles(IList<ScannedSeriesResult> seenSeries,
@@ -635,7 +635,7 @@ public class ScannerService(
             throw;
         }
 
-        BackgroundJob.Enqueue(() => directoryService.ClearDirectory(directoryService.CacheDirectory));
+        BackgroundJob.Enqueue(() => cacheService.CleanupCacheExceptActiveChaptersAsync());
     }
 
     private async Task ScanLibraryFolders(Library library, List<string> libraryFolderPaths, bool forceUpdate, bool endsJob, Stopwatch sw)
