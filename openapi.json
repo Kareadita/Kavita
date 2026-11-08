@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.19",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.20",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.1.19"
+    "version": "0.9.1.20"
   },
   "servers": [
     {
@@ -4944,7 +4944,7 @@
         "tags": [
           "Font"
         ],
-        "summary": "Removes a font family from the system. The family is validated for in-use server side and only removed when\nit is not selected by a user, or when an admin forces the deletion.",
+        "summary": "Removes a font family from the system. The family is validated for in-use server side and only removed when\nit is not selected by a user, or when force is true.",
         "parameters": [
           {
             "name": "fontId",
@@ -4958,7 +4958,7 @@
           {
             "name": "force",
             "in": "query",
-            "description": "If the family is in use and an admin wants it deleted, they must confirm to force delete it. This is prompted in the UI.",
+            "description": "True to force deletion if the font is in use. This is prompted in the UI.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -5864,6 +5864,635 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/initialization": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "First request when starting the sync flow. Returns all config for the Kobo to make request. We inject some\nredirect to the Kavita instance\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/library/sync": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Returns changes since last sync\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/library/{bookId}/metadata": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Metadata for the given book. Called when opening information, and sometimes during sync but not always\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/library/{bookId}/state": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Gets progress. Called on book open to sync\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Updates progress. Call on book close and when switching chapters via ToC while connected to the internet.\nOtherwise, during sync\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/library/{bookId}/file/epub": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Gets the (k)epub file\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "convert",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/books/{thumbnailId}/thumbnail/{width}/{height}/{isGreyScale}/image.jpg": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Gets the cover. Called during sync, and on extra info when missing\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "thumbnailId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "width",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "height",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isGreyScale",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/books/{thumbnailId}/thumbnail/{width}/{height}/{quality}/{isGreyScale}/image.jpg": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Gets the cover. Called during sync, and on extra info when missing\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "thumbnailId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "width",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "height",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "quality",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isGreyScale",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/library/{bookId}": {
+      "delete": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Called when a book is deleted from the Kobo. No-Op for Kavita books\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Called when clicking on a recommendation. Adds the series to the Kobo sync collection if enabled\nOtherwise No-Op\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/products/{bookId}/reviews": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Returns reviews for the book. Implemented to reduce upstream bad requests.\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Updates review for a book. Doesn't work 100%. Reviews are a bit weird on Kobo, needs more work\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/products/{bookId}/recommendations": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Returns the first books in a series that's recommended to the series the book belongs to\nRequires Kavita+ and Collection Sync\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/products/books/{bookId}": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Book metadata when viewing recommendations\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/products/{bookId}/nextread": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Implemented to reduce upstream bad requests. Called during sync, and sometimes otherwise\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/products/books/series/{bookId}": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Implemented to reduce upstream bad requests. Called during sync, and sometimes otherwise\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/products/{bookIds}/prices": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Implemented to reduce upstream bad requests. Always returns FREE\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookIds",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/user/reviews": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Returns a list of reviews\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "ProductIds",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -24577,10 +25206,11 @@
           3,
           4,
           5,
-          6
+          6,
+          7
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — Unknown\n- `1` — Web Browser (WebBrowser)\n- `2` — Web App (WebApp)\n- `3` — KOReader (KoReader)\n- `4` — Panels\n- `5` — Librera\n- `6` — OPDS Client (OpdsClient)",
+        "description": "Members:\n- `0` — Unknown\n- `1` — Web Browser (WebBrowser)\n- `2` — Web App (WebApp)\n- `3` — KOReader (KoReader)\n- `4` — Panels\n- `5` — Librera\n- `6` — OPDS Client (OpdsClient)\n- `7` — Kobo",
         "format": "int32",
         "x-enum-varnames": [
           "Unknown",
@@ -24589,7 +25219,8 @@
           "KoReader",
           "Panels",
           "Librera",
-          "OpdsClient"
+          "OpdsClient",
+          "Kobo"
         ],
         "x-enum-descriptions": [
           "Unknown",
@@ -24598,7 +25229,8 @@
           "KOReader",
           "Panels",
           "Librera",
-          "OPDS Client"
+          "OPDS Client",
+          "Kobo"
         ]
       },
       "ClientDeviceTypeStatCount": {
@@ -36443,6 +37075,10 @@
     },
     {
       "name": "KavitaPlusAudit"
+    },
+    {
+      "name": "Kobo",
+      "description": "Kobo sync implementation. Not intended for use beyond Kobo devices"
     },
     {
       "name": "Koreader",
