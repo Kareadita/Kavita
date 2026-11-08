@@ -151,4 +151,20 @@ public class AnnotationHelperKoboTests
 
         Assert.False(result);
     }
+
+    [Fact]
+    public void Test_TryResolveAnchors_WithKepubWrapper()
+    {
+        const string kepub = """
+                             <html><body><div id="book-columns"><div id="book-inner"><div class="galley-rw"><section>
+                             <p><span class="koboSpan" id="kobo.1.1">Nico &amp; Tucker</span></p>
+                             </section></div></div></div></body></html>
+                             """;
+        var doc = Load(kepub);
+
+        var result = AnnotationHelper.TryResolveAnchors(doc, "//body/div[1]/section[1]/p[1]", "//body/div[1]/section[1]/p[1]", "Nico & Tucker", out var start, out _);
+
+        Assert.True(result);
+        Assert.Equal("span#kobo.1.1", start.Path);
+    }
 }

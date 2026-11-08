@@ -19,6 +19,7 @@ public readonly record struct TextAnchor(HtmlNode Element, string Path, int Offs
 public static partial class AnnotationHelper
 {
     private const string UiXPathScope = "//BODY/DIV[1]"; // Div[1] is the div we inject reader contents into
+    private const string KepubBookInnerId = "book-inner";
     private const string HighlightTagName = "app-epub-highlight";
     private const string ElementTextSeparator = "\n\n";
     private const int MaxCharacterReferenceLength = 32;
@@ -211,8 +212,8 @@ public static partial class AnnotationHelper
     {
         start = end = default;
 
-        var startBlock = NormalizeToBlockElement(FindElementByXPath(doc, DescopeXpath(startXPath)));
-        var endBlock = NormalizeToBlockElement(FindElementByXPath(doc, DescopeXpath(endXPath)));
+        var startBlock = FindBlockElement(doc, startXPath);
+        var endBlock = FindBlockElement(doc, endXPath);
         if (startBlock == null || endBlock == null) return false;
 
         var elements = GetElementsInRange(startBlock, endBlock);
@@ -429,6 +430,21 @@ private static TextAnchor CreateAnchor(HtmlNode textNode, int rawOffsetInNode)
     private static string NormalizeWhitespace(string text)
     {
         return WhitespaceRegex().Replace(text.Trim(), " ");
+    }
+
+    private static HtmlNode? FindBlockElement(HtmlDocument doc, string xpath)
+    {
+        var descoped = DescopeXpath(xpath);
+
+        // Kepub docs treat #book-inner as the body, so resolve the reader's body-relative path from it
+        if (descoped.StartsWith("//body/", StringComparison.Ordinal)
+            && doc.GetElementbyId(KepubBookInnerId) is { } kepubRoot)
+        {
+            var node = kepubRoot.SelectSingleNode("." + descoped["//body".Length..]);
+            if (node != null) return NormalizeToBlockElement(node);
+        }
+
+        return NormalizeToBlockElement(FindElementByXPath(doc, descoped));
     }
 
     private static HtmlNode? NormalizeToBlockElement(HtmlNode? node)
