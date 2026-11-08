@@ -201,8 +201,7 @@ public class CacheServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(o
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var cacheService = new CacheService(_logger, unitOfWork, ds,
             new ReadingItemService(Substitute.For<IArchiveService>(),
-                Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>(),
-                Substitute.For<IMediaErrorService>()),
+                Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>()),
             Substitute.For<IBookmarkService>(), Substitute.For<ILocalizationService>());
 
         await cacheService.CleanupCacheExceptActiveChaptersAsync();
