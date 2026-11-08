@@ -660,6 +660,7 @@ public class KoboController(
     /// </summary>
     /// <returns></returns>
     [Route("{**catchAll}")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public Task<ActionResult> ProxyFallback()
     {
         return ProxyRequestIfEnabled();
