@@ -2016,4 +2016,11 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
         return result is { AllSpecial: true } ? result.Count : null;
     }
+
+    public async Task<int> GetNonSpecialChapterCountAsync(int seriesId, CancellationToken ct = default)
+    {
+        return await context.Chapter
+            .Where(c => c.Volume.SeriesId == seriesId && c.Volume.MaxNumber != ParserConstants.SpecialVolumeNumber)
+            .CountAsync(ct);
+    }
 }

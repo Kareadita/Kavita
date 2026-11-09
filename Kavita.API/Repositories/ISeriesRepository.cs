@@ -148,4 +148,5 @@ public interface ISeriesRepository
     /// <param name="ct"></param>
     /// <returns></returns>
     Task<int?> GetChapterCountIfAllSpecials(int seriesId, CancellationToken ct = default);
+    Task<int> GetNonSpecialChapterCountAsync(int seriesId, CancellationToken ct = default);
 }

@@ -182,6 +182,7 @@ public class ExternalMetadataService : IExternalMetadataService
         // When metadata is off, never do automatic match flow
         if (!series.WillScrobble() || !series.Library.AllowMetadataMatching) return null;
 
+        var format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
         var matchRequest = new MatchRequestV3Dto
         {
             AniListId = series.AniListId,
@@ -195,7 +196,9 @@ public class ExternalMetadataService : IExternalMetadataService
             Provider = series.GetEffectiveMetadataProvider(),
             SeriesName = series.Name,
             AlternativeNames = ExtractAlternativeNames(series),
-            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
+            Year = GetReleaseYear(series, format),
+            IssueCount = await GetIssueCount(series.Id, ct),
+            Format = format,
         };
 
         var result = await _kavitaPlusApiService.MatchSeriesV3Async(matchRequest, ct);
@@ -407,7 +410,8 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var provider = queried.Provider ?? dto.Provider ?? series.GetEffectiveMetadataProvider();
 
-        var matchV3Request = BuildMatchRequest(series, dto, queried, provider);
+        var issueCount = await GetIssueCount(series.Id, ct);
+        var matchV3Request = BuildMatchRequest(series, dto, queried, provider, issueCount);
 
         _logger.LogDebug("Making match request for series {SeriesId}: {@Request}", series.Id, matchV3Request);
 
@@ -489,7 +493,7 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
     private static MatchRequestV3Dto BuildMatchRequest(Series series, MatchSeriesDto dto, QueriedExternalIds queried,
-        MetadataProvider provider)
+        MetadataProvider provider, int? issueCount)
     {
         // If any id was extracted, the raw query string is meaningless to the backend
         var query = queried.HasAny ? null : dto.Query;
@@ -519,9 +523,16 @@ public class ExternalMetadataService : IExternalMetadataService
             SeriesName = series.Name,
             AlternativeNames = ExtractAlternativeNames(series),
             Year = GetReleaseYear(series, format),
+            IssueCount = issueCount,
             Query = query,
             Format = format,
         };
+    }
+
+    private async Task<int?> GetIssueCount(int seriesId, CancellationToken ct)
+    {
+        var count = await _unitOfWork.SeriesRepository.GetNonSpecialChapterCountAsync(seriesId, ct);
+        return count > 0 ? count : null;
     }
 
     /// <summary>

@@ -14,6 +14,10 @@ public sealed record MatchRequestV3Dto: MetadataRequest
     public required string SeriesName { get; set; }
     public List<string> AlternativeNames { get; set; } = [];
     public int? Year { get; set; }
+    /// <summary>
+    /// Non-special chapters the series has. Null when there are none
+    /// </summary>
+    public int? IssueCount { get; set; }
     public string? Query { get; set; }
     [EnumDataType(typeof(PlusMediaFormat))]
     public PlusMediaFormat Format { get; set; }
