@@ -46,41 +46,9 @@
     }
   </div>
 
-<!--  @if (continuousReaderInfo(); as contReaderInfo) {-->
-<!--    @if (contReaderInfo.nextChapter; as next) {-->
-<!--      <app-chapter-preview [chapterId]="next.chapterId" [heading]="contReaderInfo.nextHeading" [subheading]="next.info.chapterTitle"-->
-<!--                           [hint]="contReaderInfo.prevHint"-->
-<!--                           (activated)="moveToNextChapter()" />-->
-<!--    }-->
-<!--  }-->
+  <app-chapter-cap #endCap position="end" [info]="capInfo()" [visible]="showEndCap()"
+                   [scrollContainer]="scrollElement()"
+                   (activated)="moveToNextChapter()" />
 
-
-<!--  <div #endCap class="chapter-cap end" [class.d-none]="!showEndCap()">-->
-
-<!--    @if (nextChapter(); as next) {-->
-<!--      <app-chapter-preview [chapterId]="next.chapterId" [heading]="next.info.subtitle" [subheading]="next.info.chapterTitle"-->
-<!--                           [hint]="isHorizontal ? t('click-hint') : t('next-scroll-hint')"-->
-<!--                           [style.&#45;&#45;chapter-preview-background-color]="backgroundColor()"-->
-<!--                           [style.&#45;&#45;chapter-preview-text-color]="fontColor()"-->
-<!--                           (activated)="loadNextChapter()" />-->
-
-<!--      @if (!isHorizontal) {-->
-<!--        <app-pull-to-load [direction]="'up'" [scrollContainer]="viewerContainer()" [disabled]="!showEndCap()"-->
-<!--                          (triggered)="loadNextChapter()" />-->
-<!--      }-->
-<!--    } @else if (nextChapterDisabled()) {-->
-<!--      <app-chapter-preview [heading]="readingListMode ? t('end-of-reading-list') : t('end-of-series')"-->
-<!--                           [hint]="t('finish-hint')"-->
-<!--                           [style.&#45;&#45;chapter-preview-background-color]="backgroundColor()"-->
-<!--                           [style.&#45;&#45;chapter-preview-text-color]="fontColor()"-->
-<!--                           (activated)="loadNextChapter()" />-->
-<!--    }-->
-<!--  </div>-->
-
-  <app-pull-to-load #pullToLoadNext
-    [direction]="'up'"
-    [title]="t('continuous-reading-next-chapter')"
-    [scrollContainer]="scrollElement()"
-    (triggered)="moveToNextChapter()" />
 
 </ng-container>

@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, Component, ElementRef, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, ElementRef, input, output, viewChild} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ChapterPreviewComponent} from "../chapter-preview/chapter-preview.component";
-import {PullToLoadComponent} from "../pull-to-load/pull-to-load.component";
+import {PullState, PullToLoadComponent} from "../pull-to-load/pull-to-load.component";
 import {ChapterCapInfo} from "../../../_models/readers/chapter-cap-info";
 
 @Component({
@@ -19,6 +19,8 @@ import {ChapterCapInfo} from "../../../_models/readers/chapter-cap-info";
   }
 })
 export class ChapterCapComponent {
+  private readonly pullToLoad = viewChild(PullToLoadComponent);
+
   readonly position = input.required<'start' | 'end'>();
   readonly info = input.required<ChapterCapInfo>();
   /**
@@ -34,4 +36,6 @@ export class ChapterCapComponent {
   readonly textColor = input<string | undefined>(undefined);
 
   readonly activated = output<void>();
+
+  readonly pullState = computed(() => this.pullToLoad()?.state() ?? PullState.Idle);
 }

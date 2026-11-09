@@ -89,7 +89,8 @@ import {
   EnumOption,
   SettingSelectComponent
 } from "../../../settings/_components/setting-enum-select/setting-select.component";
-import {ContinuousReaderInfo, PrefetchChapterInfo} from "../../../_models/readers/prefetch-chapterinfo";
+import {PrefetchChapterInfo} from "../../../_models/readers/prefetch-chapterinfo";
+import {ChapterCapInfo} from "../../../_models/readers/chapter-cap-info";
 
 
 const PREFETCH_PAGES = 10;
@@ -370,18 +371,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading = signal<boolean>(true);
   hasBookmarkRights = computed(() => this.accountService.hasBookmarkRole() || this.accountService.hasAdminRole());
 
-  protected readonly continuousReaderInfo = computed<ContinuousReaderInfo>(() => {
-    const showStartCap = this.prevChapter() !== null;
-    const showEndCap = this.nextChapter() !== null || this.nextChapterDisabled();
-
-    const nextHint = translate('pdf-reader.next-scroll-hint'); // TODO: Centralize this
-    const prevHint = this.nextChapterDisabled() ? translate('pdf-reader.next-scroll-hint') : translate('pdf-reader.finish-hint');
-    const nextHeading = this.nextChapterDisabled() ?
-      (this.readingListMode ? translate('pdf-reader.end-of-reading-list') : translate('pdf-reader.end-of-series'))
-      : this.nextChapter()?.info.subtitle ?? '';
-
-    return {showStartCap, showEndCap, prevChapter: this.prevChapter(), nextChapter: this.nextChapter(), nextHint, prevHint, nextHeading};
-  });
+  protected readonly capInfo = computed<ChapterCapInfo>(() => ({
+    prevChapter: this.prevChapter(),
+    nextChapter: this.nextChapter(),
+    nextChapterDisabled: this.nextChapterDisabled(),
+    readingListMode: this.readingListMode,
+  }));
 
 
   getPageFn!: (pageNum: number) => HTMLImageElement;

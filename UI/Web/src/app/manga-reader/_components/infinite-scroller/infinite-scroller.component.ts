@@ -33,8 +33,8 @@ import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {Queue} from "../../../shared/data-structures/queue";
 import {PullState, PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
-import {ContinuousReaderInfo} from "../../../_models/readers/prefetch-chapterinfo";
-import {ChapterPreviewComponent} from "../../../shared/_components/chapter-preview/chapter-preview.component";
+import {ChapterCapComponent} from "../../../shared/_components/chapter-cap/chapter-cap.component";
+import {ChapterCapInfo} from "../../../_models/readers/chapter-cap-info";
 
 /**
  * Default debounce time from scroll and scrollend event listeners
@@ -79,7 +79,7 @@ const enum DEBUG_MODES {
   templateUrl: './infinite-scroller.component.html',
   styleUrls: ['./infinite-scroller.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, InfiniteScrollDirective, PullToLoadComponent, ChapterPreviewComponent]
+  imports: [TranslocoDirective, InfiniteScrollDirective, PullToLoadComponent, ChapterCapComponent]
 })
 export class InfiniteScrollerComponent implements OnInit {
   private readonly document = inject<Document>(DOCUMENT);
@@ -91,7 +91,7 @@ export class InfiniteScrollerComponent implements OnInit {
   protected readonly breakpointService = inject(BreakpointService);
 
   scrollContainer = viewChild.required<ElementRef<HTMLDivElement>>('scroller');
-  pullToLoadNext = viewChild<PullToLoadComponent>('pullToLoadNext');
+  endCap = viewChild<ChapterCapComponent>('endCap');
   ignoreNextScrollEvent = signal(false);
 
   /**
@@ -121,7 +121,7 @@ export class InfiniteScrollerComponent implements OnInit {
   bookmarkPage = input<ReplaySubject<number>>();
   fullscreenToggled = input<ReplaySubject<boolean>>();
 
-  continuousReaderInfo = input.required<ContinuousReaderInfo>();
+  capInfo = input.required<ChapterCapInfo>();
 
   readerElemRef!: ElementRef<HTMLDivElement>;
 
@@ -200,7 +200,9 @@ export class InfiniteScrollerComponent implements OnInit {
   scrollElement = computed<HTMLElement>(() => this.isFullscreenMode() ? this.readerElemRef.nativeElement : this.document.body);
 
   private readonly capsAllowed = computed(() => this.allImagesLoaded());
-
+  protected readonly showStartCap = computed(() => this.capsAllowed() && this.capInfo().prevChapter !== null);
+  protected readonly showEndCap = computed(() => this.capsAllowed()
+    && (this.capInfo().nextChapter !== null || this.capInfo().nextChapterDisabled));
 
   /**
    * Kept as a getter (not computed) since it also reads window dimensions, which aren't reactive
@@ -221,10 +223,10 @@ export class InfiniteScrollerComponent implements OnInit {
 
     let previousState: PullState = PullState.Idle;
     effect(() => {
-      const pullToLoad = this.pullToLoadNext();
-      if (!pullToLoad) return;
+      const endCap = this.endCap();
+      if (!endCap) return;
 
-      const currentState = pullToLoad.state();
+      const currentState = endCap.pullState();
 
       // On mobile devices with a sufficiently small last image, the debounce from moving into idle
       // causes the scroll event to fire with a wrong page number. We ignore one scroll event to prevent this from
