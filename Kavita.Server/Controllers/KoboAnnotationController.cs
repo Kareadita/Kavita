@@ -41,6 +41,7 @@ public class KoboAnnotationController(
     /// <param name="limit"></param>
     /// <returns></returns>
     [HttpGet("{bookId}/annotations")]
+    [ChapterAccess(chapterIdKey: "bookId", failOnMissing: false)]
     public async Task<ActionResult> GetAnnotations(string bookId, [FromQuery] int limit = 100)
     {
         var ct = HttpContext.RequestAborted;
@@ -141,6 +142,7 @@ public class KoboAnnotationController(
     /// <param name="bookId"></param>
     /// <returns></returns>
     [HttpPatch("{bookId}/annotations")]
+    [ChapterAccess(chapterIdKey: "bookId", failOnMissing: false)]
     public async Task<ActionResult> UpdateAnnotations(string bookId)
     {
         var ct = HttpContext.RequestAborted;
