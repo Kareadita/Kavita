@@ -6,6 +6,6 @@ export const environment = {
   production: true,
   apiUrl: `${BASE_URL}api/`,
   hubUrl:`${BASE_URL}hubs/`,
-  buyLink: 'https://buy.kavitareader.com/?src=app',
+  buyLink: 'https://buy.kavitareader.com/?src=app&promo=FIRSTTIME',
   manageLink: 'https://billing.stripe.com/p/login/28oaFRa3HdHWb5ecMM'
 };
