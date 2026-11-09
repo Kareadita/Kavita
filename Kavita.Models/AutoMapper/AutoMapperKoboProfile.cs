@@ -24,14 +24,12 @@ public class AutoMapperKoboProfile: Profile
         CreateMap<Chapter, KoboSeriesDto>()
             .ForMemberSimple(d => d.Id, c => c.Volume.SeriesId.ToString())
             .ForMemberSimple(d => d.Name, c => c.Volume.Series.Name)
-            .ForMemberSimple(d => d.NumberFloat,
-                c => c.Volume.MinNumber == ParserConstants.LooseLeafVolumeNumber
-                    ? 0
-                    : c.MinNumber != ParserConstants.DefaultChapterNumber
-                        ? c.MinNumber
-                        : c.Volume.MinNumber == ParserConstants.SpecialVolumeNumber
-                            ? 0
-                            : c.Volume.MinNumber);
+            .ForMemberSimple(d => d.NumberFloat, c => c.SortOrder)
+            .ForMemberSimple(d => d.Number, c =>
+                c.Volume.MinNumber == ParserConstants.LooseLeafVolumeNumber ? string.Empty
+                : c.MinNumber != ParserConstants.DefaultChapterNumber ? c.MinNumber.ToString()
+                    : c.Volume.MinNumber == ParserConstants.SpecialVolumeNumber ? string.Empty
+                        : c.Volume.MinNumber.ToString());
 
         CreateMap<Chapter, KoboBookMetadataDto>()
             .ForMemberSimple(d => d.Title, c => c.TitleName)
