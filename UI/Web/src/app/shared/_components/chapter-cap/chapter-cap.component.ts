@@ -14,6 +14,7 @@ import {ChapterCapInfo} from "../../../_models/readers/chapter-cap-info";
     '[class.start]': "position() === 'start'",
     '[class.end]': "position() === 'end'",
     '[class.horizontal]': 'horizontal()',
+    '[class.compact]': 'compact()',
     '[class.hidden]': '!visible()',
     '[style.color]': 'textColor()',
   }
@@ -31,6 +32,10 @@ export class ChapterCapComponent {
    * Laid out inline beside the pages, with no pull-to-load
    */
   readonly horizontal = input<boolean>(false);
+  /**
+   * No gap between the cap and the pages
+   */
+  readonly compact = input<boolean>(false);
   readonly scrollContainer = input<ElementRef | HTMLElement | undefined>(undefined);
   readonly backgroundColor = input<string | undefined>(undefined);
   readonly textColor = input<string | undefined>(undefined);

@@ -13,19 +13,11 @@
     </div>
   }
 
-<!--  @if (continuousReaderInfo(); as contReaderInfo) {-->
-<!--    @if (contReaderInfo.prevChapter; as prev) {-->
-<!--      <app-chapter-preview [chapterId]="prev.chapterId" [heading]="prev.info.subtitle" [subheading]="prev.info.chapterTitle"-->
-<!--                           [hint]="contReaderInfo.nextHint"-->
-<!--                           (activated)="loadPrevChapter.emit()" />-->
-<!--    }-->
-<!--  }-->
+  <app-chapter-cap #startCap position="start" [info]="capInfo()" [visible]="showStartCap()" [compact]="true"
+                   [scrollContainer]="scrollElement()"
+                   [backgroundColor]="backgroundColor()" [textColor]="capTextColor()"
+                   (activated)="loadPrevChapter.emit()" />
 
-  <app-pull-to-load
-    [direction]="'down'"
-    [title]="t('continuous-reading-prev-chapter')"
-    [scrollContainer]="scrollElement()"
-    (triggered)="loadPrevChapter.emit()" />
 
   <div #scroller tabindex="0" [style.outline]="'none'" infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50">
     @for(item of webtoonImages(); let index = $index; track item.src) {
@@ -46,8 +38,9 @@
     }
   </div>
 
-  <app-chapter-cap #endCap position="end" [info]="capInfo()" [visible]="showEndCap()"
+  <app-chapter-cap #endCap position="end" [info]="capInfo()" [visible]="showEndCap()" [compact]="true"
                    [scrollContainer]="scrollElement()"
+                   [backgroundColor]="backgroundColor()" [textColor]="capTextColor()"
                    (activated)="moveToNextChapter()" />
 
 

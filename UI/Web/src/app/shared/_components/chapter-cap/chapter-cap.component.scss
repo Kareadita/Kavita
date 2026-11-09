@@ -9,6 +9,10 @@
     padding-top: 2rem;
   }
 
+  &.compact {
+    padding: 0;
+  }
+
   // pdf.js lays horizontal pages out as inline-blocks in a nowrap row, a block would wrap below them
   &.horizontal {
     display: inline-block;

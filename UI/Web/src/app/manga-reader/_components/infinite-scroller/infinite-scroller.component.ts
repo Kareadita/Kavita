@@ -32,9 +32,10 @@ import {ReaderSetting} from "../../_models/reader-setting";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {Queue} from "../../../shared/data-structures/queue";
-import {PullState, PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
+import {PullState} from "../../../shared/_components/pull-to-load/pull-to-load.component";
 import {ChapterCapComponent} from "../../../shared/_components/chapter-cap/chapter-cap.component";
 import {ChapterCapInfo} from "../../../_models/readers/chapter-cap-info";
+import {ColorscapeService} from "../../../_services/colorscape.service";
 
 /**
  * Default debounce time from scroll and scrollend event listeners
@@ -78,8 +79,8 @@ const enum DEBUG_MODES {
   selector: 'app-infinite-scroller',
   templateUrl: './infinite-scroller.component.html',
   styleUrls: ['./infinite-scroller.component.scss'],
+  imports: [TranslocoDirective, InfiniteScrollDirective, ChapterCapComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, InfiniteScrollDirective, PullToLoadComponent, ChapterCapComponent]
 })
 export class InfiniteScrollerComponent implements OnInit {
   private readonly document = inject<Document>(DOCUMENT);
@@ -89,9 +90,11 @@ export class InfiniteScrollerComponent implements OnInit {
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly colorscapeService = inject(ColorscapeService);
 
   scrollContainer = viewChild.required<ElementRef<HTMLDivElement>>('scroller');
-  endCap = viewChild<ChapterCapComponent>('endCap');
+  private readonly startCapElem = viewChild('startCap', {read: ElementRef<HTMLElement>});
+  private readonly endCapElem = viewChild<ChapterCapComponent>('endCap');
   ignoreNextScrollEvent = signal(false);
 
   /**
@@ -122,6 +125,9 @@ export class InfiniteScrollerComponent implements OnInit {
   fullscreenToggled = input<ReplaySubject<boolean>>();
 
   capInfo = input.required<ChapterCapInfo>();
+  backgroundColor = input.required<string>();
+  protected readonly capTextColor = computed(() =>
+    this.colorscapeService.getContrastingTextColorFor(this.colorscapeService.hexToRGBA(this.backgroundColor())));
 
   readerElemRef!: ElementRef<HTMLDivElement>;
 
@@ -198,10 +204,15 @@ export class InfiniteScrollerComponent implements OnInit {
   minPageLoaded = computed(() => Math.min(...this.imagesLoaded()));
   maxPageLoaded = computed(() => Math.max(...this.imagesLoaded()));
   scrollElement = computed<HTMLElement>(() => this.isFullscreenMode() ? this.readerElemRef.nativeElement : this.document.body);
+  private readonly lastPageLoaded = computed(() => {
+    const last = this.totalPages() - 1;
+    return this.imagesLoaded().has(last) && !this.pendingPages().has(last);
+  });
 
-  private readonly capsAllowed = computed(() => this.allImagesLoaded());
-  protected readonly showStartCap = computed(() => this.capsAllowed() && this.capInfo().prevChapter !== null);
-  protected readonly showEndCap = computed(() => this.capsAllowed()
+  private readonly firstPageLoaded = computed(() => this.imagesLoaded().has(0) && !this.pendingPages().has(0));
+
+  protected readonly showStartCap = computed(() => this.firstPageLoaded() && this.capInfo().prevChapter !== null);
+  protected readonly showEndCap = computed(() => this.lastPageLoaded()
     && (this.capInfo().nextChapter !== null || this.capInfo().nextChapterDisabled));
 
   /**
@@ -223,7 +234,7 @@ export class InfiniteScrollerComponent implements OnInit {
 
     let previousState: PullState = PullState.Idle;
     effect(() => {
-      const endCap = this.endCap();
+      const endCap = this.endCapElem();
       if (!endCap) return;
 
       const currentState = endCap.pullState();
@@ -237,6 +248,11 @@ export class InfiniteScrollerComponent implements OnInit {
       }
 
       previousState = currentState;
+    });
+
+    effect(() => {
+      if (!this.showStartCap()) return;
+      afterNextRender(() => this.keepPagesBelowStartCap(), {injector: this.injector});
     });
 
 
@@ -453,6 +469,15 @@ export class InfiniteScrollerComponent implements OnInit {
       return this.readerElemRef.nativeElement.scrollTop;
     }
     return document.body.scrollTop;
+  }
+
+  // Scroll anchoring keeps the pages in place when the cap appears above them, except at scrollTop 0, where browsers skip it
+  private keepPagesBelowStartCap() {
+    const capHeight = this.startCapElem()?.nativeElement.offsetHeight ?? 0;
+    const scrollTop = this.getScrollTop();
+    if (capHeight === 0 || scrollTop >= capHeight) return;
+
+    this.scrollElement().scrollTop = scrollTop + capHeight;
   }
 
   /**
