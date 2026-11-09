@@ -16,5 +16,7 @@ public interface IChapterInfoDto
     public int Pages { get; set; }
     public bool IsSpecial { get; set; }
     public string ChapterTitle { get; set; }
+    [EnumDataType(typeof(PublicationStatus))]
+    public PublicationStatus? SeriesPublicationStatus { get; set; }
 
 }

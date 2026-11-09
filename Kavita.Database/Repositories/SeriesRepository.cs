@@ -689,14 +689,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .FirstOrDefaultAsync(ct);
     }
 
-    public Task<PublicationStatus?> GetPublicationStatusAsync(int seriesId, CancellationToken ct = default)
-    {
-        return context.Series
-            .Where(s => s.Id == seriesId)
-            .Select(s => (PublicationStatus?) s.Metadata.PublicationStatus)
-            .FirstOrDefaultAsync(ct);
-    }
-
     public async Task<string?> GetSeriesCoverImageAsync(int seriesId, CancellationToken ct = default)
     {
         return await context.Series
@@ -2023,5 +2015,12 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .FirstOrDefaultAsync(cancellationToken: ct);
 
         return result is { AllSpecial: true } ? result.Count : null;
+    }
+
+    public async Task<int> GetNonSpecialChapterCountAsync(int seriesId, CancellationToken ct = default)
+    {
+        return await context.Chapter
+            .Where(c => c.Volume.SeriesId == seriesId && c.Volume.MaxNumber != ParserConstants.SpecialVolumeNumber)
+            .CountAsync(ct);
     }
 }

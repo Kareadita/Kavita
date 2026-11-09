@@ -68,10 +68,11 @@ export class ColorscapeService {
       return 'black';
     }
 
-    const rgba = this.rgbStringToRGBA(bgColor);
-    const luminance = this.getLuminance(rgba);
+    return this.getContrastingTextColorFor(this.rgbStringToRGBA(bgColor));
+  }
 
-    return luminance > ColorscapeService.defaultLuminanceThreshold ? 'black' : 'white';
+  getContrastingTextColorFor(background: RGBAColor): string {
+    return this.getLuminance(background) > ColorscapeService.defaultLuminanceThreshold ? 'black' : 'white';
   }
 
   getLuminance(rgba: RGBAColor): number {

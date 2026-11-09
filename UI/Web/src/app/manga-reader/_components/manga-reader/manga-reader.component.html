@@ -12,7 +12,7 @@
     @if (menuOpen()) {
       <div class="fixed-top overlay" animate.enter="slide-in-top" animate.leave="slide-out-top">
         <div style="display: flex; margin-top: 0.3125rem;">
-          <button class="btn btn-icon" style="height: 100%" [title]="t('back')" (click)="closeReader()">
+          <button class="btn btn-icon" style="height: 100%" [title]="t('back')" (click)="exitReader()">
             <i class="fa fa-arrow-left" aria-hidden="true"></i>
             <span class="visually-hidden">{{t('back')}}</span>
           </button>
@@ -20,7 +20,9 @@
           <div>
             <div style="font-weight: bold;">{{title()}}
               @if (incognitoMode()) {
-                <span class="clickable" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-alt')">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-title')}}</span>)</span>
+                <span class="clickable" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-alt')">
+                  (<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-title')}}</span>)
+                </span>
               }
             </div>
             <div class="subtitle">
@@ -127,7 +129,10 @@
                                    [fullscreenToggled]="fullscreenEvent"
                                    [readerSettings$]="readerSettings$"
                                    [readingProfile]="readingProfile()!"
-                                   [chapterId]="chapterId()"/>
+                                   [chapterId]="chapterId()"
+                                   [capInfo]="capInfo()"
+                                   [backgroundColor]="backgroundColor()"
+            />
           </div>
         }
       }

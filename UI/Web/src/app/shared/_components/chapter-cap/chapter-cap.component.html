@@ -1,0 +1,36 @@
+<ng-container *transloco="let t; prefix: 'chapter-cap'">
+  @if (position() === 'start') {
+    @if (info().prevChapter; as prev) {
+      @if (!horizontal()) {
+        <app-pull-to-load [direction]="'down'" [scrollContainer]="scrollContainer()" [disabled]="!visible()"
+                          (triggered)="activated.emit()" />
+      }
+
+      <app-chapter-preview [chapterId]="prev.chapterId" [heading]="prev.info.subtitle" [subheading]="prev.info.chapterTitle"
+                           [hint]="horizontal() ? t('click-hint') : t('prev-scroll-hint')"
+                           [textPosition]="horizontal() ? 'top' : 'bottom'"
+                           [style.--chapter-preview-background-color]="backgroundColor()"
+                           [style.--chapter-preview-text-color]="textColor()"
+                           (activated)="activated.emit()" />
+    }
+  } @else {
+    @if (info().nextChapter; as next) {
+      <app-chapter-preview [chapterId]="next.chapterId" [heading]="next.info.subtitle" [subheading]="next.info.chapterTitle"
+                           [hint]="horizontal() ? t('click-hint') : t('next-scroll-hint')"
+                           [style.--chapter-preview-background-color]="backgroundColor()"
+                           [style.--chapter-preview-text-color]="textColor()"
+                           (activated)="activated.emit()" />
+
+      @if (!horizontal()) {
+        <app-pull-to-load [direction]="'up'" [scrollContainer]="scrollContainer()" [disabled]="!visible()"
+                          (triggered)="activated.emit()" />
+      }
+    } @else if (info().nextChapterDisabled) {
+      <app-chapter-preview [heading]="info().readingListMode ? t('end-of-reading-list') : t('end-of-series')"
+                           [hint]="t('finish-hint')"
+                           [style.--chapter-preview-background-color]="backgroundColor()"
+                           [style.--chapter-preview-text-color]="textColor()"
+                           (activated)="activated.emit()" />
+    }
+  }
+</ng-container>
