@@ -13,6 +13,22 @@ public record KoboPagination<T>
     public int VersionCode { get; set; }
 }
 
+public sealed record KoboWishlistResponseDto : KoboPagination<object>
+{
+    public object TotalCountByProductType { get; set; }
+    public static readonly KoboWishlistResponseDto Empty = new()
+    {
+        Items = [],
+        ItemCount = 0,
+        TotalPageCount = 0,
+        TotalItemCount = 0,
+        CurrentPageIndex = 0,
+        ItemsPerPage = 100,
+        VersionCode = 2,
+        TotalCountByProductType = new object(),
+    };
+}
+
 public sealed record KoboRecommendationResponseDto : KoboPagination<KoboBookWrapperDto<KoboBookRecommendationDto>>
 {
 

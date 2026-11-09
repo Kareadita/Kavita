@@ -663,6 +663,23 @@ public class KoboController(
         });
     }
 
+    /// <summary>
+    /// Dummy implementation to reduce failure when forward is off. Returns an empty pagination response
+    ///
+    /// Not intended for use beyond Kobo devices
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("v1/user/wishlist")]
+    public async Task<ActionResult> GetWishlist()
+    {
+        if ((await KoboSyncSettings).ForwardToKoboStore)
+        {
+            return await koboSyncService.ProxyRequestIfEnabled();
+        }
+
+        return Ok(KoboWishlistResponseDto.Empty);
+    }
+
     #endregion
 
     #region Analytics
