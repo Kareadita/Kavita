@@ -8,6 +8,7 @@
 
       <app-chapter-preview [chapterId]="prev.chapterId" [heading]="prev.info.subtitle" [subheading]="prev.info.chapterTitle"
                            [hint]="horizontal() ? t('click-hint') : t('prev-scroll-hint')"
+                           [textPosition]="horizontal() ? 'top' : 'bottom'"
                            [style.--chapter-preview-background-color]="backgroundColor()"
                            [style.--chapter-preview-text-color]="textColor()"
                            (activated)="activated.emit()" />

@@ -1,6 +1,6 @@
 @let cover = coverUrl();
 <button type="button" class="preview d-block position-relative mx-auto p-0 border-0 rounded-3 overflow-hidden"
-        [class.with-cover]="cover" (click)="activated.emit()">
+        [class.with-cover]="cover" [class.text-bottom]="textPosition() === 'bottom'" (click)="activated.emit()">
   @if (cover) {
     <app-image [imageUrl]="cover" width="100%" height="100%" objectFit="cover" />
   }

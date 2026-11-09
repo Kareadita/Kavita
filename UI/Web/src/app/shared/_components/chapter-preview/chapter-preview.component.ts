@@ -19,6 +19,10 @@ export class ChapterPreviewComponent {
   readonly heading = input.required<string>();
   readonly subheading = input<string>('');
   readonly hint = input<string>('');
+  /**
+   * Which edge of the cover the text sits on, the fade runs away from it
+   */
+  readonly textPosition = input<'top' | 'bottom'>('top');
 
   readonly activated = output<void>();
 

@@ -34,6 +34,16 @@
         color-mix(in srgb, var(--chapter-preview-background-color) 95%, transparent) 40%,
         transparent);
     }
+
+    &.text-bottom .text {
+      top: auto;
+      bottom: 0;
+      padding-top: 4rem !important;
+      padding-bottom: 1rem !important;
+      background: linear-gradient(to top,
+        color-mix(in srgb, var(--chapter-preview-background-color) 95%, transparent) 40%,
+        transparent);
+    }
   }
 }
 
