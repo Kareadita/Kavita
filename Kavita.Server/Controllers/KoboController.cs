@@ -19,9 +19,11 @@ using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers.Kobo;
+using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NetVips;
 
@@ -280,11 +282,24 @@ public class KoboController(
             return NotFound();
         }
 
-        var coverPath = await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(kavitaId, ct);
-        if (coverPath is null)
+        var coverInfo = await unitOfWork.DataContext.Chapter
+            .Where(c => c.Id == kavitaId)
+            .Select(c => new
+            {
+                ChapterCoverImage = c.CoverImage,
+                VolumeCoverImage = c.Volume.CoverImage,
+                c.MinNumber
+            })
+            .FirstOrDefaultAsync(ct);
+
+        if (coverInfo is null)
         {
             return NotFound();
         }
+
+        var coverPath = coverInfo.MinNumber.Is(Parser.DefaultChapterNumber)
+            ? coverInfo.VolumeCoverImage
+            : coverInfo.ChapterCoverImage;
 
         var fullPath = Path.Join(directoryService.CoverImageDirectory, coverPath);
         if (string.Equals(Path.GetExtension(fullPath), ".jpg", StringComparison.OrdinalIgnoreCase))
@@ -652,6 +667,12 @@ public class KoboController(
 
     #region Analytics
 
+    /// <summary>
+    /// Dummy implementation
+    ///
+    /// Not intended for use beyond Kobo devices
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("v1/analytics/gettests")]
     [HttpPost("v1/analytics/gettests")]
     public ActionResult GetTests()
