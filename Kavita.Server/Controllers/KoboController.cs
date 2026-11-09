@@ -650,6 +650,17 @@ public class KoboController(
 
     #endregion
 
+    #region Analytics
+
+    [HttpGet("v1/analytics/gettests")]
+    [HttpPost("v1/analytics/gettests")]
+    public ActionResult GetTests()
+    {
+        return Ok(new KoboAnalyticsTestsResponseDto());
+    }
+
+    #endregion
+
     /// <summary>
     /// Catch all fallback
     ///
