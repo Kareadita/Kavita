@@ -25,19 +25,7 @@ import {
   SpreadType
 } from 'ngx-extended-pdf-viewer';
 import {ToastrService} from '@openng/ngx-toastr';
-import {
-  auditTime,
-  catchError,
-  EMPTY,
-  filter,
-  forkJoin,
-  fromEvent,
-  map,
-  merge,
-  of,
-  switchMap,
-  take
-} from 'rxjs';
+import {auditTime, catchError, EMPTY, filter, forkJoin, fromEvent, map, merge, of, switchMap, take} from 'rxjs';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {DOCUMENT, NgStyle} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -66,10 +54,10 @@ import {EntityTitleService} from "../../../_services/entity-title.service";
 import {LibraryService} from "../../../_services/library.service";
 import {LibraryType} from "../../../_models/library/library";
 import {ReadingProfileSessionService} from '../../../_services/reading-profile-session.service';
-import {ChapterPreviewComponent} from "../../../shared/_components/chapter-preview/chapter-preview.component";
-import {PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
-import {ChapterInfo} from "../../../manga-reader/_models/chapter-info";
 import {ReaderProgressService} from '../../../_services/reader-progress.service';
+import {PrefetchChapterInfo} from "../../../_models/readers/prefetch-chapterinfo";
+import {ChapterCapComponent} from "../../../shared/_components/chapter-cap/chapter-cap.component";
+import {ChapterCapInfo} from "../../../_models/readers/chapter-cap-info";
 
 const KEYBIND_TARGETS = [
   {keyBindTarget: KeyBindTarget.PageLeft, description: 'prev-page'},
@@ -99,7 +87,7 @@ const THEME_COLORS: {[key: string]: {background: string, font: string}} = {
   styleUrls: ['./pdf-reader.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, TranslocoDirective,
-    PdfScrollModeTypePipe, PdfSpreadTypePipe, ChapterPreviewComponent, PullToLoadComponent],
+    PdfScrollModeTypePipe, PdfSpreadTypePipe, ChapterCapComponent],
   providers: [ReaderProgressService, ReadingProfileSessionService],
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
@@ -127,8 +115,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
 
   readonly container = viewChild.required<ElementRef>('container');
-  private readonly startCap = viewChild<ElementRef<HTMLElement>>('startCap');
-  private readonly endCap = viewChild<ElementRef<HTMLElement>>('endCap');
+  private readonly startCap = viewChild('startCap', {read: ElementRef<HTMLElement>});
+  private readonly endCap = viewChild('endCap', {read: ElementRef<HTMLElement>});
 
   libraryId!: number;
   seriesId!: number;
@@ -183,8 +171,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   private isReRead = false;
   private focusViewerOnLoad = false;
 
-  protected prevChapter = signal<{chapterId: number, info: ChapterInfo} | null>(null);
-  protected nextChapter = signal<{chapterId: number, info: ChapterInfo} | null>(null);
+  protected prevChapter = signal<PrefetchChapterInfo>(null);
+  protected nextChapter = signal<PrefetchChapterInfo>(null);
   protected viewerContainer = signal<HTMLElement | undefined>(undefined);
   private capsObserver: MutationObserver | null = null;
   private capsViewer: Element | null = null;
@@ -221,6 +209,12 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   protected readonly showStartCap = computed(() => this.capsAllowed() && this.prevChapter() !== null);
   protected readonly showEndCap = computed(() => this.capsAllowed()
     && (this.nextChapter() !== null || this.nextChapterDisabled()));
+  protected readonly capInfo = computed<ChapterCapInfo>(() => ({
+    prevChapter: this.prevChapter(),
+    nextChapter: this.nextChapter(),
+    nextChapterDisabled: this.nextChapterDisabled(),
+    readingListMode: this.readingListMode,
+  }));
 
   constructor() {
       this.navService.hideNavBar();

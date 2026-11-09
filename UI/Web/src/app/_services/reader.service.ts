@@ -3,7 +3,7 @@ import {effect, inject, Injectable, signal} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
 import {Router} from '@angular/router';
 import {environment} from '../../environments/environment';
-import {ChapterInfo} from '../manga-reader/_models/chapter-info';
+import {ChapterInfo} from '../_models/readers/chapter-info';
 import {Chapter} from '../_models/chapter';
 import {HourEstimateRange} from '../_models/series-detail/hour-estimate-range';
 import {MangaFormat} from '../_models/manga-format';

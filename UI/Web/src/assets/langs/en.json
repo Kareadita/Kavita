@@ -3613,7 +3613,10 @@
         "first-page-alt": "{{manga-reader.first-page-tooltip}}",
         "prev-page-alt": "{{manga-reader.prev-page-tooltip}}",
         "next-page-alt": "{{manga-reader.next-page-tooltip}}",
-        "last-page-alt": "{{manga-reader.last-page-tooltip}}",
+        "last-page-alt": "{{manga-reader.last-page-tooltip}}"
+    },
+
+    "chapter-cap": {
         "next-scroll-hint": "Scroll or click to read",
         "prev-scroll-hint": "Scroll up or click to read",
         "click-hint": "Click to read",

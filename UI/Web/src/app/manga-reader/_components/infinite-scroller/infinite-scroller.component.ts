@@ -33,6 +33,8 @@ import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {Queue} from "../../../shared/data-structures/queue";
 import {PullState, PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
+import {ContinuousReaderInfo} from "../../../_models/readers/prefetch-chapterinfo";
+import {ChapterPreviewComponent} from "../../../shared/_components/chapter-preview/chapter-preview.component";
 
 /**
  * Default debounce time from scroll and scrollend event listeners
@@ -73,11 +75,11 @@ const enum DEBUG_MODES {
 }
 
 @Component({
-    selector: 'app-infinite-scroller',
-    templateUrl: './infinite-scroller.component.html',
-    styleUrls: ['./infinite-scroller.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, InfiniteScrollDirective, PullToLoadComponent]
+  selector: 'app-infinite-scroller',
+  templateUrl: './infinite-scroller.component.html',
+  styleUrls: ['./infinite-scroller.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [TranslocoDirective, InfiniteScrollDirective, PullToLoadComponent, ChapterPreviewComponent]
 })
 export class InfiniteScrollerComponent implements OnInit {
   private readonly document = inject<Document>(DOCUMENT);
@@ -118,6 +120,8 @@ export class InfiniteScrollerComponent implements OnInit {
   goToPage = input<BehaviorSubject<number>>();
   bookmarkPage = input<ReplaySubject<number>>();
   fullscreenToggled = input<ReplaySubject<boolean>>();
+
+  continuousReaderInfo = input.required<ContinuousReaderInfo>();
 
   readerElemRef!: ElementRef<HTMLDivElement>;
 
@@ -195,11 +199,14 @@ export class InfiniteScrollerComponent implements OnInit {
   maxPageLoaded = computed(() => Math.max(...this.imagesLoaded()));
   scrollElement = computed<HTMLElement>(() => this.isFullscreenMode() ? this.readerElemRef.nativeElement : this.document.body);
 
+  private readonly capsAllowed = computed(() => this.allImagesLoaded());
+
+
   /**
    * Kept as a getter (not computed) since it also reads window dimensions, which aren't reactive
    */
   get areImagesWiderThanWindow() {
-    let [_, innerWidth] = this.getInnerDimensions();
+    const [_, innerWidth] = this.getInnerDimensions();
     return this.webtoonImageWidth() > (innerWidth || document.body.clientWidth);
   }
 

@@ -47,7 +47,7 @@ import {CanvasRendererComponent} from '../canvas-renderer/canvas-renderer.compon
 import {DoubleRendererComponent} from '../double-renderer/double-renderer.component';
 import {DoubleReverseRendererComponent} from '../double-reverse-renderer/double-reverse-renderer.component';
 import {SingleRendererComponent} from '../single-renderer/single-renderer.component';
-import {ChapterInfo} from '../../_models/chapter-info';
+import {ChapterInfo} from '../../../_models/readers/chapter-info';
 import {DoubleNoCoverRendererComponent} from '../double-renderer-no-cover/double-no-cover-renderer.component';
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {FullscreenIconPipe} from '../../../_pipes/fullscreen-icon.pipe';
@@ -89,6 +89,7 @@ import {
   EnumOption,
   SettingSelectComponent
 } from "../../../settings/_components/setting-enum-select/setting-select.component";
+import {ContinuousReaderInfo, PrefetchChapterInfo} from "../../../_models/readers/prefetch-chapterinfo";
 
 
 const PREFETCH_PAGES = 10;
@@ -369,6 +370,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading = signal<boolean>(true);
   hasBookmarkRights = computed(() => this.accountService.hasBookmarkRole() || this.accountService.hasAdminRole());
 
+  protected readonly continuousReaderInfo = computed<ContinuousReaderInfo>(() => {
+    const showStartCap = this.prevChapter() !== null;
+    const showEndCap = this.nextChapter() !== null || this.nextChapterDisabled();
+
+    const nextHint = translate('pdf-reader.next-scroll-hint'); // TODO: Centralize this
+    const prevHint = this.nextChapterDisabled() ? translate('pdf-reader.next-scroll-hint') : translate('pdf-reader.finish-hint');
+    const nextHeading = this.nextChapterDisabled() ?
+      (this.readingListMode ? translate('pdf-reader.end-of-reading-list') : translate('pdf-reader.end-of-series'))
+      : this.nextChapter()?.info.subtitle ?? '';
+
+    return {showStartCap, showEndCap, prevChapter: this.prevChapter(), nextChapter: this.nextChapter(), nextHint, prevHint, nextHeading};
+  });
+
 
   getPageFn!: (pageNum: number) => HTMLImageElement;
 
@@ -462,8 +476,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Previous Chapter ID. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
    */
   prevChapterId: number = CHAPTER_ID_NOT_FETCHED;
-  protected prevChapter = signal<{chapterId: number, info: ChapterInfo} | null>(null);
-  protected nextChapter = signal<{chapterId: number, info: ChapterInfo} | null>(null);
+  protected prevChapter = signal<PrefetchChapterInfo>(null);
+  protected nextChapter = signal<PrefetchChapterInfo>(null);
   /**
    * Is there a next chapter. If not, this will disable UI controls.
    */
