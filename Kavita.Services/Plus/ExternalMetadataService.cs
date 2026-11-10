@@ -161,7 +161,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!IsPlusEligible(libraryType)) return null;
         if (!await _licenseService.HasActiveLicense(ct: ct)) return null;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library | SeriesIncludes.Chapters, ct: ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library | SeriesIncludes.Chapters | SeriesIncludes.Metadata, ct: ct);
         if (series == null) return null;
 
         if (trigger != MetadataFetchTrigger.OnDemand && (!series.WillScrobble() || !series.Library.AllowMetadataMatching)) return null;
