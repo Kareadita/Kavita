@@ -302,9 +302,10 @@ public class TaskScheduler : ITaskScheduler
 
         // Backfilling/Freshening Reviews/Rating/Recommendations
         var randomKPlusBackfill = Rnd.Next(1, 5);
+        var randomKPlusBackfillMinute = Rnd.Next(0, 60);
         RecurringJob.AddOrUpdate(KavitaPlusDataRefreshId,
             () => _externalMetadataService.FetchExternalDataTask(CancellationToken.None),
-            Cron.Daily(randomKPlusBackfill), RecurringJobOptions);
+            Cron.Daily(randomKPlusBackfill, randomKPlusBackfillMinute), RecurringJobOptions);
 
         // This shouldn't be so close to fetching data due to Rate limit concerns
         var randomKPlusStackSync = Rnd.Next(6, 10);
