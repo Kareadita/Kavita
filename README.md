@@ -32,7 +32,8 @@ your reading collection with your friends and family!
 - Rich web readers supporting webtoon, continuous reading mode (continue without leaving the reader), virtual pages (epub), etc
 - Ability to customize your dashboard and side nav with smart filters, custom order and visibility toggles
 - Full Localization Support ([Weblate](https://hosted.weblate.org/engage/kavita/))
-- Epub-based Annotation/Highlight support 
+- Epub-based Annotation/Highlight support
+- Kobo Sync for Epub/Archives/Images with Annotation sync. Included Kepubify out of the box. [wiki](https://wiki.kavitareader.com/guides/features/kobo-sync/)
 
 ## Support
 [![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://discord.gg/eczRp9eeem)
