@@ -32,7 +32,10 @@ import {ReaderSetting} from "../../_models/reader-setting";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {Queue} from "../../../shared/data-structures/queue";
-import {PullState, PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
+import {PullState} from "../../../shared/_components/pull-to-load/pull-to-load.component";
+import {ChapterCapComponent} from "../../../shared/_components/chapter-cap/chapter-cap.component";
+import {ChapterCapInfo} from "../../../_models/readers/chapter-cap-info";
+import {ColorscapeService} from "../../../_services/colorscape.service";
 
 /**
  * Default debounce time from scroll and scrollend event listeners
@@ -73,11 +76,11 @@ const enum DEBUG_MODES {
 }
 
 @Component({
-    selector: 'app-infinite-scroller',
-    templateUrl: './infinite-scroller.component.html',
-    styleUrls: ['./infinite-scroller.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, InfiniteScrollDirective, PullToLoadComponent]
+  selector: 'app-infinite-scroller',
+  templateUrl: './infinite-scroller.component.html',
+  styleUrls: ['./infinite-scroller.component.scss'],
+  imports: [TranslocoDirective, InfiniteScrollDirective, ChapterCapComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InfiniteScrollerComponent implements OnInit {
   private readonly document = inject<Document>(DOCUMENT);
@@ -87,9 +90,11 @@ export class InfiniteScrollerComponent implements OnInit {
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly colorscapeService = inject(ColorscapeService);
 
   scrollContainer = viewChild.required<ElementRef<HTMLDivElement>>('scroller');
-  pullToLoadNext = viewChild<PullToLoadComponent>('pullToLoadNext');
+  private readonly startCapElem = viewChild('startCap', {read: ElementRef<HTMLElement>});
+  private readonly endCapElem = viewChild<ChapterCapComponent>('endCap');
   ignoreNextScrollEvent = signal(false);
 
   /**
@@ -118,6 +123,11 @@ export class InfiniteScrollerComponent implements OnInit {
   goToPage = input<BehaviorSubject<number>>();
   bookmarkPage = input<ReplaySubject<number>>();
   fullscreenToggled = input<ReplaySubject<boolean>>();
+
+  capInfo = input.required<ChapterCapInfo>();
+  backgroundColor = input.required<string>();
+  protected readonly capTextColor = computed(() =>
+    this.colorscapeService.getContrastingTextColorFor(this.colorscapeService.hexToRGBA(this.backgroundColor())));
 
   readerElemRef!: ElementRef<HTMLDivElement>;
 
@@ -194,12 +204,22 @@ export class InfiniteScrollerComponent implements OnInit {
   minPageLoaded = computed(() => Math.min(...this.imagesLoaded()));
   maxPageLoaded = computed(() => Math.max(...this.imagesLoaded()));
   scrollElement = computed<HTMLElement>(() => this.isFullscreenMode() ? this.readerElemRef.nativeElement : this.document.body);
+  private readonly lastPageLoaded = computed(() => {
+    const last = this.totalPages() - 1;
+    return this.imagesLoaded().has(last) && !this.pendingPages().has(last);
+  });
+
+  private readonly firstPageLoaded = computed(() => this.imagesLoaded().has(0) && !this.pendingPages().has(0));
+
+  protected readonly showStartCap = computed(() => this.firstPageLoaded() && this.capInfo().prevChapter !== null);
+  protected readonly showEndCap = computed(() => this.lastPageLoaded()
+    && (this.capInfo().nextChapter !== null || this.capInfo().nextChapterDisabled));
 
   /**
    * Kept as a getter (not computed) since it also reads window dimensions, which aren't reactive
    */
   get areImagesWiderThanWindow() {
-    let [_, innerWidth] = this.getInnerDimensions();
+    const [_, innerWidth] = this.getInnerDimensions();
     return this.webtoonImageWidth() > (innerWidth || document.body.clientWidth);
   }
 
@@ -214,10 +234,10 @@ export class InfiniteScrollerComponent implements OnInit {
 
     let previousState: PullState = PullState.Idle;
     effect(() => {
-      const pullToLoad = this.pullToLoadNext();
-      if (!pullToLoad) return;
+      const endCap = this.endCapElem();
+      if (!endCap) return;
 
-      const currentState = pullToLoad.state();
+      const currentState = endCap.pullState();
 
       // On mobile devices with a sufficiently small last image, the debounce from moving into idle
       // causes the scroll event to fire with a wrong page number. We ignore one scroll event to prevent this from
@@ -228,6 +248,11 @@ export class InfiniteScrollerComponent implements OnInit {
       }
 
       previousState = currentState;
+    });
+
+    effect(() => {
+      if (!this.showStartCap()) return;
+      afterNextRender(() => this.keepPagesBelowStartCap(), {injector: this.injector});
     });
 
 
@@ -446,6 +471,15 @@ export class InfiniteScrollerComponent implements OnInit {
     return document.body.scrollTop;
   }
 
+  // Scroll anchoring keeps the pages in place when the cap appears above them, except at scrollTop 0, where browsers skip it
+  private keepPagesBelowStartCap() {
+    const capHeight = this.startCapElem()?.nativeElement.offsetHeight ?? 0;
+    const scrollTop = this.getScrollTop();
+    if (capHeight === 0 || scrollTop >= capHeight) return;
+
+    this.scrollElement().scrollTop = scrollTop + capHeight;
+  }
+
   /**
    *
    * @returns Height, Width
@@ -481,6 +515,20 @@ export class InfiniteScrollerComponent implements OnInit {
             rect.top <= (innerHeight || document.body.clientHeight) &&
             rect.left <= (innerWidth || document.body.clientWidth)
           );
+  }
+
+  // pageNum can't be used: a short last page never becomes the image closest to the top
+  isLastPageInView() {
+    const lastPage = this.totalPages() - 1;
+    if (this.pendingPages().has(lastPage)) return false;
+
+    const img = this.document.querySelector('img#page-' + lastPage);
+    if (!img) return false;
+
+    const rect = img.getBoundingClientRect();
+    const [innerHeight] = this.getInnerDimensions();
+    // 1px covers fractional layout heights. A bottom above the viewport means it was scrolled past, still read
+    return rect.height > 0 && rect.bottom <= innerHeight + 1;
   }
 
   /**

@@ -139,7 +139,6 @@ public interface ISeriesRepository
     /// <param name="seriesId"></param>
     /// <param name="ct"></param>
     Task<MetadataProvider?> GetEffectiveMetadataProviderAsync(int seriesId, CancellationToken ct = default);
-    Task<PublicationStatus?> GetPublicationStatusAsync(int seriesId, CancellationToken ct = default);
     Task<Series?> MatchSeriesAsync(ExternalSeriesDetailDto externalSeries, CancellationToken ct = default);
     Task<List<Series>> GetSeriesForReadStatusTransitionRuleAsync(int userId, ReadStatusTransitionRule rule, bool requireUnReadChapters, CancellationToken ct);
     /// <summary>
@@ -149,4 +148,5 @@ public interface ISeriesRepository
     /// <param name="ct"></param>
     /// <returns></returns>
     Task<int?> GetChapterCountIfAllSpecials(int seriesId, CancellationToken ct = default);
+    Task<int> GetNonSpecialChapterCountAsync(int seriesId, CancellationToken ct = default);
 }

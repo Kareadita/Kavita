@@ -45,8 +45,8 @@ export class PullToLoadComponent {
   /** Which direction the user drags to trigger – "up" places the strip at the bottom of content. */
   readonly direction = input.required<'up' | 'down'>();
 
-  /** Label shown inside the strip (e.g. "Read Next Chapter"). */
-  readonly title = input.required<string>();
+  /** Label shown inside the strip (e.g. "Read Next Chapter"). Without one, the arrows sit either side of the bar */
+  readonly title = input<string>('');
 
   /** Scroll container to monitor. Falls back to the document body when omitted. */
   readonly scrollContainer = input<ElementRef | HTMLElement | undefined>(undefined);
@@ -153,7 +153,7 @@ export class PullToLoadComponent {
    * ancestor CSS transforms (e.g. translate3d for hardware acceleration).
    */
   private checkVisibilityForArming() {
-    if (this.isFullyVisible(this.container().nativeElement)) {
+    if (this.isInArmRange()) {
       if (this.armTimeoutId === null) {
         this.startArmCountdown();
       }
@@ -173,7 +173,7 @@ export class PullToLoadComponent {
       if (this.disabled() || this.state() === PullState.Triggered) return;
 
       // Re-check visibility in case user scrolled away during the delay
-      if (!this.isFullyVisible(this.container().nativeElement)) return;
+      if (!this.isInArmRange()) return;
 
       this.state.set(PullState.Armed);
       this.progress.set(0);
@@ -225,9 +225,26 @@ export class PullToLoadComponent {
     const rect = this.container().nativeElement.getBoundingClientRect();
     const [boundsTop, boundsBottom] = this.getScrollBounds();
 
-    if (rect.bottom < boundsTop || rect.top > boundsBottom) {
+    if (rect.bottom < boundsTop || rect.top > boundsBottom + this.getArmLookaheadPx()) {
       this.disarm();
     }
+  }
+
+  private isInArmRange() {
+    const el = this.container().nativeElement;
+    if (this.direction() === 'down') return this.isFullyVisible(el);
+
+    const rect = el.getBoundingClientRect();
+    const [boundsTop, boundsBottom] = this.getScrollBounds();
+    return rect.height > 0 && rect.bottom >= boundsTop && rect.top <= boundsBottom + this.getArmLookaheadPx();
+  }
+
+  // An 'up' strip grows below the fold, so arming it early moves nothing on screen; a 'down' strip would push the content
+  private getArmLookaheadPx() {
+    if (this.direction() === 'down') return 0;
+
+    const rootFontSize = parseFloat(getComputedStyle(this.document.documentElement).fontSize) || 16;
+    return this.armedHeightRem() * rootFontSize;
   }
 
   private fire() {

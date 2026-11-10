@@ -1,5 +1,5 @@
 import {ElementRef, inject, Injectable, Renderer2, RendererFactory2} from '@angular/core';
-import {ChapterInfo} from '../_models/chapter-info';
+import {ChapterInfo} from '../../_models/readers/chapter-info';
 import {DimensionMap} from '../_models/file-dimension';
 import {FITTING_OPTION} from '../_models/reader-enums';
 import {ReaderService} from "../../_services/reader.service";
@@ -26,6 +26,7 @@ export class MangaReaderService {
   }
 
   load(chapterInfo: ChapterInfo | BookmarkInfo) {
+    this.pageDimensions = {};
     chapterInfo.pageDimensions!.forEach(d => {
       this.pageDimensions[d.pageNumber] = {
         height: d.height,
@@ -34,7 +35,6 @@ export class MangaReaderService {
       };
     });
     this.pairs = chapterInfo.doublePairs!;
-    this.hasPageOffset = false;
   }
 
   adjustForDoubleReader(page: number) {

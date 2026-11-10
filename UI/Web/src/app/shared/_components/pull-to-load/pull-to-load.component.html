@@ -8,17 +8,24 @@
   aria-hidden="true"
 >
   <div class="content" [class.stick-bottom]="direction() === 'down'">
-    <span class="title">
-       <i class="fa fa-angle-double-{{directionArrow()}} animate" aria-hidden="true"></i>
-      {{ title() }}
+    @if (title()) {
+      <span class="title">
+         <i class="fa fa-angle-double-{{directionArrow()}} animate" aria-hidden="true"></i>
+        {{ title() }}
+        <i class="fa fa-angle-double-{{directionArrow()}} animate" aria-hidden="true"></i>
+      </span>
+    } @else {
       <i class="fa fa-angle-double-{{directionArrow()}} animate" aria-hidden="true"></i>
-    </span>
+    }
     <div class="track">
       <div
         class="bar"
         [style.width.%]="progressPercent()"
       ></div>
     </div>
+    @if (!title()) {
+      <i class="fa fa-angle-double-{{directionArrow()}} animate" aria-hidden="true"></i>
+    }
   </div>
 
   <div #triggerSentinel class="trigger-sentinel" [class.at-top]="direction() === 'down'"></div>
