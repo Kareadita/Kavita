@@ -199,5 +199,35 @@ public class ChapterListExtensionsTests
         Assert.Equal(2002, chapterList.MinimumReleaseYear());
     }
 
+    [Fact]
+    public void MinimumReleaseYear_IgnoresSpecials_WhenTheSeriesHasRegularChapters()
+    {
+        var chapterList = new List<Chapter>()
+        {
+            CreateChapter("1", "1", CreateFile("/comics/Adventure Time 001 (2012).cbr", MangaFormat.Archive), false),
+            CreateChapter("2", "2", CreateFile("/comics/Adventure Time 002 (2012).cbr", MangaFormat.Archive), false),
+            CreateChapter("Princess and Princess", Parser.DefaultChapter, CreateFile("/comics/Specials/Adventure Time - Princess and Princess (2018).cbz", MangaFormat.Archive), true)
+        };
+
+        chapterList[1].ReleaseDate = new DateTime(2013, 3, 1, 0, 0, 0, DateTimeKind.Utc);
+        chapterList[2].ReleaseDate = new DateTime(2010, 1, 24, 0, 0, 0, DateTimeKind.Utc);
+
+        Assert.Equal(2013, chapterList.MinimumReleaseYear());
+    }
+
+    [Fact]
+    public void MinimumReleaseYear_IsZero_WhenOnlyASpecialHasADate()
+    {
+        var chapterList = new List<Chapter>()
+        {
+            CreateChapter("1", "1", CreateFile("/comics/Adventure Time 001 (2012).cbr", MangaFormat.Archive), false),
+            CreateChapter("Princess and Princess", Parser.DefaultChapter, CreateFile("/comics/Specials/Adventure Time - Princess and Princess (2018).cbz", MangaFormat.Archive), true)
+        };
+
+        chapterList[1].ReleaseDate = new DateTime(2018, 1, 24, 0, 0, 0, DateTimeKind.Utc);
+
+        Assert.Equal(0, chapterList.MinimumReleaseYear());
+    }
+
     #endregion
 }
