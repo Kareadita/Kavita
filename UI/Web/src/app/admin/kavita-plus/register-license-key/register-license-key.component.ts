@@ -74,7 +74,13 @@ export class RegisterLicenseKeyComponent {
   }
 
   forceSave() {
-    this.licenseService.resetLicense(this.formData!.licenseKey, this.formData!.email)
-      .subscribe(() => this.save());
+    this.isLoading.set(true);
+    this.licenseService.resetLicense(this.formData!.licenseKey, this.formData!.email).subscribe({
+      next: () => this.save(),
+      error: () => {
+        this.isLoading.set(false);
+        this.errorCode.set(KavitaPlusRegistrationErrorCode.AlreadyRegistered);
+      }
+    });
   }
 }

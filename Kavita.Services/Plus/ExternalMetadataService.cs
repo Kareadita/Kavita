@@ -161,7 +161,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!IsPlusEligible(libraryType)) return null;
         if (!await _licenseService.HasActiveLicense(ct: ct)) return null;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library | SeriesIncludes.Chapters, ct: ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library | SeriesIncludes.Chapters | SeriesIncludes.Metadata, ct: ct);
         if (series == null) return null;
 
         if (trigger != MetadataFetchTrigger.OnDemand && (!series.WillScrobble() || !series.Library.AllowMetadataMatching)) return null;
@@ -402,7 +402,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <returns></returns>
     public async Task<MatchSeriesResultDto?> MatchSeries(MatchSeriesDto dto, CancellationToken ct = default)
     {
-        const SeriesIncludes includes = SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata | SeriesIncludes.Library;
+        const SeriesIncludes includes = SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata | SeriesIncludes.Library | SeriesIncludes.Chapters;
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, includes, ct);
         if (series == null) return null;
 
@@ -540,7 +540,11 @@ public class ExternalMetadataService : IExternalMetadataService
     /// </summary>
     private static int GetReleaseYear(Series series, PlusMediaFormat format)
     {
-        var year = series.Metadata.ReleaseYear;
+        // Unlocked Release year can be stale, recalc
+        var year = series.Metadata.ReleaseYearLocked
+            ? series.Metadata.ReleaseYear
+            : series.Volumes.SelectMany(v => v.Chapters).ToList().MinimumReleaseYear();
+
         if (year != 0 || format != PlusMediaFormat.Comic || string.IsNullOrWhiteSpace(series.Name)) return year;
 
         var potentialYear = Parser.ParseYear(series.Name);
