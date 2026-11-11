@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using Flurl.Http;
 
 namespace Kavita.Common.Helpers;
@@ -96,5 +97,14 @@ public static class FlurlConfiguration
 
             return client.Request(url);
         }
+    }
+
+    /// <summary>
+    /// Downloads <paramref name="url"/> through <see cref="CreateSafeRequest"/> into <paramref name="filePath"/>.
+    /// Throws <see cref="KavitaException"/> and leaves no file when the body is larger than <paramref name="maxBytes"/>
+    /// </summary>
+    public static Task DownloadToFileAsync(string url, string filePath, long maxBytes, CancellationToken ct = default)
+    {
+        throw new NotImplementedException();
     }
 }
