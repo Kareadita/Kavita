@@ -163,4 +163,17 @@ public class KoboAnnotationController(
         return Accepted();
     }
 
+    /// <summary>
+    /// Catch all fallback
+    ///
+    /// Not intended for use beyond Kobo devices
+    /// </summary>
+    /// <returns></returns>
+    [Route("{**catchAll}")]
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public Task<ActionResult> ProxyFallback()
+    {
+        return koboSyncService.ProxyRequestIfEnabled();
+    }
+
 }
