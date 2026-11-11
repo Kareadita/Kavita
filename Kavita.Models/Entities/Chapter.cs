@@ -6,6 +6,7 @@ using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Person;
 using Kavita.Models.Entities.Progress;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities;
@@ -189,6 +190,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKP
     /// The files that represent this Chapter
     /// </summary>
     public ICollection<MangaFile> Files { get; set; } = null!;
+    public ICollection<ReadingListItem> ReadingListItems { get; set; }
 
 
     public Volume Volume { get; set; } = null!;

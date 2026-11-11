@@ -166,9 +166,9 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         user.Collections = user.Collections.Where(uc => !dto.CollectionIds.Contains(uc.Id)).ToList();
         unitOfWork.UserRepository.Update(user);
 
-        if (dto.CollectionIds.Contains(user.UserPreferences.KoboSyncPreferences.SyncCollection))
+        if (dto.CollectionIds.Contains(user.UserPreferences.KoboSyncPreferences.ManagedCollection))
         {
-            user.UserPreferences.KoboSyncPreferences.SyncCollection = 0;
+            user.UserPreferences.KoboSyncPreferences.ManagedCollection = 0;
             logger.LogWarning("User {UserId} is deleting their Kobo Sync collection. Updating preferences", user.Id);
         }
 
@@ -273,9 +273,9 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             if (user.Collections.All(c => c.Id != tagId))
                 return BadRequest(await localizationService.TranslateAsync(user.Id, "access-denied"));
 
-            if (user.UserPreferences.KoboSyncPreferences.SyncCollection == tagId)
+            if (user.UserPreferences.KoboSyncPreferences.ManagedCollection == tagId)
             {
-                user.UserPreferences.KoboSyncPreferences.SyncCollection = 0;
+                user.UserPreferences.KoboSyncPreferences.ManagedCollection = 0;
                 logger.LogWarning("User {UserId} is deleting their Kobo Sync collection. Updating preferences", user.Id);
             }
 

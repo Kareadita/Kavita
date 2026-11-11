@@ -275,7 +275,7 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
 
         var syncPreferences = new AppUserKoboSyncPreferences
         {
-            SyncCollection = 1,
+            ManagedCollection = 1,
         };
 
         var syncPoint = new KoboSyncPoint
@@ -387,7 +387,7 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
 
         await SetupCollection(ctx);
 
-        var syncPreferences = new AppUserKoboSyncPreferences {SyncItemLimit = 1};
+        var syncPreferences = new AppUserKoboSyncPreferences {SyncItemLimit = 1, LibrarySyncEnabled = true};
 
         var series1 = await ctx.Series.Includes(SeriesIncludes.Chapters).FirstAsync();
         var series2 = new SeriesBuilder("The Moon on a Rainy Night")
@@ -489,7 +489,7 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
 
         await Task.Delay(TimeSpan.FromSeconds(1));
 
-        var syncPreferences = new AppUserKoboSyncPreferences {SyncItemLimit = 1, SyncCollection = 1};
+        var syncPreferences = new AppUserKoboSyncPreferences {SyncItemLimit = 1, ManagedCollection = 1};
 
         var syncPoint = new KoboSyncPoint
         {

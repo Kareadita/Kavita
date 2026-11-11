@@ -256,7 +256,7 @@ public class KoboSyncService(
         return unitOfWork.DataContext.Chapter
             .RestrictByLibrary(unitOfWork.DataContext.Library.GetUserLibraries(userId))
             .RestrictAgainstAgeRestriction(ageRestriction)
-            .FilterByKoboSyncSettings(syncPreferences)
+            .FilterByKoboSyncSettings(syncPreferences, userId)
             .Includes(ChapterIncludes.Files);
     }
 
@@ -272,8 +272,6 @@ public class KoboSyncService(
             throw new KavitaException();
         }
 
-        var syncPreferences = await unitOfWork.UserRepository.GetKoboSyncPreferences(userId, cancellationToken);
-
         var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(cancellationToken);
         var instanceUrl = request.GetInstanceUrl(serverSettings);
 
@@ -284,7 +282,6 @@ public class KoboSyncService(
         }
 
         var metadata = await unitOfWork.DataContext.Chapter
-            .FilterByKoboSyncSettings(syncPreferences)
             .Where(c => chapterIds.Contains(c.Id))
             .ProjectTo<KoboBookMetadataDto>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);

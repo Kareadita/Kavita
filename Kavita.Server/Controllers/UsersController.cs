@@ -157,6 +157,10 @@ public class UsersController(
 
         var allLibs = (await unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id, ct))
             .Select(l => l.Id).ToList();
+        var allCollections = (await unitOfWork.CollectionTagRepository.GetCollectionsForUserAsync(user.Id, ct: ct))
+            .Select(l => l.Id).ToList();
+        var allReadingLists = (await unitOfWork.ReadingListRepository.GetReadingListsForUserAsync(user.Id, true, ct: ct))
+            .Select(l => l.Id).ToList();
 
         preferencesDto.SocialPreferences.SocialLibraries = preferencesDto.SocialPreferences.SocialLibraries
             .Where(allLibs.Contains).ToList();
@@ -164,8 +168,7 @@ public class UsersController(
 
         existingPreferences.OpdsPreferences = preferencesDto.OpdsPreferences;
 
-        if (preferencesDto.KoboSyncPreferences.IsSyncingCollection && !await unitOfWork.UserRepository.HasAccessToCollection(user.Id,
-                preferencesDto.KoboSyncPreferences.SyncCollection, false, ct))
+        if (preferencesDto.KoboSyncPreferences.HasManagedCollection && !allCollections.Contains(preferencesDto.KoboSyncPreferences.ManagedCollection))
         {
             return BadRequest();
         }
@@ -173,6 +176,10 @@ public class UsersController(
         existingPreferences.KoboSyncPreferences = preferencesDto.KoboSyncPreferences;
         existingPreferences.KoboSyncPreferences.SyncLibraries = existingPreferences.KoboSyncPreferences.SyncLibraries
             .Where(allLibs.Contains).ToList();
+        existingPreferences.KoboSyncPreferences.SyncCollections = existingPreferences.KoboSyncPreferences.SyncCollections
+            .Where(allCollections.Contains).ToList();
+        existingPreferences.KoboSyncPreferences.SyncReadingLists = existingPreferences.KoboSyncPreferences.SyncReadingLists
+            .Where(allReadingLists.Contains).ToList();
 
         if (preferencesDto.Theme != null && existingPreferences.Theme.Id != preferencesDto.Theme?.Id)
         {

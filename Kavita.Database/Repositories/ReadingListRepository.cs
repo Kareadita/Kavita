@@ -32,6 +32,15 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         context.Entry(list).State = EntityState.Modified;
     }
 
+    public Task<List<ReadingList>> GetReadingListsForUserAsync(int userId, bool includePromoted,
+        ReadingListIncludes includes = ReadingListIncludes.None, CancellationToken ct = default)
+    {
+        return context.ReadingList
+            .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted))
+            .Includes(includes)
+            .ToListAsync(ct);
+    }
+
     public void Add(ReadingList list)
     {
         context.Add(list);

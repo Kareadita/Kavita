@@ -365,7 +365,7 @@ public class KoboController(
         }
 
         var syncPreferences = await unitOfWork.UserRepository.GetKoboSyncPreferences(UserId, ct);
-        if (!syncPreferences.IsSyncingCollection)
+        if (!syncPreferences.HasManagedCollection)
         {
             // We cannot handle this for non collection syncs
             return Ok();
@@ -374,7 +374,7 @@ public class KoboController(
         var seriesId = await unitOfWork.ChapterRepository.GetSeriesIdForChapter(kavitaId, ct);
         if (seriesId is null) return NotFound();
 
-        var userCollection = await unitOfWork.CollectionTagRepository.GetCollectionAsync(syncPreferences.SyncCollection, CollectionIncludes.Series, ct: ct);
+        var userCollection = await unitOfWork.CollectionTagRepository.GetCollectionAsync(syncPreferences.ManagedCollection, CollectionIncludes.Series, ct: ct);
         if (userCollection is null || userCollection.AppUserId != UserId) return NotFound();
 
         if (userCollection.Items.Any(i => i.Id == seriesId))
