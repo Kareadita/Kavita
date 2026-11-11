@@ -49,12 +49,14 @@ public static class ChapterListExtensions
     }
 
     /// <summary>
-    /// Returns the minimum Release Year from all Chapters that meets the year requirement (>= 1000)
+    /// Returns the minimum Release Year that meets the year requirement (>= 1000), or 0 when none does. Specials are
+    /// skipped unless every chapter is a special
     /// </summary>
-    /// <param name="chapters"></param>
-    /// <returns></returns>
     public static int MinimumReleaseYear(this IList<Chapter> chapters)
     {
-        return chapters.Select(v => v.ReleaseDate.Year).Where(NumberHelper.IsValidYear).DefaultIfEmpty().Min();
+        var regularChapters = chapters.Where(c => !c.IsSpecial).ToList();
+        var source = regularChapters.Count > 0 ? regularChapters : chapters;
+
+        return source.Select(v => v.ReleaseDate.Year).Where(NumberHelper.IsValidYear).DefaultIfEmpty().Min();
     }
 }

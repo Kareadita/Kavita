@@ -29,9 +29,13 @@ namespace Kavita.Services.Tests.Helpers;
 
 public class ScannerHelper
 {
+    private static readonly string ScanTestsDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/ScanTests");
+    private static readonly Lazy<bool> ScanTestsCleared = new(ClearScanTestsDirectory);
+
     private readonly IUnitOfWork _unitOfWork;
     private readonly ITestOutputHelper _testOutputHelper;
-    private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/ScanTests");
+    // Test classes run in parallel and some share a test case, so each helper gets its own folder
+    private readonly string _testDirectory = Path.Join(ScanTestsDirectory, Guid.NewGuid().ToString("N")[..8]);
     private readonly string _testcasesDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/TestCases");
     private readonly string _imagePath = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/1x1.png");
     private static readonly string[] ComicInfoExtensions = [".cbz", ".cbr", ".zip", ".rar"];
@@ -43,6 +47,17 @@ public class ScannerHelper
     {
         _unitOfWork = unitOfWork;
         _testOutputHelper = testOutputHelper;
+        _ = ScanTestsCleared.Value;
+    }
+
+    private static bool ClearScanTestsDirectory()
+    {
+        if (Directory.Exists(ScanTestsDirectory))
+        {
+            Directory.Delete(ScanTestsDirectory, true);
+        }
+
+        return true;
     }
 
     public async Task<Library> GenerateScannerData(string testcase, Dictionary<string, ComicInfo>? comicInfos = null)
