@@ -230,6 +230,12 @@ public static class IdentityServiceExtensions
         auth.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
         auth.AddOpenIdConnect(OpenIdConnect, options =>
         {
+            var openIdConnectConfiguration = configurationManager.GetSync();
+
+            var supportsFormPost = openIdConnectConfiguration?
+                .ResponseModesSupported
+                .Contains(OpenIdConnectResponseMode.FormPost) ?? true;
+
             options.Authority = settings.Authority;
             options.ClientId = settings.ClientId;
             options.ClientSecret = settings.Secret;
@@ -237,6 +243,7 @@ public static class IdentityServiceExtensions
 
             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.ResponseType = OpenIdConnectResponseType.Code;
+            options.ResponseMode = supportsFormPost ? OpenIdConnectResponseMode.FormPost : OpenIdConnectResponseMode.Query;
             options.CallbackPath = OidcCallback;
             options.SignedOutCallbackPath = OidcLogoutCallback;
 
@@ -252,7 +259,7 @@ public static class IdentityServiceExtensions
             options.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "given_name");
 
             options.Scope.Clear();
-            foreach (var scope in GetValidScopes(configurationManager, settings))
+            foreach (var scope in GetValidScopes(openIdConnectConfiguration, settings))
             {
                 options.Scope.Add(scope);
             }
@@ -263,33 +270,20 @@ public static class IdentityServiceExtensions
         return true;
     }
 
-    private static IEnumerable<string> GetValidScopes(
-        ConfigurationManager<OpenIdConnectConfiguration> configurationManager,
-        Configuration.OpenIdConnectSettings settings
-    )
+    private static IEnumerable<string> GetValidScopes(OpenIdConnectConfiguration? configuration, Configuration.OpenIdConnectSettings settings)
     {
         var scopes = OidcService.DefaultScopes;
 
-        ICollection<string> supportedScopes;
-        try
-        {
-            supportedScopes = configurationManager.GetConfigurationAsync()
-                .ConfigureAwait(false)
-                .GetAwaiter()
-                .GetResult()
-                .ScopesSupported;
-        }
-        catch (Exception ex)
+        if (configuration is null)
         {
             // Most idps will safely ignore invalid scopes (all except Authelia as far as I know), so we return them here
             // to have the least amount of impact on users
-            Log.Error(ex, "Failed to load OIDC configuration, scopes will not be filtered. This may cause issues with some idps.");
             return scopes.Concat(settings.CustomScopes);
         }
 
         return scopes.Where(scope =>
         {
-            if (supportedScopes.Contains(scope))
+            if (configuration.ScopesSupported.Contains(scope))
                 return true;
 
             Log.Warning("Scope {Scope} is configured, but not supported by your OIDC provider. Skipping", scope);
