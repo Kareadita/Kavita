@@ -71,7 +71,8 @@ public class KoboSyncService(
 
     public async Task<(List<KoboSyncItem>, bool)> GetChangesSinceAsync(int userId, AppUserKoboSyncPreferences syncPreferences, KoboSyncPoint syncPoint, CancellationToken cancellationToken)
     {
-        logger.LogTrace("GetChangesSinceAsync: {@SyncPoint}", syncPoint);
+        logger.LogTrace("GetChangesSinceAsync: sync point {SyncPointId}, chapter index {ChapterIndex}, progress index {ProgressIndex}",
+            syncPoint.Id, syncPoint.ChapterIndex, syncPoint.ProgressSyncedUntilIndex);
 
         var syncResults = new List<KoboSyncItem>();
 
@@ -1026,11 +1027,12 @@ public class KoboSyncService(
         return new NotFoundResult();
     }
 
-    public async Task<(JsonNode?, bool)> ProxyRequest(KoboSyncToken? syncToken, CancellationToken ct, bool copyResponse = true, object? body = null, HttpClient? httpClient = null, bool writeResponseOnError = true)
+    public async Task<(JsonNode?, bool)> ProxyRequest(KoboSyncPoint? syncPoint, CancellationToken ct, bool copyResponse = true, object? body = null, HttpClient? httpClient = null, bool writeResponseOnError = true)
     {
         var client = httpClient ?? KoboHttpClient;
         var request = Context.Request;
         var response = Context.Response;
+
         var targetUrl = KoboStoreUrl.Build(request.Path, request.QueryString, client.BaseAddress);
         var safeTargetUrl = targetUrl.AbsoluteUri.Sanitize();
 
@@ -1043,9 +1045,9 @@ public class KoboSyncService(
         upstreamRequest.Headers.Remove(KoboHeaders.KoboSyncToken);
 
         // Add back if requested (Need to remove first so it doesn't have 2 values)
-        if (!string.IsNullOrEmpty(syncToken?.KoboStoreSyncToken))
+        if (!string.IsNullOrEmpty(syncPoint?.KoboStoreSyncToken))
         {
-            upstreamRequest.Headers.TryAddWithoutValidation(KoboHeaders.KoboSyncToken, syncToken.KoboStoreSyncToken);
+            upstreamRequest.Headers.TryAddWithoutValidation(KoboHeaders.KoboSyncToken, syncPoint.KoboStoreSyncToken);
         }
 
         using var upstreamResponse = await client.SendAsync(upstreamRequest, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -1060,7 +1062,7 @@ public class KoboSyncService(
         }
 
         // Copy sync tokens from Kobo Servers back over
-        if (syncToken is not null)
+        if (syncPoint is not null)
         {
             if (upstreamResponse.Headers.TryGetValues(KoboHeaders.KoboSync, out var koboSyncHeader))
             {
@@ -1072,11 +1074,15 @@ public class KoboSyncService(
                 var koboSyncTokenValue = koboSyncTokens.FirstOrDefault();
                 if (!string.IsNullOrEmpty(koboSyncTokenValue))
                 {
-                    syncToken.KoboStoreSyncToken = koboSyncTokenValue;
+                    syncPoint.KoboStoreSyncToken = koboSyncTokenValue;
+                    if (unitOfWork.HasChanges())
+                    {
+                        await unitOfWork.CommitAsync(ct);
+                    }
                 }
             }
 
-            response.Headers[KoboHeaders.KoboSyncToken] = KoboSyncTokenHelper.Encode(syncToken);
+            response.Headers[KoboHeaders.KoboSyncToken] = KoboSyncTokenHelper.Encode(syncPoint.Id);
         }
 
         if (!upstreamResponse.IsSuccessStatusCode || copyResponse)
@@ -1087,7 +1093,6 @@ public class KoboSyncService(
             }
 
             response.Headers.XContentTypeOptions = "nosniff";
-            // Append, assigning would drop the frame-ancestors policy Startup already set on this response
             response.Headers.Append(HeaderNames.ContentSecurityPolicy, "sandbox");
 
             await response.CopyResponse(upstreamResponse, IsKoboHeader, ct);

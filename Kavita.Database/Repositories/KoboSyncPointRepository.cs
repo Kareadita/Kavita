@@ -10,7 +10,7 @@ namespace Kavita.Database.Repositories;
 
 public class KoboSyncPointRepository(DataContext context): IKoboSyncPointRepository
 {
-    public async Task<KoboSyncPoint> GetSyncPoint(int userId, int? syncPointId, CancellationToken cancellationToken)
+    public async Task<KoboSyncPoint> GetSyncPoint(int userId, int? syncPointId, string? koboStoreSyncToken, CancellationToken cancellationToken)
     {
         KoboSyncPoint? syncPoint = null;
         if (syncPointId is not null)
@@ -26,11 +26,15 @@ public class KoboSyncPointRepository(DataContext context): IKoboSyncPointReposit
             {
                 UserId = userId,
                 ChapterSyncTime = DateTime.MinValue,
+                KoboStoreSyncToken = koboStoreSyncToken,
             };
 
             context.KoboSyncPoints.Add(syncPoint);
         }
-
+        else if (!string.IsNullOrEmpty(koboStoreSyncToken))
+        {
+            syncPoint.KoboStoreSyncToken = koboStoreSyncToken;
+        }
 
         return syncPoint;
     }

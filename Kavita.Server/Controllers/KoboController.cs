@@ -101,22 +101,22 @@ public class KoboController(
     {
         var ct = HttpContext.RequestAborted;
 
-        var syncToken = KoboSyncToken;
+        var decodedToken = KoboSyncTokenHelper.Decode(Request.Headers[KoboHeaders.KoboSyncToken]);
         var deviceId = KoboDeviceId;
         var syncSettings = await KoboSyncSettings;
 
-        var syncPoint = await unitOfWork.KoboSyncPointRepository.GetSyncPoint(UserId, syncToken.SyncPointId, ct);
+        var syncPoint = await unitOfWork.KoboSyncPointRepository.GetSyncPoint(UserId,
+            decodedToken.Token.SyncPointId, decodedToken.KoboStoreSyncToken, ct);
 
         // Delete all other KoboSyncPoints for this device id as they'll not be used anymore
         await unitOfWork.KoboSyncPointRepository.DeleteOthersForDeviceId(UserId, syncPoint.Id, deviceId, ct);
         syncPoint.KoboDeviceId = deviceId;
 
         var (kavitaChanges, completedSync) = await koboSyncService.GetChangesSinceAsync(UserId, syncSettings, syncPoint, ct);
-        syncToken.SyncPointId = syncPoint.Id; // After since GetSyncPoint does not commit
 
         if (kavitaChanges.Count == 0 && completedSync && syncSettings.ForwardToKoboStore)
         {
-            await koboSyncService.ProxyRequest(syncToken, ct);
+            await koboSyncService.ProxyRequest(syncPoint, ct);
             return new EmptyResult();
         }
 
@@ -125,7 +125,7 @@ public class KoboController(
             Response.Headers[KoboHeaders.KoboSync] = "continue";
         }
 
-        Response.Headers[KoboHeaders.KoboSyncToken] = KoboSyncTokenHelper.Encode(syncToken);
+        Response.Headers[KoboHeaders.KoboSyncToken] = KoboSyncTokenHelper.Encode(syncPoint.Id);
 
         return Ok(kavitaChanges);
     }
@@ -712,7 +712,6 @@ public class KoboController(
         return koboSyncService.ProxyRequestIfEnabled();
     }
 
-    private KoboSyncToken KoboSyncToken => KoboSyncTokenHelper.Decode(Request.Headers[KoboHeaders.KoboSyncToken]);
     private string KoboDeviceId => Request.Headers[KoboHeaders.KoboDeviceId].FirstOrDefault() ?? string.Empty;
 
     private Task<AppUserKoboSyncPreferences> KoboSyncSettings => unitOfWork.UserRepository.GetKoboSyncPreferences(UserId, HttpContext.RequestAborted);

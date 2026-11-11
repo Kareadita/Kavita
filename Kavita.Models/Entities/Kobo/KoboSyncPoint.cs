@@ -18,6 +18,12 @@ public class KoboSyncPoint
     public string KoboDeviceId { get; set; }
 
     /// <summary>
+    /// Sync token of the upstream Kobo store, used when forwarding requests
+    /// </summary>
+    [ExportScrub(ExportScrubKind.Random)]
+    public string? KoboStoreSyncToken { get; set; }
+
+    /// <summary>
     /// All chapter ids in the last sync
     /// </summary>
     public List<int> ChapterIds { get; set; } = [];

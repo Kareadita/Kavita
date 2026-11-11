@@ -50,5 +50,5 @@ public interface IKoboSyncService
     /// <param name="body"></param>
     Task<ActionResult> ProxyRequestIfEnabled(HttpClient? httpClient = null, object? body = null);
 
-    Task<(JsonNode?, bool)> ProxyRequest(KoboSyncToken? syncToken, CancellationToken ct, bool copyResponse = true, object? body = null, HttpClient? httpClient = null, bool writeResponseOnError = true);
+    Task<(JsonNode?, bool)> ProxyRequest(KoboSyncPoint? syncPoint, CancellationToken ct, bool copyResponse = true, object? body = null, HttpClient? httpClient = null, bool writeResponseOnError = true);
 }

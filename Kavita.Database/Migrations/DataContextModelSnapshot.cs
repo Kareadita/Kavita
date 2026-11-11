@@ -732,6 +732,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("KoboDeviceId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("KoboStoreSyncToken")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("ProgressSyncTime")
                         .HasColumnType("TEXT");
 
@@ -3246,7 +3249,7 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("KoboSyncPreferences")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue("{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"AllLibraries\":false,\"SyncLibraries\":[],\"SyncCollection\":0,\"IsSyncingCollection\":false}");
+                        .HasDefaultValue("{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"LibrarySyncEnabled\":false,\"SyncLibraries\":[],\"ReadingListSyncEnabled\":false,\"SyncReadingLists\":[],\"CollectionSyncEnabled\":false,\"SyncCollections\":[],\"ManagedCollection\":0,\"HasManagedCollection\":false}");
 
                     b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");
@@ -4486,7 +4489,7 @@ namespace Kavita.Database.Migrations
             modelBuilder.Entity("Kavita.Models.Entities.ReadingLists.ReadingListItem", b =>
                 {
                     b.HasOne("Kavita.Models.Entities.Chapter", "Chapter")
-                        .WithMany()
+                        .WithMany("ReadingListItems")
                         .HasForeignKey("ChapterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -5040,6 +5043,8 @@ namespace Kavita.Database.Migrations
                     b.Navigation("People");
 
                     b.Navigation("Ratings");
+
+                    b.Navigation("ReadingListItems");
 
                     b.Navigation("UserProgress");
                 });
