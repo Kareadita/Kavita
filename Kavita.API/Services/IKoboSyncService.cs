@@ -25,11 +25,11 @@ public interface IKoboSyncService
     /// <summary>
     /// Builds book metadata for the given ids. They are not checked against access; only against sync settings in this method. The caller is responsible
     /// </summary>
-    /// <param name="userId"></param>
     /// <param name="chapterIds"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Dictionary<int, KoboBookMetadataDto>> BuildBookMetadata(int userId, IEnumerable<int> chapterIds, CancellationToken cancellationToken);
+    Task<Dictionary<int, KoboBookMetadataDto>> BuildBookMetadata(IEnumerable<int> chapterIds,
+        CancellationToken cancellationToken);
 
     Task<IList<KoboAnnotationDto>> GetKoboAnnotationsAsync(int userId, IEnumerable<int> chapterIds, CancellationToken cancellationToken);
     /// <summary>

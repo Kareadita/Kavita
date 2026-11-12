@@ -160,7 +160,7 @@ public class KoboSyncService(
         syncPoint.ChapterIndex += chapters.Count;
         logger.LogTrace("Adding {Count} book changes.", chapters.Count);
 
-        var metadata = await BuildBookMetadata(userId, chapters.Select(s => s.Chapter.Id), cancellationToken);
+        var metadata = await BuildBookMetadata(chapters.Select(s => s.Chapter.Id), cancellationToken);
 
         foreach (var sync in chapters)
         {
@@ -265,7 +265,7 @@ public class KoboSyncService(
 
     #region Metadata
 
-    public async Task<Dictionary<int, KoboBookMetadataDto>> BuildBookMetadata(int userId, IEnumerable<int> chapterIds, CancellationToken cancellationToken)
+    public async Task<Dictionary<int, KoboBookMetadataDto>> BuildBookMetadata(IEnumerable<int> chapterIds, CancellationToken cancellationToken)
     {
         var request = httpContextAccessor.HttpContext?.Request;
         if (request is null)

@@ -146,10 +146,9 @@ public class KoboController(
         if (!int.TryParse(bookId, out var kavitaId))
         {
             return await koboSyncService.ProxyRequestIfEnabled();
-
         }
 
-        var metadata = await koboSyncService.BuildBookMetadata(UserId, [kavitaId], ct);
+        var metadata = await koboSyncService.BuildBookMetadata([kavitaId], ct);
         if (metadata.Count > 0)
         {
             return Ok(metadata.Values);
