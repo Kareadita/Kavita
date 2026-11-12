@@ -131,7 +131,7 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     {
         using var image = Image.NewFromFile(imagePath);
         // Resize the image to speed up processing
-        var resizedImage = image.Resize(0.1);
+        using var resizedImage = image.Resize(0.1);
 
         // Convert image to RGB array
         var pixels = resizedImage.WriteToMemory<byte>().ToArray();
@@ -452,32 +452,40 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
 
 
         var image = Image.Black(width, height);
-
-        var thumbnailWidth = image.Width / cols;
-        var thumbnailHeight = image.Height / rows;
-
-        for (var i = 0; i < coverImages.Count; i++)
+        try
         {
-            if (!File.Exists(coverImages[i])) continue;
-            var tile = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
-            tile = tile.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
+            var thumbnailWidth = image.Width / cols;
+            var thumbnailHeight = image.Height / rows;
 
-            var row = i / cols;
-            var col = i % cols;
-
-            var x = col * thumbnailWidth;
-            var y = row * thumbnailHeight;
-
-            if (coverImages.Count == 3 && i == 2)
+            for (var i = 0; i < coverImages.Count; i++)
             {
-                x = (image.Width - thumbnailWidth) / 2;
-                y = thumbnailHeight;
+                if (!File.Exists(coverImages[i])) continue;
+                using var source = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
+                using var tile = source.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
+
+                var row = i / cols;
+                var col = i % cols;
+
+                var x = col * thumbnailWidth;
+                var y = row * thumbnailHeight;
+
+                if (coverImages.Count == 3 && i == 2)
+                {
+                    x = (image.Width - thumbnailWidth) / 2;
+                    y = thumbnailHeight;
+                }
+
+                var merged = image.Insert(tile, x, y);
+                image.Dispose();
+                image = merged;
             }
 
-            image = image.Insert(tile, x, y);
+            image.WriteToFile(dest);
         }
-
-        image.WriteToFile(dest);
+        finally
+        {
+            image.Dispose();
+        }
     }
 
     public void UpdateColorScape(IHasCoverImage entity)
