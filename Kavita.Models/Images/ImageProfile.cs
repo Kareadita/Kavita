@@ -7,7 +7,7 @@ namespace Kavita.Models.Images;
 /// <br/> <see cref="ImageSizeRule.CoverSize"/> reads the server's cover size from <see cref="ImagePolicy"/>.
 /// <br/> <see cref="ImageSizeRule.FitWithin"/> shrinks into <see cref="Width"/> x <see cref="Height"/>
 /// keeping the aspect ratio and never upscales.
-/// <br/> <see cref="KeepsTransparency"/> kinds are never written in a format without an alpha channel
+/// <br/> <see cref="KeepsTransparency"/> kinds are never written in a format without an alpha channel (aka JPEG wont save, PNG would be used)
 /// </summary>
 public sealed record ImageProfile(ImageSizeRule Size, int Width = 0, int Height = 0, bool KeepsTransparency = false)
 {

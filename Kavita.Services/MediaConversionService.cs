@@ -20,6 +20,7 @@ namespace Kavita.Services;
 public class MediaConversionService(
     IUnitOfWork unitOfWork,
     IImageService imageService,
+    IImagePipeline imagePipeline,
     IEventHub eventHub,
     IDirectoryService directoryService,
     ILogger<MediaConversionService> logger)
@@ -38,13 +39,10 @@ public class MediaConversionService(
         await ConvertAllBookmarkToEncoding(ct);
         await ConvertAllCoversToEncoding(ct);
         await CoverAllFaviconsToEncoding(ct);
-
-        // TODO: This needs to cover everything Kavita owns (ImageFile)
-
     }
 
     /// <summary>
-    /// This is a long-running job that will convert all bookmarks into a format that is not PNG. Do not invoke anyway except via Hangfire.
+    /// This is a long-running job that will convert all bookmarks into a format. Do not invoke anyway except via Hangfire.
     /// </summary>
     /// <param name="ct"></param>
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
@@ -54,12 +52,6 @@ public class MediaConversionService(
             (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory, ct)).Value;
         var encodeFormat =
             (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
-
-        if (encodeFormat == EncodeFormat.PNG)
-        {
-            logger.LogError("Cannot convert media to PNG");
-            return;
-        }
 
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertBookmarksProgressEvent(0F, ProgressEventType.Started), ct: ct);
@@ -98,12 +90,6 @@ public class MediaConversionService(
         var coverDirectory = directoryService.CoverImageDirectory;
         var encodeFormat =
             (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
-
-        if (encodeFormat == EncodeFormat.PNG)
-        {
-            logger.LogError("Cannot convert media to PNG");
-            return;
-        }
 
         logger.LogInformation("[MediaConversionService] Starting conversion of all covers to {Format}", encodeFormat);
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -244,26 +230,23 @@ public class MediaConversionService(
 
     private async Task CoverAllFaviconsToEncoding(CancellationToken ct = default)
     {
-        var encodeFormat =
-            (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs.ForKind(ImageKind.Favicon);
-
-        // A JPEG setting keeps favicons in PNG; ones in another format are fetched again as PNG when next shown
-        if (encodeFormat == EncodeFormat.PNG) return;
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        var policy = new ImagePolicy(settings.EncodeMediaAs, settings.CoverImageSize);
+        var encodeFormat = policy.Format.ForKind(ImageKind.Favicon);
 
         logger.LogInformation("[MediaConversionService] Starting conversion of favicons to {Format}", encodeFormat);
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertBookmarksProgressEvent(0F, ProgressEventType.Started), ct: ct);
-        var pngFavicons = directoryService.GetFiles(directoryService.FaviconDirectory)
+        var favicons = directoryService.GetFiles(directoryService.FaviconDirectory)
             .Where(b => !b.EndsWith(encodeFormat.GetExtension())).
             ToList();
 
         var count = 1F;
-        foreach (var file in pngFavicons)
+        foreach (var file in favicons)
         {
-            await SaveAsEncodingFormat(directoryService.FaviconDirectory, directoryService.FileSystem.FileInfo.New(file).Name, directoryService.FaviconDirectory,
-                encodeFormat);
+            ConvertFavicon(file, policy, encodeFormat);
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertBookmarksProgressEvent(count / pngFavicons.Count, ProgressEventType.Updated), ct: ct);
+                MessageFactory.ConvertBookmarksProgressEvent(count / favicons.Count, ProgressEventType.Updated), ct: ct);
             count++;
         }
 
@@ -272,6 +255,22 @@ public class MediaConversionService(
             MessageFactory.ConvertBookmarksProgressEvent(1F, ProgressEventType.Ended), ct: ct);
 
         logger.LogInformation("[MediaConversionService] Converted favicons to {Format}", encodeFormat);
+    }
+
+    private void ConvertFavicon(string file, ImagePolicy policy, EncodeFormat encodeFormat)
+    {
+        var fileName = Path.GetFileNameWithoutExtension(file) + encodeFormat.GetExtension();
+        try
+        {
+            // From bytes: loaded from the file, a WebP source stays open and Windows refuses to delete it
+            imagePipeline.Write(new ImageSource.FromBytes(File.ReadAllBytes(file)), ImageKind.Favicon, policy,
+                directoryService.FaviconDirectory, fileName);
+            directoryService.DeleteFiles([file]);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Could not convert favicon {File} to {Format}", file, encodeFormat);
+        }
     }
 
 

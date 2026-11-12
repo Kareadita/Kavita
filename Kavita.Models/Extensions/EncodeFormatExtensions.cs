@@ -6,7 +6,6 @@ namespace Kavita.Models.Extensions;
 
 public static class EncodeFormatExtensions
 {
-    [Obsolete("Use ForKind() instead")]
     public static string GetExtension(this EncodeFormat encodeFormat)
     {
         return encodeFormat switch

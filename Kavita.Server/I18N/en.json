@@ -125,7 +125,6 @@
     "age-restriction-not-applicable": "No Restriction",
     "generic-relationship": "There was an issue updating relationships",
     "job-already-running": "Job already running",
-    "encode-as-warning": "You cannot convert to PNG. For covers, use Refresh Covers. Bookmarks and favicons cannot be encoded back.",
     "ip-address-invalid": "IP Address '{0}' is invalid",
     "bookmark-dir-permissions": "Bookmark Directory does not have correct permissions for Kavita to use",
     "total-backups": "Total Backups must be between 1 and 30",
