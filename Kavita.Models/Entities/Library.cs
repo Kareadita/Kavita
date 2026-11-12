@@ -12,8 +12,13 @@ public class Library : IEntityDate, IHasCoverImage
 {
     public int Id { get; set; }
     public required string Name { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string? CoverImage { get; set; }
+    public int? CoverImageFileId { get; set; }
+    public ImageFile? CoverImageFile { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string PrimaryColor { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string SecondaryColor { get; set; }
     public LibraryType Type { get; set; }
     public FolderWatchMode FolderWatchMode { get; set; } = FolderWatchMode.Automatic;

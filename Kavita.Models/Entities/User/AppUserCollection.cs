@@ -21,8 +21,13 @@ public class AppUserCollection : IEntityDate, IHasCoverImage
     /// Reading lists that are promoted are only done by admins
     /// </summary>
     public bool Promoted { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string? CoverImage { get; set; }
+    public int? CoverImageFileId { get; set; }
+    public ImageFile? CoverImageFile { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string PrimaryColor { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string SecondaryColor { get; set; }
     public bool CoverImageLocked { get; set; }
     /// <summary>

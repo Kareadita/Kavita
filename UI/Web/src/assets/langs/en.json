@@ -2464,7 +2464,6 @@
         "encode-as-description-part-1": "WebP/AVIF can drastically reduce space requirements for files. WebP/AVIF is not supported on all browsers or versions. To learn if these settings are appropriate for your setup, visit ",
         "encode-as-description-part-2": "Can I Use WebP?",
         "encode-as-description-part-3": "Can I Use AVIF?",
-        "encode-as-warning": "You cannot convert back to PNG once you've gone to WebP/AVIF. You would need to refresh covers on your libraries to regenerate all covers. Bookmarks and favicons cannot be converted.",
         "media-warning": "You must trigger the media conversion task in Tasks Tab after Saving.",
         "encode-as-label": "Save Media As",
         "encode-as-tooltip": "All media Kavita manages (covers, bookmarks, favicons) will be encoded as this type.",

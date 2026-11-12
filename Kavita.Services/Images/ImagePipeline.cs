@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using Kavita.API.Services;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Extensions;
 using Kavita.Models.Images;
 using Microsoft.Extensions.Logging;
 using NetVips;
@@ -25,7 +26,7 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
         try
         {
             // Writes the staged file then Moves it into place
-            var staged = Stage(source, profile, policy, tmpPath);
+            var staged = Stage(source, profile, policy, policy.Format.ForKind(kind), tmpPath);
             MoveIntoPlace(tmpPath, Path.Join(directory, fileName));
 
             return new ImageWriteResult(fileName, staged.Width, staged.Height, staged.SourceWidth, staged.SourceHeight);
@@ -36,7 +37,7 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
         }
     }
 
-    private static StagedImage Stage(ImageSource source, ImageProfile profile, ImagePolicy policy, string tmpPath)
+    private static StagedImage Stage(ImageSource source, ImageProfile profile, ImagePolicy policy, EncodeFormat format, string tmpPath)
     {
         switch (source)
         {
@@ -48,7 +49,7 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
                     ? Image.Thumbnail(file.Path, t.Width, height: t.Height, size: t.Size, crop: t.Crop)
                     : null;
 
-                return Save(thumbnail ?? header, header, tmpPath, policy.Format);
+                return Save(thumbnail ?? header, header, tmpPath, format);
             }
             case ImageSource.FromBytes bytes:
             {
@@ -58,16 +59,16 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
                     ? Image.ThumbnailBuffer(bytes.Data, t.Width, height: t.Height, size: t.Size, crop: t.Crop)
                     : null;
 
-                return Save(thumbnail ?? header, header, tmpPath, policy.Format);
+                return Save(thumbnail ?? header, header, tmpPath, format);
             }
             case ImageSource.FromStream fromStream:
-                return StageStream(fromStream.Stream, profile, policy, tmpPath);
+                return StageStream(fromStream.Stream, profile, policy, format, tmpPath);
             default:
                 throw new ArgumentOutOfRangeException(nameof(source), source.GetType().Name, null);
         }
     }
 
-    private static StagedImage StageStream(Stream stream, ImageProfile profile, ImagePolicy policy, string tmpPath)
+    private static StagedImage StageStream(Stream stream, ImageProfile profile, ImagePolicy policy, EncodeFormat format, string tmpPath)
     {
         if (stream.CanSeek) stream.Position = 0;
         using var source = Image.NewFromStream(stream);
@@ -75,13 +76,13 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
         var target = GetThumbnailTarget(source, profile, policy);
         if (target is not { } t)
         {
-            return Save(source, source, tmpPath, policy.Format);
+            return Save(source, source, tmpPath, format);
         }
 
         using var thumbnail = source.ThumbnailImage(t.Width, t.Height, size: t.Size, crop: t.Crop);
         try
         {
-            return Save(thumbnail, source, tmpPath, policy.Format);
+            return Save(thumbnail, source, tmpPath, format);
         }
         catch (VipsException)
         {
@@ -89,7 +90,7 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
             if (stream.CanSeek) stream.Position = 0;
             using var retry = Image.ThumbnailStream(stream, t.Width, height: t.Height, size: t.Size, crop: t.Crop);
 
-            return Save(retry, source, tmpPath, policy.Format);
+            return Save(retry, source, tmpPath, format);
         }
     }
 
@@ -123,6 +124,10 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
             case EncodeFormat.AVIF:
                 // Heifsave defaults to HEVC; WriteToFile only picks AV1 from an .avif suffix, which a .tmp lacks
                 output.Heifsave(path, compression: Enums.ForeignHeifCompression.Av1);
+                break;
+            case EncodeFormat.JPEG:
+                // Jpegsave flattens transparency onto black, so a cover with a see-through background would turn black
+                output.Jpegsave(path, background: [255, 255, 255]);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(format), format, null);

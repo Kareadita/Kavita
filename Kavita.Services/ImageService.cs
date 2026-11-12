@@ -98,8 +98,17 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         var fileName = file.Name.Replace(file.Extension, string.Empty);
         var outputFile = Path.Join(outputPath, fileName + encodeFormat.GetExtension());
 
-        using var sourceImage = Image.NewFromFile(filePath, false, Enums.Access.SequentialUnbuffered);
-        sourceImage.WriteToFile(outputFile);
+        // Use load from buffer to avoid a disposal issue on Windows for the delete later
+        using var sourceImage = Image.NewFromBuffer(File.ReadAllBytes(filePath));
+        if (encodeFormat == EncodeFormat.JPEG)
+        {
+            sourceImage.Jpegsave(outputFile, background: [255, 255, 255]);
+        }
+        else
+        {
+            sourceImage.WriteToFile(outputFile);
+        }
+
         return Task.FromResult(outputFile);
     }
 
@@ -316,7 +325,7 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     private string WriteThumbnail(ImageSource source, string fileName, ImageKind kind, ImagePolicy policy, string? targetDirectory)
     {
         return imagePipeline.Write(source, kind, policy, targetDirectory ?? directoryService.CoverImageDirectory,
-            fileName + policy.Format.GetExtension()).FileName;
+            fileName + policy.Format.ForKind(kind).GetExtension()).FileName;
     }
 
 
@@ -420,12 +429,12 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
 
     public static string GetWebLinkFormat(string url, EncodeFormat encodeFormat)
     {
-        return $"{new Uri(url).Host.Replace("www.", string.Empty)}{encodeFormat.GetExtension()}";
+        return $"{new Uri(url).Host.Replace("www.", string.Empty)}{encodeFormat.ForKind(ImageKind.Favicon).GetExtension()}";
     }
 
     public static string GetPublisherFormat(string publisher, EncodeFormat encodeFormat)
     {
-        return $"{publisher}{encodeFormat.GetExtension()}";
+        return $"{publisher}{encodeFormat.ForKind(ImageKind.Publisher).GetExtension()}";
     }
 
 

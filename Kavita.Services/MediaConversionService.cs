@@ -10,6 +10,7 @@ using Kavita.API.Services.SignalR;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 using Kavita.Services.Comparators;
 using Kavita.Services.Extensions;
 using Microsoft.Extensions.Logging;
@@ -37,6 +38,8 @@ public class MediaConversionService(
         await ConvertAllBookmarkToEncoding(ct);
         await ConvertAllCoversToEncoding(ct);
         await CoverAllFaviconsToEncoding(ct);
+
+        // TODO: This needs to cover everything Kavita owns (ImageFile)
 
     }
 
@@ -107,12 +110,13 @@ public class MediaConversionService(
             MessageFactory.ConvertCoverProgressEvent(0F, ProgressEventType.Started), ct: ct);
 
         var chapterCovers = await unitOfWork.ChapterRepository.GetAllChaptersWithCoversInDifferentEncoding(encodeFormat, ct);
-        var customSeriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncodingAsync(encodeFormat);
-        var seriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncodingAsync(encodeFormat, false);
+        var customSeriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncodingAsync(encodeFormat, ct: ct);
+        var seriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncodingAsync(encodeFormat, false, ct);
         var nonCustomOrConvertedVolumeCovers = await unitOfWork.VolumeRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);
 
         var readingListCovers = await unitOfWork.ReadingListRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);
-        var libraryCovers = await unitOfWork.LibraryRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);
+        var libraryFormat = encodeFormat.ForKind(ImageKind.LibraryIcon);
+        var libraryCovers = await unitOfWork.LibraryRepository.GetAllWithCoversInDifferentEncoding(libraryFormat, ct);
         var collectionCovers = await unitOfWork.CollectionTagRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);
 
         var totalCount = chapterCovers.Count + seriesCovers.Count + readingListCovers.Count +
@@ -127,7 +131,7 @@ public class MediaConversionService(
         {
             if (string.IsNullOrEmpty(library.CoverImage)) continue;
 
-            var newFile = await SaveAsEncodingFormat(coverDirectory, library.CoverImage, coverDirectory, encodeFormat);
+            var newFile = await SaveAsEncodingFormat(coverDirectory, library.CoverImage, coverDirectory, libraryFormat);
             library.CoverImage = Path.GetFileName(newFile);
 
             unitOfWork.LibraryRepository.Update(library);
@@ -241,13 +245,10 @@ public class MediaConversionService(
     private async Task CoverAllFaviconsToEncoding(CancellationToken ct = default)
     {
         var encodeFormat =
-            (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
+            (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs.ForKind(ImageKind.Favicon);
 
-        if (encodeFormat == EncodeFormat.PNG)
-        {
-            logger.LogError("Cannot convert media to PNG");
-            return;
-        }
+        // A JPEG setting keeps favicons in PNG; ones in another format are fetched again as PNG when next shown
+        if (encodeFormat == EncodeFormat.PNG) return;
 
         logger.LogInformation("[MediaConversionService] Starting conversion of favicons to {Format}", encodeFormat);
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -297,6 +298,12 @@ public class MediaConversionService(
             return newFilename;
         }
 
+        // Converting in place would write over the source and then delete it
+        if (Path.GetExtension(filename).Equals(encodeFormat.GetExtension(), StringComparison.OrdinalIgnoreCase))
+        {
+            return Path.Join(targetFolder, new FileInfo(filename).Name);
+        }
+
         try
         {
             // Convert target file to format then delete original target file
@@ -306,6 +313,10 @@ public class MediaConversionService(
                 var targetName = new FileInfo(targetFile).Name;
                 newFilename = Path.Join(targetFolder, targetName);
                 directoryService.DeleteFiles([fullSourcePath]);
+                if (File.Exists(fullSourcePath))
+                {
+                    logger.LogWarning("Converted {File} to {Format} but could not delete the original", fullSourcePath, encodeFormat);
+                }
             }
             catch (Exception ex)
             {

@@ -29,6 +29,37 @@ public class ImagePipelineTests : IDisposable
         Assert.Empty(Directory.GetFiles(_directory));
     }
 
+    [Fact]
+    public void Write_Jpeg_TransparencyBecomesWhite()
+    {
+        var source = new ImageSource.FromBytes(TransparentPng());
+
+        _pipeline.Write(source, ImageKind.SeriesCover, Policy with { Format = EncodeFormat.JPEG }, _directory, "series1.jpg");
+
+        using var written = Image.NewFromFile(Path.Join(_directory, "series1.jpg"));
+        Assert.True(written.Getpoint(0, 0)[0] > 250);
+    }
+
+    [Fact]
+    public void Write_JpegSetting_FaviconWrittenAndLookedUpAsPng()
+    {
+        var fileName = ImageService.GetWebLinkFormat("https://anilist.co", EncodeFormat.JPEG);
+
+        _pipeline.Write(new ImageSource.FromBytes(TransparentPng()), ImageKind.Favicon,
+            Policy with { Format = EncodeFormat.JPEG }, _directory, fileName);
+
+        Assert.Equal("anilist.co.png", fileName);
+        using var written = Image.NewFromFile(Path.Join(_directory, fileName));
+        Assert.Equal("pngload", written.Get("vips-loader"));
+        Assert.True(written.HasAlpha());
+    }
+
+    private static byte[] TransparentPng()
+    {
+        using var image = Image.Black(8, 8, bands: 4);
+        return image.PngsaveBuffer();
+    }
+
     public void Dispose()
     {
         try { Directory.Delete(_directory, recursive: true); } catch (IOException) { }

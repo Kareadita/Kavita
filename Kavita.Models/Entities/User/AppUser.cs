@@ -128,8 +128,13 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// </summary>
     public IdentityProvider IdentityProvider { get; set; } = IdentityProvider.Kavita;
 
+    [Obsolete("Use CoverImageFile")]
     public string? CoverImage { get; set; }
+    public int? CoverImageFileId { get; set; }
+    public ImageFile? CoverImageFile { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string? PrimaryColor { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string? SecondaryColor { get; set; }
 
 
