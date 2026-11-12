@@ -22,6 +22,7 @@ using Flurl.Http;
 using Kavita.Common;
 using Kavita.Common.Helpers;
 using Kavita.Models.Entities.Enums.ReadingList;
+using Kavita.Models.Images;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.ReadingLists;
@@ -249,13 +250,9 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             try
             {
                 await urlValidationService.ValidateUrlAsync(coverUrl);
-                var (width, height) = settings.CoverImageSize.GetDimensions();
-                var fileName = await imageService.CreateThumbnailFromUrl(
-                    coverUrl,
-                    ImageService.GetReadingListFormat(readingList.Id),
-                    settings.EncodeMediaAs,
-                    width,
-                    height);
+                var fileName = await imageService.CreateThumbnailFromUrl(coverUrl,
+                    ImageService.GetReadingListFormat(readingList.Id), ImageKind.ReadingListCover,
+                    new ImagePolicy(settings.EncodeMediaAs, settings.CoverImageSize));
 
                 if (!string.IsNullOrEmpty(fileName))
                 {

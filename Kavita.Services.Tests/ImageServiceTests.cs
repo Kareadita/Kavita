@@ -1,6 +1,8 @@
 ﻿using System.IO.Abstractions;
 using System.Text;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Images;
+using Kavita.Services.Images;
 using Microsoft.Extensions.Logging;
 using NetVips;
 using NSubstitute;
@@ -23,15 +25,16 @@ public class ImageServiceTests
         try
         {
             var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
-            var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService);
+            var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService,
+                new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>()));
             var source = Path.Join(directory, "wide.png");
             using (var wide = Image.Black(1000, 500, bands: 3))
             {
                 wide.WriteToFile(source);
             }
 
-            var (width, height) = CoverImageSize.Default.GetDimensions();
-            var uploaded = imageService.CreateThumbnailFromFile(source, "upload", EncodeFormat.WEBP, width, height, directory);
+            var uploaded = imageService.CreateThumbnailFromFile(source, "upload", ImageKind.SeriesCover,
+                new ImagePolicy(EncodeFormat.WEBP, CoverImageSize.Default), directory);
             var scanned = imageService.GetCoverImage(source, "scan", directory, EncodeFormat.WEBP, CoverImageSize.Default);
 
             using var uploadImage = Image.NewFromFile(Path.Join(directory, uploaded));
@@ -87,8 +90,8 @@ public class ImageServiceTests
             var dims = CoverImageSize.Default.GetDimensions();
             using var sourceImage = Image.NewFromFile(imagePath, false, Enums.Access.SequentialUnbuffered);
 
-            var size = ImageService.GetSizeForDimensions(sourceImage, dims.Width, dims.Height);
-            var crop = ImageService.GetCropForDimensions(sourceImage, dims.Width, dims.Height);
+            var size = ImagePipeline.GetSizeForDimensions(sourceImage, dims.Width, dims.Height);
+            var crop = ImagePipeline.GetCropForDimensions(sourceImage, dims.Width, dims.Height);
 
             using var thumbnail = Image.Thumbnail(imagePath, dims.Width, dims.Height,
                 size: size,
@@ -132,7 +135,7 @@ public class ImageServiceTests
 
             using var sourceImage = Image.NewFromFile(imagePath, false, Enums.Access.SequentialUnbuffered);
             htmlBuilder.AppendLine("<div class=\"image-row\">");
-            htmlBuilder.AppendLine($"<p>{fileName} ({((double) sourceImage.Width / sourceImage.Height).ToString("F2")}) - {ImageService.WillScaleWell(sourceImage, dims.Width, dims.Height)}</p>");
+            htmlBuilder.AppendLine($"<p>{fileName} ({((double) sourceImage.Width / sourceImage.Height).ToString("F2")}) - {ImagePipeline.WillScaleWell(sourceImage, dims.Width, dims.Height)}</p>");
             htmlBuilder.AppendLine($"<img src=\"./{Path.GetFileName(imagePath)}\" alt=\"{fileName}\">");
             if (File.Exists(baselinePath))
             {

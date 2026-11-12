@@ -290,6 +290,6 @@ public class Program
     private static void InitNetVips()
     {
         Cache.MaxFiles = 0;
-
+        NetVips.NetVips.BlockUntrusted = true;
     }
 }

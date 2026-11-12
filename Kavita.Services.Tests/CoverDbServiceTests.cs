@@ -13,6 +13,7 @@ using Kavita.Models.Builders;
 using Kavita.Models.Constants;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Services.Images;
 using Kavita.Services.Metadata;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -30,11 +31,12 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
     {
 
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateFileSystem());
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService);
+        var pipeline = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>());
+        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService, pipeline);
 
         var coverDbService = new CoverDbService(Substitute.For<ILogger<CoverDbService>>(), directoryService, CacheFactory,
             Substitute.For<IHostEnvironment>(), imageService, unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<IUrlValidationService>());
+            Substitute.For<IUrlValidationService>(), pipeline);
 
         return Task.FromResult<(IDirectoryService, ICoverDbService)>((directoryService, coverDbService));
     }
@@ -51,10 +53,11 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         directoryService.ExistOrCreate(directoryService.TempDirectory);
         directoryService.ExistOrCreate(directoryService.FaviconDirectory);
 
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService);
+        var pipeline = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>());
+        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService, pipeline);
         var coverDbService = new CoverDbService(Substitute.For<ILogger<CoverDbService>>(), directoryService, CacheFactory,
             Substitute.For<IHostEnvironment>(), imageService, unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<IUrlValidationService>());
+            Substitute.For<IUrlValidationService>(), pipeline);
 
         return (directoryService, coverDbService);
     }

@@ -103,8 +103,37 @@ public static class FlurlConfiguration
     /// Downloads <paramref name="url"/> through <see cref="CreateSafeRequest"/> into <paramref name="filePath"/>.
     /// Throws <see cref="KavitaException"/> and leaves no file when the body is larger than <paramref name="maxBytes"/>
     /// </summary>
-    public static Task DownloadToFileAsync(string url, string filePath, long maxBytes, CancellationToken ct = default)
+    public static async Task DownloadToFileAsync(string url, string filePath, long maxBytes, CancellationToken ct = default)
     {
-        throw new NotImplementedException();
+        using var response = await CreateSafeRequest(url).GetAsync(HttpCompletionOption.ResponseHeadersRead, ct);
+        if (response.ResponseMessage.Content.Headers.ContentLength > maxBytes)
+        {
+            throw new KavitaException("download-over-size-limit");
+        }
+
+        try
+        {
+            await using var body = await response.GetStreamAsync();
+            await using var file = File.Create(filePath);
+
+            var buffer = new byte[81920];
+            long total = 0;
+            int read;
+            while ((read = await body.ReadAsync(buffer, ct)) > 0)
+            {
+                total += read;
+                if (total > maxBytes)
+                {
+                    throw new KavitaException("download-over-size-limit");
+                }
+
+                await file.WriteAsync(buffer.AsMemory(0, read), ct);
+            }
+        }
+        catch
+        {
+            File.Delete(filePath);
+            throw;
+        }
     }
 }
