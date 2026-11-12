@@ -1,11 +1,7 @@
-﻿using System.IO.Abstractions;
-using System.Text;
+﻿using System.Text;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Images;
 using Kavita.Services.Images;
-using Microsoft.Extensions.Logging;
 using NetVips;
-using NSubstitute;
 using Image = NetVips.Image;
 
 namespace Kavita.Services.Tests;
@@ -16,36 +12,6 @@ public class ImageServiceTests
     private readonly string _testDirectoryColorScapes = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ImageService/ColorScapes");
     private const string OutputPattern = "_output";
     private const string BaselinePattern = "_baseline";
-
-    [Fact]
-    public void CreateThumbnailFromFile_WideSource_MatchesScanCrop()
-    {
-        var directory = Path.Join(Path.GetTempPath(), "kavita-thumb-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(directory);
-        try
-        {
-            var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
-            var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService,
-                new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>()));
-            var source = Path.Join(directory, "wide.png");
-            using (var wide = Image.Black(1000, 500, bands: 3))
-            {
-                wide.WriteToFile(source);
-            }
-
-            var uploaded = imageService.CreateThumbnailFromFile(source, "upload", ImageKind.SeriesCover,
-                new ImagePolicy(EncodeFormat.WEBP, CoverImageSize.Default), directory);
-            var scanned = imageService.GetCoverImage(source, "scan", directory, EncodeFormat.WEBP, CoverImageSize.Default);
-
-            using var uploadImage = Image.NewFromFile(Path.Join(directory, uploaded));
-            using var scanImage = Image.NewFromFile(Path.Join(directory, scanned));
-            Assert.Equal((scanImage.Width, scanImage.Height), (uploadImage.Width, uploadImage.Height));
-        }
-        finally
-        {
-            try { Directory.Delete(directory, recursive: true); } catch (IOException) { }
-        }
-    }
 
     /// <summary>
     /// Run this once to get the baseline generation

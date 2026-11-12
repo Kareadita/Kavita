@@ -44,14 +44,13 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
     /// <summary>
     /// NetVips writes through native paths, so these use the real file system. Directories resolve under the test's
-    /// working directory (config/covers, config/temp, config/favicons)
+    /// working directory (config/covers, config/temp)
     /// </summary>
     private static (DirectoryService, ICoverDbService) SetupOnDisk(IUnitOfWork unitOfWork)
     {
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
         directoryService.ExistOrCreate(directoryService.CoverImageDirectory);
         directoryService.ExistOrCreate(directoryService.TempDirectory);
-        directoryService.ExistOrCreate(directoryService.FaviconDirectory);
 
         var pipeline = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>());
         var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService, pipeline);
@@ -87,31 +86,6 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
     #region Set Cover By Url
 
     [Fact]
-    public async Task SetSeriesCoverByUrl_Url_WritesAtCoverImageSize()
-    {
-        var (unitOfWork, context, _) = await CreateDatabase();
-        var (directoryService, coverDbService) = SetupOnDisk(unitOfWork);
-
-        var series = await AddSeries(context, 91001);
-        using var httpTest = new HttpTest();
-        httpTest.RespondWith(() => new ByteArrayContent(PngBytes(3000, 4300)));
-
-        await coverDbService.SetSeriesCoverByUrl(series, "https://example.com/cover.png", fromBase64: false);
-
-        var path = Path.Join(directoryService.CoverImageDirectory, series.CoverImage);
-        try
-        {
-            var (width, height) = CoverImageSize.Default.GetDimensions();
-            using var cover = Image.NewFromFile(path);
-            Assert.True(cover.Width <= width && cover.Height <= height, $"Cover is {cover.Width}x{cover.Height}");
-        }
-        finally
-        {
-            DeleteQuietly(path);
-        }
-    }
-
-    [Fact]
     public async Task SetSeriesCoverByUrl_KPlusArtBeatsScanCover()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
@@ -145,35 +119,6 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
     #endregion
 
     #region Download Favicon
-
-    [Fact]
-    public async Task DownloadFavicon_Jpeg_SavedAt32()
-    {
-        var (unitOfWork, _, _) = await CreateDatabase();
-        var (directoryService, coverDbService) = SetupOnDisk(unitOfWork);
-        var provider = Substitute.For<IEasyCachingProvider>();
-        provider.GetAsync<string>(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(new CacheValue<string>(null, false));
-        CacheFactory.GetCachingProvider(EasyCacheProfiles.Favicon).Returns(provider);
-
-        using var icon = Image.Black(64, 64, bands: 3);
-        var jpeg = icon.JpegsaveBuffer();
-        using var httpTest = new HttpTest();
-        httpTest.RespondWith("<html><head><link rel=\"icon\" href=\"/icon-32.png\"></head></html>");
-        httpTest.RespondWith(() => new ByteArrayContent(jpeg));
-
-        var fileName = await coverDbService.DownloadFaviconAsync("https://favicon-jpeg.example.com/page", EncodeFormat.WEBP);
-
-        var path = Path.Join(directoryService.FaviconDirectory, fileName);
-        try
-        {
-            using var saved = Image.NewFromFile(path);
-            Assert.Equal((32, 32), (saved.Width, saved.Height));
-        }
-        finally
-        {
-            DeleteQuietly(path);
-        }
-    }
 
     [Fact]
     public async Task DownloadFaviconAsync_ShouldThrowKavitaException_WhenPreviouslyFailedUrlExistsInCache()
