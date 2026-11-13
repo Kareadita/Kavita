@@ -8,7 +8,7 @@ using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities;
 
-public class Library : IEntityDate, IHasCoverImage
+public class Library : IEntityDate, IHasCoverImage, IHasCoverImageFile
 {
     public int Id { get; set; }
     public required string Name { get; set; }

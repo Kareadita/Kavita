@@ -8,7 +8,7 @@ namespace Kavita.Models.Entities.User;
 /// <summary>
 /// Represents a Collection of Series for a given User
 /// </summary>
-public class AppUserCollection : IEntityDate, IHasCoverImage
+public class AppUserCollection : IEntityDate, IHasCoverImage, IHasCoverImageFile, IHasLockableCoverImageFile
 {
     public int Id { get; set; }
     public required string Title { get; set; }

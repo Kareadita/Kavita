@@ -1,7 +1,10 @@
-﻿namespace Kavita.Models.Entities.Interfaces;
+﻿using System;
+
+namespace Kavita.Models.Entities.Interfaces;
 
 #nullable enable
 
+[Obsolete("Use IHasCoverImageFile")]
 public interface IHasCoverImage
 {
     /// <summary>

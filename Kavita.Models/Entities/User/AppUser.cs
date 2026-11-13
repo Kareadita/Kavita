@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Kavita.Models.Entities.User;
 
-public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
+public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage, IHasCoverImageFile
 {
     public DateTime Created { get; set; } = DateTime.Now;
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
