@@ -46,12 +46,25 @@ public class KoboSyncPoint
     public int ProgressSyncedUntilId { get; set; }
     public int ProgressSyncedUntilIndex { get; set; }
 
+
+    public DateTime CollectionsSyncTime { get; set; }
+    public List<int> CollectionsIds { get; set; } = [];
+    public int CollectionsSyncedUntilIndex { get; set; }
+
+    public DateTime ReadingListsSyncTime { get; set; }
+    public List<int> ReadingListsIds { get; set; } = [];
+    public int ReadingListsSyncedUntilIndex { get; set; }
+
     public void Reset()
     {
         ChapterIndex = 0;
         ProgressSyncedUntilIndex = 0;
+        CollectionsSyncedUntilIndex = 0;
+        ReadingListsSyncedUntilIndex = 0;
         ChapterSyncTime = DateTime.UtcNow;
         ProgressSyncTime = DateTime.UtcNow;
+        CollectionsSyncTime = DateTime.UtcNow;
+        ReadingListsSyncTime = DateTime.UtcNow;
     }
 
 }
