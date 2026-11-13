@@ -177,14 +177,7 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
             throw new KavitaException("errors.font-not-found");
         }
 
-        // Choose the variable font if available
-        // Otherwise take the full list.
-        // This should be fine since Google Fonts seems to
-        // only prepend filenames with 'static/' for font
-        // families that have variable fonts since the
-        // static/ path contains non-variable variants of
-        // the font for applications that don't support
-        // variable fonts.
+        // Google Fonts only uses a 'static/' prefix for families that also ship a variable font; those are fallbacks
         var googleFontRefs = metaData.VariableFont();
         if (googleFontRefs.Length == 0)
         {
@@ -196,8 +189,7 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
         {
             await urlValidationService.ValidateUrlAsync(fontRef.url);
 
-            // filename comes from remote metadata and may contain path separators (e.g. static/...).
-            // Reduce it to a basename so the download can't create unexpected subdirectories or traverse outside temp.
+            // Remote metadata names can hold separators ('static/...'), which would write outside temp
             var fileName = directoryService.FileSystem.Path.GetFileName(fontRef.filename.Replace('\\', '/'));
 
             logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily.Sanitize(), fileName.Sanitize(), fontRef.url);

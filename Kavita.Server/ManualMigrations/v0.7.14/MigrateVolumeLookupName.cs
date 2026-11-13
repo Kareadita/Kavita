@@ -12,7 +12,7 @@ namespace Kavita.Server.ManualMigrations.v0._7._14;
 
 public static class MigrateVolumeLookupName
 {
-    public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, ILogger<Program> logger)
+    public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, ILogger logger)
     {
         if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateVolumeLookupName"))
         {

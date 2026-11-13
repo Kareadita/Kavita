@@ -10,13 +10,11 @@ using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Database;
+using Kavita.Database.Extensions;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Kavita.Server.Logging;
-using Kavita.Server.ManualMigrations.v0._7._14;
-using Kavita.Server.ManualMigrations.v0._8._2;
-using Kavita.Server.ManualMigrations.v0._8._4;
-using Kavita.Server.ManualMigrations.v0._9._2;
+using Kavita.Server.ManualMigrations;
 using Kavita.Services;
 using Kavita.Services.SignalR;
 using Microsoft.AspNetCore.Hosting;
@@ -71,61 +69,16 @@ public class Program
             var services = scope.ServiceProvider;
             var unitOfWork = services.GetRequiredService<IUnitOfWork>();
 
+            InitNetVips();
+
+            var migrationService = services.GetRequiredService<IMigrationService>();
             try
             {
                 var logger = services.GetRequiredService<ILogger<Program>>();
                 var context = services.GetRequiredService<DataContext>();
 
-                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-                var isDbCreated = await context.Database.CanConnectAsync();
-                if (isDbCreated && pendingMigrations.Any())
-                {
-                    logger.LogInformation("Performing backup as migrations are needed. Backup will be kavita.db in temp folder");
-                    var migrationDirectory = await GetMigrationDirectory(context, directoryService);
-                    directoryService.ExistOrCreate(migrationDirectory);
-
-                    if (!directoryService.FileSystem.File.Exists(
-                            directoryService.FileSystem.Path.Join(migrationDirectory, "kavita.db")))
-                    {
-                        directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(directoryService.ConfigDirectory, "kavita.db"), migrationDirectory);
-                        logger.LogInformation("Database backed up to {MigrationDirectory}", migrationDirectory);
-                    }
-                }
-
-                // Apply Before manual migrations that need to run before actual migrations
-                if (isDbCreated)
-                {
-                    Task.Run(async () =>
-                        {
-                            // Apply all migrations on startup
-                            logger.LogInformation("Running Manual Migrations");
-
-                            try
-                            {
-                                // v0.7.14
-                                await new MigrateWantToReadExport(directoryService).RunAsync(context, logger);
-
-                                // v0.8.2
-                                await ManualMigrateSwitchToWal.Migrate(context, logger);
-
-                                // v0.8.4
-                                await ManualMigrateEncodeSettings.Migrate(context, logger);
-
-                                // v0.9.2, before StartupTasksHostedService reads the setting
-                                await new ManualMigrateFolderWatchingOn().RunAsync(context, logger);
-                            }
-                            catch (Exception)
-                            {
-                                /* Swallow */
-                            }
-
-                            await unitOfWork.CommitAsync();
-                            logger.LogInformation("Running Manual Migrations - complete");
-                        }).GetAwaiter()
-                        .GetResult();
-                }
-
-
+                await migrationService.CreateSnapshot();
+                await migrationService.RunPreMigrations();
 
                 var appLifetime = services.GetRequiredService<IHostApplicationLifetime>();
                 using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
@@ -140,21 +93,16 @@ public class Program
                 }
                 catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested)
                 {
-                    logger.LogCritical("Failed to run critical Migrations, restore from a backup");
-                    Environment.Exit(1);
+                    logger.LogCritical("Database migrations did not finish within 5 minutes");
+                    throw;
                 }
                 catch (OperationCanceledException)
                 {
                     logger.LogCritical("Database migration cancelled due to shutdown signal");
                     throw;
                 }
-                catch (Exception ex)
-                {
-                    logger.LogCritical(ex, "Failed to run critical Migrations, restore from a backup");
-                    Environment.Exit(1);
-                }
 
-
+                // Seed anything that should be there on setup
                 await Seed.SeedRoles(services.GetRequiredService<RoleManager<AppRole>>());
                 await Seed.SeedSettings(context, directoryService);
                 await Seed.SeedThemes(context);
@@ -164,24 +112,23 @@ public class Program
                 await Seed.SeedMetadataSettings(context);
                 await Seed.SeedDefaultHighlightSlots(unitOfWork);
                 await Seed.SeedScrobbleProviders(context);
+
+                await migrationService.RunPostMigrations();
+                migrationService.DeleteSnapshot();
             }
             catch (Exception ex)
             {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                var context = services.GetRequiredService<DataContext>();
-                var migrationDirectory = await GetMigrationDirectory(context, directoryService);
-
-                logger.LogCritical(ex, "A migration failed during startup. Restoring backup from {MigrationDirectory} and exiting", migrationDirectory);
-                directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(migrationDirectory, "kavita.db"), directoryService.ConfigDirectory);
-
+                await migrationService.RestoreDatabase(ex);
+                Environment.ExitCode = 1;
                 return;
             }
+
+            services.GetRequiredService<ILogger<Program>>().LogInformation("Database journal mode is {JournalMode}",
+                await services.GetRequiredService<DataContext>().Database.GetJournalModeAsync());
 
             // Update the logger with the log level
             var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             LogLevelOptions.SwitchLogLevel(settings.LoggingLevel);
-
-            InitNetVips();
 
             await host.RunAsync();
         } catch (Exception ex)
@@ -211,31 +158,6 @@ public class Program
         {
             File.Move(firstRunConfigFilePath, actualRunConfigFilePath);
         }
-    }
-
-    private static async Task<string> GetMigrationDirectory(DataContext context, IDirectoryService directoryService)
-    {
-        string? currentVersion = null;
-        try
-        {
-            if (!await context.ServerSetting.AnyAsync()) return "vUnknown";
-            currentVersion =
-                (await context.ServerSetting.SingleOrDefaultAsync(s =>
-                    s.Key == ServerSettingKey.InstallVersion))?.Value;
-        }
-        catch (Exception)
-        {
-            // ignored
-        }
-
-        if (string.IsNullOrEmpty(currentVersion))
-        {
-            currentVersion = "vUnknown";
-        }
-
-        var migrationDirectory = directoryService.FileSystem.Path.Join(directoryService.TempDirectory,
-            "migration", currentVersion);
-        return migrationDirectory;
     }
 
     private static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -290,6 +212,6 @@ public class Program
     private static void InitNetVips()
     {
         Cache.MaxFiles = 0;
-
+        NetVips.NetVips.BlockUntrusted = true;
     }
 }

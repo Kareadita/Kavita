@@ -23,22 +23,6 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
 using Kavita.Server.Extensions;
 using Kavita.Server.Logging;
-using Kavita.Server.ManualMigrations.v0._7._11;
-using Kavita.Server.ManualMigrations.v0._7._14;
-using Kavita.Server.ManualMigrations.v0._7._9;
-using Kavita.Server.ManualMigrations.v0._8._0;
-using Kavita.Server.ManualMigrations.v0._8._1;
-using Kavita.Server.ManualMigrations.v0._8._2;
-using Kavita.Server.ManualMigrations.v0._8._4;
-using Kavita.Server.ManualMigrations.v0._8._5;
-using Kavita.Server.ManualMigrations.v0._8._6;
-using Kavita.Server.ManualMigrations.v0._8._7;
-using Kavita.Server.ManualMigrations.v0._8._8;
-using Kavita.Server.ManualMigrations.v0._8._9;
-using Kavita.Server.ManualMigrations.v0._9._0;
-using Kavita.Server.ManualMigrations.v0._9._1;
-using Kavita.Server.ManualMigrations.v0._9._1.x;
-using Kavita.Server.ManualMigrations.v0._9._2;
 using Kavita.Server.Middleware;
 using Kavita.Server.Swagger;
 using Kavita.Services.SignalR;
@@ -246,14 +230,10 @@ public class Startup
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
-        IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider,
-        IDirectoryService directoryService, IUnitOfWork unitOfWork, IVersionUpdaterService versionService)
+        IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider)
     {
 
         var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-
-
-        ExecuteMigrations(serviceProvider, directoryService, unitOfWork, versionService, logger);
 
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseMiddleware<SecurityEventMiddleware>();
@@ -430,162 +410,6 @@ public class Startup
         logger.LogInformation("Starting with base url as {BaseUrl}", basePath);
     }
 
-    private static void ExecuteMigrations(IServiceProvider serviceProvider, IDirectoryService directoryService,
-        IUnitOfWork unitOfWork, IVersionUpdaterService versionService, ILogger<Program> logger)
-    {
-        try
-        {
-            Task.Run(async () =>
-                {
-                    // Apply all migrations on startup
-                    var dataContext = serviceProvider.GetRequiredService<DataContext>();
-
-                    logger.LogInformation("Running Migrations");
-
-                    #region Migrations
-
-                    #region v0.7.9
-                    await MigrateUserLibrarySideNavStream.Migrate(unitOfWork, dataContext, logger);
-                    #endregion
-
-                    #region v0.7.11
-                    await MigrateSmartFilterEncoding.Migrate(unitOfWork, dataContext, logger);
-                    await new MigrateLibrariesToHaveAllFileTypes().RunAsync(dataContext, logger);
-                    #endregion
-
-                    #region v0.7.14
-                    await MigrateEmailTemplates.Migrate(directoryService, logger);
-                    await MigrateVolumeNumber.Migrate(dataContext, logger);
-                    await new MigrateWantToReadImport(unitOfWork, directoryService).RunAsync(dataContext, logger);
-                    await MigrateManualHistory.Migrate(dataContext, logger);
-                    await MigrateClearNightlyExternalSeriesRecords.Migrate(dataContext, logger);
-                    #endregion
-
-                    #region v0.8.0
-                    await MigrateVolumeLookupName.Migrate(dataContext, unitOfWork, logger);
-                    await MigrateChapterNumber.Migrate(dataContext, logger);
-                    await MigrateProgressExport.Migrate(dataContext, directoryService, logger);
-                    await MigrateMixedSpecials.Migrate(dataContext, unitOfWork, directoryService, logger);
-                    await MigrateLooseLeafChapters.Migrate(dataContext, unitOfWork, directoryService, logger);
-                    await MigrateChapterFields.Migrate(dataContext, unitOfWork, logger);
-                    await MigrateChapterRange.Migrate(dataContext, unitOfWork, logger);
-                    await MigrateMangaFilePath.Migrate(dataContext, logger);
-                    await MigrateCollectionTagToUserCollections.Migrate(dataContext, unitOfWork, logger);
-                    #endregion
-
-                    #region v0.8.1
-                    await MigrateLowestSeriesFolderPath.Migrate(dataContext, unitOfWork, logger);
-                    #endregion
-
-                    #region v0.8.2
-                    await ManualMigrateThemeDescription.Migrate(dataContext, logger);
-                    await MigrateInitialInstallData.Migrate(dataContext, logger, directoryService);
-                    await MigrateSeriesLowestFolderPath.Migrate(dataContext, logger, directoryService);
-                    #endregion
-
-                    #region v0.8.4
-                    await MigrateLowestSeriesFolderPath2.Migrate(dataContext, unitOfWork, logger);
-                    await ManualMigrateRemovePeople.Migrate(dataContext, logger);
-                    await MigrateDuplicateDarkTheme.Migrate(dataContext, logger);
-                    await ManualMigrateUnscrobbleBookLibraries.Migrate(dataContext, logger);
-                    #endregion
-
-                    #region v0.8.5
-                    await ManualMigrateBlacklistTableToSeries.Migrate(dataContext, logger);
-                    await ManualMigrateInvalidBlacklistSeries.Migrate(dataContext, logger);
-                    await ManualMigrateScrobbleErrors.Migrate(dataContext, logger);
-                    await ManualMigrateNeedsManualMatch.Migrate(dataContext, logger);
-                    await MigrateProgressExportForV085.Migrate(dataContext, directoryService, logger);
-                    #endregion
-
-                    #region v0.8.6
-                    await ManualMigrateScrobbleSpecials.Migrate(dataContext, logger);
-                    await ManualMigrateScrobbleEventGen.Migrate(dataContext, logger);
-                    #endregion
-
-                    #region v0.8.7
-                    await ManualMigrateReadingProfiles.Migrate(dataContext, logger);
-                    #endregion
-
-                    #region v0.8.8
-                    await ManualMigrateEnableMetadataMatchingDefault.Migrate(dataContext, unitOfWork, logger);
-                    await ManualMigrateBookReadingProgress.Migrate(dataContext, unitOfWork, logger);
-                    #endregion
-
-                    #region v0.8.9
-                    await new MigrateBadKoreaderProgress().RunAsync(dataContext, logger);
-                    await new MigrateProgressToReadingSessions().RunAsync(dataContext, logger);
-                    await new MigrateMissingCreatedUtcDate().RunAsync(dataContext, logger);
-                    await new MigrateTotalReads().RunAsync(dataContext, logger);
-                    await new MigrateToAuthKeys().RunAsync(dataContext, logger);
-                    await new MigrateMissingAppUserRatingDateColumns().RunAsync(dataContext, logger);
-                    await new MigrateFormatToActivityDataV2().RunAsync(dataContext, logger);
-                    await new MigrateIncorrectUtcTimes().RunAsync(dataContext, logger);
-                    #endregion
-
-                    #region v0.9.0
-                    await new ManualMigrateEnsureNoReadOnlyAdmins().RunAsync(dataContext, logger);
-                    await new ManualMigrationRemoveMoreInGenreStream().RunAsync(dataContext, logger);
-                    await new ManualMigrateSmartFilterEntityTypeBackfill().RunAsync(dataContext, logger);
-                    await new ManualMigrateEpubFontFamilyDetailsBackfill().RunAsync(dataContext, logger);
-                    #endregion
-
-                    #region v0.9.1
-
-                    await new ManualMigrationScrobbleRework().RunAsync(dataContext, logger);
-                    await new ManualMigrationKavitaScrobbleProviders().RunAsync(dataContext, logger);
-                    await new ManualMigrationMetadataProvider().RunAsync(dataContext, logger);
-                    await new ManualMigrationOAuthMigration().RunAsync(dataContext, logger);
-                    await new ManualMigrateRelationshipAuditHistory().RunAsync(dataContext, logger);
-                    await new ManualMigrationSetDefaultMetadataProvidersForLibrary().RunAsync(dataContext, logger);
-                    await new ManualMigrationMetadataSettingFieldRenumber().RunAsync(dataContext, logger);
-                    await new ManualMigrateOriginalNameBackfill().RunAsync(dataContext, logger);
-                    await new ManualMigrateNormalizedOriginalNameBackfill().RunAsync(dataContext, logger);
-                    await new ManualMigrateLastReadDates().RunAsync(dataContext, logger);
-                    await new ManualMigrateVersionCacheFiles(directoryService).RunAsync(dataContext, logger);
-                    await new ManualMigrationExternalSeriesMetadataIds().RunAsync(dataContext, logger);
-                    await new ManualMigrationCorrectAuditStatus().RunAsync(dataContext, logger);
-                    await new ManualMigrateCoverImageSettings().RunAsync(dataContext, logger);
-
-                    await new ManualMigrateBreakpointMapping().RunAsync(dataContext, logger);
-
-                    #endregion
-
-                    #region v0.9.2
-
-                    await new ManualMigrationUnassignDefaultReadingProfile().RunAsync(dataContext, logger);
-                    await new ManualMigrateOnDeckSettings().RunAsync(dataContext, logger);
-                    await new ManualMigrationFixInvalidOnDeckSettings().RunAsync(dataContext, logger);
-                    await new ManualMigrationClearRootLowestFolderPath().RunAsync(dataContext, logger);
-                    await new ManualMigrateRemoveLegacyGithubCaches(directoryService).RunAsync(dataContext, logger);
-
-                    #endregion
-
-                    #endregion
-
-                    //  Update the version in the DB after all migrations are run
-                    var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
-                    var isVersionDifferent = installVersion.Value != BuildInfo.Version.ToString();
-                    installVersion.Value = BuildInfo.Version.ToString();
-                    unitOfWork.SettingsRepository.Update(installVersion);
-                    await unitOfWork.CommitAsync();
-
-                    logger.LogInformation("Running Migrations - complete");
-
-                    if (isVersionDifferent)
-                    {
-                        // Clear the GitHub cache so update stuff shows correctly
-                        versionService.BustGithubCache();
-                    }
-
-                }).GetAwaiter()
-                .GetResult();
-        }
-        catch (Exception ex)
-        {
-            logger.LogCritical(ex, "An error occurred during migration");
-        }
-    }
 
     private static void UpdateBaseUrlInIndex(string baseUrl)
     {

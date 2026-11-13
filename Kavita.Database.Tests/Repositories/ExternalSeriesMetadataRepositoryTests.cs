@@ -131,8 +131,8 @@ public class ExternalSeriesMetadataRepositoryTests(ITestOutputHelper outputHelpe
             ValidUntilUtc = DateTime.UtcNow.AddDays(7),
             ExternalRatings = new List<ExternalRating>
             {
-                new() { Provider = ScrobbleProvider.AniList, AverageScore = 85, FavoriteCount = 1000 },
-                new() { Provider = ScrobbleProvider.Mal, AverageScore = 90, FavoriteCount = 2000 }
+                new() { Provider = ScrobbleProvider.AniList, AverageScore = 85},
+                new() { Provider = ScrobbleProvider.Mal, AverageScore = 90 }
             }
         };
         context.ExternalSeriesMetadata.Add(metadata);

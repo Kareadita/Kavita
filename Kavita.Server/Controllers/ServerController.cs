@@ -132,21 +132,13 @@ public class ServerController(
 
 
     /// <summary>
-    /// Triggers the scheduling of the convert media job. This will convert all media to the target encoding (except for PNG). Only one job will run at a time.
+    /// Triggers the scheduling of the convert media job. This will convert all media to the target encoding. Only one job will run at a time.
     /// </summary>
     /// <returns></returns>
     [HttpPost("convert-media")]
-    public async Task<ActionResult> ScheduleConvertCovers()
+    public ActionResult ScheduleConvertCovers()
     {
-        var ct = HttpContext.RequestAborted;
-        var encoding = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
-        if (encoding == EncodeFormat.PNG)
-        {
-            return BadRequest(await localizationService.TranslateAsync(UserId, "encode-as-warning"));
-        }
-
         taskScheduler.ConvertAllCoversToEncoding();
-
         return Ok();
     }
 

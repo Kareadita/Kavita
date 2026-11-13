@@ -120,20 +120,16 @@ public static class ImageExtensions
     {
         // If the dimensions differ, resample img2 up/down to img1's size, then compare
         // pixel-by-pixel over the RGB bands (alpha is ignored).
-        if (img1.Width != img2.Width || img1.Height != img2.Height)
-        {
-            var hscale = (double) img1.Width / img2.Width;
-            var vscale = (double) img1.Height / img2.Height;
-            img2 = img2.Resize(hscale, vscale: vscale);
-            img2 = ForceSize(img2, img1.Width, img1.Height);
-        }
+        using var resized = img1.Width != img2.Width || img1.Height != img2.Height
+            ? ForceSize(img2.Resize((double) img1.Width / img2.Width, vscale: (double) img1.Height / img2.Height), img1.Width, img1.Height)
+            : img2.Copy();
 
         // Work in float so subtraction cannot wrap around (uchar - uchar would clip/overflow).
-        var f1 = img1.Cast(Enums.BandFormat.Float);
-        var f2 = img2.Cast(Enums.BandFormat.Float);
+        using var f1 = img1.Cast(Enums.BandFormat.Float);
+        using var f2 = resized.Cast(Enums.BandFormat.Float);
 
-        var diff = f1 - f2;
-        var squared = diff * diff;
+        using var diff = f1 - f2;
+        using var squared = diff * diff;
 
         // Avg() is the mean over every band-element. We sum R²+G²+B² per pixel and divide by the
         // pixel count only, so multiply the per-element mean back up by the band count.
@@ -174,12 +170,8 @@ public static class ImageExtensions
     {
         // Create a smaller version if the image is large to speed up analysis.
         // This bounds the longest side to 512 while preserving aspect ratio.
-        var workingImage = image;
-        if (image.Width > 512 || image.Height > 512)
-        {
-            var scale = 512.0 / Math.Max(image.Width, image.Height);
-            workingImage = image.Resize(scale);
-        }
+        var scale = 512.0 / Math.Max(image.Width, image.Height);
+        using var workingImage = scale < 1 ? image.Resize(scale) : image.Copy();
 
         var buffer = ToRgbBuffer(workingImage);
 
@@ -443,25 +435,31 @@ public static class ImageExtensions
     /// </summary>
     private static Image Normalize(Image img)
     {
-        var result = img;
+        var result = img.Copy();
 
         if (result.Interpretation != Enums.Interpretation.Srgb)
         {
-            result = result.Colourspace(Enums.Interpretation.Srgb);
+            result = Replace(result, result.Colourspace(Enums.Interpretation.Srgb));
         }
 
         if (result.HasAlpha())
         {
-            result = result.Flatten();
+            result = Replace(result, result.Flatten());
         }
 
         if (result.Format != Enums.BandFormat.Uchar)
         {
-            result = result.Cast(Enums.BandFormat.Uchar);
+            result = Replace(result, result.Cast(Enums.BandFormat.Uchar));
         }
 
-        // Ensure we always return a distinct instance, otherwise the caller's original instance will get disposed incorrectly
-        return ReferenceEquals(result, img) ? img.Copy() : result;
+        return result;
+    }
+
+    // libvips holds its own reference to each input, so disposing the upstream wrapper leaves the chain valid
+    private static Image Replace(Image previous, Image next)
+    {
+        previous.Dispose();
+        return next;
     }
 
     /// <summary>
@@ -477,23 +475,19 @@ public static class ImageExtensions
 
     /// <summary>
     /// Forces an image to exact dimensions after a resize, guarding against NetVips' rounding
-    /// producing an off-by-one width/height (which would make band arithmetic throw).
+    /// producing an off-by-one width/height (which would make band arithmetic throw). Takes ownership of
+    /// <paramref name="img"/>: it is disposed whenever a new image is returned in its place.
     /// </summary>
     private static Image ForceSize(Image img, int width, int height)
     {
-        if (img.Width == width && img.Height == height)
-        {
-            return img;
-        }
-
         if (img.Width > width || img.Height > height)
         {
-            img = img.Crop(0, 0, Math.Min(img.Width, width), Math.Min(img.Height, height));
+            img = Replace(img, img.Crop(0, 0, Math.Min(img.Width, width), Math.Min(img.Height, height)));
         }
 
         if (img.Width != width || img.Height != height)
         {
-            img = img.Embed(0, 0, width, height, extend: Enums.Extend.Copy);
+            img = Replace(img, img.Embed(0, 0, width, height, extend: Enums.Extend.Copy));
         }
 
         return img;

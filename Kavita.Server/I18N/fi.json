@@ -39,7 +39,6 @@
     "age-restriction-not-applicable": "Ei rajoituksia",
     "generic-relationship": "Suhteiden päivittämisessä oli ongelma",
     "job-already-running": "Työ on jo käynnissä",
-    "encode-as-warning": "Et voi muuttaa PNG:ksi. Kansikuville, kokeile päivitystä. Kirjamerkkejä ja faviconeja ei voi koodata takaisin.",
     "ip-address-invalid": "IP-osoite '{0}' on virheellinen",
     "bookmark-dir-permissions": "Kirjanmerkki hakemistolla ei ole oikeita käyttöoikeuksia Kavitalle",
     "total-backups": "Varmuuskopioiden kokonaismäärän on oltava välillä 1–30",

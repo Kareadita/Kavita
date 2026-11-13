@@ -13,7 +13,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._0;
 public class ManualMigrateEnsureNoReadOnlyAdmins : ManualMigration
 {
     protected override string MigrationName => "ManualMigrateEnsureNoReadOnlyAdmins";
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var users = await context.Users
             .Include(u => u.UserRoles)

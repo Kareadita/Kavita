@@ -67,12 +67,6 @@ public class BookmarkService(
         var encodeFormat =
             (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
 
-        if (encodeFormat == EncodeFormat.PNG)
-        {
-            logger.LogError("Cannot convert media to PNG");
-            return;
-        }
-
         // Validate the bookmark still exists
         var bookmark = await unitOfWork.UserRepository.GetBookmarkAsync(bookmarkId, ct);
         if (bookmark == null) return;
@@ -141,11 +135,7 @@ public class BookmarkService(
             unitOfWork.UserRepository.Add(bookmark);
             await unitOfWork.CommitAsync(ct);
 
-            if (settings.EncodeMediaAs != EncodeFormat.PNG)
-            {
-                // Enqueue a task to convert the bookmark to webP
-                BackgroundJob.Enqueue(() => ConvertBookmarkToEncoding(bookmark.Id));
-            }
+            BackgroundJob.Enqueue(() => ConvertBookmarkToEncoding(bookmark.Id));
         }
         catch (Exception ex)
         {

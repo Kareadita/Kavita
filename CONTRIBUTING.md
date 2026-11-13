@@ -130,3 +130,4 @@ If you have any questions about any of this, please let us know.
 ## Misc
 - Localization should use component name for primary grouping, -label for labels, -alt for accessibility text
 - /theme can be used to visualize different components available for building
+- Add a unit test for any regression bug fix. This helps us catch it the next time around.

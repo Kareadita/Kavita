@@ -6,6 +6,7 @@ using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
+using Kavita.Services.Images;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -24,7 +25,7 @@ public class BookServiceTests
     {
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
         _bookService = new BookService(_logger, directoryService,
-            new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService)
+            new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService, new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>()))
             , _mediaErrorService, _unitOfWork);
     }
 

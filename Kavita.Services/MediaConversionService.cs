@@ -10,6 +10,7 @@ using Kavita.API.Services.SignalR;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 using Kavita.Services.Comparators;
 using Kavita.Services.Extensions;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,7 @@ namespace Kavita.Services;
 public class MediaConversionService(
     IUnitOfWork unitOfWork,
     IImageService imageService,
+    IImagePipeline imagePipeline,
     IEventHub eventHub,
     IDirectoryService directoryService,
     ILogger<MediaConversionService> logger)
@@ -37,11 +39,10 @@ public class MediaConversionService(
         await ConvertAllBookmarkToEncoding(ct);
         await ConvertAllCoversToEncoding(ct);
         await CoverAllFaviconsToEncoding(ct);
-
     }
 
     /// <summary>
-    /// This is a long-running job that will convert all bookmarks into a format that is not PNG. Do not invoke anyway except via Hangfire.
+    /// This is a long-running job that will convert all bookmarks into a format. Do not invoke anyway except via Hangfire.
     /// </summary>
     /// <param name="ct"></param>
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
@@ -51,12 +52,6 @@ public class MediaConversionService(
             (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory, ct)).Value;
         var encodeFormat =
             (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
-
-        if (encodeFormat == EncodeFormat.PNG)
-        {
-            logger.LogError("Cannot convert media to PNG");
-            return;
-        }
 
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertBookmarksProgressEvent(0F, ProgressEventType.Started), ct: ct);
@@ -96,23 +91,18 @@ public class MediaConversionService(
         var encodeFormat =
             (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
 
-        if (encodeFormat == EncodeFormat.PNG)
-        {
-            logger.LogError("Cannot convert media to PNG");
-            return;
-        }
-
         logger.LogInformation("[MediaConversionService] Starting conversion of all covers to {Format}", encodeFormat);
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertCoverProgressEvent(0F, ProgressEventType.Started), ct: ct);
 
         var chapterCovers = await unitOfWork.ChapterRepository.GetAllChaptersWithCoversInDifferentEncoding(encodeFormat, ct);
-        var customSeriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncodingAsync(encodeFormat);
-        var seriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncodingAsync(encodeFormat, false);
+        var customSeriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncodingAsync(encodeFormat, ct: ct);
+        var seriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncodingAsync(encodeFormat, false, ct);
         var nonCustomOrConvertedVolumeCovers = await unitOfWork.VolumeRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);
 
         var readingListCovers = await unitOfWork.ReadingListRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);
-        var libraryCovers = await unitOfWork.LibraryRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);
+        var libraryFormat = encodeFormat.ForKind(ImageKind.LibraryIcon);
+        var libraryCovers = await unitOfWork.LibraryRepository.GetAllWithCoversInDifferentEncoding(libraryFormat, ct);
         var collectionCovers = await unitOfWork.CollectionTagRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);
 
         var totalCount = chapterCovers.Count + seriesCovers.Count + readingListCovers.Count +
@@ -127,7 +117,7 @@ public class MediaConversionService(
         {
             if (string.IsNullOrEmpty(library.CoverImage)) continue;
 
-            var newFile = await SaveAsEncodingFormat(coverDirectory, library.CoverImage, coverDirectory, encodeFormat);
+            var newFile = await SaveAsEncodingFormat(coverDirectory, library.CoverImage, coverDirectory, libraryFormat);
             library.CoverImage = Path.GetFileName(newFile);
 
             unitOfWork.LibraryRepository.Update(library);
@@ -240,29 +230,23 @@ public class MediaConversionService(
 
     private async Task CoverAllFaviconsToEncoding(CancellationToken ct = default)
     {
-        var encodeFormat =
-            (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
-
-        if (encodeFormat == EncodeFormat.PNG)
-        {
-            logger.LogError("Cannot convert media to PNG");
-            return;
-        }
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        var policy = new ImagePolicy(settings.EncodeMediaAs, settings.CoverImageSize);
+        var encodeFormat = policy.Format.ForKind(ImageKind.Favicon);
 
         logger.LogInformation("[MediaConversionService] Starting conversion of favicons to {Format}", encodeFormat);
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertBookmarksProgressEvent(0F, ProgressEventType.Started), ct: ct);
-        var pngFavicons = directoryService.GetFiles(directoryService.FaviconDirectory)
+        var favicons = directoryService.GetFiles(directoryService.FaviconDirectory)
             .Where(b => !b.EndsWith(encodeFormat.GetExtension())).
             ToList();
 
         var count = 1F;
-        foreach (var file in pngFavicons)
+        foreach (var file in favicons)
         {
-            await SaveAsEncodingFormat(directoryService.FaviconDirectory, directoryService.FileSystem.FileInfo.New(file).Name, directoryService.FaviconDirectory,
-                encodeFormat);
+            ConvertFavicon(file, policy, encodeFormat);
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertBookmarksProgressEvent(count / pngFavicons.Count, ProgressEventType.Updated), ct: ct);
+                MessageFactory.ConvertBookmarksProgressEvent(count / favicons.Count, ProgressEventType.Updated), ct: ct);
             count++;
         }
 
@@ -271,6 +255,22 @@ public class MediaConversionService(
             MessageFactory.ConvertBookmarksProgressEvent(1F, ProgressEventType.Ended), ct: ct);
 
         logger.LogInformation("[MediaConversionService] Converted favicons to {Format}", encodeFormat);
+    }
+
+    private void ConvertFavicon(string file, ImagePolicy policy, EncodeFormat encodeFormat)
+    {
+        var fileName = Path.GetFileNameWithoutExtension(file) + encodeFormat.GetExtension();
+        try
+        {
+            // From bytes: loaded from the file, a WebP source stays open and Windows refuses to delete it
+            imagePipeline.Write(new ImageSource.FromBytes(File.ReadAllBytes(file)), ImageKind.Favicon, policy,
+                directoryService.FaviconDirectory, fileName);
+            directoryService.DeleteFiles([file]);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Could not convert favicon {File} to {Format}", file, encodeFormat);
+        }
     }
 
 
@@ -297,6 +297,12 @@ public class MediaConversionService(
             return newFilename;
         }
 
+        // Converting in place would write over the source and then delete it
+        if (Path.GetExtension(filename).Equals(encodeFormat.GetExtension(), StringComparison.OrdinalIgnoreCase))
+        {
+            return Path.Join(targetFolder, new FileInfo(filename).Name);
+        }
+
         try
         {
             // Convert target file to format then delete original target file
@@ -306,6 +312,10 @@ public class MediaConversionService(
                 var targetName = new FileInfo(targetFile).Name;
                 newFilename = Path.Join(targetFolder, targetName);
                 directoryService.DeleteFiles([fullSourcePath]);
+                if (File.Exists(fullSourcePath))
+                {
+                    logger.LogWarning("Converted {File} to {Format} but could not delete the original", fullSourcePath, encodeFormat);
+                }
             }
             catch (Exception ex)
             {

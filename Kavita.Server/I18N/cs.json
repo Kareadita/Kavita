@@ -100,7 +100,6 @@
     "bookmarks-empty": "Záložky nemohou být prázdné",
     "invalid-filename": "Neplatný název souboru",
     "job-already-running": "Práce již běží",
-    "encode-as-warning": "Nelze převést na PNG. Pro obaly použijte Refresh Covers. Záložky a oblíbené ikony nelze zpětně kódovat.",
     "ip-address-invalid": "IP adresa '{0}' je neplatná",
     "bookmark-dir-permissions": "Adresář záložek nemá správná oprávnění k použití pro Kavitu",
     "total-backups": "Celkový počet záloh musí být mezi 1 a 30",
@@ -287,5 +286,14 @@
     "mappings-re-run-libraries-overlap": "Seznamy ExcludedLibraries a IncludedLibraries nesmí obsahovat stejné knihovny",
     "series-name-orphans-files": "Změna tohoto názvu by vedla k rozdělení souborů, které jsou v současné době sloučeny do této série",
     "series-localized-name-exists": "Tento název již používá jiná série v této knihovně",
-    "series-localized-name-orphans-files": "Změna tohoto lokalizovaného názvu by vedla k rozdělení souborů, které jsou v současné době sloučeny do této série"
+    "series-localized-name-orphans-files": "Změna tohoto lokalizovaného názvu by vedla k rozdělení souborů, které jsou v současné době sloučeny do této série",
+    "email.token-invalidated.subject": "Kavita – Tvůj token {{Provider}} byl zneplatněn a události scrobbingu byly zastaveny",
+    "email.token-invalidated.header": "Váš token {{Provider}} byl zneplatněn z důvodu opakovaných selhání při aktualizaci!",
+    "email.token-invalidated.description": "Kavita přestane synchronizovat s {{Provider}}, dokud neobnovíte připojení.",
+    "email.token-invalidated.cta": "OBNOVIT",
+    "email.token-invalidated.fallback-link-label": "Pokud výše uvedené tlačítko nefunguje, najdete odkaz zde:",
+    "cbl-repo-path-not-found": "{0} nebylo nalezeno v repozitáři CBL",
+    "cbl-repo-download-failed": "Nelze stáhnout {0} z repozitáře CBL",
+    "github-unavailable": "GitHub není k dispozici, zkuste to prosím později",
+    "kobo-sync-disabled": "Na tomto serveru není služba KoboSync povolena"
 }

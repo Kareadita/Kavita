@@ -8,7 +8,6 @@ export enum RatingAuthority {
 export interface Rating {
   averageScore: number;
   meanScore: number;
-  favoriteCount: number;
   provider: ScrobbleProvider;
   providerUrl: string | undefined;
   authority: RatingAuthority;

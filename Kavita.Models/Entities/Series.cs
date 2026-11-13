@@ -57,7 +57,10 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     /// Absolute path to the (managed) image file
     /// </summary>
     /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
+    [Obsolete("Use CoverImageFile")]
     public string? CoverImage { get; set; }
+    public int? CoverImageFileId { get; set; }
+    public ImageFile? CoverImageFile { get; set; }
     /// <summary>
     /// Denotes if the CoverImage has been overridden by the user. If so, it will not be updated during normal scan operations.
     /// </summary>
@@ -89,7 +92,9 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     /// </summary>
     public MangaFormat Format { get; set; } = MangaFormat.Unknown;
 
+    [Obsolete("Use CoverImageFile")]
     public string PrimaryColor { get; set; } = string.Empty;
+    [Obsolete("Use CoverImageFile")]
     public string SecondaryColor { get; set; } = string.Empty;
 
     public bool SortNameLocked { get; set; }

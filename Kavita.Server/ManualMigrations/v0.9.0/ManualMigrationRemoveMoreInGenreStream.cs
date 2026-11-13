@@ -12,7 +12,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._0;
 public class ManualMigrationRemoveMoreInGenreStream : ManualMigration
 {
     protected override string MigrationName => "ManualMigrationRemoveMoreInGenreStream";
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var existing = await context.AppUserDashboardStream
             .Where(s => (int) s.StreamType == 5)

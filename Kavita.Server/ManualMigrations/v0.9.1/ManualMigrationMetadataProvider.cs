@@ -10,7 +10,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._1;
 public class ManualMigrationMetadataProvider: ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrationMetadataProvider);
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         // Cbr for Comic libraries
         await context.ExternalSeriesMetadata

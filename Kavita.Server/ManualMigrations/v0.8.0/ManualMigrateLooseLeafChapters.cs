@@ -24,7 +24,7 @@ namespace Kavita.Server.ManualMigrations.v0._8._0;
 /// </summary>
 public static class MigrateLooseLeafChapters
 {
-    public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger<Program> logger)
+    public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger logger)
     {
         if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateLooseLeafChapters"))
         {
@@ -171,7 +171,7 @@ public static class MigrateLooseLeafChapters
             "Running MigrateLooseLeafChapters migration - Completed. This is not an error");
     }
 
-    private static void UpdateCoverImage(IDirectoryService directoryService, ILogger<Program> logger, Chapter chapter,
+    private static void UpdateCoverImage(IDirectoryService directoryService, ILogger logger, Chapter chapter,
         string extension, Volume newVolume)
     {
         var existingCover = ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId) + extension;

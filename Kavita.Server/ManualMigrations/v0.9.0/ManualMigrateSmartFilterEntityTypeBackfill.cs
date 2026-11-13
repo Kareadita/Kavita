@@ -13,7 +13,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._0;
 public class ManualMigrateSmartFilterEntityTypeBackfill : ManualMigration
 {
     protected override string MigrationName => "ManualMigrateSmartFilterEntityTypeBackfill";
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         // Find all Smart Filters and re-encode them so they have the entityType on
         var filters = await context.AppUserSmartFilter.ToListAsync();

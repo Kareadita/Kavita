@@ -5,14 +5,15 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
-using Flurl.Http;
 using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Common.Helpers;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 using NetVips;
@@ -20,7 +21,7 @@ using Image = NetVips.Image;
 
 namespace Kavita.Services;
 
-public class ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
+public class ImageService(ILogger<ImageService> logger, IDirectoryService directoryService, IImagePipeline imagePipeline)
     : IImageService
 {
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
@@ -29,18 +30,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     public const string ReadingListCoverImageRegex = @"readinglist\d+";
     public const string PersonCoverImageRegex = @"person\d+";
 
-    /// <summary>
-    /// Width of the Thumbnail generation
-    /// </summary>
-    private const int ThumbnailWidth = 320;
-    /// <summary>
-    /// Height of the Thumbnail generation
-    /// </summary>
-    private const int ThumbnailHeight = 455;
-    /// <summary>
-    /// Width of a cover for Library
-    /// </summary>
-    public const int LibraryThumbnailWidth = 32;
     // Fixed seed for generation of ColorScapes. Do not change
     private const int ColorScapeSeed = 7;
 
@@ -60,93 +49,13 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         }
     }
 
-    /// <summary>
-    /// Tries to determine if there is a better mode for resizing
-    /// </summary>
-    /// <param name="image"></param>
-    /// <param name="targetWidth"></param>
-    /// <param name="targetHeight"></param>
-    /// <returns></returns>
-    public static Enums.Size GetSizeForDimensions(Image image, int targetWidth, int targetHeight)
-    {
-        try
-        {
-            if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
-            {
-                return Enums.Size.Force;
-            }
-        }
-        catch (Exception)
-        {
-            /* Swallow */
-        }
-
-        return Enums.Size.Both;
-    }
-
-    public static Enums.Interesting? GetCropForDimensions(Image image, int targetWidth, int targetHeight)
-    {
-        try
-        {
-            if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
-            {
-                return null;
-            }
-        } catch (Exception)
-        {
-            /* Swallow */
-            return null;
-        }
-
-        return Enums.Interesting.Attention;
-    }
-
-    public static bool WillScaleWell(Image sourceImage, int targetWidth, int targetHeight, double tolerance = 0.1)
-    {
-        // Calculate the aspect ratios
-        var sourceAspectRatio = (double) sourceImage.Width / sourceImage.Height;
-        var targetAspectRatio = (double) targetWidth / targetHeight;
-
-        // Compare aspect ratios
-        if (Math.Abs(sourceAspectRatio - targetAspectRatio) > tolerance)
-        {
-            return false; // Aspect ratios differ significantly
-        }
-
-        // Calculate scaling factors
-        var widthScaleFactor = (double) targetWidth / sourceImage.Width;
-        var heightScaleFactor = (double) targetHeight / sourceImage.Height;
-
-        // Check resolution quality (example thresholds)
-        if (widthScaleFactor > 2.0 || heightScaleFactor > 2.0)
-        {
-            return false; // Scaling factor too large
-        }
-
-        return true; // Image will scale well
-    }
-
-    private static bool IsLikelyWideImage(int width, int height)
-    {
-        var aspectRatio = (double) width / height;
-        return aspectRatio > 1.25;
-    }
-
     public string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
     {
         if (string.IsNullOrEmpty(path)) return string.Empty;
 
         try
         {
-            var (width, height) = size.GetDimensions();
-            using var sourceImage = Image.NewFromFile(path, false, Enums.Access.SequentialUnbuffered);
-
-            using var thumbnail = Image.Thumbnail(path, width, height: height,
-                size: GetSizeForDimensions(sourceImage, width, height),
-                crop: GetCropForDimensions(sourceImage, width, height));
-            var filename = fileName + encodeFormat.GetExtension();
-            thumbnail.WriteToFile(directoryService.FileSystem.Path.Join(outputDirectory, filename));
-            return filename;
+            return WriteCover(new ImageSource.FromFile(path), fileName, outputDirectory, encodeFormat, size);
         }
         catch (Exception ex)
         {
@@ -157,72 +66,29 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     }
 
     /// <summary>
-    /// Creates a thumbnail out of a memory stream and saves to <see cref="DirectoryService.CoverImageDirectory"/> with the passed
+    /// Creates a thumbnail out of a stream and saves it to <paramref name="outputDirectory"/> with the passed
     /// fileName and the appropriate extension.
     /// </summary>
-    /// <param name="stream">Stream to write to disk. Ensure this is rewinded.</param>
+    /// <param name="stream">Stream to read; rewound first when it can seek</param>
     /// <param name="fileName">filename to save as without extension</param>
-    /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
+    /// <param name="outputDirectory">Where to output the file</param>
     /// <param name="encodeFormat">Export the file as the passed encoding</param>
-    /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
+    /// <param name="size">Cover size to scale and crop to</param>
+    /// <returns>File name with extension of the file</returns>
     public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        var (targetWidth, targetHeight) = size.GetDimensions();
-        if (stream.CanSeek) stream.Position = 0;
-        using var sourceImage = Image.NewFromStream(stream);
-
-        var scalingSize = GetSizeForDimensions(sourceImage, targetWidth, targetHeight);
-        var scalingCrop = GetCropForDimensions(sourceImage, targetWidth, targetHeight);
-
-        using var thumbnail = sourceImage.ThumbnailImage(targetWidth, targetHeight,
-            size: scalingSize,
-            crop: scalingCrop);
-
-        var filename = fileName + encodeFormat.GetExtension();
-        directoryService.ExistOrCreate(outputDirectory);
-
-        try
-        {
-            directoryService.FileSystem.File.Delete(directoryService.FileSystem.Path.Join(outputDirectory, filename));
-        } catch (Exception) {/* Swallow exception */}
-
-        try
-        {
-            thumbnail.WriteToFile(directoryService.FileSystem.Path.Join(outputDirectory, filename));
-
-            return filename;
-        }
-        catch (VipsException)
-        {
-            // NetVips Issue: https://github.com/kleisauke/net-vips/issues/234
-            // Saving pdf covers from a stream can fail, so revert to old code
-
-            if (stream.CanSeek) stream.Position = 0;
-            using var thumbnail2 = Image.ThumbnailStream(stream, targetWidth, height: targetHeight,
-                size: scalingSize,
-                crop: scalingCrop);
-            thumbnail2.WriteToFile(directoryService.FileSystem.Path.Join(outputDirectory, filename));
-
-            return filename;
-        }
+        return WriteCover(new ImageSource.FromStream(stream), fileName, outputDirectory, encodeFormat, size);
     }
 
     public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        var (width, height) = size.GetDimensions();
-        using var sourceImage = Image.NewFromFile(sourceFile, false, Enums.Access.SequentialUnbuffered);
+        return WriteCover(new ImageSource.FromFile(sourceFile), fileName, outputDirectory, encodeFormat, size);
+    }
 
-        using var thumbnail = Image.Thumbnail(sourceFile, width, height: height,
-            size: GetSizeForDimensions(sourceImage, width, height),
-            crop: GetCropForDimensions(sourceImage, width, height));
-        var filename = fileName + encodeFormat.GetExtension();
-        directoryService.ExistOrCreate(outputDirectory);
-        try
-        {
-            directoryService.FileSystem.File.Delete(directoryService.FileSystem.Path.Join(outputDirectory, filename));
-        } catch (Exception) {/* Swallow exception */}
-        thumbnail.WriteToFile(directoryService.FileSystem.Path.Join(outputDirectory, filename));
-        return filename;
+    private string WriteCover(ImageSource source, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
+    {
+        return imagePipeline.Write(source, ImageKind.ChapterCover, new ImagePolicy(encodeFormat, size), outputDirectory,
+            fileName + encodeFormat.GetExtension()).FileName;
     }
 
     public Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat,
@@ -232,32 +98,40 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         var fileName = file.Name.Replace(file.Extension, string.Empty);
         var outputFile = Path.Join(outputPath, fileName + encodeFormat.GetExtension());
 
-        using var sourceImage = Image.NewFromFile(filePath, false, Enums.Access.SequentialUnbuffered);
-        sourceImage.WriteToFile(outputFile);
+        // Use load from buffer to avoid a disposal issue on Windows for the delete later
+        using var sourceImage = Image.NewFromBuffer(File.ReadAllBytes(filePath));
+        if (encodeFormat == EncodeFormat.JPEG)
+        {
+            sourceImage.Jpegsave(outputFile, background: [255, 255, 255]);
+        }
+        else
+        {
+            sourceImage.WriteToFile(outputFile);
+        }
+
         return Task.FromResult(outputFile);
     }
 
-    public Task<bool> IsImage(string filePath, CancellationToken ct = default)
+    public string? GetImageExtension(string filePath)
     {
         try
         {
-            // NetVips resolves the loader from the file header without decoding the pixels; if the
-            // file is not a recognized image, NewFromFile throws a VipsException.
-            ct.ThrowIfCancellationRequested();
             using var image = Image.NewFromFile(filePath, access: Enums.Access.Sequential);
-            return Task.FromResult(true);
+            return image.Get("vips-loader") switch
+            {
+                "pngload" => ".png",
+                "jpegload" => ".jpg",
+                "webpload" => ".webp",
+                "gifload" => ".gif",
+                // heifload also opens HEIC, which browsers can't show
+                "heifload" when image.Contains("heif-compression") && (string) image.Get("heif-compression") == "av1" => ".avif",
+                _ => null,
+            };
         }
-        catch (OperationCanceledException)
+        catch (VipsException)
         {
-            // This allows cancellation to propagate upwards
-            throw;
+            return null;
         }
-        catch (Exception)
-        {
-            /* Swallow Exception */
-        }
-
-        return Task.FromResult(false);
     }
 
 
@@ -266,7 +140,7 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     {
         using var image = Image.NewFromFile(imagePath);
         // Resize the image to speed up processing
-        var resizedImage = image.Resize(0.1);
+        using var resizedImage = image.Resize(0.1);
 
         // Convert image to RGB array
         var pixels = resizedImage.WriteToMemory<byte>().ToArray();
@@ -296,23 +170,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         }
 
         return (null, null);
-    }
-
-    private static Dictionary<Vector3, int> GenerateColorHistogram(Image image)
-    {
-        var pixels = image.WriteToMemory().ToArray();
-        var histogram = new Dictionary<Vector3, int>();
-
-        for (var i = 0; i < pixels.Length; i += 3)
-        {
-            var color = new Vector3(pixels[i], pixels[i + 1], pixels[i + 2]);
-            if (!histogram.TryAdd(color, 1))
-            {
-                histogram[color]++;
-            }
-        }
-
-        return histogram;
     }
 
     private static List<Vector3> KMeansClustering(List<Vector3> points, int k, int maxIterations = 100)
@@ -402,45 +259,38 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
 
 
     /// <inheritdoc />
-    public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat,
-        int thumbnailWidth = ThumbnailWidth, int thumbnailHeight = ThumbnailHeight, string? targetDirectory = null)
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName, ImageKind kind, ImagePolicy policy,
+        string? targetDirectory = null)
     {
-        // TODO: This code has no concept of cropping nor Thumbnail Size
+        byte[] bytes;
         try
         {
-            targetDirectory ??= directoryService.CoverImageDirectory;
-            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), thumbnailWidth, height: thumbnailHeight);
-
-            fileName += encodeFormat.GetExtension();
-            thumbnail.WriteToFile(directoryService.FileSystem.Path.Join(targetDirectory, fileName));
-
-            return fileName;
+            bytes = Convert.FromBase64String(encodedImage);
         }
         catch (FormatException e)
         {
             throw new KavitaException("Invalid Base64 string", e);
         }
+
+        try
+        {
+            return WriteThumbnail(new ImageSource.FromBytes(bytes), fileName, kind, policy, targetDirectory);
+        }
         catch (Exception e)
         {
-            logger.LogError(e, "Error creating thumbnail from url");
+            logger.LogError(e, "Error creating thumbnail from base64");
         }
 
         return string.Empty;
     }
 
     /// <inheritdoc />
-    public string CreateThumbnailFromFile(string sourceFile, string fileName, EncodeFormat encodeFormat,
-        int thumbnailWidth = 320, int thumbnailHeight = 455, string? targetDirectory = null)
+    public string CreateThumbnailFromFile(string sourceFile, string fileName, ImageKind kind, ImagePolicy policy,
+        string? targetDirectory = null)
     {
         try
         {
-            targetDirectory ??= directoryService.CoverImageDirectory;
-            using var thumbnail = Image.Thumbnail(sourceFile, thumbnailWidth, thumbnailHeight);
-
-            fileName += encodeFormat.GetExtension();
-            thumbnail.WriteToFile(directoryService.FileSystem.Path.Join(targetDirectory, fileName));
-
-            return fileName;
+            return WriteThumbnail(new ImageSource.FromFile(sourceFile), fileName, kind, policy, targetDirectory);
         }
         catch (Exception e)
         {
@@ -451,27 +301,31 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     }
 
     /// <inheritdoc />
-    public async Task<string> CreateThumbnailFromUrl(string url, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth, int thumbnailHeight = ThumbnailHeight)
+    public async Task<string> CreateThumbnailFromUrl(string url, string fileName, ImageKind kind, ImagePolicy policy)
     {
+        var downloadPath = directoryService.FileSystem.Path.Join(directoryService.TempDirectory, $"download_{Guid.NewGuid():N}.tmp");
         try
         {
-            var imageStream = await FlurlConfiguration.CreateSafeRequest(url)
-                .AllowHttpStatus("2xx,304")
-                .GetStreamAsync();
+            await FlurlConfiguration.DownloadToFileAsync(url, downloadPath, ControllerConstants.MaxUploadSizeBytes);
 
-            using var thumbnail = Image.ThumbnailStream(imageStream, thumbnailWidth, height: thumbnailHeight);
-
-            fileName += encodeFormat.GetExtension();
-            thumbnail.WriteToFile(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, fileName));
-
-            return fileName;
+            return WriteThumbnail(new ImageSource.FromFile(downloadPath), fileName, kind, policy, null);
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error creating thumbnail from url");
         }
+        finally
+        {
+            directoryService.DeleteFiles([downloadPath]);
+        }
 
         return string.Empty;
+    }
+
+    private string WriteThumbnail(ImageSource source, string fileName, ImageKind kind, ImagePolicy policy, string? targetDirectory)
+    {
+        return imagePipeline.Write(source, kind, policy, targetDirectory ?? directoryService.CoverImageDirectory,
+            fileName + policy.Format.ForKind(kind).GetExtension()).FileName;
     }
 
 
@@ -575,12 +429,12 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
 
     public static string GetWebLinkFormat(string url, EncodeFormat encodeFormat)
     {
-        return $"{new Uri(url).Host.Replace("www.", string.Empty)}{encodeFormat.GetExtension()}";
+        return $"{new Uri(url).Host.Replace("www.", string.Empty)}{encodeFormat.ForKind(ImageKind.Favicon).GetExtension()}";
     }
 
     public static string GetPublisherFormat(string publisher, EncodeFormat encodeFormat)
     {
-        return $"{publisher}{encodeFormat.GetExtension()}";
+        return $"{publisher}{encodeFormat.ForKind(ImageKind.Publisher).GetExtension()}";
     }
 
 
@@ -607,32 +461,40 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
 
 
         var image = Image.Black(width, height);
-
-        var thumbnailWidth = image.Width / cols;
-        var thumbnailHeight = image.Height / rows;
-
-        for (var i = 0; i < coverImages.Count; i++)
+        try
         {
-            if (!File.Exists(coverImages[i])) continue;
-            var tile = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
-            tile = tile.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
+            var thumbnailWidth = image.Width / cols;
+            var thumbnailHeight = image.Height / rows;
 
-            var row = i / cols;
-            var col = i % cols;
-
-            var x = col * thumbnailWidth;
-            var y = row * thumbnailHeight;
-
-            if (coverImages.Count == 3 && i == 2)
+            for (var i = 0; i < coverImages.Count; i++)
             {
-                x = (image.Width - thumbnailWidth) / 2;
-                y = thumbnailHeight;
+                if (!File.Exists(coverImages[i])) continue;
+                using var source = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
+                using var tile = source.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
+
+                var row = i / cols;
+                var col = i % cols;
+
+                var x = col * thumbnailWidth;
+                var y = row * thumbnailHeight;
+
+                if (coverImages.Count == 3 && i == 2)
+                {
+                    x = (image.Width - thumbnailWidth) / 2;
+                    y = thumbnailHeight;
+                }
+
+                var merged = image.Insert(tile, x, y);
+                image.Dispose();
+                image = merged;
             }
 
-            image = image.Insert(tile, x, y);
+            image.WriteToFile(dest);
         }
-
-        image.WriteToFile(dest);
+        finally
+        {
+            image.Dispose();
+        }
     }
 
     public void UpdateColorScape(IHasCoverImage entity)

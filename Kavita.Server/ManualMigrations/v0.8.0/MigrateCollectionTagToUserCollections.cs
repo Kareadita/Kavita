@@ -19,7 +19,7 @@ namespace Kavita.Server.ManualMigrations.v0._8._0;
 /// </summary>
 public static class MigrateCollectionTagToUserCollections
 {
-    public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, ILogger<Program> logger)
+    public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, ILogger logger)
     {
         if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateCollectionTagToUserCollections") ||
             !await dataContext.AppUser.AnyAsync())
@@ -67,7 +67,7 @@ public static class MigrateCollectionTagToUserCollections
         await CompleteMigration(dataContext, logger);
     }
 
-    private static async Task CompleteMigration(DataContext dataContext, ILogger<Program> logger)
+    private static async Task CompleteMigration(DataContext dataContext, ILogger logger)
     {
         dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
         {

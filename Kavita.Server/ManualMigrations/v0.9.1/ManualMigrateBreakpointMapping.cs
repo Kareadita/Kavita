@@ -14,7 +14,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._1.x;
 public class ManualMigrateBreakpointMapping : ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrateBreakpointMapping);
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         await context.AppUserReadingProfiles
             .Where(p => (int) p.DisableWidthOverride == 1)

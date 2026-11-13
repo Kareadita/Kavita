@@ -19,7 +19,7 @@ namespace Kavita.Server.ManualMigrations.v0._8._5;
 /// </summary>
 public static class MigrateProgressExportForV085
 {
-    public static async Task Migrate(DataContext dataContext, IDirectoryService directoryService, ILogger<Program> logger)
+    public static async Task Migrate(DataContext dataContext, IDirectoryService directoryService, ILogger logger)
     {
         try
         {

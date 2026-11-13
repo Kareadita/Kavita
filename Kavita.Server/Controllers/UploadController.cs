@@ -14,11 +14,13 @@ using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Extensions;
+using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.Uploads;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.MetadataMatching;
+using Kavita.Models.Images;
 using Kavita.Server.Attributes;
 using Kavita.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -87,33 +89,33 @@ public class UploadController : BaseApiController
 
         var now = DateTime.UtcNow;
         var dateString = $"{now:d}_{now:T}".Replace('/', '_').Replace(':', '_');
+        var stem = $"coverupload_{dateString}_{Guid.NewGuid():N}";
+        var downloadPath = Path.Join(_directoryService.TempDirectory, stem + ".tmp");
         try
         {
-            var format = await dto.Url.GetFileFormatAsync();
-            if (string.IsNullOrEmpty(format))
+            await FlurlConfiguration.DownloadToFileAsync(dto.Url, downloadPath, ControllerConstants.MaxUploadSizeBytes, ct);
+
+            var extension = _imageService.GetImageExtension(downloadPath);
+            if (extension == null)
             {
-                // Fallback to unreliable parsing if needed
-                format = _directoryService.FileSystem.Path.GetExtension(dto.Url.Split('?')[0]).Replace(".", string.Empty);
+                _logger.LogWarning("Rejected cover from {Url} - content is not a supported image", dto.Url.Sanitize());
+                return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
             }
 
-            var path = await dto.Url
-                .DownloadFileAsync(_directoryService.TempDirectory, $"coverupload_{dateString}.{format}", cancellationToken: ct);
+            var fileName = stem + extension;
+            _directoryService.FileSystem.File.Move(downloadPath, Path.Join(_directoryService.TempDirectory, fileName));
 
-            if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
-                return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
-
-            if (!await _imageService.IsImage(path, ct)) return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
-
-            return $"coverupload_{dateString}.{format}";
+            return fileName;
         }
-        catch (FlurlHttpException ex)
+        catch (Exception ex) when (ex is FlurlHttpException or KavitaException)
         {
-            // Unauthorized
-            if (ex.StatusCode == 401)
-                return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
+            _logger.LogWarning(ex, "Could not download a cover from {Url}", dto.Url.Sanitize());
+            return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
         }
-
-        return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
+        finally
+        {
+            _directoryService.DeleteFiles([downloadPath]);
+        }
     }
 
     [HttpPost("upload-chapter-cover")]
@@ -184,7 +186,6 @@ public class UploadController : BaseApiController
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     public async Task<ActionResult<string>> UploadCoverByFile(IFormFile file)
     {
-        var ct = HttpContext.RequestAborted;
         if (file.Length == 0) return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
 
         // Reject anything that isn't an allowed image extension before we write it to disk, so an executable (or an
@@ -208,7 +209,7 @@ public class UploadController : BaseApiController
         {
             var path = await UploadToTempAsync(file, fileName);
 
-            if (!_directoryService.FileSystem.File.Exists(path) || !await _imageService.IsImage(path, ct))
+            if (!_directoryService.FileSystem.File.Exists(path) || _imageService.GetImageExtension(path) == null)
             {
                 _directoryService.DeleteFiles([path]);
                 _logger.LogWarning("Rejected cover upload '{FileName}' - content is not a valid image", file.FileName.Sanitize());
@@ -248,7 +249,7 @@ public class UploadController : BaseApiController
             var lockState = false;
             if (HasCoverSource(uploadCoverFileDto))
             {
-                filePath = await CreateThumbnail(uploadCoverFileDto, $"{ImageService.GetSeriesFormat(uploadCoverFileDto.Id)}");
+                filePath = await CreateThumbnail(uploadCoverFileDto, ImageService.GetSeriesFormat(uploadCoverFileDto.Id), ImageKind.SeriesCover);
                 lockState = uploadCoverFileDto.LockCover;
             }
 
@@ -311,7 +312,7 @@ public class UploadController : BaseApiController
             var lockState = false;
             if (HasCoverSource(uploadCoverFileDto))
             {
-                filePath = await CreateThumbnail(uploadCoverFileDto, $"{ImageService.GetCollectionTagFormat(uploadCoverFileDto.Id)}");
+                filePath = await CreateThumbnail(uploadCoverFileDto, ImageService.GetCollectionTagFormat(uploadCoverFileDto.Id), ImageKind.CollectionCover);
                 lockState = uploadCoverFileDto.LockCover;
             }
 
@@ -364,7 +365,7 @@ public class UploadController : BaseApiController
             var lockState = false;
             if (HasCoverSource(uploadCoverFileDto))
             {
-                filePath = await CreateThumbnail(uploadCoverFileDto, $"{ImageService.GetReadingListFormat(uploadCoverFileDto.Id)}");
+                filePath = await CreateThumbnail(uploadCoverFileDto, ImageService.GetReadingListFormat(uploadCoverFileDto.Id), ImageKind.ReadingListCover);
                 lockState = uploadCoverFileDto.LockCover;
             }
 
@@ -411,11 +412,10 @@ public class UploadController : BaseApiController
         return _directoryService.FileSystem.File.Exists(path) ? path : null;
     }
 
-    private async Task<string> CreateThumbnail(UploadCoverFileDto uploadCoverFileDto, string filename)
+    private async Task<string> CreateThumbnail(UploadCoverFileDto uploadCoverFileDto, string filename, ImageKind kind)
     {
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        var encodeFormat = settings.EncodeMediaAs;
-        var (width, height) = settings.CoverImageSize.GetDimensions();
+        var policy = new ImagePolicy(settings.EncodeMediaAs, settings.CoverImageSize);
 
         // Preferred path: the image was already streamed into temp (upload-by-url / upload-by-file) and we only
         // received its filename. This avoids posting a large base64 payload back through the request body.
@@ -424,11 +424,11 @@ public class UploadController : BaseApiController
             var tempPath = ResolveTempCoverPath(uploadCoverFileDto.FileName)
                            ?? throw new KavitaException(await _localizationService.TranslateAsync(UserId, "invalid-filename"));
 
-            return _imageService.CreateThumbnailFromFile(tempPath, filename, encodeFormat, width, height);
+            return _imageService.CreateThumbnailFromFile(tempPath, filename, kind, policy);
         }
 
         // Legacy fallback: base64 payload
-        return _imageService.CreateThumbnailFromBase64(uploadCoverFileDto.Url, filename, encodeFormat, width, height);
+        return _imageService.CreateThumbnailFromBase64(uploadCoverFileDto.Url, filename, kind, policy);
     }
 
     /// <summary>
@@ -453,7 +453,7 @@ public class UploadController : BaseApiController
             var lockState = false;
             if (HasCoverSource(uploadCoverFileDto))
             {
-                filePath = await CreateThumbnail(uploadCoverFileDto, $"{ImageService.GetChapterFormat(uploadCoverFileDto.Id, chapter.VolumeId)}");
+                filePath = await CreateThumbnail(uploadCoverFileDto, ImageService.GetChapterFormat(uploadCoverFileDto.Id, chapter.VolumeId), ImageKind.ChapterCover);
                 lockState = uploadCoverFileDto.LockCover;
             }
 
@@ -521,7 +521,7 @@ public class UploadController : BaseApiController
             var lockState = false;
             if (HasCoverSource(uploadCoverFileDto))
             {
-                filePath = await CreateThumbnail(uploadCoverFileDto, $"{ImageService.GetVolumeFormat(uploadCoverFileDto.Id)}");
+                filePath = await CreateThumbnail(uploadCoverFileDto, ImageService.GetVolumeFormat(uploadCoverFileDto.Id), ImageKind.VolumeCover);
                 lockState = uploadCoverFileDto.LockCover;
             }
 
@@ -592,8 +592,8 @@ public class UploadController : BaseApiController
 
         try
         {
-            var filePath = await CreateThumbnail(uploadCoverFileDto,
-                $"{ImageService.GetLibraryFormat(uploadCoverFileDto.Id)}");
+            var filePath = await CreateThumbnail(uploadCoverFileDto, ImageService.GetLibraryFormat(uploadCoverFileDto.Id),
+                ImageKind.LibraryIcon);
 
             if (!string.IsNullOrEmpty(filePath))
             {

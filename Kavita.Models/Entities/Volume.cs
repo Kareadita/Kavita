@@ -37,9 +37,14 @@ public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
 
+    [Obsolete("Use CoverImageFile")]
     public string? CoverImage { get; set; }
+    public int? CoverImageFileId { get; set; }
+    public ImageFile? CoverImageFile { get; set; }
     public bool CoverImageLocked { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string PrimaryColor { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string SecondaryColor { get; set; }
 
     /// <summary>

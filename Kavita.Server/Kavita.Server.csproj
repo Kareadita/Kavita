@@ -146,7 +146,6 @@
     <Content Include="Assets\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Folder Include="Extensions\KavitaPlus\" />
     <Content Include="I18N\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

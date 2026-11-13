@@ -15,6 +15,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Services.DebugExport;
 using Kavita.Services.Helpers;
 using Kavita.Services.HostedServices;
+using Kavita.Services.Images;
 using Kavita.Services.Kobo;
 using Kavita.Services.Metadata;
 using Kavita.Services.Plus;
@@ -99,6 +100,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IEventHub, EventHub>();
         services.AddScoped<IPresenceTracker, PresenceTracker>();
         services.AddScoped<IImageService, ImageService>();
+        services.AddSingleton<IImagePipeline, ImagePipeline>();
         services.AddScoped<ICoverDbService, CoverDbService>();
 
         services.AddScoped<ILocalizationService, LocalizationService>();

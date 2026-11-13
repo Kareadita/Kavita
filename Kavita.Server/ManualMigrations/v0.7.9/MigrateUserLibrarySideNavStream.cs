@@ -16,7 +16,7 @@ namespace Kavita.Server.ManualMigrations.v0._7._9;
 /// </summary>
 public static class MigrateUserLibrarySideNavStream
 {
-    public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)
+    public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger logger)
     {
         if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateUserLibrarySideNavStream"))
         {

@@ -36,7 +36,7 @@ public class UserProgressCsvRecord
 /// </summary>
 public static class MigrateMixedSpecials
 {
-    public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger<Program> logger)
+    public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger logger)
     {
         if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "ManualMigrateMixedSpecials"))
         {
@@ -188,7 +188,7 @@ public static class MigrateMixedSpecials
             "Running ManualMigrateMixedSpecials migration - Completed. This is not an error");
     }
 
-    private static void UpdateCoverImage(IDirectoryService directoryService, ILogger<Program> logger, Chapter specialChapter,
+    private static void UpdateCoverImage(IDirectoryService directoryService, ILogger logger, Chapter specialChapter,
         string extension, Volume newVolume)
     {
         // We need to migrate cover images as well

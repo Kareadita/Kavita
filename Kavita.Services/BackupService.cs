@@ -9,8 +9,11 @@ using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.EnvironmentInfo;
+using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Sqlite;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -135,17 +138,16 @@ public class BackupService(
 
     public async Task SnapshotDatabase(string path, CancellationToken ct = default)
     {
-        if (path.Contains('\''))
-        {
-            throw new ArgumentException("Backup path contains invalid characters", nameof(path));
-        }
-
         try
         {
-            // VACUUM INTO takes a literal path, not a SQL parameter, hence the quote check above
-            #pragma warning disable EF1002
-            await unitOfWork.DataContext.Database.ExecuteSqlRawAsync($"VACUUM INTO '{path}'", ct);
-            #pragma warning restore EF1002
+            await unitOfWork.DataContext.Database.ExecuteSqlAsync($"VACUUM INTO {path}", ct);
+
+            // VACUUM INTO always writes rollback-journal mode, so a restored WAL server would stay off WAL for good
+            if (await unitOfWork.DataContext.Database.GetJournalModeAsync(ct) == DbJournalMode.Wal)
+            {
+                await SetWalMode(path, ct);
+            }
+
             logger.LogDebug("Database snapshot created at {SnapshotPath}", path);
         }
         catch (Exception ex)
@@ -153,6 +155,17 @@ public class BackupService(
             logger.LogError(ex, "Failed to create database snapshot using VACUUM INTO at {SnapshotPath}", path);
             throw new InvalidOperationException($"Failed to create database snapshot at {path}", ex);
         }
+    }
+
+    private static async Task SetWalMode(string databaseFile, CancellationToken ct)
+    {
+        // Pooling off so the connection really closes, which checkpoints and removes the copy's -wal
+        var connectionString = new SqliteConnectionStringBuilder { DataSource = databaseFile, Pooling = false }.ToString();
+        await using var connection = new SqliteConnection(connectionString);
+        await connection.OpenAsync(ct);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "PRAGMA journal_mode=WAL;";
+        await command.ExecuteNonQueryAsync(ct);
     }
 
     private void CopyFaviconsToBackupDirectory(string tempDirectory)

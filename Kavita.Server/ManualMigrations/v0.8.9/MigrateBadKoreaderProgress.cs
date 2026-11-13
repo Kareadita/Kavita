@@ -13,7 +13,7 @@ public class MigrateBadKoreaderProgress : ManualMigration
 {
     protected override string MigrationName => "MigrateBadKoreaderProgress";
 
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var badProgressWithLibrary = await context.AppUserProgresses
             .Where(p => p.LibraryId == 0)

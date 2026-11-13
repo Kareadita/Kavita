@@ -494,6 +494,11 @@ public static class QueryableExtensions
     /// <param name="cancellationToken"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
+    /// <remarks>
+    /// Pages by offset, so the rows the query matches must not change while iterating. If the caller updates,
+    /// inserts or deletes rows the query filters on, use <see cref="BatchByKeyAsync{T}"/>: a row leaving the filter
+    /// shifts every later page and the next one skips rows that were never returned
+    /// </remarks>
     public static async IAsyncEnumerable<List<T>> BatchToAsyncEnumerable<T>(
         this IOrderedQueryable<T> query,
         int batchSize,
@@ -523,5 +528,52 @@ public static class QueryableExtensions
 
             skip += batchSize;
         }
+    }
+
+    /// <summary>
+    /// Yields <paramref name="query"/> in batches of <paramref name="batchSize"/> ordered by <paramref name="keySelector"/>,
+    /// each batch starting after the last key of the batch before
+    /// </summary>
+    /// <remarks>
+    /// Safe when the caller changes rows between batches so they leave or join the query's filter. The key must be unique
+    /// </remarks>
+    public static async IAsyncEnumerable<List<T>> BatchByKeyAsync<T>(
+        this IQueryable<T> query,
+        Expression<Func<T, int>> keySelector,
+        int batchSize,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        if (batchSize <= 0)
+            throw new ArgumentOutOfRangeException(nameof(batchSize), "Batch size must be greater than zero.");
+
+        // EF reads a field on a captured object as a query parameter on every run, so one query serves every batch
+        var lastKey = new LastKey();
+        var afterLastKey = Expression.Lambda<Func<T, bool>>(
+            Expression.GreaterThan(keySelector.Body, Expression.Field(Expression.Constant(lastKey), nameof(LastKey.Value))),
+            keySelector.Parameters);
+        var page = query.Where(afterLastKey).OrderBy(keySelector).Take(batchSize);
+        var getKey = keySelector.Compile();
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var batch = await page.ToListAsync(cancellationToken);
+
+            if (batch.Count == 0)
+                yield break;
+
+            yield return batch;
+
+            if (batch.Count < batchSize)
+                yield break;
+
+            lastKey.Value = getKey(batch[^1]);
+        }
+    }
+
+    private sealed class LastKey
+    {
+        public int Value = int.MinValue;
     }
 }

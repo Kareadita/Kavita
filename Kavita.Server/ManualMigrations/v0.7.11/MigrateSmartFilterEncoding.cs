@@ -24,7 +24,7 @@ public static class MigrateSmartFilterEncoding
     private const string ComparisonRegex = @"comparison=(?<value>\d+)";
     private const string SortOptionsRegex = @"sortField=(.*?),isAscending=(.*?)";
 
-    public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)
+    public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger logger)
     {
         if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateSmartFilterEncoding"))
         {

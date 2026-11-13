@@ -24,8 +24,13 @@ public class ReadingList : IEntityDate, IHasCoverImage, IHasTags<ReadingListTag>
     /// Promotion allows non-owners to view the list
     /// </summary>
     public bool Promoted { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string? CoverImage { get; set; }
+    public int? CoverImageFileId { get; set; }
+    public ImageFile? CoverImageFile { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string? PrimaryColor { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string? SecondaryColor { get; set; }
     /// <summary>
     /// Denotes if the CoverImage has been overridden by the user. If so, it will not be updated during normal scan operations.
