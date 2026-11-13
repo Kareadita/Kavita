@@ -15,10 +15,11 @@ namespace Kavita.Server.ManualMigrations.v0._9._1;
 public class ManualMigrateEpubFontFamilyDetailsBackfill : ManualMigration
 {
     protected override string MigrationName => "ManualMigrateEpubFontFamilyDetailsBackfill";
+
     /// <summary>
     /// Migrates System fonts by finding the corresponding entry in the DefaultFonts list
     /// and mapping the added properties to the font in the database.
-    ///
+    /// 
     /// For custom user fonts attempt a best effort guess by re-parsing the filename and
     /// applying updated results. If this best guess is incorrect then users will still
     /// need to delete and re-upload fonts while following filename guidelines if uploading
@@ -29,7 +30,7 @@ public class ManualMigrateEpubFontFamilyDetailsBackfill : ManualMigration
     /// <param name="context"></param>
     /// <param name="logger"></param>
     /// <returns></returns>
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var fonts = await context.EpubFont.ToListAsync();
         if (fonts.Count == 0) return;

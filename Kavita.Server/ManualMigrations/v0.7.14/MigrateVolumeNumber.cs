@@ -12,7 +12,7 @@ namespace Kavita.Server.ManualMigrations.v0._7._14;
 /// </summary>
 public static class MigrateVolumeNumber
 {
-    public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
+    public static async Task Migrate(DataContext dataContext, ILogger logger)
     {
         if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateVolumeNumber"))
         {

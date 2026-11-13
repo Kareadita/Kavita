@@ -26,6 +26,10 @@ public interface IDirectoryService
     string TemplateDirectory { get; }
     string PublisherDirectory { get; }
     /// <summary>
+    /// Holds db file while pre- / post-migrations are running in case of restoration
+    /// </summary>
+    string MigrationDirectory { get; }
+    /// <summary>
     /// Used for caching documents that may need to stay on disk for more than a day
     /// </summary>
     string LongTermCacheDirectory { get; }

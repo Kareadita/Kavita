@@ -16,7 +16,7 @@ public class ManualMigrateNormalizedOriginalNameBackfill : ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrateNormalizedOriginalNameBackfill);
 
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var series = await context.Series
             .Where(s => s.NormalizedOriginalName == null || s.NormalizedOriginalName == string.Empty)

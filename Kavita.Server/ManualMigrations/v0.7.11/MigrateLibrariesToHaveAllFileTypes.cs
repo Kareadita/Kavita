@@ -14,7 +14,7 @@ namespace Kavita.Server.ManualMigrations.v0._7._11;
 public class MigrateLibrariesToHaveAllFileTypes : ManualMigration
 {
     protected override string MigrationName => nameof(MigrateLibrariesToHaveAllFileTypes);
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var allLibs = await context.Library
             .Include(l => l.LibraryFileTypes)

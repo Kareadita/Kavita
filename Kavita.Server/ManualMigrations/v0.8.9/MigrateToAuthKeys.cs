@@ -16,7 +16,7 @@ public class MigrateToAuthKeys : ManualMigration
 {
     protected override string MigrationName => nameof(MigrateToAuthKeys);
 
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         // First: Migrate all existing ApiKeys
         var allUsers = await context.AppUser

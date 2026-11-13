@@ -19,7 +19,7 @@ public class ManualMigrationScrobbleRework: ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrationScrobbleRework);
 
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var librariesWithScrobbleEnables = await context.Library
             .Where(l => l.AllowScrobbling)

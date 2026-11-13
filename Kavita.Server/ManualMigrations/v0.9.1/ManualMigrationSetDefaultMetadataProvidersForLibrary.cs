@@ -10,7 +10,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._1;
 public class ManualMigrationSetDefaultMetadataProvidersForLibrary: ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrationSetDefaultMetadataProvidersForLibrary);
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var libraries = await context.Library.ToListAsync();
 

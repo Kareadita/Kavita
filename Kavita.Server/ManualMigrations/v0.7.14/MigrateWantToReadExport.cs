@@ -25,7 +25,7 @@ public class MigrateWantToReadExport : ManualMigration
         _directoryService = directoryService;
     }
 
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var importFile = Path.Join(_directoryService.ConfigDirectory, "want-to-read-migration.csv");
         if (File.Exists(importFile))

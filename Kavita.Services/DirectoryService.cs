@@ -34,6 +34,7 @@ public class DirectoryService : IDirectoryService
     public string CustomizedTemplateDirectory { get; }
     public string TemplateDirectory { get; }
     public string PublisherDirectory { get; }
+    public string MigrationDirectory { get; }
     public string LongTermCacheDirectory { get; }
     public string EpubFontDirectory { get; }
     public string BackupDirectory { get; }
@@ -83,6 +84,8 @@ public class DirectoryService : IDirectoryService
         ExistOrCreate(BackupDirectory);
         DebugExportDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "debug-exports");
         ExistOrCreate(DebugExportDirectory);
+        MigrationDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "migrations");
+        ExistOrCreate(MigrationDirectory);
     }
 
     /// <summary>

@@ -10,7 +10,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._2;
 public class ManualMigrateOnDeckSettings: ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrateOnDeckSettings);
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var onDeckUpdateDays = await GetIntServerSetting(context, ServerSettingKey.OnDeckUpdateDays, 7, logger);
         var onDeckProgressDays = await GetIntServerSetting(context, ServerSettingKey.OnDeckProgressDays, 30, logger);
@@ -21,7 +21,7 @@ public class ManualMigrateOnDeckSettings: ManualMigration
                     .SetProperty(p => p.OnDeckProgressDays, onDeckProgressDays));
     }
 
-    private async Task<int> GetIntServerSetting(DataContext context, ServerSettingKey key, int fallback, ILogger<Program> logger)
+    private async Task<int> GetIntServerSetting(DataContext context, ServerSettingKey key, int fallback, ILogger logger)
     {
         var value = await context.ServerSetting.FirstOrDefaultAsync(s => s.Key == key);
         if (value is null)

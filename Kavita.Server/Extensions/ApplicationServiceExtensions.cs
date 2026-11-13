@@ -4,6 +4,7 @@ using Kavita.Common;
 using Kavita.Database.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Server.Logging;
+using Kavita.Server.ManualMigrations;
 using Kavita.Server.Middleware;
 using Kavita.Server.Store;
 using Kavita.Services.Extensions;
@@ -27,6 +28,8 @@ public static class ApplicationServiceExtensions
 
         services.AddKavitaDatabases();
         services.AddKavitaServices();
+
+        services.AddScoped<IMigrationService, MigrationService>();
 
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
 

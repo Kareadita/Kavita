@@ -14,7 +14,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._1;
 public class ManualMigrateLastReadDates: ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrateLastReadDates);
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var allSeriesSmartFilters = await context.AppUserSmartFilter
             .Where(f => f.EntityType == FilterEntityType.Series)

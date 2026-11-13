@@ -12,7 +12,7 @@ public class MigrateIncorrectUtcTimes: ManualMigration
     private const int BatchSize = 1000;
     protected override string MigrationName { get; } = nameof(MigrateIncorrectUtcTimes);
 
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var skip = 0;
         var correctedEntries = 0;

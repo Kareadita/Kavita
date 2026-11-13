@@ -13,7 +13,7 @@ namespace Kavita.Server.ManualMigrations.v0._8._9;
 public class MigrateFormatToActivityDataV2 : ManualMigration
 {
     protected override string MigrationName => nameof(MigrateFormatToActivityDataV2);
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var activitiesWithoutFormat = await context.AppUserReadingSessionActivityData
             .Where(d => d.Format == MangaFormat.Unknown || d.Format == 0)

@@ -32,7 +32,7 @@ public class ManualMigrateImageFileBackfill(IDirectoryService directoryService) 
     protected override string MigrationName => nameof(ManualMigrateImageFileBackfill);
 
     // Links are set with ExecuteUpdate: saving tracked entities would stamp LastModified on every chapter and series
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         await LinkAsync(context, ImageKind.ChapterCover, SeriesCoverKinds,
             context.Chapter.AsNoTracking()
@@ -186,7 +186,7 @@ public class ManualMigrateImageFileBackfill(IDirectoryService directoryService) 
         }
     }
 
-    private async Task AddFolderAsync(DataContext context, ImageKind kind, string directory, ILogger<Program> logger)
+    private async Task AddFolderAsync(DataContext context, ImageKind kind, string directory, ILogger logger)
     {
         var fileSystem = directoryService.FileSystem;
         if (!fileSystem.Directory.Exists(directory)) return;

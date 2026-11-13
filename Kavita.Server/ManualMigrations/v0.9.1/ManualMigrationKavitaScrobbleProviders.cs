@@ -13,7 +13,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._1;
 public class ManualMigrationKavitaScrobbleProviders : ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrationKavitaScrobbleProviders);
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         await context.ScrobbleEvent.Where(s => s.ScrobbleProvider == ScrobbleProvider.Kavita)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.ScrobbleProvider, ScrobbleProvider.AniList));
