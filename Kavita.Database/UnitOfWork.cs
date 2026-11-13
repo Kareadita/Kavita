@@ -52,6 +52,7 @@ public class UnitOfWork : IUnitOfWork
         RemapRuleRepository = new ReadingListRemapRuleRepository(_context, mapper);
         KavitaPlusAuditRepository = new KavitaPlusAuditRepository(_context);
         KoboSyncPointRepository = new KoboSyncPointRepository(_context);
+        ImageFileRepository = new ImageFileRepository(_context);
     }
 
     /// <summary>
@@ -89,6 +90,7 @@ public class UnitOfWork : IUnitOfWork
     public IReadingListRemapRuleRepository RemapRuleRepository { get; }
     public IKavitaPlusAuditRepository KavitaPlusAuditRepository { get; }
     public IKoboSyncPointRepository KoboSyncPointRepository { get; }
+    public IImageFileRepository ImageFileRepository { get; }
 
     /// <summary>
     /// Commits pending changes inside an IMMEDIATE SQLite transaction so writer contention

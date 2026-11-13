@@ -100,8 +100,10 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IEventHub, EventHub>();
         services.AddScoped<IPresenceTracker, PresenceTracker>();
         services.AddScoped<IImageService, ImageService>();
+
         services.AddSingleton<IImagePipeline, ImagePipeline>();
         services.AddScoped<ICoverDbService, CoverDbService>();
+        services.AddScoped<IImageFileService, ImageFileService>();
 
         services.AddScoped<ILocalizationService, LocalizationService>();
         services.AddScoped<ISettingsService, SettingsService>();

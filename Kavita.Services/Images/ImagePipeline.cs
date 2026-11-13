@@ -37,6 +37,33 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
         }
     }
 
+    /// <inheritdoc />
+    public ImageWriteResult Copy(string sourcePath, ImageKind kind, string directory, string fileStem)
+    {
+        int width, height;
+        using (var header = Image.NewFromFile(sourcePath, access: Enums.Access.Sequential))
+        {
+            width = header.Width;
+            height = header.Height;
+        }
+
+        Directory.CreateDirectory(directory);
+        var fileName = fileStem + Path.GetExtension(sourcePath);
+        var tmpPath = Path.Join(directory, $"{fileStem}.{Guid.NewGuid():N}.tmp");
+
+        try
+        {
+            File.Copy(sourcePath, tmpPath);
+            MoveIntoPlace(tmpPath, Path.Join(directory, fileName));
+
+            return new ImageWriteResult(fileName, width, height, width, height);
+        }
+        finally
+        {
+            DeleteQuietly(tmpPath);
+        }
+    }
+
     private static StagedImage Stage(ImageSource source, ImageProfile profile, ImagePolicy policy, EncodeFormat format, string tmpPath)
     {
         switch (source)
