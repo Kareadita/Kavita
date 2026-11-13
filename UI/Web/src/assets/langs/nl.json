@@ -598,8 +598,6 @@
         "manage-reading-list-tooltip": "Moet Kavita leeslijsten maken van StoryArc/StoryArcNumber en AlternativeSeries/AlternativeCount-tags gevonden in ComicInfo.xml/opf-bestanden",
         "allow-scrobbling-label": "Scrobbelen toestaan",
         "allow-scrobbling-tooltip": "Mocht Kavita leesgebeurtenissen scrobblen, status, beoordelingen en recensies willen lezen voor geconfigureerde providers. Dit gebeurt alleen als de server een actief Kavita+ abonnement heeft.",
-        "folder-watching-label": "Mappen bekijken",
-        "folder-watching-tooltip": "Negeer het bewaken van servermappen voor deze bibliotheek. Indien uitgeschakeld, wordt mapbewaking niet uitgevoerd op de mappen die deze bibliotheek bevat. Als bibliotheken mappen delen, kunnen mappen nog steeds worden aangevallen.",
         "include-in-dashboard-label": "Opnemen in dashboard",
         "include-in-dashboard-tooltip": "Moeten series uit de bibliotheek worden opgenomen op het Dashboard. Dit is van invloed op alle streams, zoals Aan Het Lezen, Onlangs bijgewerkt, Onlangs toegevoegd of andere aangepaste toevoegingen.",
         "include-in-search-label": "Opnemen in Zoeken",
@@ -797,7 +795,6 @@
         "encode-as-description-part-1": "WebP/AVIF kan de benodigde ruimte voor bestanden drastisch verminderen. WebP/AVIF wordt niet door alle browsers of versies ondersteund. Als u wilt weten of deze instellingen geschikt zijn voor uw installatie, gaat u naar ",
         "encode-as-description-part-2": "Kan ik WebP gebruiken?",
         "encode-as-description-part-3": "Kan ik AVIF gebruiken?",
-        "encode-as-warning": "U kunt niet terug converteren naar PNG als u eenmaal naar WebP/AVIF bent gegaan. U moet omslagen in uw bibliotheken vernieuwen om alle omslagen opnieuw te genereren. Bladwijzers en favicons kunnen niet worden geconverteerd.",
         "media-warning": "U moet de mediaconversietaak activeren op het tabblad Taken.,",
         "encode-as-label": "Media opslaan als",
         "encode-as-tooltip": "Alle media die Kavita beheert (omslagen, bladwijzers, favicons) worden als dit type gecodeerd.",
@@ -1026,15 +1023,7 @@
         "characters-title": "{{metadata-fields.characters-title}}"
     },
     "events-widget": {
-        "title-alt": "Activiteit",
-        "dismiss-all": "Alles afkeuren",
-        "update-available": "Update beschikbaar",
-        "downloading-item": "{{item}} downloaden",
-        "more-info": "Klik voor meer informatie",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Gebruikers online",
-        "active-events-title": "Actieve gebeurtenissen:",
-        "no-data": "Er gebeurt hier niet veel"
+        "title-alt": "Activiteit"
     },
     "shortcuts-modal": {
         "title": "Sneltoetsen",
@@ -1106,9 +1095,7 @@
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "Scroll omhoog om naar het vorige hoofdstuk te gaan",
-        "continuous-reading-prev-chapter": "Vorig hoofdstuk",
-        "continuous-reading-next-chapter-alt": "Scroll omhoog om naar het volgende hoofdstuk te gaan",
-        "continuous-reading-next-chapter": "Volgende hoofdstuk"
+        "continuous-reading-prev-chapter": "Vorig hoofdstuk"
     },
     "manga-reader": {
         "back": "Terug",

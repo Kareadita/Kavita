@@ -120,7 +120,6 @@
     "generic-series-delete": "Es gab einen Fehler beim Löschen der Serie",
     "age-restriction-not-applicable": "Keine Einschränkung",
     "generic-relationship": "Es gab ein Problem bei der Aktualisierung von Relationen",
-    "encode-as-warning": "Sie können nicht in PNG konvertieren. Für Cover verwenden Sie „Cover aktualisieren“. Lesezeichen und Favicons können nicht zurückkodiert werden.",
     "ip-address-invalid": "IP-Adresse '{0}' ist ungültig",
     "bookmark-dir-permissions": "Das Lesezeichenverzeichnis hat nicht die richtigen Rechte für die Verwendung durch Kavita",
     "total-backups": "Die Gesamtzahl der Backups muss zwischen 1 und 30 liegen",

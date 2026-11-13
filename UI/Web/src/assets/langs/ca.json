@@ -2,22 +2,35 @@
     "login": {
         "forgot-password": "Heu oblidat la contrasenya?",
         "title": "Inici de sessió amb el teu compte",
-        "submit": "Accedir"
+        "submit": "Accedir",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}"
     },
     "dashboard": {
         "no-libraries": "Encara no s'ha configurat cap biblioteca. Creeu-ne una de nova a",
         "server-settings-link": "Paràmetres del servidor",
         "recently-updated-title": "Sèries actualitzades recentment",
         "recently-added-title": "Sèries afegides recentment",
-        "not-granted": "No se us ha atorgat cap accés a biblioteques."
+        "not-granted": "No se us ha atorgat cap accés a biblioteques.",
+        "on-deck-title": "Continua llegint",
+        "more-in-genre-title": "Més de {{genre}}"
     },
     "edit-user": {
         "update": "Actualitza",
         "account-detail-title": "Detalls del compte",
-        "saving": "S'està desant…"
+        "saving": "S'està desant…",
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}",
+        "username": "{{common.username}}",
+        "email": "{{common.email}}",
+        "invalid-email-warning": "Una adreça electrònica no vàlida bloquejarà algunes funcionalitats de Kavita",
+        "cancel": "{{common.cancel}}"
     },
     "want-to-read": {
-        "title": "Vull llegir"
+        "title": "Vull llegir",
+        "series-count": "{{common.series-count}}",
+        "no-items": "No hi ha cap element. Proveu d'afegir una sèrie.",
+        "no-items-filtered": "Cap element no coincideix amb el vostre filtre actual."
     },
     "user-preferences": {
         "success-toast": "S'han actualitzat les preferències d'ús",
@@ -25,7 +38,37 @@
         "locale-label": "Configuració local",
         "locale-tooltip": "La llengua que ha d'usar el Kavita",
         "prompt-on-download-label": "Pregunta en baixar",
-        "disable-animations-label": "Desactiva les animacions"
+        "disable-animations-label": "Desactiva les animacions",
+        "title": "Tauler de l'usuari",
+        "pref-description": "Aquests són paràmetres globals vinculats al vostre compte. Els paràmetres del lector es troben a «Perfils de lectura».",
+        "account-tab": "{{tabs.account-tab}}",
+        "preferences-tab": "{{tabs.preferences-tab}}",
+        "theme-tab": "{{tabs.theme-tab}}",
+        "devices-tab": "{{tabs.devices-tab}}",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "scrobbling-tab": "{{tabs.scrobbling-tab}}",
+        "smart-filters-tab": "{{tabs.smart-filters-tab}}",
+        "page-layout-mode-label": "Mode de disposició de la pàgina",
+        "page-layout-mode-tooltip": "Mostra els elements com a targetes o en vista de llista a la pàgina de detalls de la sèrie.",
+        "blur-unread-summaries-label": "Difumina els resums no llegits",
+        "blur-unread-summaries-tooltip": "Difumina el text del resum dels volums o capítols que no tenen progrés de lectura (per evitar espòilers)",
+        "prompt-on-download-tooltip": "Demana confirmació quan una baixada superi els {{size}} MB de mida",
+        "disable-animations-tooltip": "Desactiva les animacions del lloc. És útil per als lectors de tinta electrònica.",
+        "collapse-series-relationships-label": "Plega les relacions entre sèries",
+        "collapse-series-relationships-tooltip": "Si Kavita ha de mostrar només les sèries que no tenen relacions o que són la principal o la preqüela",
+        "share-series-reviews-label": "Comparteix les ressenyes de sèries",
+        "share-series-reviews-tooltip": "Permet que les vostres ressenyes siguin visibles per als altres usuaris d'aquest servidor",
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-label": "Scrobbling d'AniList",
+        "anilist-scrobbling-tooltip": "Permet que Kavita faci scrobbling (sincronització unidireccional) del progrés de lectura i les valoracions a AniList",
+        "want-to-read-sync-label": "Sincronització de «Vull llegir»",
+        "want-to-read-sync-tooltip": "Permet que Kavita afegeixi elements a la vostra llista «Vull llegir» a partir de les sèries d'AniList i MAL que tingueu a la llista de lectura pendent",
+        "clients-opds-alert": "OPDS no està activat en aquest servidor. Això no afectarà els usuaris de Mihon.",
+        "clients-opds-description": "Tots els clients de tercers faran servir la clau d'autenticació d'OPDS o l'URL de connexió de sota. Són com contrasenyes: manteniu-les en privat.",
+        "clients-opds-url-label": "URL d'OPDS",
+        "clients-opds-url-tooltip": "Vegeu una llista de clients OPDS compatibles: ",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}"
     },
     "theme-manager": {
         "default-theme": "Per defecte",
@@ -35,7 +78,15 @@
         "downloaded": "Baixats",
         "applied": "Aplicat",
         "preview-default": "Seleccioneu un tema primer",
-        "preview-title": "Previsualització"
+        "preview-title": "Previsualització",
+        "description": "Kavita té molts colors: trobeu un esquema de colors que s'adapti a les vostres necessitats o creeu-ne un i compartiu-lo. Els temes es poden aplicar al vostre compte o a tots els comptes.",
+        "set-default": "Estableix com a predeterminat",
+        "download": "{{changelog.download}}",
+        "apply": "{{common.apply}}",
+        "updated-toastr": "S'ha canviat el tema predeterminat del lloc a {{name}}",
+        "delete": "{{common.delete}}",
+        "preview-default-admin": "Seleccioneu primer un tema o pugeu-ne un manualment",
+        "add": "{{common.add}}"
     },
     "theme": {
         "theme-dark": "Fosc",
@@ -47,25 +98,56 @@
         "email-label": "Adreça electrònica",
         "title": "Gestor de dispositius",
         "platform-label": "Plataforma",
-        "name-label": "Nom"
+        "name-label": "Nom",
+        "description": "Aquesta secció serveix per configurar dispositius de correu electrònic que no es poden connectar a Kavita i que, en canvi, tenen una adreça electrònica que accepta fitxers.",
+        "email-setup-alert": "Voleu enviar fitxers a la vostra adreça electrònica? Demaneu primer a l'administrador que configuri els paràmetres de correu electrònic!",
+        "add": "{{common.add}}",
+        "delete": "{{common.delete}}",
+        "edit": "{{common.edit}}",
+        "no-data": "{{common.no-data}}",
+        "actions-header": "{{manage-users.actions-header}}"
     },
     "changelog-update-item": {
         "known-issues": "Problemes coneguts",
         "api": "API",
-        "theme": "Tema"
+        "theme": "Tema",
+        "download": "Baixa",
+        "added": "Afegit",
+        "changed": "Modificat",
+        "fixed": "Corregit",
+        "developer": "Desenvolupador",
+        "removed": "Eliminat",
+        "published-label": "Publicat: ",
+        "installed": "{{changelog.installed}}",
+        "feature-requests": "Sol·licituds de funcionalitats"
     },
     "change-password": {
         "current-password-label": "Contrasenya actual",
         "confirm-password-label": "Confirmeu la contrasenya",
-        "new-password-label": "Contrasenya nova"
+        "new-password-label": "Contrasenya nova",
+        "password-label": "{{common.password}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "passwords-must-match": "Les contrasenyes han de coincidir",
+        "permission-error": "No teniu permís per canviar la contrasenya. Poseu-vos en contacte amb l'administrador del servidor."
     },
     "change-email": {
         "current-password-label": "Contrasenya actual",
         "email-title": "Adreça electrònica",
-        "email-label": "Adreça electrònica nova"
+        "email-label": "Adreça electrònica nova",
+        "email-not-confirmed": "Aquesta adreça electrònica no s'ha confirmat",
+        "email-confirmed": "Aquesta adreça electrònica està confirmada",
+        "email-updated-title": "Adreça electrònica actualitzada",
+        "email-updated-description": "Podeu fer servir l'enllaç següent per confirmar l'adreça electrònica del vostre compte. Si s'ha configurat el correu electrònic, s'haurà enviat un correu i podreu fer servir l'enllaç per confirmar l'adreça.",
+        "setup-user-account": "Configura el compte de l'usuari",
+        "invite-url-label": "URL d'invitació",
+        "invite-url-tooltip": "Copieu-ho i enganxeu-ho en una pestanya nova",
+        "has-invalid-email": "Sembla que no teniu definida cap adreça electrònica vàlida. Per canviar l'adreça electrònica, l'administrador us haurà d'enviar un enllaç per completar aquesta acció.",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "Copia"
+        "copy": "{{book-line-overlay.copy}}"
     },
     "scrobbling-providers": {
         "no-token-set": "No s'ha definit cap testimoni",
@@ -74,20 +156,54 @@
         "generate": "Genera",
         "token-valid": "El testimoni és vàlid",
         "token-set": "S'ha definit el testimoni",
-        "token-expired": "El testimoni ha caducat"
+        "token-expired": "El testimoni ha caducat",
+        "title": "Proveïdors de scrobbling",
+        "requires": "Aquesta funció requereix una llicència activa de {{product}}",
+        "generic-instructions": "Ompliu la informació sobre els diferents serveis externs que tingueu per permetre que Kavita+ hi interactuï.",
+        "instructions": "Si és la primera vegada, feu clic a «{{scrobbling-providers.generate}}» a continuació per permetre que Kavita+ es comuniqui amb {{service}}. Un cop hàgiu autoritzat el programa, copieu el testimoni i enganxeu-lo al camp de sota. Podeu tornar a generar el testimoni en qualsevol moment.",
+        "mal-instructions": "Kavita fa servir un ID de client de MAL per a l'autenticació. Creeu un client nou per a Kavita i, un cop aprovat, indiqueu l'ID de client i el vostre nom d'usuari.",
+        "scrobbling-applicable-label": "Scrobbling aplicable",
+        "token-input-label": "Enganxeu aquí el testimoni de {{service}}",
+        "mal-token-input-label": "ID de client de MAL",
+        "mal-username-input-label": "Nom d'usuari de MAL",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "loading": "{{common.loading}}",
+        "anilist-used-for": "AniList s'utilitza per al scrobbling (sincronització de dades) i per sincronitzar «Vull llegir».",
+        "mal-used-for": "MyAnimeList s'utilitza per a les col·leccions intel·ligents i per sincronitzar «Vull llegir».",
+        "anilist-first-header": "S'ha desat el testimoni d'AniList",
+        "anilist-first-description": "El vostre testimoni d'AniList ja està configurat. Aquest testimoni dura un any i Kavita us avisarà abans que caduqui perquè el renoveu aquí. Amb això, Kavita generarà esdeveniments de scrobble (sincronització) a partir del vostre historial de lectura, de «Vull llegir» i de les valoracions. Podeu començar-ho ara o més tard. Si teniu sèries que no voleu que s'enviïn per scrobbling, seleccioneu «Més tard» i poseu-les en retenció de scrobble. Només cal executar aquesta tasca una vegada. Després, Kavita s'encarregarà de la sincronització per vosaltres.<br/> Si seleccioneu «Més tard», trobareu el botó a la pàgina de Scrobbling."
     },
     "directory-picker": {
         "title": "Trieu una carpeta",
         "path-label": "Camí",
-        "share": "Comparteix"
+        "share": "Comparteix",
+        "close": "{{common.close}}",
+        "path-placeholder": "Comenceu a escriure o seleccioneu un camí",
+        "instructions": "Seleccioneu una carpeta per a entrar-hi. No veieu la vostra carpeta? Proveu de comprovar primer /.",
+        "type-header": "Tipus",
+        "name-header": "Nom",
+        "cancel": "{{common.cancel}}",
+        "help": "{{common.help}}"
     },
     "library-access-modal": {
         "title": "Accés a la biblioteca",
-        "no-data": "Encara no s'ha configurat cap biblioteca."
+        "no-data": "Encara no s'ha configurat cap biblioteca.",
+        "select-all": "{{common.select-all}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "close": "{{common.close}}",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "time-periods": {
         "last-year": "L'any passat",
-        "this-week": "Aquesta setmana"
+        "this-week": "Aquesta setmana",
+        "last-7-days": "Últims 7 dies",
+        "last-30-days": "Últims 30 dies",
+        "last-90-days": "Últims 90 dies",
+        "all-time": "Tot el temps"
     },
     "device-platform-pipe": {
         "custom": "Personalitzat"
@@ -96,7 +212,8 @@
         "minutes": "{{value}} minuts",
         "months": "{{value}} mesos",
         "days": "{{value}} dies",
-        "years": "{{value}} anys"
+        "years": "{{value}} anys",
+        "hours": "{{value}} hores"
     },
     "time-ago-pipe": {
         "just-now": "ara mateix",
@@ -120,10 +237,28 @@
         "edition": "Edició",
         "alternative-version": "Versió alternativa",
         "character": "Personatge",
-        "contains": "Conté"
+        "contains": "Conté",
+        "doujinshi": "Doujinshi",
+        "other": "Altres",
+        "side-story": "Història paral·lela",
+        "spin-off": "Spin-off",
+        "parent": "Principal",
+        "annual": "Anual"
     },
     "person-role-pipe": {
-        "imprint": "Segell"
+        "imprint": "Segell",
+        "artist": "Artista",
+        "character": "Personatge",
+        "colorist": "Colorista",
+        "editor": "Editor",
+        "inker": "Entintador",
+        "letterer": "Rotulista",
+        "penciller": "Dibuixant",
+        "publisher": "Editorial",
+        "writer": "Escriptor",
+        "translator": "Traductor",
+        "team": "{{filter-field-pipe.team}}",
+        "location": "{{filter-field-pipe.location}}"
     },
     "manga-format-pipe": {
         "epub": "EPUB",
@@ -135,25 +270,36 @@
     "library-type-pipe": {
         "image": "Imatge",
         "book": "Llibre",
-        "comic": "Còmic",
+        "comic": "Còmic (flexible)",
         "manga": "Manga",
-        "comicVine": "Comic Vine"
+        "comicVine": "Còmic",
+        "lightNovel": "Novel·la lleugera"
     },
     "book-reader": {
         "loading-book": "S'està carregant el llibre…",
         "go-back": "Ves enrere",
         "previous": "Anterior",
-        "go-to-page-prompt": "Hi ha {{totalPages}} pàgines. A quina pàgina voleu anar?",
+        "go-to-page-prompt": "Hi ha {{totalPages}} pàgines. A quina pàgina voleu anar? Les pàgines comencen per l'1.",
         "incognito-mode-label": "Mode incògnit",
         "go-to-page": "Ves a la pàgina",
         "next": "Següent",
-        "page-label": "Pàgina"
+        "page-label": "Pàgina",
+        "skip-header": "Salta al contingut principal",
+        "incognito-mode-alt": "El mode d'incògnit està activat. Commuteu-lo per desactivar-lo."
     },
     "personal-table-of-contents": {
-        "delete": "Suprimeix {{bookmarkName}}"
+        "delete": "Suprimeix {{bookmarkName}}",
+        "no-data": "Encara no hi ha cap marcador"
     },
     "confirm-email": {
-        "error-label": "Error:"
+        "error-label": "Error:",
+        "title": "Registre",
+        "description": "Empleneu el formulari per completar el registre",
+        "username-label": "{{common.username}}",
+        "password-label": "{{common.password}}",
+        "email-label": "{{common.email}}",
+        "password-validation": "{{validation.password-validation}}",
+        "register": "Registra't"
     },
     "series-detail": {
         "page-settings-title": "Paràmetres de pàgina",
@@ -164,28 +310,87 @@
         "more-alt": "Més",
         "pages-count": "{{num}} pàgines",
         "words-count": "{{num}} mots",
-        "publication-status-tooltip": "Estat de publicació"
+        "publication-status-tooltip": "Estat de publicació",
+        "close": "{{common.close}}",
+        "continue-from": "Continua {{title}}",
+        "read": "{{common.read}}",
+        "read-options-alt": "Opcions de lectura",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
+        "no-pages": "{{toasts.no-pages}}",
+        "cover-change": "El vostre navegador pot trigar fins a un minut a actualitzar la imatge. Mentrestant, és possible que en algunes pàgines es mostri la imatge antiga.",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "genres-title": "{{metadata-fields.genres-title}}",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "ongoing": "{{publication-status-pipe.ongoing}}",
+        "release-date-title": "Llançament",
+        "volume-num": "{{common.volume-num}}",
+        "reading-lists-title": "{{side-nav.reading-lists}}",
+        "time-left-alt": "Temps restant",
+        "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
+        "publication-status-title": "Publicació"
     },
     "match-series-modal": {
-        "search": "Cerca"
+        "search": "Cerca",
+        "description": "Trieu una coincidència per tornar a enllaçar les metadades de Kavita+ i regenerar els esdeveniments de scrobble. Feu clic a una edició per obtenir les metadades a nivell de volum/capítol (si escau).",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "dont-match-label": "No associïs",
+        "dont-match-tooltip": "Impedeix que Kavita associï automàticament aquesta sèrie o en faci scrobbling"
     },
     "metadata-fields": {
         "genres-title": "Gèneres",
         "cover-artists-title": "Artistes",
         "characters-title": "Personatges",
         "imprints-title": "Segells",
-        "tags-title": "Etiquetes"
+        "tags-title": "Etiquetes",
+        "collections-title": "{{side-nav.collections}}",
+        "reading-lists-title": "{{side-nav.reading-lists}}",
+        "writers-title": "Escriptors",
+        "colorists-title": "Coloristes",
+        "editors-title": "Editors",
+        "inkers-title": "Entintadors",
+        "letterers-title": "Retolistes",
+        "translators-title": "Traductors",
+        "pencillers-title": "Dibuixants",
+        "publishers-title": "Editorials",
+        "teams-title": "Equips",
+        "locations-title": "Llocs",
+        "language-title": "Idioma",
+        "age-rating-title": "Classificació d'edat",
+        "links-title": "Enllaços web"
     },
     "side-nav": {
         "want-to-read": "Vull llegir",
-        "collections": "Col·leccions"
+        "collections": "Col·leccions",
+        "home": "Inici",
+        "reading-lists": "Llistes de lectura",
+        "bookmarks": "Marcadors",
+        "filter-label": "{{common.filter}}",
+        "all-series": "Totes les sèries",
+        "clear": "{{common.clear}}",
+        "donate": "Fes una donació",
+        "donate-tooltip": "Podeu eliminar-ho subscrivint-vos a Kavita+",
+        "back": "Enrere",
+        "more": "Més",
+        "customize": "{{settings.customize}}"
     },
     "cover-image-chooser": {
         "url": "URL",
         "upload": "Carrega",
-        "upload-continued": "una imatge",
+        "upload-continued": "imatge",
         "enter-an-url-pre-title": "Introduïu un {{url}}",
-        "url-label": "URL"
+        "url-label": "URL",
+        "drag-n-drop": "Arrossegueu i deixeu anar",
+        "load": "Carrega",
+        "back": "Enrere",
+        "reset-cover-tooltip": "Reinicialitza la imatge de coberta",
+        "reset": "{{common.reset}}",
+        "image-num": "Imatge {{num}}",
+        "apply": "{{common.apply}}",
+        "applied": "{{theme-manager.applied}}"
     },
     "all-collections": {
         "title": "Col·leccions"
@@ -366,11 +571,22 @@
         "chapter-count": "{{num}} capítols"
     },
     "edit-device-modal": {
-        "device-platform-label": "Plataforma del dispositiu",
-        "title": "Edita el dispositiu"
+        "device-platform-label": "{{manage-devices.platform-label}}",
+        "title": "Edita el dispositiu de correu electrònic",
+        "device-name-label": "{{manage-devices.name-label}}",
+        "email-label": "{{common.email}}",
+        "email-tooltip": "Aquesta adreça electrònica s'utilitzarà per acceptar el fitxer mitjançant «Envia a»",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}"
     },
     "typeahead": {
-        "add-item": "Afegeix {{item}}…"
+        "add-item": "Afegeix {{item}}…",
+        "locked-field": "El camp està bloquejat",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "no-data": "{{common.no-data}}",
+        "add-custom-item": ", escriviu per afegir un element personalitzat"
     },
     "confirm": {
         "ok": "D'acord",
@@ -384,7 +600,8 @@
         "title-smart-filters": "Filtres intel·ligents"
     },
     "all-filters": {
-        "title": "Tots els filtres intel·ligents"
+        "title": "Tots els filtres intel·ligents",
+        "count": "{{count}} filtres intel·ligents en total"
     },
     "toasts": {
         "confirm-delete-smart-filter": "Segur que voleu suprimir aquest filtre intel·ligent?",
@@ -399,7 +616,6 @@
         "list-doesnt-exist": "Aquesta llista no existeix"
     },
     "infinite-scroller": {
-        "continuous-reading-next-chapter": "Capítol següent",
         "continuous-reading-prev-chapter": "Capítol anterior"
     },
     "manga-reader": {
@@ -412,14 +628,69 @@
         "horizontal": "Horitzontal"
     },
     "book-line-overlay": {
-        "copy": "Copia"
+        "copy": "Copia",
+        "bookmark": "Marcador",
+        "close": "{{common.close}}",
+        "bookmark-label": "Nom del marcador",
+        "save": "{{common.save}}"
     },
     "manage-matched-metadata": {
-        "library-name-header": "Biblioteca"
+        "library-name-header": "Biblioteca",
+        "title": "Metadades associades",
+        "description": "Aquí hi ha totes les sèries aplicables que es poden associar amb metadades externes. Kavita precarregarà o actualitzarà les metadades de les sèries, a raó de 50 sèries cada 24 hores.",
+        "status-header": "Estat",
+        "series-name-header": "Sèrie",
+        "valid-until-header": "Propera actualització",
+        "actions-header": "Accions",
+        "matched-status-label": "Associat",
+        "unmatched-status-label": "No associat",
+        "blacklist-status-label": "Cal associació manual",
+        "dont-match-status-label": "{{dont-match-label}}",
+        "all-status-label": "Tots",
+        "dont-match-label": "No l'associïs",
+        "no-data": "{{common.no-data}}",
+        "match-alt": "Fes coincidir {{seriesName}}"
     },
     "manage-metadata-settings": {
         "summary-label": "Resum",
-        "derive-publication-status-label": "Estat de publicació"
+        "derive-publication-status-label": "Estat de publicació",
+        "description": "Kavita+ pot baixar i escriure algunes metadades limitades a la base de dades. Aquesta pàgina us permet triar què s'hi inclou.",
+        "enabled-label": "Activa la baixada de metadades",
+        "enabled-tooltip": "Permet que Kavita baixi metadades i les escrigui a la seva base de dades.",
+        "summary-tooltip": "Permet que s'escrigui el resum quan el camp estigui desbloquejat.",
+        "localized-name-label": "Nom localitzat de la sèrie",
+        "localized-name-tooltip": "Permet que s'escrigui el nom localitzat quan el camp estigui desbloquejat. Kavita intentarà fer la millor estimació.",
+        "derive-publication-status-tooltip": "Permet que l'estat de publicació es dedueixi del recompte total de capítols/volums.",
+        "enable-relations-label": "Relacions",
+        "enable-relations-tooltip": "Permet que s'<b>afegeixin</b> relacions entre sèries.",
+        "enable-people-label": "Persones",
+        "enable-people-tooltip": "Permet que s'<b>afegeixin</b> persones (personatges, escriptors, etc.). Totes les persones inclouen imatges.",
+        "enable-cover-image-label": "Imatge de coberta",
+        "enable-cover-image-tooltip": "Permet que Kavita escrigui la imatge de portada de la sèrie",
+        "enable-start-date-label": "Data d'inici",
+        "enable-start-date-tooltip": "Permet que la data d'inici de la sèrie s'escrigui a la sèrie",
+        "enable-genres-label": "Gèneres",
+        "enable-genres-tooltip": "Permet que s'escriguin els gèneres de la sèrie.",
+        "enable-tags-label": "Etiquetes",
+        "enable-tags-tooltip": "Permet que s'escriguin les etiquetes de la sèrie.",
+        "blacklist-label": "Llista negra de gèneres/etiquetes",
+        "blacklist-tooltip": "Tot el que hi hagi en aquesta llista s'eliminarà del processament tant de gèneres com d'etiquetes. Aquí podeu afegir els gèneres/etiquetes que <b>no</b> voleu que s'escriguin. Assegureu-vos que estiguin separats per comes.",
+        "whitelist-label": "Llista blanca d'etiquetes",
+        "whitelist-tooltip": "Només permet que s'escriguin a <b>Etiquetes</b> les cadenes d'aquesta llista. Assegureu-vos que estiguin separades per comes.",
+        "age-rating-mapping-title": "Assignació de classificació d'edat",
+        "age-rating-mapping-description": "Qualsevol cadena de l'esquerra, si es troba al gènere o a les etiquetes, establirà la classificació d'edat de la sèrie. La comparació es normalitza i no distingeix entre majúscules i minúscules; s'utilitza la classificació d'edat més alta.",
+        "genre": "Gènere",
+        "tag": "Etiqueta",
+        "remove-source-tag-label": "Elimina l'etiqueta d'origen",
+        "add-field-mapping-label": "Afegeix una assignació de camp",
+        "add-age-rating-mapping-label": "Afegeix una assignació de classificació d'edat",
+        "field-mapping-title": "Assignació de camps",
+        "field-mapping-description": "Configureu regles per a determinades cadenes que es trobin al camp Gènere/Etiqueta, assigneu-les a una cadena nova a Gènere/Etiqueta i, opcionalment, elimineu-les de la llista d'origen. La comparació es normalitza i no distingeix entre majúscules i minúscules; s'utilitza el primer valor coincident. Només s'aplica quan l'escriptura de Gènere/Etiqueta està activada.",
+        "first-last-name-label": "Format nom i cognom",
+        "first-last-name-tooltip": "Garanteix que els noms de les persones s'escriuen primer amb el nom i després amb el cognom",
+        "person-roles-label": "{{common.roles}}",
+        "overrides-label": "Substitucions",
+        "overrides-description": "Permet que Kavita sobreescrigui els camps bloquejats."
     },
     "edit-collection-tags": {
         "summary-label": "Resum"
@@ -430,13 +701,24 @@
         "month-label": "Mes"
     },
     "scrobble-event-type-pipe": {
-        "chapter-read": "Progrés de lectura"
+        "chapter-read": "Progrés de lectura",
+        "score-updated": "Actualització de la valoració",
+        "want-to-read-add": "Vull llegir: afegeix",
+        "want-to-read-remove": "Vull llegir: elimina",
+        "review": "Actualització de la ressenya"
     },
     "site-theme-provider-pipe": {
-        "system": "Sistema"
+        "system": "Sistema",
+        "custom": "{{device-platform-pipe.custom}}"
     },
     "restriction-selector": {
-        "no-restriction": "Cap restricció"
+        "no-restriction": "Cap restricció",
+        "title": "Restricció per classificació d'edat",
+        "description": "Si se selecciona, s'exclouran dels resultats totes les sèries i llistes de lectura que tinguin almenys un element per sobre de la restricció seleccionada.",
+        "not-applicable-for-admins": "Això no s'aplica als administradors.",
+        "age-rating-label": "{{metadata-fields.age-rating-title}}",
+        "include-unknowns-label": "Inclou els desconeguts",
+        "include-unknowns-tooltip": "Si s'activa, es permetran els elements desconeguts amb la restricció d'edat. Això podria fer que contingut sense etiquetar arribés a usuaris amb restriccions d'edat."
     },
     "version-update-modal": {
         "close": "{{common.close}}",
@@ -444,5 +726,497 @@
             "title": "S'ha actualitzat el Kavita.",
             "refresh": "Actualitza"
         }
+    },
+    "spoiler": {
+        "click-to-show": "Espòiler, feu clic per mostrar-lo"
+    },
+    "review-card-modal": {
+        "close": "{{common.close}}",
+        "user-review": "Ressenya de {{username}}",
+        "external-mod": "(externa)",
+        "go-to-review": "Ves a la ressenya"
+    },
+    "review-card": {
+        "your-review": "Aquesta és la vostra ressenya",
+        "external-review": "Ressenya externa",
+        "local-review": "Ressenya local",
+        "rating-percentage": "Valoració {{r}}%"
+    },
+    "user-holds": {
+        "title": "Retencions de scrobbling",
+        "description": "Aquesta és una llista de sèries, gestionada per l'usuari, de les quals no es farà scrobbling als proveïdors externs. Podeu eliminar una sèrie en qualsevol moment i el següent esdeveniment susceptible de scrobbling (progrés de lectura, valoració, estat de «Vull llegir») l'activarà.",
+        "no-data": "{{typeahead.no-data}}",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "created-header": "{{manage-media-issues.created-header}}",
+        "delete-label": "{{common.remove}}"
+    },
+    "change-age-restriction": {
+        "age-restriction-label": "Restricció d'edat",
+        "unknowns": "Desconeguts",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}"
+    },
+    "generic-list-modal": {
+        "close": "{{common.close}}",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}",
+        "open-filtered-search": "Obre una cerca filtrada per a {{item}}"
+    },
+    "role-selector": {
+        "title": "{{common.roles}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}"
+    },
+    "day-of-week-pipe": {
+        "monday": "Dilluns",
+        "tuesday": "Dimarts",
+        "wednesday": "Dimecres",
+        "thursday": "Dijous",
+        "friday": "Divendres",
+        "saturday": "Dissabte",
+        "sunday": "Diumenge"
+    },
+    "cbl-import-result-pipe": {
+        "success": "Èxit",
+        "partial": "Parcial",
+        "failure": "Fallada"
+    },
+    "cbl-conflict-reason-pipe": {
+        "all-series-missing": "El vostre compte no té accés a cap de les sèries de la llista o Kavita no té res del que hi ha a la llista.",
+        "chapter-missing": "{{series}}: el capítol {{chapter}} no és a Kavita. S'ometrà aquest element.",
+        "empty-file": "El fitxer CBL és buit; no hi ha res a fer.",
+        "name-conflict": "Al vostre compte ja hi ha una llista de lectura ({{readingListName}}) que coincideix amb el fitxer CBL.",
+        "series-collision": "La sèrie {{seriesLink}} entra en conflicte amb una altra sèrie amb el mateix nom d'una altra biblioteca.",
+        "series-missing": "La sèrie {{series}} no és a Kavita o el vostre compte no hi té permís. S'ometran de la importació tots els elements d'aquesta sèrie.",
+        "volume-missing": "{{series}}: el volum {{volume}} no és a Kavita o el vostre compte no hi té permís. S'ometran tots els elements amb aquest número de volum.",
+        "all-chapter-missing": "No s'ha pogut fer coincidir cap capítol amb els capítols de Kavita.",
+        "invalid-file": "El fitxer és malmès o no coincideix amb les etiquetes/especificació esperades.",
+        "success": "{{series}}, volum {{volume}}, capítol {{chapter}}: s'ha assignat correctament."
+    },
+    "publication-status-pipe": {
+        "ongoing": "En curs",
+        "hiatus": "En pausa",
+        "completed": "Completat",
+        "cancelled": "Cancel·lat",
+        "ended": "Finalitzat"
+    },
+    "age-rating-pipe": {
+        "unknown": "Desconegut",
+        "early-childhood": "Primera infància",
+        "adults-only": "Només adults 18+",
+        "everyone": "Tots els públics",
+        "everyone-10-plus": "Tots els públics 10+",
+        "g": "G",
+        "kids-to-adults": "De nens a adults",
+        "mature": "Per a adults",
+        "ma15-plus": "MA15+",
+        "mature-17-plus": "Per a adults 17+",
+        "rating-pending": "Classificació pendent",
+        "teen": "Adolescents",
+        "x18-plus": "X18+",
+        "not-applicable": "No aplicable",
+        "pg": "PG",
+        "r18-plus": "R18+"
+    },
+    "reset-password": {
+        "title": "Restabliment de la contrasenya",
+        "description": "Introduïu l'adreça electrònica del vostre compte. Kavita us enviarà un correu electrònic si n'hi ha una de vàlida registrada; altrament, demaneu a l'administrador que us restableixi la contrasenya.",
+        "email-label": "{{common.email}}",
+        "submit": "{{common.submit}}"
+    },
+    "reset-password-modal": {
+        "title": "Restableix la contrasenya de {{username}}",
+        "new-password-label": "Contrasenya nova",
+        "error-label": "Error: ",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
+    },
+    "all-series": {
+        "title": "Totes les sèries",
+        "series-count": "{{common.series-count}}"
+    },
+    "announcements": {
+        "title": "Anuncis"
+    },
+    "changelog": {
+        "installed": "Instal·lada",
+        "download": "Baixa",
+        "nightly": "Nightly: {{version}}",
+        "available": "Disponible"
+    },
+    "invite-user": {
+        "title": "Convida un usuari",
+        "close": "{{common.close}}",
+        "description": "Convideu un usuari al vostre servidor introduint la seva adreça electrònica. Rebrà un correu electrònic per crear un compte. Perquè funcioni, heu d'haver omplert els camps de configuració «Nom d'amfitrió» i «Adreça electrònica» a la pestanya <a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">Adreça electrònica</a>; altrament, se us mostrarà un enllaç per configurar-lo en nom de l'usuari.<br/><br/>No cal que l'adreça electrònica sigui vàlida.",
+        "email": "{{common.email}}",
+        "setup-user-title": "Usuari convidat",
+        "setup-user-description": "Podeu fer servir l'enllaç següent per configurar el compte del vostre usuari o bé el botó de copiar. Potser haureu de tancar la sessió abans de fer servir l'enllaç per registrar un usuari nou.",
+        "setup-user-account": "Configura el compte de l'usuari",
+        "setup-user-account-tooltip": "Copieu-ho i enganxeu-ho en una pestanya nova. Potser haureu de tancar la sessió.",
+        "invite-url-label": "URL d'invitació",
+        "invite": "Convida",
+        "inviting": "S'està convidant…",
+        "cancel": "{{common.cancel}}",
+        "email-not-sent": "{{toasts.email-not-sent}}",
+        "notice": "{{manage-settings.notice}}"
+    },
+    "library-selector": {
+        "title": "{{common.libraries}}",
+        "select-all": "{{common.select-all}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "no-data": "Encara no s'ha configurat cap biblioteca."
+    },
+    "manage-user-tokens": {
+        "description": "És possible que els usuaris que tenen testimonis de scrobbling els hagin de renovar de tant en tant. Kavita els enviarà automàticament un correu electrònic si el correu electrònic està configurat i tenen una adreça electrònica vàlida.",
+        "username-header": "Nom d'usuari",
+        "anilist-header": "AniList",
+        "mal-header": "MAL",
+        "token-set-label": "S'ha definit el testimoni",
+        "no-data": "{{common.no-data}}",
+        "expires-label": "Caduca: {{date}}"
+    },
+    "confirm-email-change": {
+        "title": "Valida el canvi d'adreça electrònica",
+        "non-confirm-description": "Espereu mentre es valida l'actualització de la vostra adreça electrònica.",
+        "confirm-description": "La vostra adreça electrònica s'ha validat i ja s'ha canviat a Kavita. Se us redirigirà a l'inici de sessió.",
+        "success": "Èxit!"
+    },
+    "confirm-reset-password": {
+        "title": "Restabliment de la contrasenya",
+        "description": "Introduïu la contrasenya nova",
+        "password-label": "{{common.password}}",
+        "submit": "{{common.submit}}",
+        "password-validation": "{{validation.password-validation}}"
+    },
+    "register": {
+        "title": "Registra't",
+        "description": "Completeu el formulari per registrar un compte d'administrador",
+        "username-label": "{{common.username}}",
+        "email-label": "{{common.email}}",
+        "email-tooltip": "No cal que l'adreça electrònica sigui real, però permet recuperar la contrasenya oblidada. No s'envia fora del servidor tret que Kavita us enviï un correu electrònic.",
+        "password-label": "{{common.password}}",
+        "password-validation": "{{validation.password-validation}}",
+        "register": "Registra't"
+    },
+    "match-series-result-item": {
+        "volume-count": "{{num}} vol.",
+        "chapter-count": "{{num}} cap."
+    },
+    "download-button": {
+        "download-tooltip": "Baixa",
+        "downloading-status": "S'està baixant…"
+    },
+    "external-rating": {
+        "entry-label": "Mostra els detalls",
+        "kavita-tooltip": "La vostra valoració + valoració global",
+        "kavita-rating-title": "La vostra valoració",
+        "close": "{{common.close}}"
+    },
+    "badge-expander": {
+        "more-items": "i {{count}} més"
+    },
+    "read-more": {
+        "read-more": "Llegeix més",
+        "read-less": "Llegeix menys"
+    },
+    "side-nav-companion-bar": {
+        "page-settings-title": "{{series-detail.page-settings-title}}",
+        "open-filter-and-sort": "Obre el filtratge i l'ordenació",
+        "close-filter-and-sort": "Tanca el filtratge i l'ordenació",
+        "filter-and-sort-alt": "Ordena / Filtra"
+    },
+    "person-detail": {
+        "known-for-title": "Conegut per",
+        "individual-role-title": "Com a {{role}}",
+        "browse-person-title": "Totes les obres de {{name}}",
+        "browse-person-by-role-title": "Totes les obres de {{name}} com a {{role}}",
+        "all-roles": "{{common.roles}}"
+    },
+    "library-settings-modal": {
+        "close": "{{common.close}}",
+        "edit-title": "Edita {{name}}",
+        "add-title": "Afegeix una biblioteca",
+        "name-label": "Nom",
+        "library-name-unique": "El nom de la biblioteca ha de ser únic",
+        "last-scanned-label": "Últim escaneig:",
+        "type-label": "Tipus",
+        "type-tooltip": "El tipus de biblioteca determina com s'analitzen els noms dels fitxers i si la IU mostra capítols (manga) o números (còmics). Consulteu la wiki per a més detalls sobre les diferències entre els tipus de biblioteca.",
+        "kavitaplus-eligible-label": "Apte per a Kavita+",
+        "kavitaplus-eligible-tooltip": "Admet les funcions de metadades i/o el scrobbling de Kavita+",
+        "folder-description": "Afegiu carpetes a la vostra biblioteca",
+        "browse": "Explora carpetes multimèdia",
+        "help-us-part-1": "Ajudeu-nos seguint ",
+        "help-us-part-2": "la nostra guia",
+        "help-us-part-3": "sobre com anomenar i organitzar el vostre contingut multimèdia.",
+        "naming-conventions-part-1": "Kavita té ",
+        "naming-conventions-part-2": "requisits de carpetes.",
+        "naming-conventions-part-3": "Consulteu aquest enllaç per assegurar-vos que els seguiu; altrament, és possible que els fitxers no apareguin a l'escaneig.",
+        "cover-description": "Les icones d'imatge personalitzades de la biblioteca són opcionals",
+        "cover-description-extra": "La imatge de la biblioteca no hauria de ser gran. Intenteu que sigui un fitxer petit, de 32x32 píxels. Kavita no en valida la mida.",
+        "manage-collection-label": "Gestiona les col·leccions",
+        "manage-collection-tooltip": "Si Kavita ha de crear col·leccions a partir de les etiquetes SeriesGroup dels fitxers ComicInfo.xml/opf",
+        "manage-reading-list-label": "Gestiona les llistes de lectura",
+        "manage-reading-list-tooltip": "Si Kavita ha de crear llistes de lectura a partir de les etiquetes StoryArc/StoryArcNumber i AlternativeSeries/AlternativeCount dels fitxers ComicInfo.xml/opf",
+        "allow-scrobbling-label": "Permet el scrobbling",
+        "allow-scrobbling-tooltip": "Si Kavita ha de fer scrobbling dels esdeveniments de lectura, de l'estat «Vull llegir», de les valoracions i de les ressenyes cap als proveïdors configurats. Això només passarà si el servidor té una subscripció activa a Kavita+.",
+        "allow-metadata-matching-label": "Permet la correspondència de metadades",
+        "allow-metadata-matching-tooltip": "Si Kavita ha de baixar metadades per a les sèries d'aquesta biblioteca. Això només passarà si el servidor té una subscripció activa a Kavita+.",
+        "include-in-dashboard-label": "Inclou al tauler",
+        "include-in-dashboard-tooltip": "Si les sèries de la biblioteca s'han d'incloure al tauler. Això afecta tots els fluxos, com ara «Continua llegint», «Actualitzat recentment», «Afegit recentment» o qualsevol addició personalitzada.",
+        "include-in-search-label": "Inclou a la cerca",
+        "include-in-search-tooltip": "Si les sèries i qualsevol informació derivada (gèneres, persones, fitxers) de la biblioteca s'han d'incloure als resultats de cerca.",
+        "force-scan": "Força l'escaneig",
+        "force-scan-tooltip": "Això forçarà un escaneig de la biblioteca i el tractarà com un escaneig nou",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
+        "next": "Següent",
+        "save": "{{common.save}}",
+        "file-type-group-label": "Tipus de fitxer",
+        "file-type-group-tooltip": "Quins tipus de fitxers ha d'escanejar Kavita. Per exemple, «Arxiu» inclourà tots els fitxers cb*, zip, rar, etc.",
+        "exclude-patterns-label": "Patrons d'exclusió",
+        "exclude-patterns-tooltip": "Configureu un conjunt de patrons (sintaxi Glob) que Kavita farà coincidir en escanejar directoris i que exclourà dels resultats de l'escàner.",
+        "help": "{{common.help}}"
+    },
+    "file-type-group-pipe": {
+        "archive": "Arxiu",
+        "epub": "Epub",
+        "pdf": "Pdf",
+        "image": "Imatge"
+    },
+    "reader-settings": {
+        "general-settings-title": "Paràmetres generals",
+        "font-family-label": "{{manage-reading-profiles.font-family-label}}",
+        "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
+        "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
+        "margin-label": "{{manage-reading-profiles.margin-book-label}}",
+        "reset-to-defaults": "Restableix els valors predeterminats",
+        "reader-settings-title": "Paràmetres del lector",
+        "reading-direction-label": "{{manage-reading-profiles.reading-direction-book-label}}",
+        "right-to-left": "De dreta a esquerra",
+        "left-to-right": "D'esquerra a dreta",
+        "horizontal": "Horitzontal",
+        "vertical": "Vertical",
+        "writing-style-label": "{{manage-reading-profiles.writing-style-label}}",
+        "writing-style-tooltip": "Canvia la direcció del text. Horitzontal és d'esquerra a dreta; vertical és de dalt a baix.",
+        "tap-to-paginate-label": "Paginació per toc",
+        "tap-to-paginate-tooltip": "Feu clic a les vores de la pantalla per canviar de pàgina",
+        "on": "Activat",
+        "off": "Desactivat",
+        "immersive-mode-label": "{{manage-reading-profiles.immersive-mode-label}}",
+        "immersive-mode-tooltip": "Això amagarà el menú fins que feu clic al document del lector i activarà la paginació per toc",
+        "fullscreen-label": "Pantalla completa",
+        "fullscreen-tooltip": "Posa el lector en mode de pantalla completa",
+        "exit": "Surt",
+        "enter": "Entra",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
+        "layout-mode-tooltip": "Desplaçament: reprodueix el fitxer EPUB (normalment una pàgina llarga amb desplaçament per capítol).<br/>1 columna: crea una sola pàgina virtual cada vegada.<br/>2 columnes: crea dues pàgines virtuals cada vegada, una al costat de l'altra.",
+        "layout-mode-option-scroll": "Desplaçament",
+        "layout-mode-option-1col": "1 columna",
+        "layout-mode-option-2col": "2 columnes",
+        "color-theme-title": "Tema de color",
+        "theme-dark": "Fosc",
+        "theme-black": "Negre",
+        "theme-white": "Blanc",
+        "theme-paper": "Paper"
+    },
+    "table-of-contents": {
+        "no-data": "Aquest llibre no té cap taula de continguts definida a les metadades ni cap fitxer toc"
+    },
+    "bookmarks": {
+        "title": "{{side-nav.bookmarks}}",
+        "series-count": "{{common.series-count}}",
+        "no-data": "No hi ha cap marcador. Proveu de crear-ne",
+        "no-data-2": "un.",
+        "confirm-delete": "Segur que voleu esborrar tots els marcadors de diverses sèries? Aquesta acció no es pot desfer.",
+        "confirm-single-delete": "Segur que voleu esborrar tots els marcadors de {{seriesName}}? Aquesta acció no es pot desfer.",
+        "delete-success": "S'han eliminat els marcadors",
+        "delete-single-success": "S'han eliminat els marcadors de {{seriesName}}"
+    },
+    "bulk-operations": {
+        "title": "Accions en bloc",
+        "items-selected": "{{num}} elements seleccionats",
+        "mark-as-unread": "Marca com a no llegit",
+        "mark-as-read": "Marca com a llegit",
+        "deselect-all": "{{common.deselect-all}}"
+    },
+    "card-detail-layout": {
+        "total-items": "{{count}} elements en total"
+    },
+    "card-item": {
+        "cannot-read": "No es pot llegir"
+    },
+    "details-tab": {
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "translators-title": "{{metadata-fields.translators-title}}",
+        "letterers-title": "{{metadata-fields.letterers-title}}",
+        "colorists-title": "{{metadata-fields.colorists-title}}",
+        "inkers-title": "{{metadata-fields.inkers-title}}",
+        "pencillers-title": "{{metadata-fields.pencillers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "editors-title": "{{metadata-fields.editors-title}}",
+        "teams-title": "{{metadata-fields.teams-title}}",
+        "locations-title": "{{metadata-fields.locations-title}}",
+        "imprints-title": "{{metadata-fields.imprints-title}}",
+        "genres-title": "{{metadata-fields.genres-title}}",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "weblinks-title": "{{tabs.weblink-tab}}",
+        "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
+        "language-title": "{{edit-chapter-modal.language-label}}",
+        "release-title": "{{sort-field-pipe.release-year}}",
+        "format-title": "{{metadata-filter.format-label}}",
+        "length-title": "{{edit-chapter-modal.words-label}}"
+    },
+    "related-tab": {
+        "reading-lists-title": "{{reading-lists.title}}",
+        "collections-title": "{{side-nav.collections}}",
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
+    },
+    "edit-series-relation": {
+        "description-part-1": "No sabeu quina relació afegir? Consulteu el nostre",
+        "description-part-2": "wiki per a obtenir-ne pistes.",
+        "target-series": "Sèrie de destinació",
+        "relationship": "Relació",
+        "remove": "{{common.remove}}",
+        "add-relationship": "Afegeix una relació",
+        "parent": "{{relationship-pipe.parent}}"
+    },
+    "bulk-add-to-collection": {
+        "title": "Afegeix a una col·lecció",
+        "promoted": "{{common.promoted}}",
+        "close": "{{common.close}}",
+        "filter-label": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "no-data": "Encara no s'ha creat cap col·lecció",
+        "loading": "{{common.loading}}",
+        "collection-label": "Col·lecció",
+        "create": "{{common.create}}"
+    },
+    "entity-title": {
+        "special": "Especial",
+        "issue-num": "Número {{num}}",
+        "book-num": "Llibre {{num}}",
+        "single-volume": "Volum únic"
+    },
+    "external-series-card": {
+        "open-external": "Obre externament"
+    },
+    "email-history": {
+        "description": "Aquí podeu trobar tots els correus electrònics enviats des de Kavita i a quin usuari.",
+        "template-header": "Plantilla",
+        "date-header": "Data d'enviament",
+        "user-header": "Enviat a",
+        "sent-header": "Amb èxit",
+        "no-data": "{{common.no-data}}",
+        "sent-tooltip": "Enviat",
+        "not-sent-tooltip": "No enviat"
+    },
+    "manage-media-issues": {
+        "filter-label": "{{common.filter}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "manage-email-settings": {
+        "description": "Per utilitzar algunes funcions de Kavita, com ara «Envia al dispositiu», cal configurar un proveïdor de correu electrònic. Altres funcions, com ara «He oblidat la contrasenya», requereixen la intervenció d'un administrador si el correu electrònic no està configurat.",
+        "setting-description": "Heu d'emplenar tant el nom d'amfitrió com els paràmetres SMTP per utilitzar les funcions de correu electrònic de Kavita.",
+        "test-warning": "Heu de tenir uns paràmetres vàlids abans de fer clic a «Prova».",
+        "send-to-warning": "Si voleu que «Envia al dispositiu» funcioni, heu de configurar els paràmetres de correu electrònic",
+        "email-url-label": "URL del servei de correu electrònic",
+        "email-url-tooltip": "Utilitzeu l'URL completa del servei de correu electrònic. No hi incloeu la barra final.",
+        "email-settings-title": "Paràmetres de correu electrònic",
+        "reset": "{{common.reset}}",
+        "test": "Prova",
+        "host-name-label": "Nom d'amfitrió",
+        "host-name-tooltip": "El nom de domini del vostre servidor intermediari invers, necessari per a les funcions de correu electrònic. Si no feu servir cap servidor intermediari invers, podeu fer servir qualsevol URL, inclosa http://externalip:port/",
+        "host-name-validation": "El nom d'amfitrió ha de començar per http(s) i no pot acabar en /",
+        "sender-address-label": "Adreça del remitent",
+        "sender-address-tooltip": "És l'adreça electrònica que veurà el destinatari quan rebi el correu. Normalment, l'adreça electrònica associada al compte.",
+        "sender-displayname-label": "Nom visible",
+        "sender-displayname-tooltip": "El nom que veurà el destinatari quan rebi el correu",
+        "host-label": "Amfitrió",
+        "host-tooltip": "Adreça de sortida/SMTP del vostre servidor de correu electrònic",
+        "port-label": "Port",
+        "username-label": "Nom d'usuari",
+        "username-tooltip": "El nom d'usuari que s'utilitza per autenticar-se a l'amfitrió",
+        "password-label": "Contrasenya",
+        "enable-ssl-label": "Utilitza SSL al servidor de correu electrònic",
+        "size-limit-label": "Límit de mida",
+        "size-limit-tooltip": "Quants bytes pot gestionar el servidor de correu electrònic per als fitxers adjunts",
+        "customized-templates-label": "Plantilles personalitzades",
+        "customized-templates-tooltip": "Kavita ha de fer servir el directori config/templates per a les plantilles en lloc de les predeterminades? Sou responsable de mantenir-les al dia amb els canvis de les plantilles.",
+        "gmail-label": "Gmail",
+        "outlook-label": "Outlook",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "save": "{{common.save}}"
+    },
+    "manage-library": {
+        "title": "{{common.libraries}}",
+        "add-library": "Afegeix una biblioteca",
+        "no-data": "No hi ha cap biblioteca. Proveu de crear-ne una.",
+        "loading": "{{common.loading}}",
+        "last-scanned-title": "Últim escaneig",
+        "shared-folders-title": "Carpetes",
+        "type-title": "Tipus",
+        "scan-library": "Escaneja la biblioteca",
+        "delete-library": "Suprimeix la biblioteca",
+        "delete-library-by-name": "Suprimeix {{name}}",
+        "edit-library": "Edita",
+        "edit-library-by-name": "Edita {{name}}",
+        "folder-count": "{{num}} carpetes",
+        "actions-header": "{{manage-users.actions-header}}",
+        "name-header": "{{manage-users.name-header}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}",
+        "cancel": "{{common.cancel}}",
+        "apply": "{{common.apply}}",
+        "bulk-copy-to": "Seleccioneu les biblioteques on voleu copiar els paràmetres de {{libraryName}}",
+        "include-type-label": "Inclou la còpia del tipus de biblioteca",
+        "include-type-tooltip": "Això no farà cap escaneig automàtic. En el pròxim escaneig, és possible que algunes sèries canviïn a causa de diferències en l'anàlisi",
+        "bulk-action-label": "Acció en bloc"
+    },
+    "copy-settings-from-library-modal": {
+        "close": "{{common.close}}",
+        "select": "Selecciona",
+        "title": "Copia els paràmetres d'una biblioteca a diverses altres",
+        "description": "Seleccioneu una biblioteca de la qual copiar els paràmetres i, a la pantalla següent, seleccioneu les biblioteques on aplicar-los.",
+        "select-option": "Seleccioneu una biblioteca"
+    },
+    "manage-media-settings": {
+        "encode-as-description-part-1": "WebP/AVIF pot reduir dràsticament l'espai que ocupen els fitxers. WebP/AVIF no és compatible amb tots els navegadors ni versions. Per saber si aquests paràmetres són adequats per a la vostra configuració, visiteu ",
+        "encode-as-description-part-2": "Puc fer servir WebP?",
+        "encode-as-description-part-3": "Puc fer servir AVIF?",
+        "media-warning": "Després de desar, heu d'iniciar la tasca de conversió multimèdia a la pestanya «Tasques».",
+        "encode-as-label": "Desa el contingut multimèdia com a",
+        "encode-as-tooltip": "Tot el contingut multimèdia que gestiona Kavita (portades, marcadors, favicons) es codificarà en aquest format.",
+        "bookmark-dir-label": "Directori de marcadors",
+        "bookmark-dir-tooltip": "Ubicació on es desaran els marcadors. Els marcadors són fitxers d'origen i poden ocupar molt. Trieu una ubicació amb prou espai d'emmagatzematge. El directori està gestionat: se'n suprimiran els altres fitxers que contingui. Si feu servir Docker, munteu un volum addicional i feu servir aquest.",
+        "change": "Canvia",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "media-issue-title": "Problemes multimèdia",
+        "scrobble-issue-title": "Problemes de scrobble",
+        "cover-image-size-label": "Mida de la imatge de coberta",
+        "cover-image-size-tooltip": "Mida amb què s'han de generar les imatges de coberta. Nota: qualsevol mida més gran que la predeterminada allargarà el temps de càrrega de les pàgines."
+    },
+    "cover-image-size": {
+        "default": "Predeterminada (320x455)",
+        "medium": "Mitjana (640x909)",
+        "large": "Gran (900x1277)",
+        "xlarge": "Extragran (1265x1795)"
+    },
+    "manage-scrobble-errors": {
+        "title": "Errors de scrobbling",
+        "description": "Aquesta taula conté els problemes trobats durant el scrobbling. Podeu netejar-la en qualsevol moment i esperar a la propera pujada de scrobbles per veure'ls. Si hi ha una sèrie desconeguda, feu servir la coincidència per corregir-la i tornar a posar els esdeveniments a la cua.",
+        "filter-label": "{{common.filter}}",
+        "clear-errors": "Neteja els errors",
+        "series-header": "Sèrie",
+        "created-header": "Creat",
+        "comment-header": "Comentari",
+        "edit-header": "Edita",
+        "edit-item-alt": "Edita {{seriesName}}",
+        "no-data": "Cap incidència"
     }
 }

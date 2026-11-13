@@ -121,7 +121,6 @@
     "series-updated": "更新成功",
     "unable-to-register-k+": "由於錯誤無法註冊授權。請聯絡 Kavita+ 支援",
     "register-user": "註冊帳號時發生問題",
-    "encode-as-warning": "您無法將檔案轉成 PNG 格式。若要更新封面，請選「重新整理封面」功能。而書籤和網站圖示則不能重新編碼回原狀。",
     "collection-tag-title-required": "收藏標題不能為空",
     "invalid-path": "無效的路徑",
     "want-to-read": "待讀清單",

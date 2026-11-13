@@ -146,7 +146,6 @@
     "generic-scrobble-hold": "Se ha producido un error al añadir la retención",
     "age-restriction-not-applicable": "Sin restricciones",
     "no-series-collection": "No se han podido obtener series para la colección",
-    "encode-as-warning": "No se puede convertir a PNG. Para las carátulas, utilice refrescar carátulas. Los marcadores y favicons no se pueden volver a codificar.",
     "total-logs": "El número total de registros debe estar comprendido entre 1 y 30",
     "on-deck": "En el puente",
     "access-denied": "Usted no tiene acceso",
@@ -287,5 +286,14 @@
     "mappings-re-run-in-progress": "Actualmente se está procesando una solicitud de reejecución de asignaciones de metadatos. Espera a que finalice para volver a ponerla en cola",
     "series-localized-name-exists": "Otra serie en esta biblioteca ya usa este nombre",
     "series-localized-name-orphans-files": "Cambiar este nombre localizado separaría los archivos que actualmente están unidos en esta serie",
-    "series-name-orphans-files": "Cambiar este nombre separaría los archivos que actualmente están unidos en esta serie"
+    "series-name-orphans-files": "Cambiar este nombre separaría los archivos que actualmente están unidos en esta serie",
+    "email.token-invalidated.subject": "Kavita - Tu token de {{Provider}} ha sido invalidado y los eventos de scrobbling se han detenido",
+    "email.token-invalidated.header": "¡Tu token de {{Provider}} ha sido invalidado debido a fallos repetidos de actualización!",
+    "email.token-invalidated.description": "Kavita dejará de sincronizar con {{Provider}} hasta que renueves tu conexión.",
+    "email.token-invalidated.cta": "RENOVAR",
+    "email.token-invalidated.fallback-link-label": "Si el botón de abajo no funciona, por favor encuentra el enlace aquí:",
+    "github-unavailable": "GitHub no está disponible, por favor inténtalo de nuevo más tarde",
+    "cbl-repo-download-failed": "No se pudo descargar {0} del repositorio CBL",
+    "cbl-repo-path-not-found": "No se encontró {0} en el repositorio CBL",
+    "kobo-sync-disabled": "KoboSync no está activado en este servidor"
 }

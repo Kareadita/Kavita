@@ -114,7 +114,6 @@
     "age-restriction-not-applicable": "Bez obmedzenia",
     "generic-relationship": "Pri aktualizácii vzťahov sa vyskytol problém",
     "job-already-running": "Úloha už beží",
-    "encode-as-warning": "Nedá sa konvertovať do formátu PNG. Pre obaly použite možnosť Obnoviť obaly. Záložky a favicony sa nedajú spätne zakódovať.",
     "ip-address-invalid": "IP adresa „{0}“ je neplatná",
     "bookmark-dir-permissions": "Adresár záložiek nemá správne povolenia pre použitie v aplikácii Kavita",
     "total-backups": "Celkový počet záloh musí byť medzi 1 a 30",
