@@ -24,6 +24,12 @@ public class KoboSyncPoint
     public string? KoboStoreSyncToken { get; set; }
 
     /// <summary>
+    /// Chapters removed on the Kobo, filtered out during sync. Can be un-removed in the UI
+    /// </summary>
+    [JsonColumn]
+    public List<RemovedChapter> RemovedChapterIds { get; set; }
+
+    /// <summary>
     /// All chapter ids in the last sync
     /// </summary>
     public List<int> ChapterIds { get; set; } = [];
@@ -48,4 +54,10 @@ public class KoboSyncPoint
         ProgressSyncTime = DateTime.UtcNow;
     }
 
+}
+
+public sealed class RemovedChapter
+{
+    public int ChapterId { get; set; }
+    public DateTime RemovedAtUtc { get; set; }
 }

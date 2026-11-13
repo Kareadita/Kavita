@@ -31,6 +31,7 @@ public interface IVolumeRepository
     Task<string?> GetVolumeCoverImageAsync(int volumeId, CancellationToken ct = default);
     Task<List<int>> GetChapterIdsByVolumeIds(int seriesId, IReadOnlyList<int> volumeIds, CancellationToken ct = default);
     Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId, VolumeIncludes includes = VolumeIncludes.Chapters, CancellationToken ct = default);
+    Task<List<VolumeDto>> GetVolumesDtosAsync(IEnumerable<int> volumeIds, CancellationToken ct = default);
     Task<Volume?> GetVolumeByIdAsync(int volumeId, VolumeIncludes includes = VolumeIncludes.Files, CancellationToken ct = default);
     Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId, CancellationToken ct = default);
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false, CancellationToken ct = default);

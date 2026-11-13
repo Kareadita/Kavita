@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20261111231700_TrackKoboStoreSyncTokenForSyncPoint")]
+    [Migration("20261113203837_TrackKoboStoreSyncTokenForSyncPoint")]
     partial class TrackKoboStoreSyncTokenForSyncPoint
     {
         /// <inheritdoc />
@@ -746,6 +746,11 @@ namespace Kavita.Database.Migrations
 
                     b.Property<int>("ProgressSyncedUntilIndex")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("RemovedChapterIds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("[]");
 
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");

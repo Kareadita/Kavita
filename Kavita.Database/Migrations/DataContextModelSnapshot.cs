@@ -744,6 +744,11 @@ namespace Kavita.Database.Migrations
                     b.Property<int>("ProgressSyncedUntilIndex")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("RemovedChapterIds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("[]");
+
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 

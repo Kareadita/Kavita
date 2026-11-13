@@ -113,7 +113,7 @@ public class KoboSyncService(
         var limit = syncPreferences.SyncItemLimit;
         var alreadySeenChapters = syncPoint.ChapterIds.ToHashSet();
 
-        var eligible = await KoboEligibleChapters(userId, ageRestriction, syncPreferences)
+        var eligible = await KoboEligibleChapters(userId, ageRestriction, syncPreferences, syncPoint)
             .Select(c => new { c.Id, c.LastModifiedUtc }) // Reduce memory
             .ToDictionaryAsync(c => c.Id, c => c.LastModifiedUtc, cancellationToken);
 
@@ -141,7 +141,7 @@ public class KoboSyncService(
 
         var idsToFetch = pendingIds.Take(limit - changes.Count).ToList();
 
-        var chapters = await KoboEligibleChapters(userId, ageRestriction, syncPreferences)
+        var chapters = await KoboEligibleChapters(userId, ageRestriction, syncPreferences, syncPoint)
             .LeftJoin(unitOfWork.DataContext.AppUserProgresses.Where(p => p.AppUserId == userId),
                 c => c.Id,
                 p => p.ChapterId,
@@ -238,7 +238,7 @@ public class KoboSyncService(
 
         IOrderedQueryable<KoboChapterSyncData> ProgressSyncQueryable(DateTime after)
         {
-            return KoboEligibleChapters(userId, ageRestriction, syncPreferences)
+            return KoboEligibleChapters(userId, ageRestriction, syncPreferences, syncPoint)
                 .Join(unitOfWork.DataContext.AppUserProgresses.Where(p => p.AppUserId == userId),
                     c => c.Id,
                     p => p.ChapterId,
@@ -252,12 +252,14 @@ public class KoboSyncService(
         }
     }
 
-    private IQueryable<Chapter> KoboEligibleChapters(int userId, AgeRestriction ageRestriction, AppUserKoboSyncPreferences syncPreferences)
+    private IQueryable<Chapter> KoboEligibleChapters(int userId,
+        AgeRestriction ageRestriction, AppUserKoboSyncPreferences syncPreferences, KoboSyncPoint syncPoint)
     {
         return unitOfWork.DataContext.Chapter
             .RestrictByLibrary(unitOfWork.DataContext.Library.GetUserLibraries(userId))
             .RestrictAgainstAgeRestriction(ageRestriction)
             .FilterByKoboSyncSettings(syncPreferences, userId)
+            .Where(c => !syncPoint.RemovedChapterIds.Contains(c.Id))
             .Includes(ChapterIncludes.Files);
     }
 

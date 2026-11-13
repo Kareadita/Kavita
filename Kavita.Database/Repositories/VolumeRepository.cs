@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Kavita.API.Repositories;
 using Kavita.Database.Extensions;
 using Kavita.Models.DTOs;
@@ -151,6 +152,15 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
             .AsSplitQuery()
             .OrderBy(vol => vol.MinNumber)
             .ToListAsync(ct);
+    }
+
+    public Task<List<VolumeDto>> GetVolumesDtosAsync(IEnumerable<int> volumeIds, CancellationToken ct = default)
+    {
+        return context.Volume
+            .Where(vol => volumeIds.Contains(vol.Id))
+            .ProjectTo<VolumeDto>(mapper.ConfigurationProvider)
+            .ToListAsync(ct);
+
     }
 
     /// <summary>

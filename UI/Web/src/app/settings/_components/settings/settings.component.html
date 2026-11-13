@@ -310,6 +310,17 @@
             }
           }
 
+          @case (SettingsTabId.Kobo) {
+            @defer {
+              <div class="col-xxl-6 col-12">
+                <app-manage-kobo />
+              </div>
+              <div class="col-12">
+                <app-manage-kobo-sync-points />
+              </div>
+            }
+          }
+
           @case (SettingsTabId.Theme) {
             @defer {
               <div class="scale col-md-12">

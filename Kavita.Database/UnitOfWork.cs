@@ -51,7 +51,7 @@ public class UnitOfWork : IUnitOfWork
         ClientDeviceRepository = new ClientDeviceRepository(_context, mapper);
         RemapRuleRepository = new ReadingListRemapRuleRepository(_context, mapper);
         KavitaPlusAuditRepository = new KavitaPlusAuditRepository(_context);
-        KoboSyncPointRepository = new KoboSyncPointRepository(_context);
+        KoboSyncPointRepository = new KoboSyncPointRepository(_context, mapper);
     }
 
     /// <summary>

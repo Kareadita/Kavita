@@ -29,6 +29,7 @@ public class ChapterController(
     IUnitOfWork unitOfWork,
     ILocalizationService localizationService,
     IEventHub eventHub,
+    IEntityNamingService namingService,
     ILogger<ChapterController> logger)
     : BaseApiController
 {
@@ -44,6 +45,77 @@ public class ChapterController(
     {
         var ct = HttpContext.RequestAborted;
         return Ok(await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId, ct));
+    }
+
+    /// <summary>
+    /// Returns information to restore chapters in the Kobo Sync UI
+    /// </summary>
+    /// <param name="syncPointId"></param>
+    /// <returns></returns>
+    [HttpGet("restore-info")]
+    public async Task<ActionResult<IList<ChapterRestoreInfoDto>>> GetRestoreInfo([FromQuery] int syncPointId)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        var syncPoint = await unitOfWork.KoboSyncPointRepository.GetSyncPoint(UserId, syncPointId, ct);
+        if (syncPoint is null)
+        {
+            return NotFound();
+        }
+
+        var chapterIds = syncPoint.RemovedChapterIds.Select(rc => rc.ChapterId).ToList();
+
+        var chapters = await unitOfWork.ChapterRepository.GetChapterDtosAsync(chapterIds, UserId, ct);
+        if (chapters.Count == 0) return Ok(new List<ChapterRestoreInfoDto>());
+
+        if (!await unitOfWork.UserRepository.HasAccessToAllChapters(UserId, chapters.Select(c => c.Id), ct))
+        {
+            return NotFound();
+        }
+
+        var volumeIds = chapters.Select(c => c.VolumeId).ToList();
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesDtosAsync(volumeIds.Distinct(), ct);
+        var volumesById = volumes.ToDictionary(v => v.Id);
+
+        var seriesIds = volumes.Select(v => v.SeriesId).Distinct().ToList();
+        var seriesById = (await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(seriesIds, false, ct))
+            .ToDictionary(s => s.Id);
+        var libraryTypes = await unitOfWork.LibraryRepository.GetLibraryTypesBySeriesIdsAsync(seriesIds, ct);
+
+        var namingContexts = await LocalizedNamingContext
+            .CreateAsync(namingService, localizationService, UserId, [.. libraryTypes.Values]);
+
+        var removedAt = syncPoint.RemovedChapterIds.ToDictionary(rc => rc.ChapterId);
+
+        var result = chapters
+            .OrderByDescending(c => removedAt[c.Id].RemovedAtUtc)
+            .Select(c =>
+            {
+                var volume = volumesById[c.VolumeId];
+
+                var series = seriesById[volume.SeriesId];
+                var namingContext = namingContexts[libraryTypes[series.Id]];
+                var chapterDto = new ChapterDto
+                {
+                    Id = c.Id,
+                    Range = c.Range,
+                    Title = c.Title,
+                    TitleName = c.TitleName,
+                    IsSpecial = c.IsSpecial,
+                };
+
+                return new ChapterRestoreInfoDto
+                {
+                    ChapterId = c.Id,
+                    SeriesId = series.Id,
+                    SeriesTitle = series.Name,
+                    Title = namingContext.BuildChapterTitle(volume, chapterDto),
+                    RemovedAtUtc = removedAt[c.Id].RemovedAtUtc,
+                };
+            })
+            .ToList();
+
+        return Ok(result);
     }
 
     /// <summary>

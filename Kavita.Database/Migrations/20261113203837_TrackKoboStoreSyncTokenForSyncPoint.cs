@@ -16,6 +16,13 @@ namespace Kavita.Database.Migrations
                 type: "TEXT",
                 nullable: true);
 
+            migrationBuilder.AddColumn<string>(
+                name: "RemovedChapterIds",
+                table: "KoboSyncPoints",
+                type: "TEXT",
+                nullable: true,
+                defaultValue: "[]");
+
             migrationBuilder.AlterColumn<string>(
                 name: "KoboSyncPreferences",
                 table: "AppUserPreferences",
@@ -33,6 +40,10 @@ namespace Kavita.Database.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "KoboStoreSyncToken",
+                table: "KoboSyncPoints");
+
+            migrationBuilder.DropColumn(
+                name: "RemovedChapterIds",
                 table: "KoboSyncPoints");
 
             migrationBuilder.AlterColumn<string>(

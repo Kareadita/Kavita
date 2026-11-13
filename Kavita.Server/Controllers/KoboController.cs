@@ -14,6 +14,7 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.User;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
@@ -334,13 +335,32 @@ public class KoboController(
     [ChapterAccess(failOnMissing: false, chapterIdKey: "bookId")]
     public async Task<ActionResult> DeleteBook(string bookId)
     {
-        if (int.TryParse(bookId, out var _))
+        var ct = HttpContext.RequestAborted;
+
+        if (!int.TryParse(bookId, out var kavitaId))
         {
-            // We cannot really process this. As the collection is series
+            return await koboSyncService.ProxyRequestIfEnabled();
+        }
+
+        var syncPoint = await unitOfWork.KoboSyncPointRepository.GetSyncPoint(UserId, KoboDeviceId, ct);
+        if (syncPoint is null)
+        {
             return Ok();
         }
 
-        return await koboSyncService.ProxyRequestIfEnabled();
+        if (syncPoint.RemovedChapterIds.All(rc => rc.ChapterId != kavitaId))
+        {
+            syncPoint.RemovedChapterIds.Add(new RemovedChapter()
+            {
+                ChapterId = kavitaId,
+                RemovedAtUtc = DateTime.UtcNow,
+            });
+            unitOfWork.KoboSyncPointRepository.Update(syncPoint);
+
+            await unitOfWork.CommitAsync(ct);
+        }
+
+        return Ok();
     }
 
     /// <summary>

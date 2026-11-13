@@ -1,0 +1,92 @@
+<ng-container *transloco="let t; prefix:'restore-chapters-modal'">
+
+  <div class="modal-header">
+    <h4 class="modal-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" [disabled]="restoring()" (click)="close()"></button>
+  </div>
+
+  <div class="modal-body scrollable-modal">
+    <p class="text-muted">{{t('description')}}</p>
+
+    @if (infoLoading()) {
+      <app-loading [loading]="true" />
+    } @else if (infoError()) {
+      <app-empty-state [isError]="true" [titleKey]="'load-error-title'" [descriptionKey]="'load-error-description'"
+                       [i18nPrefix]="'restore-chapters-modal'">
+        <i icon class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+      </app-empty-state>
+    } @else if (restoreInfo().length === 0) {
+      <app-empty-state [titleKey]="'no-data'" [descriptionKey]="'no-data-description'" [i18nPrefix]="'restore-chapters-modal'">
+        <i icon class="fa-solid fa-book" aria-hidden="true"></i>
+      </app-empty-state>
+    } @else {
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <span class="text-muted" aria-live="polite">{{t('selected-count', {selected: tracker.selectedCount(), total: restoreInfo().length})}}</span>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-sm btn-outline-primary"
+                  [disabled]="restoring() || tracker.selectedCount() === restoreInfo().length" (click)="tracker.setAll(true)">
+            {{t('select-all')}}
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary"
+                  [disabled]="restoring() || tracker.selectedCount() === 0" (click)="tracker.setAll(false)">
+            {{t('clear-selection')}}
+          </button>
+        </div>
+      </div>
+
+      <ngx-datatable class="bootstrap" [rows]="restoreInfo()" columnMode="flex" rowHeight="auto">
+        <ngx-datatable-column
+          [width]="40"
+          [minWidth]="40"
+          [maxWidth]="40"
+          [sortable]="false"
+          [canAutoResize]="false"
+          [draggable]="false"
+          [resizeable]="false">
+          <ng-template ngx-datatable-cell-template let-row="row">
+            <input type="checkbox"
+                   class="form-check-input"
+                   [checked]="tracker.isSelected(row.chapterId)"
+                   (change)="tracker.toggle(row.chapterId)" />
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column prop="seriesTitle" [flexGrow]="3">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('series-label')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.seriesTitle}}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column prop="title" [flexGrow]="3">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('chapter-title-label')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.title}}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column prop="removedAtUtc" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('removed-at-label')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            <span [ngbTooltip]="item.removedAtUtc | utcToLocalTime">
+              {{item.removedAtUtc | utcToLocalDate | timeDifference}}
+            </span>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+
+
+    }
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" [disabled]="restoring()" (click)="close()">{{t('cancel')}}</button>
+    <button type="button" class="btn btn-primary" [disabled]="tracker.selectedCount() === 0 || restoring()" (click)="restore()">
+      {{t('restore-selected', {count: tracker.selectedCount()})}}
+    </button>
+  </div>
+
+</ng-container>
