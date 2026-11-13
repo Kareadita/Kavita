@@ -13,12 +13,21 @@
       </div>
     }
 
-    @for (rating of ratings(); track rating.provider + rating.averageScore) {
-      <div class="col-auto custom-col clickable" [ngbPopover]="externalPopContent" [popoverContext]="{rating: rating}"
-           [popoverTitle]="(rating.provider | scrobbleProviderName) + getAuthorityTitle(rating)" popoverClass="sm-popover">
-        <span class="badge rounded-pill me-1">
-          <img class="me-1" [ngSrc]="rating.provider | providerImage:true" width="24" height="24" alt="" aria-hidden="true">
-          {{rating.averageScore}}%
+    @for (rating of ratings(); track rating.provider) {
+      @let altText = (rating.provider | scrobbleProviderName) + getAuthorityTitle(rating);
+      <div class="col-auto custom-col clickable">
+        <span class="badge rounded-pill me-1" [ngbTooltip]="altText">
+          @if (rating.providerUrl) {
+            <a class="dark-exempt btn-icon" [href]="rating.providerUrl" target="_blank" rel="noreferrer nofollow">
+              <ng-container [ngTemplateOutlet]="icon" [ngTemplateOutletContext]="{ $implicit: rating }" />
+            </a>
+          } @else {
+            <ng-container [ngTemplateOutlet]="icon" [ngTemplateOutletContext]="{ $implicit: rating }" />
+          }
+          <ng-template #icon let-rating>
+            <img class="me-1" [ngSrc]="rating.provider | providerImage:true" width="24" height="24" [attr.alt]="altText" aria-hidden="true">
+            {{rating.averageScore}}%
+          </ng-template>
         </span>
       </div>
     }
@@ -59,19 +68,6 @@
     <ngx-stars [initialStars]="userRating()" (ratingOutput)="updateRating($event)" [size]="2"
                [maxStars]="5" [color]="starColor" />
     {{userRating() * 20}}%
-  </ng-template>
-
-  <ng-template #externalPopContent let-rating="rating">
-    @if (rating.favoriteCount > 0) {
-      <div>
-        <i class="fa-solid fa-heart" aria-hidden="true"></i> {{rating.favoriteCount}}
-      </div>
-    }
-
-
-    @if (rating.providerUrl) {
-      <a [href]="rating.providerUrl" target="_blank" rel="noreferrer nofollow">{{t('entry-label')}}</a>
-    }
   </ng-template>
 
 </ng-container>

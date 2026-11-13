@@ -732,6 +732,7 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FileName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("Format")
@@ -1102,9 +1103,6 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ChapterId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FavoriteCount")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Provider")
