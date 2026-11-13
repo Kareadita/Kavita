@@ -422,7 +422,12 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
 
         await ctx.SaveChangesAsync();
 
-        var syncPoint = new KoboSyncPoint();
+        var syncPoint = new KoboSyncPoint
+        {
+            // Chapters already synced, so the progress changes get the whole limit
+            ChapterIds = await ctx.Chapter.Select(c => c.Id).ToListAsync(),
+            ChapterSyncTime = DateTime.UtcNow,
+        };
 
         var (changes, _) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
         var readingChanges = changes.Where(c => c.ChangedReadingState != null).ToList();
@@ -527,6 +532,88 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         (changes, exhausted) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
         Assert.Single(changes, c => c.NewEntitlement != null);
         Assert.Equal("4", changes.First().NewEntitlement.BookEntitlement.Id);
+        // Chapter changes filled the limit, so progress was not checked this call
+        Assert.False(exhausted);
+
+        (changes, exhausted) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Empty(changes);
+        Assert.True(exhausted);
+    }
+
+    [Fact]
+    public async Task GetChangesSinceAsync_TotalChangesRespectSyncItemLimit()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        await SetupCollection(ctx);
+
+        var series2 = new SeriesBuilder("The Moon on a Rainy Night")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
+                    .Build())
+                .Build())
+            .Build();
+        ctx.Series.Add(series2);
+        await ctx.SaveChangesAsync();
+
+        var chapters = await ctx.Chapter.Include(c => c.Volume).OrderBy(c => c.Id).ToListAsync();
+
+        foreach (var chapter in chapters)
+        {
+            ctx.AppUserProgresses.Add(new AppUserProgress
+            {
+                PagesRead = 1,
+                VolumeId = chapter.VolumeId,
+                SeriesId = chapter.Volume.SeriesId,
+                LibraryId = 1,
+                ChapterId = chapter.Id,
+                AppUserId = 1,
+            });
+        }
+
+        await ctx.SaveChangesAsync();
+
+        var syncPreferences = new AppUserKoboSyncPreferences {SyncItemLimit = 2, LibrarySyncEnabled = true};
+        var syncPoint = new KoboSyncPoint();
+
+        var syncItems = new List<KoboSyncItem>();
+        var exhausted = false;
+        for (var i = 0; i < 10 && !exhausted; i++)
+        {
+            var (changes, isExhausted) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+
+            Assert.True(changes.Count <= syncPreferences.SyncItemLimit);
+            syncItems.AddRange(changes);
+            exhausted = isExhausted;
+        }
+
+        Assert.True(exhausted);
+        Assert.Equal(2, syncItems.Count(c => c.NewEntitlement != null));
+        Assert.Equal(2, syncItems.Count(c => c.ChangedReadingState != null));
+    }
+
+    [Fact]
+    public async Task GetChangesSinceAsync_CollectionChangesAreExhausted()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        await SetupCollection(ctx);
+
+        var syncPreferences = new AppUserKoboSyncPreferences {CollectionSyncEnabled = true};
+        var syncPoint = new KoboSyncPoint();
+
+        var (changes, exhausted) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+
+        Assert.Contains(changes, c => c.NewTag?.Tag.Id == "col:1");
+        Assert.True(exhausted);
+
+        (changes, exhausted) = await koboSyncService.GetChangesSinceAsync(1, syncPreferences, syncPoint, CancellationToken.None);
+
+        Assert.Empty(changes);
         Assert.True(exhausted);
     }
 }

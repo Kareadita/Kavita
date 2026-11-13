@@ -27,7 +27,7 @@ public class KoboSyncPoint
     /// Chapters removed on the Kobo, filtered out during sync. Can be un-removed in the UI
     /// </summary>
     [JsonColumn]
-    public List<RemovedChapter> RemovedChapterIds { get; set; }
+    public List<RemovedChapter> RemovedChapterIds { get; set; } = [];
 
     /// <summary>
     /// All chapter ids in the last sync

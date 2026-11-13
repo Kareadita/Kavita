@@ -6,7 +6,7 @@ namespace Kavita.Models.Entities.User;
 public class AppUserKoboSyncPreferences
 {
     /// <summary>
-    /// Maximum amount of items per sync (per type)
+    /// Maximum amount of items per sync request, across all sources
     /// </summary>
     [Range(25, 100)]
     public int SyncItemLimit { get; set; } = 100;

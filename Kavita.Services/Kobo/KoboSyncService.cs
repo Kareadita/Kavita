@@ -75,13 +75,20 @@ public class KoboSyncService(
             syncPoint.Id, syncPoint.ChapterIndex, syncPoint.ProgressSyncedUntilIndex);
 
         var syncResults = new List<KoboSyncItem>();
+        var remaining = syncPreferences.SyncItemLimit;
 
         var ageRestriction = await unitOfWork.DataContext.AppUser.GetUserAgeRestriction(userId, cancellationToken);
 
-        var (chapterChanges, chaptersExhausted) = await AccumulateChapterChanges(userId, syncPreferences, syncPoint, ageRestriction, cancellationToken);
-        var (progressChanges, progressExhausted) = await AccumulateProgressChanges(userId, syncPreferences, syncPoint, ageRestriction, cancellationToken);
-        var (collectionChanges, collectionsExhausted) = await AccumulateCollectionsChanges(userId, syncPreferences, syncPoint, ageRestriction, cancellationToken);
-        var (readingListsChanges, readingListsExhausted) = await AccumulateReadingListChanges(userId, syncPreferences, syncPoint, ageRestriction, cancellationToken);
+        var (chapterChanges, chaptersExhausted) = await AccumulateChapterChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
+        remaining -= chapterChanges.Count;
+
+        var (progressChanges, progressExhausted) = await AccumulateProgressChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
+        remaining -= progressChanges.Count;
+
+        var (collectionChanges, collectionsExhausted) = await AccumulateCollectionsChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
+        remaining -= collectionChanges.Count;
+
+        var (readingListsChanges, readingListsExhausted) = await AccumulateReadingListChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
 
         syncResults.AddRange(chapterChanges);
         syncResults.AddRange(progressChanges);
@@ -101,8 +108,8 @@ public class KoboSyncService(
             await unitOfWork.CommitAsync(cancellationToken);
         }
 
-        logger.LogDebug("GetChangesSinceAsync: Accumulated {ChapterChanges} chapter changes and {ProgressChanges} progress changes",
-            chapterChanges.Count, progressChanges.Count);
+        logger.LogDebug("GetChangesSinceAsync: Accumulated {TotalChanges} changes ({ChapterChanges} chapter, {ProgressChanges} progress, {CollectionChanges} collection, {ReadingListChanges} reading list)",
+            syncResults.Count, chapterChanges.Count, progressChanges.Count, collectionChanges.Count, readingListsChanges.Count);
 
         return (syncResults, localChangesExhausted);
     }
@@ -111,10 +118,12 @@ public class KoboSyncService(
         int userId,
         AppUserKoboSyncPreferences syncPreferences,
         KoboSyncPoint syncPoint,
+        int limit,
         AgeRestriction ageRestriction,
         CancellationToken cancellationToken)
     {
-        var limit = syncPreferences.SyncItemLimit;
+        if (limit <= 0) return new SyncAccumulationResult([], false);
+
         var alreadySeenChapters = syncPoint.ChapterIds.ToHashSet();
 
         var eligible = await KoboEligibleChapters(userId, ageRestriction, syncPreferences, syncPoint)
@@ -202,9 +211,12 @@ public class KoboSyncService(
     private async Task<SyncAccumulationResult> AccumulateProgressChanges(int userId,
         AppUserKoboSyncPreferences syncPreferences,
         KoboSyncPoint syncPoint,
+        int limit,
         AgeRestriction ageRestriction,
         CancellationToken cancellationToken)
     {
+        if (limit <= 0) return new SyncAccumulationResult([], false);
+
         var progressAtIndex = await ProgressSyncQueryable(syncPoint.ProgressSyncTime)
             .Skip(syncPoint.ProgressSyncedUntilIndex - 1)
             .Take(1)
@@ -215,7 +227,7 @@ public class KoboSyncService(
 
         var progressToSync = await ProgressSyncQueryable(syncPoint.ProgressSyncTime)
             .SkipIf(useIndex, syncPoint.ProgressSyncedUntilIndex)
-            .Take(syncPreferences.SyncItemLimit)
+            .Take(limit)
             .ToListAsync(cancellationToken);
 
         if (progressToSync.Count == 0)
@@ -238,7 +250,7 @@ public class KoboSyncService(
             }});
         }
 
-        return new SyncAccumulationResult(changes, progressToSync.Count < syncPreferences.SyncItemLimit);
+        return new SyncAccumulationResult(changes, progressToSync.Count < limit);
 
         IOrderedQueryable<KoboChapterSyncData> ProgressSyncQueryable(DateTime after)
         {
@@ -259,6 +271,7 @@ public class KoboSyncService(
     private async Task<SyncAccumulationResult> AccumulateCollectionsChanges(int userId,
         AppUserKoboSyncPreferences syncPreferences,
         KoboSyncPoint syncPoint,
+        int limit,
         AgeRestriction ageRestriction,
         CancellationToken cancellationToken)
     {
@@ -267,7 +280,8 @@ public class KoboSyncService(
             return new SyncAccumulationResult([], true);
         }
 
-        var limit = syncPreferences.SyncItemLimit;
+        if (limit <= 0) return new SyncAccumulationResult([], false);
+
         var alreadySeenCollections = syncPoint.CollectionsIds.ToHashSet();
 
         var eligible = await unitOfWork.DataContext.AppUserCollection
@@ -298,7 +312,7 @@ public class KoboSyncService(
         if (changes.Count >= limit)
         {
             var hasMore = deletedIds.Count > deletedBatch.Count || pendingIds.Count > 0;
-            return new SyncAccumulationResult(changes, hasMore);
+            return new SyncAccumulationResult(changes, !hasMore);
         }
 
         var idsToFetch = pendingIds.Take(limit - changes.Count).ToList();
@@ -313,7 +327,7 @@ public class KoboSyncService(
             syncPoint.CollectionsIds = [.. eligible.Keys];
 
             logger.LogTrace("No collection changes since {CollectionTimeSync}", syncPoint.CollectionsSyncTime);
-            return new SyncAccumulationResult(changes, false);
+            return new SyncAccumulationResult(changes, true);
         }
 
         syncPoint.CollectionsSyncedUntilIndex += collections.Count;
@@ -337,7 +351,9 @@ public class KoboSyncService(
         foreach (var collection in collections)
         {
             var collectionChapters = collection.Items
-                .SelectMany(s => chapters[s.Id]);
+                .SelectMany(s => chapters.TryGetValue(s.Id, out var chapter) ? chapter : [])
+                .ToList();
+            if (collectionChapters.Count == 0) continue;
 
             var tag = new KoboWrappedTagDto
             {
@@ -354,7 +370,7 @@ public class KoboSyncService(
                 },
             };
 
-            changes.Add(collection.CreatedUtc > syncPoint.CollectionsSyncTime
+            changes.Add(collection.CreatedUtc > syncPoint.CollectionsSyncTime && alreadySeenCollections.Contains(collection.Id)
                 ? new KoboSyncItem { NewTag = tag }
                 : new KoboSyncItem { ChangedTag = tag }
             );
@@ -366,12 +382,13 @@ public class KoboSyncService(
             syncPoint.CollectionsIds = [.. eligible.Keys];
         }
 
-        return new SyncAccumulationResult(changes, false);
+        return new SyncAccumulationResult(changes, exhausted);
     }
 
     private async Task<SyncAccumulationResult> AccumulateReadingListChanges(int userId,
         AppUserKoboSyncPreferences syncPreferences,
         KoboSyncPoint syncPoint,
+        int limit,
         AgeRestriction ageRestriction,
         CancellationToken cancellationToken)
     {
@@ -380,13 +397,14 @@ public class KoboSyncService(
             return new SyncAccumulationResult([], true);
         }
 
-        var limit = syncPreferences.SyncItemLimit;
+        if (limit <= 0) return new SyncAccumulationResult([], false);
+
         var alreadySeenReadingLists = syncPoint.ReadingListsIds.ToHashSet();
 
         var eligible = await unitOfWork.DataContext.ReadingList
             .Where(rl => rl.Promoted || rl.AppUserId == userId)
             .RestrictAgainstAgeRestriction(ageRestriction)
-            .WhereIf(syncPreferences.SyncReadingLists.Count > 0, rl => syncPoint.ReadingListsIds.Contains(rl.Id))
+            .WhereIf(syncPreferences.SyncReadingLists.Count > 0, rl => syncPreferences.SyncReadingLists.Contains(rl.Id))
             .Select(c => new { c.Id, c.LastModifiedUtc }) // Reduce memory
             .ToDictionaryAsync(c => c.Id, c => c.LastModifiedUtc, cancellationToken);
 
@@ -402,7 +420,7 @@ public class KoboSyncService(
         deletedBatch.ForEach(id => syncPoint.ReadingListsIds.Remove(id));
 
         var pendingIds = eligible
-            .Where(kv => !alreadySeenReadingLists.Contains(kv.Key))
+            .Where(kv => !alreadySeenReadingLists.Contains(kv.Key) || kv.Value > syncPoint.ReadingListsSyncTime)
             .OrderBy(kv => kv.Value)
             .ThenBy(kv => kv.Key)
             .Skip(syncPoint.ReadingListsSyncedUntilIndex)
@@ -412,7 +430,7 @@ public class KoboSyncService(
         if (changes.Count >= limit)
         {
             var hasMore = deletedIds.Count > deletedBatch.Count || pendingIds.Count > 0;
-            return new SyncAccumulationResult(changes, hasMore);
+            return new SyncAccumulationResult(changes, !hasMore);
         }
 
         var idsToFetch = pendingIds.Take(limit - changes.Count).ToList();
@@ -427,7 +445,7 @@ public class KoboSyncService(
             syncPoint.ReadingListsIds = [.. eligible.Keys];
 
             logger.LogTrace("No reading list changes since {ReadingListTimeSync}", syncPoint.ReadingListsSyncTime);
-            return new SyncAccumulationResult(changes, false);
+            return new SyncAccumulationResult(changes, true);
         }
 
         syncPoint.ReadingListsSyncedUntilIndex += readingLists.Count;
@@ -450,7 +468,7 @@ public class KoboSyncService(
                 },
             };
 
-            changes.Add(readingList.CreatedUtc > syncPoint.CollectionsSyncTime
+            changes.Add(readingList.CreatedUtc > syncPoint.ReadingListsSyncTime && alreadySeenReadingLists.Contains(readingList.Id)
                 ? new KoboSyncItem { NewTag = tag }
                 : new KoboSyncItem { ChangedTag = tag }
             );
@@ -459,10 +477,10 @@ public class KoboSyncService(
         var exhausted = pendingIds.Count == idsToFetch.Count;
         if (exhausted)
         {
-            syncPoint.CollectionsIds = [.. eligible.Keys];
+            syncPoint.ReadingListsIds = [.. eligible.Keys];
         }
 
-        return new SyncAccumulationResult(changes, false);
+        return new SyncAccumulationResult(changes, exhausted);
     }
 
     private IQueryable<Chapter> KoboEligibleChapters(int userId,
