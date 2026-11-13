@@ -5,9 +5,12 @@ using AutoMapper;
 using Hangfire;
 using Kavita.API.Services.SignalR;
 using Kavita.Database;
+using Kavita.Database.Extensions;
 using Kavita.Database.Tests;
 using Kavita.Models.AutoMapper;
+using Kavita.Models.Sqlite;
 using Kavita.Services.Scanner;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -128,19 +131,86 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         }
     }
 
-    [Fact]
-    public async Task SnapshotDatabase_WithPathContainingSingleQuote_ThrowsArgumentException()
+    [Theory]
+    [InlineData(DbJournalMode.Wal)]
+    [InlineData(DbJournalMode.Delete)]
+    public async Task SnapshotDatabase_KeepsJournalMode(DbJournalMode journalMode)
     {
-        var (unitOfWork, context, _) = await CreateDatabase();
+        var tempDbPath = Path.Combine(Path.GetTempPath(), $"kavita_test_{Guid.NewGuid()}.db");
+        var tempBackupDir = Path.Combine(Path.GetTempPath(), $"kavita_backup_test_{Guid.NewGuid()}");
+        Directory.CreateDirectory(tempBackupDir);
+        var backupPath = Path.Combine(tempBackupDir, "kavita.db");
 
-        var filesystem = CreateFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var backupService = new BackupService(_logger, unitOfWork, ds, _messageHub);
+        try
+        {
+            var contextOptions = new DbContextOptionsBuilder<DataContext>()
+                .UseSqlite(new SqliteConnectionStringBuilder { DataSource = tempDbPath, Pooling = false }.ToString())
+                .Options;
 
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-            backupService.SnapshotDatabase("/tmp/test'injection/kavita.db"));
+            await using (var context = new DataContext(contextOptions))
+            {
+                await context.Database.EnsureCreatedAsync();
+                var pragma = "PRAGMA journal_mode=" + journalMode + ";";
+                await context.Database.ExecuteSqlRawAsync(pragma);
 
-        Assert.Contains("invalid characters", exception.Message);
+                var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateFileSystem());
+                var unitOfWork = new UnitOfWork(context, new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>()).CreateMapper(), null!);
+                await new BackupService(_logger, unitOfWork, ds, _messageHub).SnapshotDatabase(backupPath);
+            }
+
+            Assert.Equal(journalMode, await ReadJournalMode(backupPath));
+            Assert.False(File.Exists(backupPath + "-wal"));
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(tempDbPath);
+                Directory.Delete(tempBackupDir, true);
+            }
+            catch (Exception)
+            {
+                // Ignore cleanup exceptions
+            }
+        }
+    }
+
+    private static async Task<DbJournalMode> ReadJournalMode(string databaseFile)
+    {
+        var options = new DbContextOptionsBuilder<DataContext>()
+            .UseSqlite(new SqliteConnectionStringBuilder { DataSource = databaseFile, Pooling = false }.ToString())
+            .Options;
+        await using var context = new DataContext(options);
+        return await context.Database.GetJournalModeAsync();
+    }
+
+    [Fact]
+    public async Task SnapshotDatabase_PathWithQuote_CreatesCopy()
+    {
+        var tempBackupDir = Path.Combine(Path.GetTempPath(), $"kavita_backup_test_{Guid.NewGuid()}", "o'brien's library");
+        Directory.CreateDirectory(tempBackupDir);
+        var backupPath = Path.Combine(tempBackupDir, "kavita.db");
+
+        try
+        {
+            var (unitOfWork, _, _) = await CreateDatabase();
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateFileSystem());
+
+            await new BackupService(_logger, unitOfWork, ds, _messageHub).SnapshotDatabase(backupPath);
+
+            Assert.True(File.Exists(backupPath));
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(Path.GetDirectoryName(tempBackupDir)!, true);
+            }
+            catch (Exception)
+            {
+                // Ignore cleanup exceptions
+            }
+        }
     }
 
     #endregion

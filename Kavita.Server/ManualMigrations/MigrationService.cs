@@ -31,73 +31,60 @@ namespace Kavita.Server.ManualMigrations;
 public interface IMigrationService
 {
     /// <summary>
-    /// Returns the directory where the temp migration snapshot should reside
+    /// Takes a snapshot of kavita.db when this start will migrate it. Throws when the snapshot cannot be written
     /// </summary>
-    /// <returns></returns>
-    Task<string> GetMigrationDirectory();
+    Task CreateSnapshot();
     /// <summary>
-    /// Is the DB Created and there are pending pre-migrations to run?
+    /// Runs manual migrations that MUST run before EF migrations
     /// </summary>
-    /// <returns></returns>
-    Task<bool> HasPendingMigrations();
-    /// <summary>
-    /// Runs migrations that should run before EF Migrations trigger
-    /// </summary>
-    /// <returns></returns>
     Task RunPreMigrations();
     /// <summary>
-    /// Runs Manual Migrations that should run after EF Migrations trigger
+    /// Runs manual migrations that run after EF migrations and seeding
     /// </summary>
-    /// <returns></returns>
     Task RunPostMigrations();
     /// <summary>
-    /// Whenever the migration (Pre/Post) fails, Kavita restores the db and related files
+    /// Deletes this run's snapshot once every migration has succeeded
     /// </summary>
-    /// <returns></returns>
+    void DeleteSnapshot();
+    /// <summary>
+    /// Copies this run's snapshot back over kavita.db. Does nothing when this run took no snapshot
+    /// </summary>
     Task RestoreDatabase(Exception ex);
 }
-
 
 public class MigrationService(IUnitOfWork unitOfWork, DataContext context, IVersionUpdaterService versionService, IDirectoryService directoryService,
     IBackupService backupService, ILogger<MigrationService> logger) : IMigrationService
 {
-    public async Task<string> GetMigrationDirectory()
+    private const string DatabaseFile = "kavita.db";
+    private const bool SnapshotOnVersionChange = false;
+
+    private string? _snapshotFile;
+
+    public async Task CreateSnapshot()
     {
-        string? currentVersion = null;
-        try
-        {
-            if (!await context.ServerSetting.AnyAsync()) return "vUnknown";
-            currentVersion =
-                (await context.ServerSetting.SingleOrDefaultAsync(s =>
-                    s.Key == ServerSettingKey.InstallVersion))?.Value;
-        }
-        catch (Exception)
-        {
-            // ignored
-        }
+        if (!await context.Database.CanConnectAsync()) return;
 
-        if (string.IsNullOrEmpty(currentVersion))
-        {
-            currentVersion = "vUnknown";
-        }
+        var installVersion = await ReadInstallVersion();
+        var efPending = (await context.Database.GetPendingMigrationsAsync()).Any();
+        var versionChanged = SnapshotOnVersionChange && installVersion != BuildInfo.Version.ToString();
+        if (!efPending && !versionChanged) return;
 
-        return directoryService.FileSystem.Path.Join(directoryService.MigrationDirectory, currentVersion);
-    }
+        var fs = directoryService.FileSystem;
+        var stamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
+        var folderName = string.IsNullOrEmpty(installVersion) ? $"unknown_{stamp}" : $"v{installVersion}_{stamp}";
+        var snapshotDirectory = fs.Path.Join(directoryService.MigrationDirectory, folderName);
+        var snapshotFile = fs.Path.Join(snapshotDirectory, DatabaseFile);
 
-    public async Task<bool> HasPendingMigrations()
-    {
-        var isDbCreated = await context.Database.CanConnectAsync();
-        var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+        logger.LogInformation("Migrations are needed, taking a snapshot of the database at {SnapshotFile}", snapshotFile);
+        directoryService.ExistOrCreate(snapshotDirectory);
+        await backupService.SnapshotDatabase(snapshotFile);
 
-        return isDbCreated && pendingMigrations.Any();
+        _snapshotFile = snapshotFile;
     }
 
     public async Task RunPreMigrations()
     {
-        var isDbCreated = await context.Database.CanConnectAsync();
-        if (!isDbCreated) return;
-
-        await CreateMigrationBackupSnapshot();
+        if (!await context.Database.CanConnectAsync()) return;
 
         logger.LogInformation("Running Manual Migrations");
 
@@ -112,12 +99,12 @@ public class MigrationService(IUnitOfWork unitOfWork, DataContext context, IVers
             // v0.8.4
             await ManualMigrateEncodeSettings.Migrate(context, logger);
 
-            // v0.9.2
+            // v0.9.2, before StartupTasksHostedService reads the setting
             await new ManualMigrateFolderWatchingOn().RunAsync(context, logger);
         }
-        catch (Exception)
+        catch (Exception ex) when (_snapshotFile == null)
         {
-            /* Swallow */
+            logger.LogCritical(ex, "A manual migration failed and there is no snapshot to restore, continuing startup");
         }
 
         await unitOfWork.CommitAsync();
@@ -128,7 +115,6 @@ public class MigrationService(IUnitOfWork unitOfWork, DataContext context, IVers
     {
         try
         {
-             await CreateMigrationBackupSnapshot();
             logger.LogInformation("Running Migrations");
 
             #region Migrations
@@ -267,52 +253,72 @@ public class MigrationService(IUnitOfWork unitOfWork, DataContext context, IVers
                 // Clear the GitHub cache so update stuff shows correctly
                 versionService.BustGithubCache();
             }
-        } catch (Exception ex)
-        {
-            logger.LogCritical(ex, "An error occurred during migration");
         }
+        catch (Exception ex) when (_snapshotFile == null)
+        {
+            logger.LogCritical(ex, "A migration failed and there is no snapshot to restore, continuing startup");
+        }
+    }
+
+    public void DeleteSnapshot()
+    {
+        if (_snapshotFile == null) return;
+
+        var snapshotDirectory = directoryService.FileSystem.Path.GetDirectoryName(_snapshotFile)!;
+        directoryService.ClearAndDeleteDirectory(snapshotDirectory);
+        logger.LogInformation("Removed the database snapshot {SnapshotDirectory}", snapshotDirectory);
+
+        _snapshotFile = null;
     }
 
     public async Task RestoreDatabase(Exception ex)
     {
-        var migrationDirectory = await GetMigrationDirectory();
-        var fs = directoryService.FileSystem;
-        var snapshotFile = fs.Path.Join(migrationDirectory, "kavita.db");
-
-        if (!fs.File.Exists(snapshotFile))
+        if (_snapshotFile == null)
         {
-            logger.LogCritical(ex, "Kavita failed during startup and there is no migration snapshot at {SnapshotFile} to restore, leaving the database as is", snapshotFile);
+            logger.LogCritical(ex, "Kavita failed during startup. No snapshot was taken this run, leaving the database as is");
             return;
         }
 
-        logger.LogCritical(ex, "A migration failed during startup. Restoring backup from {MigrationDirectory} and exiting", migrationDirectory);
+        var fs = directoryService.FileSystem;
+        var databaseFile = fs.Path.Join(directoryService.ConfigDirectory, DatabaseFile);
+        var walFile = databaseFile + "-wal";
+        logger.LogCritical(ex, "A migration failed during startup. Restoring the database from {SnapshotFile} and exiting", _snapshotFile);
 
-        // Pooled connections keep kavita.db open, and Windows refuses to delete or overwrite an open file
+        // Pooled connections keep kavita.db open, and Windows refuses to delete or overwrite an open file. Pools only release closed connections
+        await context.Database.CloseConnectionAsync();
         SqliteConnection.ClearAllPools();
 
         // The snapshot is a VACUUM INTO copy with no WAL, so the failed run's -wal must not be replayed onto it
-        directoryService.DeleteFiles([
-            fs.Path.Join(directoryService.ConfigDirectory, "kavita.db-shm"),
-            fs.Path.Join(directoryService.ConfigDirectory, "kavita.db-wal")
-        ]);
+        directoryService.DeleteFiles([databaseFile + "-shm", walFile]);
+        directoryService.CopyFileToDirectory(_snapshotFile, directoryService.ConfigDirectory);
 
-        directoryService.CopyFileToDirectory(snapshotFile, directoryService.ConfigDirectory);
+        var restored = !fs.File.Exists(walFile)
+                       && fs.File.Exists(databaseFile)
+                       && fs.FileInfo.New(databaseFile).Length == fs.FileInfo.New(_snapshotFile).Length;
+        if (!restored)
+        {
+            logger.LogCritical("The database could not be restored. With Kavita stopped, delete {WalFile} and copy {SnapshotFile} over {DatabaseFile}",
+                walFile, _snapshotFile, databaseFile);
+            return;
+        }
+
+        logger.LogInformation("Database restored from {SnapshotFile}", _snapshotFile);
+        DeleteSnapshot();
     }
 
-    private async Task CreateMigrationBackupSnapshot()
+    private async Task<string?> ReadInstallVersion()
     {
-        if (!await HasPendingMigrations()) return;
-        var migrationDirectory = await GetMigrationDirectory();
-
-        logger.LogInformation("Performing backup as migrations are needed. Backup will be config/temp/kavita.db");
-        directoryService.ExistOrCreate(migrationDirectory);
-
-        var fs = directoryService.FileSystem;
-        var snapshotFile = fs.Path.Join(migrationDirectory, "kavita.db");
-        if (!fs.File.Exists(snapshotFile))
+        try
         {
-            await backupService.SnapshotDatabase(snapshotFile);
-            logger.LogInformation("Database backed up to {MigrationDirectory}", migrationDirectory);
+            return await context.ServerSetting
+                .Where(s => s.Key == ServerSettingKey.InstallVersion)
+                .Select(s => s.Value)
+                .SingleOrDefaultAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Could not read the install version, naming the snapshot unknown");
+            return null;
         }
     }
 }

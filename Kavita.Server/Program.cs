@@ -10,14 +10,11 @@ using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Database;
+using Kavita.Database.Extensions;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Kavita.Server.Logging;
 using Kavita.Server.ManualMigrations;
-using Kavita.Server.ManualMigrations.v0._7._14;
-using Kavita.Server.ManualMigrations.v0._8._2;
-using Kavita.Server.ManualMigrations.v0._8._4;
-using Kavita.Server.ManualMigrations.v0._9._2;
 using Kavita.Services;
 using Kavita.Services.SignalR;
 using Microsoft.AspNetCore.Hosting;
@@ -72,32 +69,15 @@ public class Program
             var services = scope.ServiceProvider;
             var unitOfWork = services.GetRequiredService<IUnitOfWork>();
 
+            InitNetVips();
+
+            var migrationService = services.GetRequiredService<IMigrationService>();
             try
             {
                 var logger = services.GetRequiredService<ILogger<Program>>();
                 var context = services.GetRequiredService<DataContext>();
-                var backupService = services.GetRequiredService<IBackupService>();
-                var migrationService = services.GetRequiredService<IMigrationService>();
 
-
-                // Grab a snapshot of the db for migrations
-                //
-                // var migrationDirectory = await migrationService.GetMigrationDirectory();
-                //
-                // if (await migrationService.HasPendingMigrations())
-                // {
-                //     logger.LogInformation("Performing backup as migrations are needed. Backup will be config/temp/kavita.db");
-                //     directoryService.ExistOrCreate(migrationDirectory);
-                //
-                //     if (!directoryService.FileSystem.File.Exists(
-                //             directoryService.FileSystem.Path.Join(migrationDirectory, "kavita.db")))
-                //     {
-                //         await backupService.SnapshotDatabase(migrationDirectory);
-                //         logger.LogInformation("Database backed up to {MigrationDirectory}", migrationDirectory);
-                //     }
-                // }
-
-                // Apply Before manual migrations that need to run before actual migrations
+                await migrationService.CreateSnapshot();
                 await migrationService.RunPreMigrations();
 
                 var appLifetime = services.GetRequiredService<IHostApplicationLifetime>();
@@ -113,18 +93,13 @@ public class Program
                 }
                 catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested)
                 {
-                    logger.LogCritical("Failed to run critical Migrations, restore from a backup");
-                    Environment.Exit(1);
+                    logger.LogCritical("Database migrations did not finish within 5 minutes");
+                    throw;
                 }
                 catch (OperationCanceledException)
                 {
                     logger.LogCritical("Database migration cancelled due to shutdown signal");
                     throw;
-                }
-                catch (Exception ex)
-                {
-                    logger.LogCritical(ex, "Failed to run critical Migrations, restore from a backup");
-                    Environment.Exit(1);
                 }
 
                 // Seed anything that should be there on setup
@@ -137,19 +112,23 @@ public class Program
                 await Seed.SeedMetadataSettings(context);
                 await Seed.SeedDefaultHighlightSlots(unitOfWork);
                 await Seed.SeedScrobbleProviders(context);
+
+                await migrationService.RunPostMigrations();
+                migrationService.DeleteSnapshot();
             }
             catch (Exception ex)
             {
-                var migrationService = services.GetRequiredService<IMigrationService>();
                 await migrationService.RestoreDatabase(ex);
+                Environment.ExitCode = 1;
                 return;
             }
+
+            services.GetRequiredService<ILogger<Program>>().LogInformation("Database journal mode is {JournalMode}",
+                await services.GetRequiredService<DataContext>().Database.GetJournalModeAsync());
 
             // Update the logger with the log level
             var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             LogLevelOptions.SwitchLogLevel(settings.LoggingLevel);
-
-            InitNetVips();
 
             await host.RunAsync();
         } catch (Exception ex)

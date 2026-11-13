@@ -19,8 +19,8 @@ public interface IBackupService
     /// <returns></returns>
     IEnumerable<string> GetLogFiles(bool rollFiles = true);
     /// <summary>
-    /// Writes a consistent copy of the live database to <paramref name="path"/> with <c>VACUUM INTO</c>, while it stays in use
+    /// Writes a consistent copy of the live database to <paramref name="path"/> with <c>VACUUM INTO</c>, while it stays in use.
+    /// The copy keeps the live database's journal mode
     /// </summary>
-    /// <exception cref="System.ArgumentException">The path holds a single quote</exception>
     Task SnapshotDatabase(string path, CancellationToken ct = default);
 }

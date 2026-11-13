@@ -23,23 +23,6 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
 using Kavita.Server.Extensions;
 using Kavita.Server.Logging;
-using Kavita.Server.ManualMigrations;
-using Kavita.Server.ManualMigrations.v0._7._11;
-using Kavita.Server.ManualMigrations.v0._7._14;
-using Kavita.Server.ManualMigrations.v0._7._9;
-using Kavita.Server.ManualMigrations.v0._8._0;
-using Kavita.Server.ManualMigrations.v0._8._1;
-using Kavita.Server.ManualMigrations.v0._8._2;
-using Kavita.Server.ManualMigrations.v0._8._4;
-using Kavita.Server.ManualMigrations.v0._8._5;
-using Kavita.Server.ManualMigrations.v0._8._6;
-using Kavita.Server.ManualMigrations.v0._8._7;
-using Kavita.Server.ManualMigrations.v0._8._8;
-using Kavita.Server.ManualMigrations.v0._8._9;
-using Kavita.Server.ManualMigrations.v0._9._0;
-using Kavita.Server.ManualMigrations.v0._9._1;
-using Kavita.Server.ManualMigrations.v0._9._1.x;
-using Kavita.Server.ManualMigrations.v0._9._2;
 using Kavita.Server.Middleware;
 using Kavita.Server.Swagger;
 using Kavita.Services.SignalR;
@@ -247,18 +230,10 @@ public class Startup
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
-        IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider,
-        IDirectoryService directoryService, IUnitOfWork unitOfWork, IVersionUpdaterService versionService)
+        IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider)
     {
 
         var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-
-
-        Task.Run(async () =>
-            {
-                var migrationService = serviceProvider.GetRequiredService<IMigrationService>();
-                await migrationService.RunPostMigrations();
-            }).GetAwaiter() .GetResult();
 
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseMiddleware<SecurityEventMiddleware>();
