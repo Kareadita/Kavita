@@ -22,6 +22,7 @@ public enum CollectionIncludes
 {
     None = 1 << 0,
     Series = 1 << 1,
+    CoverImageFile = 1 << 2,
 }
 
 public interface ICollectionTagRepository

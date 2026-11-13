@@ -19,7 +19,8 @@ public enum LibraryIncludes
     AppUser = 1 << 2,
     Folders = 1 << 3,
     FileTypes = 1 << 4,
-    ExcludePatterns = 1 << 5
+    ExcludePatterns = 1 << 5,
+    CoverImageFile = 1 << 6,
 }
 
 public interface ILibraryRepository

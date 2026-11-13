@@ -1,4 +1,4 @@
-﻿namespace Kavita.Models.DTOs;
+﻿namespace Kavita.Models.Images;
 #nullable enable
 
 /// <summary>

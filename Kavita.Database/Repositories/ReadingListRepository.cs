@@ -21,6 +21,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Extensions;
+using Kavita.Models.DTOs.Theme;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Database.Repositories;
@@ -601,5 +602,13 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
             ReadingListFilterField.MissingItemCount => query.HasMissingCount(true, statement.Comparison, (int) value),
             _ => throw new ArgumentOutOfRangeException(nameof(statement.Field), $"Unexpected value for field: {statement.Field}")
         };
+    }
+
+    public async Task<ColorScapeDto?> GetColorScapeAsync(int readingListId, CancellationToken ct = default)
+    {
+        return await context.ReadingList
+            .Where(r => r.Id == readingListId && r.CoverImageFile != null)
+            .Select(r => new ColorScapeDto(r.CoverImageFile!.PrimaryColor, r.CoverImageFile.SecondaryColor))
+            .FirstOrDefaultAsync(ct);
     }
 }

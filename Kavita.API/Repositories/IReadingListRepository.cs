@@ -6,6 +6,7 @@ using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
+using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.ReadingLists;
@@ -19,6 +20,7 @@ public enum ReadingListIncludes
     Items = 1 << 1,
     ItemChapter = 1 << 2,
     Tags = 1 << 3,
+    CoverImageFile = 1 << 4,
 }
 
 public interface IReadingListRepository
@@ -62,4 +64,5 @@ public interface IReadingListRepository
     Task<List<ReadingListTagDto>> GetAllReadingListTagDtosAsync(int userId, CancellationToken ct = default);
     Task<PagedList<ReadingListDto>> GetBrowseReadingListDtos(int userId, ReadingListFilterDto filter, UserParams userParams, CancellationToken ct = default);
     Task<ReadingList?> GetReadingListBySourcePathStemAsync(string sourcePathStem, int userId, ReadingListIncludes includes = ReadingListIncludes.Items, CancellationToken ct = default);
+    Task<ColorScapeDto?> GetColorScapeAsync(int readingListId, CancellationToken ct = default);
 }

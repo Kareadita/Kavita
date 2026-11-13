@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs;
+using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 
@@ -18,7 +19,8 @@ public enum VolumeIncludes
     /// <summary>
     /// This will include Chapters by default
     /// </summary>
-    Files = 1 << 4
+    Files = 1 << 4,
+    CoverImageFile = 1 << 5,
 }
 
 public interface IVolumeRepository
@@ -40,4 +42,5 @@ public interface IVolumeRepository
     Task<IEnumerable<string>> GetCoverImagesForLockedVolumesAsync(CancellationToken ct = default);
     Task<long> GetFilesizeAsync(int volumeId, CancellationToken ct = default);
     Task<Dictionary<int, long>> GetFilesizesAsync(int userId, IList<int> volumeIds, CancellationToken ct = default);
+    Task<ColorScapeDto?> GetColorScapeAsync(int volumeId, CancellationToken ct = default);
 }

@@ -21,6 +21,7 @@ using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Person;
 using Kavita.Models.Extensions;
+using Kavita.Models.DTOs.Theme;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Database.Repositories;
@@ -361,5 +362,13 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
             .OrderBy(p => p.Name)
             .ProjectTo<PersonDto>(mapper.ConfigurationProvider)
             .ToListAsync(ct);
+    }
+
+    public async Task<ColorScapeDto?> GetColorScapeAsync(int personId, CancellationToken ct = default)
+    {
+        return await context.Person
+            .Where(p => p.Id == personId && p.CoverImageFile != null)
+            .Select(p => new ColorScapeDto(p.CoverImageFile!.PrimaryColor, p.CoverImageFile.SecondaryColor))
+            .FirstOrDefaultAsync(ct);
     }
 }

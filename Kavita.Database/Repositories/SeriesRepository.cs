@@ -41,6 +41,7 @@ using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Models.Misc;
 using Kavita.Models.Parser;
+using Kavita.Models.DTOs.Theme;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -2022,5 +2023,13 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return await context.Chapter
             .Where(c => c.Volume.SeriesId == seriesId && c.Volume.MaxNumber != ParserConstants.SpecialVolumeNumber)
             .CountAsync(ct);
+    }
+
+    public async Task<ColorScapeDto?> GetColorScapeAsync(int seriesId, CancellationToken ct = default)
+    {
+        return await context.Series
+            .Where(s => s.Id == seriesId && s.CoverImageFile != null)
+            .Select(s => new ColorScapeDto(s.CoverImageFile!.PrimaryColor, s.CoverImageFile.SecondaryColor))
+            .FirstOrDefaultAsync(ct);
     }
 }

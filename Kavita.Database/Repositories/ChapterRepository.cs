@@ -20,6 +20,7 @@ using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Extensions;
+using Kavita.Models.DTOs.Theme;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Database.Repositories;
@@ -600,5 +601,13 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .ThenInclude(v => v.Series)
             .ThenInclude(s => s.Metadata)
             .ToListAsync(ct);
+    }
+
+    public async Task<ColorScapeDto?> GetColorScapeAsync(int chapterId, CancellationToken ct = default)
+    {
+        return await context.Chapter
+            .Where(c => c.Id == chapterId && c.CoverImageFile != null)
+            .Select(c => new ColorScapeDto(c.CoverImageFile!.PrimaryColor, c.CoverImageFile.SecondaryColor))
+            .FirstOrDefaultAsync(ct);
     }
 }

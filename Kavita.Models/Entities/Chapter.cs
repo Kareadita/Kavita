@@ -10,7 +10,7 @@ using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities;
 
-public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKPlusMetadata, IHasMetadataIds, IHasTags<Tag>, IHasCoverImageFile, IHasLockableCoverImageFile
+public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKPlusMetadata, IHasMetadataIds, IHasTags<Tag>, IHasLockableCoverImageFile
 {
     public int Id { get; set; }
     /// <summary>

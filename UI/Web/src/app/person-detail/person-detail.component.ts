@@ -24,7 +24,8 @@ import {CardActionablesComponent} from "../_single-module/card-actionables/card-
 import {ActionFactoryService} from "../_services/action-factory.service";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
-import {ThemeService} from "../_services/theme.service";
+import {ColorscapeService} from "../_services/colorscape.service";
+import {ColorScapeKind} from "../_models/theme/colorscape";
 import {LicenseService} from "../_services/license.service";
 import {SafeUrlPipe} from "../_pipes/safe-url.pipe";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
@@ -72,7 +73,7 @@ export class PersonDetailComponent {
   protected readonly imageService = inject(ImageService);
   protected readonly accountService = inject(AccountService);
   protected readonly licenseService = inject(LicenseService);
-  private readonly themeService = inject(ThemeService);
+  private readonly colorScapeService = inject(ColorscapeService);
   private readonly messageHubService = inject(MessageHubService)
   private readonly metadataService = inject(MetadataService)
 
@@ -110,7 +111,7 @@ export class PersonDetailComponent {
 
   private setPerson(person: Person) {
     this.person.set(person);
-    this.themeService.setColorScape(person.primaryColor || '', person.secondaryColor);
+    this.colorScapeService.loadColorScape(ColorScapeKind.Person, person.id).subscribe();
 
     const roles = person.roles;
     if (roles) {

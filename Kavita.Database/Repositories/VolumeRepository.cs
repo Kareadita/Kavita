@@ -9,6 +9,7 @@ using Kavita.Models.DTOs;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
+using Kavita.Models.DTOs.Theme;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Database.Repositories;
@@ -248,5 +249,13 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
                     TotalBytes = g.SelectMany(c => c.Files).Sum(f => f.Bytes)
                 })
                 .ToDictionaryAsync(x => x.VolumeId, x => x.TotalBytes, cancellationToken: ct));
+    }
+
+    public async Task<ColorScapeDto?> GetColorScapeAsync(int volumeId, CancellationToken ct = default)
+    {
+        return await context.Volume
+            .Where(v => v.Id == volumeId && v.CoverImageFile != null)
+            .Select(v => new ColorScapeDto(v.CoverImageFile!.PrimaryColor, v.CoverImageFile.SecondaryColor))
+            .FirstOrDefaultAsync(ct);
     }
 }

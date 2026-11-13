@@ -1,8 +1,11 @@
 import {inject, Injectable} from '@angular/core';
 import {DOCUMENT} from '@angular/common';
+import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject, filter, take, tap, timer} from 'rxjs';
 import {NavigationEnd, Router} from "@angular/router";
 import {AccountService} from "./account.service";
+import {environment} from '../../environments/environment';
+import {ColorScape, ColorScapeKind} from '../_models/theme/colorscape';
 
 interface ColorSpace {
   primary: string;
@@ -24,6 +27,15 @@ interface HSL { h: number; s: number; l: number; }
 
 const colorScapeSelector = 'colorscape';
 
+// The server's access attributes read the id under these names; any other name is a 404 for non-admins
+const colorScapeIdKeys: Record<ColorScapeKind, string> = {
+  [ColorScapeKind.Series]: 'seriesId',
+  [ColorScapeKind.Volume]: 'volumeId',
+  [ColorScapeKind.Chapter]: 'chapterId',
+  [ColorScapeKind.Person]: 'personId',
+  [ColorScapeKind.ReadingList]: 'readingListId',
+};
+
 /**
  * ColorScape handles setting the scape and managing the transitions
  */
@@ -34,6 +46,8 @@ export class ColorscapeService {
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
   private readonly accountService = inject(AccountService);
+  private readonly httpClient = inject(HttpClient);
+  private readonly baseUrl = environment.apiUrl;
 
   private colorSubject = new BehaviorSubject<ColorSpaceRGBA | null>(null);
   private colorSeedSubject = new BehaviorSubject<{primary: string, complementary: string | null} | null>(null);
@@ -169,6 +183,19 @@ export class ColorscapeService {
         }
       })
     ).subscribe();
+  }
+
+  getColorScape(kind: ColorScapeKind, id: number) {
+    return this.httpClient.get<ColorScape>(`${this.baseUrl}colorscape/${kind}?${colorScapeIdKeys[kind]}=${id}`);
+  }
+
+  /**
+   * Fetches the colors for an entity and applies them
+   */
+  loadColorScape(kind: ColorScapeKind, id: number) {
+    return this.getColorScape(kind, id).pipe(
+      tap(colors => this.setColorScape(colors.primary || '', colors.secondary || null))
+    );
   }
 
   /**

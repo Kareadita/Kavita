@@ -9,7 +9,7 @@ using Kavita.Models.Parser;
 
 namespace Kavita.Models.Entities;
 
-public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds, IHasCoverImageFile, IHasLockableCoverImageFile
+public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds, IHasLockableCoverImageFile
 {
     public int Id { get; set; }
     /// <summary>

@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.Models.DTOs.Theme;
-using Kavita.Models.Entities.Interfaces;
 using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,49 +13,50 @@ public class ColorScapeController(IUnitOfWork unitOfWork) : BaseApiController
     /// <summary>
     /// Returns the color scape for a series
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
     [SeriesAccess]
     [HttpGet("series")]
-    public async Task<ActionResult<ColorScapeDto>> GetColorScapeForSeries(int id)
+    public async Task<ActionResult<ColorScapeDto>> GetColorScapeForSeries(int seriesId)
     {
-        var ct = HttpContext.RequestAborted;
-        var entity = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(id, UserId, ct);
-        return GetColorSpaceDto(entity);
+        return Ok(await unitOfWork.SeriesRepository.GetColorScapeAsync(seriesId, HttpContext.RequestAborted) ?? ColorScapeDto.Empty);
     }
 
     /// <summary>
     /// Returns the color scape for a volume
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
     [VolumeAccess]
     [HttpGet("volume")]
-    public async Task<ActionResult<ColorScapeDto>> GetColorScapeForVolume(int id)
+    public async Task<ActionResult<ColorScapeDto>> GetColorScapeForVolume(int volumeId)
     {
-        var ct = HttpContext.RequestAborted;
-        var entity = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(id, UserId, ct);
-        return GetColorSpaceDto(entity);
+        return Ok(await unitOfWork.VolumeRepository.GetColorScapeAsync(volumeId, HttpContext.RequestAborted) ?? ColorScapeDto.Empty);
     }
 
     /// <summary>
     /// Returns the color scape for a chapter
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
     [ChapterAccess]
     [HttpGet("chapter")]
-    public async Task<ActionResult<ColorScapeDto>> GetColorScapeForChapter(int id)
+    public async Task<ActionResult<ColorScapeDto>> GetColorScapeForChapter(int chapterId)
     {
-        var ct = HttpContext.RequestAborted;
-        var entity = await unitOfWork.ChapterRepository.GetChapterDtoAsync(id, UserId, ct);
-        return GetColorSpaceDto(entity);
+        return Ok(await unitOfWork.ChapterRepository.GetColorScapeAsync(chapterId, HttpContext.RequestAborted) ?? ColorScapeDto.Empty);
     }
 
-
-    private ActionResult<ColorScapeDto> GetColorSpaceDto(IHasCoverImage? entity)
+    /// <summary>
+    /// Returns the color scape for a person
+    /// </summary>
+    [PersonAccess]
+    [HttpGet("person")]
+    public async Task<ActionResult<ColorScapeDto>> GetColorScapeForPerson(int personId)
     {
-        if (entity == null) return Ok(ColorScapeDto.Empty);
-        return Ok(new ColorScapeDto(entity.PrimaryColor, entity.SecondaryColor));
+        return Ok(await unitOfWork.PersonRepository.GetColorScapeAsync(personId, HttpContext.RequestAborted) ?? ColorScapeDto.Empty);
+    }
+
+    /// <summary>
+    /// Returns the color scape for a reading list
+    /// </summary>
+    [ReadingListAccess]
+    [HttpGet("reading-list")]
+    public async Task<ActionResult<ColorScapeDto>> GetColorScapeForReadingList(int readingListId)
+    {
+        return Ok(await unitOfWork.ReadingListRepository.GetColorScapeAsync(readingListId, HttpContext.RequestAborted) ?? ColorScapeDto.Empty);
     }
 }

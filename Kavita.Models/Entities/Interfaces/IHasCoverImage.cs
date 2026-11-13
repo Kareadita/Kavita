@@ -4,6 +4,7 @@ namespace Kavita.Models.Entities.Interfaces;
 
 #nullable enable
 
+// TODO: Refactor after pipeline work to make this for the DTOs public bool HasCoverImage { get; set; } which AutoMapper can set based on ImageFileId != null
 [Obsolete("Use IHasCoverImageFile")]
 public interface IHasCoverImage
 {

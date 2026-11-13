@@ -14,6 +14,7 @@ using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.Search;
 using Kavita.Models.DTOs.SeriesDetail;
+using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Metadata;
@@ -39,6 +40,7 @@ public enum SeriesIncludes
     ExternalRatings = 1 << 7,
     ExternalRecommendations = 1 << 8,
     ExternalMetadata = 1 << 9,
+    CoverImageFile = 1 << 10,
 
     ExternalData = ExternalMetadata | ExternalReviews | ExternalRatings | ExternalRecommendations,
 }
@@ -149,4 +151,5 @@ public interface ISeriesRepository
     /// <returns></returns>
     Task<int?> GetChapterCountIfAllSpecials(int seriesId, CancellationToken ct = default);
     Task<int> GetNonSpecialChapterCountAsync(int seriesId, CancellationToken ct = default);
+    Task<ColorScapeDto?> GetColorScapeAsync(int seriesId, CancellationToken ct = default);
 }

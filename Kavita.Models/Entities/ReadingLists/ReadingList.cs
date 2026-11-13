@@ -12,7 +12,7 @@ namespace Kavita.Models.Entities.ReadingLists;
 /// <summary>
 /// This is a collection of <see cref="ReadingListItem"/> which represent individual chapters and an order.
 /// </summary>
-public class ReadingList : IEntityDate, IHasCoverImage, IHasTags<ReadingListTag>, IHasCoverImageFile, IHasLockableCoverImageFile
+public class ReadingList : IEntityDate, IHasCoverImage, IHasTags<ReadingListTag>, IHasLockableCoverImageFile
 {
     public int Id { get; set; }
     public required string Title { get; set; }

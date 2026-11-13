@@ -8,6 +8,7 @@ using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.SeriesDetail;
+using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Metadata;
@@ -24,7 +25,8 @@ public enum ChapterIncludes
     Genres = 1 << 4,
     Tags = 1 << 5,
     ExternalReviews = 1 << 6,
-    ExternalRatings = 1 << 7
+    ExternalRatings = 1 << 7,
+    CoverImageFile = 1 << 8,
 }
 
 public interface IChapterRepository
@@ -88,4 +90,5 @@ public interface IChapterRepository
     Task<IList<Chapter>> GetChaptersByAlternateSeriesAsync(IList<string> normalizedNames, IList<int> libraryIds, CancellationToken ct = default);
 
     Task<List<Chapter>> GetChaptersForReadStatusTransitionRuleAsync(int userId, ReadStatusTransitionRule rule, CancellationToken ct = default);
+    Task<ColorScapeDto?> GetColorScapeAsync(int chapterId, CancellationToken ct = default);
 }

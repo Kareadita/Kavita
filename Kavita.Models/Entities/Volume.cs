@@ -6,7 +6,7 @@ using Kavita.Models.Entities.MetadataMatching;
 
 namespace Kavita.Models.Entities;
 
-public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds, IHasKPlusMetadata, IHasCoverImageFile, IHasLockableCoverImageFile
+public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds, IHasKPlusMetadata, IHasLockableCoverImageFile
 {
     public int Id { get; set; }
     /// <summary>
