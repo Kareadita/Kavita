@@ -373,7 +373,7 @@ public class KoboSyncService(
                 },
             };
 
-            changes.Add(collection.CreatedUtc > syncPoint.CollectionsSyncTime && alreadySeenCollections.Contains(collection.Id)
+            changes.Add(collection.CreatedUtc > syncPoint.CollectionsSyncTime || !alreadySeenCollections.Contains(collection.Id)
                 ? new KoboSyncItem { NewTag = tag }
                 : new KoboSyncItem { ChangedTag = tag }
             );
@@ -474,7 +474,7 @@ public class KoboSyncService(
                 },
             };
 
-            changes.Add(readingList.CreatedUtc > syncPoint.ReadingListsSyncTime && alreadySeenReadingLists.Contains(readingList.Id)
+            changes.Add(readingList.CreatedUtc > syncPoint.ReadingListsSyncTime || !alreadySeenReadingLists.Contains(readingList.Id)
                 ? new KoboSyncItem { NewTag = tag }
                 : new KoboSyncItem { ChangedTag = tag }
             );
