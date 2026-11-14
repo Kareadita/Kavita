@@ -72,10 +72,10 @@ public class UploadControllerTests(ITestOutputHelper outputHelper) : AbstractDbT
         directoryService.CoverImageDirectory.Returns(Path.Join(Path.GetTempPath(), "kavita-upload-tests"));
 
         var imageFileService = new ImageFileService(unitOfWork, Substitute.For<IImagePipeline>(), directoryService,
-            Substitute.For<ILogger<ImageFileService>>());
+            Substitute.For<IEventHub>(), Substitute.For<ILogger<ImageFileService>>());
 
         return new UploadController(unitOfWork, Substitute.For<IImageService>(), Substitute.For<ILogger<UploadController>>(),
-            Substitute.For<ITaskScheduler>(), directoryService, Substitute.For<IEventHub>(), Substitute.For<IReadingListService>(),
+            Substitute.For<ITaskScheduler>(), directoryService, Substitute.For<IReadingListService>(),
             Substitute.For<ILocalizationService>(), Substitute.For<IUrlValidationService>(), imageFileService)
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }

@@ -5,19 +5,17 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
-using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Collection;
-using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 
 namespace Kavita.Services;
 
-public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, IDirectoryService directoryService,
+public class CollectionTagService(IUnitOfWork unitOfWork, IDirectoryService directoryService,
     IImageFileService imageFileService) : ICollectionTagService
 {
     public async Task<bool> DeleteTag(int tagId, AppUser user, CancellationToken ct = default)
@@ -83,8 +81,6 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, ID
         if (resetCover)
         {
             await imageFileService.ClearCoverAsync(existingTag, ct: ct);
-            await eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(existingTag.Id, MessageFactoryEntityTypes.Collection), false, ct);
         }
 
         return saved;

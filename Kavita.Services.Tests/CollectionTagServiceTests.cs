@@ -53,9 +53,8 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     private static CollectionTagService CreateService(IUnitOfWork unitOfWork)
     {
         var imageFileService = new ImageFileService(unitOfWork, Substitute.For<IImagePipeline>(),
-            Substitute.For<IDirectoryService>(), Substitute.For<ILogger<ImageFileService>>());
-        return new CollectionTagService(unitOfWork, Substitute.For<IEventHub>(), Substitute.For<IDirectoryService>(),
-            imageFileService);
+            Substitute.For<IDirectoryService>(), Substitute.For<IEventHub>(), Substitute.For<ILogger<ImageFileService>>());
+        return new CollectionTagService(unitOfWork, Substitute.For<IDirectoryService>(), imageFileService);
     }
 
     #region DeleteTag

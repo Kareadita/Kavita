@@ -129,8 +129,6 @@ public class ReadingListService(
         if (resetCover)
         {
             await imageFileService.ClearCoverAsync(readingList);
-            await eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false);
         }
     }
 

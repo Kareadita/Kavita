@@ -39,7 +39,6 @@ public class UploadController : BaseApiController
     private readonly ILogger<UploadController> _logger;
     private readonly ITaskScheduler _taskScheduler;
     private readonly IDirectoryService _directoryService;
-    private readonly IEventHub _eventHub;
     private readonly IReadingListService _readingListService;
     private readonly ILocalizationService _localizationService;
     private readonly IUrlValidationService _urlValidationService;
@@ -47,7 +46,7 @@ public class UploadController : BaseApiController
 
     /// <inheritdoc />
     public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger,
-        ITaskScheduler taskScheduler, IDirectoryService directoryService, IEventHub eventHub, IReadingListService readingListService,
+        ITaskScheduler taskScheduler, IDirectoryService directoryService, IReadingListService readingListService,
         ILocalizationService localizationService, IUrlValidationService urlValidationService,
         IImageFileService imageFileService)
     {
@@ -57,7 +56,6 @@ public class UploadController : BaseApiController
         _logger = logger;
         _taskScheduler = taskScheduler;
         _directoryService = directoryService;
-        _eventHub = eventHub;
         _readingListService = readingListService;
         _localizationService = localizationService;
         _urlValidationService = urlValidationService;
@@ -254,8 +252,6 @@ public class UploadController : BaseApiController
                 await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false, ct);
             return Ok();
         }
         catch (KavitaException)
@@ -302,8 +298,6 @@ public class UploadController : BaseApiController
                 await _imageFileService.ClearCoverAsync(tag, ct: ct);
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(tag.Id, MessageFactoryEntityTypes.Collection), false, ct);
             return Ok();
         }
         catch (Exception e)
@@ -347,8 +341,6 @@ public class UploadController : BaseApiController
                 await _imageFileService.ClearCoverAsync(readingList, ct: ct);
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false, ct);
             return Ok();
         }
         catch (Exception e)
@@ -428,10 +420,6 @@ public class UploadController : BaseApiController
                 await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(chapter.VolumeId, MessageFactoryEntityTypes.Volume), false, ct);
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter), false, ct);
             return Ok();
         }
         catch (Exception e)
@@ -474,8 +462,6 @@ public class UploadController : BaseApiController
                 await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume), false, ct);
             return Ok();
         }
         catch (Exception e)
@@ -513,8 +499,6 @@ public class UploadController : BaseApiController
                 await _imageFileService.ClearCoverAsync(library, ct: ct);
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(library.Id, MessageFactoryEntityTypes.Library), false, ct);
             return Ok();
         }
         catch (Exception e)
@@ -553,8 +537,6 @@ public class UploadController : BaseApiController
                 await _imageFileService.ClearCoverAsync(person, ct: ct);
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(person.Id, MessageFactoryEntityTypes.Person), false, ct);
             return Ok();
         }
         catch (Exception e)
@@ -595,8 +577,6 @@ public class UploadController : BaseApiController
                 await _imageFileService.ClearCoverAsync(user, ct: ct);
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(user.Id, MessageFactoryEntityTypes.User), false, ct);
             return Ok();
         }
         catch (Exception e)

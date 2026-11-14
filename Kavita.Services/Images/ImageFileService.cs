@@ -6,7 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
+using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Person;
@@ -22,6 +24,7 @@ public class ImageFileService(
     IUnitOfWork unitOfWork,
     IImagePipeline imagePipeline,
     IDirectoryService directoryService,
+    IEventHub eventHub,
     ILogger<ImageFileService> logger) : IImageFileService
 {
     private const float PlaceholderSimilarity = 0.9f;
@@ -86,13 +89,14 @@ public class ImageFileService(
         }
 
         // Until I update read code, keep the entity CoverImage inline for testing
-        foreach (var holder in await GetHoldersAsync(row, [entity], ct))
+        var holders = await GetHoldersAsync(row, [entity], ct);
+        foreach (var holder in holders)
         {
             SyncLegacyCover(holder, row);
         }
 
         var staleFiles = oldFileName != null && oldFileName != row.FileName ? new List<string> { oldFileName } : [];
-        await FinishAsync(commit, staleFiles, ct);
+        await FinishAsync(commit, staleFiles, holders, ct);
     }
 
     public async Task ShareCoverAsync(IHasCoverImageFile target, IHasCoverImageFile source, bool lockBoth, bool commit = true,
@@ -127,7 +131,7 @@ public class ImageFileService(
             await ReleaseIfUnheldAsync(target, previous, staleFiles, ct);
         }
 
-        await FinishAsync(commit, staleFiles, ct);
+        await FinishAsync(commit, staleFiles, [target], ct);
     }
 
     public async Task ClearCoverAsync(IHasCoverImageFile entity, bool commit = true, CancellationToken ct = default)
@@ -146,7 +150,7 @@ public class ImageFileService(
 
         var staleFiles = new List<string>();
         await ReleaseIfUnheldAsync(entity, previous, staleFiles, ct);
-        await FinishAsync(commit, staleFiles, ct);
+        await FinishAsync(commit, staleFiles, [entity], ct);
     }
 
     public async Task UpdateLockAsync(IHasLockableCoverImageFile entity, bool locked, bool commit = true,
@@ -154,7 +158,7 @@ public class ImageFileService(
     {
         EnsureCoverLoaded(entity);
         await ApplyLockAsync(entity, locked, ct);
-        await FinishAsync(commit, [], ct);
+        await FinishAsync(commit, [], [], ct);
     }
 
     private async Task ApplyLockAsync(IHasLockableCoverImageFile entity, bool locked, CancellationToken ct)
@@ -258,7 +262,8 @@ public class ImageFileService(
             .ToList();
     }
 
-    private async Task FinishAsync(bool commit, List<string> staleFiles, CancellationToken ct)
+    private async Task FinishAsync(bool commit, List<string> staleFiles, List<IHasCoverImageFile> changed,
+        CancellationToken ct)
     {
         if (!commit) return;
 
@@ -267,6 +272,12 @@ public class ImageFileService(
         foreach (var fileName in staleFiles)
         {
             DeleteQuietly(Path.Join(directoryService.CoverImageDirectory, fileName));
+        }
+
+        foreach (var entity in changed)
+        {
+            await eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                MessageFactory.CoverUpdateEvent(entity.Id, Describe(entity).EventType), false, ct);
         }
     }
 
@@ -348,16 +359,24 @@ public class ImageFileService(
 
     private static CoverTarget Describe(IHasCoverImageFile entity) => entity switch
     {
-        Chapter chapter => new CoverTarget(ImageKind.ChapterCover, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId)),
-        Volume volume => new CoverTarget(ImageKind.VolumeCover, ImageService.GetVolumeFormat(volume.Id)),
-        Series series => new CoverTarget(ImageKind.SeriesCover, ImageService.GetSeriesFormat(series.Id)),
-        Library library => new CoverTarget(ImageKind.LibraryIcon, ImageService.GetLibraryFormat(library.Id)),
-        Person person => new CoverTarget(ImageKind.PersonCover, ImageService.GetPersonFormat(person.Id)),
-        ReadingList readingList => new CoverTarget(ImageKind.ReadingListCover, ImageService.GetReadingListFormat(readingList.Id)),
-        AppUser user => new CoverTarget(ImageKind.UserCover, ImageService.GetUserFormat(user.Id)),
-        AppUserCollection collection => new CoverTarget(ImageKind.CollectionCover, ImageService.GetCollectionTagFormat(collection.Id)),
+        Chapter chapter => new CoverTarget(ImageKind.ChapterCover, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId),
+            MessageFactoryEntityTypes.Chapter),
+        Volume volume => new CoverTarget(ImageKind.VolumeCover, ImageService.GetVolumeFormat(volume.Id),
+            MessageFactoryEntityTypes.Volume),
+        Series series => new CoverTarget(ImageKind.SeriesCover, ImageService.GetSeriesFormat(series.Id),
+            MessageFactoryEntityTypes.Series),
+        Library library => new CoverTarget(ImageKind.LibraryIcon, ImageService.GetLibraryFormat(library.Id),
+            MessageFactoryEntityTypes.Library),
+        Person person => new CoverTarget(ImageKind.PersonCover, ImageService.GetPersonFormat(person.Id),
+            MessageFactoryEntityTypes.Person),
+        ReadingList readingList => new CoverTarget(ImageKind.ReadingListCover, ImageService.GetReadingListFormat(readingList.Id),
+            MessageFactoryEntityTypes.ReadingList),
+        AppUser user => new CoverTarget(ImageKind.UserCover, ImageService.GetUserFormat(user.Id),
+            MessageFactoryEntityTypes.User),
+        AppUserCollection collection => new CoverTarget(ImageKind.CollectionCover, ImageService.GetCollectionTagFormat(collection.Id),
+            MessageFactoryEntityTypes.Collection),
         _ => throw new ArgumentOutOfRangeException(nameof(entity), entity.GetType().Name, null),
     };
 
-    private readonly record struct CoverTarget(ImageKind Kind, string Stem);
+    private readonly record struct CoverTarget(ImageKind Kind, string Stem, string EventType);
 }

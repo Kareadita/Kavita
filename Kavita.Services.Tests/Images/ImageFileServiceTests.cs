@@ -1,8 +1,11 @@
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.API.Services.SignalR;
 using Kavita.Database;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
+using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.DTOs.SignalR.Bodies;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
@@ -26,6 +29,7 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
     private readonly string _covers = Path.Join(Path.GetTempPath(), "kavita-imagefile-" + Guid.NewGuid().ToString("N"));
     private readonly string _incoming;
     private readonly int _maxFiles = NetVips.Cache.MaxFiles;
+    private readonly IEventHub _eventHub = Substitute.For<IEventHub>();
     private int _imagesWritten;
 
     public ImageFileServiceTests(ITestOutputHelper output) : base(output)
@@ -91,6 +95,22 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
         Assert.Equal(updated.FileName, CoverImageOf(savedChapter));
         Assert.Equal(updated.FileName, CoverImageOf(savedVolume));
         Assert.Equal(updated.FileName, CoverImageOf(savedSeries));
+
+        await AssertCoverUpdateSent(chapter.Id, MessageFactoryEntityTypes.Chapter);
+        await AssertCoverUpdateSent(volume.Id, MessageFactoryEntityTypes.Volume);
+        await AssertCoverUpdateSent(series.Id, MessageFactoryEntityTypes.Series);
+    }
+
+    [Fact]
+    public async Task SetCover_NoCommit_NoEvent()
+    {
+        var (service, _, context) = await Setup(EncodeFormat.WEBP);
+        var series = await SeedSeries(context);
+
+        await service.SetCoverAsync(series, Incoming("upload.png", 600, 900), new CoverWrite(ImageOrigin.Upload, Lock: true),
+            commit: false);
+
+        await _eventHub.DidNotReceiveWithAnyArgs().SendMessageAsync(default!, default!, default, default);
     }
 
     [Fact]
@@ -312,10 +332,15 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.CoverImageDirectory.Returns(_covers);
         var pipeline = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>());
-        var service = new ImageFileService(unitOfWork, pipeline, directoryService, Substitute.For<ILogger<ImageFileService>>());
+        var service = new ImageFileService(unitOfWork, pipeline, directoryService, _eventHub, Substitute.For<ILogger<ImageFileService>>());
 
         return (service, unitOfWork, context);
     }
+
+    private Task AssertCoverUpdateSent(int id, string entityType) =>
+        _eventHub.Received(1).SendMessageAsync(MessageFactory.CoverUpdate,
+            Arg.Is<SignalRMessageDto>(m => Equals(m.Body, new CoverUpdateEventBodyDto(id, entityType))),
+            false, Arg.Any<CancellationToken>());
 
     private static async Task<Series> SeedSeries(DataContext context)
     {
