@@ -70,10 +70,10 @@ public class KoboSyncPointRepository(DataContext context, IMapper mapper): IKobo
             .ToListAsync(cancellationToken);
     }
 
-    public Task DeleteOthersForDeviceId(int userId, int syncPointId, string koboDeviceId, CancellationToken cancellationToken)
+    public Task DeleteOthersForDeviceId(int syncPointId, string koboDeviceId, CancellationToken cancellationToken)
     {
         return context.KoboSyncPoints
-            .Where(sp => sp.UserId == userId && sp.Id != syncPointId && sp.KoboDeviceId == koboDeviceId)
+            .Where(sp => sp.Id != syncPointId && sp.KoboDeviceId == koboDeviceId)
             .ExecuteDeleteAsync(cancellationToken);
     }
 

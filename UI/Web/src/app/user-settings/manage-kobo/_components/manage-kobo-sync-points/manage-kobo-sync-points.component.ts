@@ -48,7 +48,7 @@ export class ManageKoboSyncPointsComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
-  protected readonly clipboard = inject(Clipboard);
+  private readonly clipboard = inject(Clipboard);
 
   protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
   protected readonly syncPoints = signal<KoboSyncPoint[]>([]);
@@ -59,6 +59,11 @@ export class ManageKoboSyncPointsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSyncPoints();
+  }
+
+  protected copyDeviceId(point: KoboSyncPoint) {
+    this.clipboard.copy(point.deviceId);
+    this.toastr.info(translate('toasts.kobo-sync-point.copied'))
   }
 
   protected openRemovedChapters(point: KoboSyncPoint) {
@@ -76,13 +81,13 @@ export class ManageKoboSyncPointsComponent implements OnInit {
   }
 
   protected async deleteSyncPoint(point: KoboSyncPoint) {
-    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-kobo-sync-point'))) return;
+    if (!await this.confirmService.confirm(translate('toasts.kobo-sync-point.confirm-delete'))) return;
 
     this.koboService.deleteSyncPoint(point.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.syncPoints.update(points => points.filter(p => p.id !== point.id));
-        this.toastr.success(translate('toasts.kobo-sync-point-deleted'));
+        this.toastr.success(translate('toasts.kobo-sync-point.deleted'));
       });
   }
 

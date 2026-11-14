@@ -110,7 +110,7 @@ public class KoboController(
             decodedToken.Token.SyncPointId, decodedToken.KoboStoreSyncToken, ct);
 
         // Delete all other KoboSyncPoints for this device id as they'll not be used anymore
-        await unitOfWork.KoboSyncPointRepository.DeleteOthersForDeviceId(UserId, syncPoint.Id, deviceId, ct);
+        await unitOfWork.KoboSyncPointRepository.DeleteOthersForDeviceId(syncPoint.Id, deviceId, ct);
         syncPoint.KoboDeviceId = deviceId;
 
         var (kavitaChanges, completedSync) = await koboSyncService.GetChangesSinceAsync(UserId, syncSettings, syncPoint, ct);
@@ -301,6 +301,11 @@ public class KoboController(
             ? coverInfo.VolumeCoverImage
             : coverInfo.ChapterCoverImage;
 
+        if (string.IsNullOrEmpty(coverPath))
+        {
+            return NotFound();
+        }
+
         var fullPath = Path.Join(directoryService.CoverImageDirectory, coverPath);
         if (string.Equals(Path.GetExtension(fullPath), ".jpg", StringComparison.OrdinalIgnoreCase))
         {
@@ -324,7 +329,7 @@ public class KoboController(
     }
 
     /// <summary>
-    /// Called when a book is deleted from the Kobo. No-Op for Kavita books
+    /// Called when a book is deleted from the Kobo. Will no longer be synced to the Kobo. Can be restored in the UI
     ///
     /// Not intended for use beyond Kobo devices
     /// </summary>

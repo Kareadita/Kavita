@@ -213,11 +213,21 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList(), false);
+
+        var changed = false;
         foreach (var s in series)
         {
             if (tag.Items.Contains(s)) continue;
+
             tag.Items.Add(s);
+            changed = true;
         }
+
+        if (changed)
+        {
+            unitOfWork.CollectionTagRepository.Update(tag);
+        }
+
         unitOfWork.UserRepository.Update(user);
         if (await unitOfWork.CommitAsync(ct)) return Ok();
 

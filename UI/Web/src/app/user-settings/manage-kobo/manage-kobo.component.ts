@@ -145,7 +145,7 @@ export class ManageKoboComponent implements OnInit {
     forkJoin({
       libraries: this.libraryService.getLibraries(),
       readingLists: this.readingListService.getReadingLists(),
-      collections: this.collectionTagService.allCollections(true)
+      collections: this.collectionTagService.allCollections()
     }).pipe(
       takeUntilDestroyed(this.destroyRef),
       finalize(() => this.loading.set(false))

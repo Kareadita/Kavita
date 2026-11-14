@@ -158,7 +158,7 @@ public class UsersController(
 
         var allLibs = (await unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id, ct))
             .Select(l => l.Id).ToList();
-        var allCollections = (await unitOfWork.CollectionTagRepository.GetCollectionsForUserAsync(user.Id, ct: ct))
+        var allCollections = (await unitOfWork.CollectionTagRepository.GetCollectionsForUserAsync(user.Id, true, ct: ct))
             .Select(l => l.Id).ToList();
         var allReadingLists = (await unitOfWork.ReadingListRepository.GetReadingListsForUserAsync(user.Id, true, ct: ct))
             .Select(l => l.Id).ToList();

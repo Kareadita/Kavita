@@ -47,7 +47,11 @@
             <input type="checkbox"
                    class="form-check-input"
                    [checked]="tracker.isSelected(row.chapterId)"
-                   (change)="tracker.toggle(row.chapterId)" />
+                   (change)="tracker.toggle(row.chapterId)"
+                   [attr.aria-label]="tracker.isSelected(row.chapterId)
+                   ? t('unselect-chapter-alt', {title: row.title})
+                   : t('select-chapter-alt', {title: row.title})"
+            />
           </ng-template>
         </ngx-datatable-column>
         <ngx-datatable-column prop="seriesTitle" [flexGrow]="3">

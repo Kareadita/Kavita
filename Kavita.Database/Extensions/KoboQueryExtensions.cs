@@ -58,11 +58,11 @@ public static class KoboQueryExtensions
             {
                 if (preferences.SyncCollections.Count > 0)
                 {
-                    sources.Add(c => c.Volume.Series.Collections.Any(col => preferences.SyncCollections.Contains(col.Id)));
+                    sources.Add(c => c.Volume.Series.Collections.Any(col => preferences.SyncCollections.Contains(col.Id) || col.Promoted));
                 }
                 else
                 {
-                    sources.Add(c => c.Volume.Series.Collections.Any(col => col.AppUserId == userId));
+                    sources.Add(c => c.Volume.Series.Collections.Any(col => col.AppUserId == userId || col.Promoted));
                 }
             }
 

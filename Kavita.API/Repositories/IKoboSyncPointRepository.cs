@@ -22,6 +22,6 @@ public interface IKoboSyncPointRepository
     Task<KoboSyncPoint?> GetSyncPoint(int userId, string koboDeviceId, CancellationToken cancellationToken);
     Task<KoboSyncPoint?> GetSyncPoint(int userId, int syncPointId, CancellationToken cancellationToken);
     Task<List<KoboSyncPointDto>> GetSyncPoints(int userId, CancellationToken cancellationToken);
-    Task DeleteOthersForDeviceId(int userId, int syncPointId, string koboDeviceId, CancellationToken cancellationToken);
+    Task DeleteOthersForDeviceId(int syncPointId, string koboDeviceId, CancellationToken cancellationToken);
     Task DeleteSyncPoint(int userId, int syncPointId, CancellationToken cancellationToken);
 }

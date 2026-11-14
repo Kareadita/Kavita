@@ -84,7 +84,7 @@ public class SmartCollectionSyncServiceTests(ITestOutputHelper outputHelper) : A
 
     private async Task<AppUserCollection> GetCollection(IUnitOfWork unitOfWork)
     {
-        var collections = await unitOfWork.CollectionTagRepository.GetCollectionsForUserAsync(UserId, CollectionIncludes.Series);
+        var collections = await unitOfWork.CollectionTagRepository.GetCollectionsForUserAsync(UserId, false, CollectionIncludes.Series);
         return collections.First(c => c.Title == CollectionTitle);
     }
 

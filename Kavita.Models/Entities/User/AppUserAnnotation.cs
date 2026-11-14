@@ -13,7 +13,7 @@ public class AppUserAnnotation : IEntityDate
 {
     public int Id { get; set; }
     /// <summary>
-    /// When created on the Kobo, will be generated. Otherwise, use stringified <see cref="Id"/>
+    /// When created on the Kobo, will be generated
     /// </summary>
     public string KoboId { get; set; }
     /// <summary>

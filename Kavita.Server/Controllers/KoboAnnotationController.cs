@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common.Extensions;
 using Kavita.Models.Constants;
@@ -26,7 +27,8 @@ namespace Kavita.Server.Controllers;
 public class KoboAnnotationController(
     ILogger<KoboAnnotationController> logger,
     IKoboSyncService koboSyncService,
-    IHttpClientFactory httpClientFactory): BaseApiController
+    IHttpClientFactory httpClientFactory,
+    IUnitOfWork unitOfWork): BaseApiController
 {
 
     private HttpClient KoboReadingServicesClient => httpClientFactory.CreateClient("KoboReadingServices");
@@ -120,7 +122,9 @@ public class KoboAnnotationController(
             }
         }
 
-        if (remote.Count > 0)
+        var syncSettings = await unitOfWork.UserRepository.GetKoboSyncPreferences(UserId, HttpContext.RequestAborted);
+
+        if (remote.Count > 0 && syncSettings.ForwardToKoboStore)
         {
             var (remoteJson, _) = await koboSyncService.ProxyRequest(null, ct, copyResponse: false, body: remote,
                 httpClient: KoboReadingServicesClient, writeResponseOnError: false);
@@ -173,7 +177,7 @@ public class KoboAnnotationController(
     [ApiExplorerSettings(IgnoreApi = true)]
     public Task<ActionResult> ProxyFallback()
     {
-        return koboSyncService.ProxyRequestIfEnabled();
+        return koboSyncService.ProxyRequestIfEnabled(KoboReadingServicesClient);
     }
 
 }

@@ -161,11 +161,11 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
             .ToList();
     }
 
-    public async Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId,
+    public async Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, bool includePromoted,
         CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default)
     {
         return await context.AppUserCollection
-            .Where(c => c.AppUserId == userId)
+            .Where(c => c.AppUserId == userId || (includePromoted && c.Promoted))
             .Includes(includes)
             .ToListAsync(ct);
     }

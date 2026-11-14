@@ -400,7 +400,7 @@ public class KoboSyncService(
         var alreadySeenReadingLists = syncPoint.ReadingListsIds.ToHashSet();
 
         Dictionary<int, DateTime> eligible;
-        if (syncPreferences.CollectionSyncEnabled)
+        if (syncPreferences.ReadingListSyncEnabled)
         {
             eligible = await unitOfWork.DataContext.ReadingList
                 .Where(rl => rl.Promoted || rl.AppUserId == userId)

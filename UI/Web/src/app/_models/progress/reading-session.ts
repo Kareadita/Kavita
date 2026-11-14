@@ -37,5 +37,6 @@ export enum AuthenticationType
   Unknown = 0,
   JWT = 1,
   AuthKey = 2,
-  OIDC = 3
+  OIDC = 3,
+  Kobo = 4,
 }

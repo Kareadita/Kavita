@@ -84,7 +84,7 @@ export class RestoreChaptersModalComponent implements OnInit {
         finalize(() => this.restoring.set(false))
       )
       .subscribe(() => {
-        this.toastr.success(translate('toasts.kobo-chapters-restored'));
+        this.toastr.success(translate('toasts.kobo-sync-point.restored'));
         this.modalRef.close(modalSaved(ids.length));
       });
   }
