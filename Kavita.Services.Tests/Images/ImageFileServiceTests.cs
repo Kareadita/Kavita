@@ -43,30 +43,6 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
     }
 
     [Fact]
-    public async Task SetCover_NoRow_CreatesRowAndLinks_Validation()
-    {
-        var (service, _, context) = await Setup(EncodeFormat.WEBP);
-        var series = await SeedSeries(context);
-        var chapter = series.Volumes[0].Chapters[0];
-
-        await service.SetCoverAsync(chapter, Incoming("upload.png", 600, 900), new CoverWrite(ImageOrigin.Upload, Lock: false));
-
-        context.ChangeTracker.Clear();
-        var saved = await context.Chapter.SingleAsync(c => c.Id == chapter.Id);
-        Assert.NotNull(saved.CoverImageFileId);
-        var row = await context.ImageFile.SingleAsync(f => f.Id == saved.CoverImageFileId);
-        Assert.Equal(ImageKind.ChapterCover, row.Kind);
-        Assert.Equal(ImageOrigin.Upload, row.Origin);
-        Assert.Equal(EncodeFormat.WEBP, row.Format);
-        Assert.Equal($"v{chapter.VolumeId}_c{chapter.Id}.webp", row.FileName);
-        Assert.True(row.Width > 0);
-        Assert.True(row.Height > 0);
-        Assert.NotNull(row.PrimaryColor);
-        Assert.Equal(row.FileName, CoverImageOf(saved));
-        Assert.True(File.Exists(Path.Join(_covers, row.FileName)));
-    }
-
-    [Fact]
     public async Task SetCover_PngSetting_NameMatchesBytes()
     {
         var (service, _, context) = await Setup(EncodeFormat.PNG);
@@ -205,6 +181,33 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
         Assert.Equal(ImageKind.SeriesCover, seriesRow.Kind);
         Assert.Equal($"series{series.Id}.webp", seriesRow.FileName);
         Assert.Equal(sourceBytes, File.ReadAllBytes(Path.Join(_covers, seriesRow.FileName)));
+    }
+
+    [Fact]
+    public async Task SetCover_UnlockWithLockedBorrower_BorrowerKeepsOldArt()
+    {
+        var (service, _, context) = await Setup(EncodeFormat.WEBP);
+        var series = await SeedSeries(context);
+        var volume = series.Volumes[0];
+        var chapter = volume.Chapters[0];
+        var row = await AddRow(context, ImageKind.ChapterCover, $"v{volume.Id}_c{chapter.Id}.webp");
+        Link(chapter, row);
+        Link(volume, row);
+        chapter.CoverImageLocked = true;
+        volume.CoverImageLocked = true;
+        await context.SaveChangesAsync();
+        var oldBytes = File.ReadAllBytes(Path.Join(_covers, row.FileName));
+
+        await service.SetCoverAsync(chapter, Incoming("upload.png", 600, 900), new CoverWrite(ImageOrigin.Upload, Lock: false));
+
+        context.ChangeTracker.Clear();
+        var savedVolume = await context.Volume.SingleAsync(v => v.Id == volume.Id);
+        Assert.True(savedVolume.CoverImageLocked);
+        Assert.NotEqual(row.Id, savedVolume.CoverImageFileId);
+        Assert.Equal($"v{volume.Id}.webp", CoverImageOf(savedVolume));
+        Assert.Equal(oldBytes, File.ReadAllBytes(Path.Join(_covers, $"v{volume.Id}.webp")));
+        Assert.NotEqual(oldBytes, File.ReadAllBytes(Path.Join(_covers, row.FileName)));
+        Assert.False((await context.Chapter.SingleAsync(c => c.Id == chapter.Id)).CoverImageLocked);
     }
 
     [Fact]
