@@ -142,7 +142,7 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
     }
 
     [Fact]
-    public async Task Unlock_OwnerWithLockedBorrower_BorrowerGetsCopy()
+    public async Task Unlock_OwnerWithLockedSharer_SharerIsUnshared()
     {
         // PNG setting with a WebP source: the copies must keep .webp, since their bytes are not re-encoded
         var (service, _, context) = await Setup(EncodeFormat.PNG);
@@ -184,7 +184,7 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
     }
 
     [Fact]
-    public async Task SetCover_UnlockWithLockedBorrower_BorrowerKeepsOldArt()
+    public async Task SetCover_UnlockWithLockedSharer_SharerKeepsOldArt()
     {
         var (service, _, context) = await Setup(EncodeFormat.WEBP);
         var series = await SeedSeries(context);
@@ -211,7 +211,7 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
     }
 
     [Fact]
-    public async Task Unlock_Borrower_NoCopy()
+    public async Task Unlock_Sharer_NoCopy()
     {
         var (service, _, context) = await Setup(EncodeFormat.WEBP);
         var series = await SeedSeries(context);

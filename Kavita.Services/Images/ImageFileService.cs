@@ -46,7 +46,7 @@ public class ImageFileService(
         var lockable = entity as IHasLockableCoverImageFile;
         if (lockable != null && !write.Lock)
         {
-            // Unlock before writing so locked borrowers (volume/chapter) are copied off the old art first
+            // Unlock before the write: a locked volume/series sharing this cover must copy the current art, not the new one
             await ApplyLockAsync(lockable, false, ct);
         }
 
@@ -181,29 +181,29 @@ public class ImageFileService(
 
         if (!ownsRow) return;
 
-        // This is needed for Volume/Chapter or Series/Volume where they originally share a cover image, but when updating an image/lock, they may diverge
-        var lockedBorrowers = holders
+        // Sharers are volumes/series that share a cover from a chapter/volume; a locked one is unshared so it keeps its art
+        var lockedSharers = holders
             .OfType<IHasLockableCoverImageFile>()
             .Where(h => !ReferenceEquals(h, entity) && h.CoverImageLocked && Describe(h).Kind != row.Kind)
             .ToList();
 
-        foreach (var borrower in lockedBorrowers)
+        foreach (var sharer in lockedSharers)
         {
-            await CopyToOwnRowAsync(borrower, row, ct);
+            await UnshareCoverAsync(sharer, row, ct);
         }
     }
 
-    private async Task CopyToOwnRowAsync(IHasCoverImageFile borrower, ImageFile source, CancellationToken ct)
+    private async Task UnshareCoverAsync(IHasCoverImageFile sharer, ImageFile source, CancellationToken ct)
     {
         var sourcePath = Path.Join(directoryService.CoverImageDirectory, source.FileName);
         if (!File.Exists(sourcePath))
         {
             logger.LogWarning("Could not give {Type} {Id} its own cover: {File} is missing, it stays on the shared row",
-                borrower.GetType().Name, borrower.Id, source.FileName);
+                sharer.GetType().Name, sharer.Id, source.FileName);
             return;
         }
 
-        var target = Describe(borrower);
+        var target = Describe(sharer);
         var fileName = target.Stem + Path.GetExtension(source.FileName);
         var existing = await unitOfWork.ImageFileRepository.GetByNameAsync(target.Kind, fileName, ct);
 
@@ -225,8 +225,8 @@ public class ImageFileService(
         copy.PrimaryColor = source.PrimaryColor;
         copy.SecondaryColor = source.SecondaryColor;
 
-        Link(borrower, copy);
-        SyncLegacyCover(borrower, copy);
+        Link(sharer, copy);
+        SyncLegacyCover(sharer, copy);
     }
 
     private async Task ReleaseIfUnheldAsync(IHasCoverImageFile entity, ImageFile? previous, List<string> staleFiles,
