@@ -24,7 +24,7 @@
         </div>
 
         <div class="mb-3 text-start">
-          <label for="password" class="form-label">Password</label>
+          <label for="password" class="form-label">{{t('password-label')}}</label>
           <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="passwordTooltip" role="button" tabindex="0"></i>
           <ng-template #passwordTooltip>
             {{t('password-validation')}}
@@ -37,6 +37,15 @@
               maxlength: t('password-validation'),
               pattern: t('password-validation')
             }" />
+        </div>
+
+        <div class="mb-3 text-start locale-select">
+          <label for="register-locale" class="form-label">{{t('locale-label')}}</label>
+          <select id="register-locale" class="form-select" (change)="changeLocale($event)" [title]="t('locale-tooltip')">
+            @for (opt of locales(); track opt.fileName) {
+              <option [value]="opt.fileName" [selected]="opt.fileName === selectedLocale()">{{localeDisplayName(opt.fileName, opt.renderName)}}</option>
+            }
+          </select>
         </div>
 
         <div>
