@@ -3,21 +3,6 @@ using System.Collections.Generic;
 
 namespace Kavita.Models.DTOs.Kobo;
 
-public sealed record KoboNewTagDto
-{
-    public KoboWrappedTagDto NewTag { get; set; }
-}
-
-public sealed record KoboChangedTagDto
-{
-    public KoboWrappedTagDto ChangedTag { get; set; }
-}
-
-public sealed record KoboDeletedTagDto
-{
-    public KoboWrappedTagDto DeletedTag { get; set; }
-}
-
 public sealed record KoboWrappedTagDto
 {
     public KoboTagDto Tag { get; set; }

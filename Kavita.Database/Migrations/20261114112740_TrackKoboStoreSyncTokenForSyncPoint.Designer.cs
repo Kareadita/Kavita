@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20261113203837_TrackKoboStoreSyncTokenForSyncPoint")]
+    [Migration("20261114112740_TrackKoboStoreSyncTokenForSyncPoint")]
     partial class TrackKoboStoreSyncTokenForSyncPoint
     {
         /// <inheritdoc />
@@ -732,6 +732,15 @@ namespace Kavita.Database.Migrations
                     b.Property<DateTime>("ChapterSyncTime")
                         .HasColumnType("TEXT");
 
+                    b.PrimitiveCollection<string>("CollectionsIds")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CollectionsSyncTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CollectionsSyncedUntilIndex")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("KoboDeviceId")
                         .HasColumnType("TEXT");
 
@@ -745,6 +754,15 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ProgressSyncedUntilIndex")
+                        .HasColumnType("INTEGER");
+
+                    b.PrimitiveCollection<string>("ReadingListsIds")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ReadingListsSyncTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ReadingListsSyncedUntilIndex")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("RemovedChapterIds")

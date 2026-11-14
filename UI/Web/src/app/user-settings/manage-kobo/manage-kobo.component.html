@@ -82,7 +82,7 @@
       </app-setting-switch>
     </div>
 
-    @if (!licenseService.hasActiveLicense()) {
+    @if (licenseService.hasActiveLicense()) {
       <div class="setting-section-break"></div>
 
       <div class="row g-0 mt-4">
