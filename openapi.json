@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.22",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.23",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.1.22"
+    "version": "0.9.1.23"
   },
   "servers": [
     {
@@ -2656,6 +2656,56 @@
               "text/json": {
                 "schema": {
                   "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Chapter/restore-info": {
+      "get": {
+        "tags": [
+          "Chapter"
+        ],
+        "summary": "Returns information to restore chapters in the Kobo Sync UI",
+        "parameters": [
+          {
+            "name": "syncPointId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChapterRestoreInfoDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChapterRestoreInfoDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChapterRestoreInfoDto"
+                  }
                 }
               }
             }
@@ -6184,7 +6234,7 @@
         "tags": [
           "Kobo"
         ],
-        "summary": "Called when a book is deleted from the Kobo. No-Op for Kavita books\n            \nNot intended for use beyond Kobo devices",
+        "summary": "Called when a book is deleted from the Kobo. Will no longer be synced to the Kobo. Can be restored in the UI\n            \nNot intended for use beyond Kobo devices",
         "parameters": [
           {
             "name": "bookId",
@@ -6490,6 +6540,142 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/user/wishlist": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Dummy implementation to reduce failure when forward is off. Returns an empty pagination response\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Kobo/{apiKey}/v1/analytics/gettests": {
+      "get": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Dummy implementation\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Kobo"
+        ],
+        "summary": "Dummy implementation\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v3/content/{bookId}/annotations": {
+      "get": {
+        "tags": [
+          "KoboAnnotation"
+        ],
+        "summary": "Returns annotations for the given book\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "KoboAnnotation"
+        ],
+        "summary": "Update an annotation\n            \nNot intended for use beyond Kobo devices",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v3/content/checkforchanges": {
+      "post": {
+        "tags": [
+          "KoboAnnotation"
+        ],
+        "summary": "Check if the given books have had any changes since their last ETag\n            \nNot intended for use beyond Kobo devices",
         "responses": {
           "200": {
             "description": "OK"
@@ -22408,6 +22594,102 @@
         }
       }
     },
+    "/api/Users/kobo-sync-points": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Returns all sync points for the currently active user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KoboSyncPointDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KoboSyncPointDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KoboSyncPointDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Users/kobo-sync-point": {
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Delete a kobo sync point. By id",
+        "parameters": [
+          {
+            "name": "syncPointId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Users/kobo-sync-point/undo-remove-books": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Undo removal of books for the given sync point",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UndoKoboRemoveBookDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UndoKoboRemoveBookDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UndoKoboRemoveBookDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Users/names": {
       "get": {
         "tags": [
@@ -23387,7 +23669,7 @@
           "forwardToKoboStore": {
             "type": "boolean"
           },
-          "allLibraries": {
+          "librarySyncEnabled": {
             "type": "boolean"
           },
           "syncLibraries": {
@@ -23398,11 +23680,33 @@
             },
             "nullable": true
           },
-          "syncCollection": {
+          "readingListSyncEnabled": {
+            "type": "boolean"
+          },
+          "syncReadingLists": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "collectionSyncEnabled": {
+            "type": "boolean"
+          },
+          "syncCollections": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "managedCollection": {
             "type": "integer",
             "format": "int32"
           },
-          "isSyncingCollection": {
+          "hasManagedCollection": {
             "type": "boolean",
             "readOnly": true
           }
@@ -23607,22 +23911,25 @@
           0,
           1,
           2,
-          3
+          3,
+          4
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — Unknown\n- `1` — JWT\n- `2` — AuthKey\n- `3` — OIDC",
+        "description": "Members:\n- `0` — Unknown\n- `1` — JWT\n- `2` — AuthKey\n- `3` — OIDC\n- `4` — KoboDevice",
         "format": "int32",
         "x-enum-varnames": [
           "Unknown",
           "JWT",
           "AuthKey",
-          "OIDC"
+          "OIDC",
+          "KoboDevice"
         ],
         "x-enum-descriptions": [
           "Unknown",
           "JWT",
           "AuthKey",
-          "OIDC"
+          "OIDC",
+          "KoboDevice"
         ]
       },
       "AuthorChapterDto": {
@@ -25098,6 +25405,32 @@
               "format": "int32"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChapterRestoreInfoDto": {
+        "type": "object",
+        "properties": {
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "removedAtUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -28248,6 +28581,28 @@
               "type": "string"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "KoboSyncPointDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deviceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "removedChapterCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastSync": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -34867,6 +35222,24 @@
         },
         "additionalProperties": false
       },
+      "UndoKoboRemoveBookDto": {
+        "type": "object",
+        "properties": {
+          "syncPointId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "undoBookIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "UpcomingTaskDto": {
         "required": [
           "cron",
@@ -37082,6 +37455,9 @@
     {
       "name": "Kobo",
       "description": "Kobo sync implementation. Not intended for use beyond Kobo devices"
+    },
+    {
+      "name": "KoboAnnotation"
     },
     {
       "name": "Koreader",
