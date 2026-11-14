@@ -275,20 +275,23 @@ public class KoboSyncService(
         AgeRestriction ageRestriction,
         CancellationToken cancellationToken)
     {
-        if (!syncPreferences.CollectionSyncEnabled)
-        {
-            return new SyncAccumulationResult([], true);
-        }
-
         if (limit <= 0) return new SyncAccumulationResult([], false);
 
         var alreadySeenCollections = syncPoint.CollectionsIds.ToHashSet();
 
-        var eligible = await unitOfWork.DataContext.AppUserCollection
-            .Where(col => col.Promoted || col.AppUserId == userId)
-            .WhereIf(syncPreferences.SyncCollections.Count > 0, col => syncPreferences.SyncCollections.Contains(col.Id))
-            .Select(c => new { c.Id, c.LastModifiedUtc }) // Reduce memory
-            .ToDictionaryAsync(c => c.Id, c => c.LastModifiedUtc, cancellationToken);
+        Dictionary<int, DateTime> eligible;
+        if (syncPreferences.CollectionSyncEnabled)
+        {
+            eligible = await unitOfWork.DataContext.AppUserCollection
+                .Where(col => col.Promoted || col.AppUserId == userId)
+                .WhereIf(syncPreferences.SyncCollections.Count > 0, col => syncPreferences.SyncCollections.Contains(col.Id))
+                .Select(c => new { c.Id, c.LastModifiedUtc }) // Reduce memory
+                .ToDictionaryAsync(c => c.Id, c => c.LastModifiedUtc, cancellationToken);
+        }
+        else
+        {
+            eligible = [];
+        }
 
         var changes = new List<KoboSyncItem>();
 
@@ -392,21 +395,24 @@ public class KoboSyncService(
         AgeRestriction ageRestriction,
         CancellationToken cancellationToken)
     {
-        if (!syncPreferences.ReadingListSyncEnabled)
-        {
-            return new SyncAccumulationResult([], true);
-        }
-
         if (limit <= 0) return new SyncAccumulationResult([], false);
 
         var alreadySeenReadingLists = syncPoint.ReadingListsIds.ToHashSet();
 
-        var eligible = await unitOfWork.DataContext.ReadingList
-            .Where(rl => rl.Promoted || rl.AppUserId == userId)
-            .RestrictAgainstAgeRestriction(ageRestriction)
-            .WhereIf(syncPreferences.SyncReadingLists.Count > 0, rl => syncPreferences.SyncReadingLists.Contains(rl.Id))
-            .Select(c => new { c.Id, c.LastModifiedUtc }) // Reduce memory
-            .ToDictionaryAsync(c => c.Id, c => c.LastModifiedUtc, cancellationToken);
+        Dictionary<int, DateTime> eligible;
+        if (syncPreferences.CollectionSyncEnabled)
+        {
+            eligible = await unitOfWork.DataContext.ReadingList
+                .Where(rl => rl.Promoted || rl.AppUserId == userId)
+                .RestrictAgainstAgeRestriction(ageRestriction)
+                .WhereIf(syncPreferences.SyncReadingLists.Count > 0, rl => syncPreferences.SyncReadingLists.Contains(rl.Id))
+                .Select(c => new { c.Id, c.LastModifiedUtc }) // Reduce memory
+                .ToDictionaryAsync(c => c.Id, c => c.LastModifiedUtc, cancellationToken);
+        }
+        else
+        {
+            eligible = [];
+        }
 
         var changes = new List<KoboSyncItem>();
 
