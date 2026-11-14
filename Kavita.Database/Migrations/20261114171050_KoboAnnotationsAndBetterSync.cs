@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Kavita.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class TrackKoboStoreSyncTokenForSyncPoint : Migration
+    public partial class KoboAnnotationsAndBetterSync : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -74,6 +74,12 @@ namespace Kavita.Database.Migrations
                 oldType: "TEXT",
                 oldNullable: true,
                 oldDefaultValue: "{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"AllLibraries\":false,\"SyncLibraries\":[],\"SyncCollection\":0,\"IsSyncingCollection\":false}");
+
+            migrationBuilder.AddColumn<string>(
+                name: "KoboId",
+                table: "AppUserAnnotation",
+                type: "TEXT",
+                nullable: true);
         }
 
         /// <inheritdoc />
@@ -110,6 +116,10 @@ namespace Kavita.Database.Migrations
             migrationBuilder.DropColumn(
                 name: "RemovedChapterIds",
                 table: "KoboSyncPoints");
+
+            migrationBuilder.DropColumn(
+                name: "KoboId",
+                table: "AppUserAnnotation");
 
             migrationBuilder.AlterColumn<string>(
                 name: "KoboSyncPreferences",
