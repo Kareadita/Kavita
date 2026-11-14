@@ -275,7 +275,8 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .Include(c => c.Volume);
     }
 
-    public async Task<IList<Chapter>> GetAllChaptersForSeries(int seriesId, CancellationToken ct = default)
+    public async Task<IList<Chapter>> GetAllChaptersForSeriesAsync(int seriesId, ChapterIncludes includes = ChapterIncludes.None,
+        CancellationToken ct = default)
     {
         return await context.Chapter
             .Where(c => c.Volume.SeriesId == seriesId)
@@ -283,6 +284,7 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .Include(c => c.Volume)
             .Include(c => c.People)
             .ThenInclude(cp => cp.Person)
+            .Includes(includes)
             .ToListAsync(ct);
     }
 

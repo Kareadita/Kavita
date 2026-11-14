@@ -10,6 +10,7 @@ using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Person;
 using Kavita.Models.Entities.ReadingLists;
@@ -49,7 +50,7 @@ public class ImageFileService(
         var lockable = entity as IHasLockableCoverImageFile;
         if (lockable != null && !write.Lock)
         {
-            // Unlock before the write: a locked volume/series sharing this cover must copy the current art, not the new one
+            // Unlock before writing as a locked volume/series sharing this cover must use the current art
             await ApplyLockAsync(lockable, false, ct);
         }
 
@@ -159,6 +160,48 @@ public class ImageFileService(
         EnsureCoverLoaded(entity);
         await ApplyLockAsync(entity, locked, ct);
         await FinishAsync(commit, [], [], ct);
+    }
+
+    public async Task<string> WriteKeyedAsync(ImageSource source, ImageKind kind, string key, string fileName,
+        ImageOrigin origin, CancellationToken ct = default)
+    {
+        var directory = kind switch
+        {
+            ImageKind.Favicon => directoryService.FaviconDirectory,
+            ImageKind.Publisher => directoryService.PublisherDirectory,
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Only favicons and publishers are keyed"),
+        };
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        var policy = new ImagePolicy(settings.EncodeMediaAs, CoverImageSize.Default);
+        var written = imagePipeline.Write(source, kind, policy, directory, fileName);
+
+        var row = await unitOfWork.ImageFileRepository.GetByNameAsync(kind, written.FileName, ct);
+        if (row == null)
+        {
+            row = new ImageFile { Kind = kind, FileName = written.FileName };
+            unitOfWork.ImageFileRepository.Add(row);
+        }
+
+        row.Key = key;
+        row.Origin = origin;
+        row.Format = policy.Format.ForKind(kind);
+        row.Width = written.Width;
+        row.Height = written.Height;
+        row.SourceWidth = written.SourceWidth;
+        row.SourceHeight = written.SourceHeight;
+
+        await unitOfWork.CommitAsync(ct);
+
+        return written.FileName;
+    }
+
+    public bool HasCoverFile(IHasCoverImageFile entity)
+    {
+        EnsureCoverLoaded(entity);
+
+        var row = entity.CoverImageFile;
+        return row != null && File.Exists(Path.Join(directoryService.CoverImageDirectory, row.FileName));
     }
 
     private async Task ApplyLockAsync(IHasLockableCoverImageFile entity, bool locked, CancellationToken ct)

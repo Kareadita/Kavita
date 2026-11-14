@@ -36,4 +36,9 @@ public enum ImageOrigin
     /// </summary>
     [Description("Legacy")]
     Legacy = 6,
+    /// <summary>
+    /// A website's favicon, fetched from the site itself
+    /// </summary>
+    [Description("Website")]
+    Website = 7,
 }

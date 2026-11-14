@@ -584,7 +584,7 @@ public class ReaderController(ICacheService cacheService,
             }
         }
 
-        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true, ct);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesIdsAsync(dto.SeriesIds.ToArray(), true, ct);
         foreach (var g in volumes.GroupBy(v => v.SeriesId))
         {
             var chapters = g.SelectMany(v => v.Chapters).ToList();
@@ -622,7 +622,7 @@ public class ReaderController(ICacheService cacheService,
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesIds, ct))
             return NotFound();
 
-        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true, ct);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesIdsAsync(dto.SeriesIds.ToArray(), true, ct);
         foreach (var g in volumes.GroupBy(v => v.SeriesId))
         {
             var chapters = g.SelectMany(v => v.Chapters).ToList();

@@ -88,7 +88,7 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
     /// <param name="includeChapters">Include chapter entities</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false,
+    public async Task<IEnumerable<Volume>> GetVolumesForSeriesIdsAsync(IList<int> seriesIds, bool includeChapters = false,
         CancellationToken ct = default)
     {
         var query = context.Volume
@@ -134,11 +134,12 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
     /// <param name="seriesId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<Volume>> GetVolumes(int seriesId, CancellationToken ct = default)
+    public async Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int seriesId,
+        VolumeIncludes includes = VolumeIncludes.Chapters | VolumeIncludes.Files, CancellationToken ct = default)
     {
         return await context.Volume
             .Where(vol => vol.SeriesId == seriesId)
-            .Includes(VolumeIncludes.Chapters | VolumeIncludes.Files)
+            .Includes(includes)
             .AsSplitQuery()
             .OrderBy(vol => vol.MinNumber)
             .ToListAsync(ct);

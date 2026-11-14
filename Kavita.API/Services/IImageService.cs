@@ -80,15 +80,4 @@ public interface IImageService
     /// when the file is not an image or is a format Kavita does not take for covers</returns>
     string? GetImageExtension(string filePath);
     void UpdateColorScape(IHasCoverImage entity);
-
-    /// <summary>
-    /// Downloads an image from the given URL, resizes it, and saves it to the covers directory.
-    /// <remarks>Caller is responsible for validating the URL before calling this method (via <see cref="IUrlValidationService"/> ).</remarks>
-    /// </summary>
-    /// <param name="url">The URL to download the image from</param>
-    /// <param name="fileName">Filename without extension</param>
-    /// <param name="kind">Picks the size profile</param>
-    /// <param name="policy">Encoding format and cover size</param>
-    /// <returns>File name with extension of the saved file, or empty string on failure</returns>
-    Task<string> CreateThumbnailFromUrl(string url, string fileName, ImageKind kind, ImagePolicy policy);
 }

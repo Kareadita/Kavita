@@ -414,7 +414,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         if (!string.IsNullOrEmpty(picture) && string.IsNullOrEmpty(user.CoverImage))
         {
             // Run in the background to not block http thread, pass id to Hangfire doesn't kill itself
-            BackgroundJob.Enqueue(() => coverDbService.SetUserCoverByUrl(user.Id, picture, false));
+            BackgroundJob.Enqueue(() => coverDbService.SetOidcUserCoverAsync(user.Id, picture, CancellationToken.None));
         }
     }
 

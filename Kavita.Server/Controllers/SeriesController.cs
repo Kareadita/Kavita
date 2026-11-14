@@ -260,10 +260,6 @@ public class SeriesController(
 
         // This is when you hit Reset
         var resetCover = series.CoverImageLocked && !updateSeries.CoverImageLocked;
-        if (resetCover)
-        {
-            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Covers);
-        }
 
         unitOfWork.SeriesRepository.Update(series);
 

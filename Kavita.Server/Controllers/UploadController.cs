@@ -234,12 +234,9 @@ public class UploadController : BaseApiController
         // Check if Url is non-empty, request the image and place in temp, then ask image service to handle it.
         try
         {
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadCoverFileDto.Id,
-                SeriesIncludes.Metadata | SeriesIncludes.CoverImageFile, ct);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadCoverFileDto.Id, SeriesIncludes.CoverImageFile, ct);
 
             if (series == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
-
-            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Covers);
 
             if (await GetCoverSourceAsync(uploadCoverFileDto) is { } source)
             {
@@ -405,8 +402,6 @@ public class UploadController : BaseApiController
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadCoverFileDto.Id,
                 ChapterIncludes.Volumes | ChapterIncludes.CoverImageFile, ct);
             if (chapter == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "chapter-doesnt-exist"));
-
-            chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterCovers);
 
             if (await GetCoverSourceAsync(uploadCoverFileDto) is { } source)
             {

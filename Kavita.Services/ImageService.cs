@@ -300,28 +300,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         return string.Empty;
     }
 
-    /// <inheritdoc />
-    public async Task<string> CreateThumbnailFromUrl(string url, string fileName, ImageKind kind, ImagePolicy policy)
-    {
-        var downloadPath = directoryService.FileSystem.Path.Join(directoryService.TempDirectory, $"download_{Guid.NewGuid():N}.tmp");
-        try
-        {
-            await FlurlConfiguration.DownloadToFileAsync(url, downloadPath, ControllerConstants.MaxUploadSizeBytes);
-
-            return WriteThumbnail(new ImageSource.FromFile(downloadPath), fileName, kind, policy, null);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error creating thumbnail from url");
-        }
-        finally
-        {
-            directoryService.DeleteFiles([downloadPath]);
-        }
-
-        return string.Empty;
-    }
-
     private string WriteThumbnail(ImageSource source, string fileName, ImageKind kind, ImagePolicy policy, string? targetDirectory)
     {
         return imagePipeline.Write(source, kind, policy, targetDirectory ?? directoryService.CoverImageDirectory,

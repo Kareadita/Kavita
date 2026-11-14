@@ -35,8 +35,9 @@ public interface IVolumeRepository
     Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId, VolumeIncludes includes = VolumeIncludes.Chapters, CancellationToken ct = default);
     Task<Volume?> GetVolumeByIdAsync(int volumeId, VolumeIncludes includes = VolumeIncludes.Files, CancellationToken ct = default);
     Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId, CancellationToken ct = default);
-    Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false, CancellationToken ct = default);
-    Task<IEnumerable<Volume>> GetVolumes(int seriesId, CancellationToken ct = default);
+    Task<IEnumerable<Volume>> GetVolumesForSeriesIdsAsync(IList<int> seriesIds, bool includeChapters = false, CancellationToken ct = default);
+    Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int seriesId, VolumeIncludes includes = VolumeIncludes.Chapters | VolumeIncludes.Files,
+        CancellationToken ct = default);
     Task<IList<Volume>> GetVolumesById(IList<int> volumeIds, VolumeIncludes includes = VolumeIncludes.None, CancellationToken ct = default);
     Task<IList<Volume>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, CancellationToken ct = default);
     Task<IEnumerable<string>> GetCoverImagesForLockedVolumesAsync(CancellationToken ct = default);

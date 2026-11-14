@@ -59,7 +59,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     /// <param name="ct"></param>
     public async Task MarkSeriesAsRead(AppUser user, int seriesId, CancellationToken ct = default)
     {
-        var volumes = await unitOfWork.VolumeRepository.GetVolumes(seriesId, ct);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(seriesId, ct: ct);
         var chapters = volumes.SelectMany(v => v.Chapters).ToList();
 
         await MarkChaptersAsRead(user, seriesId, chapters, ct);
@@ -73,7 +73,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     /// <param name="ct"></param>
     public async Task MarkSeriesAsUnread(AppUser user, int seriesId, CancellationToken ct = default)
     {
-        var volumes = await unitOfWork.VolumeRepository.GetVolumes(seriesId, ct);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(seriesId, ct: ct);
         var chapters = volumes.SelectMany(v => v.Chapters).ToList();
 
         await MarkChaptersAsUnread(user, seriesId, chapters, ct);

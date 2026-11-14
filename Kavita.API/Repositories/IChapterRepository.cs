@@ -49,7 +49,8 @@ public interface IChapterRepository
     Task<IList<Chapter>> GetAllChaptersWithCoversInDifferentEncoding(EncodeFormat format, CancellationToken ct = default);
     Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync(CancellationToken ct = default);
     IQueryable<Chapter> GetChaptersForSeries(int seriesId, CancellationToken ct = default);
-    Task<IList<Chapter>> GetAllChaptersForSeries(int seriesId, CancellationToken ct = default);
+    Task<IList<Chapter>> GetAllChaptersForSeriesAsync(int seriesId, ChapterIncludes includes = ChapterIncludes.None,
+        CancellationToken ct = default);
     Task<int> GetAverageUserRating(int chapterId, int userId, CancellationToken ct = default);
     Task<IList<UserReviewDto>> GetExternalChapterReviewDtos(int chapterId, CancellationToken ct = default);
     Task<IList<ExternalReview>> GetExternalChapterReview(int chapterId, CancellationToken ct = default);

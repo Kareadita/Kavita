@@ -235,7 +235,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
 
 
-        var volumes = await unitOfWork.VolumeRepository.GetVolumes(1);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(1);
         await readerService.MarkChaptersAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1), 1, volumes.First().Chapters);
         await context.SaveChangesAsync();
 
@@ -281,7 +281,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
 
 
-        var volumes = (await unitOfWork.VolumeRepository.GetVolumes(1)).ToList();
+        var volumes = (await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(1)).ToList();
         await readerService.MarkChaptersAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1), 1, volumes[0].Chapters);
 
         await context.SaveChangesAsync();
@@ -2794,7 +2794,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
 
 
-        var volumes = (await unitOfWork.VolumeRepository.GetVolumes(1)).ToList();
+        var volumes = (await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(1)).ToList();
         await readerService.MarkChaptersAsRead(await unitOfWork.UserRepository.GetUserByIdAsync(1), 1, volumes[0].Chapters);
 
         await context.SaveChangesAsync();

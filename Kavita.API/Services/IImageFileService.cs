@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Images;
 
@@ -24,4 +25,19 @@ public interface IImageFileService
 
     Task ClearCoverAsync(IHasCoverImageFile entity, bool commit = true, CancellationToken ct = default);
     Task UpdateLockAsync(IHasLockableCoverImageFile entity, bool locked, bool commit = true, CancellationToken ct = default);
+
+    /// <summary>
+    /// Writes a <see cref="ImageKind.Favicon"/> or <see cref="ImageKind.Publisher"/> image, which no entity points at,
+    /// into its row looked up by kind and file name. Commits
+    /// </summary>
+    /// <param name="key">The host for a favicon, the name for a publisher</param>
+    /// <param name="fileName">Name with the extension, relative to the kind's folder</param>
+    /// <returns>The file name written</returns>
+    Task<string> WriteKeyedAsync(ImageSource source, ImageKind kind, string key, string fileName, ImageOrigin origin,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// True when the entity has a cover row and its file is on disk
+    /// </summary>
+    bool HasCoverFile(IHasCoverImageFile entity);
 }

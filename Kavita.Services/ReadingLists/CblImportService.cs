@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
+using Kavita.API.Services.Metadata;
 using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
@@ -29,7 +30,7 @@ namespace Kavita.Services.ReadingLists;
 
 public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithubService, IEventHub eventHub,
     IDirectoryService directoryService, IReadingListService readingListService, IUrlValidationService urlValidationService,
-    IImageService imageService, ILogger<CblImportService> logger) : ICblImportService
+    ICoverDbService coverDbService, ILogger<CblImportService> logger) : ICblImportService
 {
     public async Task<CblImportSummaryDto> ValidateList(int userId, string filePath)
     {
@@ -135,7 +136,8 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
 
         // Find or create reading list
         var readingList = await unitOfWork.ReadingListRepository
-            .GetReadingListByTitleAsync(cbl.Name, userId, ReadingListIncludes.Tags | ReadingListIncludes.Items);
+            .GetReadingListByTitleAsync(cbl.Name, userId,
+                ReadingListIncludes.Tags | ReadingListIncludes.Items | ReadingListIncludes.CoverImageFile);
         var isUpdate = readingList != null;
 
         if (readingList == null)
@@ -236,12 +238,10 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
     /// Attempts to set a cover image on the reading list if not already locked/set.
     /// First tries the v2 cover URL, then falls back to merged cover generation.
     /// </summary>
-    /// <remarks>Does not commit changes</remarks>
+    /// <remarks>The cover URL path commits; the merged fallback does not</remarks>
     private async Task GenerateCoverForReadingList(ReadingList readingList, IList<string> coverImageUrls)
     {
         if (readingList.CoverImageLocked || !string.IsNullOrEmpty(readingList.CoverImage)) return;
-
-        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
         // Try v2 cover URL first
         var coverUrl = coverImageUrls.FirstOrDefault();
@@ -249,17 +249,9 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         {
             try
             {
-                await urlValidationService.ValidateUrlAsync(coverUrl);
-                var fileName = await imageService.CreateThumbnailFromUrl(coverUrl,
-                    ImageService.GetReadingListFormat(readingList.Id), ImageKind.ReadingListCover,
-                    new ImagePolicy(settings.EncodeMediaAs, settings.CoverImageSize));
-
-                if (!string.IsNullOrEmpty(fileName))
-                {
-                    readingList.CoverImage = fileName;
-                    imageService.UpdateColorScape(readingList);
-                    return;
-                }
+                await coverDbService.SetCoverByUrlAsync(readingList, coverUrl,
+                    new CoverWrite(ImageOrigin.Upload, Lock: readingList.CoverImageLocked));
+                if (readingList.CoverImageFile != null) return;
             }
             catch (KavitaException ex)
             {
@@ -280,7 +272,8 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
     public async Task SyncReadingListAsync(int userId, int readingListId, bool force = false)
     {
         var readingList = await unitOfWork.ReadingListRepository
-            .GetReadingListByIdAsync(readingListId, ReadingListIncludes.Tags | ReadingListIncludes.Items);
+            .GetReadingListByIdAsync(readingListId,
+                ReadingListIncludes.Tags | ReadingListIncludes.Items | ReadingListIncludes.CoverImageFile);
 
         if (readingList is not {CanSync: true} || readingList.AppUserId != userId)
         {

@@ -13,6 +13,7 @@ using Kavita.Models.Builders;
 using Kavita.Models.Constants;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Images;
 using Kavita.Services.Images;
 using Kavita.Services.Metadata;
 using Microsoft.Extensions.Hosting;
@@ -31,12 +32,10 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
     {
 
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateFileSystem());
-        var pipeline = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>());
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService, pipeline);
 
         var coverDbService = new CoverDbService(Substitute.For<ILogger<CoverDbService>>(), directoryService, CacheFactory,
-            Substitute.For<IHostEnvironment>(), imageService, unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<IUrlValidationService>(), pipeline);
+            Substitute.For<IHostEnvironment>(), unitOfWork, Substitute.For<IUrlValidationService>(),
+            Substitute.For<IImageFileService>());
 
         return Task.FromResult<(IDirectoryService, ICoverDbService)>((directoryService, coverDbService));
     }
@@ -52,11 +51,10 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         directoryService.ExistOrCreate(directoryService.CoverImageDirectory);
         directoryService.ExistOrCreate(directoryService.TempDirectory);
 
-        var pipeline = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>());
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService, pipeline);
         var coverDbService = new CoverDbService(Substitute.For<ILogger<CoverDbService>>(), directoryService, CacheFactory,
-            Substitute.For<IHostEnvironment>(), imageService, unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<IUrlValidationService>(), pipeline);
+            Substitute.For<IHostEnvironment>(), unitOfWork, Substitute.For<IUrlValidationService>(),
+            new ImageFileService(unitOfWork, new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>()),
+                directoryService, Substitute.For<IEventHub>(), Substitute.For<ILogger<ImageFileService>>()));
 
         return (directoryService, coverDbService);
     }
@@ -86,7 +84,7 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
     #region Set Cover By Url
 
     [Fact]
-    public async Task SetSeriesCoverByUrl_KPlusArtBeatsScanCover()
+    public async Task SetCoverByUrl_KPlusArtBeatsScanCover()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var (directoryService, coverDbService) = SetupOnDisk(unitOfWork);
@@ -98,21 +96,30 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         {
             scan.WriteToFile(scanCover);
         }
-        series.CoverImage = "v91002_c91002.webp";
+        series.CoverImageFile = new ImageFile
+        {
+            Kind = ImageKind.ChapterCover,
+            FileName = "v91002_c91002.webp",
+            Origin = ImageOrigin.Scan,
+            Format = EncodeFormat.WEBP,
+        };
+        await context.SaveChangesAsync();
         using var httpTest = new HttpTest();
         httpTest.RespondWith(() => new ByteArrayContent(PngBytes(3000, 4300)));
 
         try
         {
-            await coverDbService.SetSeriesCoverByUrl(series, "https://example.com/cover.png", fromBase64: false,
-                chooseBetterImage: true);
+            await coverDbService.SetCoverByUrlAsync(series, "https://example.com/cover.png",
+                new CoverWrite(ImageOrigin.KavitaPlus, Lock: true, ChooseBetter: true));
 
-            Assert.Equal("series91002.webp", series.CoverImage);
+            Assert.Equal(ImageKind.SeriesCover, series.CoverImageFile.Kind);
+            Assert.Equal(ImageOrigin.KavitaPlus, series.CoverImageFile.Origin);
+            Assert.True(File.Exists(scanCover));
         }
         finally
         {
             DeleteQuietly(scanCover);
-            DeleteQuietly(Path.Join(directoryService.CoverImageDirectory, "series91002.webp"));
+            DeleteQuietly(Path.Join(directoryService.CoverImageDirectory, series.CoverImageFile!.FileName));
         }
     }
 
