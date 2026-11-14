@@ -23,6 +23,7 @@ using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Images;
 using Kavita.Server.Attributes;
 using Kavita.Services;
+using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -43,12 +44,6 @@ public class UploadController : BaseApiController
     private readonly ILocalizationService _localizationService;
     private readonly ICoverDbService _coverDbService;
     private readonly IUrlValidationService _urlValidationService;
-
-    /// <summary>
-    /// Image extensions accepted for direct file uploads. Mirrors the cover chooser's client-side allowlist and
-    /// deliberately excludes SVG (script-bearing XSS vector).
-    /// </summary>
-    private static readonly string[] AllowedCoverExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif"];
 
     /// <inheritdoc />
     public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger,
@@ -191,7 +186,7 @@ public class UploadController : BaseApiController
         // Reject anything that isn't an allowed image extension before we write it to disk, so an executable (or an
         // image-content polyglot wearing a dangerous extension) never lands in temp. Content is still validated below.
         var extension = _directoryService.FileSystem.Path.GetExtension(file.FileName);
-        if (string.IsNullOrEmpty(extension) || !AllowedCoverExtensions.Contains(extension.ToLowerInvariant()))
+        if (!Parser.IsImage(file.FileName))
         {
             _logger.LogWarning("Rejected cover upload with disallowed extension '{Extension}' (file '{FileName}')",
                 extension.Sanitize(), file.FileName.Sanitize());
