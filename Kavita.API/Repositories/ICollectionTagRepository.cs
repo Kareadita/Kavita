@@ -50,7 +50,7 @@ public interface ICollectionTagRepository
     Task<bool> CollectionExists(string title, int userId, CancellationToken ct = default);
     Task<IList<AppUserCollection>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, CancellationToken ct = default);
     Task<IList<string>> GetRandomCoverImagesAsync(int collectionId, CancellationToken ct = default);
-    Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
+    Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, bool includePromoted, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
     Task UpdateCollectionAgeRating(AppUserCollection tag, CancellationToken ct = default);
     Task<IEnumerable<AppUserCollection>> GetCollectionsByIds(IEnumerable<int> tags, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
     Task<IList<AppUserCollection>> GetAllCollectionsForSyncing(DateTime expirationTime, CancellationToken ct = default);

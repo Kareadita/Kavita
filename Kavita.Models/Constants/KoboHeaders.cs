@@ -1,4 +1,4 @@
-namespace Kavita.Server.Helpers;
+namespace Kavita.Models.Constants;
 
 public static class KoboHeaders
 {

@@ -65,6 +65,10 @@ import {
   ManageScrobbleProvidersComponent
 } from "../../../user-settings/manage-scrobble-providers/manage-scrobble-providers.component";
 import {AccountSettingsComponent} from "../../../user-settings/account-settings/account-settings.component";
+import {ManageKoboComponent} from "../../../user-settings/manage-kobo/manage-kobo.component";
+import {
+  ManageKoboSyncPointsComponent
+} from "../../../user-settings/manage-kobo/_components/manage-kobo-sync-points/manage-kobo-sync-points.component";
 
 @Component({
   selector: 'app-settings',
@@ -107,7 +111,9 @@ import {AccountSettingsComponent} from "../../../user-settings/account-settings/
     ManageRemapRulesComponent,
     KavitaplusActivityComponent,
     ManageKavitaplusActivityComponent,
-    ManageScrobbleProvidersComponent
+    ManageScrobbleProvidersComponent,
+    ManageKoboComponent,
+    ManageKoboSyncPointsComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

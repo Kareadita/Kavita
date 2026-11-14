@@ -1,0 +1,45 @@
+name: Generate OpenAPI
+
+on:
+  pull_request:
+    branches: [ '**' ]
+
+jobs:
+  generate-openapi:
+    name: Generate OpenAPI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build Server
+        run: dotnet build Kavita.Server/Kavita.Server.csproj --configuration Debug --no-restore --output "$RUNNER_TEMP/build"
+
+      - name: Read Swashbuckle version
+        id: swashbuckle
+        run: |
+          version=$(grep -o '<PackageReference Include="Swashbuckle.AspNetCore"[^>]*Version="[^"]*"' Kavita.Services/Kavita.Services.csproj \
+            | grep -o 'Version="[^"]*"' \
+            | cut -d'"' -f2)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Install matching Swashbuckle CLI
+        run: |
+          mkdir -p "$RUNNER_TEMP/openapi"
+          cd "$RUNNER_TEMP/openapi"
+          dotnet new tool-manifest
+          dotnet tool install Swashbuckle.AspNetCore.Cli --version "${{ steps.swashbuckle.outputs.version }}"
+
+      - name: Generate spec
+        working-directory: ${{ runner.temp }}/openapi
+        run: dotnet swagger tofile --output "$RUNNER_TEMP/openapi.json" "$RUNNER_TEMP/build/Kavita.Server.dll" v1

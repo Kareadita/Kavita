@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
@@ -9,7 +11,6 @@ namespace Kavita.Database.Extensions;
 public static class KoboQueryExtensions
 {
 
-    // Note: This needs to be updated if we ever support auto conversion from CBZ to Epub
     private static readonly List<MangaFormat> SupportedFormats =
     [
         MangaFormat.Epub, MangaFormat.Archive, MangaFormat.Image
@@ -23,38 +24,60 @@ public static class KoboQueryExtensions
         /// </summary>
         /// <param name="preferences"></param>
         /// <returns></returns>
-        public IQueryable<Chapter> FilterByKoboSyncSettings(AppUserKoboSyncPreferences preferences)
+        public IQueryable<Chapter> FilterByKoboSyncSettings(AppUserKoboSyncPreferences preferences, int userId)
         {
-            if (preferences.IsSyncingCollection)
+            query = query.Where(c => SupportedFormats.Contains(c.Volume.Series.Format));
+
+            var sources = new List<Expression<Func<Chapter, bool>>>();
+
+            if (preferences.LibrarySyncEnabled)
             {
-                query = query.Where(c => c.Volume.Series.Collections.Any(c => c.Id == preferences.SyncCollection));
-            }
-            else if (!preferences.AllLibraries && preferences.SyncLibraries.Count != 0)
-            {
-                query = query.Where(c => preferences.SyncLibraries.Contains(c.Volume.Series.LibraryId));
+                if (preferences.SyncLibraries.Count > 0)
+                {
+                    sources.Add(c => preferences.SyncLibraries.Contains(c.Volume.Series.LibraryId));
+                }
+                else // everything
+                {
+                    return query;
+                }
             }
 
-            return query.Where(c => SupportedFormats.Contains(c.Volume.Series.Format));
+            if (preferences.ReadingListSyncEnabled)
+            {
+                if (preferences.SyncReadingLists.Count > 0)
+                {
+                    sources.Add(c => c.ReadingListItems.Any(item => preferences.SyncReadingLists.Contains(item.ReadingListId)));
+                }
+                else
+                {
+                    sources.Add(c => c.ReadingListItems.Any(item => item.ReadingList.AppUserId == userId));
+                }
+            }
+
+            if (preferences.CollectionSyncEnabled)
+            {
+                if (preferences.SyncCollections.Count > 0)
+                {
+                    sources.Add(c => c.Volume.Series.Collections.Any(col => preferences.SyncCollections.Contains(col.Id) || col.Promoted));
+                }
+                else
+                {
+                    sources.Add(c => c.Volume.Series.Collections.Any(col => col.AppUserId == userId || col.Promoted));
+                }
+            }
+
+            if (preferences.HasManagedCollection)
+            {
+                sources.Add(c => c.Volume.Series.Collections.Any(col => col.Id == preferences.ManagedCollection));
+            }
+
+            if (sources.Count == 0)
+            {
+                return query.Where(_ => false);
+            }
+
+            return query.Where(sources.Aggregate((a, b) => a.Or(b)));
         }
 
-        /// <summary>
-        /// The inverse of <see cref="FilterByKoboSyncSettings"/>. I.e. only returns chapters not synced to the Kobo
-        /// </summary>
-        /// <param name="preferences"></param>
-        /// <returns></returns>
-        public IQueryable<Chapter> FilterAgainstKoboSyncSettings(AppUserKoboSyncPreferences preferences)
-        {
-            if (preferences.IsSyncingCollection)
-            {
-                // Using All seems to be break the query. Do not change
-                query = query.Where(c => !c.Volume.Series.Collections.Any(uc => uc.Id == preferences.SyncCollection));
-            }
-            else if (!preferences.AllLibraries && preferences.SyncLibraries.Count != 0)
-            {
-                query = query.Where(c => !preferences.SyncLibraries.Contains(c.Volume.Series.LibraryId));
-            }
-
-            return query.Where(c => SupportedFormats.Contains(c.Volume.Series.Format));
-        }
     }
 }

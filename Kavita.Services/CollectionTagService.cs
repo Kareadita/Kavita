@@ -91,11 +91,16 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, ID
         if (tag == null) return false;
 
         tag.Items ??= [];
+        var previousItemCount = tag.Items.Count;
         tag.Items = tag.Items.Where(s => !seriesIds.Contains(s.Id)).ToList();
 
         if (tag.Items.Count == 0)
         {
             unitOfWork.CollectionTagRepository.Remove(tag);
+        }
+        else if (tag.Items.Count < previousItemCount)
+        {
+            unitOfWork.CollectionTagRepository.Update(tag);
         }
 
         if (!unitOfWork.HasChanges()) return true;

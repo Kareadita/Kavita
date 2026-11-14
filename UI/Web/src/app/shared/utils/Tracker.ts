@@ -60,6 +60,10 @@ export class Tracker<T> {
     return entry !== undefined && entry.selected;
   }
 
+  public selectedCount: Signal<number> = computed(() => {
+    return this.selected().length;
+  });
+
   public hasSomeSelected: Signal<boolean> = computed(() => {
     const selectedCount = this.data().filter(d => d.selected).length;
     return selectedCount !== this.data().length && selectedCount > 0;

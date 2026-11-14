@@ -28,6 +28,7 @@ public interface IReadingListRepository
     void BulkRemove(IEnumerable<ReadingListItem> items);
     void Update(ReadingList list);
 
+    Task<List<ReadingList>> GetReadingListsForUserAsync(int userId, bool includePromoted, ReadingListIncludes includes = ReadingListIncludes.None, CancellationToken ct = default);
     Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams, bool sortByLastModified = true, CancellationToken ct = default);
     Task<ReadingList?> GetReadingListByIdAsync(int readingListId, ReadingListIncludes includes = ReadingListIncludes.None, CancellationToken ct = default);
     Task<IList<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null, CancellationToken ct = default);

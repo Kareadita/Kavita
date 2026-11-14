@@ -558,6 +558,7 @@ public class Startup
                     await new ManualMigrationFixInvalidOnDeckSettings().RunAsync(dataContext, logger);
                     await new ManualMigrationClearRootLowestFolderPath().RunAsync(dataContext, logger);
                     await new ManualMigrateRemoveLegacyGithubCaches(directoryService).RunAsync(dataContext, logger);
+                    await new ManualMigrationBackfillKoboAnnotationIds().RunAsync(dataContext, logger);
 
                     #endregion
 

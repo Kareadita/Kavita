@@ -19,6 +19,7 @@ public readonly record struct TextAnchor(HtmlNode Element, string Path, int Offs
 public static partial class AnnotationHelper
 {
     private const string UiXPathScope = "//BODY/DIV[1]"; // Div[1] is the div we inject reader contents into
+    private const string KepubBookInnerId = "book-inner";
     private const string HighlightTagName = "app-epub-highlight";
     private const string ElementTextSeparator = "\n\n";
     private const int MaxCharacterReferenceLength = 32;
@@ -172,6 +173,108 @@ public static partial class AnnotationHelper
             }
         }
     }
+
+    public static IEnumerable<KoboAnnotationDto> BuildKoboAnnotations(string fileName, HtmlDocument doc, IEnumerable<AppUserAnnotation> annotations, List<HighlightSlot> highlightSlots)
+    {
+        return annotations.Select(annotation =>
+        {
+            if (!TryResolveAnchors(doc, annotation.XPath, annotation.EndingXPath,
+                    annotation.SelectedText, out var start, out var end))
+            {
+                return null;
+            }
+
+            return new KoboAnnotationDto
+            {
+                ClientLastModifiedUtc = annotation.LastModifiedUtc,
+                HighlightColor = highlightSlots[annotation.SelectedSlotIndex].Color.ToHex(false).ToUpper(),
+                HighlightedText = annotation.SelectedText,
+                Id = string.IsNullOrEmpty(annotation.KoboId) ? annotation.Id.ToString() : annotation.KoboId,
+                Type = string.IsNullOrWhiteSpace(annotation.CommentPlainText) ? "highlight" : "note",
+                Location = new KoboAnnotationLocationDto
+                {
+                    Span = new KoboAnnotationLocationSpanDto
+                    {
+                        ChapterFilename = fileName,
+                        ChapterTitle = fileName,
+                        ChapterProgress = 0,
+                        EndChar = end.Offset,
+                        StartChar = start.Offset,
+                        EndPath = end.Path,
+                        StartPath = start.Path,
+                    }
+                },
+                noteText = annotation.CommentPlainText,
+            };
+        }).WhereNotNull();
+    }
+
+    internal static bool TryResolveAnchors(HtmlDocument doc, string startXPath, string endXPath, string selectedText, out TextAnchor start, out TextAnchor end)
+    {
+        start = end = default;
+
+        var startBlock = FindBlockElement(doc, startXPath);
+        var endBlock = FindBlockElement(doc, endXPath);
+        if (startBlock == null || endBlock == null) return false;
+
+        var elements = GetElementsInRange(startBlock, endBlock);
+        if (elements.Count == 0) return false;
+
+        var fullText = string.Join(ElementTextSeparator, elements.Select(GetTextForHighlighting));
+        var (decoded, rawStarts) = DecodeWithMap(fullText);
+
+        var normalizedFull = NormalizeWhitespace(decoded);
+        var normalizedSelection = NormalizeWhitespace(selectedText);
+
+        var selStart = normalizedFull.IndexOf(normalizedSelection, StringComparison.Ordinal);
+        if (selStart < 0) return false;
+
+        var rawStart = rawStarts[MapNormalizedPositionToText(decoded, selStart)];
+        var rawEnd = rawStarts[MapNormalizedPositionToText(decoded, selStart + normalizedSelection.Length)];
+
+        var mappings = BuildElementTextMappings(elements);
+
+        TextAnchor? foundStart = null, foundEnd = null;
+
+        for (var i = 0; i < elements.Count; i++)
+        {
+            foreach (var (node, runStart, runLength) in BuildTextRuns(elements[i]))
+            {
+                var globalStart = mappings[i].StartPos + runStart;
+                var globalEnd = globalStart + runLength;
+
+                // Start is inclusive of the run start, exclusive of the run end
+                if (foundStart == null && rawStart >= globalStart && rawStart < globalEnd)
+                    foundStart = CreateAnchor(node, rawStart - globalStart);
+
+                // End is exclusive of the run start, inclusive of the run end
+                if (foundEnd == null && rawEnd > globalStart && rawEnd <= globalEnd)
+                    foundEnd = CreateAnchor(node, rawEnd - globalStart);
+            }
+        }
+
+        if (foundStart == null || foundEnd == null) return false;
+
+        start = foundStart.Value;
+        end = foundEnd.Value;
+        return true;
+    }
+
+private static TextAnchor CreateAnchor(HtmlNode textNode, int rawOffsetInNode)
+{
+    var element = textNode.ParentNode;
+
+    // Offset in decoded chars, so "&amp;" counts as one character
+    var (_, starts) = DecodeWithMap(GetText(textNode));
+    var idx = Array.BinarySearch(starts, rawOffsetInNode);
+    var decodedOffset = idx >= 0 ? idx : ~idx;
+
+    // Kobo-style "span#kobo\.3\.2" when there's an id, otherwise a real xpath
+    var id = element.GetAttributeValue("id", string.Empty);
+    var path = string.IsNullOrEmpty(id) ? element.XPath : $"{element.Name}#{id.Replace(".", "\\.")}";
+
+    return new TextAnchor(element, path, decodedOffset);
+}
 
     private static void WrapTextRange(HtmlNode root, int start, int end, int annotationId, HtmlDocument doc)
     {
@@ -328,6 +431,21 @@ public static partial class AnnotationHelper
     private static string NormalizeWhitespace(string text)
     {
         return WhitespaceRegex().Replace(text.Trim(), " ");
+    }
+
+    private static HtmlNode? FindBlockElement(HtmlDocument doc, string xpath)
+    {
+        var descoped = DescopeXpath(xpath);
+
+        // Kepub docs treat #book-inner as the body, so resolve the reader's body-relative path from it
+        if (descoped.StartsWith("//body/", StringComparison.Ordinal)
+            && doc.GetElementbyId(KepubBookInnerId) is { } kepubRoot)
+        {
+            var node = kepubRoot.SelectSingleNode("." + descoped["//body".Length..]);
+            if (node != null) return NormalizeToBlockElement(node);
+        }
+
+        return NormalizeToBlockElement(FindElementByXPath(doc, descoped));
     }
 
     private static HtmlNode? NormalizeToBlockElement(HtmlNode? node)

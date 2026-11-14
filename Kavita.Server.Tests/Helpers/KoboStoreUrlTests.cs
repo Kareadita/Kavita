@@ -1,4 +1,4 @@
-using Kavita.Server.Helpers;
+using Kavita.Services.Helpers.Kobo;
 using Microsoft.AspNetCore.Http;
 
 namespace Kavita.Server.Tests.Helpers;
@@ -28,5 +28,22 @@ public class KoboStoreUrlTests
 
         Assert.Equal("storeapi.kobo.com", url.Host);
         Assert.Equal(expected, url.AbsoluteUri);
+    }
+
+    [Fact]
+    public void Build_WithoutKoboPrefix_KeepsFullPath()
+    {
+        var url = KoboStoreUrl.Build(new PathString("/api/v3/content/8/annotations"), new QueryString(""));
+
+        Assert.Equal("https://storeapi.kobo.com/api/v3/content/8/annotations", url.AbsoluteUri);
+    }
+
+    [Fact]
+    public void Build_WithBaseAddress_UsesThatHost()
+    {
+        var url = KoboStoreUrl.Build(new PathString("/api/v3/content/8/annotations"), new QueryString(""),
+            new Uri("https://readingservices.kobo.com"));
+
+        Assert.Equal("https://readingservices.kobo.com/api/v3/content/8/annotations", url.AbsoluteUri);
     }
 }

@@ -709,7 +709,9 @@ export class ActionService {
   handleCollectionAction(action: ActionItem<UserCollection>, collection: UserCollection) {
     switch (action.action) {
       case Action.Delete: {
-        const isKoboSyncCollection = this.accountService.currentUser()?.preferences.koboSyncPreferences.syncCollection == collection.id;
+        const koboPreferences = this.accountService.currentUser()?.preferences.koboSyncPreferences;
+        const isKoboSyncCollection = koboPreferences != null && (koboPreferences.managedCollection === collection.id
+          || (koboPreferences.syncCollections ?? []).includes(collection.id));
         const content = isKoboSyncCollection
           ? translate('toasts.confirm-delete-kobo-collection')
           : translate('toasts.confirm-delete-collection');
@@ -1257,8 +1259,10 @@ export class ActionService {
         );
 
       case Action.Delete: {
+        const koboPreferences = this.accountService.currentUser()?.preferences.koboSyncPreferences;
         const isKoboSyncCollection = collections.some(collection => {
-          return this.accountService.currentUser()?.preferences.koboSyncPreferences.syncCollection === collection.id;
+          return koboPreferences != null && (koboPreferences.managedCollection === collection.id
+            || (koboPreferences.syncCollections ?? []).includes(collection.id));
         });
         const content = isKoboSyncCollection
           ? translate('toasts.confirm-delete-collections-kobo')
