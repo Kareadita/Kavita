@@ -369,6 +369,24 @@ public class KoboController(
     }
 
     /// <summary>
+    /// Dummy implementation of the tag delete endpoint (may happen when switching kavita servers)
+    ///
+    /// Not intended for use beyond Kobo devices
+    /// </summary>
+    /// <param name="tagId"></param>
+    /// <returns></returns>
+    [HttpPost("v1/library/tags/{tagId}/items/delete")]
+    public async Task<ActionResult> DeleteTag(string tagId)
+    {
+        if (tagId.StartsWith("rl:") || tagId.StartsWith("col:"))
+        {
+            return Ok();
+        }
+
+        return await koboSyncService.ProxyRequestIfEnabled();
+    }
+
+    /// <summary>
     /// Called when clicking on a recommendation. Adds the series to the Kobo sync collection if enabled
     /// Otherwise No-Op
     ///
