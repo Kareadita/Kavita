@@ -39,7 +39,8 @@ public class ReadingListService(
     IEventHub eventHub,
     IImageService imageService,
     IDirectoryService directoryService,
-    IEntityNamingService namingService)
+    IEntityNamingService namingService,
+    IImageFileService imageFileService)
     : IReadingListService
 {
     /// <summary>
@@ -85,7 +86,12 @@ public class ReadingListService(
         readingList.Title = dto.Title.Trim();
         readingList.NormalizedTitle = Parser.Normalize(readingList.Title);
         readingList.Promoted = dto.Promoted;
-        readingList.CoverImageLocked = dto.CoverImageLocked;
+
+        var resetCover = readingList.CoverImageLocked && !dto.CoverImageLocked;
+        if (!resetCover)
+        {
+            await imageFileService.UpdateLockAsync(readingList, dto.CoverImageLocked, commit: false);
+        }
 
         if (readingList.Tags == null)
         {
@@ -113,19 +119,19 @@ public class ReadingListService(
         }
 
 
-        if (!dto.CoverImageLocked)
-        {
-            readingList.CoverImageLocked = false;
-            readingList.CoverImage = string.Empty;
-            await eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false);
-            unitOfWork.ReadingListRepository.Update(readingList);
-        }
-
         unitOfWork.ReadingListRepository.Update(readingList);
 
-        if (!unitOfWork.HasChanges()) return;
-        await unitOfWork.CommitAsync();
+        if (unitOfWork.HasChanges())
+        {
+            await unitOfWork.CommitAsync();
+        }
+
+        if (resetCover)
+        {
+            await imageFileService.ClearCoverAsync(readingList);
+            await eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false);
+        }
     }
 
     /// <summary>

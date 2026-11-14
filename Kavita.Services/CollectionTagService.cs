@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
+using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
@@ -16,7 +17,8 @@ using Kavita.Models.Extensions;
 
 namespace Kavita.Services;
 
-public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, IDirectoryService directoryService) : ICollectionTagService
+public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, IDirectoryService directoryService,
+    IImageFileService imageFileService) : ICollectionTagService
 {
     public async Task<bool> DeleteTag(int tagId, AppUser user, CancellationToken ct = default)
     {
@@ -33,7 +35,7 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, ID
 
     public async Task<bool> UpdateTag(AppUserCollectionDto dto, int userId, CancellationToken ct = default)
     {
-        var existingTag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(dto.Id, ct: ct);
+        var existingTag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(dto.Id, CollectionIncludes.CoverImageFile, ct);
         if (existingTag == null) throw new KavitaException("collection-doesnt-exist");
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
@@ -61,7 +63,11 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, ID
         {
             existingTag.Promoted = dto.Promoted;
         }
-        existingTag.CoverImageLocked = dto.CoverImageLocked;
+        var resetCover = existingTag.CoverImageLocked && !dto.CoverImageLocked;
+        if (!resetCover)
+        {
+            await imageFileService.UpdateLockAsync(existingTag, dto.CoverImageLocked, commit: false, ct: ct);
+        }
         unitOfWork.CollectionTagRepository.Update(existingTag);
 
         // Check if Tag has updated (Summary)
@@ -72,18 +78,16 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, ID
             unitOfWork.CollectionTagRepository.Update(existingTag);
         }
 
-        // If we unlock the cover image, it means reset
-        if (!dto.CoverImageLocked)
+        var saved = !unitOfWork.HasChanges() || await unitOfWork.CommitAsync(ct);
+
+        if (resetCover)
         {
-            existingTag.CoverImageLocked = false;
-            existingTag.CoverImage = string.Empty;
+            await imageFileService.ClearCoverAsync(existingTag, ct: ct);
             await eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
                 MessageFactory.CoverUpdateEvent(existingTag.Id, MessageFactoryEntityTypes.Collection), false, ct);
-            unitOfWork.CollectionTagRepository.Update(existingTag);
         }
 
-        if (!unitOfWork.HasChanges()) return true;
-        return await unitOfWork.CommitAsync(ct);
+        return saved;
     }
 
     public async Task<bool> RemoveTagFromSeries(AppUserCollection? tag, IEnumerable<int> seriesIds, CancellationToken ct = default)

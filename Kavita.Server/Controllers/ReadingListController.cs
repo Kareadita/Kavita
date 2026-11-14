@@ -273,7 +273,7 @@ public class ReadingListController(
     public async Task<ActionResult<ReadingListDto>> UpdateList(UpdateReadingListDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        var readingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId, ReadingListIncludes.Tags, ct: ct);
+        var readingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId, ReadingListIncludes.Tags | ReadingListIncludes.CoverImageFile, ct: ct);
         if (readingList == null) return BadRequest(await localizationService.TranslateAsync(UserId, "reading-list-doesnt-exist"));
 
         var user = await readingListService.UserHasReadingListAccess(readingList.Id, Username!);
