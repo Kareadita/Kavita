@@ -68,8 +68,8 @@ export class CardActionablesComponent implements OnDestroy {
   }
 
   preventEvent(event: any) {
-    event.stopPropagation();
-    event.preventDefault();
+    event?.stopPropagation();
+    event?.preventDefault();
   }
 
   performAction(event: any, action: ActionItem<ActionableEntity>) {
@@ -146,8 +146,9 @@ export class CardActionablesComponent implements OnDestroy {
     ref.setInput('entity', this.entity());
     ref.setInput('filteredActions', this.filteredActions());
 
-    ref.componentInstance.actionPerformed.subscribe((actionOrResult: any) => {
-      this.actionHandler.emit(actionOrResult);
+    ref.closed.subscribe((action: ActionItem<ActionableEntity> | undefined) => {
+      if (!action) return;
+      this.performAction(null, action);
     });
   }
 }
