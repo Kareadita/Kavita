@@ -70,14 +70,14 @@ public class NetVipsFileHandleTests : IDisposable
     }
 
     [Fact]
-    public void CreateMergedImage_LeavesSourcesReplaceable()
+    public void CreateMergedImageBuffer_LeavesSourcesReplaceable()
     {
         if (!OperatingSystem.IsWindows()) return;
 
         var first = WriteWebp("first.webp", 640, 909);
         var second = WriteWebp("second.webp", 640, 909);
 
-        ImageService.CreateMergedImage([first, second], CoverImageSize.Default, Path.Join(_directory, "merged.webp"));
+        ImageService.CreateMergedImageBuffer([first, second], CoverImageSize.Default);
 
         AssertReplaceable(first);
         AssertReplaceable(second);

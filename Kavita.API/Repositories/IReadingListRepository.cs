@@ -40,11 +40,14 @@ public interface IReadingListRepository
         bool includePromoted, CancellationToken ct = default);
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForChapterAndUserAsync(int userId, int chapterId,
         bool includePromoted, CancellationToken ct = default);
-    Task<IList<string>> GetRandomCoverImagesAsync(int readingListId, CancellationToken ct = default);
     /// <summary>
     /// Cover rows of the list's chapters, untracked. Items with no cover are left out
     /// </summary>
     Task<IList<ImageFile>> GetItemCoverFilesAsync(int readingListId, CancellationToken ct = default);
+    /// <summary>
+    /// Unlocked reading lists with no cover row and at least one chapter with a cover
+    /// </summary>
+    Task<IList<int>> GetIdsMissingCompositeCoverAsync(CancellationToken ct = default);
     Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default);
     Task<bool> ReadingListExists(string name, int? readingListId = null, CancellationToken ct = default);
     IEnumerable<PersonDto> GetReadingListPeopleAsync(int readingListId, PersonRole role, CancellationToken ct = default);

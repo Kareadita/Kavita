@@ -158,6 +158,7 @@ public class CblTestHelper : IDisposable
             Substitute.For<IReadingListService>(),
             Substitute.For<IUrlValidationService>(),
             Substitute.For<ICoverDbService>(),
+            Substitute.For<ICompositeCoverService>(),
             Substitute.For<ILogger<CblImportService>>()
         );
     }
@@ -176,6 +177,7 @@ public class CblTestHelper : IDisposable
             readingListService,
             Substitute.For<IUrlValidationService>(),
             Substitute.For<ICoverDbService>(),
+            Substitute.For<ICompositeCoverService>(),
             Substitute.For<ILogger<CblImportService>>()
         );
     }

@@ -40,10 +40,6 @@ public interface ICollectionTagRepository
     /// <summary>
     /// Returns all the user's collections with the option of other user's promoted
     /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="includePromoted"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosAsync(int userId, bool includePromoted = false, bool sortByLastModified = false, CancellationToken ct = default);
     Task<PagedList<AppUserCollectionDto>> GetCollectionDtosPagedAsync(int userId, UserParams userParams, bool includePromoted = false, CancellationToken ct = default);
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosBySeriesAsync(int userId, int seriesId, bool includePromoted = false, CancellationToken ct = default);
@@ -51,11 +47,14 @@ public interface ICollectionTagRepository
     Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default);
     Task<bool> CollectionExists(string title, int userId, CancellationToken ct = default);
     Task<IList<AppUserCollection>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, CancellationToken ct = default);
-    Task<IList<string>> GetRandomCoverImagesAsync(int collectionId, CancellationToken ct = default);
     /// <summary>
     /// Cover rows of the collection's series, untracked. Series with no cover are left out
     /// </summary>
     Task<IList<ImageFile>> GetItemCoverFilesAsync(int collectionId, CancellationToken ct = default);
+    /// <summary>
+    /// Unlocked collections with no cover row and at least one series with a cover
+    /// </summary>
+    Task<IList<int>> GetIdsMissingCompositeCoverAsync(CancellationToken ct = default);
     Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
     Task UpdateCollectionAgeRating(AppUserCollection tag, CancellationToken ct = default);
     Task<IEnumerable<AppUserCollection>> GetCollectionsByIds(IEnumerable<int> tags, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);

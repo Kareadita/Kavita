@@ -17,6 +17,7 @@ using Kavita.Models.DTOs.CollectionTags;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Images;
 using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,7 @@ namespace Kavita.Server.Controllers;
 public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService collectionService,
     ILocalizationService localizationService, IExternalMetadataService externalMetadataService,
     ISmartCollectionSyncService collectionSyncService, ILogger<CollectionController> logger,
-    IEventHub eventHub) : BaseApiController
+    IEventHub eventHub, ICompositeCoverService compositeCoverService) : BaseApiController
 {
 
     /// <summary>
@@ -219,9 +220,13 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             tag.Items.Add(s);
         }
         unitOfWork.UserRepository.Update(user);
-        if (await unitOfWork.CommitAsync(ct)) return Ok();
+        if (!await unitOfWork.CommitAsync(ct))
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
+        }
 
-        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
+        await compositeCoverService.CreateIfMissingAsync(ImageKind.CollectionCover, tag.Id, ct);
+        return Ok();
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Attributes;
@@ -19,6 +20,7 @@ using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.DTOs.ReadingLists.Request;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Images;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Services.Reading;
@@ -33,6 +35,7 @@ public class ReadingListController(
     IReadingListService readingListService,
     ILocalizationService localizationService,
     ICblExportService  cblExportService,
+    ICompositeCoverService compositeCoverService,
     IEventHub eventHub)
     : BaseApiController
 {
@@ -331,7 +334,7 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync(ct);
-                await readingListService.UpdateReadingListCoverImage(readingList);
+                await compositeCoverService.CreateIfMissingAsync(ImageKind.ReadingListCover, readingList.Id, ct);
                 await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
                     MessageFactory.ReadingListUpdatedEvent(readingList.Id), false, ct);
                 return Ok(await localizationService.TranslateAsync(UserId, "reading-list-updated"));
@@ -385,7 +388,7 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync(ct);
-                await readingListService.UpdateReadingListCoverImage(readingList);
+                await compositeCoverService.CreateIfMissingAsync(ImageKind.ReadingListCover, readingList.Id, ct);
                 await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
                     MessageFactory.ReadingListUpdatedEvent(readingList.Id), false, ct);
                 return Ok(await localizationService.TranslateAsync(UserId, "reading-list-updated"));
@@ -436,7 +439,7 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync(ct);
-                await readingListService.UpdateReadingListCoverImage(readingList);
+                await compositeCoverService.CreateIfMissingAsync(ImageKind.ReadingListCover, readingList.Id, ct);
                 await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
                     MessageFactory.ReadingListUpdatedEvent(readingList.Id), false, ct);
                 return Ok(await localizationService.TranslateAsync(UserId, "reading-list-updated"));
@@ -480,7 +483,7 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync(ct);
-                await readingListService.UpdateReadingListCoverImage(readingList);
+                await compositeCoverService.CreateIfMissingAsync(ImageKind.ReadingListCover, readingList.Id, ct);
                 await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
                     MessageFactory.ReadingListUpdatedEvent(readingList.Id), false, ct);
                 return Ok(await localizationService.TranslateAsync(UserId, "reading-list-updated"));
@@ -521,7 +524,7 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync(ct);
-                await readingListService.UpdateReadingListCoverImage(readingList);
+                await compositeCoverService.CreateIfMissingAsync(ImageKind.ReadingListCover, readingList.Id, ct);
                 await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
                     MessageFactory.ReadingListUpdatedEvent(readingList.Id), false, ct);
                 return Ok(await localizationService.TranslateAsync(UserId, "reading-list-updated"));
@@ -739,7 +742,7 @@ public class ReadingListController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public ActionResult RegenerateCover([FromQuery] int readingListId)
     {
-        BackgroundJob.Enqueue(() => readingListService.GenerateReadingListCoverImage(readingListId, true));
+        BackgroundJob.Enqueue(() => compositeCoverService.RefreshAsync(ImageKind.ReadingListCover, readingListId, true, CancellationToken.None));
 
         return Ok();
     }

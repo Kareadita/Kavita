@@ -46,27 +46,21 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
             .ToListAsync(ct))!;
     }
 
-    public async Task<IList<string>> GetRandomCoverImagesAsync(int readingListId, CancellationToken ct = default)
-    {
-        var random = new Random();
-        var data = await context.ReadingList
-                .Where(r => r.Id == readingListId)
-                .SelectMany(r => r.Items.Select(ri => ri.Chapter.CoverImage))
-                .Where(t => !string.IsNullOrEmpty(t))
-                .ToListAsync(ct);
-
-        return data
-            .OrderBy(_ => random.Next())
-            .Take(4)
-            .ToList();
-    }
-
     public async Task<IList<ImageFile>> GetItemCoverFilesAsync(int readingListId, CancellationToken ct = default)
     {
         return await context.ReadingListItem
             .AsNoTracking()
             .Where(ri => ri.ReadingListId == readingListId && ri.Chapter.CoverImageFile != null)
             .Select(ri => ri.Chapter.CoverImageFile!)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IList<int>> GetIdsMissingCompositeCoverAsync(CancellationToken ct = default)
+    {
+        return await context.ReadingList
+            .Where(r => r.CoverImageFileId == null && !r.CoverImageLocked)
+            .Where(r => r.Items.Any(ri => ri.Chapter.CoverImageFileId != null))
+            .Select(r => r.Id)
             .ToListAsync(ct);
     }
 

@@ -416,12 +416,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     }
 
 
-    public static void CreateMergedImage(IList<string> coverImages, CoverImageSize size, string dest)
-    {
-        using var image = BuildMergedImage(coverImages, size);
-        image.WriteToFile(dest);
-    }
-
     /// <summary>
     /// Tiles up to 4 covers into one image, sized to <paramref name="size"/>
     /// </summary>

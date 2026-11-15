@@ -26,8 +26,7 @@ namespace Kavita.Server.Controllers;
 /// <inheritdoc />
 [SkipDeviceTracking]
 public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService,
-    ILocalizationService localizationService, IReadingListService readingListService,
-    ICoverDbService coverDbService, ICollectionTagService collectionTagService,
+    ILocalizationService localizationService, ICoverDbService coverDbService,
     IExternalMetadataService externalMetadataService) : BaseApiController
 {
 
@@ -99,11 +98,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
         var collectionTag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(collectionTagId, ct: ct);
         if (collectionTag == null || (collectionTag.AppUserId != UserId && !collectionTag.Promoted)) return NotFound();
 
+        if (string.IsNullOrEmpty(collectionTag.CoverImage)) return NotFound();
+
         var path = Path.Join(directoryService.CoverImageDirectory, collectionTag.CoverImage);
-        if (string.IsNullOrEmpty(path) || !directoryService.FileSystem.File.Exists(path))
-        {
-            path = await collectionTagService.GenerateCollectionCoverImage(collectionTagId);
-        }
+        if (!directoryService.FileSystem.File.Exists(path)) return NotFound();
 
         return PhysicalFile(path);
     }
@@ -120,13 +118,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
         var readingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId, ct: ct);
         if (readingList == null || (readingList.AppUserId != UserId && !readingList.Promoted)) return NotFound();
 
+        if (string.IsNullOrEmpty(readingList.CoverImage)) return NotFound();
+
         var path = Path.Join(directoryService.CoverImageDirectory, readingList.CoverImage);
-        if (string.IsNullOrEmpty(path) || !directoryService.FileSystem.File.Exists(path))
-        {
-            readingList.CoverImage = await readingListService.GenerateReadingListCoverImage(readingListId);
-            path = Path.Join(directoryService.CoverImageDirectory, readingList.CoverImage);
-            await unitOfWork.CommitAsync(ct);
-        }
+        if (!directoryService.FileSystem.File.Exists(path)) return NotFound();
 
         return PhysicalFile(path);
     }

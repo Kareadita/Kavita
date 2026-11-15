@@ -12,11 +12,12 @@ using Kavita.Models.DTOs.Collection;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 
 namespace Kavita.Services;
 
-public class CollectionTagService(IUnitOfWork unitOfWork, IDirectoryService directoryService,
-    IImageFileService imageFileService) : ICollectionTagService
+public class CollectionTagService(IUnitOfWork unitOfWork, IImageFileService imageFileService,
+    ICompositeCoverService compositeCoverService) : ICollectionTagService
 {
     public async Task<bool> DeleteTag(int tagId, AppUser user, CancellationToken ct = default)
     {
@@ -81,6 +82,7 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IDirectoryService dire
         if (resetCover)
         {
             await imageFileService.ClearCoverAsync(existingTag, ct: ct);
+            await compositeCoverService.CreateIfMissingAsync(ImageKind.CollectionCover, existingTag.Id, ct);
         }
 
         return saved;
@@ -107,24 +109,5 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IDirectoryService dire
         }
 
         return result;
-    }
-
-    public async Task<string> GenerateCollectionCoverImage(int collectionId)
-    {
-        var covers = await unitOfWork.CollectionTagRepository.GetRandomCoverImagesAsync(collectionId);
-        var destFile = directoryService.FileSystem.Path.Join(directoryService.TempDirectory, ImageService.GetCollectionTagFormat(collectionId));
-
-        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        destFile += settings.EncodeMediaAs.GetExtension();
-
-        if (directoryService.FileSystem.File.Exists(destFile)) return destFile;
-
-        ImageService.CreateMergedImage(
-            covers.Select(c => directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, c)).ToList(),
-            settings.CoverImageSize,
-            destFile);
-
-        // TODO: Refactor this so that collections have a dedicated cover image so we can calculate primary/secondary colors
-        return !directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
     }
 }

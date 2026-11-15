@@ -30,7 +30,8 @@ namespace Kavita.Services.ReadingLists;
 
 public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithubService, IEventHub eventHub,
     IDirectoryService directoryService, IReadingListService readingListService, IUrlValidationService urlValidationService,
-    ICoverDbService coverDbService, ILogger<CblImportService> logger) : ICblImportService
+    ICoverDbService coverDbService, ICompositeCoverService compositeCoverService,
+    ILogger<CblImportService> logger) : ICblImportService
 {
     public async Task<CblImportSummaryDto> ValidateList(int userId, string filePath)
     {
@@ -266,7 +267,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         }
 
         // Fallback to merged cover generation
-        await readingListService.GenerateReadingListCoverImage(readingList);
+        await compositeCoverService.CreateIfMissingAsync(ImageKind.ReadingListCover, readingList.Id);
     }
 
     public async Task SyncReadingListAsync(int userId, int readingListId, bool force = false)

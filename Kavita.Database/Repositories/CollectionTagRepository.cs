@@ -146,27 +146,21 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
             .ToListAsync(ct);
     }
 
-    public async Task<IList<string>> GetRandomCoverImagesAsync(int collectionId, CancellationToken ct = default)
-    {
-        var random = new Random();
-        var data = await context.AppUserCollection
-            .Where(t => t.Id == collectionId)
-            .SelectMany(uc => uc.Items.Select(series => series.CoverImage))
-            .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync(ct);
-
-        return data
-            .OrderBy(_ => random.Next())
-            .Take(4)
-            .ToList();
-    }
-
     public async Task<IList<ImageFile>> GetItemCoverFilesAsync(int collectionId, CancellationToken ct = default)
     {
         return await context.AppUserCollection
             .AsNoTracking()
             .Where(c => c.Id == collectionId)
             .SelectMany(c => c.Items.Where(s => s.CoverImageFile != null).Select(s => s.CoverImageFile!))
+            .ToListAsync(ct);
+    }
+
+    public async Task<IList<int>> GetIdsMissingCompositeCoverAsync(CancellationToken ct = default)
+    {
+        return await context.AppUserCollection
+            .Where(c => c.CoverImageFileId == null && !c.CoverImageLocked)
+            .Where(c => c.Items.Any(s => s.CoverImageFileId != null))
+            .Select(c => c.Id)
             .ToListAsync(ct);
     }
 

@@ -24,7 +24,38 @@ public class CompositeCoverService(
 {
     private const int MaxTiles = 4;
 
-    public async Task RefreshAsync(ImageKind kind, int id, bool force, CancellationToken ct = default)
+    public Task RefreshAsync(ImageKind kind, int id, bool force, CancellationToken ct = default)
+    {
+        return BuildAsync(kind, id, force, onlyIfMissing: false, ct);
+    }
+
+    public Task CreateIfMissingAsync(ImageKind kind, int id, CancellationToken ct = default)
+    {
+        return BuildAsync(kind, id, force: false, onlyIfMissing: true, ct);
+    }
+
+    public async Task CreateMissingCoversAsync(CancellationToken ct = default)
+    {
+        var readingListIds = await unitOfWork.ReadingListRepository.GetIdsMissingCompositeCoverAsync(ct);
+        foreach (var id in readingListIds)
+        {
+            await CreateIfMissingAsync(ImageKind.ReadingListCover, id, ct);
+        }
+
+        var collectionIds = await unitOfWork.CollectionTagRepository.GetIdsMissingCompositeCoverAsync(ct);
+        foreach (var id in collectionIds)
+        {
+            await CreateIfMissingAsync(ImageKind.CollectionCover, id, ct);
+        }
+
+        if (readingListIds.Count + collectionIds.Count > 0)
+        {
+            logger.LogInformation("Built missing covers for {ReadingListCount} reading lists and {CollectionCount} collections",
+                readingListIds.Count, collectionIds.Count);
+        }
+    }
+
+    private async Task BuildAsync(ImageKind kind, int id, bool force, bool onlyIfMissing, CancellationToken ct)
     {
         var target = await LoadAsync(kind, id, ct);
         if (target == null) return;
@@ -33,7 +64,7 @@ public class CompositeCoverService(
         if (entity.CoverImageLocked) return;
 
         var row = entity.CoverImageFile;
-        if (row != null && row.Origin != ImageOrigin.Composite) return;
+        if (row != null && (onlyIfMissing || row.Origin != ImageOrigin.Composite)) return;
 
         var tiles = itemCovers
             .Select(f => Path.Join(directoryService.CoverImageDirectory, f.FileName))

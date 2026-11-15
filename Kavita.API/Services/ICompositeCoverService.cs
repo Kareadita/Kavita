@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Hangfire;
 using Kavita.Models.Images;
 
 namespace Kavita.API.Services;
@@ -13,4 +14,14 @@ public interface ICompositeCoverService
     /// <param name="kind"><see cref="ImageKind.ReadingListCover"/> or <see cref="ImageKind.CollectionCover"/></param>
     /// <param name="force">Build even when the item covers are unchanged</param>
     Task RefreshAsync(ImageKind kind, int id, bool force, CancellationToken ct = default);
+    /// <summary>
+    /// Builds the cover only when the reading list or collection has no cover yet and is not locked
+    /// </summary>
+    /// <param name="kind"><see cref="ImageKind.ReadingListCover"/> or <see cref="ImageKind.CollectionCover"/></param>
+    Task CreateIfMissingAsync(ImageKind kind, int id, CancellationToken ct = default);
+    /// <summary>
+    /// <see cref="CreateIfMissingAsync"/> for every reading list and collection that has item covers but no cover of its own
+    /// </summary>
+    [DisableConcurrentExecution(timeoutInSeconds: 60 * 60), AutomaticRetry(Attempts = 0)]
+    Task CreateMissingCoversAsync(CancellationToken ct = default);
 }
