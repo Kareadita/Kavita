@@ -24,6 +24,16 @@ public interface IImageFileService
         CancellationToken ct = default);
 
     Task ClearCoverAsync(IHasCoverImageFile entity, bool commit = true, CancellationToken ct = default);
+
+    /// <summary>
+    /// Recomputes the ColorScape of the entity's cover row from its file. Does nothing when there is no row or no file
+    /// </summary>
+    Task RefreshColorsAsync(IHasCoverImageFile entity, bool commit = true, CancellationToken ct = default);
+
+    /// <summary>
+    /// Deletes the files that writes with <c>commit: false</c> in this scope replaced. Call it after your own commit
+    /// </summary>
+    void DeleteReplacedFiles();
     Task UpdateLockAsync(IHasLockableCoverImageFile entity, bool locked, bool commit = true, CancellationToken ct = default);
 
     /// <summary>

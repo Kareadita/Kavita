@@ -10,16 +10,6 @@ namespace Kavita.API.Services;
 public interface IImageService
 {
     void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1);
-    /// <summary>
-    /// Writes a cover thumbnail from an image file, logging and swallowing any error
-    /// </summary>
-    /// <param name="path">Image file to read</param>
-    /// <param name="fileName">File name without extension</param>
-    /// <param name="outputDirectory">Where to write the cover</param>
-    /// <param name="encodeFormat">Convert and save as encoding format</param>
-    /// <param name="size">Cover size to scale and crop to</param>
-    /// <returns>File name with extension of the file, or empty string on failure</returns>
-    string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size);
 
     /// <summary>
     /// Creates a Thumbnail version of a base64 image

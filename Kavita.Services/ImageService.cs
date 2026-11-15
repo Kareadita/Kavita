@@ -49,22 +49,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         }
     }
 
-    public string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
-    {
-        if (string.IsNullOrEmpty(path)) return string.Empty;
-
-        try
-        {
-            return WriteCover(new ImageSource.FromFile(path), fileName, outputDirectory, encodeFormat, size);
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {ImageFile}. Defaulting to no cover image", path);
-        }
-
-        return string.Empty;
-    }
-
     /// <summary>
     /// Creates a thumbnail out of a stream and saves it to <paramref name="outputDirectory"/> with the passed
     /// fileName and the appropriate extension.

@@ -6,6 +6,8 @@ using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
+using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 using Kavita.Services.Images;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
@@ -24,9 +26,7 @@ public class BookServiceTests
     public BookServiceTests()
     {
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
-        _bookService = new BookService(_logger, directoryService,
-            new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService, new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>()))
-            , _mediaErrorService, _unitOfWork);
+        _bookService = new BookService(_logger, directoryService, _mediaErrorService, _unitOfWork);
     }
 
     [Fact]
@@ -173,7 +173,7 @@ public class BookServiceTests
     public void GetCoverImage_Pdf_ProducesValidImage()
     {
         // End-to-end coverage for the NetVips GetPdfPage migration: Docnet renders page 0 to raw
-        // BGRA bytes, GetPdfPage reorders to RGBA and encodes a PNG, then WriteCoverThumbnail
+        // BGRA bytes, GetPdfPage reorders to RGBA and encodes a PNG, then the image pipeline
         // (NetVips) thumbnails it. A malformed intermediate PNG would throw or yield an empty file.
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
         var document = Path.Join(testDirectory, "test.pdf");
@@ -182,7 +182,12 @@ public class BookServiceTests
 
         try
         {
-            var coverFile = _bookService.GetCoverImage(document, "test_pdf_cover", outputDirectory, EncodeFormat.PNG);
+            using var cover = _bookService.OpenCover(document);
+            Assert.NotNull(cover);
+            var coverFile = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>())
+                .Write(cover.Source, ImageKind.ChapterCover, new ImagePolicy(EncodeFormat.PNG, CoverImageSize.Default),
+                    outputDirectory, "test_pdf_cover" + EncodeFormat.PNG.GetExtension())
+                .FileName;
 
             Assert.False(string.IsNullOrEmpty(coverFile), "Expected a cover image to be produced for the PDF");
 

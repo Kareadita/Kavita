@@ -8,6 +8,7 @@ using Kavita.Models.DTOs.Progress;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Images;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
 using Kavita.Services.Builders;
@@ -38,9 +39,9 @@ internal class MockReadingItemServiceForCacheService : IReadingItemService
         return 1;
     }
 
-    public string GetCoverImage(string fileFilePath, string fileName, MangaFormat format, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
+    public OpenedCover? OpenCover(string filePath, MangaFormat format)
     {
-        return string.Empty;
+        return null;
     }
 
     public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1)

@@ -152,6 +152,13 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Include(s => s.Volumes)!
             .ThenInclude(v => v.Chapters)!
             .ThenInclude(c => c.Files)
+
+            .Include(s => s.CoverImageFile)
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.CoverImageFile)
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.CoverImageFile)
             .AsSplitQuery()
             .OrderBy(s => s.SortName.ToLower());
 #nullable  enable
@@ -195,6 +202,13 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(c => c.Files)
+
+            .Include(s => s.CoverImageFile)
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.CoverImageFile)
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.CoverImageFile)
             .AsSplitQuery()
             .SingleOrDefaultAsync(ct);
 #nullable  enable

@@ -2,6 +2,7 @@
 using System.IO;
 using Kavita.API.Services;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Images;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
 using Kavita.Services.Scanner;
@@ -145,21 +146,18 @@ public class ReadingItemService : IReadingItemService
         }
     }
 
-    public string GetCoverImage(string filePath, string fileName, MangaFormat format, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
+    public OpenedCover? OpenCover(string filePath, MangaFormat format)
     {
-        if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(fileName))
-        {
-            return string.Empty;
-        }
-
+        if (string.IsNullOrEmpty(filePath)) return null;
 
         return format switch
         {
-            MangaFormat.Epub => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, encodeFormat, size),
-            MangaFormat.Archive => _archiveService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, encodeFormat, size),
-            MangaFormat.Image => _imageService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, encodeFormat, size),
-            MangaFormat.Pdf => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, encodeFormat, size),
-            _ => string.Empty
+            MangaFormat.Epub or MangaFormat.Pdf => _bookService.OpenCover(filePath),
+            MangaFormat.Archive => _archiveService.OpenCover(filePath),
+            MangaFormat.Image => _directoryService.FileSystem.File.Exists(filePath)
+                ? new OpenedCover(new ImageSource.FromFile(filePath))
+                : null,
+            _ => null
         };
     }
 

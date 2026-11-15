@@ -31,6 +31,8 @@ public class ImageFileService(
     private const float PlaceholderSimilarity = 0.9f;
     private static readonly ImageKind[] SharedKinds = [ImageKind.ChapterCover, ImageKind.VolumeCover, ImageKind.SeriesCover];
 
+    private readonly List<string> _replacedFiles = [];
+
     public async Task SetCoverAsync(IHasCoverImageFile entity, ImageSource source, CoverWrite write, bool commit = true,
         CancellationToken ct = default)
     {
@@ -133,7 +135,7 @@ public class ImageFileService(
         var staleFiles = new List<string>();
         if (!ReferenceEquals(previous, row))
         {
-            await ReleaseIfUnheldAsync(target, previous, staleFiles, ct);
+            await ReleaseIfUnheldAsync(previous, staleFiles, ct);
         }
 
         await FinishAsync(commit, staleFiles, [target], ct);
@@ -154,8 +156,41 @@ public class ImageFileService(
         SyncLegacyCover(entity, null);
 
         var staleFiles = new List<string>();
-        await ReleaseIfUnheldAsync(entity, previous, staleFiles, ct);
+        await ReleaseIfUnheldAsync(previous, staleFiles, ct);
         await FinishAsync(commit, staleFiles, [entity], ct);
+    }
+
+    public async Task RefreshColorsAsync(IHasCoverImageFile entity, bool commit = true, CancellationToken ct = default)
+    {
+        EnsureCoverLoaded(entity);
+
+        var row = entity.CoverImageFile;
+        if (row == null) return;
+
+        var path = Path.Join(directoryService.CoverImageDirectory, row.FileName);
+        if (!File.Exists(path)) return;
+
+        var colors = ImageService.CalculateColorScape(path);
+        row.PrimaryColor = colors.Primary;
+        row.SecondaryColor = colors.Secondary;
+
+        var holders = await GetHoldersAsync(row, [entity], ct);
+        foreach (var holder in holders)
+        {
+            SyncLegacyCover(holder, row);
+        }
+
+        await FinishAsync(commit, [], holders, ct);
+    }
+
+    public void DeleteReplacedFiles()
+    {
+        foreach (var fileName in _replacedFiles)
+        {
+            DeleteQuietly(Path.Join(directoryService.CoverImageDirectory, fileName));
+        }
+
+        _replacedFiles.Clear();
     }
 
     public async Task UpdateLockAsync(IHasLockableCoverImageFile entity, bool locked, bool commit = true,
@@ -280,10 +315,10 @@ public class ImageFileService(
         SyncLegacyCover(sharer, copy);
     }
 
-    private async Task ReleaseIfUnheldAsync(IHasCoverImageFile entity, ImageFile? previous, List<string> staleFiles,
+    private async Task ReleaseIfUnheldAsync(ImageFile? previous, List<string> staleFiles,
         CancellationToken ct)
     {
-        if (previous == null || previous.Kind != Describe(entity).Kind) return;
+        if (previous == null) return;
         if ((await GetHoldersAsync(previous, [], ct)).Count > 0) return;
 
         unitOfWork.ImageFileRepository.Remove(previous);
@@ -312,7 +347,11 @@ public class ImageFileService(
     private async Task FinishAsync(bool commit, List<string> staleFiles, List<IHasCoverImageFile> changed,
         CancellationToken ct)
     {
-        if (!commit) return;
+        if (!commit)
+        {
+            _replacedFiles.AddRange(staleFiles);
+            return;
+        }
 
         await unitOfWork.CommitAsync(ct);
 
