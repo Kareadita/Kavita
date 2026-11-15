@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Collection;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 
@@ -51,6 +52,10 @@ public interface ICollectionTagRepository
     Task<bool> CollectionExists(string title, int userId, CancellationToken ct = default);
     Task<IList<AppUserCollection>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, CancellationToken ct = default);
     Task<IList<string>> GetRandomCoverImagesAsync(int collectionId, CancellationToken ct = default);
+    /// <summary>
+    /// Cover rows of the collection's series, untracked. Series with no cover are left out
+    /// </summary>
+    Task<IList<ImageFile>> GetItemCoverFilesAsync(int collectionId, CancellationToken ct = default);
     Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
     Task UpdateCollectionAgeRating(AppUserCollection tag, CancellationToken ct = default);
     Task<IEnumerable<AppUserCollection>> GetCollectionsByIds(IEnumerable<int> tags, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);

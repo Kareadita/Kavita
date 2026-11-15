@@ -16,8 +16,10 @@ namespace Kavita.Models.Images;
 /// quality). Nothing is written and the lock is left as it was. Needs an <see cref="ImageSource.FromFile"/></param>
 /// <param name="RejectPlaceholder">Skip the write when the source matches AniList's "no image" placeholder. Needs an
 /// <see cref="ImageSource.FromFile"/></param>
+/// <param name="InputHash">Stored on the row; set by composite covers only</param>
 public sealed record CoverWrite(
     ImageOrigin Origin,
     bool Lock,
     bool ChooseBetter = false,
-    bool RejectPlaceholder = false);
+    bool RejectPlaceholder = false,
+    string? InputHash = null);

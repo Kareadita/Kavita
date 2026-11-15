@@ -82,6 +82,10 @@ public class ImageFileService(
         row.SourceHeight = written.SourceHeight;
         row.PrimaryColor = colors.Primary;
         row.SecondaryColor = colors.Secondary;
+        row.InputHash = write.InputHash;
+        // A rewrite with the same size and colors changes no column, and composite covers read this to see new art
+        row.LastModified = DateTime.Now;
+        row.LastModifiedUtc = DateTime.UtcNow;
 
         Link(entity, row);
         if (lockable != null && write.Lock)

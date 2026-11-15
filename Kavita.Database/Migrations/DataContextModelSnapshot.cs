@@ -741,6 +741,9 @@ namespace Kavita.Database.Migrations
                     b.Property<int?>("Height")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("InputHash")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Key")
                         .HasColumnType("TEXT");
 

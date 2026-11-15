@@ -161,6 +161,15 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
             .ToList();
     }
 
+    public async Task<IList<ImageFile>> GetItemCoverFilesAsync(int collectionId, CancellationToken ct = default)
+    {
+        return await context.AppUserCollection
+            .AsNoTracking()
+            .Where(c => c.Id == collectionId)
+            .SelectMany(c => c.Items.Where(s => s.CoverImageFile != null).Select(s => s.CoverImageFile!))
+            .ToListAsync(ct);
+    }
+
     public async Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId,
         CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default)
     {

@@ -34,6 +34,11 @@ public class ImageFile : IEntityDate
     /// What the image belongs to when no entity points at it: the host for a favicon, the name for a publisher
     /// </summary>
     public string? Key { get; set; }
+    /// <summary>
+    /// <see cref="ImageOrigin.Composite"/> rows only: hash of the item covers the image was built from, so a rebuild
+    /// with the same inputs is skipped
+    /// </summary>
+    public string? InputHash { get; set; }
 
     public string? PrimaryColor { get; set; }
     public string? SecondaryColor { get; set; }

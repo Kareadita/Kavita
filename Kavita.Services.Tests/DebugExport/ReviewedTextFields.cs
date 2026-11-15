@@ -144,6 +144,7 @@ public static class ReviewedTextFields
         "IdentityUserToken<Int32>.LoginProvider",
         "IdentityUserToken<Int32>.Name",
         "ImageFile.FileName",
+        "ImageFile.InputHash",
         "ImageFile.Key",
         "ImageFile.PrimaryColor",
         "ImageFile.SecondaryColor",

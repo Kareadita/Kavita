@@ -418,6 +418,22 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
 
     public static void CreateMergedImage(IList<string> coverImages, CoverImageSize size, string dest)
     {
+        using var image = BuildMergedImage(coverImages, size);
+        image.WriteToFile(dest);
+    }
+
+    /// <summary>
+    /// Tiles up to 4 covers into one image, sized to <paramref name="size"/>
+    /// </summary>
+    /// <returns>Lossless PNG bytes, for the pipeline to encode</returns>
+    public static byte[] CreateMergedImageBuffer(IList<string> coverImages, CoverImageSize size)
+    {
+        using var image = BuildMergedImage(coverImages, size);
+        return image.PngsaveBuffer(compression: 1);
+    }
+
+    private static Image BuildMergedImage(IList<string> coverImages, CoverImageSize size)
+    {
         var (width, height) = size.GetDimensions();
         int rows, cols;
 
@@ -467,11 +483,12 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
                 image = merged;
             }
 
-            image.WriteToFile(dest);
+            return image;
         }
-        finally
+        catch
         {
             image.Dispose();
+            throw;
         }
     }
 
