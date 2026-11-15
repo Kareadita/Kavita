@@ -122,6 +122,44 @@ public class CompositeCoverServiceTests : AbstractDbTest, IDisposable
         Assert.Null(savedLocked.CoverImageFileId);
     }
 
+    [Fact]
+    public async Task Refresh_CoverWithAlpha_SetsCover()
+    {
+        var (service, context) = await Setup();
+        var collection = await SeedCollection(context, seriesCount: 2);
+        var withAlpha = await context.AppUserCollection.Where(c => c.Id == collection.Id)
+            .SelectMany(c => c.Items.Select(s => s.CoverImageFile!.FileName)).FirstAsync();
+        WriteImage(Path.Join(_covers, withAlpha), 320, 455, bands: 4);
+        context.ChangeTracker.Clear();
+
+        await service.RefreshAsync(ImageKind.CollectionCover, collection.Id, force: false);
+
+        context.ChangeTracker.Clear();
+        Assert.NotNull((await context.AppUserCollection.SingleAsync(c => c.Id == collection.Id)).CoverImageFileId);
+    }
+
+    [Fact]
+    public async Task RefreshAll_EmptiedCollection_ClearsBuiltCover()
+    {
+        var (service, context) = await Setup();
+        var collection = await SeedCollection(context, seriesCount: 2);
+        await service.RefreshAsync(ImageKind.CollectionCover, collection.Id, force: false);
+
+        context.ChangeTracker.Clear();
+        var tracked = await context.AppUserCollection.Include(c => c.Items).SingleAsync(c => c.Id == collection.Id);
+        tracked.Items.Clear();
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        await service.CreateMissingCoversAsync();
+        context.ChangeTracker.Clear();
+        Assert.NotNull((await context.AppUserCollection.SingleAsync(c => c.Id == collection.Id)).CoverImageFileId);
+
+        await service.RefreshAllAsync();
+        context.ChangeTracker.Clear();
+        Assert.Null((await context.AppUserCollection.SingleAsync(c => c.Id == collection.Id)).CoverImageFileId);
+    }
+
     private async Task<(ICompositeCoverService Service, DataContext Context)> Setup()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
@@ -181,11 +219,11 @@ public class CompositeCoverServiceTests : AbstractDbTest, IDisposable
         return series;
     }
 
-    private void WriteImage(string path, int width, int height)
+    private void WriteImage(string path, int width, int height, int bands = 3)
     {
         _imagesWritten++;
-        using var black = Image.Black(width, height, bands: 3);
-        using var colored = black + new double[] { 200, 80, _imagesWritten * 40 % 256 };
+        using var black = Image.Black(width, height, bands: bands);
+        using var colored = black + new double[] { 200, 80, _imagesWritten * 40 % 256, 128 }.Take(bands).ToArray();
         using var cast = colored.Cast(NetVips.Enums.BandFormat.Uchar);
         cast.Webpsave(path);
     }

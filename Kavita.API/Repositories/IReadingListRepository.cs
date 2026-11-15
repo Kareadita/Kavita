@@ -45,9 +45,10 @@ public interface IReadingListRepository
     /// </summary>
     Task<IList<ImageFile>> GetItemCoverFilesAsync(int readingListId, CancellationToken ct = default);
     /// <summary>
-    /// Unlocked reading lists with no cover row and at least one chapter with a cover
+    /// Unlocked reading lists with no cover row and at least one chapter with a cover, plus, unless
+    /// <paramref name="onlyMissing"/>, those whose cover Kavita built
     /// </summary>
-    Task<IList<int>> GetIdsMissingCompositeCoverAsync(CancellationToken ct = default);
+    Task<IList<int>> GetCompositeCoverIdsAsync(bool onlyMissing, CancellationToken ct = default);
     Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default);
     Task<bool> ReadingListExists(string name, int? readingListId = null, CancellationToken ct = default);
     IEnumerable<PersonDto> GetReadingListPeopleAsync(int readingListId, PersonRole role, CancellationToken ct = default);

@@ -601,6 +601,13 @@ public class SettingsService(
             unitOfWork.SettingsRepository.Update(setting);
             return true;
         }
+
+        if (setting.Key == ServerSettingKey.TaskCompositeCovers && updateSettingsDto.TaskCompositeCovers != setting.Value)
+        {
+            setting.Value = updateSettingsDto.TaskCompositeCovers;
+            unitOfWork.SettingsRepository.Update(setting);
+            return true;
+        }
         return false;
     }
 

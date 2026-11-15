@@ -2616,6 +2616,8 @@
         "cleanup-tooltip": "How often Kavita will run cleanup tasks. This can be heavy and should be performed at midnight in most cases.",
         "cbl-sync-label": "Reading List Sync",
         "cbl-sync-tooltip": "How often Kavita will check for new updates to CBL Reading Lists. Defaults to daily at 4am.",
+        "composite-covers-label": "Reading List & Collection Covers",
+        "composite-covers-tooltip": "How often Kavita will rebuild the reading list and collection covers it makes from their items, picking up items added or removed since the last run. Recommended to run after the Reading List Sync. Defaults to daily at 5 am.",
         "adhoc-tasks-title": "Ad-hoc Tasks",
         "job-title-header": "Job Title",
         "description-header": "Description",
@@ -3338,7 +3340,8 @@
         "scan-libraries": "Scan all libraries",
         "cleanup": "Cleanup",
         "backup": "Backup",
-        "sync-cbl": "Sync reading lists"
+        "sync-cbl": "Sync reading lists",
+        "refresh-composite-covers": "Refresh reading list and collection covers"
     },
 
     "download-queue-drawer": {

@@ -3,6 +3,7 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Database;
@@ -69,7 +70,7 @@ public class MigrationServiceTests(ITestOutputHelper testOutputHelper) : Abstrac
     {
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), _fileSystem);
         return new MigrationService(unitOfWork, context, Substitute.For<IVersionUpdaterService>(), directoryService,
-            _backupService, Substitute.For<ILogger<MigrationService>>());
+            _backupService, Substitute.For<IBackgroundJobClient>(), Substitute.For<ILogger<MigrationService>>());
     }
 
     private static async Task MarkAllMigrationsApplied(DataContext context)

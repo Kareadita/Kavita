@@ -52,9 +52,10 @@ public interface ICollectionTagRepository
     /// </summary>
     Task<IList<ImageFile>> GetItemCoverFilesAsync(int collectionId, CancellationToken ct = default);
     /// <summary>
-    /// Unlocked collections with no cover row and at least one series with a cover
+    /// Unlocked collections with no cover row and at least one series with a cover, plus, unless
+    /// <paramref name="onlyMissing"/>, those whose cover Kavita built
     /// </summary>
-    Task<IList<int>> GetIdsMissingCompositeCoverAsync(CancellationToken ct = default);
+    Task<IList<int>> GetCompositeCoverIdsAsync(bool onlyMissing, CancellationToken ct = default);
     Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
     Task UpdateCollectionAgeRating(AppUserCollection tag, CancellationToken ct = default);
     Task<IEnumerable<AppUserCollection>> GetCollectionsByIds(IEnumerable<int> tags, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);

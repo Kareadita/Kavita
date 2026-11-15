@@ -155,11 +155,12 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
             .ToListAsync(ct);
     }
 
-    public async Task<IList<int>> GetIdsMissingCompositeCoverAsync(CancellationToken ct = default)
+    public async Task<IList<int>> GetCompositeCoverIdsAsync(bool onlyMissing, CancellationToken ct = default)
     {
         return await context.AppUserCollection
-            .Where(c => c.CoverImageFileId == null && !c.CoverImageLocked)
-            .Where(c => c.Items.Any(s => s.CoverImageFileId != null))
+            .Where(c => !c.CoverImageLocked)
+            .Where(c => (c.CoverImageFileId == null && c.Items.Any(s => s.CoverImageFileId != null))
+                        || (!onlyMissing && c.CoverImageFile!.Origin == ImageOrigin.Composite))
             .Select(c => c.Id)
             .ToListAsync(ct);
     }

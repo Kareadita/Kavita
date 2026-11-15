@@ -34,24 +34,46 @@ public class CompositeCoverService(
         return BuildAsync(kind, id, force: false, onlyIfMissing: true, ct);
     }
 
-    public async Task CreateMissingCoversAsync(CancellationToken ct = default)
+    public Task CreateMissingCoversAsync(CancellationToken ct = default)
     {
-        var readingListIds = await unitOfWork.ReadingListRepository.GetIdsMissingCompositeCoverAsync(ct);
+        return BuildAllAsync(onlyIfMissing: true, ct);
+    }
+
+    public Task RefreshAllAsync(CancellationToken ct = default)
+    {
+        return BuildAllAsync(onlyIfMissing: false, ct);
+    }
+
+    private async Task BuildAllAsync(bool onlyIfMissing, CancellationToken ct)
+    {
+        var readingListIds = await unitOfWork.ReadingListRepository.GetCompositeCoverIdsAsync(onlyIfMissing, ct);
         foreach (var id in readingListIds)
         {
-            await CreateIfMissingAsync(ImageKind.ReadingListCover, id, ct);
+            await TryBuildAsync(ImageKind.ReadingListCover, id, onlyIfMissing, ct);
         }
 
-        var collectionIds = await unitOfWork.CollectionTagRepository.GetIdsMissingCompositeCoverAsync(ct);
+        var collectionIds = await unitOfWork.CollectionTagRepository.GetCompositeCoverIdsAsync(onlyIfMissing, ct);
         foreach (var id in collectionIds)
         {
-            await CreateIfMissingAsync(ImageKind.CollectionCover, id, ct);
+            await TryBuildAsync(ImageKind.CollectionCover, id, onlyIfMissing, ct);
         }
 
         if (readingListIds.Count + collectionIds.Count > 0)
         {
-            logger.LogInformation("Built missing covers for {ReadingListCount} reading lists and {CollectionCount} collections",
+            logger.LogInformation("Checked covers for {ReadingListCount} reading lists and {CollectionCount} collections",
                 readingListIds.Count, collectionIds.Count);
+        }
+    }
+
+    private async Task TryBuildAsync(ImageKind kind, int id, bool onlyIfMissing, CancellationToken ct)
+    {
+        try
+        {
+            await BuildAsync(kind, id, force: false, onlyIfMissing, ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogWarning(ex, "Could not build the {Kind} for {Id}, keeping its current cover", kind, id);
         }
     }
 

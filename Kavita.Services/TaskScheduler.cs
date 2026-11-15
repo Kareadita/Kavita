@@ -27,6 +27,7 @@ using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Extensions;
@@ -74,6 +75,7 @@ public class TaskScheduler : ITaskScheduler
     public const string CleanupDbTaskId = TaskSchedulerConstants.CleanupDbTaskId;
     public const string CleanupTaskId = TaskSchedulerConstants.CleanupTaskId;
     public const string TaskCblSyncId = TaskSchedulerConstants.TaskCblSyncId;
+    public const string RefreshCompositeCoversId = TaskSchedulerConstants.RefreshCompositeCoversId;
     public const string BackupTaskId = TaskSchedulerConstants.BackupTaskId;
     public const string ScanLibrariesTaskId = TaskSchedulerConstants.ScanLibrariesTaskId;
     public const string ReportStatsTaskId = TaskSchedulerConstants.ReportStatsTaskId;
@@ -236,6 +238,21 @@ public class TaskScheduler : ITaskScheduler
         }
 
 
+        setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskCompositeCovers, cancellationToken)).Value;
+        if (IsInvalidCronSetting(setting))
+        {
+            _logger.LogError("Composite Cover Refresh Task has invalid cron, defaulting to Daily");
+            RecurringJob.AddOrUpdate<ICompositeCoverService>(RefreshCompositeCoversId, service => service.RefreshAllAsync(CancellationToken.None),
+                "0 5 * * *", RecurringJobOptions);
+        }
+        else
+        {
+            _logger.LogDebug("Scheduling Composite Cover Refresh Task for {Setting}", setting);
+            RecurringJob.AddOrUpdate<ICompositeCoverService>(RefreshCompositeCoversId, service => service.RefreshAllAsync(CancellationToken.None),
+                CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
+        }
+
+
         RecurringJob.AddOrUpdate<ICleanupService>(RemoveFromWantToReadTaskId,
             (service) => service.CleanupWantToRead(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
@@ -263,6 +280,7 @@ public class TaskScheduler : ITaskScheduler
             "*/5 * * * *", RecurringJobOptions);
 
     }
+
 
     private static bool IsInvalidCronSetting(string? setting)
     {
@@ -1020,7 +1038,7 @@ public class TaskScheduler : ITaskScheduler
     /// </summary>
     public static IList<UpcomingTaskDto> GetUpcomingTasks()
     {
-        string[] taskIds = [ScanLibrariesTaskId, CleanupTaskId, BackupTaskId, TaskCblSyncId];
+        string[] taskIds = [ScanLibrariesTaskId, CleanupTaskId, BackupTaskId, TaskCblSyncId, RefreshCompositeCoversId];
 
         using var connection = JobStorage.Current.GetConnection();
         return connection.GetRecurringJobs(taskIds)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common.EnvironmentInfo;
@@ -53,7 +54,7 @@ public interface IMigrationService
 }
 
 public class MigrationService(IUnitOfWork unitOfWork, DataContext context, IVersionUpdaterService versionService, IDirectoryService directoryService,
-    IBackupService backupService, ILogger<MigrationService> logger) : IMigrationService
+    IBackupService backupService, IBackgroundJobClient backgroundJobClient, ILogger<MigrationService> logger) : IMigrationService
 {
     private const string DatabaseFile = "kavita.db";
     private const bool SnapshotOnVersionChange = false;
@@ -234,6 +235,7 @@ public class MigrationService(IUnitOfWork unitOfWork, DataContext context, IVers
             await new ManualMigrationClearRootLowestFolderPath().RunAsync(context, logger);
             await new ManualMigrateRemoveLegacyGithubCaches(directoryService).RunAsync(context, logger);
             await new ManualMigrateImageFileBackfill(directoryService).RunAsync(context, logger);
+            await new ManualMigrateCompositeCovers(backgroundJobClient).RunAsync(context, logger);
 
             #endregion
 

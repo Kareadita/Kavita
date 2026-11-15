@@ -178,7 +178,7 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
 #pragma warning disable S2245
         var random = new Random(ColorScapeSeed);
 #pragma warning restore S2245
-        var centroids = points.OrderBy(x => random.Next()).Take(k).ToList();
+        var centroids = points.OrderBy(_ => random.Next()).Take(k).ToList();
 
         for (var i = 0; i < maxIterations; i++)
         {
@@ -448,7 +448,7 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         }
 
 
-        var image = Image.Black(width, height);
+        var image = Image.Black(width, height, bands: 3);
         try
         {
             var thumbnailWidth = image.Width / cols;
@@ -458,7 +458,9 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
             {
                 if (!File.Exists(coverImages[i])) continue;
                 using var source = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
-                using var tile = source.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
+                using var thumbnail = source.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
+                // Insert needs equal band counts (or a single-band side), so an RGBA cover next to RGB ones throws
+                using var tile = thumbnail.HasAlpha() ? thumbnail.Flatten() : thumbnail.Copy();
 
                 var row = i / cols;
                 var col = i % cols;

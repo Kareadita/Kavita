@@ -55,11 +55,12 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
             .ToListAsync(ct);
     }
 
-    public async Task<IList<int>> GetIdsMissingCompositeCoverAsync(CancellationToken ct = default)
+    public async Task<IList<int>> GetCompositeCoverIdsAsync(bool onlyMissing, CancellationToken ct = default)
     {
         return await context.ReadingList
-            .Where(r => r.CoverImageFileId == null && !r.CoverImageLocked)
-            .Where(r => r.Items.Any(ri => ri.Chapter.CoverImageFileId != null))
+            .Where(r => !r.CoverImageLocked)
+            .Where(r => (r.CoverImageFileId == null && r.Items.Any(ri => ri.Chapter.CoverImageFileId != null))
+                        || (!onlyMissing && r.CoverImageFile!.Origin == ImageOrigin.Composite))
             .Select(r => r.Id)
             .ToListAsync(ct);
     }

@@ -260,6 +260,7 @@ public static class ReviewedTextFields
         "ServerSettingKey.TaskBackup",
         "ServerSettingKey.TaskCblSync",
         "ServerSettingKey.TaskCleanup",
+        "ServerSettingKey.TaskCompositeCovers",
         "ServerSettingKey.TaskScan",
         "ServerSettingKey.TotalBackups",
         "ServerSettingKey.TotalLogs",

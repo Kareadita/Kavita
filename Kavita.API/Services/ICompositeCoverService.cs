@@ -24,4 +24,10 @@ public interface ICompositeCoverService
     /// </summary>
     [DisableConcurrentExecution(timeoutInSeconds: 60 * 60), AutomaticRetry(Attempts = 0)]
     Task CreateMissingCoversAsync(CancellationToken ct = default);
+    /// <summary>
+    /// <see cref="CreateMissingCoversAsync"/>, plus <see cref="RefreshAsync"/> on every cover Kavita built, so item changes
+    /// since the last run are picked up and a list or collection left with no item covers loses its cover
+    /// </summary>
+    [DisableConcurrentExecution(timeoutInSeconds: 60 * 60), AutomaticRetry(Attempts = 0)]
+    Task RefreshAllAsync(CancellationToken ct = default);
 }

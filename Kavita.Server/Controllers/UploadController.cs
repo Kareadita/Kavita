@@ -43,14 +43,16 @@ public class UploadController : BaseApiController
     private readonly ILocalizationService _localizationService;
     private readonly IUrlValidationService _urlValidationService;
     private readonly IImageFileService _imageFileService;
+    private readonly ICompositeCoverService _compositeCoverService;
 
     /// <inheritdoc />
     public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger,
         ITaskScheduler taskScheduler, IDirectoryService directoryService, IReadingListService readingListService,
         ILocalizationService localizationService, IUrlValidationService urlValidationService,
-        IImageFileService imageFileService)
+        IImageFileService imageFileService, ICompositeCoverService compositeCoverService)
     {
         _imageFileService = imageFileService;
+        _compositeCoverService = compositeCoverService;
         _unitOfWork = unitOfWork;
         _imageService = imageService;
         _logger = logger;
@@ -293,6 +295,7 @@ public class UploadController : BaseApiController
             else
             {
                 await _imageFileService.ClearCoverAsync(tag, ct: ct);
+                await _compositeCoverService.CreateIfMissingAsync(ImageKind.CollectionCover, tag.Id, ct);
             }
 
             return Ok();
@@ -336,6 +339,7 @@ public class UploadController : BaseApiController
             else
             {
                 await _imageFileService.ClearCoverAsync(readingList, ct: ct);
+                await _compositeCoverService.CreateIfMissingAsync(ImageKind.ReadingListCover, readingList.Id, ct);
             }
 
             return Ok();
