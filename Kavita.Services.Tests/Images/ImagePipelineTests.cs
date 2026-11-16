@@ -54,6 +54,24 @@ public class ImagePipelineTests : IDisposable
         Assert.True(written.HasAlpha());
     }
 
+    [Fact]
+    public void Reencode_SmallCover_NotEnlarged()
+    {
+        var source = Path.Join(_directory, "series1.webp");
+        using (var image = Image.Black(320, 455, bands: 3))
+        {
+            image.Webpsave(source);
+        }
+
+        var result = _pipeline.Reencode(source, ImageKind.SeriesCover,
+            new ImagePolicy(EncodeFormat.PNG, CoverImageSize.Medium), _directory, "series1.png");
+
+        using var written = Image.NewFromFile(Path.Join(_directory, "series1.png"));
+        Assert.Equal("pngload", written.Get("vips-loader"));
+        Assert.Equal((320, 455), (written.Width, written.Height));
+        Assert.Equal((320, 455), (result.Width, result.Height));
+    }
+
     private static byte[] TransparentPng()
     {
         using var image = Image.Black(8, 8, bands: 4);

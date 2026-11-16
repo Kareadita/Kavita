@@ -15,4 +15,10 @@ public interface IImagePipeline
     /// The extension comes from the source, not the encode setting, since the bytes are not re-encoded
     /// </summary>
     ImageWriteResult Copy(string sourcePath, ImageKind kind, string directory, string fileStem);
+
+    /// <summary>
+    /// Encodes <paramref name="sourcePath"/> again under <paramref name="policy"/> into <paramref name="fileName"/> in
+    /// <paramref name="directory"/>, shrinking it into the kind's box. Never enlarges and never crops, unlike <see cref="Write"/>
+    /// </summary>
+    ImageWriteResult Reencode(string sourcePath, ImageKind kind, ImagePolicy policy, string directory, string fileName);
 }

@@ -20,21 +20,8 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
     public ImageWriteResult Write(ImageSource source, ImageKind kind, ImagePolicy policy, string directory, string fileName)
     {
         var profile = ImageProfile.For(kind);
-        Directory.CreateDirectory(directory);
-        var tmpPath = Path.Join(directory, $"{Path.GetFileNameWithoutExtension(fileName)}.{Guid.NewGuid():N}.tmp");
-
-        try
-        {
-            // Writes the staged file then Moves it into place
-            var staged = Stage(source, profile, policy, policy.Format.ForKind(kind), tmpPath);
-            MoveIntoPlace(tmpPath, Path.Join(directory, fileName));
-
-            return new ImageWriteResult(fileName, staged.Width, staged.Height, staged.SourceWidth, staged.SourceHeight);
-        }
-        finally
-        {
-            DeleteQuietly(tmpPath);
-        }
+        return StageAndMove(directory, fileName,
+            tmpPath => Stage(source, profile, policy, policy.Format.ForKind(kind), tmpPath));
     }
 
     /// <inheritdoc />
@@ -57,6 +44,42 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
             MoveIntoPlace(tmpPath, Path.Join(directory, fileName));
 
             return new ImageWriteResult(fileName, width, height, width, height);
+        }
+        finally
+        {
+            DeleteQuietly(tmpPath);
+        }
+    }
+
+    /// <inheritdoc />
+    public ImageWriteResult Reencode(string sourcePath, ImageKind kind, ImagePolicy policy, string directory, string fileName)
+    {
+        // Read into memory due to WebP opened from disk keeping its handle on Windows, so it could not be replaced or deleted
+        var bytes = File.ReadAllBytes(sourcePath);
+        var box = ImageProfile.For(kind).GetBox(policy);
+
+        return StageAndMove(directory, fileName, tmpPath =>
+        {
+            using var source = Image.NewFromBuffer(bytes);
+            using var shrunk = box is { } b
+                ? Image.ThumbnailBuffer(bytes, b.Width, height: b.Height, size: Enums.Size.Down)
+                : null;
+
+            return Save(shrunk ?? source, source, tmpPath, policy.Format.ForKind(kind));
+        });
+    }
+
+    private ImageWriteResult StageAndMove(string directory, string fileName, Func<string, StagedImage> stage)
+    {
+        Directory.CreateDirectory(directory);
+        var tmpPath = Path.Join(directory, $"{Path.GetFileNameWithoutExtension(fileName)}.{Guid.NewGuid():N}.tmp");
+
+        try
+        {
+            var staged = stage(tmpPath);
+            MoveIntoPlace(tmpPath, Path.Join(directory, fileName));
+
+            return new ImageWriteResult(fileName, staged.Width, staged.Height, staged.SourceWidth, staged.SourceHeight);
         }
         finally
         {

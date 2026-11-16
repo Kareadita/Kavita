@@ -10,7 +10,9 @@ namespace Kavita.Services.Tests.Images;
 /// </summary>
 public class EncodeFormatComparison(ITestOutputHelper output)
 {
-    private static readonly string OutputDirectory = Path.Join(Path.GetTempPath(), "kavita-encode-compare");
+    private static readonly string OutputDirectory =
+        Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ImageService/EncodeFormat"));
+    private const string OutputSuffix = "_output";
 
     public void Compare()
     {
@@ -34,16 +36,17 @@ public class EncodeFormatComparison(ITestOutputHelper output)
 
     private SourceResult Convert(string name, string sourcePath)
     {
-        var source = Path.Join(OutputDirectory, name + ".webp");
+        var stem = name + OutputSuffix;
+        var source = Path.Join(OutputDirectory, stem + ".webp");
         File.Copy(sourcePath, source, overwrite: true);
 
-        using (var image = Image.NewFromFile(source)) image.WriteToFile(Path.Join(OutputDirectory, name + ".png"));
-        using (var image = Image.NewFromFile(Path.Join(OutputDirectory, name + ".png"))) image.WriteToFile(Path.Join(OutputDirectory, name + "-roundtrip.webp"));
-        using (var image = Image.NewFromFile(source)) image.Jpegsave(Path.Join(OutputDirectory, name + ".jpg"), background: [255, 255, 255]);
+        using (var image = Image.NewFromFile(source)) image.WriteToFile(Path.Join(OutputDirectory, stem + ".png"));
+        using (var image = Image.NewFromFile(Path.Join(OutputDirectory, stem + ".png"))) image.WriteToFile(Path.Join(OutputDirectory, stem + "-roundtrip.webp"));
+        using (var image = Image.NewFromFile(source)) image.Jpegsave(Path.Join(OutputDirectory, stem + ".jpg"), background: [255, 255, 255]);
 
         using var original = Image.NewFromFile(source);
         var variants = new[] { ".webp", ".png", "-roundtrip.webp", ".jpg" }
-            .Select(suffix => Measure(original, name + suffix))
+            .Select(suffix => Measure(original, stem + suffix))
             .ToList();
 
         output.WriteLine($"{name}: {Path.GetFileName(sourcePath)} {original.Width}x{original.Height}");
@@ -110,7 +113,7 @@ public class EncodeFormatComparison(ITestOutputHelper output)
             const result = results.find(r => r.Name === which.value);
             grid.innerHTML = '';
             for (const v of result.Variants) {
-              const suffix = v.File.substring(result.Name.length);
+              const suffix = v.File.substring((result.Name + '_output').length);
               const cell = document.createElement('div');
               cell.className = 'cell';
               cell.innerHTML = `<h3>${titles[suffix]}</h3><small>${v.File}, ${v.SizeKb} KB, max diff ${v.MaxDiff}, mean ${v.MeanDiff}</small><div class="view"><img src="${v.File}"></div>`;
