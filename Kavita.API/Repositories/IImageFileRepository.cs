@@ -1,6 +1,8 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.Entities;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Images;
 
 namespace Kavita.API.Repositories;
@@ -19,4 +21,10 @@ public interface IImageFileRepository
     /// Tracked chapters, volumes and series whose cover is <paramref name="imageFileId"/>
     /// </summary>
     Task<ImageFileHolders> GetHoldersAsync(int imageFileId, CancellationToken ct = default);
+    /// <summary>
+    /// Get every <see cref="ImageOrigin"/> that belongs to a Backup, which Kavita cannot rebuild. Bookmarks are excluded as they
+    /// go into a separate backup path.
+    /// </summary>
+    /// <remarks>As NoTracking()</remarks>
+    Task<IList<ImageFile>> GetForBackupAsync(CancellationToken ct = default);
 }

@@ -47,6 +47,11 @@ public interface IImageFileService
         CancellationToken ct = default);
 
     /// <summary>
+    /// The folder images of <paramref name="kind"/> are stored in
+    /// </summary>
+    Task<string> GetImageDirectoryAsync(ImageKind kind, CancellationToken ct = default);
+
+    /// <summary>
     /// True when the entity has a cover row and its file is on disk
     /// </summary>
     bool HasCoverFile(IHasCoverImageFile entity);

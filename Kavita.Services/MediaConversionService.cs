@@ -23,6 +23,7 @@ public class MediaConversionService(
     IImagePipeline imagePipeline,
     IEventHub eventHub,
     IDirectoryService directoryService,
+    IImageFileService imageFileService,
     ILogger<MediaConversionService> logger)
     : IMediaConversionService
 {
@@ -48,8 +49,7 @@ public class MediaConversionService(
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     public async Task ConvertAllBookmarkToEncoding(CancellationToken ct = default)
     {
-        var bookmarkDirectory =
-            (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory, ct)).Value;
+        var bookmarkDirectory = await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct);
         var encodeFormat =
             (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
 

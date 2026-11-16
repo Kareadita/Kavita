@@ -3,12 +3,17 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using AutoMapper;
 using Hangfire;
+using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Database;
 using Kavita.Database.Extensions;
 using Kavita.Database.Tests;
 using Kavita.Models.AutoMapper;
+using Kavita.Models.Entities;
+using Kavita.Models.Entities.Enums;
+using Kavita.Models.Images;
 using Kavita.Models.Sqlite;
+using Kavita.Services.Images;
 using Kavita.Services.Scanner;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +28,7 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
 {
     private readonly ILogger<BackupService> _logger = Substitute.For<ILogger<BackupService>>();
     private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
+    private readonly IImageFileService _imageFileService = Substitute.For<IImageFileService>();
 
 
     #region GetLogFiles
@@ -37,7 +43,7 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         filesystem.AddFile($"{LogDirectory}kavita1.log", new MockFileData(""));
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var backupService = new BackupService(_logger, unitOfWork, ds, _messageHub);
+        var backupService = new BackupService(_logger, unitOfWork, ds, _imageFileService, _messageHub);
 
         var backupLogFiles = backupService.GetLogFiles(false).ToList();
         Assert.Single((IEnumerable)backupLogFiles);
@@ -54,7 +60,7 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         filesystem.AddFile($"{LogDirectory}kavita20200213.log", new MockFileData(""));
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var backupService = new BackupService(_logger, unitOfWork, ds, _messageHub);
+        var backupService = new BackupService(_logger, unitOfWork, ds, _imageFileService, _messageHub);
 
         var backupLogFiles = backupService.GetLogFiles().Select(Parser.NormalizePath).ToList();
         Assert.Contains(backupLogFiles, file => file.Equals(Parser.NormalizePath($"{LogDirectory}kavita.log")) || file.Equals(Parser.NormalizePath($"{LogDirectory}kavita1.log")));
@@ -93,7 +99,7 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
             GlobalConfiguration.Configuration.UseInMemoryStorage();
             var unitOfWork = new UnitOfWork(context, mapper, null!);
 
-            var backupService = new BackupService(_logger, unitOfWork, ds, _messageHub);
+            var backupService = new BackupService(_logger, unitOfWork, ds, _imageFileService, _messageHub);
 
             var backupPath = Path.Combine(tempBackupDir, "kavita.db");
             await backupService.SnapshotDatabase(backupPath);
@@ -155,7 +161,7 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
 
                 var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateFileSystem());
                 var unitOfWork = new UnitOfWork(context, new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>()).CreateMapper(), null!);
-                await new BackupService(_logger, unitOfWork, ds, _messageHub).SnapshotDatabase(backupPath);
+                await new BackupService(_logger, unitOfWork, ds, _imageFileService, _messageHub).SnapshotDatabase(backupPath);
             }
 
             Assert.Equal(journalMode, await ReadJournalMode(backupPath));
@@ -196,7 +202,7 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
             var (unitOfWork, _, _) = await CreateDatabase();
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateFileSystem());
 
-            await new BackupService(_logger, unitOfWork, ds, _messageHub).SnapshotDatabase(backupPath);
+            await new BackupService(_logger, unitOfWork, ds, _imageFileService, _messageHub).SnapshotDatabase(backupPath);
 
             Assert.True(File.Exists(backupPath));
         }
@@ -226,7 +232,7 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
 
         // Act
-        var backupService = new BackupService(_logger, unitOfWork, ds, _messageHub);
+        var backupService = new BackupService(_logger, unitOfWork, ds, _imageFileService, _messageHub);
 
         // Assert - Use reflection to access the private _backupFiles field
         var backupFilesField = typeof(BackupService).GetField("_backupFiles",
@@ -244,6 +250,50 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
 
         // Verify appsettings.json is still in the list
         Assert.Contains("appsettings.json", backupFiles);
+    }
+
+    #endregion
+
+    #region CopyCoverImages
+
+    [Fact]
+    public async Task Backup_CopiesByOrigin()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var filesystem = CreateFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var imageFileService = new ImageFileService(unitOfWork, Substitute.For<IImagePipeline>(), ds, _messageHub,
+            Substitute.For<ILogger<ImageFileService>>());
+
+        var rows = new[]
+        {
+            new ImageFile { Kind = ImageKind.PersonCover, FileName = "person1.webp", Origin = ImageOrigin.Upload },
+            new ImageFile { Kind = ImageKind.UserCover, FileName = "user1.webp", Origin = ImageOrigin.Oidc },
+            new ImageFile { Kind = ImageKind.Publisher, FileName = "viz.png", Origin = ImageOrigin.CoversDb, Key = "Viz" },
+            new ImageFile { Kind = ImageKind.ChapterCover, FileName = "v1_c1.webp", Origin = ImageOrigin.Scan },
+            new ImageFile { Kind = ImageKind.SeriesCover, FileName = "series1.webp", Origin = ImageOrigin.KavitaPlus },
+            new ImageFile { Kind = ImageKind.Bookmark, FileName = "1/1/1/1.webp", Origin = ImageOrigin.Legacy },
+        };
+        context.ImageFile.AddRange(rows);
+        await context.SaveChangesAsync();
+
+        foreach (var row in rows.Where(r => r.Kind != ImageKind.Bookmark))
+        {
+            filesystem.AddFile(filesystem.Path.Join(await imageFileService.GetImageDirectoryAsync(row.Kind), row.FileName), new MockFileData([1]));
+        }
+        filesystem.AddFile(BookmarkDirectory + "1/1/1/1.webp", new MockFileData([1]));
+
+        var backupService = new BackupService(_logger, unitOfWork, ds, imageFileService, _messageHub);
+        var temp = TempDirectory + "backup/";
+
+        await backupService.CopyCoverImagesToBackupDirectory(temp);
+
+        Assert.True(filesystem.File.Exists(temp + "covers/person1.webp"));
+        Assert.True(filesystem.File.Exists(temp + "covers/user1.webp"));
+        Assert.True(filesystem.File.Exists(temp + "images/publishers/viz.png"));
+        Assert.False(filesystem.File.Exists(temp + "covers/v1_c1.webp"));
+        Assert.False(filesystem.File.Exists(temp + "covers/series1.webp"));
+        Assert.False(filesystem.File.Exists(temp + "covers/1.webp"));
     }
 
     #endregion

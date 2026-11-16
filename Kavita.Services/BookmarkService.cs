@@ -9,9 +9,9 @@ using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Models.DTOs.Reader;
-using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 
@@ -22,7 +22,8 @@ public class BookmarkService(
     ILogger<BookmarkService> logger,
     IUnitOfWork unitOfWork,
     IDirectoryService directoryService,
-    IMediaConversionService mediaConversionService)
+    IMediaConversionService mediaConversionService,
+    IImageFileService imageFileService)
     : IBookmarkService
 {
     /// <summary>
@@ -32,8 +33,7 @@ public class BookmarkService(
     /// <param name="ct"></param>
     public async Task DeleteBookmarkFiles(IEnumerable<AppUserBookmark?> bookmarks, CancellationToken ct = default)
     {
-        var bookmarkDirectory =
-            (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory, ct)).Value;
+        var bookmarkDirectory = await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct);
 
         var bookmarkFilesToDelete = bookmarks
             .Where(b => b != null)
@@ -62,8 +62,7 @@ public class BookmarkService(
     /// <remarks>This must be public</remarks>
     public async Task ConvertBookmarkToEncoding(int bookmarkId, CancellationToken ct = default)
     {
-        var bookmarkDirectory =
-            (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory, ct)).Value;
+        var bookmarkDirectory = await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct);
         var encodeFormat =
             (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
 
@@ -184,8 +183,7 @@ public class BookmarkService(
     public async Task<IEnumerable<string>> GetBookmarkFilesById(int userId, int seriesId, IEnumerable<int> bookmarkIds,
         CancellationToken ct = default)
     {
-        var bookmarkDirectory =
-            (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory, ct)).Value;
+        var bookmarkDirectory = await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct);
 
         var bookmarks = await unitOfWork.UserRepository.GetAllBookmarksByIds(userId, seriesId, bookmarkIds.ToList(), ct);
 

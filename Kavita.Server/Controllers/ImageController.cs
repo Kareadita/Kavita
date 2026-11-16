@@ -11,7 +11,7 @@ using Kavita.API.Services.Plus;
 using Kavita.API.Services.ReadingLists;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
-using Kavita.Models.Entities.Enums;
+using Kavita.Models.Images;
 using Kavita.Server.Attributes;
 using Kavita.Services;
 using Kavita.Services.Plus;
@@ -27,7 +27,7 @@ namespace Kavita.Server.Controllers;
 [SkipDeviceTracking]
 public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService,
     ILocalizationService localizationService, ICoverDbService coverDbService,
-    IExternalMetadataService externalMetadataService) : BaseApiController
+    IExternalMetadataService externalMetadataService, IImageFileService imageFileService) : BaseApiController
 {
 
     /// <summary>
@@ -142,8 +142,7 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
         var bookmark = await unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, imageOffset, UserId, ct);
         if (bookmark == null) return BadRequest(await localizationService.TranslateAsync(UserId, "bookmark-doesnt-exist"));
 
-        var bookmarkDirectory =
-            (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory, ct)).Value;
+        var bookmarkDirectory = await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct);
         var path = Path.Join(bookmarkDirectory, bookmark.FileName);
 
         return PhysicalFile(path);

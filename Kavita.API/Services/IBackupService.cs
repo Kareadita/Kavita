@@ -9,9 +9,9 @@ public interface IBackupService
 {
     public const string LogFile = "config/logs/kavita.log";
 
-    // Hangfire reads filters from the type a job is queued on, and TaskScheduler queues this on the interface
+    /// <returns>False when no zip was written</returns>
     [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
-    Task BackupDatabase(CancellationToken ct = default);
+    Task<bool> BackupDatabase(CancellationToken ct = default);
     /// <summary>
     /// Returns a list of all log files for Kavita
     /// </summary>

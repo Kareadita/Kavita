@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Repositories;
 using Kavita.Models.Entities;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Images;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,5 +47,14 @@ public class ImageFileRepository(DataContext context) : IImageFileRepository
             .ToListAsync(ct);
 
         return new ImageFileHolders(chapters, volumes, series);
+    }
+
+    public async Task<IList<ImageFile>> GetForBackupAsync(CancellationToken ct = default)
+    {
+        return await context.ImageFile
+            .Where(f => f.Origin != ImageOrigin.Scan && f.Origin != ImageOrigin.KavitaPlus)
+            .Where(f => f.Kind != ImageKind.Bookmark)
+            .AsNoTracking()
+            .ToListAsync(ct);
     }
 }

@@ -3,12 +3,14 @@ using System.IO.Abstractions.TestingHelpers;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
+using Kavita.API.Services.SignalR;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Builders;
+using Kavita.Services.Images;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -20,8 +22,10 @@ public class BookmarkServiceTests(ITestOutputHelper outputHelper): AbstractDbTes
 {
     private BookmarkService Create(IDirectoryService ds, IUnitOfWork unitOfWork)
     {
+        var imageFileService = new ImageFileService(unitOfWork, Substitute.For<IImagePipeline>(), ds,
+            Substitute.For<IEventHub>(), Substitute.For<ILogger<ImageFileService>>());
         return new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), unitOfWork, ds,
-Substitute.For<IMediaConversionService>());
+            Substitute.For<IMediaConversionService>(), imageFileService);
     }
 
     #region BookmarkPage

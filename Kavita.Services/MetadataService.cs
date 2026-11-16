@@ -65,6 +65,8 @@ public class MetadataService(
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null) return false;
 
+        await UnlockIfFileMissingAsync(chapter, ct);
+
         var sourceFile = directoryService.FileSystem.FileInfo.New(firstFile.FilePath);
         if (!cacheHelper.ShouldUpdateCoverImage(CoverPath(chapter), HasCoverSourceChanged(chapter, sourceFile), forceUpdate,
                 chapter.CoverImageLocked))
@@ -139,6 +141,14 @@ public class MetadataService(
         await imageFileService.ShareCoverAsync(target, source, lockBoth: false, commit: false, ct);
     }
 
+    // Kavita+ covers are not backed up and a Kavita+ refresh skips a locked cover, so unlock to allow K+ to set a cover and regen
+    private async Task UnlockIfFileMissingAsync(IHasLockableCoverImageFile entity, CancellationToken ct)
+    {
+        if (!entity.CoverImageLocked || imageFileService.HasCoverFile(entity)) return;
+
+        await imageFileService.UpdateLockAsync(entity, false, commit: false, ct);
+    }
+
     /// <remarks>A null stamp (no cover made since v0.9.2) counts as changed, so each cover is made once more</remarks>
     private static bool HasCoverSourceChanged(Chapter chapter, IFileInfo source)
     {
@@ -169,6 +179,8 @@ public class MetadataService(
         if (volume == null) return false;
 
         volume.Chapters ??= new List<Chapter>();
+        await UnlockIfFileMissingAsync(volume, ct);
+
         var coverChapter = volume.CoverImageLocked ? null : GetVolumeCoverChapter(volume);
         var coverMoved = coverChapter != null && !ReferenceEquals(coverChapter.CoverImageFile, volume.CoverImageFile);
 
@@ -212,6 +224,8 @@ public class MetadataService(
         if (series == null) return;
 
         series.Volumes ??= [];
+        await UnlockIfFileMissingAsync(series, ct);
+
         var coverSource = series.GetCoverSource();
         var coverMoved = !series.CoverImageLocked && !ReferenceEquals(coverSource?.CoverImageFile, series.CoverImageFile);
 

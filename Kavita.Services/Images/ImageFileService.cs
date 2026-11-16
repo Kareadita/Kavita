@@ -52,7 +52,7 @@ public class ImageFileService(
         var lockable = entity as IHasLockableCoverImageFile;
         if (lockable != null && !write.Lock)
         {
-            // Unlock before writing as a locked volume/series sharing this cover must use the current art
+            // Unlock before writing as a locked volume/series sharing this cover must use the current cover
             await ApplyLockAsync(lockable, false, ct);
         }
 
@@ -85,7 +85,7 @@ public class ImageFileService(
         row.PrimaryColor = colors.Primary;
         row.SecondaryColor = colors.Secondary;
         row.InputHash = write.InputHash;
-        // A rewrite with the same size and colors changes no column, and composite covers read this to see new art
+        // A rewrite with the same size and colors changes no column, and composite covers read this to see a new cover
         row.LastModified = DateTime.Now;
         row.LastModifiedUtc = DateTime.UtcNow;
 
@@ -204,12 +204,12 @@ public class ImageFileService(
     public async Task<string> WriteKeyedAsync(ImageSource source, ImageKind kind, string key, string fileName,
         ImageOrigin origin, CancellationToken ct = default)
     {
-        var directory = kind switch
+        if (kind is not (ImageKind.Favicon or ImageKind.Publisher))
         {
-            ImageKind.Favicon => directoryService.FaviconDirectory,
-            ImageKind.Publisher => directoryService.PublisherDirectory,
-            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Only favicons and publishers are keyed"),
-        };
+            throw new ArgumentOutOfRangeException(nameof(kind), kind, "Only favicons and publishers are keyed");
+        }
+
+        var directory = await GetImageDirectoryAsync(kind, ct);
 
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         var policy = new ImagePolicy(settings.EncodeMediaAs, CoverImageSize.Default);
@@ -233,6 +233,17 @@ public class ImageFileService(
         await unitOfWork.CommitAsync(ct);
 
         return written.FileName;
+    }
+
+    public async Task<string> GetImageDirectoryAsync(ImageKind kind, CancellationToken ct = default)
+    {
+        return kind switch
+        {
+            ImageKind.Favicon => directoryService.FaviconDirectory,
+            ImageKind.Publisher => directoryService.PublisherDirectory,
+            ImageKind.Bookmark => (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory, ct)).Value,
+            _ => directoryService.CoverImageDirectory,
+        };
     }
 
     public bool HasCoverFile(IHasCoverImageFile entity)
@@ -267,7 +278,7 @@ public class ImageFileService(
 
         if (!ownsRow) return;
 
-        // Sharers are volumes/series that share a cover from a chapter/volume; a locked one is unshared so it keeps its art
+        // Sharers are volumes/series that share a cover from a chapter/volume; a locked one is unshared so it keeps its cover
         var lockedSharers = holders
             .OfType<IHasLockableCoverImageFile>()
             .Where(h => !ReferenceEquals(h, entity) && h.CoverImageLocked && Describe(h).Kind != row.Kind)
@@ -284,8 +295,13 @@ public class ImageFileService(
         var sourcePath = Path.Join(directoryService.CoverImageDirectory, source.FileName);
         if (!File.Exists(sourcePath))
         {
-            logger.LogWarning("Could not give {Type} {Id} its own cover: {File} is missing, it stays on the shared row",
+            logger.LogDebug("{Type} {Id} has no cover of its own to keep: {File} is missing, so it is unlocked and stays on the shared row",
                 sharer.GetType().Name, sharer.Id, source.FileName);
+
+            if (sharer is IHasLockableCoverImageFile lockable)
+            {
+                lockable.CoverImageLocked = false;
+            }
             return;
         }
 

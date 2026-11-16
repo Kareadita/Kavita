@@ -12,6 +12,7 @@ using Kavita.Common.EnvironmentInfo;
 using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Images;
 using Kavita.Models.Sqlite;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ public class BackupService(
     ILogger<BackupService> logger,
     IUnitOfWork unitOfWork,
     IDirectoryService directoryService,
+    IImageFileService imageFileService,
     IEventHub eventHub)
     : IBackupService
 {
@@ -49,10 +51,12 @@ public class BackupService(
     }
 
     /// <summary>
-    /// Will back up anything that needs to be backed up. This includes logs, setting files, bare minimum cover images (just locked and first cover).
+    /// Will back up anything that needs to be backed up. This includes logs, setting files, and images a scan/Kavita+
+    /// refresh cannot rebuild: uploads, OIDC avatars, reading list and collection covers, favicons, publishers, etc.
+    /// Covers from a scan or from Kavita+ are left out
     /// </summary>
-    /// <param name="ct"></param>
-    public async Task BackupDatabase(CancellationToken ct = default)
+    /// <returns>False when no zip was written</returns>
+    public async Task<bool> BackupDatabase(CancellationToken ct = default)
     {
         logger.LogInformation("Beginning backup of Database at {BackupTime}", DateTime.Now);
         var backupDirectory = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory, ct)).Value;
@@ -63,7 +67,7 @@ public class BackupService(
             logger.LogCritical("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
             await eventHub.SendMessageAsync(MessageFactory.Error,
                 MessageFactory.BackupFolderUnwritableEvent(backupDirectory), ct: ct);
-            return;
+            return false;
         }
 
         await SendProgress(0F, "Started backup", ct);
@@ -77,7 +81,7 @@ public class BackupService(
             logger.LogCritical("{ZipFile} already exists, aborting", zipPath);
             await eventHub.SendMessageAsync(MessageFactory.Error,
                 MessageFactory.BackupExistsEvent(zipPath), ct: ct);
-            return;
+            return false;
         }
 
         var tempDirectory = Path.Join(directoryService.TempDirectory, dateString);
@@ -99,7 +103,7 @@ public class BackupService(
         CopyLogsToBackupDirectory(tempDirectory);
 
         await SendProgress(0.25F, "Copying cover images", ct);
-        await CopyCoverImagesToBackupDirectory(tempDirectory);
+        await CopyCoverImagesToBackupDirectory(tempDirectory, ct);
 
         await SendProgress(0.35F, "Copying templates images", ct);
         CopyTemplatesToBackupDirectory(tempDirectory);
@@ -113,9 +117,6 @@ public class BackupService(
         await SendProgress(0.75F, "Copying themes", ct);
         CopyThemesToBackupDirectory(tempDirectory);
 
-        await SendProgress(0.85F, "Copying favicons", ct);
-        CopyFaviconsToBackupDirectory(tempDirectory);
-
         try
         {
             await ZipFile.CreateFromDirectoryAsync(tempDirectory, zipPath, ct);
@@ -123,11 +124,14 @@ public class BackupService(
         catch (AggregateException ex)
         {
             logger.LogError(ex, "There was an issue when archiving library backup");
+            directoryService.ClearAndDeleteDirectory(tempDirectory);
+            return false;
         }
 
         directoryService.ClearAndDeleteDirectory(tempDirectory);
         logger.LogInformation("Database backup completed");
         await SendProgress(1F, "Completed backup", ct);
+        return true;
     }
 
     private void CopyLogsToBackupDirectory(string tempDirectory)
@@ -168,62 +172,46 @@ public class BackupService(
         await command.ExecuteNonQueryAsync(ct);
     }
 
-    private void CopyFaviconsToBackupDirectory(string tempDirectory)
-    {
-        directoryService.CopyDirectoryToDirectory(directoryService.FaviconDirectory, directoryService.FileSystem.Path.Join(tempDirectory, "favicons"));
-    }
-
     private void CopyTemplatesToBackupDirectory(string tempDirectory)
     {
         directoryService.CopyDirectoryToDirectory(directoryService.TemplateDirectory, directoryService.FileSystem.Path.Join(tempDirectory, "templates"));
     }
 
-    private async Task CopyCoverImagesToBackupDirectory(string tempDirectory)
+    internal async Task CopyCoverImagesToBackupDirectory(string tempDirectory, CancellationToken ct = default)
     {
-        var outputTempDir = Path.Join(tempDirectory, "covers");
-        directoryService.ExistOrCreate(outputTempDir);
+        var fileSystem = directoryService.FileSystem;
+        var rows = await unitOfWork.ImageFileRepository.GetForBackupAsync(ct);
 
-        try
+        foreach (var kind in rows.GroupBy(r => r.Kind))
         {
-            var seriesImages = await unitOfWork.SeriesRepository.GetLockedCoverImagesAsync();
-            directoryService.CopyFilesToDirectory(
-                seriesImages.Select(s => directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, s)), outputTempDir);
+            var folder = await imageFileService.GetImageDirectoryAsync(kind.Key, ct);
+            var outputDir = fileSystem.Path.Join(tempDirectory, fileSystem.Path.GetRelativePath(directoryService.ConfigDirectory, folder));
+            directoryService.ExistOrCreate(outputDir);
 
-            var collectionTags = await unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
-            directoryService.CopyFilesToDirectory(
-                collectionTags.Select(s => directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, s)), outputTempDir);
+            foreach (var row in kind)
+            {
+                var source = fileSystem.Path.Join(folder, row.FileName);
+                if (!fileSystem.File.Exists(source))
+                {
+                    logger.LogWarning("{File} is missing, so it is not in the backup", source);
+                    continue;
+                }
 
-            var chapterImages = await unitOfWork.ChapterRepository.GetCoverImagesForLockedChaptersAsync();
-            directoryService.CopyFilesToDirectory(
-                chapterImages.Select(s => directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, s)), outputTempDir);
-
-            var volumeImages = await unitOfWork.VolumeRepository.GetCoverImagesForLockedVolumesAsync();
-            directoryService.CopyFilesToDirectory(
-                volumeImages.Select(s => directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, s)), outputTempDir);
-
-            var libraryImages = await unitOfWork.LibraryRepository.GetAllCoverImagesAsync();
-            directoryService.CopyFilesToDirectory(
-                libraryImages.Select(s => directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, s)), outputTempDir);
-
-            var readingListImages = await unitOfWork.ReadingListRepository.GetAllCoverImagesAsync();
-            directoryService.CopyFilesToDirectory(
-                readingListImages.Select(s => directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, s)), outputTempDir);
-        }
-        catch (IOException)
-        {
-            // Swallow exception. This can be a duplicate cover being copied as chapter and volumes can share same file.
-        }
-
-        if (!directoryService.GetFiles(outputTempDir, searchOption: SearchOption.AllDirectories).Any())
-        {
-            directoryService.ClearAndDeleteDirectory(outputTempDir);
+                try
+                {
+                    fileSystem.File.Copy(source, fileSystem.Path.Join(outputDir, row.FileName));
+                }
+                catch (IOException ex)
+                {
+                    logger.LogWarning(ex, "Could not copy {File} into the backup", source);
+                }
+            }
         }
     }
 
     private async Task CopyBookmarksToBackupDirectory(string tempDirectory)
     {
-        var bookmarkDirectory =
-            (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+        var bookmarkDirectory = await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark);
 
         var outputTempDir = Path.Join(tempDirectory, "bookmarks");
         directoryService.ExistOrCreate(outputTempDir);

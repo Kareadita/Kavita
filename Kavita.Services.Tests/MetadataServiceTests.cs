@@ -393,6 +393,53 @@ public class MetadataServiceTests(ITestOutputHelper outputHelper) : AbstractDbTe
     }
 
     [Fact]
+    public async Task Scan_LockedCoverFileMissing_RebuiltUnlocked()
+    {
+        using var h = await Setup();
+        var seriesId = await AddSeries(h,
+            new VolumeBuilder("1").WithChapter(Chapter(h, "1", "v1.cbz")).Build(),
+            new VolumeBuilder("2").WithChapter(Chapter(h, "1", "v2.cbz")).Build());
+        await h.Generate(seriesId);
+
+        // After a restore: K+ chapter cover shared by its locked volume, an uploaded volume cover and K+ series cover, all gone
+        var series = await h.Load(seriesId);
+        var volume1 = series.Volumes.Single(v => v.Name == "1");
+        var volume2 = series.Volumes.Single(v => v.Name == "2");
+        var chapter1 = volume1.Chapters[0];
+        chapter1.CoverImageFile!.Origin = ImageOrigin.KavitaPlus;
+        chapter1.CoverImageLocked = true;
+        volume1.CoverImageLocked = true;
+        File.Delete(Path.Join(h.Covers, chapter1.CoverImageFile.FileName));
+        volume2.CoverImageFile = new ImageFile { Kind = ImageKind.VolumeCover, FileName = "volume_upload.webp", Origin = ImageOrigin.Upload };
+        volume2.CoverImageLocked = true;
+        series.CoverImageFile = new ImageFile { Kind = ImageKind.SeriesCover, FileName = "series_kplus.webp", Origin = ImageOrigin.KavitaPlus };
+        series.CoverImageLocked = true;
+        await h.Context.SaveChangesAsync();
+
+        await h.Generate(seriesId);
+
+        series = await h.Load(seriesId);
+        volume1 = series.Volumes.Single(v => v.Name == "1");
+        volume2 = series.Volumes.Single(v => v.Name == "2");
+        chapter1 = volume1.Chapters[0];
+        var chapter2 = volume2.Chapters[0];
+
+        Assert.False(chapter1.CoverImageLocked);
+        Assert.Equal(ImageOrigin.Scan, chapter1.CoverImageFile!.Origin);
+        Assert.True(File.Exists(Path.Join(h.Covers, chapter1.CoverImageFile.FileName)));
+
+        Assert.False(volume1.CoverImageLocked);
+        Assert.Equal(chapter1.CoverImageFileId, volume1.CoverImageFileId);
+        Assert.False(volume2.CoverImageLocked);
+        Assert.Equal(chapter2.CoverImageFileId, volume2.CoverImageFileId);
+
+        Assert.False(series.CoverImageLocked);
+        Assert.Equal(chapter1.CoverImageFileId, series.CoverImageFileId);
+        Assert.Equal(ImageOrigin.Scan, series.CoverImageFile!.Origin);
+        Assert.False(await h.Context.ImageFile.AnyAsync(f => f.FileName == "volume_upload.webp" || f.FileName == "series_kplus.webp"));
+    }
+
+    [Fact]
     public async Task GenerateCovers_UnreadableCover_ClearsChapterVolumeSeries()
     {
         using var h = await Setup();
@@ -410,8 +457,8 @@ public class MetadataServiceTests(ITestOutputHelper outputHelper) : AbstractDbTe
         Assert.Null(series.Volumes[0].CoverImageFileId);
         Assert.Null(series.CoverImageFileId);
         Assert.False(File.Exists(Path.Join(h.Covers, row.FileName)));
-        h.MediaErrorService.ReceivedWithAnyArgs(1)
-            .ReportMediaIssue(default!, default, MediaErrorReason.CoverFailed, default(Exception)!);
+        await h.MediaErrorService.ReceivedWithAnyArgs(1)
+            .ReportMediaIssueAsync(default!, default, MediaErrorReason.CoverFailed, default(Exception)!);
     }
 
     [Fact]
