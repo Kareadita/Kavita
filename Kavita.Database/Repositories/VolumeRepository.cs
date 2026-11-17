@@ -192,31 +192,6 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
             .ToListAsync(ct);
     }
 
-    public async Task<IList<Volume>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
-        CancellationToken ct = default)
-    {
-        var extension = encodeFormat.GetExtension();
-        return await context.Volume
-            .Includes(VolumeIncludes.Chapters)
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
-            .AsSplitQuery()
-            .ToListAsync(ct);
-    }
-
-
-    /// <summary>
-    /// Returns cover images for locked chapters
-    /// </summary>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    public async Task<IEnumerable<string>> GetCoverImagesForLockedVolumesAsync(CancellationToken ct = default)
-    {
-        return (await context.Volume
-            .Where(c => c.CoverImageLocked)
-            .Select(c => c.CoverImage)
-            .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync(ct))!;
-    }
 
     public async Task<long> GetFilesizeAsync(int volumeId, CancellationToken ct = default)
     {

@@ -1,5 +1,7 @@
 ﻿using Kavita.Models.Builders;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
 using Kavita.Services.Builders;
 using Kavita.Services.Comparators;
 using Kavita.Services.Extensions;
@@ -33,7 +35,7 @@ public class SeriesExtensionsTests
             vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
-        Assert.Equal("Special 1", series.GetCoverImage());
+        Assert.Equal("Special 1", CoverOf(series));
     }
 
     [Fact]
@@ -68,7 +70,7 @@ public class SeriesExtensionsTests
             vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
-        Assert.Equal("Volume 1 Chapter 1", series.GetCoverImage());
+        Assert.Equal("Volume 1 Chapter 1", CoverOf(series));
     }
 
     [Fact]
@@ -101,7 +103,7 @@ public class SeriesExtensionsTests
             .Build();
 
 
-        Assert.Equal("Chapter 1", series.GetCoverImage());
+        Assert.Equal("Chapter 1", CoverOf(series));
     }
 
     /// <summary>
@@ -139,7 +141,7 @@ public class SeriesExtensionsTests
             .Build();
 
 
-        Assert.Equal("Chapter 1", series.GetCoverImage());
+        Assert.Equal("Chapter 1", CoverOf(series));
     }
 
     [Fact]
@@ -181,7 +183,7 @@ public class SeriesExtensionsTests
             vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
-        Assert.Equal("Volume 1 Chapter 1", series.GetCoverImage());
+        Assert.Equal("Volume 1 Chapter 1", CoverOf(series));
     }
 
     [Fact]
@@ -210,7 +212,7 @@ public class SeriesExtensionsTests
             vol.CoverImage = vol.Chapters.MinBy(x => x.SortOrder, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
-        Assert.Equal("Volume 1", series.GetCoverImage());
+        Assert.Equal("Volume 1", CoverOf(series));
     }
 
     [Fact]
@@ -236,7 +238,7 @@ public class SeriesExtensionsTests
             vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
-        Assert.Equal("Special 2", series.GetCoverImage());
+        Assert.Equal("Special 2", CoverOf(series));
     }
 
     [Fact]
@@ -269,7 +271,7 @@ public class SeriesExtensionsTests
             vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
-        Assert.Equal("Chapter 2", series.GetCoverImage());
+        Assert.Equal("Chapter 2", CoverOf(series));
     }
 
     [Fact]
@@ -309,7 +311,7 @@ public class SeriesExtensionsTests
             vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
-        Assert.Equal("Volume 1", series.GetCoverImage());
+        Assert.Equal("Volume 1", CoverOf(series));
     }
 
     [Fact]
@@ -349,7 +351,7 @@ public class SeriesExtensionsTests
             vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
-        Assert.Equal("Volume 1", series.GetCoverImage());
+        Assert.Equal("Volume 1", CoverOf(series));
     }
 
     [Fact]
@@ -396,7 +398,7 @@ public class SeriesExtensionsTests
             vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
-        Assert.Equal("Volume 1", series.GetCoverImage());
+        Assert.Equal("Volume 1", CoverOf(series));
     }
 
     [Fact]
@@ -429,7 +431,7 @@ public class SeriesExtensionsTests
             vol.CoverImage = vol.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
         }
 
-        Assert.Equal("Chapter 2", series.GetCoverImage());
+        Assert.Equal("Chapter 2", CoverOf(series));
     }
 
     /// <summary>
@@ -460,7 +462,7 @@ public class SeriesExtensionsTests
                 .Build())
             .Build();
 
-        Assert.Equal("Chapter 1", series.GetCoverImage());
+        Assert.Equal("Chapter 1", CoverOf(series));
     }
 
     /// <summary>
@@ -495,8 +497,10 @@ public class SeriesExtensionsTests
                 .Build())
             .Build();
 
-        Assert.Equal("Chapter 1", series.GetCoverImage());
+        Assert.Equal("Chapter 1", CoverOf(series));
     }
 
-
+#pragma warning disable CS0618
+    private static string? CoverOf(Series series) => (series.GetCoverSource() as IHasCoverImage)?.CoverImage;
+#pragma warning restore CS0618
 }

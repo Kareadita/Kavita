@@ -11,8 +11,6 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
-using Kavita.Services.Comparators;
-using Kavita.Services.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services;
@@ -20,28 +18,12 @@ namespace Kavita.Services;
 public class MediaConversionService(
     IUnitOfWork unitOfWork,
     IImageService imageService,
-    IImagePipeline imagePipeline,
     IEventHub eventHub,
     IDirectoryService directoryService,
     IImageFileService imageFileService,
     ILogger<MediaConversionService> logger)
     : IMediaConversionService
 {
-    /// <summary>
-    /// Converts all Kavita managed media (bookmarks, covers, favicons, etc) to the saved target encoding.
-    /// Do not invoke anyway except via Hangfire.
-    /// </summary>
-    /// <param name="ct"></param>
-    /// <remarks>This is a long-running job</remarks>
-    /// <returns></returns>
-    [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
-    public async Task ConvertAllManagedMediaToEncodingFormat(CancellationToken ct = default)
-    {
-        await ConvertAllBookmarkToEncoding(ct);
-        await ConvertAllCoversToEncoding(ct);
-        await CoverAllFaviconsToEncoding(ct);
-    }
-
     /// <summary>
     /// This is a long-running job that will convert all bookmarks into a format. Do not invoke anyway except via Hangfire.
     /// </summary>
@@ -79,200 +61,6 @@ public class MediaConversionService(
 
         logger.LogInformation("[MediaConversionService] Converted bookmarks to {Format}", encodeFormat);
     }
-
-    /// <summary>
-    /// This is a long-running job that will convert all covers into WebP. Do not invoke anyway except via Hangfire.
-    /// </summary>
-    /// <param name="ct"></param>
-    [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
-    public async Task ConvertAllCoversToEncoding(CancellationToken ct = default)
-    {
-        var coverDirectory = directoryService.CoverImageDirectory;
-        var encodeFormat =
-            (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
-
-        logger.LogInformation("[MediaConversionService] Starting conversion of all covers to {Format}", encodeFormat);
-        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.ConvertCoverProgressEvent(0F, ProgressEventType.Started), ct: ct);
-
-        var chapterCovers = await unitOfWork.ChapterRepository.GetAllChaptersWithCoversInDifferentEncoding(encodeFormat, ct);
-        var customSeriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncodingAsync(encodeFormat, ct: ct);
-        var seriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncodingAsync(encodeFormat, false, ct);
-        var nonCustomOrConvertedVolumeCovers = await unitOfWork.VolumeRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);
-
-        var readingListCovers = await unitOfWork.ReadingListRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);
-        var libraryFormat = encodeFormat.ForKind(ImageKind.LibraryIcon);
-        var libraryCovers = await unitOfWork.LibraryRepository.GetAllWithCoversInDifferentEncoding(libraryFormat, ct);
-        var collectionCovers = await unitOfWork.CollectionTagRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);
-
-        var totalCount = chapterCovers.Count + seriesCovers.Count + readingListCovers.Count +
-                         libraryCovers.Count + collectionCovers.Count + nonCustomOrConvertedVolumeCovers.Count + customSeriesCovers.Count;
-
-        var count = 1F;
-        logger.LogInformation("[MediaConversionService] Starting conversion of chapters");
-        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.ConvertCoverProgressEvent(0, ProgressEventType.Started), ct: ct);
-        logger.LogInformation("[MediaConversionService] Starting conversion of libraries");
-        foreach (var library in libraryCovers)
-        {
-            if (string.IsNullOrEmpty(library.CoverImage)) continue;
-
-            var newFile = await SaveAsEncodingFormat(coverDirectory, library.CoverImage, coverDirectory, libraryFormat);
-            library.CoverImage = Path.GetFileName(newFile);
-
-            unitOfWork.LibraryRepository.Update(library);
-
-            await unitOfWork.CommitAsync(ct);
-            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated), ct: ct);
-
-            count++;
-        }
-
-        logger.LogInformation("[MediaConversionService] Starting conversion of reading lists");
-        foreach (var readingList in readingListCovers)
-        {
-            if (string.IsNullOrEmpty(readingList.CoverImage)) continue;
-
-            var newFile = await SaveAsEncodingFormat(coverDirectory, readingList.CoverImage, coverDirectory, encodeFormat);
-            readingList.CoverImage = Path.GetFileName(newFile);
-
-            unitOfWork.ReadingListRepository.Update(readingList);
-
-            await unitOfWork.CommitAsync(ct);
-            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated), ct: ct);
-
-            count++;
-        }
-
-        logger.LogInformation("[MediaConversionService] Starting conversion of collections");
-        foreach (var collection in collectionCovers)
-        {
-            if (string.IsNullOrEmpty(collection.CoverImage)) continue;
-
-            var newFile = await SaveAsEncodingFormat(coverDirectory, collection.CoverImage, coverDirectory, encodeFormat);
-            collection.CoverImage = Path.GetFileName(newFile);
-
-            unitOfWork.CollectionTagRepository.Update(collection);
-
-            await unitOfWork.CommitAsync(ct);
-            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated), ct: ct);
-
-            count++;
-        }
-
-        logger.LogInformation("[MediaConversionService] Starting conversion of chapters");
-        foreach (var chapter in chapterCovers)
-        {
-            if (string.IsNullOrEmpty(chapter.CoverImage)) continue;
-
-            var newFile = await SaveAsEncodingFormat(coverDirectory, chapter.CoverImage, coverDirectory, encodeFormat);
-            chapter.CoverImage = Path.GetFileName(newFile);
-
-            unitOfWork.ChapterRepository.Update(chapter);
-
-            await unitOfWork.CommitAsync(ct);
-            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated), ct: ct);
-
-            count++;
-        }
-
-        // Now null out all series and volumes that aren't webp or custom
-        logger.LogInformation("[MediaConversionService] Starting conversion of volumes");
-        foreach (var volume in nonCustomOrConvertedVolumeCovers)
-        {
-            if (string.IsNullOrEmpty(volume.CoverImage)) continue;
-            volume.CoverImage = volume.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
-            unitOfWork.VolumeRepository.Update(volume);
-            await unitOfWork.CommitAsync(ct);
-        }
-
-        logger.LogInformation("[MediaConversionService] Starting conversion of series");
-        foreach (var series in customSeriesCovers)
-        {
-            if (string.IsNullOrEmpty(series.CoverImage)) continue;
-
-            var newFile = await SaveAsEncodingFormat(coverDirectory, series.CoverImage, coverDirectory, encodeFormat);
-            series.CoverImage = string.IsNullOrEmpty(newFile) ?
-                series.CoverImage.Replace(Path.GetExtension(series.CoverImage), encodeFormat.GetExtension()) : Path.GetFileName(newFile);
-
-            unitOfWork.SeriesRepository.Update(series);
-            await unitOfWork.CommitAsync(ct);
-            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated), ct: ct);
-            count++;
-        }
-
-        foreach (var series in seriesCovers)
-        {
-            if (string.IsNullOrEmpty(series.CoverImage)) continue;
-            series.CoverImage = series.GetCoverImage();
-            if (series.CoverImage == null)
-            {
-                logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null: {SeriesId}", series.Id);
-            }
-            unitOfWork.SeriesRepository.Update(series);
-            await unitOfWork.CommitAsync(ct);
-        }
-
-        // Get all volumes and remap their covers
-
-        // Get all series and remap their covers
-
-        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.ConvertCoverProgressEvent(1F, ProgressEventType.Ended), ct: ct);
-
-        logger.LogInformation("[MediaConversionService] Converted covers to {Format}", encodeFormat);
-    }
-
-    private async Task CoverAllFaviconsToEncoding(CancellationToken ct = default)
-    {
-        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
-        var policy = new ImagePolicy(settings.EncodeMediaAs, settings.CoverImageSize);
-        var encodeFormat = policy.Format.ForKind(ImageKind.Favicon);
-
-        logger.LogInformation("[MediaConversionService] Starting conversion of favicons to {Format}", encodeFormat);
-        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.ConvertBookmarksProgressEvent(0F, ProgressEventType.Started), ct: ct);
-        var favicons = directoryService.GetFiles(directoryService.FaviconDirectory)
-            .Where(b => !b.EndsWith(encodeFormat.GetExtension())).
-            ToList();
-
-        var count = 1F;
-        foreach (var file in favicons)
-        {
-            ConvertFavicon(file, policy, encodeFormat);
-            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertBookmarksProgressEvent(count / favicons.Count, ProgressEventType.Updated), ct: ct);
-            count++;
-        }
-
-
-        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.ConvertBookmarksProgressEvent(1F, ProgressEventType.Ended), ct: ct);
-
-        logger.LogInformation("[MediaConversionService] Converted favicons to {Format}", encodeFormat);
-    }
-
-    private void ConvertFavicon(string file, ImagePolicy policy, EncodeFormat encodeFormat)
-    {
-        var fileName = Path.GetFileNameWithoutExtension(file) + encodeFormat.GetExtension();
-        try
-        {
-            // From bytes: loaded from the file, a WebP source stays open and Windows refuses to delete it
-            imagePipeline.Write(new ImageSource.FromBytes(File.ReadAllBytes(file)), ImageKind.Favicon, policy,
-                directoryService.FaviconDirectory, fileName);
-            directoryService.DeleteFiles([file]);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Could not convert favicon {File} to {Format}", file, encodeFormat);
-        }
-    }
-
 
     /// <summary>
     /// Converts an image file, deletes original and returns the new path back

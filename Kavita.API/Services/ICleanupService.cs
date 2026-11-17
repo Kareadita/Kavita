@@ -12,9 +12,6 @@ public interface ICleanupService
     Task CleanupDbEntries(CancellationToken ct = default);
     Task CleanupCacheAndTempDirectories(CancellationToken ct = default);
     void CleanupCacheDirectory();
-    Task DeleteSeriesCoverImages(CancellationToken ct = default);
-    Task DeleteChapterCoverImages(CancellationToken ct = default);
-    Task DeleteTagCoverImages(CancellationToken ct = default);
     Task CleanupBackups(CancellationToken ct = default);
     Task CleanupLogs(CancellationToken ct = default);
     Task CleanupDebugExports(CancellationToken ct = default);
@@ -26,5 +23,11 @@ public interface ICleanupService
     Task CleanupWantToRead(CancellationToken ct = default);
 
     Task ConsolidateProgress(CancellationToken ct = default);
+    /// <summary>
+    /// Deletes image rows with no FK (entity deleted/changed) and their files, then re-encodes rows whose format/size no longer
+    /// match the settings. Rows never probed (no <c>Format</c>) and bookmarks not included.
+    /// </summary>
+    [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
+    Task CleanupImages(CancellationToken ct = default);
 
 }

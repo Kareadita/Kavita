@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
@@ -12,11 +13,16 @@ using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using VipsException = NetVips.VipsException;
 
 namespace Kavita.Services;
 
@@ -27,19 +33,23 @@ public class CleanupService(
     ILogger<CleanupService> logger,
     IUnitOfWork unitOfWork,
     IEventHub eventHub,
-    IDirectoryService directoryService)
+    IDirectoryService directoryService,
+    IImagePipeline imagePipeline,
+    IImageFileService imageFileService)
     : ICleanupService
 {
+    private const int ImageBatchSize = 500;
+
     /// <summary>
     /// Cleans up Temp, cache, deleted cover images,  and old database backups
     /// </summary>
     /// <param name="ct"></param>
     public async Task Cleanup(CancellationToken ct = default)
     {
-        if (TaskScheduler.HasAlreadyEnqueuedTask<IMediaConversionService>(s => s.ConvertAllManagedMediaToEncodingFormat(CancellationToken.None),
+        if (TaskScheduler.HasAlreadyEnqueuedTask<ICleanupService>(s => s.CleanupImages(CancellationToken.None),
                 checkRunningJobs: true))
         {
-            logger.LogInformation("Cleanup put on hold as a media conversion in progress");
+            logger.LogInformation("Cleanup put on hold as an image cleanup is in progress");
             await eventHub.SendMessageAsync(MessageFactory.Info,
                 MessageFactory.CleanupOnHoldEvent(), ct: ct);
             return;
@@ -53,12 +63,11 @@ public class CleanupService(
             (CleanupBackups, "Cleaning old database backups"),
             (CleanupDebugExports, "Cleaning old debug exports"),
             (ConsolidateProgress, "Consolidating Progress Events"),
-            (CleanupDbEntries, "Cleaning abandoned database rows"), // Cleanup DB before removing files linked to DB entries
-            (DeleteSeriesCoverImages, "Cleaning deleted series cover images"),
-            (DeleteChapterCoverImages, "Cleaning deleted chapter cover images"),
-            (innerCt => Task.WhenAll(DeleteTagCoverImages(innerCt), DeleteReadingListCoverImages(innerCt), DeletePersonCoverImages(innerCt)), "Cleaning deleted cover images"),
+            (CleanupDbEntries, "Cleaning abandoned database rows"),
             (CleanupLogs, "Cleaning old logs"),
-            (EnsureChapterProgressIsCapped, "Cleaning progress events that exceed 100%")
+            (EnsureChapterProgressIsCapped, "Cleaning progress events that exceed 100%"),
+            // Last, so the image rows of anything removed above are already unreferenced
+            (QueueImageCleanup, "Queueing image cleanup")
         };
 
         await SendProgress(0F, "Starting cleanup", ct);
@@ -90,60 +99,16 @@ public class CleanupService(
         await unitOfWork.ReadingListRepository.RemoveReadingListsWithoutSeries(ct);
     }
 
+    private static Task QueueImageCleanup(CancellationToken ct)
+    {
+        TaskScheduler.QueueImageCleanup();
+        return Task.CompletedTask;
+    }
+
     private async Task SendProgress(float progress, string subtitle, CancellationToken ct = default)
     {
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CleanupProgressEvent(progress, subtitle), ct: ct);
-    }
-
-    /// <summary>
-    /// Removes all series images that are not in the database. They must follow <see cref="ImageService.SeriesCoverImageRegex"/> filename pattern.
-    /// </summary>
-    public async Task DeleteSeriesCoverImages(CancellationToken ct = default)
-    {
-        var images = await unitOfWork.SeriesRepository.GetAllCoverImagesAsync(ct);
-        var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.SeriesCoverImageRegex);
-        directoryService.DeleteFiles(files.Where(file => !images.Contains(directoryService.FileSystem.Path.GetFileName(file))));
-    }
-
-    /// <summary>
-    /// Removes all chapter/volume images that are not in the database. They must follow <see cref="ImageService.ChapterCoverImageRegex"/> filename pattern.
-    /// </summary>
-    public async Task DeleteChapterCoverImages(CancellationToken ct = default)
-    {
-        var images = await unitOfWork.ChapterRepository.GetAllCoverImagesAsync(ct);
-        var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.ChapterCoverImageRegex);
-        directoryService.DeleteFiles(files.Where(file => !images.Contains(directoryService.FileSystem.Path.GetFileName(file))));
-    }
-
-    /// <summary>
-    /// Removes all collection tag images that are not in the database. They must follow <see cref="ImageService.CollectionTagCoverImageRegex"/> filename pattern.
-    /// </summary>
-    public async Task DeleteTagCoverImages(CancellationToken ct = default)
-    {
-        var images = await unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync(ct);
-        var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.CollectionTagCoverImageRegex);
-        directoryService.DeleteFiles(files.Where(file => !images.Contains(directoryService.FileSystem.Path.GetFileName(file))));
-    }
-
-    /// <summary>
-    /// Removes all reading list images that are not in the database. They must follow <see cref="ImageService.ReadingListCoverImageRegex"/> filename pattern.
-    /// </summary>
-    public async Task DeleteReadingListCoverImages(CancellationToken ct = default)
-    {
-        var images = await unitOfWork.ReadingListRepository.GetAllCoverImagesAsync(ct);
-        var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.ReadingListCoverImageRegex);
-        directoryService.DeleteFiles(files.Where(file => !images.Contains(directoryService.FileSystem.Path.GetFileName(file))));
-    }
-
-    /// <summary>
-    /// Remove all person cover images no longer associated with a person in the database
-    /// </summary>
-    public async Task DeletePersonCoverImages(CancellationToken ct = default)
-    {
-        var images = await unitOfWork.PersonRepository.GetAllCoverImagesAsync(ct);
-        var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.PersonCoverImageRegex);
-        directoryService.DeleteFiles(files.Where(file => !images.Contains(directoryService.FileSystem.Path.GetFileName(file))));
     }
 
     /// <summary>
@@ -390,5 +355,155 @@ public class CleanupService(
         }
 
         logger.LogInformation("Performing cleanup of Series that are Completed and have been fully read that are in Want To Read list, completed");
+    }
+
+    [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
+    public async Task CleanupImages(CancellationToken ct = default)
+    {
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.ConvertCoverProgressEvent(0F, ProgressEventType.Started), ct: ct);
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        var policy = new ImagePolicy(settings.EncodeMediaAs, settings.CoverImageSize);
+        var kinds = Enum.GetValues<ImageKind>()
+            .Where(k => k != ImageKind.Bookmark)
+            .ToList();
+        var folders = new Dictionary<ImageKind, string>();
+        var tally = new ImageCleanupTally();
+
+        foreach (var kind in kinds)
+        {
+            folders[kind] = await imageFileService.GetImageDirectoryAsync(kind, ct);
+        }
+
+        await DeleteUnusedImages(folders, tally, ct);
+
+        foreach (var kind in kinds)
+        {
+            await ReencodeImages(kind, folders[kind], policy, tally, ct);
+        }
+
+        logger.LogInformation(
+            "[CleanupService] Deleted {Deleted} unused images and re-encoded {Reencoded}; skipped {Missing} missing and {Unreadable} unreadable",
+            tally.Deleted, tally.Reencoded, tally.Missing, tally.Unreadable);
+
+        // TODO: We may want to pass extra information into this event
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.ConvertCoverProgressEvent(1F, ProgressEventType.Ended), ct: ct);
+    }
+
+    private async Task DeleteUnusedImages(Dictionary<ImageKind, string> folders, ImageCleanupTally tally, CancellationToken ct)
+    {
+        await foreach (var batch in unitOfWork.ImageFileRepository.GetImageFilesForDeletionAsync(ImageBatchSize, ct))
+        {
+            foreach (var row in batch)
+            {
+                unitOfWork.ImageFileRepository.Remove(row);
+            }
+
+            await unitOfWork.CommitAsync(ct);
+
+            foreach (var row in batch)
+            {
+                DeleteQuietly(Path.Join(folders[row.Kind], row.FileName));
+            }
+
+            tally.Deleted += batch.Count;
+        }
+    }
+
+    private async Task ReencodeImages(ImageKind kind, string folder, ImagePolicy policy, ImageCleanupTally tally,
+        CancellationToken ct)
+    {
+        var format = policy.Format.ForKind(kind);
+        var box = ImageProfile.For(kind).GetBox(policy);
+
+        await foreach (var batch in unitOfWork.ImageFileRepository.GetImageFilesForReencodeAsync(kind, format, box, ImageBatchSize, ct))
+        {
+            var replacedNames = new Dictionary<int, string>();
+            foreach (var row in batch)
+            {
+                var source = Path.Join(folder, row.FileName);
+                if (!File.Exists(source))
+                {
+                    tally.Missing++;
+                    logger.LogInformation("[CleanupService] Missing image: {File} ({Kind}, row {Id})", source, kind, row.Id);
+                    continue;
+                }
+
+                var fileName = Path.ChangeExtension(row.FileName, format.GetExtension());
+                ImageWriteResult written;
+                try
+                {
+                    written = imagePipeline.Reencode(source, kind, policy, folder, fileName);
+                }
+                catch (Exception ex) when (ex is VipsException or IOException)
+                {
+                    tally.Unreadable++;
+                    logger.LogInformation(ex, "[CleanupService] Unreadable image: {File} ({Kind}, row {Id})", source, kind, row.Id);
+                    continue;
+                }
+
+                if (!string.Equals(fileName, row.FileName, StringComparison.Ordinal))
+                {
+                    replacedNames[row.Id] = row.FileName;
+                }
+
+                row.FileName = fileName;
+                row.Format = format;
+                row.Width = written.Width;
+                row.Height = written.Height;
+                tally.Reencoded++;
+            }
+
+            if (replacedNames.Count > 0)
+            {
+                await SyncLegacyCoverNames(batch.Where(r => replacedNames.ContainsKey(r.Id)).ToList(), ct);
+            }
+
+            await unitOfWork.CommitAsync(ct);
+
+            foreach (var oldName in replacedNames.Values)
+            {
+                DeleteQuietly(Path.Join(folder, oldName));
+            }
+        }
+    }
+
+    // Workaround until every reader uses CoverImageFile, keeps the legacy CoverImage string pointing at the new file
+    private async Task SyncLegacyCoverNames(List<ImageFile> renamed, CancellationToken ct)
+    {
+        var newNames = renamed.ToDictionary(r => r.Id, r => r.FileName);
+        var holders = await unitOfWork.ImageFileRepository.GetAllHoldersAsync(newNames.Keys.ToList(), ct);
+
+#pragma warning disable CS0618
+        foreach (var holder in holders)
+        {
+            if (holder is IHasCoverImage legacy)
+            {
+                legacy.CoverImage = newNames[holder.CoverImageFileId!.Value];
+            }
+        }
+#pragma warning restore CS0618
+    }
+
+    private void DeleteQuietly(string path)
+    {
+        try
+        {
+            File.Delete(path);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            logger.LogWarning(ex, "[CleanupService] Could not delete {File}", path);
+        }
+    }
+
+    private sealed class ImageCleanupTally
+    {
+        public int Deleted { get; set; }
+        public int Reencoded { get; set; }
+        public int Missing { get; set; }
+        public int Unreadable { get; set; }
     }
 }

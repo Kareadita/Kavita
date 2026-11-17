@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Images;
 
 namespace Kavita.API.Repositories;
@@ -27,4 +28,21 @@ public interface IImageFileRepository
     /// </summary>
     /// <remarks>As NoTracking()</remarks>
     Task<IList<ImageFile>> GetForBackupAsync(CancellationToken ct = default);
+    /// <summary>
+    /// Tracked rows with no entities still on disk for physical file deletion.
+    /// Favicon, publisher and bookmark rows are never returned.
+    /// </summary>
+    /// <remarks>Safe to remove each batch before reading the next</remarks>
+    IAsyncEnumerable<List<ImageFile>> GetImageFilesForDeletionAsync(int batchSize, CancellationToken ct = default);
+    /// <summary>
+    /// Tracked rows of <paramref name="kind"/> with a known format that is not <paramref name="format"/>, or that are
+    /// larger than <paramref name="box"/>
+    /// </summary>
+    /// <remarks>Safe to update each batch before reading the next</remarks>
+    IAsyncEnumerable<List<ImageFile>> GetImageFilesForReencodeAsync(ImageKind kind, EncodeFormat format, ImageBox? box,
+        int batchSize, CancellationToken ct = default);
+    /// <summary>
+    /// Tracked entities of every kind whose cover is one of <paramref name="imageFileIds"/>
+    /// </summary>
+    Task<IList<IHasCoverImageFile>> GetAllHoldersAsync(IList<int> imageFileIds, CancellationToken ct = default);
 }

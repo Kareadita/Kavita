@@ -417,9 +417,21 @@ public class TaskScheduler : ITaskScheduler
 
     public void ConvertAllCoversToEncoding()
     {
-        if (HasAlreadyEnqueuedTask<IMediaConversionService>(s => s.ConvertAllManagedMediaToEncodingFormat(CancellationToken.None), checkRunningJobs: true)) return;
+        // TODO: Do this for Bookmarks once UI is updated
+        if (!HasAlreadyEnqueuedTask<IMediaConversionService>(s => s.ConvertAllBookmarkToEncoding(CancellationToken.None), checkRunningJobs: true))
+        {
+            BackgroundJob.Enqueue<IMediaConversionService>(s => s.ConvertAllBookmarkToEncoding(CancellationToken.None));
+        }
 
-        BackgroundJob.Enqueue(() => _mediaConversionService.ConvertAllManagedMediaToEncodingFormat());
+        QueueImageCleanup();
+    }
+
+    // TODO: See if we can bring this to an Extension and make all cases do it this way
+    public static void QueueImageCleanup()
+    {
+        if (HasAlreadyEnqueuedTask<ICleanupService>(s => s.CleanupImages(CancellationToken.None), checkRunningJobs: true)) return;
+
+        BackgroundJob.Enqueue<ICleanupService>(s => s.CleanupImages(CancellationToken.None));
     }
 
     #endregion

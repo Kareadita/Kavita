@@ -38,14 +38,6 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         context.Add(list);
     }
 
-    public async Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default)
-    {
-        return (await context.ReadingList
-            .Select(t => t.CoverImage)
-            .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync(ct))!;
-    }
-
     public async Task<IList<ImageFile>> GetItemCoverFilesAsync(int readingListId, CancellationToken ct = default)
     {
         return await context.ReadingListItem
@@ -156,15 +148,6 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         }
 
         return cast;
-    }
-
-    public async Task<IList<ReadingList>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
-        CancellationToken ct = default)
-    {
-        var extension = encodeFormat.GetExtension();
-        return await context.ReadingList
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
-            .ToListAsync(ct);
     }
 
 

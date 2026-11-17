@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Kavita.Common.Extensions;
 using Kavita.Models.Entities;
@@ -9,18 +8,6 @@ namespace Kavita.Services.Extensions;
 
 public static class SeriesExtensions
 {
-    /// <summary>
-    /// Calculates the Cover Image for the Series
-    /// </summary>
-    /// <param name="series"></param>
-    /// <returns></returns>
-    /// <remarks>This is under the assumption that the Volume already has a Cover Image calculated and set</remarks>
-    [Obsolete("Use ImageFile")]
-    public static string? GetCoverImage(this Series series)
-    {
-        return (series.GetCoverSource() as IHasCoverImage)?.CoverImage;
-    }
-
     /// <summary>
     /// The chapter or volume the series takes its cover from
     /// </summary>

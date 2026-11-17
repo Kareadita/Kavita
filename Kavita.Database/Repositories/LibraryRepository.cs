@@ -301,23 +301,6 @@ public class LibraryRepository(DataContext context, IMapper mapper) : ILibraryRe
 
     }
 
-    public async Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default)
-    {
-        return (await context.ReadingList
-            .Select(t => t.CoverImage)
-            .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync(ct))!;
-    }
-
-    public async Task<IList<Library>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
-        CancellationToken ct = default)
-    {
-        var extension = encodeFormat.GetExtension();
-        return await context.Library
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
-            .ToListAsync(ct);
-    }
-
     public async Task<bool> GetAllowsScrobblingBySeriesId(int seriesId, CancellationToken ct = default)
     {
         return await context.Series.Where(s => s.Id == seriesId)

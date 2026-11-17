@@ -87,13 +87,6 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
     }
 
 
-    public async Task<IList<string?>> GetAllCoverImagesAsync(CancellationToken ct = default)
-    {
-        return await context.Person
-            .Select(p => p.CoverImage)
-            .ToListAsync(ct);
-    }
-
     public async Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId,
         CancellationToken ct = default)
     {

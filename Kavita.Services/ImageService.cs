@@ -24,12 +24,6 @@ namespace Kavita.Services;
 public class ImageService(ILogger<ImageService> logger, IDirectoryService directoryService, IImagePipeline imagePipeline)
     : IImageService
 {
-    public const string ChapterCoverImageRegex = @"v\d+_c\d+";
-    public const string SeriesCoverImageRegex = @"series\d+";
-    public const string CollectionTagCoverImageRegex = @"tag\d+";
-    public const string ReadingListCoverImageRegex = @"readinglist\d+";
-    public const string PersonCoverImageRegex = @"person\d+";
-
     // Fixed seed for generation of ColorScapes. Do not change
     private const int ColorScapeSeed = 7;
 
@@ -335,7 +329,7 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     /// <returns></returns>
     public static string GetSeriesFormat(int seriesId)
     {
-        return $"series{seriesId}"; // If this ever changes, also needs to update in SeriesRepository#GetAllWithCoversInDifferentEncodingAsync
+        return $"series{seriesId}";
     }
 
     /// <summary>

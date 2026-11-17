@@ -428,6 +428,24 @@ public static class QueryableExtensions
     }
 
     /// <summary>
+    /// Filters to image rows no chapter, volume, series, library, person, reading list, user, collection or bookmark
+    /// points at
+    /// </summary>
+    public static IQueryable<ImageFile> WhereNotReferenced(this IQueryable<ImageFile> query, DataContext context)
+    {
+        return query
+            .Where(f => !context.Chapter.Any(e => e.CoverImageFileId == f.Id)
+                        && !context.Volume.Any(e => e.CoverImageFileId == f.Id)
+                        && !context.Series.Any(e => e.CoverImageFileId == f.Id)
+                        && !context.Library.Any(e => e.CoverImageFileId == f.Id)
+                        && !context.Person.Any(e => e.CoverImageFileId == f.Id)
+                        && !context.ReadingList.Any(e => e.CoverImageFileId == f.Id)
+                        && !context.Users.Any(e => e.CoverImageFileId == f.Id)
+                        && !context.AppUserCollection.Any(e => e.CoverImageFileId == f.Id)
+                        && !context.AppUserBookmark.Any(e => e.ImageFileId == f.Id));
+    }
+
+    /// <summary>
     /// Filters a sequence to elements where the specified key falls within an inclusive range.
     /// </summary>
     /// <param name="keySelector">Expression to extract the comparable key</param>

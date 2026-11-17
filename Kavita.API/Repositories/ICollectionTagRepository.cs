@@ -44,9 +44,7 @@ public interface ICollectionTagRepository
     Task<PagedList<AppUserCollectionDto>> GetCollectionDtosPagedAsync(int userId, UserParams userParams, bool includePromoted = false, CancellationToken ct = default);
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosBySeriesAsync(int userId, int seriesId, bool includePromoted = false, CancellationToken ct = default);
 
-    Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default);
     Task<bool> CollectionExists(string title, int userId, CancellationToken ct = default);
-    Task<IList<AppUserCollection>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, CancellationToken ct = default);
     /// <summary>
     /// Cover rows of the collection's series, untracked. Series with no cover are left out
     /// </summary>

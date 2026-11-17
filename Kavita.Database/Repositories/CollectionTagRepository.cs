@@ -114,14 +114,6 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
             .SingleOrDefaultAsync(ct);
     }
 
-    public async Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default)
-    {
-        return await context.AppUserCollection
-            .Select(t => t.CoverImage)
-            .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync(ct);
-    }
-
     /// <summary>
     /// If any tag exists for that given user's collections
     /// </summary>
@@ -135,15 +127,6 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
         return await context.AppUserCollection
             .Where(uc => uc.AppUserId == userId)
             .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized), ct);
-    }
-
-    public async Task<IList<AppUserCollection>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
-        CancellationToken ct = default)
-    {
-        var extension = encodeFormat.GetExtension();
-        return await context.AppUserCollection
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
-            .ToListAsync(ct);
     }
 
     public async Task<IList<ImageFile>> GetItemCoverFilesAsync(int collectionId, CancellationToken ct = default)

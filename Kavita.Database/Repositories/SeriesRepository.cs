@@ -632,31 +632,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .ToListAsync(ct);
     }
 
-    /// <summary>
-    /// Returns custom images only
-    /// </summary>
-    /// <remarks>If customOnly, this will not include any volumes/chapters</remarks>
-    /// <returns></returns>
-    public async Task<IList<Series>> GetAllWithCoversInDifferentEncodingAsync(EncodeFormat encodeFormat,
-        bool customOnly = true, CancellationToken ct = default)
-    {
-        var extension = encodeFormat.GetExtension();
-        var prefix = "series{0}".Replace("0", string.Empty); // TODO: This actually depends on ImageService#GetSeriesFormat
-        var query = context.Series
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage)
-                        && !c.CoverImage.EndsWith(extension)
-                        && (!customOnly || c.CoverImage.StartsWith(prefix)))
-            .AsSplitQuery();
-
-        if (!customOnly)
-        {
-            query = query.Include(s => s.Volumes)
-                .ThenInclude(v => v.Chapters);
-        }
-
-        return await query.ToListAsync(ct);
-    }
-
     public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int userId, UserParams userParams,
         SeriesFilterV2Dto seriesFilterDto, QueryContext queryContext = QueryContext.None, CancellationToken ct = default)
     {
@@ -1080,22 +1055,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .AsNoTracking()
             .AsSplitQuery()
             .ToListAsync(ct);
-    }
-
-    public async Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default)
-    {
-        return (await context.Series
-            .Select(s => s.CoverImage)
-            .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync(ct))!;
-    }
-
-    public async Task<IEnumerable<string>> GetLockedCoverImagesAsync(CancellationToken ct = default)
-    {
-        return (await context.Series
-            .Where(s => s.CoverImageLocked && !string.IsNullOrEmpty(s.CoverImage))
-            .Select(s => s.CoverImage)
-            .ToListAsync(ct))!;
     }
 
     /// <summary>

@@ -49,11 +49,9 @@ public interface IReadingListRepository
     /// <paramref name="onlyMissing"/>, those whose cover Kavita built
     /// </summary>
     Task<IList<int>> GetCompositeCoverIdsAsync(bool onlyMissing, CancellationToken ct = default);
-    Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default);
     Task<bool> ReadingListExists(string name, int? readingListId = null, CancellationToken ct = default);
     IEnumerable<PersonDto> GetReadingListPeopleAsync(int readingListId, PersonRole role, CancellationToken ct = default);
     Task<ReadingListCast> GetReadingListAllPeopleAsync(int readingListId, CancellationToken ct = default);
-    Task<IList<ReadingList>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, CancellationToken ct = default);
     Task<int> RemoveReadingListsWithoutSeries(CancellationToken ct = default);
     Task<ReadingList?> GetReadingListByTitleAsync(string name, int userId, ReadingListIncludes includes = ReadingListIncludes.Items, CancellationToken ct = default);
     Task<IEnumerable<ReadingList>> GetReadingListsByIds(IList<int> ids, ReadingListIncludes includes = ReadingListIncludes.Items, CancellationToken ct = default);

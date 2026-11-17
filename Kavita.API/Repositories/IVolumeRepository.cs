@@ -39,8 +39,6 @@ public interface IVolumeRepository
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int seriesId, VolumeIncludes includes = VolumeIncludes.Chapters | VolumeIncludes.Files,
         CancellationToken ct = default);
     Task<IList<Volume>> GetVolumesById(IList<int> volumeIds, VolumeIncludes includes = VolumeIncludes.None, CancellationToken ct = default);
-    Task<IList<Volume>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, CancellationToken ct = default);
-    Task<IEnumerable<string>> GetCoverImagesForLockedVolumesAsync(CancellationToken ct = default);
     Task<long> GetFilesizeAsync(int volumeId, CancellationToken ct = default);
     Task<Dictionary<int, long>> GetFilesizesAsync(int userId, IList<int> volumeIds, CancellationToken ct = default);
     Task<ColorScapeDto?> GetColorScapeAsync(int volumeId, CancellationToken ct = default);

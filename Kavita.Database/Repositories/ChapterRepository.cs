@@ -190,36 +190,6 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .SingleOrDefaultAsync(ct);
     }
 
-    public async Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default)
-    {
-        return (await context.Chapter
-            .Select(c => c.CoverImage)
-            .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync(ct))!;
-    }
-
-    public async Task<IList<Chapter>> GetAllChaptersWithCoversInDifferentEncoding(EncodeFormat format,
-        CancellationToken ct = default)
-    {
-        var extension = format.GetExtension();
-        return await context.Chapter
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage)  && !c.CoverImage.EndsWith(extension))
-            .ToListAsync(ct);
-    }
-
-    /// <summary>
-    /// Returns cover images for locked chapters
-    /// </summary>
-    /// <returns></returns>
-    public async Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync(CancellationToken ct = default)
-    {
-        return (await context.Chapter
-            .Where(c => c.CoverImageLocked)
-            .Select(c => c.CoverImage)
-            .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync(ct))!;
-    }
-
     /// <summary>
     /// Returns non-tracked files for a set of <paramref name="chapterIds"/>
     /// </summary>

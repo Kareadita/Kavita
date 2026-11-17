@@ -53,159 +53,6 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
     #endregion
 
-    #region DeleteSeriesCoverImages
-
-    [Fact]
-    public async Task DeleteSeriesCoverImages_ShouldDeleteAll()
-    {
-        var filesystem = CreateFileSystem();
-        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(1)}.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(3)}.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(1000)}.jpg", new MockFileData(""));
-
-        // Delete all Series to reset state
-        var (unitOfWork, context, _) = await CreateDatabase();
-        var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
-
-        var s = new SeriesBuilder("Test 1").Build();
-        s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
-        s.LibraryId = 1;
-        context.Series.Add(s);
-        s = new SeriesBuilder("Test 2").Build();
-        s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
-        s.LibraryId = 1;
-        context.Series.Add(s);
-        s = new SeriesBuilder("Test 3").Build();
-        s.CoverImage = $"{ImageService.GetSeriesFormat(1000)}.jpg";
-        s.LibraryId = 1;
-        context.Series.Add(s);
-
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub,
-            ds);
-
-        await cleanupService.DeleteSeriesCoverImages();
-
-        Assert.Empty(ds.GetFiles(CoverImageDirectory));
-    }
-
-    [Fact]
-    public async Task DeleteSeriesCoverImages_ShouldNotDeleteLinkedFiles()
-    {
-        var filesystem = CreateFileSystem();
-        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(1)}.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(3)}.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(1000)}.jpg", new MockFileData(""));
-
-        // Delete all Series to reset state
-        var (unitOfWork, context, _) = await CreateDatabase();
-        var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
-
-        // Add 2 series with cover images
-        var s = new SeriesBuilder("Test 1").Build();
-        s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
-        s.LibraryId = 1;
-        context.Series.Add(s);
-        s = new SeriesBuilder("Test 2").Build();
-        s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
-        s.LibraryId = 1;
-        context.Series.Add(s);
-
-
-        await context.SaveChangesAsync();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub,
-            ds);
-
-        await cleanupService.DeleteSeriesCoverImages();
-
-        Assert.Equal(2, ds.GetFiles(CoverImageDirectory).Count());
-    }
-    #endregion
-
-    #region DeleteChapterCoverImages
-    [Fact]
-    public async Task DeleteChapterCoverImages_ShouldNotDeleteLinkedFiles()
-    {
-        var filesystem = CreateFileSystem();
-        filesystem.AddFile($"{CoverImageDirectory}v01_c01.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}v01_c03.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}v01_c1000.jpg", new MockFileData(""));
-
-        // Delete all Series to reset state
-        var (unitOfWork, context, _) = await CreateDatabase();
-        var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
-
-        // Add 2 series with cover images
-        context.Series.Add(new SeriesBuilder("Test 1")
-            .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder(Parser.DefaultChapter).WithCoverImage("v01_c01.jpg").Build())
-                .WithCoverImage("v01_c01.jpg")
-                .Build())
-            .WithCoverImage("series_01.jpg")
-            .WithLibraryId(1)
-            .Build());
-
-        context.Series.Add(new SeriesBuilder("Test 2")
-            .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder(Parser.DefaultChapter).WithCoverImage("v01_c03.jpg").Build())
-                .WithCoverImage("v01_c03.jpg")
-                .Build())
-            .WithCoverImage("series_03.jpg")
-            .WithLibraryId(1)
-            .Build());
-
-
-        await context.SaveChangesAsync();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub,
-            ds);
-
-        await cleanupService.DeleteChapterCoverImages();
-
-        Assert.Equal(2, ds.GetFiles(CoverImageDirectory).Count());
-    }
-    #endregion
-
-    #region DeleteReadingListCoverImages
-    [Fact]
-    public async Task DeleteReadingListCoverImages_ShouldNotDeleteLinkedFiles()
-    {
-        var filesystem = CreateFileSystem();
-        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetReadingListFormat(1)}.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetReadingListFormat(2)}.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetReadingListFormat(3)}.jpg", new MockFileData(""));
-
-        // Delete all Series to reset state
-        var (unitOfWork, context, _) = await CreateDatabase();
-        var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
-
-        context.Users.Add(new AppUser()
-        {
-            UserName = "Joe",
-            ReadingLists = new List<ReadingList>()
-            {
-                new ReadingListBuilder("Something")
-                    .WithRating(AgeRating.Unknown)
-                    .WithCoverImage($"{ImageService.GetReadingListFormat(1)}.jpg")
-                    .Build(),
-                new ReadingListBuilder("Something 2")
-                    .WithRating(AgeRating.Unknown)
-                    .WithCoverImage($"{ImageService.GetReadingListFormat(2)}.jpg")
-                    .Build(),
-            }
-        });
-
-        await context.SaveChangesAsync();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds);
-
-        await cleanupService.DeleteReadingListCoverImages();
-
-        Assert.Equal(2, ds.GetFiles(CoverImageDirectory).Count());
-    }
-    #endregion
-
     #region CleanupCacheDirectory
 
     [Fact]
@@ -219,7 +66,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds);
+        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
         await cleanupService.CleanupCacheAndTempDirectories();
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption: SearchOption.AllDirectories));
     }
@@ -235,7 +82,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds);
+        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
         await cleanupService.CleanupCacheAndTempDirectories();
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption: SearchOption.AllDirectories));
     }
@@ -261,7 +108,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds);
+        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
         await cleanupService.CleanupBackups();
         Assert.Single((IEnumerable)ds.GetFiles(BackupDirectory, searchOption: SearchOption.AllDirectories));
     }
@@ -285,7 +132,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds);
+        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
         await cleanupService.CleanupBackups();
         Assert.True(filesystem.File.Exists($"{BackupDirectory}randomfile.zip"));
     }
@@ -318,7 +165,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         var (unitOfWork, context, _) = await CreateDatabase();
         var (logger, messageHub, _) = await Setup(unitOfWork, context);
-        await new CleanupService(logger, unitOfWork, messageHub, ds).CleanupDebugExports();
+        await new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>()).CleanupDebugExports();
 
         Assert.Equal([recent, started], filesystem.Directory.GetDirectories(ds.DebugExportDirectory));
     }
@@ -344,7 +191,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds);
+        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
         await cleanupService.CleanupLogs();
         Assert.Single((IEnumerable)ds.GetFiles(LogDirectory, searchOption: SearchOption.AllDirectories));
     }
@@ -375,7 +222,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds);
+        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
         await cleanupService.CleanupLogs();
         Assert.True(filesystem.File.Exists($"{LogDirectory}kavita20200911.log"));
     }
@@ -420,7 +267,8 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
             Substitute.For<IEventHub>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
 
         // Delete the Chapter
         context.Chapter.Remove(c);
@@ -463,7 +311,8 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
             Substitute.For<IEventHub>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
 
         // Delete the Chapter
         context.Series.Remove(s);
@@ -514,7 +363,8 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
             Substitute.For<IEventHub>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
 
 
         await cleanupService.CleanupWantToRead();
@@ -569,7 +419,8 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
             Substitute.For<IEventHub>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
 
         await cleanupService.CleanupWantToRead();
 
@@ -634,7 +485,8 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
             Substitute.For<IEventHub>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
 
 
         await cleanupService.ConsolidateProgress();
@@ -697,7 +549,8 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
             Substitute.For<IEventHub>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
 
         await cleanupService.EnsureChapterProgressIsCapped();
         chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(c.Id, 1);
