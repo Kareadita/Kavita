@@ -29,5 +29,13 @@ public interface ICleanupService
     /// </summary>
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     Task CleanupImages(CancellationToken ct = default);
+    /// <summary>
+    /// One time, queued on every startup by ManualMigrateImageFileBackfillPart2 until it writes that migration's history row.
+    /// The v0.9.2 backfill created image rows from the old CoverImage strings without opening the files, so their format
+    /// and size are unknown and some names do not match their content. This takes a backup, probes and fixes those rows,
+    /// then deletes files no row names.
+    /// </summary>
+    [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
+    Task FinishImageFileMigration(CancellationToken ct = default);
 
 }

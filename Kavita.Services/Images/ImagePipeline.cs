@@ -25,7 +25,7 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
     }
 
     /// <inheritdoc />
-    public ImageWriteResult Copy(string sourcePath, ImageKind kind, string directory, string fileStem)
+    public ImageWriteResult Copy(string sourcePath, ImageKind kind, string directory, string fileName)
     {
         int width, height;
         using (var header = Image.NewFromFile(sourcePath, access: Enums.Access.Sequential))
@@ -35,8 +35,7 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
         }
 
         Directory.CreateDirectory(directory);
-        var fileName = fileStem + Path.GetExtension(sourcePath);
-        var tmpPath = Path.Join(directory, $"{fileStem}.{Guid.NewGuid():N}.tmp");
+        var tmpPath = Path.Join(directory, $"{Path.GetFileNameWithoutExtension(fileName)}.{Guid.NewGuid():N}.tmp");
 
         try
         {
@@ -55,14 +54,19 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
     public ImageWriteResult Reencode(string sourcePath, ImageKind kind, ImagePolicy policy, string directory, string fileName)
     {
         // Read into memory due to WebP opened from disk keeping its handle on Windows, so it could not be replaced or deleted
-        var bytes = File.ReadAllBytes(sourcePath);
+        return Reencode(File.ReadAllBytes(sourcePath), kind, policy, directory, fileName);
+    }
+
+    /// <inheritdoc />
+    public ImageWriteResult Reencode(byte[] sourceBytes, ImageKind kind, ImagePolicy policy, string directory, string fileName)
+    {
         var box = ImageProfile.For(kind).GetBox(policy);
 
         return StageAndMove(directory, fileName, tmpPath =>
         {
-            using var source = Image.NewFromBuffer(bytes);
+            using var source = Image.NewFromBuffer(sourceBytes);
             using var shrunk = box is { } b
-                ? Image.ThumbnailBuffer(bytes, b.Width, height: b.Height, size: Enums.Size.Down)
+                ? Image.ThumbnailBuffer(sourceBytes, b.Width, height: b.Height, size: Enums.Size.Down)
                 : null;
 
             return Save(shrunk ?? source, source, tmpPath, policy.Format.ForKind(kind));

@@ -105,9 +105,7 @@ public class MetadataServiceTests(ITestOutputHelper outputHelper) : AbstractDbTe
         Directory.CreateDirectory(covers);
         Directory.CreateDirectory(Path.Join(root, "files"));
 
-        var directoryService = Substitute.For<IDirectoryService>();
-        directoryService.FileSystem.Returns(new FileSystem());
-        directoryService.CoverImageDirectory.Returns(covers);
+        var directoryService = DirectoryServiceSubstitute.OnDisk(covers);
 
         Harness? harness = null;
         var readingItemService = Substitute.For<IReadingItemService>();

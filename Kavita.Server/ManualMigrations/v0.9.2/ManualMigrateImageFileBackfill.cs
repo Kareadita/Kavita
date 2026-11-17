@@ -20,10 +20,11 @@ namespace Kavita.Server.ManualMigrations.v0._9._2;
 #pragma warning disable CS0618
 
 /// <summary>
-/// v0.9.2 changed how image files are managed by Kavita to use a DB-approach instead, for better decision making and management capabilities.
+/// v0.9.2 changed how image files are managed by Kavita to use a DB-approach instead, for better decision-making and management capabilities.
 /// This migration gives every image an <see cref="ImageFile"/> row and points its entity
 /// at it. Chapters go first so a volume or series showing a chapter's file shares that chapter's row
 /// </summary>
+/// <remarks>This is a 2 part migration. The async job (<see cref="ManualMigrateImageFileBackfillPart2"/> finishes it.</remarks>
 public class ManualMigrateImageFileBackfill(IDirectoryService directoryService) : ManualMigration
 {
     private const int BatchSize = 1000;

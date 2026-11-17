@@ -187,7 +187,7 @@ public class ImageFileService(
     {
         foreach (var fileName in _replacedFiles)
         {
-            DeleteQuietly(Path.Join(directoryService.CoverImageDirectory, fileName));
+            directoryService.DeleteFileQuietly(Path.Join(directoryService.CoverImageDirectory, fileName));
         }
 
         _replacedFiles.Clear();
@@ -309,7 +309,7 @@ public class ImageFileService(
         var fileName = target.Stem + Path.GetExtension(source.FileName);
         var existing = await unitOfWork.ImageFileRepository.GetByNameAsync(target.Kind, fileName, ct);
 
-        var written = imagePipeline.Copy(sourcePath, target.Kind, directoryService.CoverImageDirectory, target.Stem);
+        var written = imagePipeline.Copy(sourcePath, target.Kind, directoryService.CoverImageDirectory, fileName);
 
         var copy = existing ?? new ImageFile { Kind = target.Kind, FileName = written.FileName };
         if (existing == null)
@@ -373,7 +373,7 @@ public class ImageFileService(
 
         foreach (var fileName in staleFiles)
         {
-            DeleteQuietly(Path.Join(directoryService.CoverImageDirectory, fileName));
+            directoryService.DeleteFileQuietly(Path.Join(directoryService.CoverImageDirectory, fileName));
         }
 
         foreach (var entity in changed)
@@ -414,18 +414,6 @@ public class ImageFileService(
             logger.LogWarning(ex, "Could not compare covers for {Type} {Id}; accepting the new cover",
                 entity.GetType().Name, entity.Id);
             return false;
-        }
-    }
-
-    private void DeleteQuietly(string path)
-    {
-        try
-        {
-            File.Delete(path);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            logger.LogWarning(ex, "Could not delete replaced cover {File}", path);
         }
     }
 

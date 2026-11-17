@@ -62,14 +62,34 @@ public class ImageFileRepository(DataContext context) : IImageFileRepository
 
     public IAsyncEnumerable<List<ImageFile>> GetImageFilesForDeletionAsync(int batchSize, CancellationToken ct = default)
     {
-        return context.ImageFile
-            .Where(f => f.Kind != ImageKind.Favicon && f.Kind != ImageKind.Publisher && f.Kind != ImageKind.Bookmark)
-            .WhereNotReferenced(context)
-            .BatchByKeyAsync(f => f.Id, batchSize, ct);
+        return GetImageFilesForDeletionQuery().BatchByKeyAsync(f => f.Id, batchSize, ct);
+    }
+
+    public async Task<int> CountImageFilesForDeletionAsync(CancellationToken ct = default)
+    {
+        return await GetImageFilesForDeletionQuery().CountAsync(ct);
     }
 
     public IAsyncEnumerable<List<ImageFile>> GetImageFilesForReencodeAsync(ImageKind kind, EncodeFormat format, ImageBox? box,
         int batchSize, CancellationToken ct = default)
+    {
+        return GetImageFilesForReencodeQuery(kind, format, box).BatchByKeyAsync(f => f.Id, batchSize, ct);
+    }
+
+    public async Task<int> CountImageFilesForReencodeAsync(ImageKind kind, EncodeFormat format, ImageBox? box,
+        CancellationToken ct = default)
+    {
+        return await GetImageFilesForReencodeQuery(kind, format, box).CountAsync(ct);
+    }
+
+    private IQueryable<ImageFile> GetImageFilesForDeletionQuery()
+    {
+        return context.ImageFile
+            .Where(f => f.Kind != ImageKind.Favicon && f.Kind != ImageKind.Publisher && f.Kind != ImageKind.Bookmark)
+            .WhereNotReferenced(context);
+    }
+
+    private IQueryable<ImageFile> GetImageFilesForReencodeQuery(ImageKind kind, EncodeFormat format, ImageBox? box)
     {
         var query = context.ImageFile
             .Where(f => f.Kind == kind && f.Format != null);
@@ -78,14 +98,10 @@ public class ImageFileRepository(DataContext context) : IImageFileRepository
         {
             var width = b.Width;
             var height = b.Height;
-            query = query.Where(f => f.Format != format || f.Width > width || f.Height > height);
-        }
-        else
-        {
-            query = query.Where(f => f.Format != format);
+            return query.Where(f => f.Format != format || f.Width > width || f.Height > height);
         }
 
-        return query.BatchByKeyAsync(f => f.Id, batchSize, ct);
+        return query.Where(f => f.Format != format);
     }
 
     public async Task<IList<IHasCoverImageFile>> GetAllHoldersAsync(IList<int> imageFileIds, CancellationToken ct = default)
@@ -103,4 +119,38 @@ public class ImageFileRepository(DataContext context) : IImageFileRepository
 
         return holders;
     }
+
+    #region Migration Only
+
+    public async Task<bool> HasImageFilesNeedingMigrationAsync(CancellationToken ct = default)
+    {
+        return await GetImageFilesNeedingMigrationQuery().AnyAsync(ct);
+    }
+
+    public async Task<int> CountImageFilesNeedingMigrationAsync(CancellationToken ct = default)
+    {
+        return await GetImageFilesNeedingMigrationQuery().CountAsync(ct);
+    }
+
+    public IAsyncEnumerable<List<ImageFile>> GetImageFilesNeedingMigrationAsync(ImageKind kind, int batchSize, CancellationToken ct = default)
+    {
+        return GetImageFilesNeedingMigrationQuery()
+            .Where(f => f.Kind == kind)
+            .BatchByKeyAsync(f => f.Id, batchSize, ct);
+    }
+
+    public async Task<IList<string>> GetFileNamesAsync(IList<ImageKind> kinds, CancellationToken ct = default)
+    {
+        return await context.ImageFile
+            .Where(f => kinds.Contains(f.Kind))
+            .Select(f => f.FileName)
+            .ToListAsync(ct);
+    }
+
+    private IQueryable<ImageFile> GetImageFilesNeedingMigrationQuery()
+    {
+        return context.ImageFile.Where(f => f.Format == null && f.Kind != ImageKind.Bookmark);
+    }
+
+    #endregion
 }

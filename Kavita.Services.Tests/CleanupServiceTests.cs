@@ -66,7 +66,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
+        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>());
         await cleanupService.CleanupCacheAndTempDirectories();
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption: SearchOption.AllDirectories));
     }
@@ -82,7 +82,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
+        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>());
         await cleanupService.CleanupCacheAndTempDirectories();
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption: SearchOption.AllDirectories));
     }
@@ -108,7 +108,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
+        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>());
         await cleanupService.CleanupBackups();
         Assert.Single((IEnumerable)ds.GetFiles(BackupDirectory, searchOption: SearchOption.AllDirectories));
     }
@@ -132,7 +132,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
+        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>());
         await cleanupService.CleanupBackups();
         Assert.True(filesystem.File.Exists($"{BackupDirectory}randomfile.zip"));
     }
@@ -165,7 +165,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         var (unitOfWork, context, _) = await CreateDatabase();
         var (logger, messageHub, _) = await Setup(unitOfWork, context);
-        await new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>()).CleanupDebugExports();
+        await new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>()).CleanupDebugExports();
 
         Assert.Equal([recent, started], filesystem.Directory.GetDirectories(ds.DebugExportDirectory));
     }
@@ -191,7 +191,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
+        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>());
         await cleanupService.CleanupLogs();
         Assert.Single((IEnumerable)ds.GetFiles(LogDirectory, searchOption: SearchOption.AllDirectories));
     }
@@ -222,7 +222,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
+        var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds, Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>());
         await cleanupService.CleanupLogs();
         Assert.True(filesystem.File.Exists($"{LogDirectory}kavita20200911.log"));
     }
@@ -268,7 +268,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
             Substitute.For<IEventHub>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
-            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
+            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>());
 
         // Delete the Chapter
         context.Chapter.Remove(c);
@@ -312,7 +312,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
             Substitute.For<IEventHub>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
-            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
+            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>());
 
         // Delete the Chapter
         context.Series.Remove(s);
@@ -364,7 +364,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
             Substitute.For<IEventHub>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
-            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
+            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>());
 
 
         await cleanupService.CleanupWantToRead();
@@ -420,7 +420,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
             Substitute.For<IEventHub>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
-            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
+            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>());
 
         await cleanupService.CleanupWantToRead();
 
@@ -486,7 +486,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
             Substitute.For<IEventHub>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
-            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
+            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>());
 
 
         await cleanupService.ConsolidateProgress();
@@ -550,7 +550,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
             Substitute.For<IEventHub>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
-            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>());
+            Substitute.For<IImagePipeline>(), Substitute.For<IImageFileService>(), Substitute.For<IBackupService>(), Substitute.For<IImageService>());
 
         await cleanupService.EnsureChapterProgressIsCapped();
         chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(c.Id, 1);

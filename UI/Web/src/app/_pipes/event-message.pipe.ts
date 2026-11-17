@@ -35,6 +35,11 @@ type MessageBody = Partial<{
   message: string | null;
   bytes: number;
   status: KepubifyStatus;
+  corrected: number;
+  deleted: number;
+  bytesSaved: number;
+  missing: number;
+  unreadable: number;
 }>;
 
 type Params = Record<string, string | undefined>;
@@ -114,6 +119,8 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.debug-export-ready-label`, {}, fallback);
       case MessageEventCode.DebugExportFailed:
         return this.translate(`${PREFIX}.debug-export-failed-label`, {}, fallback);
+      case MessageEventCode.ImageCleanupSummary:
+        return this.translate(`${PREFIX}.image-cleanup-summary-label`, {}, fallback);
       case MessageEventCode.KepubifyChecked:
         return body.status?.status === KepubifyCheckStatus.NotSupported
           ? this.translate(`${PREFIX}.kepubify-checked-failed-label`, {}, fallback)
@@ -178,6 +185,8 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.word-count-failed-description`, {filePath: body.filePath}, fallback);
       case MessageEventCode.DebugExportReady:
         return this.debugExportReadyDescription(source, body, fallback);
+      case MessageEventCode.ImageCleanupSummary:
+        return this.imageCleanupSummaryDescription(body, fallback);
       case MessageEventCode.KepubifyChecked: {
         const status = body.status;
         if (status?.status !== KepubifyCheckStatus.NotSupported) return fallback;
@@ -197,6 +206,24 @@ export class EventMessagePipe implements PipeTransform {
     const keptUntilUtc = DateTime.fromISO(source.updatedUtc, {zone: 'utc'}).plus({hours: DebugExportKeptHours}).toISO();
     const time = this.utcToLocalTimePipe.transform(keptUntilUtc, 'weekdayTime');
     return this.translate(`${PREFIX}.debug-export-ready-description`, {size, time}, fallback);
+  }
+
+  private imageCleanupSummaryDescription(body: MessageBody, fallback: string): string {
+    if (body.corrected === undefined || body.deleted === undefined || body.bytesSaved === undefined) return fallback;
+
+    const params: Params = {
+      corrected: body.corrected.toLocaleString(),
+      deleted: body.deleted.toLocaleString(),
+      size: this.bytesPipe.transform(Math.max(body.bytesSaved, 0)),
+    };
+    const missing = body.missing ?? 0;
+    const unreadable = body.unreadable ?? 0;
+    if (missing + unreadable === 0) {
+      return this.translate(`${PREFIX}.image-cleanup-summary-description`, params, fallback);
+    }
+
+    return this.translate(`${PREFIX}.image-cleanup-summary-skipped-description`,
+      {...params, missing: missing.toLocaleString(), unreadable: unreadable.toLocaleString()}, fallback);
   }
 
   private unreadableFoldersDescription(body: MessageBody, fallback: string): string {

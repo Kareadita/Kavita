@@ -95,21 +95,41 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         try
         {
             using var image = Image.NewFromFile(filePath, access: Enums.Access.Sequential);
-            return image.Get("vips-loader") switch
-            {
-                "pngload" => ".png",
-                "jpegload" => ".jpg",
-                "webpload" => ".webp",
-                "gifload" => ".gif",
-                // heifload also opens HEIC, which browsers can't show
-                "heifload" when image.Contains("heif-compression") && (string) image.Get("heif-compression") == "av1" => ".avif",
-                _ => null,
-            };
+            return GetExtension(image);
         }
         catch (VipsException)
         {
             return null;
         }
+    }
+
+    public ImageHeader? GetImageHeader(byte[] bytes)
+    {
+        try
+        {
+            using var image = Image.NewFromBuffer(bytes, access: Enums.Access.Sequential);
+            var extension = GetExtension(image);
+            return extension == null ? null : new ImageHeader(extension, image.Width, image.Height);
+        }
+        catch (VipsException)
+        {
+            return null;
+        }
+    }
+
+    private static string? GetExtension(Image image)
+    {
+        // Loading from file reports pngload, while from memory reports pngload_buffer
+        return (string) image.Get("vips-loader") switch
+        {
+            "pngload" or "pngload_buffer" => ".png",
+            "jpegload" or "jpegload_buffer" => ".jpg",
+            "webpload" or "webpload_buffer" => ".webp",
+            "gifload" or "gifload_buffer" => ".gif",
+            // heifload also opens HEIC, which browsers can't show
+            "heifload" or "heifload_buffer" when image.Contains("heif-compression") && (string) image.Get("heif-compression") == "av1" => ".avif",
+            _ => null,
+        };
     }
 
 

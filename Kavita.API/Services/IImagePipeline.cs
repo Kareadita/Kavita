@@ -11,14 +11,17 @@ public interface IImagePipeline
     ImageWriteResult Write(ImageSource source, ImageKind kind, ImagePolicy policy, string directory, string fileName);
 
     /// <summary>
-    /// Copies <paramref name="sourcePath"/> byte for byte to <paramref name="fileStem"/> in <paramref name="directory"/>.
-    /// The extension comes from the source, not the encode setting, since the bytes are not re-encoded
+    /// Copies <paramref name="sourcePath"/> byte for byte to <paramref name="fileName"/> in <paramref name="directory"/>.
+    /// The caller picks the extension; it should match the content, since the bytes are not re-encoded
     /// </summary>
-    ImageWriteResult Copy(string sourcePath, ImageKind kind, string directory, string fileStem);
+    ImageWriteResult Copy(string sourcePath, ImageKind kind, string directory, string fileName);
 
     /// <summary>
     /// Encodes <paramref name="sourcePath"/> again under <paramref name="policy"/> into <paramref name="fileName"/> in
     /// <paramref name="directory"/>, shrinking it into the kind's box. Never enlarges and never crops, unlike <see cref="Write"/>
     /// </summary>
     ImageWriteResult Reencode(string sourcePath, ImageKind kind, ImagePolicy policy, string directory, string fileName);
+
+    /// <inheritdoc cref="Reencode(string, ImageKind, ImagePolicy, string, string)"/>
+    ImageWriteResult Reencode(byte[] sourceBytes, ImageKind kind, ImagePolicy policy, string directory, string fileName);
 }

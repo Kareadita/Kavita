@@ -69,5 +69,10 @@ public interface IImageService
     /// <returns>The extension with its dot (<c>.png</c>, <c>.jpg</c>, <c>.webp</c>, <c>.gif</c>, <c>.avif</c>), or null
     /// when the file is not an image or is a format Kavita does not take for covers</returns>
     string? GetImageExtension(string filePath);
+    /// <summary>
+    /// <see cref="GetImageExtension"/> and the size, read from the header of an image already in memory
+    /// </summary>
+    /// <returns>Null when the bytes are not an image or are a format Kavita does not take for covers</returns>
+    ImageHeader? GetImageHeader(byte[] bytes);
     void UpdateColorScape(IHasCoverImage entity);
 }

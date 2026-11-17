@@ -36,6 +36,7 @@ export enum MessageEventCode {
 
   DebugExportReady = 'debug-export-ready',
   DebugExportFailed = 'debug-export-failed',
+  ImageCleanupSummary = 'image-cleanup-summary',
 
   KepubifyChecked = 'kepubify-checked',
 }

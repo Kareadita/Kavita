@@ -844,6 +844,15 @@ public static class MessageFactory
             new DebugExportReadyEventBodyDto(Info, title, exportId, exportId, bytes));
     }
 
+    public static SignalRMessageDto ImageCleanupSummaryEvent(int corrected, int deleted, long bytesSaved, int missing, int unreadable)
+    {
+        const string title = "Image cleanup finished";
+        var subtitle = $"Cleaned up {corrected} images, deleted {deleted} and saved {bytesSaved} bytes. {missing} were missing and {unreadable} could not be read";
+
+        return CodedEvent(Info, MessageEventCode.ImageCleanupSummary, title, subtitle,
+            new ImageCleanupSummaryEventBodyDto(Info, title, subtitle, corrected, deleted, bytesSaved, missing, unreadable));
+    }
+
     public static SignalRMessageDto DebugExportFailedEvent(string exportId, string error)
     {
         const string title = "Debug export failed";
@@ -1119,17 +1128,18 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessageDto ConvertCoverProgressEvent(float progress, string eventType)
+    public static SignalRMessageDto ConvertCoverProgressEvent(float progress, string eventType, string subtitle = "",
+        int? current = null, int? total = null)
     {
         return new SignalRMessageDto()
         {
             Name = ConvertCoversProgress,
             Priority = MessageEventPriority.Activity,
             Title = "Converting Covers",
-            SubTitle = string.Empty,
+            SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Determinate,
-            Body = new ConvertCoverProgressEventBodyDto(progress, DateTime.Now)
+            Body = new ConvertCoverProgressEventBodyDto(progress, DateTime.Now, current, total)
         };
     }
 

@@ -329,8 +329,7 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
         setting.Value = format.ToString();
         await context.SaveChangesAsync();
 
-        var directoryService = Substitute.For<IDirectoryService>();
-        directoryService.CoverImageDirectory.Returns(_covers);
+        var directoryService = DirectoryServiceSubstitute.OnDisk(_covers);
         var pipeline = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>());
         var service = new ImageFileService(unitOfWork, pipeline, directoryService, _eventHub, Substitute.For<ILogger<ImageFileService>>());
 

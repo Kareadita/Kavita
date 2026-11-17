@@ -34,6 +34,8 @@ public interface IImageFileRepository
     /// </summary>
     /// <remarks>Safe to remove each batch before reading the next</remarks>
     IAsyncEnumerable<List<ImageFile>> GetImageFilesForDeletionAsync(int batchSize, CancellationToken ct = default);
+    /// <inheritdoc cref="GetImageFilesForDeletionAsync"/>
+    Task<int> CountImageFilesForDeletionAsync(CancellationToken ct = default);
     /// <summary>
     /// Tracked rows of <paramref name="kind"/> with a known format that is not <paramref name="format"/>, or that are
     /// larger than <paramref name="box"/>
@@ -41,8 +43,32 @@ public interface IImageFileRepository
     /// <remarks>Safe to update each batch before reading the next</remarks>
     IAsyncEnumerable<List<ImageFile>> GetImageFilesForReencodeAsync(ImageKind kind, EncodeFormat format, ImageBox? box,
         int batchSize, CancellationToken ct = default);
+    /// <inheritdoc cref="GetImageFilesForReencodeAsync"/>
+    Task<int> CountImageFilesForReencodeAsync(ImageKind kind, EncodeFormat format, ImageBox? box, CancellationToken ct = default);
     /// <summary>
     /// Tracked entities of every kind whose cover is one of <paramref name="imageFileIds"/>
     /// </summary>
     Task<IList<IHasCoverImageFile>> GetAllHoldersAsync(IList<int> imageFileIds, CancellationToken ct = default);
+
+    #region Migration Only
+
+    /// <summary>
+    /// Whether any non-bookmark row still has no <see cref="ImageFile.Format"/>, as the v0.9.2 backfill left it
+    /// </summary>
+    Task<bool> HasImageFilesNeedingMigrationAsync(CancellationToken ct = default);
+    /// <summary>
+    /// Non-bookmark rows with no <see cref="ImageFile.Format"/>, as the v0.9.2 backfill left them
+    /// </summary>
+    Task<int> CountImageFilesNeedingMigrationAsync(CancellationToken ct = default);
+    /// <summary>
+    /// Tracked rows of <paramref name="kind"/> with no <see cref="ImageFile.Format"/>, as the v0.9.2 backfill left them
+    /// </summary>
+    /// <remarks>Safe to update each batch before reading the next</remarks>
+    IAsyncEnumerable<List<ImageFile>> GetImageFilesNeedingMigrationAsync(ImageKind kind, int batchSize, CancellationToken ct = default);
+    /// <summary>
+    /// File names of every row of the given kinds
+    /// </summary>
+    Task<IList<string>> GetFileNamesAsync(IList<ImageKind> kinds, CancellationToken ct = default);
+
+    #endregion
 }

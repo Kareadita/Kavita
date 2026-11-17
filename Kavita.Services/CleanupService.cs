@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -15,6 +16,7 @@ using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.History;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
@@ -35,10 +37,13 @@ public class CleanupService(
     IEventHub eventHub,
     IDirectoryService directoryService,
     IImagePipeline imagePipeline,
-    IImageFileService imageFileService)
+    IImageFileService imageFileService,
+    IBackupService backupService,
+    IImageService imageService)
     : ICleanupService
 {
     private const int ImageBatchSize = 500;
+    public const string ImageFileMigrationName = "ManualMigrateImageFileBackfillPart2";
 
     /// <summary>
     /// Cleans up Temp, cache, deleted cover images,  and old database backups
@@ -360,40 +365,119 @@ public class CleanupService(
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     public async Task CleanupImages(CancellationToken ct = default)
     {
-        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.ConvertCoverProgressEvent(0F, ProgressEventType.Started), ct: ct);
+        if (TaskScheduler.HasAlreadyEnqueuedTask<ICleanupService>(s => s.FinishImageFileMigration(CancellationToken.None),
+                checkRunningJobs: true))
+        {
+            logger.LogInformation("[CleanupService] Image cleanup skipped, the image file migration is queued or running");
+            return;
+        }
 
+        await SendImageProgress(0F, ProgressEventType.Started, ct);
+
+        var run = await StartImageRun(ct);
+        await DeleteUnusedImages(run, 0F, 0.2F, ct);
+        await ReencodeImages(run, 0.2F, 1F, ct);
+
+        var tally = run.Tally;
+        logger.LogInformation(
+            "[CleanupService] Deleted {Deleted} unused images and re-encoded {Reencoded}; skipped {Missing} missing and {Unreadable} unreadable",
+            tally.Deleted, tally.Reencoded, tally.MissingCount, tally.UnreadableCount);
+        await LogSkippedImages(tally, ct);
+
+        await SendImageProgress(1F, ProgressEventType.Ended, ct);
+    }
+
+    [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
+    public Task FinishImageFileMigration(CancellationToken ct = default)
+    {
+        return FinishImageFileMigration(Process.GetCurrentProcess().StartTime.ToUniversalTime(), ct);
+    }
+
+    /// <param name="sweepBeforeUtc">Only files last written before this are swept, so a scan running now keeps the cover
+    /// file it wrote before committing its row</param>
+    internal async Task FinishImageFileMigration(DateTime sweepBeforeUtc, CancellationToken ct = default)
+    {
+        if (await unitOfWork.DataContext.ManualMigrationHistory.AnyAsync(m => m.Name == ImageFileMigrationName, ct)) return;
+
+        if (!await unitOfWork.ImageFileRepository.HasImageFilesNeedingMigrationAsync(ct))
+        {
+            await CompleteImageFileMigration(ct);
+            return;
+        }
+
+        logger.LogInformation("[CleanupService] Finishing the image file migration, taking a backup first");
+        if (!await backupService.BackupDatabase(ct))
+        {
+            logger.LogWarning("[CleanupService] Backup failed, so the image file migration changed nothing. It runs again on the next start");
+            return;
+        }
+
+        await SendImageProgress(0F, ProgressEventType.Started, ct);
+
+        var run = await StartImageRun(ct);
+        await DeleteUnusedImages(run, 0F, 0.1F, ct);
+        await MigrateImageFiles(run, 0.1F, 0.8F, ct);
+        await ReencodeImages(run, 0.8F, 0.95F, ct);
+        await SweepUnnamedFiles(run, sweepBeforeUtc, 0.95F, 1F, ct);
+
+        var tally = run.Tally;
+        logger.LogInformation(
+            "[CleanupService] Image file migration: {Reencoded} re-encoded, {Renamed} renamed, {Deleted} files removed, {BytesSaved} bytes saved, {Missing} missing, {Unreadable} unreadable",
+            tally.Reencoded, tally.Renamed, tally.Deleted, tally.BytesSaved, tally.MissingCount, tally.UnreadableCount);
+        await LogSkippedImages(tally, ct);
+
+        await CompleteImageFileMigration(ct);
+
+        await eventHub.SendMessageAsync(MessageFactory.Info,
+            MessageFactory.ImageCleanupSummaryEvent(tally.Reencoded + tally.Renamed, tally.Deleted, tally.BytesSaved,
+                tally.MissingCount, tally.UnreadableCount), ct: ct);
+        await SendImageProgress(1F, ProgressEventType.Ended, ct);
+    }
+
+    private async Task CompleteImageFileMigration(CancellationToken ct)
+    {
+        unitOfWork.DataContext.ManualMigrationHistory.Add(new ManualMigrationHistory { Name = ImageFileMigrationName });
+        await unitOfWork.CommitAsync(ct);
+    }
+
+    private async Task SendImageProgress(float progress, string eventType, CancellationToken ct)
+    {
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.ConvertCoverProgressEvent(progress, eventType), ct: ct);
+    }
+
+    private async Task SendStageProgress(float start, float end, string subtitle, int current, int total, CancellationToken ct)
+    {
+        var done = total == 0 ? 1F : Math.Min(1F, (float) current / total);
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.ConvertCoverProgressEvent(start + (end - start) * done,
+                ProgressEventType.Updated, subtitle, current, total), ct: ct);
+    }
+
+    private async Task<ImageRun> StartImageRun(CancellationToken ct)
+    {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         var policy = new ImagePolicy(settings.EncodeMediaAs, settings.CoverImageSize);
         var kinds = Enum.GetValues<ImageKind>()
             .Where(k => k != ImageKind.Bookmark)
             .ToList();
         var folders = new Dictionary<ImageKind, string>();
-        var tally = new ImageCleanupTally();
 
         foreach (var kind in kinds)
         {
             folders[kind] = await imageFileService.GetImageDirectoryAsync(kind, ct);
         }
 
-        await DeleteUnusedImages(folders, tally, ct);
-
-        foreach (var kind in kinds)
-        {
-            await ReencodeImages(kind, folders[kind], policy, tally, ct);
-        }
-
-        logger.LogInformation(
-            "[CleanupService] Deleted {Deleted} unused images and re-encoded {Reencoded}; skipped {Missing} missing and {Unreadable} unreadable",
-            tally.Deleted, tally.Reencoded, tally.Missing, tally.Unreadable);
-
-        // TODO: We may want to pass extra information into this event
-        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.ConvertCoverProgressEvent(1F, ProgressEventType.Ended), ct: ct);
+        return new ImageRun(policy, kinds, folders, new ImageCleanupTally());
     }
 
-    private async Task DeleteUnusedImages(Dictionary<ImageKind, string> folders, ImageCleanupTally tally, CancellationToken ct)
+    private async Task DeleteUnusedImages(ImageRun run, float start, float end, CancellationToken ct)
     {
+        const string subtitle = "Removing unused images";
+        var total = await unitOfWork.ImageFileRepository.CountImageFilesForDeletionAsync(ct);
+        var current = 0;
+        await SendStageProgress(start, end,subtitle, current, total, ct);
+
         await foreach (var batch in unitOfWork.ImageFileRepository.GetImageFilesForDeletionAsync(ImageBatchSize, ct))
         {
             foreach (var row in batch)
@@ -405,70 +489,242 @@ public class CleanupService(
 
             foreach (var row in batch)
             {
-                DeleteQuietly(Path.Join(folders[row.Kind], row.FileName));
+                var path = Path.Join(run.Folders[row.Kind], row.FileName);
+                var size = GetFileSize(path);
+                if (directoryService.DeleteFileQuietly(path))
+                {
+                    run.Tally.BytesSaved += size;
+                }
             }
 
-            tally.Deleted += batch.Count;
+            run.Tally.Deleted += batch.Count;
+            current += batch.Count;
+            await SendStageProgress(start, end,subtitle, current, total, ct);
         }
     }
 
-    private async Task ReencodeImages(ImageKind kind, string folder, ImagePolicy policy, ImageCleanupTally tally,
-        CancellationToken ct)
+    private async Task MigrateImageFiles(ImageRun run, float start, float end, CancellationToken ct)
     {
-        var format = policy.Format.ForKind(kind);
-        var box = ImageProfile.For(kind).GetBox(policy);
+        const string subtitle = "Checking images";
+        var total = await unitOfWork.ImageFileRepository.CountImageFilesNeedingMigrationAsync(ct);
+        var current = 0;
+        await SendStageProgress(start, end,subtitle, current, total, ct);
 
-        await foreach (var batch in unitOfWork.ImageFileRepository.GetImageFilesForReencodeAsync(kind, format, box, ImageBatchSize, ct))
+        foreach (var kind in run.Kinds)
         {
-            var replacedNames = new Dictionary<int, string>();
-            foreach (var row in batch)
+            var folder = run.Folders[kind];
+            var format = run.Policy.Format.ForKind(kind);
+            var box = ImageProfile.For(kind).GetBox(run.Policy);
+
+            await foreach (var batch in unitOfWork.ImageFileRepository.GetImageFilesNeedingMigrationAsync(kind, ImageBatchSize, ct))
             {
-                var source = Path.Join(folder, row.FileName);
-                if (!File.Exists(source))
+                var replacedNames = new Dictionary<int, string>();
+                foreach (var row in batch)
                 {
-                    tally.Missing++;
-                    logger.LogInformation("[CleanupService] Missing image: {File} ({Kind}, row {Id})", source, kind, row.Id);
-                    continue;
+                    var source = Path.Join(folder, row.FileName);
+                    if (!File.Exists(source))
+                    {
+                        run.Tally.Skipped.Add(new SkippedImage(source, kind, row.Id, Unreadable: false));
+                        continue;
+                    }
+
+                    var fileName = Path.ChangeExtension(row.FileName, format.GetExtension());
+                    int width, height;
+                    try
+                    {
+                        var bytes = await File.ReadAllBytesAsync(source, ct);
+                        var header = imageService.GetImageHeader(bytes);
+                        var inLine = header != null && header.Extension == format.GetExtension() &&
+                                     (box is not { } b || (header.Width <= b.Width && header.Height <= b.Height));
+
+                        if (inLine)
+                        {
+                            if (!IsSameName(fileName, row.FileName))
+                            {
+                                imagePipeline.Copy(source, kind, folder, fileName);
+                                run.Tally.Renamed++;
+                            }
+
+                            width = header!.Width;
+                            height = header.Height;
+                        }
+                        else
+                        {
+                            var written = imagePipeline.Reencode(bytes, kind, run.Policy, folder, fileName);
+                            run.Tally.BytesSaved += bytes.Length - GetFileSize(Path.Join(folder, fileName));
+                            run.Tally.Reencoded++;
+                            width = written.Width;
+                            height = written.Height;
+                        }
+                    }
+                    catch (Exception ex) when (ex is VipsException or IOException)
+                    {
+                        run.Tally.Skipped.Add(new SkippedImage(source, kind, row.Id, Unreadable: true));
+                        logger.LogDebug(ex, "[CleanupService] Could not read {File}", source);
+                        continue;
+                    }
+
+                    if (!IsSameName(fileName, row.FileName))
+                    {
+                        replacedNames[row.Id] = row.FileName;
+                    }
+
+                    row.FileName = fileName;
+                    row.Format = format;
+                    row.Width = width;
+                    row.Height = height;
                 }
 
-                var fileName = Path.ChangeExtension(row.FileName, format.GetExtension());
-                ImageWriteResult written;
-                try
-                {
-                    written = imagePipeline.Reencode(source, kind, policy, folder, fileName);
-                }
-                catch (Exception ex) when (ex is VipsException or IOException)
-                {
-                    tally.Unreadable++;
-                    logger.LogInformation(ex, "[CleanupService] Unreadable image: {File} ({Kind}, row {Id})", source, kind, row.Id);
-                    continue;
-                }
-
-                if (!string.Equals(fileName, row.FileName, StringComparison.Ordinal))
-                {
-                    replacedNames[row.Id] = row.FileName;
-                }
-
-                row.FileName = fileName;
-                row.Format = format;
-                row.Width = written.Width;
-                row.Height = written.Height;
-                tally.Reencoded++;
-            }
-
-            if (replacedNames.Count > 0)
-            {
-                await SyncLegacyCoverNames(batch.Where(r => replacedNames.ContainsKey(r.Id)).ToList(), ct);
-            }
-
-            await unitOfWork.CommitAsync(ct);
-
-            foreach (var oldName in replacedNames.Values)
-            {
-                DeleteQuietly(Path.Join(folder, oldName));
+                await CommitBatch(batch, replacedNames, folder, ct);
+                current += batch.Count;
+                await SendStageProgress(start, end,subtitle, current, total, ct);
             }
         }
     }
+
+    private async Task ReencodeImages(ImageRun run, float start, float end, CancellationToken ct)
+    {
+        const string subtitle = "Re-encoding images";
+        var total = 0;
+        foreach (var kind in run.Kinds)
+        {
+            total += await unitOfWork.ImageFileRepository.CountImageFilesForReencodeAsync(kind, run.Policy.Format.ForKind(kind),
+                ImageProfile.For(kind).GetBox(run.Policy), ct);
+        }
+        var current = 0;
+        await SendStageProgress(start, end,subtitle, current, total, ct);
+
+        foreach (var kind in run.Kinds)
+        {
+            var folder = run.Folders[kind];
+            var format = run.Policy.Format.ForKind(kind);
+            var box = ImageProfile.For(kind).GetBox(run.Policy);
+
+            await foreach (var batch in unitOfWork.ImageFileRepository.GetImageFilesForReencodeAsync(kind, format, box, ImageBatchSize, ct))
+            {
+                var replacedNames = new Dictionary<int, string>();
+                foreach (var row in batch)
+                {
+                    var source = Path.Join(folder, row.FileName);
+                    if (!File.Exists(source))
+                    {
+                        run.Tally.Skipped.Add(new SkippedImage(source, kind, row.Id, Unreadable: false));
+                        continue;
+                    }
+
+                    var sizeBefore = GetFileSize(source);
+                    var fileName = Path.ChangeExtension(row.FileName, format.GetExtension());
+                    ImageWriteResult written;
+                    try
+                    {
+                        written = imagePipeline.Reencode(source, kind, run.Policy, folder, fileName);
+                    }
+                    catch (Exception ex) when (ex is VipsException or IOException)
+                    {
+                        run.Tally.Skipped.Add(new SkippedImage(source, kind, row.Id, Unreadable: true));
+                        logger.LogDebug(ex, "[CleanupService] Could not read {File}", source);
+                        continue;
+                    }
+
+                    run.Tally.BytesSaved += sizeBefore - GetFileSize(Path.Join(folder, fileName));
+                    if (!IsSameName(fileName, row.FileName))
+                    {
+                        replacedNames[row.Id] = row.FileName;
+                    }
+
+                    row.FileName = fileName;
+                    row.Format = format;
+                    row.Width = written.Width;
+                    row.Height = written.Height;
+                    run.Tally.Reencoded++;
+                }
+
+                await CommitBatch(batch, replacedNames, folder, ct);
+                current += batch.Count;
+                await SendStageProgress(start, end,subtitle, current, total, ct);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Commits the batch, then deletes the files it renamed away from. A file is never moved: if the commit failed, the
+    /// row would still name the old file
+    /// </summary>
+    private async Task CommitBatch(List<ImageFile> batch, Dictionary<int, string> replacedNames, string folder, CancellationToken ct)
+    {
+        if (replacedNames.Count > 0)
+        {
+            await SyncLegacyCoverNames(batch.Where(r => replacedNames.ContainsKey(r.Id)).ToList(), ct);
+        }
+
+        await unitOfWork.CommitAsync(ct);
+
+        foreach (var oldName in replacedNames.Values)
+        {
+            directoryService.DeleteFileQuietly(Path.Join(folder, oldName));
+        }
+    }
+
+    private async Task SweepUnnamedFiles(ImageRun run, DateTime sweepBeforeUtc, float start, float end, CancellationToken ct)
+    {
+        const string subtitle = "Removing leftover files";
+        var unnamed = new List<string>();
+        foreach (var group in run.Kinds.GroupBy(k => run.Folders[k]))
+        {
+            // Windows matches file names ignoring case, so a case-sensitive set would delete series1.webp whose row says Series1.webp
+            var names = new HashSet<string>(await unitOfWork.ImageFileRepository.GetFileNamesAsync(group.ToList(), ct),
+                StringComparer.OrdinalIgnoreCase);
+
+            unnamed.AddRange(directoryService.GetFiles(group.Key)
+                .Where(path => IsTmpFile(path) || !names.Contains(Path.GetFileName(path))));
+        }
+
+        await SendStageProgress(start, end,subtitle, 0, unnamed.Count, ct);
+
+        for (var i = 0; i < unnamed.Count; i++)
+        {
+            var file = directoryService.FileSystem.FileInfo.New(unnamed[i]);
+            if (file.LastWriteTimeUtc < sweepBeforeUtc)
+            {
+                var size = file.Length;
+                if (directoryService.DeleteFileQuietly(file.FullName))
+                {
+                    run.Tally.Deleted++;
+                    run.Tally.BytesSaved += size;
+                }
+            }
+
+            if ((i + 1) % ImageBatchSize == 0)
+            {
+                await SendStageProgress(start, end,subtitle, i + 1, unnamed.Count, ct);
+            }
+        }
+
+        await SendStageProgress(start, end,subtitle, unnamed.Count, unnamed.Count, ct);
+    }
+
+    private static bool IsTmpFile(string path) => Path.GetExtension(path).Equals(".tmp", StringComparison.OrdinalIgnoreCase);
+
+    private async Task LogSkippedImages(ImageCleanupTally tally, CancellationToken ct)
+    {
+        if (tally.Skipped.Count == 0) return;
+
+        var holders = (await unitOfWork.ImageFileRepository.GetAllHoldersAsync(tally.Skipped.Select(s => s.RowId).Distinct().ToList(), ct))
+            .ToLookup(h => h.CoverImageFileId!.Value);
+
+        foreach (var skipped in tally.Skipped)
+        {
+            var heldBy = string.Join(", ", holders[skipped.RowId].Select(h => $"{h.GetType().Name} {h.Id}"));
+            logger.LogInformation("[CleanupService] {Reason} image: {File} ({Kind}, {HeldBy})",
+                skipped.Unreadable ? "Unreadable" : "Missing", skipped.Path, skipped.Kind, heldBy);
+        }
+    }
+
+    // Lowercase extensions are what Kavita writes, but on Windows two names differing only by case are the same file,
+    // and treating them as different would delete the file just written
+    private static bool IsSameName(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+
+    private static long GetFileSize(string path) => File.Exists(path) ? new FileInfo(path).Length : 0;
 
     // Workaround until every reader uses CoverImageFile, keeps the legacy CoverImage string pointing at the new file
     private async Task SyncLegacyCoverNames(List<ImageFile> renamed, CancellationToken ct)
@@ -487,23 +743,19 @@ public class CleanupService(
 #pragma warning restore CS0618
     }
 
-    private void DeleteQuietly(string path)
-    {
-        try
-        {
-            File.Delete(path);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            logger.LogWarning(ex, "[CleanupService] Could not delete {File}", path);
-        }
-    }
 
+    private sealed record ImageRun(ImagePolicy Policy, IReadOnlyList<ImageKind> Kinds,
+        IReadOnlyDictionary<ImageKind, string> Folders, ImageCleanupTally Tally);
+
+    private sealed record SkippedImage(string Path, ImageKind Kind, int RowId, bool Unreadable);
     private sealed class ImageCleanupTally
     {
         public int Deleted { get; set; }
         public int Reencoded { get; set; }
-        public int Missing { get; set; }
-        public int Unreadable { get; set; }
+        public int Renamed { get; set; }
+        public long BytesSaved { get; set; }
+        public List<SkippedImage> Skipped { get; } = [];
+        public int MissingCount => Skipped.Count(s => !s.Unreadable);
+        public int UnreadableCount => Skipped.Count(s => s.Unreadable);
     }
 }

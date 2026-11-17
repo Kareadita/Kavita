@@ -983,6 +983,20 @@ public class DirectoryService : IDirectoryService
         }
     }
 
+    public bool DeleteFileQuietly(string path)
+    {
+        try
+        {
+            FileSystem.File.Delete(path);
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _logger.LogWarning(ex, "Could not delete {File}", path);
+            return false;
+        }
+    }
+
     public void CopyFile(string sourcePath, string destinationPath, bool overwrite = true)
     {
         if (!File.Exists(sourcePath))
