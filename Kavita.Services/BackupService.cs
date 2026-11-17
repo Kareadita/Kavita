@@ -34,6 +34,12 @@ public class BackupService(
     ];
 
     /// <summary>
+    /// Backups are prepared here and this is cleared before any backup runs. This avoids any clearing temp/ while building a backup
+    /// </summary>
+    private const string StagingDirectory = ".staging";
+    private static readonly SemaphoreSlim BackupLock = new(1, 1);
+
+    /// <summary>
     /// Returns a list of all log files for Kavita
     /// </summary>
     /// <param name="rollFiles">If file rolling is enabled. Defaults to True.</param>
@@ -58,80 +64,110 @@ public class BackupService(
     /// <returns>False when no zip was written</returns>
     public async Task<bool> BackupDatabase(CancellationToken ct = default)
     {
-        logger.LogInformation("Beginning backup of Database at {BackupTime}", DateTime.Now);
-        var backupDirectory = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory, ct)).Value;
-
-        logger.LogDebug("Backing up to {BackupDirectory}", backupDirectory);
-        if (!directoryService.ExistOrCreate(backupDirectory))
-        {
-            logger.LogCritical("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
-            await eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.BackupFolderUnwritableEvent(backupDirectory), ct: ct);
-            return false;
-        }
-
-        await SendProgress(0F, "Started backup", ct);
-        await SendProgress(0.1F, "Copying core files", ct);
-
-        var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow:s}Z".Replace("/", "_").Replace(":", "_");
-        var zipPath = directoryService.FileSystem.Path.Join(backupDirectory, $"kavita_backup_v{BuildInfo.Version}_{dateString}.zip");
-
-        if (File.Exists(zipPath))
-        {
-            logger.LogCritical("{ZipFile} already exists, aborting", zipPath);
-            await eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.BackupExistsEvent(zipPath), ct: ct);
-            return false;
-        }
-
-        var tempDirectory = Path.Join(directoryService.TempDirectory, dateString);
-        directoryService.ExistOrCreate(tempDirectory);
-        directoryService.ClearDirectory(tempDirectory);
-
-        await SendProgress(0.1F, "Backing up database", ct);
-        await SnapshotDatabase(directoryService.FileSystem.Path.Join(tempDirectory, "kavita.db"), ct);
-
-        await SendProgress(0.15F, "Copying config files", ct);
-        directoryService.CopyFilesToDirectory(
-            _backupFiles.Select(file => directoryService.FileSystem.Path.Join(directoryService.ConfigDirectory, file)), tempDirectory);
-
-        // Copy any csv's as those are used for manual migrations
-        directoryService.CopyFilesToDirectory(
-            directoryService.GetFilesWithCertainExtensions(directoryService.ConfigDirectory, @"\.csv"), tempDirectory);
-
-        await SendProgress(0.2F, "Copying logs", ct);
-        CopyLogsToBackupDirectory(tempDirectory);
-
-        await SendProgress(0.25F, "Copying cover images", ct);
-        await CopyCoverImagesToBackupDirectory(tempDirectory, ct);
-
-        await SendProgress(0.35F, "Copying templates images", ct);
-        CopyTemplatesToBackupDirectory(tempDirectory);
-
-        await SendProgress(0.5F, "Copying bookmarks", ct);
-        await CopyBookmarksToBackupDirectory(tempDirectory);
-
-        await SendProgress(0.6F, "Copying Fonts", ct);
-        CopyFontsToBackupDirectory(tempDirectory);
-
-        await SendProgress(0.75F, "Copying themes", ct);
-        CopyThemesToBackupDirectory(tempDirectory);
-
+        await BackupLock.WaitAsync(ct);
+        string? stagingDirectory = null;
         try
         {
-            await ZipFile.CreateFromDirectoryAsync(tempDirectory, zipPath, ct);
-        }
-        catch (AggregateException ex)
-        {
-            logger.LogError(ex, "There was an issue when archiving library backup");
-            directoryService.ClearAndDeleteDirectory(tempDirectory);
-            return false;
-        }
+            logger.LogInformation("Beginning backup of Database at {BackupTime}", DateTime.Now);
+            var backupDirectory = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory, ct)).Value;
 
-        directoryService.ClearAndDeleteDirectory(tempDirectory);
-        logger.LogInformation("Database backup completed");
-        await SendProgress(1F, "Completed backup", ct);
-        return true;
+            logger.LogDebug("Backing up to {BackupDirectory}", backupDirectory);
+            if (!directoryService.ExistOrCreate(backupDirectory))
+            {
+                logger.LogCritical("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
+                await eventHub.SendMessageAsync(MessageFactory.Error,
+                    MessageFactory.BackupFolderUnwritableEvent(backupDirectory), ct: ct);
+                return false;
+            }
+
+            stagingDirectory = Path.Join(backupDirectory, StagingDirectory);
+            if (!directoryService.ExistOrCreate(stagingDirectory))
+            {
+                logger.LogCritical("Could not write to {BackupDirectory}; aborting backup", stagingDirectory);
+                await eventHub.SendMessageAsync(MessageFactory.Error,
+                    MessageFactory.BackupFolderUnwritableEvent(stagingDirectory), ct: ct);
+                return false;
+            }
+
+            directoryService.ClearDirectory(stagingDirectory);
+
+            await SendProgress(0F, "Started backup", ct);
+            await SendProgress(0.1F, "Copying core files", ct);
+
+            var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow:s}Z".Replace("/", "_").Replace(":", "_");
+            var zipPath = directoryService.FileSystem.Path.Join(backupDirectory, $"kavita_backup_v{BuildInfo.Version}_{dateString}.zip");
+
+            if (File.Exists(zipPath))
+            {
+                logger.LogCritical("{ZipFile} already exists, aborting", zipPath);
+                await eventHub.SendMessageAsync(MessageFactory.Error,
+                    MessageFactory.BackupExistsEvent(zipPath), ct: ct);
+                return false;
+            }
+
+            await SendProgress(0.1F, "Backing up database", ct);
+            await SnapshotDatabase(directoryService.FileSystem.Path.Join(stagingDirectory, "kavita.db"), ct);
+
+            await SendProgress(0.15F, "Copying config files", ct);
+            directoryService.CopyFilesToDirectory(
+                _backupFiles.Select(file => directoryService.FileSystem.Path.Join(directoryService.ConfigDirectory, file)), stagingDirectory);
+
+            // Copy any csv's as those are used for manual migrations
+            directoryService.CopyFilesToDirectory(
+                directoryService.GetFilesWithCertainExtensions(directoryService.ConfigDirectory, @"\.csv"), stagingDirectory);
+
+            await SendProgress(0.2F, "Copying logs", ct);
+            CopyLogsToBackupDirectory(stagingDirectory);
+
+            await SendProgress(0.25F, "Copying cover images", ct);
+            await CopyCoverImagesToBackupDirectory(stagingDirectory, ct);
+
+            await SendProgress(0.35F, "Copying templates images", ct);
+            CopyTemplatesToBackupDirectory(stagingDirectory);
+
+            await SendProgress(0.5F, "Copying bookmarks", ct);
+            await CopyBookmarksToBackupDirectory(stagingDirectory);
+
+            await SendProgress(0.6F, "Copying Fonts", ct);
+            CopyFontsToBackupDirectory(stagingDirectory);
+
+            await SendProgress(0.75F, "Copying themes", ct);
+            CopyThemesToBackupDirectory(stagingDirectory);
+
+            try
+            {
+                await ZipFile.CreateFromDirectoryAsync(stagingDirectory, zipPath, ct);
+            }
+            catch (AggregateException ex)
+            {
+                logger.LogError(ex, "There was an issue when archiving library backup");
+                return false;
+            }
+
+            logger.LogInformation("Database backup completed");
+            await SendProgress(1F, "Completed backup", ct);
+            return true;
+        }
+        finally
+        {
+            DeleteStagingDirectory(stagingDirectory);
+            BackupLock.Release();
+        }
+    }
+
+    private void DeleteStagingDirectory(string? stagingDirectory)
+    {
+        if (stagingDirectory == null) return;
+
+        // A throw here would skip releasing BackupLock and block every later backup
+        try
+        {
+            directoryService.ClearAndDeleteDirectory(stagingDirectory);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            logger.LogWarning(ex, "Could not delete the backup staging folder {Folder}; the next backup clears it", stagingDirectory);
+        }
     }
 
     private void CopyLogsToBackupDirectory(string tempDirectory)
