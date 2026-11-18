@@ -75,9 +75,7 @@ export interface Series extends IHasCover, IHasReadingTime, IHasProgress, IHasMe
    * This is currently only used on Series detail page for recommendations
    */
   summary?: string;
-  coverImage?: string;
-  primaryColor: string;
-  secondaryColor: string;
+  hasCoverImage: boolean;
   /**
    * Kavita+ only. Will not perform any matching from Kavita+
    */

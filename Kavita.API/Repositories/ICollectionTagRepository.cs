@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Collection;
+using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
@@ -58,4 +59,5 @@ public interface ICollectionTagRepository
     Task UpdateCollectionAgeRating(AppUserCollection tag, CancellationToken ct = default);
     Task<IEnumerable<AppUserCollection>> GetCollectionsByIds(IEnumerable<int> tags, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
     Task<IList<AppUserCollection>> GetAllCollectionsForSyncing(DateTime expirationTime, CancellationToken ct = default);
+    Task<ColorScapeDto?> GetColorScapeAsync(int collectionId, CancellationToken ct = default);
 }

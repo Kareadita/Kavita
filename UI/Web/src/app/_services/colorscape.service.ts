@@ -34,6 +34,7 @@ const colorScapeIdKeys: Record<ColorScapeKind, string> = {
   [ColorScapeKind.Chapter]: 'chapterId',
   [ColorScapeKind.Person]: 'personId',
   [ColorScapeKind.ReadingList]: 'readingListId',
+  [ColorScapeKind.Collection]: 'collectionId',
 };
 
 /**

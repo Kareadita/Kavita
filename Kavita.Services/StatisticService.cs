@@ -359,9 +359,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
                 {
                     Id = g.Key.Id,
                     Name = g.Key.Name,
-                    CoverImage = g.Key.CoverImage,
-                    PrimaryColor = g.Key.PrimaryColor,
-                    SecondaryColor = g.Key.SecondaryColor,
+                    HasCoverImage = g.Key.HasCoverImage(),
                     Description = g.Key.Description
                 },
                 Count = g.Sum(x => countDict.GetValueOrDefault(x.SeriesId, 0))

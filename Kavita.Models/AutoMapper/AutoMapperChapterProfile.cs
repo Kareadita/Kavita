@@ -4,6 +4,7 @@ using AutoMapper;
 using Kavita.Models.DTOs;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.AutoMapper;
 
@@ -17,6 +18,7 @@ public class AutoMapperChapterProfile : Profile
         int userId = 0; // Placeholder will be replaced at runtime
 
         CreateMap<Chapter, ChapterDto>()
+            .IncludeBase<IHasCoverImageFile, IHasCoverImageDto>()
             .MapChapterBase(userId);
 
         CreateMap<Chapter, StandaloneChapterDto>()

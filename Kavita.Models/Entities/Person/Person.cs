@@ -4,7 +4,7 @@ using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.Entities.Person;
 
-public class Person : IHasCoverImage, IHasLockableCoverImageFile
+public class Person : IHasCoverImage, IHasLockableCoverImageFile, IHasCoverImageFile
 {
     public int Id { get; set; }
     public required string Name { get; set; }

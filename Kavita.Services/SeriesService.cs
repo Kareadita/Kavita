@@ -424,7 +424,7 @@ public class SeriesService(
                 HardcoverId = personDto.HardcoverId,
                 Description = personDto.Description,
                 Asin = personDto.Asin,
-                CoverImage = personDto.CoverImage,
+                //CoverImage = personDto.HasCoverImage, // TODO: Update CoverImageRef
             };
 
             peopleToAdd.Add(newPerson);

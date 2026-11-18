@@ -4,6 +4,7 @@ using AutoMapper;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.ReadingLists;
 
 namespace Kavita.Models.AutoMapper;
@@ -18,6 +19,7 @@ public class AutoMapperReadingListProfile : Profile
         int userId = 0;
 
         CreateMap<ReadingList, ReadingListDto>()
+            .IncludeBase<IHasCoverImageFile, IHasCoverImageDto>()
             .ForMember(dest => dest.ItemCount,
                 opt => opt.MapFrom(src => src.Items.Count))
             .ForMember(dest => dest.OwnerUserName,

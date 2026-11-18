@@ -683,7 +683,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     {
         return await context.Series
             .Where(s => s.Id == seriesId)
-            .Select(s => s.CoverImage)
+            .Select(s => s.CoverImageFile!.FileName)
             .SingleOrDefaultAsync(ct);
     }
 

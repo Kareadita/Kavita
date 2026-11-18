@@ -34,6 +34,7 @@ using Kavita.Models.DTOs.Stats;
 using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Person;
@@ -58,11 +59,16 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src.Series));
         CreateMap<LibraryDto, Library>();
         CreateMap<MangaFile, MangaFileDto>();
-        CreateMap<Series, SeriesDto>();
+        CreateMap<IHasCoverImageFile, IHasCoverImageDto>()
+            .ForMember(dest => dest.HasCoverImage, opt => opt.MapFrom(src => src.CoverImageFileId != null));
+        CreateMap<Series, SeriesDto>()
+            .IncludeBase<IHasCoverImageFile, IHasCoverImageDto>();
         CreateMap<AppUserCollection, AppUserCollectionDto>()
+            .IncludeBase<IHasCoverImageFile, IHasCoverImageDto>()
             .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.AppUser.UserName))
             .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count));
         CreateMap<Person, PersonDto>()
+            .IncludeBase<IHasCoverImageFile, IHasCoverImageDto>()
             .ForMember(dest => dest.Aliases, opt => opt.MapFrom(src => src.Aliases.Select(s => s.Alias)));
         CreateMap<Genre, GenreTagDto>();
         CreateMap<Tag, TagDto>();
@@ -201,6 +207,7 @@ public class AutoMapperProfiles : Profile
                         src => src.Tags.OrderBy(p => p.NormalizedTitle)));
 
         CreateMap<AppUser, UserDto>()
+            .IncludeBase<IHasCoverImageFile, IHasCoverImageDto>()
             .ForMember(dest => dest.Roles,
                 opt =>
                     opt.MapFrom(src => src.UserRoles.Select(r => r.Role.Name)))
@@ -233,6 +240,7 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<ReadingListTag, ReadingListTagDto>();
         CreateMap<ReadingList, ReadingListDto>()
+            .IncludeBase<IHasCoverImageFile, IHasCoverImageDto>()
             .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count))
             .ForMember(dest => dest.OwnerUserName, opt => opt.MapFrom(src => src.AppUser.UserName))
             .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags));

@@ -4,6 +4,7 @@ using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
 using Kavita.Models.Attributes;
+using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.DTOs;
 #nullable enable
@@ -19,16 +20,12 @@ public record LiteLibraryDto
     public LibraryType Type { get; init; }
 }
 
-public sealed record LibraryDto : LiteLibraryDto
+public sealed record LibraryDto : LiteLibraryDto, IHasCoverImageDto
 {
     /// <summary>
     /// Last time Library was scanned
     /// </summary>
     public DateTime LastScanned { get; init; }
-    /// <summary>
-    /// An optional Cover Image or null
-    /// </summary>
-    public string? CoverImage { get; init; }
     public FolderWatchMode FolderWatchMode { get; set; } = FolderWatchMode.Automatic;
     /// <summary>
     /// Include Library series on Dashboard Streams
@@ -90,4 +87,6 @@ public sealed record LibraryDto : LiteLibraryDto
     /// <inheritdoc cref="Library.MetadataProvider"/>
     [EnumDataType(typeof(MetadataProvider))]
     public MetadataProvider MetadataProvider { get; init; }
+
+    public bool HasCoverImage { get; set; }
 }

@@ -156,25 +156,28 @@ public class DownloadService(
         return outputPath;
     }
 
-    private async Task<string> ConvertImagesToEpub(int userId, int chapterId, CancellationToken cancellationToken)
+    private async Task<string> ConvertImagesToEpub(int userId, int chapterId, CancellationToken ct)
     {
+        // TODO: Validate this wont fail if we have a file named "book.kepub.2008.kepub"
         var outputPath = kepubifyConverterService.BuildKepubifyPath(chapterId).Replace(".kepub", string.Empty);
         if (fileSystem.File.Exists(outputPath))
         {
             return outputPath;
         }
 
-        var chapter = await cacheService.Ensure(chapterId, false, cancellationToken);
+        var chapter = await cacheService.Ensure(chapterId, false, ct);
         if (chapter is null)
         {
             throw new KavitaException(await localizationService.TranslateAsync("cache-file-find"));
         }
 
-        var libraryType = await unitOfWork.ChapterRepository.GetLibraryTypeAsync(chapter.Id, cancellationToken);
-        var chapterDto = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId, cancellationToken);
-        var volumeDto = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, userId, cancellationToken);
+        var libraryType = await unitOfWork.ChapterRepository.GetLibraryTypeAsync(chapter.Id, ct);
+        var chapterDto = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId, ct);
+        var volumeDto = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, userId, ct);
         if (libraryType is null || chapterDto is null || volumeDto is null)
+        {
             throw new KavitaException();
+        }
 
         var namingCtx = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType.Value);
 
@@ -183,19 +186,27 @@ public class DownloadService(
 
         try
         {
-            var path = fileSystem.Path.Join(directoryService.CoverImageDirectory, chapter.CoverImage);
-            if (fileSystem.File.Exists(path))
+            var coverImage = await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId, ct);
+            var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+
+            if (chapterDto.HasCoverImage && fileSystem.File.Exists(coverImage))
             {
-                var fs = fileSystem.File.OpenRead(path);
+                var fs = fileSystem.File.OpenRead(coverImage);
                 openFiles.Add(fs);
 
-                epub.AddResource(chapter.CoverImage, EpubResourceType.JPEG, fs, true);
+                if (serverSettings.EncodeMediaAs != EncodeFormat.JPEG ||
+                    serverSettings.EncodeMediaAs != EncodeFormat.PNG)
+                {
+                    // TODO: We need to convert this to JPEG/PNG
+                }
+
+                epub.AddResource(coverImage, EpubResourceType.JPEG, fs, true);
             }
 
             var index = 0;
             foreach (var cachedPage in cacheService.GetCachedPages(chapterId))
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
 
                 var fs = fileSystem.File.OpenRead(cachedPage);
                 openFiles.Add(fs);

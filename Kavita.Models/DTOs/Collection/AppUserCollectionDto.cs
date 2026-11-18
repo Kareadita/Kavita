@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Kavita.Models.DTOs.Collection;
 #nullable enable
 
-public sealed record AppUserCollectionDto : IHasCoverImage
+public sealed record AppUserCollectionDto : IHasCoverImageDto
 {
     public int Id { get; init; }
     public string Title { get; init; } = default!;
@@ -14,15 +14,6 @@ public sealed record AppUserCollectionDto : IHasCoverImage
     public bool Promoted { get; init; }
     [EnumDataType(typeof(AgeRating))]
     public AgeRating AgeRating { get; init; }
-
-    /// <summary>
-    /// This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.
-    /// </summary>
-    public string? CoverImage { get; set; } = string.Empty;
-
-    public string? PrimaryColor { get; set; } = string.Empty;
-    public string? SecondaryColor { get; set; } = string.Empty;
-    public bool CoverImageLocked { get; init; }
 
     /// <summary>
     /// Number of Series in the Collection
@@ -55,9 +46,6 @@ public sealed record AppUserCollectionDto : IHasCoverImage
     /// </summary>
     public string? MissingSeriesFromSource { get; init; }
 
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
+    public bool HasCoverImage { get; set; }
+    public bool CoverImageLocked { get; init; }
 }

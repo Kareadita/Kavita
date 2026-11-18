@@ -62,7 +62,7 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
     {
         return await context.Volume
             .Where(v => v.Id == volumeId)
-            .Select(v => v.CoverImage)
+            .Select(v => v.CoverImageFile.FileName)
             .SingleOrDefaultAsync(ct);
     }
 

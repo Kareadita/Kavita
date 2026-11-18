@@ -296,7 +296,7 @@ public class LibraryRepository(DataContext context, IMapper mapper) : ILibraryRe
     {
         return context.Library
             .Where(l => l.Id == libraryId)
-            .Select(l => l.CoverImage)
+            .Select(c => c.CoverImageFile!.FileName)
             .SingleOrDefaultAsync(ct);
 
     }

@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   EventEmitter,
   inject,
@@ -65,6 +66,8 @@ import {UserCollection} from "../../../_models/collection-tag";
 import {Series} from "../../../_models/series";
 import {Pagination} from "../../../_models/pagination";
 import {JumpbarService} from "../../../_services/jumpbar.service";
+import {ColorscapeService} from "../../../_services/colorscape.service";
+import {ColorScapeKind} from "../../../_models/theme/colorscape";
 
 @Component({
   selector: 'app-collection-detail',
@@ -93,6 +96,7 @@ export class CollectionDetailComponent implements AfterContentChecked {
   protected readonly breakpointService = inject(BreakpointService);
   private readonly scrollService = inject(ScrollService);
   private readonly metadataService = inject(MetadataService);
+  private readonly colorscapeService = inject(ColorscapeService);
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
@@ -145,57 +149,64 @@ export class CollectionDetailComponent implements AfterContentChecked {
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 
   constructor() {
-      this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
-      this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-        let filter = data['filter'] as FilterV2<SeriesFilterField, SeriesSortField>;
-        const tag = this.collectionTag();
-        const tagId = tag?.id ?? 0;
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      let filter = data['filter'] as FilterV2<SeriesFilterField, SeriesSortField>;
+      const tag = this.collectionTag();
+      const tagId = tag?.id ?? 0;
 
-        const defaultStmt =  {field: SeriesFilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal};
+      const defaultStmt =  {field: SeriesFilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal};
 
-        if (filter == null) {
-          filter = this.metadataService.createDefaultFilterDto('series');
-          filter.statements.push(defaultStmt);
-        }
+      if (filter == null) {
+        filter = this.metadataService.createDefaultFilterDto('series');
+        filter.statements.push(defaultStmt);
+      }
 
-        if (filter.statements.filter((stmt: FilterStatement<SeriesFilterField>) => stmt.field === SeriesFilterField.CollectionTags).length === 0) {
-          filter!.statements.push(defaultStmt);
-        }
+      if (filter.statements.filter((stmt: FilterStatement<SeriesFilterField>) => stmt.field === SeriesFilterField.CollectionTags).length === 0) {
+        filter!.statements.push(defaultStmt);
+      }
 
-        if (!filter.statements.find(stmt => stmt.field === SeriesFilterField.CollapseSeriesRelationships)) {
-          filter.statements.push({
-            field: SeriesFilterField.CollapseSeriesRelationships,
-            value: 'false',
-            comparison: FilterComparison.Equal,
-          })
-        }
+      if (!filter.statements.find(stmt => stmt.field === SeriesFilterField.CollapseSeriesRelationships)) {
+        filter.statements.push({
+          field: SeriesFilterField.CollapseSeriesRelationships,
+          value: 'false',
+          comparison: FilterComparison.Equal,
+        })
+      }
 
-        this.filter.set(filter);
+      this.filter.set(filter);
 
-        const settings = new SeriesFilterSettings();
-        settings.presetsV2 = filter;
-        this.filterSettings.set(settings);
+      const settings = new SeriesFilterSettings();
+      settings.presetsV2 = filter;
+      this.filterSettings.set(settings);
 
-        this.loadPage();
-      });
+      this.loadPage();
+    });
 
-      this.bulkSelectionService.registerDataSource('series', () => this.series());
-      this.bulkSelectionService.registerPostAction((res: ActionResult<Series>) => {
-        if (res.effect === 'none') return;
-        this.loadPage();
-      });
+    this.bulkSelectionService.registerDataSource('series', () => this.series());
+    this.bulkSelectionService.registerPostAction((res: ActionResult<Series>) => {
+      if (res.effect === 'none') return;
+      this.loadPage();
+    });
 
-      this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(2000)).subscribe(event => {
-        if (event.event == EVENTS.CollectionUpdated) {
-          const collectionEvent = event.payload as SeriesAddedToCollectionEvent;
-          if (collectionEvent.tagId === this.collectionTag()?.id) {
-            this.loadPage();
-          }
-        } else if (event.event === EVENTS.SeriesRemoved) {
+    effect(() => {
+      const id = this.collectionId();
+      if (id > 0) {
+        this.colorscapeService.loadColorScape(ColorScapeKind.Collection, this.collectionId()).subscribe();
+      }
+    });
+
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(2000)).subscribe(event => {
+      if (event.event == EVENTS.CollectionUpdated) {
+        const collectionEvent = event.payload as SeriesAddedToCollectionEvent;
+        if (collectionEvent.tagId === this.collectionTag()?.id) {
           this.loadPage();
         }
-      });
+      } else if (event.event === EVENTS.SeriesRemoved) {
+        this.loadPage();
+      }
+    });
   }
 
   shouldRenderCollection(action: ActionItem<UserCollection>, entity: UserCollection, user: User) {

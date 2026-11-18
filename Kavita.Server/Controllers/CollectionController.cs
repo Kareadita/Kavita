@@ -53,6 +53,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
     /// <param name="collectionId"></param>
     /// <returns></returns>
     [HttpGet("single")]
+    [CollectionTagAccess]
     public async Task<ActionResult<AppUserCollectionDto>> GetTag(int collectionId)
     {
         var ct = HttpContext.RequestAborted;
@@ -213,7 +214,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesIds, ct))
             return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList(), false);
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList(), false, ct);
         foreach (var s in series)
         {
             if (tag.Items.Contains(s)) continue;
@@ -267,6 +268,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
     /// <returns></returns>
     [HttpDelete]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    [CollectionTagAccess]
     public async Task<ActionResult> DeleteTag(int tagId)
     {
         var ct = HttpContext.RequestAborted;

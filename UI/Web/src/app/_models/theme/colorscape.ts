@@ -9,4 +9,5 @@ export enum ColorScapeKind {
   Chapter = 'chapter',
   Person = 'person',
   ReadingList = 'reading-list',
+  Collection = 'collection'
 }

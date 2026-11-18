@@ -21,14 +21,12 @@ export interface Person extends IHasCover {
   name: string;
   description: string;
   aliases: Array<string>;
-  coverImage?: string;
+  hasCoverImage: boolean;
   coverImageLocked: boolean;
   malId?: number;
   aniListId?: number;
   hardcoverId?: string;
   asin?: string;
-  primaryColor: string;
-  secondaryColor: string;
   /**
    * Only present when retrieving from person info endpoint
    */

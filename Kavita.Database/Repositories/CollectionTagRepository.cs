@@ -10,6 +10,7 @@ using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.Collection;
+using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
@@ -110,7 +111,7 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
     {
         return await context.AppUserCollection
             .Where(c => c.Id == collectionTagId)
-            .Select(c => c.CoverImage)
+            .Select(c => c.CoverImageFile!.FileName)
             .SingleOrDefaultAsync(ct);
     }
 
@@ -142,7 +143,7 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
     {
         return await context.AppUserCollection
             .Where(c => !c.CoverImageLocked)
-            .Where(c => (c.CoverImageFileId == null && c.Items.Any(s => s.CoverImageFileId != null))
+            .Where(c => (c.CoverImageFileId == null && c.Items.Any(i => i.CoverImageFile != null))
                         || (!onlyMissing && c.CoverImageFile!.Origin == ImageOrigin.Composite))
             .Select(c => c.Id)
             .ToListAsync(ct);
@@ -189,6 +190,14 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
             .Include(c => c.Items)
             .AsSplitQuery()
             .ToListAsync(ct);
+    }
+
+    public async Task<ColorScapeDto?> GetColorScapeAsync(int collectionId, CancellationToken ct = default)
+    {
+        return await context.AppUserCollection
+            .Where(s => s.Id == collectionId && s.CoverImageFile != null)
+            .Select(s => new ColorScapeDto(s.CoverImageFile!.PrimaryColor, s.CoverImageFile.SecondaryColor))
+            .FirstOrDefaultAsync(ct);
     }
 
     public async Task<AppUserCollection?> GetCollectionAsync(int tagId,

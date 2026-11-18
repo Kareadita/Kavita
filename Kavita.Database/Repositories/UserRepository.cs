@@ -989,7 +989,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
     {
         return context.AppUser
             .Where(u => u.Id == userId)
-            .Select(u => u.CoverImage)
+            .Select(u => u.CoverImageFile.FileName)
             .FirstOrDefaultAsync(ct);
     }
 
@@ -997,7 +997,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
     {
         return await context.Person
             .Where(p => p.Id == personId)
-            .Select(p => p.CoverImage)
+            .Select(p => p.CoverImageFile.FileName)
             .FirstOrDefaultAsync(ct);
     }
 

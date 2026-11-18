@@ -5,7 +5,7 @@ namespace Kavita.Models.DTOs.Metadata.Browse;
 /// <summary>
 /// Used to browse writers and click in to see their series
 /// </summary>
-public class BrowsePersonDto : PersonDto
+public sealed record BrowsePersonDto : PersonDto
 {
     /// <summary>
     /// Number of Series this Person is the Writer for

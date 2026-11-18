@@ -48,7 +48,7 @@
               </ng-template>
               <ng-template #optionItem let-item let-position="idx">
                 <div class="d-flex align-items-center gap-2">
-                  <app-image [imageUrl]="item.coverImage" height="40px" width="30px" />
+                  <app-image [imageUrl]="getCoverImage(item)" height="40px" width="30px" />
                   <div>
                     <div>{{item.title}}</div>
                     @if (item.volumeTitle) {

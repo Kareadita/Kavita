@@ -16,7 +16,7 @@ namespace Kavita.Models.DTOs;
 /// A Chapter is the lowest grouping of a reading medium. A Chapter contains a set of MangaFiles which represents the underlying
 /// file (abstracted from type).
 /// </summary>
-public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds
+public class ChapterDto : IHasReadTimeEstimate, IHasMetadataIds, IHasCoverImageDto
 {
     /// <inheritdoc cref="Chapter.Id"/>
     public int Id { get; init; }
@@ -172,20 +172,9 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds
 
     #endregion
 
-    /// <inheritdoc cref="Chapter.CoverImage"/>
-    public string? CoverImage { get; set; }
-    /// <inheritdoc cref="Chapter.PrimaryColor"/>
-    public string? PrimaryColor { get; set; } = string.Empty;
-    /// <inheritdoc cref="Chapter.SecondaryColor"/>
-    public string? SecondaryColor { get; set; } = string.Empty;
+    public bool HasCoverImage { get; set; }
 
     public MangaFormat? Format => Files.FirstOrDefault()?.Format;
-
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
 
     #region Metadata
     public int AniListId { get; set; }

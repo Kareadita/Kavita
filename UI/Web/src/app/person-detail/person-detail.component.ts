@@ -81,7 +81,7 @@ export class PersonDetailComponent {
   personName = computed(() => this.person().name);
   works = signal<Series[]>([]);
   filter = signal<FilterV2<SeriesFilterField> | null>(null);
-  hasCoverImage = computed(() => this.person().coverImage);
+  hasCoverImage = computed(() => this.person().hasCoverImage);
   personActions = this.actionService.getPersonActions();
 
   chaptersByRole = computed(() => {

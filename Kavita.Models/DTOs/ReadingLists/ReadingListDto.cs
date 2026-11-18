@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Kavita.Models.DTOs.ReadingLists;
 #nullable enable
 
-public sealed record ReadingListDto : IHasCoverImage
+public sealed record ReadingListDto : IHasCoverImageDto
 {
     public int Id { get; init; }
     public string Title { get; set; } = null!;
@@ -18,13 +18,6 @@ public sealed record ReadingListDto : IHasCoverImage
     /// </summary>
     public bool Promoted { get; set; }
     public bool CoverImageLocked { get; set; }
-    /// <summary>
-    /// This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.
-    /// </summary>
-    public string? CoverImage { get; set; } = string.Empty;
-
-    public string? PrimaryColor { get; set; } = string.Empty;
-    public string? SecondaryColor { get; set; } = string.Empty;
 
     /// <summary>
     /// Number of Items in the Reading List
@@ -103,10 +96,5 @@ public sealed record ReadingListDto : IHasCoverImage
     public bool HasRemoteChange(string remoteSha)
         => !string.Equals(ShaHash, remoteSha, StringComparison.Ordinal);
 
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
-
+    public bool HasCoverImage { get; set; }
 }

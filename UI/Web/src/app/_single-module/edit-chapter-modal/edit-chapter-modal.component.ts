@@ -68,9 +68,10 @@ import {personFields, PersonFields, personFieldsFrom} from "../../_helpers/perso
 import {LockableFieldComponent} from "../../shared/_components/lockable-field/lockable-field.component";
 import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
+import {IHasCover} from "../../_models/common/i-has-cover";
 
 
-interface FormModel extends IHasMetadataIds, PersonFields {
+interface FormModel extends IHasMetadataIds, PersonFields, IHasCover {
   titleName: string;
   sortOrder: number;
   summary: string;
@@ -80,7 +81,6 @@ interface FormModel extends IHasMetadataIds, PersonFields {
   releaseDate: string;
   genres: Genre[];
   tags: Tag[];
-  coverImage: string;
 
   aniListId: number;
   malId: number;
@@ -154,7 +154,7 @@ export class EditChapterModalComponent implements OnInit {
     aniListId: 0,
     cbrId: 0,
     comicVineId: null,
-    coverImage: '',
+    hasCoverImage: false,
     genres: [],
     hardcoverId: 0,
     isbn: '',
@@ -232,7 +232,7 @@ export class EditChapterModalComponent implements OnInit {
       comicVineId: this.chapter().comicVineId,
       mangaBakaId: this.chapter().mangaBakaId,
       cbrId: this.chapter().cbrId,
-      coverImage: this.chapter().coverImage,
+      hasCoverImage: this.chapter().hasCoverImage,
       ...personFieldsFrom(this.chapter()),
     });
 

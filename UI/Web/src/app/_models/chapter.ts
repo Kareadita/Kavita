@@ -19,10 +19,6 @@ export interface Chapter extends IHasCast, IHasReadingTime, IHasCover, IHasProgr
   minNumber: number;
   maxNumber: number;
   files: Array<MangaFile>;
-  /**
-   * This is used in the UI, it is not updated or sent to Backend
-   */
-  coverImage: string;
   coverImageLocked: boolean;
   pages: number;
   volumeId: number;
@@ -53,9 +49,6 @@ export interface Chapter extends IHasCast, IHasReadingTime, IHasCover, IHasProgr
   isbn: string;
   lastReadingProgress: string;
   sortOrder: number;
-
-  primaryColor: string;
-  secondaryColor: string;
 
   year: string;
   language: string;

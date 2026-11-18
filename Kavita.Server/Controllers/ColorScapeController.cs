@@ -59,4 +59,15 @@ public class ColorScapeController(IUnitOfWork unitOfWork) : BaseApiController
     {
         return Ok(await unitOfWork.ReadingListRepository.GetColorScapeAsync(readingListId, HttpContext.RequestAborted) ?? ColorScapeDto.Empty);
     }
+
+
+    /// <summary>
+    /// Returns the color scape for a collection
+    /// </summary>
+    [CollectionTagAccess]
+    [HttpGet("collection")]
+    public async Task<ActionResult<ColorScapeDto>> GetColorScapeForCollection(int collectionId)
+    {
+        return Ok(await unitOfWork.CollectionTagRepository.GetColorScapeAsync(collectionId, HttpContext.RequestAborted) ?? ColorScapeDto.Empty);
+    }
 }

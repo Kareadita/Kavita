@@ -186,7 +186,7 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
     {
         return await context.Chapter
             .Where(c => c.Id == chapterId)
-            .Select(c => c.CoverImage)
+            .Select(c => c.CoverImageFile!.FileName)
             .SingleOrDefaultAsync(ct);
     }
 
