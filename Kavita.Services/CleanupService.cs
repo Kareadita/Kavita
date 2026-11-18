@@ -415,6 +415,7 @@ public class CleanupService(
         await SendImageProgress(0F, ProgressEventType.Started, ct);
 
         var run = await StartImageRun(ct);
+        await RemoveDuplicateKeyedImages(run, ct);
         await DeleteUnusedImages(run, 0F, 0.1F, ct);
         await MigrateImageFiles(run, 0.1F, 0.8F, ct);
         await ReencodeImages(run, 0.8F, 0.95F, ct);
@@ -469,6 +470,50 @@ public class CleanupService(
         }
 
         return new ImageRun(policy, kinds, folders, new ImageCleanupTally());
+    }
+
+    /// <summary>
+    /// Keeps one favicon or publisher row per key: the one whose file exists, then the one already named for the target
+    /// format, then the newest. Without this, re-encoding host.png to host.webp collides with the host.webp row
+    /// </summary>
+    private async Task RemoveDuplicateKeyedImages(ImageRun run, CancellationToken ct)
+    {
+        var duplicates = await unitOfWork.ImageFileRepository.GetKeyedImageFilesWithDuplicateKeysAsync(ct);
+        if (duplicates.Count == 0) return;
+
+        var removed = duplicates
+            .GroupBy(f => new { f.Kind, f.Key })
+            .SelectMany(group =>
+            {
+                var extension = run.Policy.Format.ForKind(group.Key.Kind).GetExtension();
+                var kept = group
+                    .OrderByDescending(f => File.Exists(Path.Join(run.Folders[f.Kind], f.FileName)))
+                    .ThenByDescending(f => Path.GetExtension(f.FileName).Equals(extension, StringComparison.OrdinalIgnoreCase))
+                    .ThenByDescending(f => f.Id)
+                    .First();
+                return group.Where(f => f.Id != kept.Id);
+            })
+            .ToList();
+
+        foreach (var row in removed)
+        {
+            unitOfWork.ImageFileRepository.Remove(row);
+        }
+
+        await unitOfWork.CommitAsync(ct);
+
+        foreach (var row in removed)
+        {
+            var path = Path.Join(run.Folders[row.Kind], row.FileName);
+            var size = GetFileSize(path);
+            if (directoryService.DeleteFileQuietly(path))
+            {
+                run.Tally.Deleted++;
+                run.Tally.BytesSaved += size;
+            }
+        }
+
+        logger.LogInformation("[CleanupService] Removed {Count} favicon and publisher rows that repeated another row's key", removed.Count);
     }
 
     private async Task DeleteUnusedImages(ImageRun run, float start, float end, CancellationToken ct)

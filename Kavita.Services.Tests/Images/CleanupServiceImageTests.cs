@@ -311,6 +311,28 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
     }
 
     [Fact]
+    public async Task FirstPass_DuplicateFaviconKey_KeepsOne()
+    {
+        var (service, context, eventHub, _, _) = await Setup(EncodeFormat.WEBP);
+        WriteImage(Path.Join(_favicons, "anilist.co.png"), EncodeFormat.PNG, 32, 32);
+        WriteImage(Path.Join(_favicons, "anilist.co.webp"), EncodeFormat.WEBP, 32, 32);
+        var png = new ImageFile { Kind = ImageKind.Favicon, Key = "anilist.co", FileName = "anilist.co.png", Origin = ImageOrigin.Legacy };
+        var webp = new ImageFile { Kind = ImageKind.Favicon, Key = "anilist.co", FileName = "anilist.co.webp", Origin = ImageOrigin.Legacy };
+        context.ImageFile.AddRange(png, webp);
+        await context.SaveChangesAsync();
+
+        await service.FinishImageFileMigration(DateTime.UtcNow.AddMinutes(1));
+
+        context.ChangeTracker.Clear();
+        var saved = await context.ImageFile.SingleAsync(f => f.Kind == ImageKind.Favicon);
+        Assert.Equal(webp.Id, saved.Id);
+        Assert.Equal(EncodeFormat.WEBP, saved.Format);
+        Assert.True(File.Exists(Path.Join(_favicons, "anilist.co.webp")));
+        Assert.False(File.Exists(Path.Join(_favicons, "anilist.co.png")));
+        Assert.NotNull(SummaryOf(eventHub));
+    }
+
+    [Fact]
     public async Task FirstPass_FileWithNoRow_OnlyOldDeleted()
     {
         var (service, context, _, _, _) = await Setup(EncodeFormat.WEBP);

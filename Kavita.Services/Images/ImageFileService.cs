@@ -215,13 +215,19 @@ public class ImageFileService(
         var policy = new ImagePolicy(settings.EncodeMediaAs, CoverImageSize.Default);
         var written = imagePipeline.Write(source, kind, policy, directory, fileName);
 
-        var row = await unitOfWork.ImageFileRepository.GetByNameAsync(kind, written.FileName, ct);
+        // We need to handle a case where a user changes the EncodeFormat, then visits a page which downloads the new domain.
+        // The domain now is going to be anilist.co.webp (switched from png -> webp) and thus the row wont find, because the old row is
+        // still anilist.co.png and hasn't been converted yet
+        var row = await unitOfWork.ImageFileRepository.GetByNameAsync(kind, written.FileName, ct)
+                  ?? await unitOfWork.ImageFileRepository.GetByKeyAsync(kind, key, ct);
         if (row == null)
         {
             row = new ImageFile { Kind = kind, FileName = written.FileName };
             unitOfWork.ImageFileRepository.Add(row);
         }
 
+        var replacedFileName = row.FileName != written.FileName ? row.FileName : null;
+        row.FileName = written.FileName;
         row.Key = key;
         row.Origin = origin;
         row.Format = policy.Format.ForKind(kind);
@@ -231,6 +237,11 @@ public class ImageFileService(
         row.SourceHeight = written.SourceHeight;
 
         await unitOfWork.CommitAsync(ct);
+
+        if (replacedFileName != null)
+        {
+            directoryService.DeleteFileQuietly(Path.Join(directory, replacedFileName));
+        }
 
         return written.FileName;
     }

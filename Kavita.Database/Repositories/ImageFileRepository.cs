@@ -36,6 +36,12 @@ public class ImageFileRepository(DataContext context) : IImageFileRepository
             .FirstOrDefaultAsync(f => f.Kind == kind && f.FileName == fileName, ct);
     }
 
+    public async Task<ImageFile?> GetByKeyAsync(ImageKind kind, string key, CancellationToken ct = default)
+    {
+        return await context.ImageFile
+            .FirstOrDefaultAsync(f => f.Kind == kind && f.Key == key, ct);
+    }
+
     public async Task<ImageFileHolders> GetHoldersAsync(int imageFileId, CancellationToken ct = default)
     {
         var chapters = await context.Chapter
@@ -144,6 +150,21 @@ public class ImageFileRepository(DataContext context) : IImageFileRepository
         return await context.ImageFile
             .Where(f => kinds.Contains(f.Kind))
             .Select(f => f.FileName)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IList<ImageFile>> GetKeyedImageFilesWithDuplicateKeysAsync(CancellationToken ct = default)
+    {
+        var keyed = context.ImageFile
+            .Where(f => (f.Kind == ImageKind.Favicon || f.Kind == ImageKind.Publisher) && f.Key != null);
+
+        var duplicated = keyed
+            .GroupBy(f => new { f.Kind, f.Key })
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key);
+
+        return await keyed
+            .Where(f => duplicated.Any(d => d.Kind == f.Kind && d.Key == f.Key))
             .ToListAsync(ct);
     }
 

@@ -19,6 +19,10 @@ public interface IImageFileRepository
     /// </summary>
     Task<ImageFile?> GetByNameAsync(ImageKind kind, string fileName, CancellationToken ct = default);
     /// <summary>
+    /// The favicon or publisher row for <paramref name="key"/> (a host or a publisher name)
+    /// </summary>
+    Task<ImageFile?> GetByKeyAsync(ImageKind kind, string key, CancellationToken ct = default);
+    /// <summary>
     /// Tracked chapters, volumes and series whose cover is <paramref name="imageFileId"/>
     /// </summary>
     Task<ImageFileHolders> GetHoldersAsync(int imageFileId, CancellationToken ct = default);
@@ -69,6 +73,11 @@ public interface IImageFileRepository
     /// File names of every row of the given kinds
     /// </summary>
     Task<IList<string>> GetFileNamesAsync(IList<ImageKind> kinds, CancellationToken ct = default);
+    /// <summary>
+    /// Tracked favicon and publisher rows whose <see cref="ImageFile.Key"/> another row of the same kind also has, as the
+    /// backfill left them when an old format change had left both files on disk
+    /// </summary>
+    Task<IList<ImageFile>> GetKeyedImageFilesWithDuplicateKeysAsync(CancellationToken ct = default);
 
     #endregion
 }
