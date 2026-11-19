@@ -394,7 +394,6 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
         cast.Webpsave(path);
     }
 
-#pragma warning disable CS0618
     private static void Link(IHasCoverImageFile entity, ImageFile row)
     {
         entity.CoverImageFileId = row.Id;
@@ -403,5 +402,4 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
     }
 
     private static string? CoverImageOf(IHasCoverImage entity) => entity.CoverImage;
-#pragma warning restore CS0618
 }

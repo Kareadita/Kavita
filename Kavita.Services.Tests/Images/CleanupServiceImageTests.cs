@@ -483,7 +483,7 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
             Arg.Any<Func<object, Exception?, string>>());
     }
 
-#pragma warning disable CS0618
+
     private static void Link(IHasCoverImageFile entity, ImageFile row)
     {
         entity.CoverImageFile = row;
@@ -491,7 +491,6 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
     }
 
     private static string? CoverImageOf(IHasCoverImage entity) => entity.CoverImage;
-#pragma warning restore CS0618
 
     private sealed record ImageTestSetup(CleanupService Service, DataContext Context, IEventHub EventHub,
         IBackupService Backup, ILogger<CleanupService> Logger);

@@ -1,10 +1,12 @@
 using Kavita.API.Repositories;
+using Kavita.API.Services;
 using Kavita.Common.Extensions;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Person;
 using Kavita.Services.Builders;
+using NSubstitute;
 using Xunit.Abstractions;
 
 namespace Kavita.Services.Tests;
@@ -17,7 +19,7 @@ public class PersonServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
     {
         var (unitOfWork, _, _) = await CreateDatabase();
 
-        var ps = new PersonService(unitOfWork);
+        var ps = new PersonService(unitOfWork, Substitute.For<IImageFileService>());
 
         var person1 = new Person
         {
@@ -60,7 +62,7 @@ public class PersonServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
     {
         var (unitOfWork, _, _) = await CreateDatabase();
 
-        var ps = new PersonService(unitOfWork);
+        var ps = new PersonService(unitOfWork, Substitute.For<IImageFileService>());
 
         var person1 = new Person
         {
@@ -88,7 +90,7 @@ public class PersonServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
     {
         var (unitOfWork, _, _) = await CreateDatabase();
 
-        var ps = new PersonService(unitOfWork);
+        var ps = new PersonService(unitOfWork, Substitute.For<IImageFileService>());
 
         var library = new LibraryBuilder("My Library").Build();
         unitOfWork.LibraryRepository.Add(library);
@@ -155,7 +157,7 @@ public class PersonServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
     {
         var (unitOfWork, _, _) = await CreateDatabase();
 
-        var ps = new PersonService(unitOfWork);
+        var ps = new PersonService(unitOfWork, Substitute.For<IImageFileService>());
 
         var library = new LibraryBuilder("My Library").Build();
         unitOfWork.LibraryRepository.Add(library);
@@ -251,7 +253,7 @@ public class PersonServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         unitOfWork.PersonRepository.Attach(new PersonBuilder("Jilly Cowan").WithAlias("Jolly Cowan").Build());
         await unitOfWork.CommitAsync();
 
-        var ps = new PersonService(unitOfWork);
+        var ps = new PersonService(unitOfWork, Substitute.For<IImageFileService>());
 
         var person1 = await unitOfWork.PersonRepository.GetPersonByNameOrAliasAsync("Jillian Cowan");
         var person2 = await unitOfWork.PersonRepository.GetPersonByNameOrAliasAsync("Jilly Cowan");

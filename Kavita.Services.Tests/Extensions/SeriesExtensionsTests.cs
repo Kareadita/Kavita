@@ -500,7 +500,5 @@ public class SeriesExtensionsTests
         Assert.Equal("Chapter 1", CoverOf(series));
     }
 
-#pragma warning disable CS0618
     private static string? CoverOf(Series series) => (series.GetCoverSource() as IHasCoverImage)?.CoverImage;
-#pragma warning restore CS0618
 }

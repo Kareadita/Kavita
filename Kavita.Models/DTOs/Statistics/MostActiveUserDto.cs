@@ -8,7 +8,6 @@ public sealed record MostActiveUserDto
 {
     public int UserId { get; set; }
     public string Username { get; set; }
-    public string? CoverImage { get; set; }
 
     public int TimePeriodHours { get; set; }
     public int TotalHours { get; set; }

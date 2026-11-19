@@ -22,7 +22,7 @@ public enum PersonIncludes
     SeriesPeople = 1 << 3,
     CoverImageFile = 1 << 4,
 
-    All = Aliases | ChapterPeople | SeriesPeople,
+    All = Aliases | ChapterPeople | SeriesPeople | CoverImageFile,
 }
 
 public interface IPersonRepository
