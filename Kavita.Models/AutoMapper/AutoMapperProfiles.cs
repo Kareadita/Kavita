@@ -262,6 +262,7 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<Library, LiteLibraryDto>();
         CreateMap<Library, LibraryDto>()
+            .IncludeBase<IHasCoverImageFile, IHasCoverImageDto>()
             .ForMember(dest => dest.Folders,
                 opt =>
                     opt.MapFrom(src => src.Folders.Select(x => x.Path).ToList()))

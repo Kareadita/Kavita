@@ -156,7 +156,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
             Id = p.Id,
             Name = p.Name,
             Description = p.Description,
-            HasCoverImage = p.HasCoverImage(),
+            HasCoverImage = p.CoverImageFileId != null,
             SeriesCount = p.SeriesMetadataPeople
                 .Select(smp => smp.SeriesMetadata)
                 .Where(sm => allLibrariesCount == userLibs.Count || seriesIds.Contains(sm.SeriesId))

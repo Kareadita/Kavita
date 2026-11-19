@@ -11,37 +11,7 @@ public interface IImageService
 {
     void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1);
 
-    /// <summary>
-    /// Creates a Thumbnail version of a base64 image
-    /// </summary>
-    /// <param name="encodedImage">base64 encoded image</param>
-    /// <param name="fileName">File name without extension</param>
-    /// <param name="kind">Picks the size profile</param>
-    /// <param name="policy">Encoding format and cover size</param>
-    /// <param name="targetDirectory">If null, will write to <see cref="DirectoryService.CoverImageDirectory"/></param>
-    /// <returns>File name with extension of the file, or empty string on failure</returns>
-    string CreateThumbnailFromBase64(string encodedImage, string fileName, ImageKind kind, ImagePolicy policy, string? targetDirectory = null);
 
-    /// <summary>
-    /// Creates a thumbnail from an image file already on disk (e.g. one staged in the temp directory).
-    /// </summary>
-    /// <param name="sourceFile">Absolute path to the source image</param>
-    /// <param name="fileName">File name without extension</param>
-    /// <param name="kind">Picks the size profile</param>
-    /// <param name="policy">Encoding format and cover size</param>
-    /// <param name="targetDirectory">If null, will write to <see cref="DirectoryService.CoverImageDirectory"/></param>
-    /// <returns>File name with extension of the file, or empty string on failure</returns>
-    string CreateThumbnailFromFile(string sourceFile, string fileName, ImageKind kind, ImagePolicy policy, string? targetDirectory = null);
-    /// <summary>
-    /// Writes out a thumbnail by stream input
-    /// </summary>
-    /// <param name="stream">Stream to read; rewound first when it can seek</param>
-    /// <param name="fileName">File name without extension</param>
-    /// <param name="outputDirectory">Where to write the cover</param>
-    /// <param name="encodeFormat">Convert and save as encoding format</param>
-    /// <param name="size">Cover size to scale and crop to</param>
-    /// <returns>File name with extension of the file</returns>
-    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
     /// <summary>
     /// Writes out a thumbnail by file path input
     /// </summary>
@@ -74,5 +44,4 @@ public interface IImageService
     /// </summary>
     /// <returns>Null when the bytes are not an image or are a format Kavita does not take for covers</returns>
     ImageHeader? GetImageHeader(byte[] bytes);
-    void UpdateColorScape(IHasCoverImage entity);
 }

@@ -49,6 +49,7 @@ public interface IReadingListRepository
     /// <paramref name="onlyMissing"/>, those whose cover Kavita built
     /// </summary>
     Task<IList<int>> GetCompositeCoverIdsAsync(bool onlyMissing, CancellationToken ct = default);
+    Task<string?> GetCoverImageAsync(int collectionTagId, CancellationToken ct = default);
     Task<bool> ReadingListExists(string name, int? readingListId = null, CancellationToken ct = default);
     IEnumerable<PersonDto> GetReadingListPeopleAsync(int readingListId, PersonRole role, CancellationToken ct = default);
     Task<ReadingListCast> GetReadingListAllPeopleAsync(int readingListId, CancellationToken ct = default);

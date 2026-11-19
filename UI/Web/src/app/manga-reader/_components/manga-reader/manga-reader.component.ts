@@ -1999,6 +1999,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         apis.push(this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId(), pageNum + 1));
       }
 
+
+
       concat(...apis).subscribe({
         complete: () => {
           this.bookmarks.update(bookmarks => {
@@ -2033,6 +2035,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Show an effect on the image to show that it was bookmarked
     this.showBookmarkEffectEvent.next(pageNum);
+  }
+
+  private setBookmark(targetState: boolean) {
+
   }
 
   // This is menu only code

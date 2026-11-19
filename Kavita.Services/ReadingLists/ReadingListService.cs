@@ -414,8 +414,6 @@ public class ReadingListService(
 
                 if (!unitOfWork.HasChanges()) continue;
 
-
-                imageService.UpdateColorScape(readingList);
                 await CalculateReadingListAgeRating(readingList);
 
                 await unitOfWork.CommitAsync(); // TODO: See if we can avoid this extra commit by reworking bottom logic

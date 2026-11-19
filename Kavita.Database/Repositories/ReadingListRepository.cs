@@ -57,6 +57,14 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
             .ToListAsync(ct);
     }
 
+    public async Task<string?> GetCoverImageAsync(int collectionTagId, CancellationToken ct = default)
+    {
+        return await context.ReadingList
+            .Where(r => r.Id == collectionTagId && r.CoverImageFileId != null)
+            .Select(r => r.CoverImageFile!.FileName)
+            .FirstOrDefaultAsync(cancellationToken: ct);
+    }
+
 
     public async Task<bool> ReadingListExists(string name, int? readingListId = null,  CancellationToken ct = default)
     {

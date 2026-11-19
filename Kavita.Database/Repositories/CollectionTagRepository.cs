@@ -195,7 +195,7 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
     public async Task<ColorScapeDto?> GetColorScapeAsync(int collectionId, CancellationToken ct = default)
     {
         return await context.AppUserCollection
-            .Where(s => s.Id == collectionId && s.CoverImageFile != null)
+            .Where(s => s.Id == collectionId && s.CoverImageFileId != null)
             .Select(s => new ColorScapeDto(s.CoverImageFile!.PrimaryColor, s.CoverImageFile.SecondaryColor))
             .FirstOrDefaultAsync(ct);
     }

@@ -40,7 +40,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     public async Task<ActionResult> GetChapterCoverImage(int chapterId)
     {
         var ct = HttpContext.RequestAborted;
-        var path = Path.Join(directoryService.CoverImageDirectory, await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId, ct));
+        var cover = await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId, ct);
+        if (string.IsNullOrEmpty(cover)) return NotFound();
+
+        var path = Path.Join(directoryService.CoverImageDirectory, cover);
         return PhysicalFile(path);
     }
 
@@ -54,7 +57,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     public async Task<ActionResult> GetLibraryCoverImage(int libraryId)
     {
         var ct = HttpContext.RequestAborted;
-        var path = Path.Join(directoryService.CoverImageDirectory, await unitOfWork.LibraryRepository.GetLibraryCoverImageAsync(libraryId, ct));
+        var cover = await unitOfWork.LibraryRepository.GetLibraryCoverImageAsync(libraryId, ct);
+        if (string.IsNullOrEmpty(cover)) return NotFound();
+
+        var path = Path.Join(directoryService.CoverImageDirectory, cover);
         return PhysicalFile(path);
     }
 
@@ -68,7 +74,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     public async Task<ActionResult> GetVolumeCoverImage(int volumeId)
     {
         var ct = HttpContext.RequestAborted;
-        var path = Path.Join(directoryService.CoverImageDirectory, await unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId, ct));
+        var cover = await unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId, ct);
+        if (string.IsNullOrEmpty(cover)) return NotFound();
+
+        var path = Path.Join(directoryService.CoverImageDirectory, cover);
         return PhysicalFile(path);
     }
 
@@ -82,7 +91,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     public async Task<ActionResult> GetSeriesCoverImage(int seriesId)
     {
         var ct = HttpContext.RequestAborted;
-        var path = Path.Join(directoryService.CoverImageDirectory, await unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId, ct));
+        var cover = await unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId, ct);
+        if (string.IsNullOrEmpty(cover)) return NotFound();
+
+        var path = Path.Join(directoryService.CoverImageDirectory, cover);
         return PhysicalFile(path);
     }
 
@@ -98,11 +110,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
         var collectionTag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(collectionTagId, ct: ct);
         if (collectionTag == null || (collectionTag.AppUserId != UserId && !collectionTag.Promoted)) return NotFound();
 
-        if (string.IsNullOrEmpty(collectionTag.CoverImage)) return NotFound();
+        var cover = await unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId, ct);
+        if (string.IsNullOrEmpty(cover)) return NotFound();
 
-        var path = Path.Join(directoryService.CoverImageDirectory, collectionTag.CoverImage);
-        if (!directoryService.FileSystem.File.Exists(path)) return NotFound();
-
+        var path = Path.Join(directoryService.CoverImageDirectory, cover);
         return PhysicalFile(path);
     }
 
@@ -118,11 +129,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
         var readingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId, ct: ct);
         if (readingList == null || (readingList.AppUserId != UserId && !readingList.Promoted)) return NotFound();
 
-        if (string.IsNullOrEmpty(readingList.CoverImage)) return NotFound();
+        var cover = await unitOfWork.ReadingListRepository.GetCoverImageAsync(readingListId, ct);
+        if (string.IsNullOrEmpty(cover)) return NotFound();
 
-        var path = Path.Join(directoryService.CoverImageDirectory, readingList.CoverImage);
-        if (!directoryService.FileSystem.File.Exists(path)) return NotFound();
-
+        var path = Path.Join(directoryService.CoverImageDirectory, cover);
         return PhysicalFile(path);
     }
 
@@ -140,10 +150,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     {
         var ct = HttpContext.RequestAborted;
         var bookmark = await unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, imageOffset, UserId, ct);
-        if (bookmark == null) return BadRequest(await localizationService.TranslateAsync(UserId, "bookmark-doesnt-exist"));
+        if (bookmark == null) return NotFound();
 
-        var bookmarkDirectory = await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct);
-        var path = Path.Join(bookmarkDirectory, bookmark.FileName);
+        // TODO: This needs to be converted to ImageFile
+        var path = Path.Join(await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct), bookmark.FileName);
 
         return PhysicalFile(path);
     }
@@ -234,7 +244,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     public async Task<ActionResult> GetPersonCoverImage(int personId)
     {
         var ct = HttpContext.RequestAborted;
-        var path = Path.Join(directoryService.CoverImageDirectory, await unitOfWork.UserRepository.GetPersonCoverImageAsync(personId, ct));
+        var cover = await unitOfWork.UserRepository.GetPersonCoverImageAsync(personId, ct);
+        if (cover == null) return NotFound();
+
+        var path = Path.Join(directoryService.CoverImageDirectory, cover);
         return PhysicalFile(path);
     }
 
@@ -247,10 +260,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     public async Task<ActionResult> GetUserCoverImage(int userId)
     {
         var ct = HttpContext.RequestAborted;
-        var filename = await unitOfWork.UserRepository.GetCoverImageAsync(userId, ct);
-        if (filename == null) return NotFound();
+        var cover = await unitOfWork.UserRepository.GetCoverImageAsync(userId, ct);
+        if (cover == null) return NotFound();
 
-        var path = Path.Join(directoryService.CoverImageDirectory, filename);
+        var path = Path.Join(directoryService.CoverImageDirectory, cover);
         return CachedFile(path);
     }
 

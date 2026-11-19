@@ -186,21 +186,22 @@ public class DownloadService(
 
         try
         {
-            var coverImage = await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId, ct);
+            var cover = await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId, ct);
             var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+            var path = Path.Join(directoryService.CoverImageDirectory, cover);
 
-            if (chapterDto.HasCoverImage && fileSystem.File.Exists(coverImage))
+            if (chapterDto.HasCoverImage && fileSystem.File.Exists(path))
             {
-                var fs = fileSystem.File.OpenRead(coverImage);
+                var fs = fileSystem.File.OpenRead(path);
                 openFiles.Add(fs);
 
-                if (serverSettings.EncodeMediaAs != EncodeFormat.JPEG ||
+                if (serverSettings.EncodeMediaAs != EncodeFormat.JPEG &&
                     serverSettings.EncodeMediaAs != EncodeFormat.PNG)
                 {
                     // TODO: We need to convert this to JPEG/PNG
                 }
 
-                epub.AddResource(coverImage, EpubResourceType.JPEG, fs, true);
+                epub.AddResource(cover, EpubResourceType.JPEG, fs, true);
             }
 
             var index = 0;

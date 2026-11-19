@@ -988,16 +988,16 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
     public Task<string?> GetCoverImageAsync(int userId, CancellationToken ct = default)
     {
         return context.AppUser
-            .Where(u => u.Id == userId)
-            .Select(u => u.CoverImageFile.FileName)
+            .Where(u => u.Id == userId && u.CoverImageFileId != null)
+            .Select(u => u.CoverImageFile!.FileName)
             .FirstOrDefaultAsync(ct);
     }
 
     public async Task<string?> GetPersonCoverImageAsync(int personId, CancellationToken ct = default)
     {
         return await context.Person
-            .Where(p => p.Id == personId)
-            .Select(p => p.CoverImageFile.FileName)
+            .Where(p => p.Id == personId && p.CoverImageFileId != null)
+            .Select(p => p.CoverImageFile!.FileName)
             .FirstOrDefaultAsync(ct);
     }
 

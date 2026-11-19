@@ -39,7 +39,7 @@ public static class SeriesExtensions
         if (chapters.Count > 1 && chapters.Exists(c => c.IsSpecial))
         {
             var nonSpecial = chapters.Find(c => !c.IsSpecial);
-            return nonSpecial?.CoverImage != null ? nonSpecial : chapters[0];
+            return nonSpecial?.CoverImageFileId != null ? nonSpecial : chapters[0];
         }
 
         // just volumes
@@ -78,6 +78,6 @@ public static class SeriesExtensions
         }
 
         var firstChapter = chpts.FirstOrDefault();
-        return firstChapter?.CoverImage != null ? firstChapter : firstVolume;
+        return firstChapter?.CoverImageFileId != null ? firstChapter : firstVolume;
     }
 }

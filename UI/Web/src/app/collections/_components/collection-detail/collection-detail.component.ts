@@ -4,7 +4,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   ElementRef,
   EventEmitter,
   inject,
@@ -190,12 +189,6 @@ export class CollectionDetailComponent implements AfterContentChecked {
       this.loadPage();
     });
 
-    effect(() => {
-      const id = this.collectionId();
-      if (id > 0) {
-        this.colorscapeService.loadColorScape(ColorScapeKind.Collection, this.collectionId()).subscribe();
-      }
-    });
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(2000)).subscribe(event => {
       if (event.event == EVENTS.CollectionUpdated) {
@@ -227,6 +220,11 @@ export class CollectionDetailComponent implements AfterContentChecked {
   loadPage() {
     this.filterActive.set(!this.utilityService.deepEqual(this.filter(), this.filterActiveCheck()));
     this.isLoading.set(true);
+
+    const collectionId = this.collectionId();
+    if (collectionId > 0) {
+      this.colorscapeService.loadColorScape(ColorScapeKind.Collection, this.collectionId()).subscribe();
+    }
 
     this.seriesService.getAllSeriesV2(undefined, undefined, this.filter()).subscribe(series => {
       this.series.set(series.result);

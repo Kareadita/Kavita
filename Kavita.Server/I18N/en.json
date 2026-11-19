@@ -77,7 +77,6 @@
     "volume-doesnt-exist": "Volume does not exist",
     "bookmarks-empty": "Bookmarks cannot be empty",
     "no-cover-image": "No cover image",
-    "bookmark-doesnt-exist": "Bookmark does not exist",
     "must-be-defined": "{0} must be defined",
     "generic-favicon": "There was an issue fetching favicon for domain",
     "invalid-filename": "Invalid Filename",

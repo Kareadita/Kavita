@@ -242,7 +242,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
     /// <remarks>The cover URL path commits; the merged fallback does not</remarks>
     private async Task GenerateCoverForReadingList(ReadingList readingList, IList<string> coverImageUrls)
     {
-        if (readingList.CoverImageLocked || !string.IsNullOrEmpty(readingList.CoverImage)) return;
+        if (readingList.CoverImageLocked || readingList.CoverImageFileId != null) return;
 
         // Try v2 cover URL first
         var coverUrl = coverImageUrls.FirstOrDefault();

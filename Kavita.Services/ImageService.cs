@@ -486,15 +486,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         }
     }
 
-    public void UpdateColorScape(IHasCoverImage entity)
-    {
-        var colors = CalculateColorScape(
-            directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, entity.CoverImage));
-        entity.PrimaryColor = colors.Primary;
-        entity.SecondaryColor = colors.Secondary;
-    }
-
-
     public static (int R, int G, int B) HexToRgb(string? hex)
     {
         if (string.IsNullOrEmpty(hex)) throw new ArgumentException("Hex cannot be null");

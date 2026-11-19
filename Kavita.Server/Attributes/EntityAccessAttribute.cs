@@ -27,7 +27,7 @@ public class ReadingListAccessAttribute(bool failOnMissing = true, string readin
 }
 
 /// <summary>
-/// An attribute restricting access to entities based on the user's access to the reading list.
+/// An attribute restricting access to entities based on the user's access to the collection.
 /// Returns 404 Not Found on failure
 /// </summary>
 /// <param name="failOnMissing"></param>

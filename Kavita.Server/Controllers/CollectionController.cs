@@ -268,7 +268,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
     /// <returns></returns>
     [HttpDelete]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    [CollectionTagAccess]
+    [CollectionTagAccess(collectionIdKey: "tagId")]
     public async Task<ActionResult> DeleteTag(int tagId)
     {
         var ct = HttpContext.RequestAborted;

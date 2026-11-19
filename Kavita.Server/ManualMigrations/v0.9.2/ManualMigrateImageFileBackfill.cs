@@ -37,7 +37,7 @@ public class ManualMigrateImageFileBackfill(IDirectoryService directoryService) 
     {
         await LinkAsync(context, ImageKind.ChapterCover, SeriesCoverKinds,
             context.Chapter.AsNoTracking()
-                .Where(c => c.CoverImageFileId == null && c.CoverImage != null && c.CoverImage != "")
+                .Where(c => c.CoverImageFileId == null && c.CoverImage != null && c.CoverImage != string.Empty)
                 .Select(c => new { c.Id, c.CoverImage, c.PrimaryColor, c.SecondaryColor, c.CoverImageLocked, c.KPlusOverrides }),
             r => r.Id,
             r => new CoverRow(r.CoverImage!, r.PrimaryColor, r.SecondaryColor,

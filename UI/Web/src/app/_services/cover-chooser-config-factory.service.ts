@@ -147,9 +147,9 @@ export class CoverChooserConfigFactoryService {
 
   public forLibrary(library: Library | undefined): CoverImageChooserConfig {
     return {
-      isLocked: library?.coverImage != null,
+      isLocked: library?.hasCoverImage,
       resetFunc: library ? () => this.uploadService.updateLibraryCoverImage(library.id, '', false) : undefined,
-      selected: (library?.coverImage != null && library?.coverImage !== '')
+      selected: library?.hasCoverImage
         ? { url: this.imageService.getLibraryCoverImage(library!.id), title: library!.name }
         : undefined,
     };
