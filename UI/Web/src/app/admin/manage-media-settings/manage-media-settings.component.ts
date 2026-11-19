@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ToastrService} from '@openng/ngx-toastr';
-import {catchError, debounceTime, distinctUntilChanged, filter, map, of, skip, switchMap, tap} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {
@@ -18,18 +18,9 @@ import {PdfRenderResolutionPipe} from "../../_pipes/pdf-render-resolution.pipe"
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {ModalService} from "../../_services/modal.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
-import {form, FormField, readonly, required} from "@angular/forms/signals";
+import {form, FormField, required} from "@angular/forms/signals";
 import {SettingSelectComponent} from "../../settings/_components/setting-enum-select/setting-select.component";
-import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
-import {MessageHubService} from "../../_services/message-hub.service";
-import {MessageEventCode} from "../../_models/events/core/message-event-code";
-import {KepubifyCheckedBody} from "../../_models/events/bodies/kepubify-checked-body";
-import {KepubifyStatus} from "../_models/kepubify-status";
 import {KepubifyCheckStatus} from "../_models/kepubify-check-status";
-import {KepubifyOffReason} from "../_models/kepubify-off-reason";
-import {KepubifySourcePipe} from "../../_pipes/kepubify-source.pipe";
-import {KepubifyCheckStatusPipe} from "../../_pipes/kepubify-check-status.pipe";
-import {KepubifyOffReasonPipe} from "../../_pipes/kepubify-off-reason.pipe";
 
 interface FormModel {
   encodeMediaAs: EncodeFormat;
@@ -70,7 +61,7 @@ export class ManageMediaSettingsComponent implements OnInit {
   });
   protected readonly settingsForm = form(this.formModel, p => {
     required(p.encodeMediaAs);
-    readonly(p.bookmarksDirectory);
+    required(p.bookmarksDirectory);
     required(p.coverImageSize);
     required(p.pdfRenderResolution);
   });
