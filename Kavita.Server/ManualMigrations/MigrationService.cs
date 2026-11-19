@@ -237,6 +237,7 @@ public class MigrationService(IUnitOfWork unitOfWork, DataContext context, IVers
             await new ManualMigrateImageFileBackfill(directoryService).RunAsync(context, logger);
             await new ManualMigrateCompositeCovers(backgroundJobClient).RunAsync(context, logger);
             await ManualMigrateImageFileBackfillPart2.Migrate(context, backgroundJobClient, logger);
+            //await new ManualMigrationNullOutIHasCoverFields().RunAsync(context, logger);
 
             #endregion
 
