@@ -8,7 +8,7 @@ using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities;
 
-public class Library : IEntityDate, IHasCoverImage, IHasCoverImageFile
+public class Library : IEntityDate, IHasCoverImageFile
 {
     public int Id { get; set; }
     public required string Name { get; set; }
@@ -137,11 +137,5 @@ public class Library : IEntityDate, IHasCoverImage, IHasCoverImageFile
         {
             LastScanned = (DateTime) time;
         }
-    }
-
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
     }
 }

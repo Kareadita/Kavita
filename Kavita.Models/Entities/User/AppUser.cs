@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Kavita.Models.Entities.User;
 
-public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage, IHasCoverImageFile
+public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImageFile
 {
     public DateTime Created { get; set; } = DateTime.Now;
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
@@ -176,12 +176,6 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage, 
     {
         LastActive = DateTime.Now;
         LastActiveUtc = DateTime.UtcNow;
-    }
-
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
     }
 
     public string GetOpdsAuthKey()

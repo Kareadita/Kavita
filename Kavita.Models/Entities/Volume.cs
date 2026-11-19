@@ -6,7 +6,7 @@ using Kavita.Models.Entities.MetadataMatching;
 
 namespace Kavita.Models.Entities;
 
-public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds, IHasKPlusMetadata, IHasLockableCoverImageFile
+public class Volume : IEntityDate, IHasReadTimeEstimate, IHasMetadataIds, IHasKPlusMetadata, IHasLockableCoverImageFile
 {
     public int Id { get; set; }
     /// <summary>
@@ -95,11 +95,4 @@ public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
 
         return $"{MinNumber.ToString(CultureInfo.InvariantCulture)}-{MaxNumber.ToString(CultureInfo.InvariantCulture)}";
     }
-
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
-
 }

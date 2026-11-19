@@ -8,7 +8,7 @@ namespace Kavita.Models.Entities.User;
 /// <summary>
 /// Represents a Collection of Series for a given User
 /// </summary>
-public class AppUserCollection : IEntityDate, IHasCoverImage, IHasLockableCoverImageFile
+public class AppUserCollection : IEntityDate, IHasLockableCoverImageFile
 {
     public int Id { get; set; }
     public required string Title { get; set; }
@@ -61,12 +61,6 @@ public class AppUserCollection : IEntityDate, IHasCoverImage, IHasLockableCoverI
     /// A <br/> separated string of all missing series
     /// </summary>
     public string? MissingSeriesFromSource { get; set; }
-
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
 
     // Relationship
     public AppUser AppUser { get; set; } = null!;

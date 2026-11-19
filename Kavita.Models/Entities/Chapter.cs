@@ -10,7 +10,7 @@ using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities;
 
-public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKPlusMetadata, IHasMetadataIds, IHasTags<Tag>, IHasLockableCoverImageFile
+public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasKPlusMetadata, IHasMetadataIds, IHasTags<Tag>, IHasLockableCoverImageFile
 {
     public int Id { get; set; }
     /// <summary>
@@ -201,11 +201,6 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKP
 
     public ICollection<ExternalReview> ExternalReviews { get; set; } = [];
     public ICollection<ExternalRating> ExternalRatings { get; set; } = null!;
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
 
     public bool IsPersonRoleLocked(PersonRole role)
     {

@@ -9,7 +9,7 @@ using Kavita.Models.Parser;
 
 namespace Kavita.Models.Entities;
 
-public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds, IHasLockableCoverImageFile
+public class Series : IEntityDate, IHasReadTimeEstimate, IHasMetadataIds, IHasLockableCoverImageFile
 {
     public int Id { get; set; }
     /// <summary>
@@ -202,12 +202,6 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
                 || NormalizedLocalizedName.Equals(key.NormalizedName)
                 || NormalizedOriginalName.Equals(key.NormalizedName))
                && (Format == key.Format || Format == MangaFormat.Unknown);
-    }
-
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
     }
 
     /// <summary>
