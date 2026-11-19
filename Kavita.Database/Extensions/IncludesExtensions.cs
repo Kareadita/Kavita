@@ -242,7 +242,8 @@ public static class IncludesExtensions
     {
         if (includeFlags.HasFlag(AppUserIncludes.Bookmarks))
         {
-            query = query.Include(u => u.Bookmarks);
+            query = query.Include(u => u.Bookmarks)
+                .ThenInclude(b => b.ImageFile);
         }
 
         if (includeFlags.HasFlag(AppUserIncludes.Progress))

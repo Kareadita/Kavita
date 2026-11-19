@@ -748,30 +748,8 @@ public class ReaderController(ICacheService cacheService,
         if (user == null) return Unauthorized();
         if (user.Bookmarks.Count == 0) return Ok(await localizationService.TranslateAsync(UserId, "nothing-to-do"));
 
-        try
-        {
-            var bookmarksToRemove = user.Bookmarks.Where(bmk => bmk.SeriesId == dto.SeriesId).ToList();
-            user.Bookmarks = user.Bookmarks.Where(bmk => bmk.SeriesId != dto.SeriesId).ToList();
-            unitOfWork.UserRepository.Update(user);
-
-            if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync(ct))
-            {
-                try
-                {
-                    await bookmarkService.DeleteBookmarkFiles(bookmarksToRemove, ct);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "There was an issue cleaning up old bookmarks");
-                }
-                return Ok();
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "There was an exception when trying to clear bookmarks");
-            await unitOfWork.RollbackAsync(ct);
-        }
+        var bookmarksToRemove = user.Bookmarks.Where(bmk => bmk.SeriesId == dto.SeriesId).ToList();
+        if (await bookmarkService.RemoveBookmarksAsync(bookmarksToRemove, ct)) return Ok();
 
         return BadRequest(await localizationService.TranslateAsync(UserId, "generic-clear-bookmarks"));
     }
@@ -789,27 +767,8 @@ public class ReaderController(ICacheService cacheService,
         if (user == null) return Unauthorized();
         if (user.Bookmarks.Count == 0) return Ok(await localizationService.TranslateAsync(UserId, "nothing-to-do"));
 
-        try
-        {
-            foreach (var seriesId in dto.SeriesIds)
-            {
-                var bookmarksToRemove = user.Bookmarks.Where(bmk => bmk.SeriesId == seriesId).ToList();
-                user.Bookmarks = user.Bookmarks.Where(bmk => bmk.SeriesId != seriesId).ToList();
-                unitOfWork.UserRepository.Update(user);
-                await bookmarkService.DeleteBookmarkFiles(bookmarksToRemove, ct);
-            }
-
-
-            if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync(ct))
-            {
-                return Ok();
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "There was an exception when trying to clear bookmarks");
-            await unitOfWork.RollbackAsync(ct);
-        }
+        var bookmarksToRemove = user.Bookmarks.Where(bmk => dto.SeriesIds.Contains(bmk.SeriesId)).ToList();
+        if (await bookmarkService.RemoveBookmarksAsync(bookmarksToRemove, ct)) return Ok();
 
         return BadRequest(await localizationService.TranslateAsync(UserId, "generic-clear-bookmarks"));
     }

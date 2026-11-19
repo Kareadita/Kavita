@@ -150,10 +150,9 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     {
         var ct = HttpContext.RequestAborted;
         var bookmark = await unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, imageOffset, UserId, ct);
-        if (bookmark == null) return NotFound();
+        if (bookmark?.ImageFile == null) return NotFound();
 
-        // TODO: This needs to be converted to ImageFile
-        var path = Path.Join(await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct), bookmark.FileName);
+        var path = Path.Join(await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct), bookmark.ImageFile.FileName);
 
         return PhysicalFile(path);
     }

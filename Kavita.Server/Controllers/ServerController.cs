@@ -138,7 +138,7 @@ public class ServerController(
     [HttpPost("convert-media")]
     public ActionResult ScheduleConvertCovers()
     {
-        taskScheduler.ConvertAllCoversToEncoding();
+        TaskScheduler.QueueImageCleanup();
         return Ok();
     }
 

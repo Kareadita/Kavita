@@ -114,21 +114,21 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
     }
 
     [Fact]
-    public async Task Cleanup_Bookmarks_Untouched()
+    public async Task Cleanup_UnreferencedBookmark_ReencodedNotDeleted()
     {
         var (service, context, _, _, _) = await Setup(EncodeFormat.WEBP);
         var bookmark = AddRow(context, _bookmarks, ImageKind.Bookmark, "1/1/1/1.png", EncodeFormat.PNG, 1200, 1800);
         await context.SaveChangesAsync();
-        var path = Path.Join(_bookmarks, "1/1/1/1.png");
-        var bytes = await File.ReadAllBytesAsync(path);
 
         await service.CleanupImages();
 
         context.ChangeTracker.Clear();
         var saved = await context.ImageFile.SingleAsync(f => f.Id == bookmark.Id);
-        Assert.Equal("1/1/1/1.png", saved.FileName);
-        Assert.Equal(EncodeFormat.PNG, saved.Format);
-        Assert.Equal(bytes, await File.ReadAllBytesAsync(path));
+        Assert.Equal("1/1/1/1.webp", saved.FileName);
+        Assert.Equal(EncodeFormat.WEBP, saved.Format);
+        Assert.Equal(1200, saved.Width);
+        Assert.True(File.Exists(Path.Join(_bookmarks, "1/1/1/1.webp")));
+        Assert.False(File.Exists(Path.Join(_bookmarks, "1/1/1/1.png")));
     }
 
     [Fact]
@@ -343,7 +343,8 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
         var oldCover = Path.Join(_covers, "v9_c9.webp");
         var oldTmp = Path.Join(_covers, "v8_c8.0123.tmp");
         var oldFavicon = Path.Join(_favicons, "old.example.webp");
-        foreach (var path in new[] { oldCover, oldTmp, oldFavicon })
+        var oldBookmark = Path.Join(_bookmarks, "old.png");
+        foreach (var path in new[] { oldCover, oldTmp, oldFavicon, oldBookmark })
         {
             WriteImage(path, EncodeFormat.WEBP, 32, 32);
             File.SetLastWriteTimeUtc(path, cutoff.AddHours(-1));
@@ -358,6 +359,7 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
         Assert.False(File.Exists(oldCover));
         Assert.False(File.Exists(oldTmp));
         Assert.False(File.Exists(oldFavicon));
+        Assert.True(File.Exists(oldBookmark));
         Assert.True(File.Exists(newCover));
         Assert.True(File.Exists(newTmp));
     }

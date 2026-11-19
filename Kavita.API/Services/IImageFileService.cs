@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
+using Kavita.Models.Entities.User;
 using Kavita.Models.Images;
 
 namespace Kavita.API.Services;
@@ -55,4 +56,11 @@ public interface IImageFileService
     /// True when the entity has a cover row and its file is on disk
     /// </summary>
     bool HasCoverFile(IHasCoverImageFile entity);
+
+    /// <summary>
+    /// Writes the page into the bookmark folder in the server's encode format, adds its row and links it to the bookmark.
+    /// Does not commit
+    /// </summary>
+    /// <param name="sourcePath">Full path of the cached page</param>
+    Task WriteBookmarkAsync(AppUserBookmark bookmark, string sourcePath, CancellationToken ct = default);
 }

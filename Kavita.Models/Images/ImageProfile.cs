@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.Images;
@@ -51,5 +53,16 @@ public sealed record ImageProfile(ImageSizeRule Size, int Width = 0, int Height 
             default:
                 throw new ArgumentOutOfRangeException(nameof(Size), Size, null);
         }
+    }
+
+    /// <summary>
+    /// Returns all ImageKinds that have KeepFile
+    /// </summary>
+    /// <returns></returns>
+    public static List<ImageKind> GetKeptKinds()
+    {
+        return Enum.GetValues<ImageKind>()
+            .Where(k => For(k).KeepFile)
+            .ToList();
     }
 }

@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Models.DTOs.Reader;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
@@ -22,69 +22,9 @@ public class BookmarkService(
     ILogger<BookmarkService> logger,
     IUnitOfWork unitOfWork,
     IDirectoryService directoryService,
-    IMediaConversionService mediaConversionService,
     IImageFileService imageFileService)
     : IBookmarkService
 {
-    /// <summary>
-    /// Deletes the files associated with the list of Bookmarks passed. Will clean up empty folders.
-    /// </summary>
-    /// <param name="bookmarks"></param>
-    /// <param name="ct"></param>
-    public async Task DeleteBookmarkFiles(IEnumerable<AppUserBookmark?> bookmarks, CancellationToken ct = default)
-    {
-        var bookmarkDirectory = await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct);
-
-        var bookmarkFilesToDelete = bookmarks
-            .Where(b => b != null)
-            .Select(b => Parser.NormalizePath(
-                directoryService.FileSystem.Path.Join(bookmarkDirectory, b!.FileName)))
-            .ToList();
-
-        if (bookmarkFilesToDelete.Count == 0) return;
-
-        directoryService.DeleteFiles(bookmarkFilesToDelete);
-
-        // Delete any leftover folders
-        foreach (var directory in directoryService.FileSystem.Directory.GetDirectories(bookmarkDirectory, string.Empty, SearchOption.AllDirectories))
-        {
-            if (directoryService.FileSystem.Directory.GetFiles(directory, "", SearchOption.AllDirectories).Length == 0 &&
-                directoryService.FileSystem.Directory.GetDirectories(directory).Length == 0)
-            {
-                directoryService.FileSystem.Directory.Delete(directory, false);
-            }
-        }
-    }
-
-    /// <summary>
-    /// This is a job that runs after a bookmark is saved
-    /// </summary>
-    /// <remarks>This must be public</remarks>
-    public async Task ConvertBookmarkToEncoding(int bookmarkId, CancellationToken ct = default)
-    {
-        var bookmarkDirectory = await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct);
-        var encodeFormat =
-            (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
-
-        // Validate the bookmark still exists
-        var bookmark = await unitOfWork.UserRepository.GetBookmarkAsync(bookmarkId, ct);
-        if (bookmark == null) return;
-
-        // Validate the bookmark isn't already in target format
-        if (bookmark.FileName.EndsWith(encodeFormat.GetExtension()))
-        {
-            // Nothing to ddo
-            return;
-        }
-
-        bookmark.FileName = await mediaConversionService.SaveAsEncodingFormat(bookmarkDirectory, bookmark.FileName,
-            BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId), encodeFormat);
-        unitOfWork.UserRepository.Update(bookmark);
-
-        await unitOfWork.CommitAsync();
-    }
-
-
     /// <summary>
     /// Creates a new entry in the AppUserBookmarks and copies an image to BookmarkDirectory.
     /// </summary>
@@ -101,8 +41,22 @@ public class BookmarkService(
             throw new KavitaException("Bookmarks cannot be null!");
         }
 
+
+        var bookmark = new AppUserBookmark()
+        {
+            Page = bookmarkDto.Page,
+            VolumeId = bookmarkDto.VolumeId,
+            SeriesId = bookmarkDto.SeriesId,
+            ChapterId = bookmarkDto.ChapterId,
+            ImageOffset = bookmarkDto.ImageOffset,
+            XPath = bookmarkDto.XPath,
+            ChapterTitle = bookmarkDto.ChapterTitle,
+            AppUserId = userWithBookmarks.Id
+        };
+
         try
         {
+
             var userBookmark = userWithBookmarks.Bookmarks
                 .SingleOrDefault(b => b.Page == bookmarkDto.Page && b.ChapterId == bookmarkDto.ChapterId && b.ImageOffset == bookmarkDto.ImageOffset);
             if (userBookmark != null)
@@ -111,35 +65,23 @@ public class BookmarkService(
                 return true;
             }
 
-            var fileInfo = directoryService.FileSystem.FileInfo.New(imageToBookmark);
-            var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            var targetFolderStem = BookmarkStem(userWithBookmarks.Id, bookmarkDto.SeriesId, bookmarkDto.ChapterId);
-            var targetFilepath = Path.Join(settings.BookmarksDirectory, targetFolderStem);
-
-            var bookmark = new AppUserBookmark()
-            {
-                Page = bookmarkDto.Page,
-                VolumeId = bookmarkDto.VolumeId,
-                SeriesId = bookmarkDto.SeriesId,
-                ChapterId = bookmarkDto.ChapterId,
-                FileName = Path.Join(targetFolderStem, fileInfo.Name),
-                ImageOffset = bookmarkDto.ImageOffset,
-                XPath = bookmarkDto.XPath,
-                ChapterTitle = bookmarkDto.ChapterTitle,
-                AppUserId = userWithBookmarks.Id
-            };
-
-            directoryService.CopyFileToDirectory(imageToBookmark, targetFilepath);
+            await imageFileService.WriteBookmarkAsync(bookmark, imageToBookmark, ct);
 
             unitOfWork.UserRepository.Add(bookmark);
             await unitOfWork.CommitAsync(ct);
-
-            BackgroundJob.Enqueue(() => ConvertBookmarkToEncoding(bookmark.Id));
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an exception when saving bookmark");
            await unitOfWork.RollbackAsync(ct);
+
+           // Cleanup never deletes bookmark files, so a page written before a failed commit would stay forever
+           if (bookmark.ImageFile != null)
+           {
+               var root = await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct);
+               directoryService.DeleteFileQuietly(Path.Join(root, bookmark.ImageFile.FileName));
+           }
+
            return false;
         }
 
@@ -147,36 +89,51 @@ public class BookmarkService(
     }
 
     /// <summary>
-    /// Removes the Bookmark entity and the file from BookmarkDirectory
+    /// Removes the user's bookmark for the page, its image row and its file
     /// </summary>
-    /// <param name="userWithBookmarks"></param>
-    /// <param name="bookmarkDto"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
+    /// <param name="userWithBookmarks">An AppUser with Bookmarks and their ImageFile loaded</param>
+    /// <returns>False when the commit failed</returns>
     public async Task<bool> RemoveBookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto,
         CancellationToken ct = default)
     {
-        var bookmarkToDelete = userWithBookmarks.Bookmarks.FirstOrDefault(x =>
+        var bookmark = userWithBookmarks.Bookmarks.FirstOrDefault(x =>
             x.ChapterId == bookmarkDto.ChapterId && x.Page == bookmarkDto.Page && x.ImageOffset == bookmarkDto.ImageOffset);
-        try
+        if (bookmark == null) return true;
+
+        return await RemoveBookmarksAsync([bookmark], ct);
+    }
+
+    public async Task<bool> RemoveBookmarksAsync(IList<AppUserBookmark> bookmarks, CancellationToken ct = default)
+    {
+        if (bookmarks.Count == 0) return true;
+
+        var fileNames = bookmarks
+            .Where(b => b.ImageFile != null)
+            .Select(b => b.ImageFile!.FileName)
+            .ToList();
+
+        foreach (var bookmark in bookmarks)
         {
-            if (bookmarkToDelete != null)
+            if (bookmark.ImageFile != null)
             {
-                unitOfWork.UserRepository.Delete(bookmarkToDelete);
+                unitOfWork.ImageFileRepository.Remove(bookmark.ImageFile);
             }
 
+            unitOfWork.UserRepository.Delete(bookmark);
+        }
+
+        try
+        {
             await unitOfWork.CommitAsync(ct);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            logger.LogError(ex, "There was an exception when removing bookmarks");
+            await unitOfWork.RollbackAsync(ct);
             return false;
         }
 
-        if (bookmarkToDelete != null)
-        {
-            await DeleteBookmarkFiles([bookmarkToDelete], ct);
-        }
-
+        await DeleteBookmarkFiles(fileNames, ct);
         return true;
     }
 
@@ -188,8 +145,36 @@ public class BookmarkService(
         var bookmarks = await unitOfWork.UserRepository.GetAllBookmarksByIds(userId, seriesId, bookmarkIds.ToList(), ct);
 
         return bookmarks
+            .Where(b => b.ImageFile != null)
             .Select(b => Parser.NormalizePath(directoryService.FileSystem.Path.Join(bookmarkDirectory,
-                b.FileName)));
+                b.ImageFile!.FileName)));
+    }
+
+    /// <summary>
+    /// Deletes the files, then each folder they leave empty up to the bookmark folder
+    /// </summary>
+    /// <param name="fileNames">Relative to the bookmark folder</param>
+    private async Task DeleteBookmarkFiles(IList<string> fileNames, CancellationToken ct)
+    {
+        if (fileNames.Count == 0) return;
+
+        var fileSystem = directoryService.FileSystem;
+        var bookmarkDirectory = Parser.NormalizePath(await imageFileService.GetImageDirectoryAsync(ImageKind.Bookmark, ct))
+            .TrimEnd('/');
+
+        foreach (var fileName in fileNames)
+        {
+            var path = Parser.NormalizePath(fileSystem.Path.Join(bookmarkDirectory, fileName));
+            directoryService.DeleteFileQuietly(path);
+
+            var folder = Parser.NormalizePath(fileSystem.Path.GetDirectoryName(path));
+            while (folder.StartsWith(bookmarkDirectory + "/") && fileSystem.Directory.Exists(folder) &&
+                   !fileSystem.Directory.EnumerateFileSystemEntries(folder).Any())
+            {
+                fileSystem.Directory.Delete(folder, false);
+                folder = Parser.NormalizePath(fileSystem.Path.GetDirectoryName(folder));
+            }
+        }
     }
 
     public static string BookmarkStem(int userId, int seriesId, int chapterId)

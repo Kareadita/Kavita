@@ -254,6 +254,37 @@ public class ImageFileService(
         return row != null && File.Exists(Path.Join(directoryService.CoverImageDirectory, row.FileName));
     }
 
+    public async Task WriteBookmarkAsync(AppUserBookmark bookmark, string sourcePath, CancellationToken ct = default)
+    {
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        var policy = new  ImagePolicy(settings.EncodeMediaAs, CoverImageSize.Default);
+        var format = policy.Format.ForKind(ImageKind.Bookmark);
+
+        var stem = BookmarkService.BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId);
+        var directory = Path.Join(await GetImageDirectoryAsync(ImageKind.Bookmark, ct), stem);
+        var fileName = Path.GetFileNameWithoutExtension(sourcePath) + format.GetExtension();
+
+        var written = Path.GetExtension(sourcePath).Equals(format.GetExtension(), StringComparison.OrdinalIgnoreCase)
+            ? imagePipeline.Copy(sourcePath, ImageKind.Bookmark, directory, fileName)
+            : imagePipeline.Write(new ImageSource.FromFile(sourcePath), ImageKind.Bookmark, policy, directory, fileName);
+
+
+        var row = new ImageFile
+        {
+            Kind = ImageKind.Bookmark,
+            FileName = Path.Join(stem, written.FileName),
+            Origin = ImageOrigin.Scan,
+            Format = format,
+            Width = written.Width,
+            Height = written.Height,
+            SourceWidth = written.SourceWidth,
+            SourceHeight = written.SourceHeight,
+        };
+
+        unitOfWork.ImageFileRepository.Add(row);
+        bookmark.ImageFile = row;
+    }
+
     private async Task ApplyLockAsync(IHasLockableCoverImageFile entity, bool locked, CancellationToken ct)
     {
         entity.CoverImageLocked = locked;

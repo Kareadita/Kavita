@@ -459,9 +459,7 @@ public class CleanupService(
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         var policy = new ImagePolicy(settings.EncodeMediaAs, settings.CoverImageSize);
-        var kinds = Enum.GetValues<ImageKind>()
-            .Where(k => k != ImageKind.Bookmark)
-            .ToList();
+        var kinds = Enum.GetValues<ImageKind>().ToList();
         var folders = new Dictionary<ImageKind, string>();
 
         foreach (var kind in kinds)
@@ -709,7 +707,7 @@ public class CleanupService(
     {
         const string subtitle = "Removing leftover files";
         var unnamed = new List<string>();
-        foreach (var group in run.Kinds.GroupBy(k => run.Folders[k]))
+        foreach (var group in run.Kinds.Where(k => !ImageProfile.For(k).KeepFile).GroupBy(k => run.Folders[k]))
         {
             // Windows matches file names ignoring case, so a case-sensitive set would delete series1.webp whose row says Series1.webp
             var names = new HashSet<string>(await unitOfWork.ImageFileRepository.GetFileNamesAsync(group.ToList(), ct),

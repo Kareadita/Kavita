@@ -55,7 +55,6 @@ public class TaskScheduler : ITaskScheduler
     private readonly IStatsService _statsService;
     private readonly IVersionUpdaterService _versionUpdaterService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
-    private readonly IMediaConversionService _mediaConversionService;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILicenseService _licenseService;
     private readonly IExternalMetadataService _externalMetadataService;
@@ -122,10 +121,9 @@ public class TaskScheduler : ITaskScheduler
 
 
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
-        IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
+        IUnitOfWork unitOfWork, IMetadataService metadataService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
-        IWordCountAnalyzerService wordCountAnalyzerService,
-        IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService,
+        IWordCountAnalyzerService wordCountAnalyzerService, IScrobblingService scrobblingService, ILicenseService licenseService,
         IExternalMetadataService externalMetadataService, ISmartCollectionSyncService smartCollectionSyncService,
         IWantToReadSyncService wantToReadSyncService, IEventHub eventHub, IEmailService emailService,
         IAuthKeyService authKeyService)
@@ -139,7 +137,6 @@ public class TaskScheduler : ITaskScheduler
         _statsService = statsService;
         _versionUpdaterService = versionUpdaterService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
-        _mediaConversionService = mediaConversionService;
         _scrobblingService = scrobblingService;
         _licenseService = licenseService;
         _externalMetadataService = externalMetadataService;
@@ -415,18 +412,8 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Schedule(() => _statsService.Send(), DateTimeOffset.Now.AddDays(1));
     }
 
-    public void ConvertAllCoversToEncoding()
-    {
-        // TODO: Do this for Bookmarks once UI is updated
-        if (!HasAlreadyEnqueuedTask<IMediaConversionService>(s => s.ConvertAllBookmarkToEncoding(CancellationToken.None), checkRunningJobs: true))
-        {
-            BackgroundJob.Enqueue<IMediaConversionService>(s => s.ConvertAllBookmarkToEncoding(CancellationToken.None));
-        }
 
-        QueueImageCleanup();
-    }
-
-    // TODO: See if we can bring this to an Extension and make all cases do it this way
+    // TODO: See if we can bring this to an Extension and make all cases do it this way (the check then call)
     public static void QueueImageCleanup()
     {
         if (HasAlreadyEnqueuedTask<ICleanupService>(s => s.CleanupImages(CancellationToken.None), checkRunningJobs: true)) return;

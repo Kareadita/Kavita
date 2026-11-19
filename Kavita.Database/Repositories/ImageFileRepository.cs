@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,7 +62,7 @@ public class ImageFileRepository(DataContext context) : IImageFileRepository
     {
         return await context.ImageFile
             .Where(f => f.Origin != ImageOrigin.Scan && f.Origin != ImageOrigin.KavitaPlus)
-            .Where(f => f.Kind != ImageKind.Bookmark)
+            .Where(f => f.Kind != ImageKind.Bookmark) // Bookmarks are backed up via a dedicated method
             .AsNoTracking()
             .ToListAsync(ct);
     }
@@ -90,8 +91,9 @@ public class ImageFileRepository(DataContext context) : IImageFileRepository
 
     private IQueryable<ImageFile> GetImageFilesForDeletionQuery()
     {
+        var keptKinds = ImageProfile.GetKeptKinds();
         return context.ImageFile
-            .Where(f => f.Kind != ImageKind.Favicon && f.Kind != ImageKind.Publisher && f.Kind != ImageKind.Bookmark)
+            .Where(f => !keptKinds.Contains(f.Kind) && f.Kind != ImageKind.Favicon && f.Kind != ImageKind.Publisher)
             .WhereNotReferenced(context);
     }
 
