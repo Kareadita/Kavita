@@ -11,7 +11,6 @@ export interface TopUserRead {
 export interface MostActiveUser {
   userId: number;
   username: string;
-  coverImage?: string;
   timePeriodHours: number;
   totalHours: number;
   totalComics: number;

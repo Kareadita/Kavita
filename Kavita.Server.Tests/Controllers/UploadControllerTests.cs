@@ -23,9 +23,6 @@ using Xunit.Abstractions;
 
 namespace Kavita.Server.Tests.Controllers;
 
-// Seeds the obsolete CoverImage column the read paths still use
-#pragma warning disable CS0618
-
 public class UploadControllerTests(ITestOutputHelper outputHelper) : AbstractDbTest(outputHelper)
 {
     [Fact]
@@ -45,10 +42,8 @@ public class UploadControllerTests(ITestOutputHelper outputHelper) : AbstractDbT
         context.ImageFile.AddRange(volumeRow, chapterRow);
         await context.SaveChangesAsync();
         volume.CoverImageFileId = volumeRow.Id;
-        volume.CoverImage = volumeRow.FileName;
         volume.CoverImageLocked = true;
         chapter2.CoverImageFileId = chapterRow.Id;
-        chapter2.CoverImage = chapterRow.FileName;
         chapter2.CoverImageLocked = true;
         await context.SaveChangesAsync();
         context.ChangeTracker.Clear();
@@ -61,7 +56,6 @@ public class UploadControllerTests(ITestOutputHelper outputHelper) : AbstractDbT
 
         var savedVolume = await context.Volume.SingleAsync(v => v.Id == volume.Id);
         Assert.Equal(volumeRow.Id, savedVolume.CoverImageFileId);
-        Assert.Equal(volumeRow.FileName, savedVolume.CoverImage);
         Assert.True(savedVolume.CoverImageLocked);
         Assert.True(await context.ImageFile.AnyAsync(f => f.Id == volumeRow.Id));
     }

@@ -620,7 +620,7 @@ public class CleanupService(
                     row.Height = height;
                 }
 
-                await CommitBatch(batch, replacedNames, folder, ct);
+                await CommitBatch(replacedNames, folder, ct);
                 current += batch.Count;
                 await SendStageProgress(start, end,subtitle, current, total, ct);
             }
@@ -684,7 +684,7 @@ public class CleanupService(
                     run.Tally.Reencoded++;
                 }
 
-                await CommitBatch(batch, replacedNames, folder, ct);
+                await CommitBatch(replacedNames, folder, ct);
                 current += batch.Count;
                 await SendStageProgress(start, end,subtitle, current, total, ct);
             }
@@ -695,13 +695,8 @@ public class CleanupService(
     /// Commits the batch, then deletes the files it renamed away from. A file is never moved: if the commit failed, the
     /// row would still name the old file
     /// </summary>
-    private async Task CommitBatch(List<ImageFile> batch, Dictionary<int, string> replacedNames, string folder, CancellationToken ct)
+    private async Task CommitBatch(Dictionary<int, string> replacedNames, string folder, CancellationToken ct)
     {
-        if (replacedNames.Count > 0)
-        {
-            await SyncLegacyCoverNames(batch.Where(r => replacedNames.ContainsKey(r.Id)).ToList(), ct);
-        }
-
         await unitOfWork.CommitAsync(ct);
 
         foreach (var oldName in replacedNames.Values)
@@ -770,24 +765,6 @@ public class CleanupService(
     private static bool IsSameName(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
 
     private static long GetFileSize(string path) => File.Exists(path) ? new FileInfo(path).Length : 0;
-
-    // Workaround until every reader uses CoverImageFile, keeps the legacy CoverImage string pointing at the new file
-    private async Task SyncLegacyCoverNames(List<ImageFile> renamed, CancellationToken ct)
-    {
-        var newNames = renamed.ToDictionary(r => r.Id, r => r.FileName);
-        var holders = await unitOfWork.ImageFileRepository.GetAllHoldersAsync(newNames.Keys.ToList(), ct);
-
-#pragma warning disable CS0618
-        foreach (var holder in holders)
-        {
-            if (holder is IHasCoverImage legacy)
-            {
-                legacy.CoverImage = newNames[holder.CoverImageFileId!.Value];
-            }
-        }
-#pragma warning restore CS0618
-    }
-
 
     private sealed record ImageRun(ImagePolicy Policy, IReadOnlyList<ImageKind> Kinds,
         IReadOnlyDictionary<ImageKind, string> Folders, ImageCleanupTally Tally);

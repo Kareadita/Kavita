@@ -95,14 +95,9 @@ public class ImageFileService(
             await ApplyLockAsync(lockable, true, ct);
         }
 
-        // Until I update read code, keep the entity CoverImage inline for testing
         var holders = await GetHoldersAsync(row, [entity], ct);
-        foreach (var holder in holders)
-        {
-            SyncLegacyCover(holder, row);
-        }
-
         var staleFiles = oldFileName != null && oldFileName != row.FileName ? new List<string> { oldFileName } : [];
+
         await FinishAsync(commit, staleFiles, holders, ct);
     }
 
@@ -117,7 +112,6 @@ public class ImageFileService(
 
         var previous = target.CoverImageFile;
         Link(target, row);
-        SyncLegacyCover(target, row);
 
         if (lockBoth)
         {
@@ -153,7 +147,6 @@ public class ImageFileService(
         var previous = entity.CoverImageFile;
         entity.CoverImageFile = null;
         entity.CoverImageFileId = null;
-        SyncLegacyCover(entity, null);
 
         var staleFiles = new List<string>();
         await ReleaseIfUnheldAsync(previous, staleFiles, ct);
@@ -175,10 +168,6 @@ public class ImageFileService(
         row.SecondaryColor = colors.Secondary;
 
         var holders = await GetHoldersAsync(row, [entity], ct);
-        foreach (var holder in holders)
-        {
-            SyncLegacyCover(holder, row);
-        }
 
         await FinishAsync(commit, [], holders, ct);
     }
@@ -339,7 +328,6 @@ public class ImageFileService(
         copy.SecondaryColor = source.SecondaryColor;
 
         Link(sharer, copy);
-        SyncLegacyCover(sharer, copy);
     }
 
     private async Task ReleaseIfUnheldAsync(ImageFile? previous, List<string> staleFiles,
@@ -445,16 +433,6 @@ public class ImageFileService(
         {
             entity.CoverImageFileId = row.Id;
         }
-    }
-
-
-    private static void SyncLegacyCover(IHasCoverImageFile holder, ImageFile? row)
-    {
-        if (holder is not IHasCoverImage legacy) return;
-
-        legacy.CoverImage = row?.FileName;
-        legacy.PrimaryColor = row?.PrimaryColor;
-        legacy.SecondaryColor = row?.SecondaryColor;
     }
 
 

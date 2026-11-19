@@ -92,9 +92,6 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
         Assert.Equal(row.Id, savedChapter.CoverImageFileId);
         Assert.Equal(row.Id, savedVolume.CoverImageFileId);
         Assert.Equal(row.Id, savedSeries.CoverImageFileId);
-        Assert.Equal(updated.FileName, CoverImageOf(savedChapter));
-        Assert.Equal(updated.FileName, CoverImageOf(savedVolume));
-        Assert.Equal(updated.FileName, CoverImageOf(savedSeries));
 
         await AssertCoverUpdateSent(chapter.Id, MessageFactoryEntityTypes.Chapter);
         await AssertCoverUpdateSent(volume.Id, MessageFactoryEntityTypes.Volume);
@@ -224,7 +221,8 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
         var savedVolume = await context.Volume.SingleAsync(v => v.Id == volume.Id);
         Assert.True(savedVolume.CoverImageLocked);
         Assert.NotEqual(row.Id, savedVolume.CoverImageFileId);
-        Assert.Equal($"v{volume.Id}.webp", CoverImageOf(savedVolume));
+        var volumeRow = await context.ImageFile.SingleAsync(f => f.Id == savedVolume.CoverImageFileId);
+        Assert.Equal($"v{volume.Id}.webp", volumeRow.FileName);
         Assert.Equal(oldBytes, File.ReadAllBytes(Path.Join(_covers, $"v{volume.Id}.webp")));
         Assert.NotEqual(oldBytes, File.ReadAllBytes(Path.Join(_covers, row.FileName)));
         Assert.False((await context.Chapter.SingleAsync(c => c.Id == chapter.Id)).CoverImageLocked);
@@ -296,7 +294,6 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
         var savedVolume = await context.Volume.SingleAsync(v => v.Id == volume.Id);
         Assert.Null(savedVolume.CoverImageFileId);
         Assert.False(savedVolume.CoverImageLocked);
-        Assert.True(string.IsNullOrEmpty(CoverImageOf(savedVolume)));
         Assert.True(await context.ImageFile.AnyAsync(f => f.Id == row.Id));
         Assert.True(File.Exists(Path.Join(_covers, row.FileName)));
         Assert.Equal(row.Id, (await context.Chapter.SingleAsync(c => c.Id == chapter.Id)).CoverImageFileId);
@@ -398,8 +395,5 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
     {
         entity.CoverImageFileId = row.Id;
         entity.CoverImageFile = row;
-        ((IHasCoverImage) entity).CoverImage = row.FileName;
     }
-
-    private static string? CoverImageOf(IHasCoverImage entity) => entity.CoverImage;
 }

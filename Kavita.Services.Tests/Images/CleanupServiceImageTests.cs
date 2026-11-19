@@ -84,12 +84,11 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
             Assert.False(File.Exists(Path.Join(_covers, stem + ".png")));
         }
 
-        var chapterName = $"v{volume.Id}_c{chapter.Id}.webp";
-        Assert.Equal(chapterName, CoverImageOf(await context.Chapter.SingleAsync(c => c.Id == chapter.Id)));
-        Assert.Equal(chapterName, CoverImageOf(await context.Volume.SingleAsync(v => v.Id == volume.Id)));
-        Assert.Equal(chapterName, CoverImageOf(await context.Series.SingleAsync(s => s.Id == series.Id)));
-        Assert.Equal($"person{person.Id}.webp", CoverImageOf(await context.Person.SingleAsync(p => p.Id == person.Id)));
-        Assert.Equal($"l{library.Id}.webp", CoverImageOf(await context.Library.SingleAsync(l => l.Id == library.Id)));
+        Assert.Equal(chapterRow.Id, (await context.Chapter.SingleAsync(c => c.Id == chapter.Id)).CoverImageFileId);
+        Assert.Equal(chapterRow.Id, (await context.Volume.SingleAsync(v => v.Id == volume.Id)).CoverImageFileId);
+        Assert.Equal(chapterRow.Id, (await context.Series.SingleAsync(s => s.Id == series.Id)).CoverImageFileId);
+        Assert.Equal(personRow.Id, (await context.Person.SingleAsync(p => p.Id == person.Id)).CoverImageFileId);
+        Assert.Equal(libraryRow.Id, (await context.Library.SingleAsync(l => l.Id == library.Id)).CoverImageFileId);
     }
 
     [Fact]
@@ -252,7 +251,7 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
         Assert.Equal(EncodeFormat.WEBP, saved.Format);
         Assert.Equal(bytes, await File.ReadAllBytesAsync(Path.Join(_covers, newName)));
         Assert.False(File.Exists(Path.Join(_covers, $"series{series.Id}.png")));
-        Assert.Equal(newName, CoverImageOf(await context.Series.SingleAsync(s => s.Id == series.Id)));
+        Assert.Equal(row.Id, (await context.Series.SingleAsync(s => s.Id == series.Id)).CoverImageFileId);
     }
 
     [Fact]
@@ -487,10 +486,7 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
     private static void Link(IHasCoverImageFile entity, ImageFile row)
     {
         entity.CoverImageFile = row;
-        ((IHasCoverImage) entity).CoverImage = row.FileName;
     }
-
-    private static string? CoverImageOf(IHasCoverImage entity) => entity.CoverImage;
 
     private sealed record ImageTestSetup(CleanupService Service, DataContext Context, IEventHub EventHub,
         IBackupService Backup, ILogger<CleanupService> Logger);

@@ -185,8 +185,8 @@ public class MetadataServiceTests(ITestOutputHelper outputHelper) : AbstractDbTe
 
         var volume = (await h.Load(seriesId)).Volumes[0];
         var chapterOne = volume.Chapters.Single(c => c.MinNumber == 1);
-        Assert.NotNull(chapterOne.CoverImage);
-        Assert.Equal(chapterOne.CoverImage, volume.CoverImage);
+        Assert.NotNull(chapterOne.CoverImageFileId);
+        Assert.Equal(chapterOne.CoverImageFileId, volume.CoverImageFileId);
     }
 
     [Fact]
@@ -206,7 +206,8 @@ public class MetadataServiceTests(ITestOutputHelper outputHelper) : AbstractDbTe
         await h.Generate(seriesId);
 
         var volume = (await h.Load(seriesId)).Volumes[0];
-        Assert.Equal(volume.Chapters.Single().CoverImage, volume.CoverImage);
+        Assert.NotNull(volume.CoverImageFileId);
+        Assert.Equal(volume.Chapters.Single().CoverImageFileId, volume.CoverImageFileId);
     }
 
     [Fact]
@@ -225,7 +226,8 @@ public class MetadataServiceTests(ITestOutputHelper outputHelper) : AbstractDbTe
         await h.Generate(seriesId);
 
         var after = await h.Load(seriesId);
-        Assert.Equal(after.Volumes.Single().CoverImage, after.CoverImage);
+        Assert.NotNull(after.CoverImageFileId);
+        Assert.Equal(after.Volumes.Single().CoverImageFileId, after.CoverImageFileId);
     }
 
     [Fact]
@@ -247,8 +249,8 @@ public class MetadataServiceTests(ITestOutputHelper outputHelper) : AbstractDbTe
         await h.Generate(seriesId);
 
         var after = await h.Load(seriesId);
-        Assert.StartsWith("custom", after.CoverImage);
-        Assert.StartsWith("custom", after.Volumes[0].CoverImage);
+        Assert.StartsWith("custom", after.CoverImageFile!.FileName);
+        Assert.StartsWith("custom", after.Volumes[0].CoverImageFile!.FileName);
         Assert.Equal(CustomColor, after.CoverImageFile!.PrimaryColor);
         Assert.Equal(CustomColor, after.Volumes[0].CoverImageFile!.PrimaryColor);
     }
@@ -521,6 +523,5 @@ public class MetadataServiceTests(ITestOutputHelper outputHelper) : AbstractDbTe
         };
         h.Context.ImageFile.Add(row);
         entity.CoverImageFile = row;
-        ((IHasCoverImage) entity).CoverImage = name;
     }
 }
