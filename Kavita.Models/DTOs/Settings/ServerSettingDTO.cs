@@ -13,6 +13,7 @@ public sealed record ServerSettingDto
     public string TaskBackup { get; set; } = default!;
     public string TaskCleanup { get; set; } = default!;
     public string TaskCblSync { get; set; } = default!;
+    public string TaskCompositeCovers { get; set; } = default!;
     /// <summary>
     /// Logging level for server. Managed in appsettings.json.
     /// </summary>

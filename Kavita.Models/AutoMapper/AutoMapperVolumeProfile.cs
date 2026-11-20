@@ -2,6 +2,7 @@
 using AutoMapper;
 using Kavita.Models.DTOs;
 using Kavita.Models.Entities;
+using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.AutoMapper;
 
@@ -16,6 +17,7 @@ public class AutoMapperVolumeProfile : Profile
         int userId = 0;
 
         CreateMap<Volume, VolumeDto>()
+            .IncludeBase<IHasCoverImageFile, IHasCoverImageDto>()
             .ForMember(dest => dest.Number,
                 opt => opt.MapFrom(src => (int)src.MinNumber))
             .ForMember(dest => dest.PagesRead,

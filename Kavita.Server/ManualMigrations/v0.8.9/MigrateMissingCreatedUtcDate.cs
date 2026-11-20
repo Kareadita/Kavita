@@ -13,7 +13,7 @@ namespace Kavita.Server.ManualMigrations.v0._8._9;
 public class MigrateMissingCreatedUtcDate : ManualMigration
 {
     protected override string MigrationName => nameof(MigrateMissingCreatedUtcDate);
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         try
         {

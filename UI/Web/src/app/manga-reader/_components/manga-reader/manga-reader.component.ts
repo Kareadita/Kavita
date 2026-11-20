@@ -1991,48 +1991,55 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       doubleRenderer.getBookmarkPageCount(), this.doubleReverseRenderer()!.getBookmarkPageCount(), this.doubleNoCoverRenderer()!.getBookmarkPageCount()) > 1;
 
     // Don't use forkJoin() here because order matters
+    const isAlreadyBookmarked = this.CurrentPageBookmarked();
+    const apis = [];
 
-    if (this.CurrentPageBookmarked()) {
-      const apis = [this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId(), pageNum)];
+    if (isAlreadyBookmarked) {
+      apis.push(this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId(), pageNum));
 
       if (isDouble) {
         apis.push(this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId(), pageNum + 1));
       }
 
-      concat(...apis).subscribe({
-        complete: () => {
-          this.bookmarks.update(bookmarks => {
-            const next = {...bookmarks};
-            delete next[pageNum];
-            if (isDouble) delete next[pageNum + 1];
-
-            return next;
-          });
-        }
-      });
-
     } else {
-      const apis = [this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId(), pageNum)];
+      apis.push(this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId(), pageNum));
 
       if (isDouble) {
         apis.push(this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId(), pageNum + 1));
       }
-
-      concat(...apis).subscribe({
-        complete: () => {
-          const chapterTitle = this.chapterInfo()?.chapterTitle ?? '';
-          this.bookmarks.update(bookmarks => ({
-            ...bookmarks,
-            [pageNum]: chapterTitle,
-            ...(isDouble ? {[pageNum + 1]: chapterTitle} : {}),
-          }));
-        }
-      });
-
     }
 
+    concat(...apis).subscribe({
+      complete: () => {
+        /* We already update state ahead of time to give time to image pipeline converting */
+      }, error: (err) => {
+        this.setBookmark(pageNum, isDouble, isAlreadyBookmarked);
+      }
+    });
+
     // Show an effect on the image to show that it was bookmarked
+    this.setBookmark(pageNum, isDouble, !isAlreadyBookmarked); // Update instantly as backend may take some time to convert image
     this.showBookmarkEffectEvent.next(pageNum);
+  }
+
+  private setBookmark(pageNum: number, isDouble: boolean, targetState: boolean) {
+    const chapterTitle = this.chapterInfo()?.chapterTitle ?? '';
+
+    if (targetState) {
+      this.bookmarks.update(bookmarks => ({
+        ...bookmarks,
+        [pageNum]: chapterTitle,
+        ...(isDouble ? {[pageNum + 1]: chapterTitle} : {}),
+      }));
+    } else {
+      this.bookmarks.update(bookmarks => {
+        const next = {...bookmarks};
+        delete next[pageNum];
+        if (isDouble) delete next[pageNum + 1];
+
+        return next;
+      });
+    }
   }
 
   // This is menu only code

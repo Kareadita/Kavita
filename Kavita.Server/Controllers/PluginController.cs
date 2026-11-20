@@ -7,6 +7,7 @@ using Kavita.API.Attributes;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.Misc;
@@ -19,7 +20,8 @@ using Microsoft.Extensions.Logging;
 namespace Kavita.Server.Controllers;
 
 [SkipDeviceTracking]
-public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService, ILogger<PluginController> logger)
+public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService, ILogger<PluginController> logger,
+    ILocalizationService localizationService)
     : BaseApiController
 {
     /// <summary>
@@ -46,11 +48,17 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
             logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {@Information}", pluginName.Replace(Environment.NewLine, string.Empty), new
             {
                 IpAddress = ipAddress,
-                UserAgent = userAgent,
-                ApiKey = apiKey
+                UserAgent = userAgent
             });
             throw new KavitaUnauthenticatedUserException();
         }
+
+        var roles = await unitOfWork.UserRepository.GetRoles(userId, ct);
+        if (!roles.Contains(PolicyConstants.LoginRole) && !roles.Contains(PolicyConstants.AdminRole))
+        {
+            return Unauthorized(await localizationService.TranslateAsync(userId, "disabled-account"));
+        }
+
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({AppUserId})'s API Key", pluginName.Replace(Environment.NewLine, string.Empty), user!.UserName, userId);
 

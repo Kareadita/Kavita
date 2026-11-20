@@ -10,6 +10,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.ReadingLists;
 using Kavita.Common;
 using Kavita.Common.Extensions;
+using Kavita.Common.Helpers;
 using Kavita.Database;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.ReadingLists.CBL;
@@ -66,8 +67,8 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         var userId = UserId;
         var filename = cblFile.FileName;
 
-        var (isInvalid, actionResult) = await HasInvalidExtensionAsync(filename, filename);
-        if (isInvalid) return actionResult!;
+        var invalidFileName = await ValidateCblFileNameAsync(filename);
+        if (invalidFileName != null) return invalidFileName;
 
         await SaveCblFile(cblFile, userId, filename);
 
@@ -96,23 +97,22 @@ public class CblController(IReadingListService readingListService, IDirectorySer
             return BadRequest(ex.Message);
         }
 
+        var filename = dto.Url.UrlFilePath().SanitizeFileName();
+
+        var invalidFileName = await ValidateCblFileNameAsync(filename);
+        if (invalidFileName != null) return invalidFileName;
+
         var dir = GetCblManagerFolder(UserId);
         Directory.CreateDirectory(dir);
 
-        string fullPath;
-        string filename;
         try
         {
-            fullPath = await dto.Url.DownloadFileAsync(dir, cancellationToken: ct);
-            filename = Path.GetFileName(fullPath);
+            await FlurlConfiguration.DownloadToFileAsync(dto.Url, Path.Join(dir, filename), ControllerConstants.MaxUploadSizeBytes, ct);
         }
-        catch (FlurlHttpException)
+        catch (Exception ex) when (ex is FlurlHttpException or KavitaException)
         {
             return BadRequest(await localizationService.TranslateAsync("cbl-import-download-from-url"));
         }
-
-        var (isInvalid, actionResult) = await HasInvalidExtensionAsync(filename, fullPath);
-        if (isInvalid) return actionResult!;
 
         return Ok(new CblSavedFileDto
         {
@@ -123,21 +123,17 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         });
     }
 
-    private async Task<(bool IsInvalid, ActionResult? ActionResult)> HasInvalidExtensionAsync(string filename, string fullPath)
+    private async Task<ActionResult?> ValidateCblFileNameAsync(string filename)
     {
-        if (!IsPathWithinDirectory(GetCblManagerFolder(UserId), filename))
-        {
-            return (true, BadRequest(await localizationService.TranslateAsync("cbl-import-validation-types")));
-        }
-
         var ext = Path.GetExtension(filename);
-        if (!ext.Equals(".cbl", StringComparison.OrdinalIgnoreCase) && !ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        var isCblFile = ext.Equals(".cbl", StringComparison.OrdinalIgnoreCase) || ext.Equals(".json", StringComparison.OrdinalIgnoreCase);
+
+        if (!isCblFile || !IsPathWithinDirectory(GetCblManagerFolder(UserId), filename))
         {
-            if (System.IO.File.Exists(fullPath) && filename != fullPath) System.IO.File.Delete(fullPath);
-            return (true, BadRequest(await localizationService.TranslateAsync("cbl-import-validation-types")));
+            return BadRequest(await localizationService.TranslateAsync("cbl-import-validation-types"));
         }
 
-        return (false, null);
+        return null;
     }
 
 
@@ -154,29 +150,32 @@ public class CblController(IReadingListService readingListService, IDirectorySer
 
         foreach (var item in request.Items)
         {
-            var (isInvalid, actionResult) = await HasInvalidExtensionAsync(item.Name, item.Path);
-            if (isInvalid) return actionResult!;
-
+            CblRepoItemDto file;
             string content;
             try
             {
-                content = await cblGithubService.GetFileContent(item.Path);
+                file = await cblGithubService.GetFile(item.Path);
+
+                var invalidFileName = await ValidateCblFileNameAsync(file.Name);
+                if (invalidFileName != null) return invalidFileName;
+
+                content = await cblGithubService.GetFileContent(file.Path);
             }
             catch (KavitaException ex)
             {
-                return BadRequest(await localizationService.TranslateAsync(userId, ex.Message, item.Name));
+                return BadRequest(await localizationService.TranslateAsync(userId, ex.Message, item.Path));
             }
 
-            SaveCblFileFromContent(content, userId, item.Name);
+            SaveCblFileFromContent(content, userId, file.Name);
 
             savedFiles.Add(new CblSavedFileDto
             {
-                Name = item.Name,
-                FileName = item.Name,
+                Name = file.Name,
+                FileName = file.Name,
                 Provider = ReadingListProvider.Url,
-                RepoPath = item.Path,
-                DownloadUrl = item.DownloadUrl,
-                Sha = item.Sha
+                RepoPath = file.Path,
+                DownloadUrl = file.DownloadUrl,
+                Sha = file.Sha
             });
         }
 

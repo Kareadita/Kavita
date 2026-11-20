@@ -13,7 +13,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._1;
 public class ManualMigrationExternalSeriesMetadataIds: ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrationExternalSeriesMetadataIds);
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var aniListCount = await context.Series
             .Where(s => s.AniListId == 0)

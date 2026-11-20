@@ -107,7 +107,6 @@
     "user-no-access-library-from-series": "Gebruiker heeft geen toegang tot de bibliotheek waartoe deze serie behoort",
     "collections": "Alle collecties",
     "total-backups": "Het totale aantal back-ups moet tussen 1 en 30 liggen",
-    "encode-as-warning": "U kunt niet converteren naar PNG. Gebruik Covers vernieuwen voor covers. Bladwijzers en favicons kunnen niet worden teruggecodeerd.",
     "ip-address-invalid": "IP-adres '{0}' is ongeldig",
     "bookmark-dir-permissions": "Bladwijzermap heeft niet de juiste machtigingen voor Kavita om te gebruiken",
     "total-logs": "Het totale aantal logboeken moet tussen 1 en 30 liggen",

@@ -300,11 +300,9 @@ public class ScannerServiceScanFolderDedupeTests : AbstractDbTest
 
         var scanner = new ScannerHelper(unitOfWork, _testOutputHelper).CreateServices(eventHub: _eventHub);
         var taskScheduler = new TaskScheduler(Substitute.For<ICacheService>(), Substitute.For<ILogger<TaskScheduler>>(),
-            scanner, unitOfWork, Substitute.For<IMetadataService>(),
-            Substitute.For<IBackupService>(), Substitute.For<ICleanupService>(), Substitute.For<IStatsService>(),
+            scanner, unitOfWork, Substitute.For<IMetadataService>(), Substitute.For<ICleanupService>(), Substitute.For<IStatsService>(),
             Substitute.For<IVersionUpdaterService>(), Substitute.For<IWordCountAnalyzerService>(),
-            Substitute.For<IMediaConversionService>(), Substitute.For<IScrobblingService>(),
-            Substitute.For<ILicenseService>(), Substitute.For<IExternalMetadataService>(),
+            Substitute.For<IScrobblingService>(), Substitute.For<ILicenseService>(), Substitute.For<IExternalMetadataService>(),
             Substitute.For<ISmartCollectionSyncService>(), Substitute.For<IWantToReadSyncService>(), _eventHub,
             Substitute.For<IEmailService>(), Substitute.For<IAuthKeyService>());
 

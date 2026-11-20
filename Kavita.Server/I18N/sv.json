@@ -166,7 +166,6 @@
     "reading-list-permission": "Du har inte behörighet för den här läslistan eller så finns listan inte",
     "reading-list-updated": "Uppdaterat",
     "generic-reading-list-create": "Ett problem uppstod vid skapandet av läslistan",
-    "encode-as-warning": "Du kan inte konvertera till PNG. För omslag, använd Uppdatera Omslag. Bokmärken och favikoner kan inte kodas tillbaka.",
     "no-series-collection": "Kunde inte skaffa serier för Samling",
     "generic-relationship": "Det uppstod ett problem vid uppdatering av förhållanden",
     "total-backups": "Totala Säkerhetskopior måste vara mellan 1 och 30",

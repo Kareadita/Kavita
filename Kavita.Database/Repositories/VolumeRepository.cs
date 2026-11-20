@@ -10,6 +10,7 @@ using Kavita.Models.DTOs;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
+using Kavita.Models.DTOs.Theme;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Database.Repositories;
@@ -62,7 +63,7 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
     {
         return await context.Volume
             .Where(v => v.Id == volumeId)
-            .Select(v => v.CoverImage)
+            .Select(v => v.CoverImageFile.FileName)
             .SingleOrDefaultAsync(ct);
     }
 
@@ -88,7 +89,7 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
     /// <param name="includeChapters">Include chapter entities</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false,
+    public async Task<IEnumerable<Volume>> GetVolumesForSeriesIdsAsync(IList<int> seriesIds, bool includeChapters = false,
         CancellationToken ct = default)
     {
         var query = context.Volume
@@ -134,11 +135,12 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
     /// <param name="seriesId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<Volume>> GetVolumes(int seriesId, CancellationToken ct = default)
+    public async Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int seriesId,
+        VolumeIncludes includes = VolumeIncludes.Chapters | VolumeIncludes.Files, CancellationToken ct = default)
     {
         return await context.Volume
             .Where(vol => vol.SeriesId == seriesId)
-            .Includes(VolumeIncludes.Chapters | VolumeIncludes.Files)
+            .Includes(includes)
             .AsSplitQuery()
             .OrderBy(vol => vol.MinNumber)
             .ToListAsync(ct);
@@ -200,31 +202,6 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
             .ToListAsync(ct);
     }
 
-    public async Task<IList<Volume>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
-        CancellationToken ct = default)
-    {
-        var extension = encodeFormat.GetExtension();
-        return await context.Volume
-            .Includes(VolumeIncludes.Chapters)
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
-            .AsSplitQuery()
-            .ToListAsync(ct);
-    }
-
-
-    /// <summary>
-    /// Returns cover images for locked chapters
-    /// </summary>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    public async Task<IEnumerable<string>> GetCoverImagesForLockedVolumesAsync(CancellationToken ct = default)
-    {
-        return (await context.Volume
-            .Where(c => c.CoverImageLocked)
-            .Select(c => c.CoverImage)
-            .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync(ct))!;
-    }
 
     public async Task<long> GetFilesizeAsync(int volumeId, CancellationToken ct = default)
     {
@@ -258,5 +235,13 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
                     TotalBytes = g.SelectMany(c => c.Files).Sum(f => f.Bytes)
                 })
                 .ToDictionaryAsync(x => x.VolumeId, x => x.TotalBytes, cancellationToken: ct));
+    }
+
+    public async Task<ColorScapeDto?> GetColorScapeAsync(int volumeId, CancellationToken ct = default)
+    {
+        return await context.Volume
+            .Where(v => v.Id == volumeId && v.CoverImageFile != null)
+            .Select(v => new ColorScapeDto(v.CoverImageFile!.PrimaryColor, v.CoverImageFile.SecondaryColor))
+            .FirstOrDefaultAsync(ct);
     }
 }

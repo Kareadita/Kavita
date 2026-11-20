@@ -54,7 +54,7 @@ public class TachiyomiService(
             if (!userHasProgress) return null;
 
             // Else return the max chapter to Tachiyomi so it can consider everything read
-            var volumes = (await unitOfWork.VolumeRepository.GetVolumes(seriesId, ct)).ToImmutableList();
+            var volumes = (await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(seriesId, ct: ct)).ToImmutableList();
             var looseLeafChapterVolume = volumes.GetLooseLeafVolumeOrDefault();
             if (looseLeafChapterVolume == null)
             {
@@ -150,7 +150,7 @@ public class TachiyomiService(
 
     private async Task<List<Chapter>> GetChaptersUntilVolume(int seriesId, int volumeNumber)
     {
-        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync([seriesId], true);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesIdsAsync([seriesId], true);
 
         return volumes
             .Where(v => v.MinNumber <= volumeNumber && v.MinNumber > 0)
@@ -161,7 +161,7 @@ public class TachiyomiService(
 
     private async Task<List<Chapter>> GetChaptersUntilChapter(int seriesId, float chapterNumber)
     {
-        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync([seriesId], true);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesIdsAsync([seriesId], true);
 
         return volumes
             .OrderBy(v => v.MinNumber)

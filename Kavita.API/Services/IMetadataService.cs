@@ -32,7 +32,7 @@ public interface IMetadataService
     /// <param name="forceColorScape"></param>
     /// <param name="ct"></param>
     Task GenerateCoversForSeries(ServerSettingDto serverSetting, int libraryId, int seriesId, bool forceUpdate = true, bool forceColorScape = true, CancellationToken ct = default);
-    Task GenerateCoversForSeries(Series series, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceUpdate = false, bool forceColorScape = true, CancellationToken ct = default);
+    Task GenerateCoversForSeries(Series series, bool forceUpdate = false, bool forceColorScape = true, CancellationToken ct = default);
     Task RemoveAbandonedMetadataKeys(CancellationToken ct = default);
 
     [Queue(TaskSchedulerConstants.ScanQueue)]

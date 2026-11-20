@@ -194,6 +194,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("CoverImageFileId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("CoverImageLocked")
                         .HasColumnType("INTEGER");
 
@@ -357,6 +360,8 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CoverImageFileId");
 
                     b.HasIndex("TitleName")
                         .HasDatabaseName("IX_Chapter_TitleName");
@@ -714,6 +719,73 @@ namespace Kavita.Database.Migrations
                     b.ToTable("ScrobbleRuleHistory");
                 });
 
+            modelBuilder.Entity("Kavita.Models.Entities.ImageFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Format")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Height")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("InputHash")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Key")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Origin")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PrimaryColor")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SecondaryColor")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("SourceHeight")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SourceWidth")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Width")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FileName", "Kind")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ImageFile_FileName_Kind");
+
+                    b.HasIndex("Kind", "Key")
+                        .HasDatabaseName("IX_ImageFile_Kind_Key");
+
+                    b.ToTable("ImageFile");
+                });
+
             modelBuilder.Entity("Kavita.Models.Entities.Kobo.KoboSyncPoint", b =>
                 {
                     b.Property<int>("Id")
@@ -796,6 +868,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("CoverImageFileId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
@@ -873,6 +948,8 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CoverImageFileId");
 
                     b.ToTable("Library");
                 });
@@ -1055,9 +1132,6 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ChapterId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FavoriteCount")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Provider")
@@ -1613,6 +1687,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("CoverImageFileId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("CoverImageLocked")
                         .HasColumnType("INTEGER");
 
@@ -1638,6 +1715,8 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CoverImageFileId");
 
                     b.ToTable("Person");
                 });
@@ -1962,6 +2041,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("CoverImageFileId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("CoverImageLocked")
                         .HasColumnType("INTEGER");
 
@@ -2035,6 +2117,8 @@ namespace Kavita.Database.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
+
+                    b.HasIndex("CoverImageFileId");
 
                     b.ToTable("ReadingList");
                 });
@@ -2361,6 +2445,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("CoverImageFileId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("CoverImageLocked")
                         .HasColumnType("INTEGER");
 
@@ -2476,6 +2563,8 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CoverImageFileId");
 
                     b.HasIndex("LibraryId")
                         .HasDatabaseName("IX_Series_LibraryId");
@@ -2681,6 +2770,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("CoverImageFileId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
@@ -2770,6 +2862,8 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CoverImageFileId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -2936,6 +3030,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("FileName")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("ImageFileId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("ImageOffset")
                         .HasColumnType("INTEGER");
 
@@ -2960,6 +3057,8 @@ namespace Kavita.Database.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ChapterId");
+
+                    b.HasIndex("ImageFileId");
 
                     b.HasIndex("SeriesId");
 
@@ -3035,6 +3134,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("CoverImageFileId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("CoverImageLocked")
                         .HasColumnType("INTEGER");
 
@@ -3086,6 +3188,8 @@ namespace Kavita.Database.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
+
+                    b.HasIndex("CoverImageFileId");
 
                     b.ToTable("AppUserCollection");
                 });
@@ -3786,6 +3890,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("CoverImageFileId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("CoverImageLocked")
                         .HasColumnType("INTEGER");
 
@@ -3855,6 +3962,8 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CoverImageFileId");
 
                     b.HasIndex("SeriesId");
 
@@ -4099,11 +4208,18 @@ namespace Kavita.Database.Migrations
 
             modelBuilder.Entity("Kavita.Models.Entities.Chapter", b =>
                 {
+                    b.HasOne("Kavita.Models.Entities.ImageFile", "CoverImageFile")
+                        .WithMany()
+                        .HasForeignKey("CoverImageFileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Kavita.Models.Entities.Volume", "Volume")
                         .WithMany("Chapters")
                         .HasForeignKey("VolumeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CoverImageFile");
 
                     b.Navigation("Volume");
                 });
@@ -4200,6 +4316,16 @@ namespace Kavita.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Kavita.Models.Entities.Library", b =>
+                {
+                    b.HasOne("Kavita.Models.Entities.ImageFile", "CoverImageFile")
+                        .WithMany()
+                        .HasForeignKey("CoverImageFileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CoverImageFile");
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.LibraryExcludePattern", b =>
@@ -4380,6 +4506,16 @@ namespace Kavita.Database.Migrations
                     b.Navigation("Person");
                 });
 
+            modelBuilder.Entity("Kavita.Models.Entities.Person.Person", b =>
+                {
+                    b.HasOne("Kavita.Models.Entities.ImageFile", "CoverImageFile")
+                        .WithMany()
+                        .HasForeignKey("CoverImageFileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CoverImageFile");
+                });
+
             modelBuilder.Entity("Kavita.Models.Entities.Person.PersonAlias", b =>
                 {
                     b.HasOne("Kavita.Models.Entities.Person.Person", "Person")
@@ -4506,7 +4642,14 @@ namespace Kavita.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Kavita.Models.Entities.ImageFile", "CoverImageFile")
+                        .WithMany()
+                        .HasForeignKey("CoverImageFileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("AppUser");
+
+                    b.Navigation("CoverImageFile");
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.ReadingLists.ReadingListItem", b =>
@@ -4656,13 +4799,30 @@ namespace Kavita.Database.Migrations
 
             modelBuilder.Entity("Kavita.Models.Entities.Series", b =>
                 {
+                    b.HasOne("Kavita.Models.Entities.ImageFile", "CoverImageFile")
+                        .WithMany()
+                        .HasForeignKey("CoverImageFileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Kavita.Models.Entities.Library", "Library")
                         .WithMany("Series")
                         .HasForeignKey("LibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CoverImageFile");
+
                     b.Navigation("Library");
+                });
+
+            modelBuilder.Entity("Kavita.Models.Entities.User.AppUser", b =>
+                {
+                    b.HasOne("Kavita.Models.Entities.ImageFile", "CoverImageFile")
+                        .WithMany()
+                        .HasForeignKey("CoverImageFileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CoverImageFile");
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserAnnotation", b =>
@@ -4725,6 +4885,11 @@ namespace Kavita.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Kavita.Models.Entities.ImageFile", "ImageFile")
+                        .WithMany()
+                        .HasForeignKey("ImageFileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Kavita.Models.Entities.Series", "Series")
                         .WithMany()
                         .HasForeignKey("SeriesId")
@@ -4740,6 +4905,8 @@ namespace Kavita.Database.Migrations
                     b.Navigation("AppUser");
 
                     b.Navigation("Chapter");
+
+                    b.Navigation("ImageFile");
 
                     b.Navigation("Series");
 
@@ -4781,7 +4948,14 @@ namespace Kavita.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Kavita.Models.Entities.ImageFile", "CoverImageFile")
+                        .WithMany()
+                        .HasForeignKey("CoverImageFileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("AppUser");
+
+                    b.Navigation("CoverImageFile");
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserDashboardStream", b =>
@@ -4995,11 +5169,18 @@ namespace Kavita.Database.Migrations
 
             modelBuilder.Entity("Kavita.Models.Entities.Volume", b =>
                 {
+                    b.HasOne("Kavita.Models.Entities.ImageFile", "CoverImageFile")
+                        .WithMany()
+                        .HasForeignKey("CoverImageFileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Kavita.Models.Entities.Series", "Series")
                         .WithMany("Volumes")
                         .HasForeignKey("SeriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CoverImageFile");
 
                     b.Navigation("Series");
                 });

@@ -20,13 +20,14 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Person;
 using Kavita.Models.Entities.User;
-using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 using Kavita.Services.Repositories;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using NetVips;
+using Microsoft.Extensions.Logging;
+using Kavita.Services.Helpers;
 
 namespace Kavita.Services.Metadata;
 
@@ -36,9 +37,8 @@ public class CoverDbService : ICoverDbService
     private readonly IDirectoryService _directoryService;
     private readonly IEasyCachingProviderFactory _cacheFactory;
     private readonly IHostEnvironment _env;
-    private readonly IImageService _imageService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IEventHub _eventHub;
+    private readonly IImageFileService _imageFileService;
     private readonly TimeSpan _cacheTime = TimeSpan.FromDays(10);
 
     private const string NewHost = "https://www.kavitareader.com/CoversDB/";
@@ -65,16 +65,15 @@ public class CoverDbService : ICoverDbService
     private readonly IUrlValidationService _urlValidationService;
 
     public CoverDbService(ILogger<CoverDbService> logger, IDirectoryService directoryService,
-        IEasyCachingProviderFactory cacheFactory, IHostEnvironment env, IImageService imageService,
-        IUnitOfWork unitOfWork, IEventHub eventHub, IUrlValidationService urlValidationService)
+        IEasyCachingProviderFactory cacheFactory, IHostEnvironment env, IUnitOfWork unitOfWork,
+        IUrlValidationService urlValidationService, IImageFileService imageFileService)
     {
+        _imageFileService = imageFileService;
         _logger = logger;
         _directoryService = directoryService;
         _cacheFactory = cacheFactory;
         _env = env;
-        _imageService = imageService;
         _unitOfWork = unitOfWork;
-        _eventHub = eventHub;
         _urlValidationService = urlValidationService;
     }
 
@@ -144,9 +143,11 @@ public class CoverDbService : ICoverDbService
 
         try
         {
+            var origin = ImageOrigin.Website;
             if (string.IsNullOrEmpty(correctSizeLink))
             {
                 correctSizeLink = await FallbackToKavitaReaderFavicon(baseUrl);
+                origin = ImageOrigin.CoversDb;
             }
             if (string.IsNullOrEmpty(correctSizeLink))
             {
@@ -166,16 +167,8 @@ public class CoverDbService : ICoverDbService
             }
 
             _logger.LogTrace("Fetching favicon from {Url}", finalUrl);
-            // Download the favicon.ico file using Flurl
-            var faviconStream = await FlurlConfiguration.CreateSafeRequest(finalUrl)
-                .AllowHttpStatus("2xx,304")
-                .GetStreamAsync(cancellationToken: ct);
-
-            // Create the destination file path
-            using var image = Image.PngloadStream(faviconStream);
-            var filename = ImageService.GetWebLinkFormat(baseUrl, encodeFormat);
-
-            image.WriteToFile(Path.Combine(_directoryService.FaviconDirectory, filename));
+            var filename = await DownloadKeyedAsync(finalUrl, ImageKind.Favicon, domain,
+                ImageHelper.GetWebLinkFormat(baseUrl, encodeFormat), origin, ct);
             _logger.LogDebug("Favicon for {Domain} downloaded and saved successfully", domain);
 
             return filename;
@@ -209,11 +202,9 @@ public class CoverDbService : ICoverDbService
                 throw new KavitaException($"Could not grab publisher image for {publisherName}");
             }
 
-            // Create the destination file path
-            var filename = ImageService.GetPublisherFormat(publisherName, encodeFormat);
-
             _logger.LogTrace("Fetching publisher image from {Url}", publisherLink.Sanitize());
-            await DownloadImageFromUrl(publisherName, encodeFormat, publisherLink, _directoryService.PublisherDirectory);
+            var filename = await DownloadKeyedAsync(publisherLink, ImageKind.Publisher, publisherName,
+                ImageHelper.GetPublisherFormat(publisherName, encodeFormat), ImageOrigin.CoversDb, ct);
 
             _logger.LogDebug("Publisher image for {PublisherName} downloaded and saved successfully", publisherName.Sanitize());
 
@@ -226,108 +217,23 @@ public class CoverDbService : ICoverDbService
     }
 
     /// <summary>
-    /// Attempts to download the Person image from CoverDB while matching against metadata within the Person
+    /// Downloads <paramref name="url"/> as is into the temp directory
     /// </summary>
-    /// <param name="person"></param>
-    /// <param name="encodeFormat"></param>
-    /// <param name="targetDirectory">Defaults to CoverImageDirectory</param>
-    /// <param name="ct"></param>
-    /// <returns>Person image (in correct directory) or null if not found/error</returns>
-    public async Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat,
-        string? targetDirectory = null,  CancellationToken ct = default)
-    {
-        try
-        {
-            var personImageLink = await GetCoverPersonImagePath(person);
-            if (string.IsNullOrEmpty(personImageLink))
-            {
-                throw new KavitaException($"Could not grab person image for {person.Name}");
-            }
-            return await DownloadPersonImageAsync(person, encodeFormat, personImageLink, targetDirectory: targetDirectory, ct: ct);
-        } catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error downloading image for {PersonName}", person.Name);
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// Attempts to download the Person cover image from a Url
-    /// </summary>
-    /// <param name="person"></param>
-    /// <param name="encodeFormat"></param>
-    /// <param name="url"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    /// <exception cref="KavitaException"></exception>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public async Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url, string? targetDirectory = null,
-        CancellationToken ct = default)
-    {
-        try
-        {
-            var personImageLink = await GetCoverPersonImagePath(person);
-            if (string.IsNullOrEmpty(personImageLink))
-            {
-                throw new KavitaException($"Could not grab person image for {person.Name}");
-            }
-
-
-            var filename = await DownloadImageFromUrl(ImageService.GetPersonFormat(person.Id), encodeFormat, personImageLink, targetDirectory: targetDirectory, ct: ct);
-
-            _logger.LogDebug("Person image for {PersonName} downloaded and saved successfully", person.Name);
-
-            return filename;
-        } catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error downloading image for {PersonName}", person.Name);
-        }
-
-        return null;
-    }
-
-    private async Task<string> DownloadImageFromUrl(string filenameWithoutExtension, EncodeFormat encodeFormat, string url, string? targetDirectory = null, CancellationToken ct = default)
+    /// <returns>Full path of the downloaded file. The caller deletes it</returns>
+    private async Task<string> DownloadImageFromUrl(string url, CancellationToken ct)
     {
         await _urlValidationService.ValidateUrlAsync(url);
 
-        // Target Directory defaults to CoverImageDirectory, but can be temp for when comparison between images is used
-        targetDirectory ??= _directoryService.CoverImageDirectory;
+        var path = NewTempPath();
+        _logger.LogTrace("Fetching image from {Url}", url.Sanitize());
+        await FlurlConfiguration.DownloadToFileAsync(url, path, ControllerConstants.MaxUploadSizeBytes, ct);
 
-        // Create the destination file path
-        var filename = filenameWithoutExtension + encodeFormat.GetExtension();
-        var targetFile = Path.Combine(targetDirectory, filename);
+        return path;
+    }
 
-        _logger.LogTrace("Fetching person image from {Url}", url.Sanitize());
-        // Download the file using Flurl
-        var imageStream = await url
-            .AllowHttpStatus("2xx,304")
-            .GetStreamAsync(cancellationToken: ct);
-
-        using var image = Image.NewFromStream(imageStream);
-        try
-        {
-            image.WriteToFile(targetFile);
-        }
-        catch (Exception)
-        {
-            switch (encodeFormat)
-            {
-                case EncodeFormat.PNG:
-                    image.Pngsave(Path.Combine(targetDirectory, filename));
-                    break;
-                case EncodeFormat.WEBP:
-                    image.Webpsave(Path.Combine(targetDirectory, filename));
-                    break;
-                case EncodeFormat.AVIF:
-                    image.Heifsave(Path.Combine(targetDirectory, filename));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
-            }
-        }
-
-        return filename;
+    private string NewTempPath()
+    {
+        return Path.Join(_directoryService.TempDirectory, $"download_{Guid.NewGuid():N}.tmp");
     }
 
     public async Task<string?> GetPersonImageUrlAsync(Person person, CancellationToken ct = default)
@@ -487,492 +393,38 @@ public class CoverDbService : ICoverDbService
         return null;
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="person"></param>
-    /// <param name="url"></param>
-    /// <param name="fromBase64"></param>
-    /// <param name="checkNoImagePlaceholder">Will check against all known null image placeholders to avoid writing it</param>
-    /// <param name="chooseBetterImage">If we check cross-reference the current cover for the better option</param>
-    /// <param name="ct"></param>
-    public async Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true,
-        bool checkNoImagePlaceholder = false, bool chooseBetterImage = true, CancellationToken ct = default)
+    public async Task SetCoverByUrlAsync(IHasCoverImageFile entity, string url, CoverWrite write, CancellationToken ct = default)
     {
-        if (!string.IsNullOrEmpty(url))
+        var sourcePath = await DownloadImageFromUrl(url, ct);
+        try
         {
-            var tempDir = _directoryService.TempDirectory;
-            var format = ImageService.GetPersonFormat(person.Id);
-            var finalFileName = format + ".webp";
-            var tempFileName = format + "_new";
-
-            // This is writing the image to CoverDirectory
-            var tempFilePath = await CreateThumbnail(url, tempFileName, fromBase64, tempDir);
-
-            if (!string.IsNullOrEmpty(tempFilePath))
-            {
-                var tempFullPath = Path.Combine(tempDir, tempFilePath);
-                var finalFullPath = Path.Combine(_directoryService.CoverImageDirectory, finalFileName);
-
-                // Skip setting image if it's similar to a known placeholder
-                if (checkNoImagePlaceholder)
-                {
-                    var placeholderPath = Path.Combine(_directoryService.AssetsDirectory, "anilist-no-image-placeholder.jpg");
-                    var similarity = placeholderPath.CalculateSimilarity(tempFullPath);
-                    if (similarity >= 0.9f)
-                    {
-                        _logger.LogInformation("Skipped setting placeholder image for person {PersonId} due to high similarity ({Similarity})", person.Id, similarity);
-                        _directoryService.DeleteFiles([tempFullPath]);
-                        return;
-                    }
-                }
-
-                try
-                {
-                    if (!string.IsNullOrEmpty(person.CoverImage) && chooseBetterImage)
-                    {
-                        var existingPath = Path.Combine(_directoryService.CoverImageDirectory, person.CoverImage);
-
-                        if (!File.Exists(existingPath))
-                        {
-                            _logger.LogWarning("Existing cover for Person {PersonId} is missing on disk ({Path}); accepting new cover from source", person.Id, existingPath);
-                            _directoryService.CopyFile(tempFullPath, finalFullPath);
-                            person.CoverImage = finalFileName;
-                        }
-                        else
-                        {
-                            var betterImage = existingPath.GetBetterImage(tempFullPath)!;
-
-                            var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
-                            if (choseNewImage)
-                            {
-                                _directoryService.DeleteFiles([existingPath]);
-                                _directoryService.CopyFile(tempFullPath, finalFullPath);
-                                person.CoverImage = finalFileName;
-                            }
-                            else
-                            {
-                                _directoryService.DeleteFiles([tempFullPath]);
-                                return;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _directoryService.CopyFile(tempFullPath, finalFullPath);
-                        person.CoverImage = finalFileName;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Error choosing better image for Person: {PersonId}; accepting new cover from source", person.Id);
-                    _directoryService.CopyFile(tempFullPath, finalFullPath);
-                    person.CoverImage = finalFileName;
-                }
-
-                _directoryService.DeleteFiles([tempFullPath]);
-
-                person.CoverImageLocked = true;
-                _imageService.UpdateColorScape(person);
-                _unitOfWork.PersonRepository.Update(person);
-            }
+            await _imageFileService.SetCoverAsync(entity, new ImageSource.FromFile(sourcePath), write, ct: ct);
         }
-        else
+        finally
         {
-            person.CoverImage = string.Empty;
-            person.CoverImageLocked = false;
-            _imageService.UpdateColorScape(person);
-            _unitOfWork.PersonRepository.Update(person);
-        }
-
-        if (_unitOfWork.HasChanges())
-        {
-            await _unitOfWork.CommitAsync(ct);
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(person.Id, MessageFactoryEntityTypes.Person), false, ct);
+            _directoryService.DeleteFiles([sourcePath]);
         }
     }
 
-    /// <summary>
-    /// Sets the series cover by url
-    /// </summary>
-    /// <param name="series"></param>
-    /// <param name="url"></param>
-    /// <param name="fromBase64"></param>
-    /// <param name="chooseBetterImage">If images are similar, will choose the higher quality image</param>
-    /// <param name="ct"></param>
-    public async Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true,
-        bool chooseBetterImage = false, CancellationToken ct = default)
+    public async Task SetOidcUserCoverAsync(int userId, string url, CancellationToken ct = default)
     {
-        if (!string.IsNullOrEmpty(url))
-        {
-            var tempDir = _directoryService.TempDirectory;
-            var format = ImageService.GetSeriesFormat(series.Id);
-            var finalFileName = format + ".webp";
-            var tempFileName = format + "_new";
-            var tempFilePath = await CreateThumbnail(url, tempFileName, fromBase64, tempDir);
-
-            if (!string.IsNullOrEmpty(tempFilePath))
-            {
-                var tempFullPath = Path.Combine(tempDir, tempFilePath);
-                var finalFullPath = Path.Combine(_directoryService.CoverImageDirectory, finalFileName);
-
-                if (chooseBetterImage && !string.IsNullOrEmpty(series.CoverImage))
-                {
-                    var existingPath = Path.Combine(_directoryService.CoverImageDirectory, series.CoverImage);
-
-                    if (!File.Exists(existingPath))
-                    {
-                        // Existing cover reference is stale/missing on disk; accept the new image as it's better than nothing
-                        _logger.LogWarning("Existing cover for Series {SeriesId} is missing on disk ({Path}); accepting new cover from source", series.Id, existingPath);
-                        _directoryService.CopyFile(tempFullPath, finalFullPath);
-                        series.CoverImage = finalFileName;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            var betterImage = existingPath.GetBetterImage(tempFullPath)!;
-
-                            var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
-                            if (choseNewImage)
-                            {
-                                // Don't delete the Series cover unless it is an override, otherwise the first chapter will be null
-                                if (existingPath.Contains(ImageService.GetSeriesFormat(series.Id)))
-                                {
-                                    _directoryService.DeleteFiles([existingPath]);
-                                }
-
-                                _directoryService.CopyFile(tempFullPath, finalFullPath);
-                                series.CoverImage = finalFileName;
-                            }
-                            else
-                            {
-                                _directoryService.DeleteFiles([tempFullPath]);
-                                return;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning(ex, "Error choosing better image for Series: {SeriesId}; accepting new cover from source", series.Id);
-                            _directoryService.CopyFile(tempFullPath, finalFullPath);
-                            series.CoverImage = finalFileName;
-                        }
-                    }
-                }
-                else
-                {
-                    _directoryService.CopyFile(tempFullPath, finalFullPath);
-                    series.CoverImage = finalFileName;
-                }
-
-                _directoryService.DeleteFiles([tempFullPath]);
-                series.CoverImageLocked = true;
-                _imageService.UpdateColorScape(series);
-                _unitOfWork.SeriesRepository.Update(series);
-            }
-        }
-        else
-        {
-            series.CoverImage = null;
-            series.CoverImageLocked = false;
-            _logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null");
-            _imageService.UpdateColorScape(series);
-            _unitOfWork.SeriesRepository.Update(series);
-        }
-
-        if (_unitOfWork.HasChanges())
-        {
-            await _unitOfWork.CommitAsync(ct);
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false, ct);
-        }
-    }
-
-    // TODO: Refactor this to IHasCoverImage instead of a hard entity type
-    public async Task SetChapterCoverByUrl(Chapter chapter, string url, bool fromBase64 = true,
-        bool chooseBetterImage = false, CancellationToken ct = default)
-    {
-        if (!string.IsNullOrEmpty(url))
-        {
-            var tempDirectory = _directoryService.TempDirectory;
-            var finalFileName = ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId) + ".webp";
-            var tempFileName = ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId) + "_new";
-
-            var tempFilePath = await CreateThumbnail(url, tempFileName, fromBase64, tempDirectory);
-
-            if (!string.IsNullOrEmpty(tempFilePath))
-            {
-                var tempFullPath = Path.Combine(tempDirectory, tempFilePath);
-                var finalFullPath = Path.Combine(_directoryService.CoverImageDirectory, finalFileName);
-
-                if (chooseBetterImage && !string.IsNullOrEmpty(chapter.CoverImage))
-                {
-                    var existingPath = Path.Combine(_directoryService.CoverImageDirectory, chapter.CoverImage);
-
-                    if (!File.Exists(existingPath))
-                    {
-                        // Existing cover reference is stale/missing on disk; accept the new image as it's better than nothing
-                        _logger.LogWarning("Existing cover for Chapter {FileName} ({ChapterId}) is missing on disk ({Path}); accepting new cover from source", chapter.Range, chapter.Id, new FileInfo(existingPath).Name);
-                        _directoryService.CopyFile(tempFullPath, finalFullPath);
-                        _directoryService.DeleteFiles([tempFullPath]);
-                        chapter.CoverImage = finalFileName;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            var betterImage = existingPath.GetBetterImage(tempFullPath)!;
-                            var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
-
-                            if (choseNewImage)
-                            {
-                                // This will fail if Cover gen is done just before this as there is a bug with files getting locked.
-                                _directoryService.DeleteFiles([existingPath]);
-                                _directoryService.CopyFile(tempFullPath, finalFullPath);
-                                _directoryService.DeleteFiles([tempFullPath]);
-                            }
-                            else
-                            {
-                                _directoryService.DeleteFiles([tempFullPath]);
-                                return;
-                            }
-
-                            chapter.CoverImage = finalFileName;
-                        }
-                        catch (Exception ex)
-                        {
-                            // Accept the new image rather than keeping no/old cover, since a source is better than nothing
-                            _logger.LogWarning(ex, "There was an issue trying to choose a better cover image for Chapter: {FileName} ({ChapterId}); accepting new cover from source", chapter.Range, chapter.Id);
-                            _directoryService.CopyFile(tempFullPath, finalFullPath);
-                            _directoryService.DeleteFiles([tempFullPath]);
-                            chapter.CoverImage = finalFileName;
-                        }
-                    }
-                }
-                else
-                {
-                    // No comparison needed, just copy and rename to final
-                    _directoryService.CopyFile(tempFullPath, finalFullPath);
-                    _directoryService.DeleteFiles([tempFullPath]);
-                    chapter.CoverImage = finalFileName;
-                }
-
-                chapter.CoverImageLocked = true;
-                _imageService.UpdateColorScape(chapter);
-                _unitOfWork.ChapterRepository.Update(chapter);
-            }
-        }
-        else
-        {
-            chapter.CoverImage = null;
-            chapter.CoverImageLocked = false;
-            _imageService.UpdateColorScape(chapter);
-            _unitOfWork.ChapterRepository.Update(chapter);
-        }
-
-        if (_unitOfWork.HasChanges())
-        {
-            await _unitOfWork.CommitAsync(ct);
-            await _eventHub.SendMessageAsync(
-                MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter),
-                false, ct);
-        }
-    }
-
-    public async Task SetVolumeCoverByUrl(Volume volume, string url, bool fromBase64 = true,
-        bool chooseBetterImage = false, CancellationToken ct = default)
-    {
-        // TODO: See what we can refactor with SetChapterCoverByUrl
-        if (!string.IsNullOrEmpty(url))
-        {
-            var tempDirectory = _directoryService.TempDirectory;
-            var finalFileName = ImageService.GetVolumeFormat(volume.Id) + ".webp";
-            var tempFileName = ImageService.GetVolumeFormat(volume.Id) + "_new";
-
-            var tempFilePath = await CreateThumbnail(url, tempFileName, fromBase64, tempDirectory);
-
-            if (!string.IsNullOrEmpty(tempFilePath))
-            {
-                var tempFullPath = Path.Combine(tempDirectory, tempFilePath);
-                var finalFullPath = Path.Combine(_directoryService.CoverImageDirectory, finalFileName);
-
-                if (chooseBetterImage && !string.IsNullOrEmpty(volume.CoverImage))
-                {
-                    var existingPath = Path.Combine(_directoryService.CoverImageDirectory, volume.CoverImage);
-
-                    if (!File.Exists(existingPath))
-                    {
-                        // Existing cover reference is stale/missing on disk; accept the new image as it's better than nothing
-                        _logger.LogWarning("Existing cover for Volume {VolumeName} ({VolumeId}) is missing on disk ({Path}); accepting new cover from source", volume.Name, volume.Id, new FileInfo(existingPath).Name);
-                        _directoryService.CopyFile(tempFullPath, finalFullPath);
-                        _directoryService.DeleteFiles([tempFullPath]);
-                        volume.CoverImage = finalFileName;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            var betterImage = existingPath.GetBetterImage(tempFullPath)!;
-                            var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
-
-                            if (choseNewImage)
-                            {
-                                // This will fail if Cover gen is done just before this as there is a bug with files getting locked.
-                                // Only delete existing
-                                if (!ImageService.IsChapterFormatForVolume(existingPath, volume.Id))
-                                {
-                                    _directoryService.DeleteFiles([existingPath]);
-                                }
-
-                                _directoryService.CopyFile(tempFullPath, finalFullPath);
-                                _directoryService.DeleteFiles([tempFullPath]);
-                            }
-                            else
-                            {
-                                _directoryService.DeleteFiles([tempFullPath]);
-                                return;
-                            }
-
-                            volume.CoverImage = finalFileName;
-                        }
-                        catch (Exception ex)
-                        {
-                            // Accept the new image rather than keeping no/old cover, since a source is better than nothing
-                            _logger.LogWarning(ex, "There was an issue trying to choose a better cover image for Volume: {VolumeName} ({VolumeId}); accepting new cover from source", volume.Name, volume.Id);
-                            _directoryService.CopyFile(tempFullPath, finalFullPath);
-                            _directoryService.DeleteFiles([tempFullPath]);
-                            volume.CoverImage = finalFileName;
-                        }
-                    }
-                }
-                else
-                {
-                    // No comparison needed, just copy and rename to final
-                    _directoryService.CopyFile(tempFullPath, finalFullPath);
-                    _directoryService.DeleteFiles([tempFullPath]);
-                    volume.CoverImage = finalFileName;
-                }
-
-                volume.CoverImageLocked = true;
-                _imageService.UpdateColorScape(volume);
-                _unitOfWork.VolumeRepository.Update(volume);
-            }
-        }
-        else
-        {
-            volume.CoverImage = null;
-            volume.CoverImageLocked = false;
-            _imageService.UpdateColorScape(volume);
-            _unitOfWork.VolumeRepository.Update(volume);
-        }
-
-        if (_unitOfWork.HasChanges())
-        {
-            await _unitOfWork.CommitAsync(ct);
-            await _eventHub.SendMessageAsync(
-                MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume),
-                false, ct);
-        }
-    }
-
-    public async Task SetVolumeCoverFromChapter(Volume volume, Chapter chapter, CancellationToken ct = default)
-    {
-        if (string.IsNullOrEmpty(chapter.CoverImage)) return;
-
-        if (!string.Equals(volume.CoverImage, chapter.CoverImage, StringComparison.Ordinal))
-        {
-            volume.CoverImage = chapter.CoverImage;
-            volume.CoverImageLocked = true;
-            _imageService.UpdateColorScape(volume);
-            _unitOfWork.VolumeRepository.Update(volume);
-
-            if (_unitOfWork.HasChanges())
-            {
-                await _unitOfWork.CommitAsync(ct);
-                await _eventHub.SendMessageAsync(
-                    MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume),
-                    false, ct);
-            }
-        }
-    }
-
-    public async Task SetUserCoverByUrl(int userId, string url, bool fromBase64 = true, bool chooseBetterImage = false,
-        CancellationToken ct = default)
-    {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.CoverImageFile, ct);
         if (user == null) return;
 
-        await SetUserCoverByUrl(user, url, fromBase64, chooseBetterImage, ct);
+        await SetCoverByUrlAsync(user, url, new CoverWrite(ImageOrigin.Oidc, Lock: false), ct);
     }
 
-    public async Task SetUserCoverByUrl(AppUser user, string url, bool fromBase64 = true,
-        bool chooseBetterImage = false, CancellationToken ct = default)
+    private async Task<string> DownloadKeyedAsync(string url, ImageKind kind, string key, string fileName,
+        ImageOrigin origin, CancellationToken ct)
     {
-        if (!string.IsNullOrEmpty(url))
+        var sourcePath = await DownloadImageFromUrl(url, ct);
+        try
         {
-            var tempDir = _directoryService.TempDirectory;
-            var finalFileName = ImageService.GetUserFormat(user.Id) + ".webp";
-            var tempFileName = ImageService.GetUserFormat(user.Id) + "_new";
-            var finalFullPath = Path.Combine(_directoryService.CoverImageDirectory, finalFileName);
-
-            // This is writing the image to CoverDirectory
-            var tempFilePath = await CreateThumbnail(url, tempFileName, fromBase64, tempDir);
-
-            if (!string.IsNullOrEmpty(tempFilePath))
-            {
-                var tempFullPath = Path.Combine(tempDir, tempFilePath);
-
-
-                _directoryService.CopyFile(tempFullPath, finalFullPath);
-                _directoryService.DeleteFiles([tempFullPath]);
-
-                user.CoverImage = finalFileName;
-                _unitOfWork.UserRepository.Update(user);
-                _imageService.UpdateColorScape(user);
-                _unitOfWork.UserRepository.Update(user);
-            }
+            return await _imageFileService.WriteKeyedAsync(new ImageSource.FromFile(sourcePath), kind, key, fileName, origin, ct);
         }
-        else
+        finally
         {
-            user.CoverImage = string.Empty;
-            _imageService.UpdateColorScape(user);
-            _unitOfWork.UserRepository.Update(user);
+            _directoryService.DeleteFiles([sourcePath]);
         }
-
-        if (_unitOfWork.HasChanges())
-        {
-            await _unitOfWork.CommitAsync(ct);
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(user.Id, MessageFactoryEntityTypes.User), false, ct);
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="url"></param>
-    /// <param name="filenameWithoutExtension">Filename without extension</param>
-    /// <param name="fromBase64"></param>
-    /// <param name="targetDirectory">Allows a different directory to be written to</param>
-    /// <returns></returns>
-    private async Task<string> CreateThumbnail(string url, string filenameWithoutExtension, bool fromBase64 = true, string? targetDirectory = null)
-    {
-        targetDirectory ??= _directoryService.CoverImageDirectory;
-
-        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        var encodeFormat = settings.EncodeMediaAs;
-        var coverImageSize = settings.CoverImageSize;
-
-        if (fromBase64)
-        {
-            var (width, height) = coverImageSize.GetDimensions();
-            return _imageService.CreateThumbnailFromBase64(url, filenameWithoutExtension, encodeFormat, width, height, targetDirectory);
-        }
-
-        return await DownloadImageFromUrl(filenameWithoutExtension, encodeFormat, url, targetDirectory);
     }
 }

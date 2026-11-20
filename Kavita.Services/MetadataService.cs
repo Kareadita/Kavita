@@ -22,6 +22,7 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
+using Kavita.Models.Images;
 using Kavita.Services.Comparators;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers;
@@ -44,7 +45,8 @@ public class MetadataService(
     ICacheHelper cacheHelper,
     IReadingItemService readingItemService,
     IDirectoryService directoryService,
-    IImageService imageService)
+    IImageFileService imageFileService,
+    IMediaErrorService mediaErrorService)
     : IMetadataService
 {
     private readonly List<SignalRMessageDto> _updateEvents = new List<SignalRMessageDto>();
@@ -54,24 +56,24 @@ public class MetadataService(
     /// </summary>
     /// <param name="chapter"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-    /// <param name="encodeFormat">Convert image to Encoding Format when extracting the cover</param>
     /// <param name="forceColorScape">Force colorscape gen</param>
-    private bool UpdateChapterCoverImage(Chapter? chapter, bool forceUpdate, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceColorScape = false)
+    /// <param name="ct"></param>
+    private async Task<bool> UpdateChapterCoverImageAsync(Chapter? chapter, bool forceUpdate, bool forceColorScape, CancellationToken ct)
     {
         if (chapter == null) return false;
 
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null) return false;
 
+        await UnlockIfFileMissingAsync(chapter, ct);
+
         var sourceFile = directoryService.FileSystem.FileInfo.New(firstFile.FilePath);
-        if (!cacheHelper.ShouldUpdateCoverImage(
-                directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, chapter.CoverImage),
-                HasCoverSourceChanged(chapter, sourceFile), forceUpdate, chapter.CoverImageLocked))
+        if (!cacheHelper.ShouldUpdateCoverImage(CoverPath(chapter), HasCoverSourceChanged(chapter, sourceFile), forceUpdate,
+                chapter.CoverImageLocked))
         {
             if (NeedsColorSpace(chapter, forceColorScape))
             {
-                imageService.UpdateColorScape(chapter);
-                unitOfWork.ChapterRepository.Update(chapter);
+                await imageFileService.RefreshColorsAsync(chapter, commit: false, ct);
                 _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
             }
 
@@ -81,19 +83,70 @@ public class MetadataService(
 
         logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
 
-        chapter.CoverImage = readingItemService.GetCoverImage(firstFile.FilePath,
-            ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format, encodeFormat, coverImageSize);
+        await WriteChapterCoverAsync(chapter, firstFile, ct);
         if (sourceFile.Exists)
         {
             chapter.CoverFileWriteTimeUtc = sourceFile.LastWriteTimeUtc;
         }
 
-        imageService.UpdateColorScape(chapter);
-
         unitOfWork.ChapterRepository.Update(chapter);
 
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
         return true;
+    }
+
+    /// <remarks>A cover that cannot be read clears the chapter, so the UI shows its placeholder as it always has</remarks>
+    private async Task WriteChapterCoverAsync(Chapter chapter, MangaFile file, CancellationToken ct)
+    {
+        using var cover = readingItemService.OpenCover(file.FilePath, file.Format);
+        if (cover == null)
+        {
+            await imageFileService.ClearCoverAsync(chapter, commit: false, ct);
+            return;
+        }
+
+        try
+        {
+            await imageFileService.SetCoverAsync(chapter, cover.Source,
+                new CoverWrite(ImageOrigin.Scan, Lock: chapter.CoverImageLocked), commit: false, ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogWarning(ex, "[MetadataService] The cover image in {File} could not be read. Defaulting to no cover image", file.FilePath);
+            var producer = file.Format switch
+            {
+                MangaFormat.Archive => MediaErrorProducer.ArchiveService,
+                MangaFormat.Epub or MangaFormat.Pdf => MediaErrorProducer.BookService,
+                _ => MediaErrorProducer.Scanner,
+            };
+            await mediaErrorService.ReportMediaIssueAsync(file.FilePath, producer, MediaErrorReason.CoverFailed, ex, ct);
+            await imageFileService.ClearCoverAsync(chapter, commit: false, ct);
+        }
+    }
+
+    private string CoverPath(IHasCoverImageFile entity) =>
+        directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, entity.CoverImageFile?.FileName);
+
+    /// <summary>
+    /// Points the volume or series at its cover source's row, or clears it when the source has no cover
+    /// </summary>
+    private async Task ShareOrClearAsync(IHasCoverImageFile target, IHasCoverImageFile source, CancellationToken ct)
+    {
+        if (source.CoverImageFile == null)
+        {
+            await imageFileService.ClearCoverAsync(target, commit: false, ct);
+            return;
+        }
+
+        await imageFileService.ShareCoverAsync(target, source, lockBoth: false, commit: false, ct);
+    }
+
+    // Kavita+ covers are not backed up and a Kavita+ refresh skips a locked cover, so unlock to allow K+ to set a cover and regen
+    private async Task UnlockIfFileMissingAsync(IHasLockableCoverImageFile entity, CancellationToken ct)
+    {
+        if (!entity.CoverImageLocked || imageFileService.HasCoverFile(entity)) return;
+
+        await imageFileService.UpdateLockAsync(entity, false, commit: false, ct);
     }
 
     /// <remarks>A null stamp (no cover made since v0.9.2) counts as changed, so each cover is made once more</remarks>
@@ -104,13 +157,13 @@ public class MetadataService(
                !FolderChangeCheck.IsSameWriteTime(chapter.CoverFileWriteTimeUtc.Value, source.LastWriteTimeUtc);
     }
 
-    private static bool NeedsColorSpace(IHasCoverImage? entity, bool force)
+    private static bool NeedsColorSpace(IHasCoverImageFile entity, bool force)
     {
-        if (entity == null) return false;
+        var row = entity.CoverImageFile;
+        if (row == null) return false;
         if (force) return true;
 
-        return !string.IsNullOrEmpty(entity.CoverImage) &&
-               (string.IsNullOrEmpty(entity.PrimaryColor) || string.IsNullOrEmpty(entity.SecondaryColor));
+        return string.IsNullOrEmpty(row.PrimaryColor) || string.IsNullOrEmpty(row.SecondaryColor);
     }
 
 
@@ -121,33 +174,35 @@ public class MetadataService(
     /// <param name="volume"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
     /// <param name="forceColorScape">Force updating colorscape</param>
-    private bool UpdateVolumeCoverImage(Volume? volume, bool forceUpdate, bool forceColorScape = false)
+    private async Task<bool> UpdateVolumeCoverImageAsync(Volume? volume, bool forceUpdate, bool forceColorScape, CancellationToken ct)
     {
         if (volume == null) return false;
 
         volume.Chapters ??= new List<Chapter>();
-        var coverChapter = volume.CoverImageLocked ? null : GetVolumeCoverChapter(volume);
-        var coverMoved = coverChapter != null && coverChapter.CoverImage != volume.CoverImage;
+        await UnlockIfFileMissingAsync(volume, ct);
 
-        if (!cacheHelper.ShouldUpdateCoverImage(
-                directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, volume.CoverImage),
-                false, forceUpdate || coverMoved))
+        var coverChapter = volume.CoverImageLocked ? null : GetVolumeCoverChapter(volume);
+        var coverMoved = coverChapter != null && !ReferenceEquals(coverChapter.CoverImageFile, volume.CoverImageFile);
+
+        if (!cacheHelper.ShouldUpdateCoverImage(CoverPath(volume), false, forceUpdate || coverMoved))
         {
             if (NeedsColorSpace(volume, forceColorScape))
             {
-                imageService.UpdateColorScape(volume);
-                unitOfWork.VolumeRepository.Update(volume);
+                await imageFileService.RefreshColorsAsync(volume, commit: false, ct);
                 _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));
             }
             return false;
         }
 
-        if (!volume.CoverImageLocked)
+        if (volume.CoverImageLocked)
+        {
+            await imageFileService.RefreshColorsAsync(volume, commit: false, ct);
+        }
+        else
         {
             if (coverChapter == null) return false;
-            volume.CoverImage = coverChapter.CoverImage;
+            await ShareOrClearAsync(volume, coverChapter, ct);
         }
-        imageService.UpdateColorScape(volume);
 
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));
 
@@ -164,47 +219,43 @@ public class MetadataService(
     /// <param name="series"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
     /// <param name="forceColorScape"></param>
-    private void UpdateSeriesCoverImage(Series? series, bool forceUpdate, bool forceColorScape = false)
+    private async Task UpdateSeriesCoverImageAsync(Series? series, bool forceUpdate, bool forceColorScape, CancellationToken ct)
     {
         if (series == null) return;
 
         series.Volumes ??= [];
-        var coverImage = series.GetCoverImage();
-        var coverMoved = !series.CoverImageLocked && coverImage != series.CoverImage;
+        await UnlockIfFileMissingAsync(series, ct);
 
-        if (!cacheHelper.ShouldUpdateCoverImage(
-                directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, series.CoverImage),
-                false, forceUpdate || coverMoved, series.CoverImageLocked))
+        var coverSource = series.GetCoverSource();
+        var coverMoved = !series.CoverImageLocked && !ReferenceEquals(coverSource?.CoverImageFile, series.CoverImageFile);
+
+        if (!cacheHelper.ShouldUpdateCoverImage(CoverPath(series), false, forceUpdate || coverMoved, series.CoverImageLocked))
         {
             // Check if we don't have a primary/seconary color
             if (NeedsColorSpace(series, forceColorScape))
             {
-                imageService.UpdateColorScape(series);
+                await imageFileService.RefreshColorsAsync(series, commit: false, ct);
                 _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
             }
 
             return;
         }
 
-        series.CoverImage = coverImage;
-        if (series.CoverImage == null)
+        if (coverSource == null)
         {
             logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null: {SeriesId}", series.Id);
+            await imageFileService.ClearCoverAsync(series, commit: false, ct);
         }
-
-        imageService.UpdateColorScape(series);
+        else
+        {
+            await ShareOrClearAsync(series, coverSource, ct);
+        }
 
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
     }
 
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="series"></param>
-    /// <param name="forceUpdate"></param>
-    /// <param name="encodeFormat"></param>
-    private async Task ProcessSeriesCoverGen(Series series, bool forceUpdate, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceColorScape = false)
+    private async Task ProcessSeriesCoverGen(Series series, bool forceUpdate, bool forceColorScape, CancellationToken ct)
     {
         logger.LogDebug("[MetadataService] Processing cover image generation for series: {SeriesName}", series.OriginalName);
         try
@@ -218,18 +269,18 @@ public class MetadataService(
                 var anyChapterUpdated = false;
                 foreach (var chapter in volume.Chapters)
                 {
-                    anyChapterUpdated |= UpdateChapterCoverImage(chapter, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
+                    anyChapterUpdated |= await UpdateChapterCoverImageAsync(chapter, forceUpdate, forceColorScape, ct);
                 }
 
-                anyVolumeUpdated |= UpdateVolumeCoverImage(volume, anyChapterUpdated || forceUpdate, forceColorScape);
+                anyVolumeUpdated |= await UpdateVolumeCoverImageAsync(volume, anyChapterUpdated || forceUpdate, forceColorScape, ct);
 
                 await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                    MessageFactory.CoverUpdateProgressEvent(series.LibraryId, volumeIndex / (float) totalVolumes, ProgressEventType.Started, series.Name));
+                    MessageFactory.CoverUpdateProgressEvent(series.LibraryId, volumeIndex / (float) totalVolumes, ProgressEventType.Started, series.Name), ct: ct);
 
                 volumeIndex++;
             }
 
-            UpdateSeriesCoverImage(series, anyVolumeUpdated || forceUpdate, forceColorScape);
+            await UpdateSeriesCoverImageAsync(series, anyVolumeUpdated || forceUpdate, forceColorScape, ct);
         }
         catch (Exception ex)
         {
@@ -265,10 +316,6 @@ public class MetadataService(
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(library.Id, 0F, ProgressEventType.Started, $"Starting {library.Name}"), ct: ct);
 
-        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
-        var encodeFormat = settings.EncodeMediaAs;
-        var coverImageSize = settings.CoverImageSize;
-
         for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
         {
             if (chunkInfo.TotalChunks == 0) continue;
@@ -297,7 +344,7 @@ public class MetadataService(
 
                 try
                 {
-                    await ProcessSeriesCoverGen(series, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
+                    await ProcessSeriesCoverGen(series, forceUpdate, forceColorScape, ct);
                 }
                 catch (Exception ex)
                 {
@@ -307,6 +354,7 @@ public class MetadataService(
             }
 
             await unitOfWork.CommitAsync(ct);
+            imageFileService.DeleteReplacedFiles();
 
             await FlushEvents();
 
@@ -544,29 +592,24 @@ public class MetadataService(
             return;
         }
 
-        var encodeFormat = serverSetting.EncodeMediaAs;
-        var coverImageSize = serverSetting.CoverImageSize;
-
-        await GenerateCoversForSeries(series, encodeFormat, coverImageSize, forceUpdate, forceColorScape, ct);
+        await GenerateCoversForSeries(series, forceUpdate, forceColorScape, ct);
     }
 
     /// <summary>
     /// Generate Cover for a Series. This is used by Scan Loop and should not be invoked directly via User Interaction.
     /// </summary>
     /// <param name="series">A full Series, with metadata, chapters, etc</param>
-    /// <param name="encodeFormat">When saving the file, what encoding should be used</param>
-    /// <param name="coverImageSize"></param>
     /// <param name="forceUpdate"></param>
     /// <param name="forceColorScape">Forces just colorscape generation</param>
     /// <param name="ct"></param>
-    public async Task GenerateCoversForSeries(Series series, EncodeFormat encodeFormat, CoverImageSize coverImageSize,
-        bool forceUpdate = false, bool forceColorScape = true, CancellationToken ct = default)
+    public async Task GenerateCoversForSeries(Series series, bool forceUpdate = false, bool forceColorScape = true,
+        CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(series.LibraryId, 0F, ProgressEventType.Started, series.Name), ct: ct);
 
-        await ProcessSeriesCoverGen(series, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
+        await ProcessSeriesCoverGen(series, forceUpdate, forceColorScape, ct);
 
 
         if (unitOfWork.HasChanges())
@@ -574,6 +617,8 @@ public class MetadataService(
             await unitOfWork.CommitAsync(ct);
             logger.LogInformation("[MetadataService] Updated covers for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
         }
+
+        imageFileService.DeleteReplacedFiles();
 
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(series.LibraryId, 1F, ProgressEventType.Ended, series.Name), ct: ct);

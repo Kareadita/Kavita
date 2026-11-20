@@ -27,6 +27,21 @@ public class ReadingListAccessAttribute(bool failOnMissing = true, string readin
 }
 
 /// <summary>
+/// An attribute restricting access to entities based on the user's access to the collection.
+/// Returns 404 Not Found on failure
+/// </summary>
+/// <param name="failOnMissing"></param>
+/// <param name="collectionIdKey"></param>
+public class CollectionTagAccessAttribute(bool failOnMissing = true, string collectionIdKey = "collectionId", bool allowPromoted = true)
+    : AccessAttribute(collectionIdKey, failOnMissing, false)
+{
+    protected override Task<bool> CheckAccess(IUnitOfWork unitOfWork, int userId, int entityId, CancellationToken ct)
+    {
+        return unitOfWork.UserRepository.HasAccessToCollection(userId, entityId, allowPromoted, ct);
+    }
+}
+
+/// <summary>
 /// An attribute restricting access to entities based on the user's access to the person.
 /// Returns 404 Not Found on failure
 /// </summary>

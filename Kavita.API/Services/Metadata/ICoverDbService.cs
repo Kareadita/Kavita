@@ -1,9 +1,9 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Person;
-using Kavita.Models.Entities.User;
+using Kavita.Models.Images;
 
 namespace Kavita.API.Services.Metadata;
 
@@ -15,17 +15,13 @@ public interface ICoverDbService
     /// Returns the remote CoversDB url for a Person, without downloading or applying it
     /// </summary>
     Task<string?> GetPersonImageUrlAsync(Person person, CancellationToken ct = default);
-    Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string? targetDirectory = null, CancellationToken ct = default);
-    Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url, string? targetDirectory = null, CancellationToken ct = default);
-    Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false, bool chooseBetterImage = true, CancellationToken ct = default);
-    Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true, bool chooseBetterImage = false, CancellationToken ct = default);
-    Task SetChapterCoverByUrl(Chapter chapter, string url, bool fromBase64 = true, bool chooseBetterImage = false, CancellationToken ct = default);
-    Task SetVolumeCoverByUrl(Volume volume, string url, bool fromBase64 = true, bool chooseBetterImage = false, CancellationToken ct = default);
     /// <summary>
-    /// Points a Volume's cover at an existing Chapter's cover image (reuse, no download), mirroring how single-chapter
-    /// volumes derive their cover during cover generation.
+    /// Downloads the url to temp and writes it through <see cref="IImageFileService.SetCoverAsync"/>, which commits
+    /// and sends the CoverUpdate
     /// </summary>
-    Task SetVolumeCoverFromChapter(Volume volume, Chapter chapter, CancellationToken ct = default);
-    Task SetUserCoverByUrl(int userId, string url, bool fromBase64 = true, bool chooseBetterImage = false, CancellationToken ct = default);
-    Task SetUserCoverByUrl(AppUser user, string url, bool fromBase64 = true, bool chooseBetterImage = false, CancellationToken ct = default);
+    Task SetCoverByUrlAsync(IHasCoverImageFile entity, string url, CoverWrite write, CancellationToken ct = default);
+    /// <summary>
+    /// Takes an id so it can run as a Hangfire job
+    /// </summary>
+    Task SetOidcUserCoverAsync(int userId, string url, CancellationToken ct = default);
 }

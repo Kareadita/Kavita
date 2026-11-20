@@ -13,8 +13,6 @@ public sealed record RatingDto
     /// Normalized score 0-100
     /// </summary>
     public int AverageScore { get; set; }
-    [Obsolete("Not used as of v0.9.1")]
-    public int FavoriteCount { get; set; }
     [EnumDataType(typeof(ScrobbleProvider))]
     public ScrobbleProvider Provider { get; set; }
     /// <inheritdoc cref="ExternalRating.Authority"/>

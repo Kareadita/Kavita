@@ -11,7 +11,7 @@ using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities;
 
-public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKPlusMetadata, IHasMetadataIds, IHasTags<Tag>
+public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasKPlusMetadata, IHasMetadataIds, IHasTags<Tag>, IHasLockableCoverImageFile
 {
     public int Id { get; set; }
     /// <summary>
@@ -44,8 +44,13 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKP
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
 
+    [Obsolete("Use CoverImageFile")]
     public string? CoverImage { get; set; }
+    public int? CoverImageFileId { get; set; }
+    public ImageFile? CoverImageFile { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string PrimaryColor { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string SecondaryColor { get; set; }
     public bool CoverImageLocked { get; set; }
     /// <summary>
@@ -198,11 +203,6 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKP
 
     public ICollection<ExternalReview> ExternalReviews { get; set; } = [];
     public ICollection<ExternalRating> ExternalRatings { get; set; } = null!;
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
 
     public bool IsPersonRoleLocked(PersonRole role)
     {

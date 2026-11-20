@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'bytes',
@@ -14,6 +14,7 @@ export class BytesPipe implements PipeTransform {
    *           binary (IEC), aka powers of 1024.
    * @param dp Number of decimal places to display.
    *
+   * @param alwaysShowDp Always show decimal places
    * @return Formatted string.
    *
    * Credit: https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string

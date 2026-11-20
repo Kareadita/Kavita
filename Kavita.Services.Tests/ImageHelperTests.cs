@@ -1,11 +1,13 @@
 ﻿using System.Text;
 using Kavita.Models.Entities.Enums;
+using Kavita.Services.Helpers;
+using Kavita.Services.Images;
 using NetVips;
 using Image = NetVips.Image;
 
 namespace Kavita.Services.Tests;
 
-public class ImageServiceTests
+public class ImageHelperTests
 {
     private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ImageService/Covers");
     private readonly string _testDirectoryColorScapes = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ImageService/ColorScapes");
@@ -55,8 +57,8 @@ public class ImageServiceTests
             var dims = CoverImageSize.Default.GetDimensions();
             using var sourceImage = Image.NewFromFile(imagePath, false, Enums.Access.SequentialUnbuffered);
 
-            var size = ImageService.GetSizeForDimensions(sourceImage, dims.Width, dims.Height);
-            var crop = ImageService.GetCropForDimensions(sourceImage, dims.Width, dims.Height);
+            var size = ImagePipeline.GetSizeForDimensions(sourceImage, dims.Width, dims.Height);
+            var crop = ImagePipeline.GetCropForDimensions(sourceImage, dims.Width, dims.Height);
 
             using var thumbnail = Image.Thumbnail(imagePath, dims.Width, dims.Height,
                 size: size,
@@ -100,7 +102,7 @@ public class ImageServiceTests
 
             using var sourceImage = Image.NewFromFile(imagePath, false, Enums.Access.SequentialUnbuffered);
             htmlBuilder.AppendLine("<div class=\"image-row\">");
-            htmlBuilder.AppendLine($"<p>{fileName} ({((double) sourceImage.Width / sourceImage.Height).ToString("F2")}) - {ImageService.WillScaleWell(sourceImage, dims.Width, dims.Height)}</p>");
+            htmlBuilder.AppendLine($"<p>{fileName} ({((double) sourceImage.Width / sourceImage.Height).ToString("F2")}) - {ImagePipeline.WillScaleWell(sourceImage, dims.Width, dims.Height)}</p>");
             htmlBuilder.AppendLine($"<img src=\"./{Path.GetFileName(imagePath)}\" alt=\"{fileName}\">");
             if (File.Exists(baselinePath))
             {
@@ -141,7 +143,7 @@ public class ImageServiceTests
         foreach (var imagePath in imageFiles)
         {
             var fileName = Path.GetFileNameWithoutExtension(imagePath);
-            var colors = ImageService.CalculateColorScape(imagePath);
+            var colors = ImageHelper.CalculateColorScape(imagePath);
 
             // Generate primary color image
             GenerateColorImage(colors.Primary, Path.Combine(_testDirectoryColorScapes, $"{fileName}_primary_output.png"));
@@ -169,7 +171,7 @@ public class ImageServiceTests
         var imagePath = Path.Join(_testDirectoryColorScapes, fileName);
 
         var results = Enumerable.Range(0, 10)
-            .Select(_ => ImageService.CalculateColorScape(imagePath))
+            .Select(_ => ImageHelper.CalculateColorScape(imagePath))
             .Select(c => $"{c.Primary} {c.Secondary}")
             .Distinct()
             .ToList();
@@ -188,14 +190,14 @@ public class ImageServiceTests
     [InlineData("yellow-blue.png", "#E4AD28 #54535E")]
     public void CalculateColorScape_KnownImage_ExactColors(string fileName, string expected)
     {
-        var colors = ImageService.CalculateColorScape(Path.Join(_testDirectoryColorScapes, fileName));
+        var colors = ImageHelper.CalculateColorScape(Path.Join(_testDirectoryColorScapes, fileName));
 
         Assert.Equal(expected, $"{colors.Primary} {colors.Secondary}");
     }
 
     private static void GenerateColorImage(string hexColor, string outputPath)
     {
-        var (r, g, b) = ImageService.HexToRgb(hexColor);
+        var (r, g, b) = ImageHelper.HexToRgb(hexColor);
         using var blackImage = Image.Black(200, 100);
         using var colorImage = blackImage.NewFromImage(r, g, b);
         colorImage.WriteToFile(outputPath);

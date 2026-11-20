@@ -38,6 +38,7 @@ public interface IUnitOfWork
     IReadingListRemapRuleRepository RemapRuleRepository { get; }
     IKavitaPlusAuditRepository KavitaPlusAuditRepository { get; }
     IKoboSyncPointRepository KoboSyncPointRepository { get; }
+    IImageFileRepository ImageFileRepository { get; }
 
     /// <summary>
     /// Commits pending changes to the database inside an IMMEDIATE transaction so writer

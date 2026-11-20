@@ -38,6 +38,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Interfaces;
+using Kavita.Models.Images;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Person;
@@ -61,6 +62,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IScrobblingService _scrobblingService;
     private readonly IEventHub _eventHub;
     private readonly ICoverDbService _coverDbService;
+    private readonly IImageFileService _imageFileService;
     private readonly IKavitaPlusApiService _kavitaPlusApiService;
     private readonly IFileCacheService _fileCacheService;
     private readonly IKavitaPlusAuditService _auditService;
@@ -92,8 +94,10 @@ public class ExternalMetadataService : IExternalMetadataService
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
         ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub, ICoverDbService coverDbService,
-        IKavitaPlusApiService kavitaPlusApiService, IFileCacheService fileCacheService, IKavitaPlusAuditService auditService)
+        IKavitaPlusApiService kavitaPlusApiService, IFileCacheService fileCacheService, IKavitaPlusAuditService auditService,
+        IImageFileService imageFileService)
     {
+        _imageFileService = imageFileService;
         _unitOfWork = unitOfWork;
         _logger = logger;
         _mapper = mapper;
@@ -1067,7 +1071,8 @@ public class ExternalMetadataService : IExternalMetadataService
 
         try
         {
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Related, ct);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
+                SeriesIncludes.Metadata | SeriesIncludes.Related | SeriesIncludes.CoverImageFile, ct);
             if (series == null) return false;
 
             var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct);
@@ -1183,7 +1188,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// are not.
     /// </summary>
     /// <remarks>Not run for ComicBookRoundup, whose covers come from chapter/issue metadata already.</remarks>
-    private async Task ApplyExternalCovers(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, CancellationToken ct = default)
+    internal async Task ApplyExternalCovers(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, CancellationToken ct = default)
     {
         if (!settings.EnableVolumeCoverImage && !settings.EnableChapterCoverImage) return;
         if (series.GetEffectiveMetadataProvider() == MetadataProvider.ComicBookRoundup) return;
@@ -1196,7 +1201,8 @@ public class ExternalMetadataService : IExternalMetadataService
             .FirstOrDefault();
 
         // All volumes: manga chapters can live in the loose-leaf volume, so we filter loose-leaf/specials only for volume covers
-        var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(series.Id, ct)).ToList();
+        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(series.Id,
+            VolumeIncludes.Chapters | VolumeIncludes.Files | VolumeIncludes.CoverImageFile, ct)).ToList();
         if (volumes.Count == 0) return;
 
         var covers = await GetExternalCovers(series.Id, ct: ct);
@@ -1238,7 +1244,7 @@ public class ExternalMetadataService : IExternalMetadataService
             // Volume covers only apply to real volumes (skip loose-leaf/specials)
             if (!settings.EnableVolumeCoverImage) continue;
             if (volume.MinNumber.Is(Parser.LooseLeafVolumeNumber) || volume.MinNumber.Is(Parser.SpecialVolumeNumber)) continue;
-            if (volume.CoverImageLocked && !HasForceOverride(settings, volume, MetadataSettingField.VolumeCovers)) continue;
+            if (volume.CoverImageLocked && !HasForceCoverOverride(settings, volume, MetadataSettingField.VolumeCovers)) continue;
 
             try
             {
@@ -1252,15 +1258,15 @@ public class ExternalMetadataService : IExternalMetadataService
                     if (match == null) continue;
 
                     // If the chapter loop didn't already write it, download onto the chapter now (bypassing the chapter-cover setting)
-                    if (!coveredChapterIds.Contains(chapter.Id))
+                    var chapterHeld = chapter.CoverImageLocked
+                                      && !HasForceCoverOverride(settings, chapter, MetadataSettingField.ChapterCovers);
+                    if (!coveredChapterIds.Contains(chapter.Id) && !chapterHeld)
                     {
-                        var chooseBetterImage = !chapter.HasSetKPlusMetadata(MetadataSettingField.ChapterCovers);
-                        chapter.AddKPlusOverride(MetadataSettingField.ChapterCovers);
-                        await _coverDbService.SetChapterCoverByUrl(chapter, match.Url, false, chooseBetterImage, ct);
+                        await _coverDbService.SetCoverByUrlAsync(chapter, match.Url,
+                            new CoverWrite(ImageOrigin.KavitaPlus, Lock: true, ChooseBetter: !IsKavitaPlusCover(chapter)), ct);
                     }
 
-                    volume.AddKPlusOverride(MetadataSettingField.VolumeCovers);
-                    await _coverDbService.SetVolumeCoverFromChapter(volume, chapter, ct);
+                    await _imageFileService.ShareCoverAsync(volume, chapter, lockBoth: true, ct: ct);
                     await LogVolumeCoverAudit(series.Id, volume, match.Url, ct);
                 }
                 else
@@ -1269,9 +1275,8 @@ public class ExternalMetadataService : IExternalMetadataService
                     if (match == null) continue;
 
                     // Only choose the better image the first time; once K+ owns the cover, overwrite freely
-                    var chooseBetterImage = !volume.HasSetKPlusMetadata(MetadataSettingField.VolumeCovers);
-                    volume.AddKPlusOverride(MetadataSettingField.VolumeCovers);
-                    await _coverDbService.SetVolumeCoverByUrl(volume, match.Url, false, chooseBetterImage, ct);
+                    await _coverDbService.SetCoverByUrlAsync(volume, match.Url,
+                        new CoverWrite(ImageOrigin.KavitaPlus, Lock: true, ChooseBetter: !IsKavitaPlusCover(volume)), ct);
                     await LogVolumeCoverAudit(series.Id, volume, match.Url, ct);
                 }
             }
@@ -1682,10 +1687,12 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             var aniListId = ExternalIdParser.GetAniListCharacterId(character.Url);
             if (aniListId <= 0) continue;
-            var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
-            if (person != null && !string.IsNullOrEmpty(character.ImageUrl) && string.IsNullOrEmpty(person.CoverImage))
+            var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId,
+                PersonIncludes.Aliases | PersonIncludes.CoverImageFile);
+            if (person != null && !string.IsNullOrEmpty(character.ImageUrl) && !_imageFileService.HasCoverFile(person))
             {
-                await _coverDbService.SetPersonCoverByUrl(person, character.ImageUrl, false);
+                await _coverDbService.SetCoverByUrlAsync(person, character.ImageUrl,
+                    new CoverWrite(ImageOrigin.KavitaPlus, Lock: true, ChooseBetter: true));
             }
         }
 
@@ -2029,7 +2036,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // Get all volumes and chapters
         var madeModification = false;
-        var allChapters =  await _unitOfWork.ChapterRepository.GetAllChaptersForSeries(series.Id);
+        var allChapters =  await _unitOfWork.ChapterRepository.GetAllChaptersForSeriesAsync(series.Id, ChapterIncludes.CoverImageFile);
 
         List<(Chapter, ExternalChapterDto)> matchedChapters = [];
 
@@ -2326,14 +2333,13 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (string.IsNullOrEmpty(coverUrl)) return false;
 
-        if (chapter.CoverImageLocked && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterCovers))
+        if (chapter.CoverImageLocked && !HasForceCoverOverride(settings, chapter, MetadataSettingField.ChapterCovers))
         {
             _logger.LogDebug("Kavita+ Update Chapter was skipped as cover was locked, Chapter: {ChapterId}", chapter.Id);
             return false;
         }
 
         await DownloadChapterCovers(chapter, coverUrl);
-        chapter.AddKPlusOverride(MetadataSettingField.ChapterCovers);
         await _auditService.LogAsync(KavitaPlusAuditCategory.Metadata, KavitaPlusEventType.ChapterCoverUpdated, AuditStatus.Success,
             AuditSubjectType.Chapter, seriesId: seriesId, subjectId: chapter.Id,
             payload: new AuditLogChapterCoverParamsDto { IssueNumber = chapter.Range, CoverUrl = coverUrl });
@@ -2399,18 +2405,12 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (string.IsNullOrEmpty(externalMetadata.CoverUrl)) return false;
 
-        if (series.CoverImageLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.Covers))
-        {
-            return false;
-        }
-
-        if (string.IsNullOrEmpty(externalMetadata.CoverUrl))
+        if (series.CoverImageLocked && !HasForceCoverOverride(settings, series, MetadataSettingField.Covers))
         {
             return false;
         }
 
         await DownloadSeriesCovers(series, externalMetadata.CoverUrl);
-        series.Metadata.AddKPlusOverride(MetadataSettingField.Covers);
         await _auditService.LogAsync(KavitaPlusAuditCategory.Metadata, KavitaPlusEventType.CoverUpdated, AuditStatus.Success,
             AuditSubjectType.Series, seriesId: series.Id,
             payload: new AuditLogSeriesCoverParamsDto { SeriesName = series.Name, CoverUrl = externalMetadata.CoverUrl });
@@ -2769,8 +2769,8 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         try
         {
-            // Only choose the better image if we're overriding a user provided cover
-            await _coverDbService.SetSeriesCoverByUrl(series, coverUrl, false, !series.Metadata.HasSetKPlusMetadata(MetadataSettingField.Covers));
+            await _coverDbService.SetCoverByUrlAsync(series, coverUrl,
+                new CoverWrite(ImageOrigin.KavitaPlus, Lock: true, ChooseBetter: !IsKavitaPlusCover(series)));
         }
         catch (Exception ex)
         {
@@ -2782,7 +2782,8 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         try
         {
-            await _coverDbService.SetChapterCoverByUrl(chapter, coverUrl, false, true);
+            await _coverDbService.SetCoverByUrlAsync(chapter, coverUrl,
+                new CoverWrite(ImageOrigin.KavitaPlus, Lock: true, ChooseBetter: true));
         }
         catch (Exception ex)
         {
@@ -2804,21 +2805,23 @@ public class ExternalMetadataService : IExternalMetadataService
 
             Person? person = null;
 
+            const PersonIncludes includes = PersonIncludes.Aliases | PersonIncludes.CoverImageFile;
             if (aniListId > 0)
             {
-                person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
+                person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId, includes);
             }
 
             if (person == null && !string.IsNullOrEmpty(hardcoverId))
             {
-                person = await _unitOfWork.PersonRepository.GetPersonByHardcoverId(hardcoverId);
+                person = await _unitOfWork.PersonRepository.GetPersonByHardcoverId(hardcoverId, includes);
             }
 
-            if (person == null|| !string.IsNullOrEmpty(person.CoverImage)) continue;
+            if (person == null || _imageFileService.HasCoverFile(person)) continue;
 
             try
             {
-                await _coverDbService.SetPersonCoverByUrl(person, staff.ImageUrl, false, true);
+                await _coverDbService.SetCoverByUrlAsync(person, staff.ImageUrl,
+                    new CoverWrite(ImageOrigin.KavitaPlus, Lock: true, ChooseBetter: true, RejectPlaceholder: true));
                 await _auditService.LogPersonAsync(KavitaPlusEventType.PersonCoverUpdated, person.Id,
                     new AuditLogPersonCoverParamsDto { PersonName = person.Name, AniListId = aniListId, HardcoverId = hardcoverId, ImageUrl = staff.ImageUrl });
             }
@@ -3160,5 +3163,16 @@ public class ExternalMetadataService : IExternalMetadataService
         MetadataSettingField field)
     {
         return settings.HasOverride(field) || kPlusMetadata.HasSetKPlusMetadata(field);
+    }
+
+    private static bool HasForceCoverOverride(MetadataSettingsDto settings, IHasCoverImageFile entity,
+        MetadataSettingField field)
+    {
+        return settings.HasOverride(field) || IsKavitaPlusCover(entity);
+    }
+
+    private static bool IsKavitaPlusCover(IHasCoverImageFile entity)
+    {
+        return entity.CoverImageFile?.Origin == ImageOrigin.KavitaPlus;
     }
 }

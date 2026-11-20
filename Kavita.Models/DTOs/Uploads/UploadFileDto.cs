@@ -1,4 +1,5 @@
 ﻿namespace Kavita.Models.DTOs.Uploads;
+#nullable enable
 
 public sealed record UploadCoverFileDto
 {
@@ -9,6 +10,7 @@ public sealed record UploadCoverFileDto
     /// <summary>
     /// Base64 encoding of the file to upload from. Legacy fallback - prefer <see cref="FileName"/>.
     /// </summary>
+    /// <remarks>Pass an empty string to reset the cover which Kavita will queue a job to regenerate from file</remarks>
     public string? Url { get; set; }
 
     /// <summary>

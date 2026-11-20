@@ -93,16 +93,6 @@ public class MessageFactoryTests
     }
 
     [Fact]
-    public void ConvertCoverProgress_HasItsOwnName()
-    {
-        var covers = MessageFactory.ConvertCoverProgressEvent(0.5f, ProgressEventType.Updated);
-        var bookmarks = MessageFactory.ConvertBookmarksProgressEvent(0.5f, ProgressEventType.Updated);
-
-        Assert.Equal("ConvertCoversProgress", covers.Name);
-        Assert.NotEqual(bookmarks.Name, covers.Name);
-    }
-
-    [Fact]
     public void SmartCollectionProgress_ZeroTotal_IsZeroAndSerializes()
     {
         var message = MessageFactory.SmartCollectionProgressEvent("Seasonal", string.Empty, 0, 0, ProgressEventType.Started);

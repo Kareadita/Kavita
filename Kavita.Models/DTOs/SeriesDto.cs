@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Kavita.Models.DTOs;
 #nullable enable
 
-public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds
+public sealed record SeriesDto : IHasReadTimeEstimate, IHasMetadataIds, IHasCoverImageDto
 {
     /// <inheritdoc cref="API.Entities.Series.Id"/>
     public int Id { get; init; }
@@ -88,6 +88,9 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     public string? LowestFolderPath { get; set; }
     /// <inheritdoc cref="API.Entities.Series.LastFolderScanned"/>
     public DateTime LastFolderScanned { get; set; }
+
+    public bool HasCoverImage { get; set; }
+
     #region KavitaPlus
     /// <inheritdoc cref="API.Entities.Series.DontMatch"/>
     public bool DontMatch { get; set; }
@@ -98,15 +101,6 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     /// <inheritdoc cref="Kavita.Models.Entities.Series.MetadataProviderOverride"/>
     [EnumDataType(typeof(MetadataProvider))]
     public MetadataProvider? MetadataProviderOverride { get; set; }
-    #endregion
-
-    #region ColorScape
-    /// <inheritdoc cref="API.Entities.Series.CoverImage"/>
-    public string? CoverImage { get; set; }
-    /// <inheritdoc cref="API.Entities.Series.PrimaryColor"/>
-    public string? PrimaryColor { get; set; } = string.Empty;
-    /// <inheritdoc cref="API.Entities.Series.SecondaryColor"/>
-    public string? SecondaryColor { get; set; } = string.Empty;
     #endregion
 
     #region Metadata
@@ -120,12 +114,4 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     public int CbrId { get; set; }
 
     #endregion
-
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
-
-
 }

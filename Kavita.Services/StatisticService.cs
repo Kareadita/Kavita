@@ -359,9 +359,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
                 {
                     Id = g.Key.Id,
                     Name = g.Key.Name,
-                    CoverImage = g.Key.CoverImage,
-                    PrimaryColor = g.Key.PrimaryColor,
-                    SecondaryColor = g.Key.SecondaryColor,
+                    HasCoverImage = g.Key.HasCoverImage(),
                     Description = g.Key.Description
                 },
                 Count = g.Sum(x => countDict.GetValueOrDefault(x.SeriesId, 0))
@@ -1429,7 +1427,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
         // Fetch user details
         var users = await context.AppUser
             .Where(u => userIds.Contains(u.Id))
-            .Select(u => new { u.Id, u.UserName, u.CoverImage })
+            .Select(u => new { u.Id, u.UserName })
             .ToDictionaryAsync(u => u.Id, cancellationToken: ct);
 
         // Fetch TotalReads for each user's series
@@ -1476,7 +1474,6 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
             {
                 UserId = stat.UserId,
                 Username = user.UserName ?? string.Empty,
-                CoverImage = user.CoverImage,
                 TimePeriodHours = (int)Math.Round(stat.HoursRead),
                 TotalHours = (int)Math.Round(stat.HoursRead),
                 TotalComics = stat.ComicsRead,

@@ -109,6 +109,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<KavitaPlusAuditLog> KavitaPlusAuditLogs { get; set; } = null!;
 
     public DbSet<ScrobbleRuleHistory> ScrobbleRuleHistory { get; set; } = null!;
+    public DbSet<ImageFile> ImageFile { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -597,6 +598,39 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
                 .HasForeignKey(b => b.AppUserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+        #endregion
+
+        #region Image Files
+        builder.Entity<ImageFile>(entity =>
+        {
+            entity.HasIndex(f => new { f.FileName, f.Kind })
+                .IsUnique()
+                .HasDatabaseName("IX_ImageFile_FileName_Kind");
+            entity.HasIndex(f => new { f.Kind, f.Key })
+                .HasDatabaseName("IX_ImageFile_Kind_Key");
+        });
+
+        builder.Entity<Chapter>().HasOne(e => e.CoverImageFile).WithMany()
+            .HasForeignKey(e => e.CoverImageFileId)
+            .OnDelete(DeleteBehavior.SetNull);
+        builder.Entity<Volume>().HasOne(e => e.CoverImageFile).WithMany()
+            .HasForeignKey(e => e.CoverImageFileId)
+            .OnDelete(DeleteBehavior.SetNull);
+        builder.Entity<Series>().HasOne(e => e.CoverImageFile).WithMany()
+            .HasForeignKey(e => e.CoverImageFileId)
+            .OnDelete(DeleteBehavior.SetNull);
+        builder.Entity<Library>().HasOne(e => e.CoverImageFile).WithMany()
+            .HasForeignKey(e => e.CoverImageFileId).OnDelete(DeleteBehavior.SetNull);
+        builder.Entity<Person>().HasOne(e => e.CoverImageFile).WithMany()
+            .HasForeignKey(e => e.CoverImageFileId).OnDelete(DeleteBehavior.SetNull);
+        builder.Entity<ReadingList>().HasOne(e => e.CoverImageFile).WithMany()
+            .HasForeignKey(e => e.CoverImageFileId).OnDelete(DeleteBehavior.SetNull);
+        builder.Entity<AppUser>().HasOne(e => e.CoverImageFile).WithMany()
+            .HasForeignKey(e => e.CoverImageFileId).OnDelete(DeleteBehavior.SetNull);
+        builder.Entity<AppUserCollection>().HasOne(e => e.CoverImageFile).WithMany()
+            .HasForeignKey(e => e.CoverImageFileId).OnDelete(DeleteBehavior.SetNull);
+        builder.Entity<AppUserBookmark>().HasOne(e => e.ImageFile).WithMany()
+            .HasForeignKey(e => e.ImageFileId).OnDelete(DeleteBehavior.SetNull);
         #endregion
 
         #region Search Indexes

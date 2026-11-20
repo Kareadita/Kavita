@@ -219,4 +219,9 @@ public enum ServerSettingKey
     /// </summary>
     [Description("EnableKobo")]
     EnableKobo = 45,
+    /// <summary>
+    /// When the reading list and collection covers built from their items are refreshed
+    /// </summary>
+    [Description("TaskCompositeCovers")]
+    TaskCompositeCovers = 46,
 }

@@ -14,7 +14,8 @@ using Kavita.Models.Extensions;
 using Kavita.Services;
 using Kavita.Services.Builders;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
+using Kavita.Services.Helpers;
 
 namespace Kavita.Server.ManualMigrations.v0._8._0;
 
@@ -36,7 +37,7 @@ public class UserProgressCsvRecord
 /// </summary>
 public static class MigrateMixedSpecials
 {
-    public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger<Program> logger)
+    public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger logger)
     {
         if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "ManualMigrateMixedSpecials"))
         {
@@ -188,12 +189,12 @@ public static class MigrateMixedSpecials
             "Running ManualMigrateMixedSpecials migration - Completed. This is not an error");
     }
 
-    private static void UpdateCoverImage(IDirectoryService directoryService, ILogger<Program> logger, Chapter specialChapter,
+    private static void UpdateCoverImage(IDirectoryService directoryService, ILogger logger, Chapter specialChapter,
         string extension, Volume newVolume)
     {
         // We need to migrate cover images as well
-        var existingCover = ImageService.GetChapterFormat(specialChapter.Id, specialChapter.VolumeId) + extension;
-        var newCover = ImageService.GetChapterFormat(specialChapter.Id, newVolume.Id) + extension;
+        var existingCover = ImageHelper.GetChapterFormat(specialChapter.Id, specialChapter.VolumeId) + extension;
+        var newCover = ImageHelper.GetChapterFormat(specialChapter.Id, newVolume.Id) + extension;
         try
         {
 

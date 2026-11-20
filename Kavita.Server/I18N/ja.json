@@ -82,7 +82,7 @@
     "no-series": "ライブラリのシリーズを取得できませんでした",
     "series-restricted": "このシリーズに対するアクセス権がありません",
     "generic-relationship": "関係の更新中に問題が発生しました",
-    "ip-address-invalid": "IPアドレス '{0}' は無効です",
+    "ip-address-invalid": "IP アドレス「{0}」は無効です",
     "bookmark-dir-permissions": "ブックマーク ディレクトリには、Kavita が使用するための適切な権限がありません",
     "url-not-valid": "URL は有効な画像を返さないか、認証が必要です",
     "volume-doesnt-exist": "巻が存在しません",
@@ -101,7 +101,6 @@
     "generic-reading-list-create": "読書リストの作成中に問題が発生しました",
     "libraries-restricted": "ライブラリに対してのアクセス権がありません",
     "job-already-running": "ジョブはすでに実行中です",
-    "encode-as-warning": "PNG に変換できません。カバー画像の場合は、「カバーを更新」を使用してください。ブックマークとファビコンは元の形式に戻すことはできません。",
     "total-logs": "ログの合計数は 1 から 30 の間でなければなりません",
     "stats-permission-denied": "他のユーザーの統計情報を表示する権限がありません",
     "bookmark-doesnt-exist": "ブックマークが存在しません",
@@ -287,5 +286,14 @@
     "series-localized-name-exists": "このライブラリ内の別のシリーズですでにこの名前が使用されています",
     "series-localized-name-orphans-files": "このローカライズされた名前を変更すると、現在このシリーズに統合されているファイルが分割されます",
     "email.auth-key-expired.cta": "ローテーション",
-    "email.auth-key-expiring-soon.cta": "ローテーション"
+    "email.auth-key-expiring-soon.cta": "ローテーション",
+    "email.token-invalidated.subject": "Kavita - {{Provider}} トークンの有効期限が切れたため、Scrobbling イベントは停止しました",
+    "email.token-invalidated.header": "{{Provider}} トークンは、度重なる更新の失敗により無効になりました！",
+    "email.token-invalidated.description": "接続を更新するまで、Kavita は {{Provider}} との同期を停止します。",
+    "email.token-invalidated.cta": "更新",
+    "email.token-invalidated.fallback-link-label": "上記のボタンが機能しない場合は、こちらのリンクをご利用ください：",
+    "cbl-repo-path-not-found": "CBL リポジトリには {0} が見つかりませんでした",
+    "cbl-repo-download-failed": "CBL リポジトリから {0} をダウンロードできませんでした",
+    "github-unavailable": "GitHub は現在ご利用いただけません。しばらくしてからもう一度お試しください",
+    "kobo-sync-disabled": "このサーバーでは KoboSync は有効になっていません"
 }

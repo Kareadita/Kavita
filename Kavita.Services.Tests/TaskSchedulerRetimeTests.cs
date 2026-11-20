@@ -31,11 +31,9 @@ public class TaskSchedulerRetimeTests
         JobStorage.Current = new InMemoryStorage();
 
         _taskScheduler = new TaskScheduler(Substitute.For<ICacheService>(), Substitute.For<ILogger<TaskScheduler>>(),
-            Substitute.For<IScannerService>(), Substitute.For<IUnitOfWork>(), Substitute.For<IMetadataService>(),
-            Substitute.For<IBackupService>(), Substitute.For<ICleanupService>(), Substitute.For<IStatsService>(),
+            Substitute.For<IScannerService>(), Substitute.For<IUnitOfWork>(), Substitute.For<IMetadataService>(), Substitute.For<ICleanupService>(), Substitute.For<IStatsService>(),
             Substitute.For<IVersionUpdaterService>(), Substitute.For<IWordCountAnalyzerService>(),
-            Substitute.For<IMediaConversionService>(), Substitute.For<IScrobblingService>(),
-            Substitute.For<ILicenseService>(), Substitute.For<IExternalMetadataService>(),
+            Substitute.For<IScrobblingService>(), Substitute.For<ILicenseService>(), Substitute.For<IExternalMetadataService>(),
             Substitute.For<ISmartCollectionSyncService>(), Substitute.For<IWantToReadSyncService>(), _eventHub,
             Substitute.For<IEmailService>(), Substitute.For<IAuthKeyService>());
     }

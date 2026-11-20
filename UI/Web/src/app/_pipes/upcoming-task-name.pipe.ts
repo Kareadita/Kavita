@@ -19,6 +19,7 @@ export class UpcomingTaskNamePipe implements PipeTransform {
       case 'cleanup': return this.translocoService.translate(`${PREFIX}.cleanup`);
       case 'backup': return this.translocoService.translate(`${PREFIX}.backup`);
       case 'sync-cbl': return this.translocoService.translate(`${PREFIX}.sync-cbl`);
+      case 'refresh-composite-covers': return this.translocoService.translate(`${PREFIX}.refresh-composite-covers`);
       default: return taskId;
     }
   }

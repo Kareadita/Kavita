@@ -8,12 +8,17 @@ using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities;
 
-public class Library : IEntityDate, IHasCoverImage
+public class Library : IEntityDate, IHasCoverImageFile
 {
     public int Id { get; set; }
     public required string Name { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string? CoverImage { get; set; }
+    public int? CoverImageFileId { get; set; }
+    public ImageFile? CoverImageFile { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string PrimaryColor { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string SecondaryColor { get; set; }
     public LibraryType Type { get; set; }
     public FolderWatchMode FolderWatchMode { get; set; } = FolderWatchMode.Automatic;
@@ -132,11 +137,5 @@ public class Library : IEntityDate, IHasCoverImage
         {
             LastScanned = (DateTime) time;
         }
-    }
-
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
     }
 }

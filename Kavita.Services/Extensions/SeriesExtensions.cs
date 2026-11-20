@@ -1,6 +1,7 @@
 using System.Linq;
 using Kavita.Common.Extensions;
 using Kavita.Models.Entities;
+using Kavita.Models.Entities.Interfaces;
 using Kavita.Services.Comparators;
 
 namespace Kavita.Services.Extensions;
@@ -8,12 +9,10 @@ namespace Kavita.Services.Extensions;
 public static class SeriesExtensions
 {
     /// <summary>
-    /// Calculates the Cover Image for the Series
+    /// The chapter or volume the series takes its cover from
     /// </summary>
-    /// <param name="series"></param>
-    /// <returns></returns>
     /// <remarks>This is under the assumption that the Volume already has a Cover Image calculated and set</remarks>
-    public static string? GetCoverImage(this Series series)
+    public static IHasLockableCoverImageFile? GetCoverSource(this Series series)
     {
         var volumes = (series.Volumes ?? [])
             .OrderBy(v => v.MinNumber, ChapterSortComparerDefaultLast.Default)
@@ -39,13 +38,14 @@ public static class SeriesExtensions
 
         if (chapters.Count > 1 && chapters.Exists(c => c.IsSpecial))
         {
-            return chapters.Find(c => !c.IsSpecial)?.CoverImage ?? chapters[0].CoverImage;
+            var nonSpecial = chapters.Find(c => !c.IsSpecial);
+            return nonSpecial?.CoverImageFileId != null ? nonSpecial : chapters[0];
         }
 
         // just volumes
         if (volumes.TrueForAll(v => v.MinNumber.IsNot(Scanner.Parser.LooseLeafVolumeNumber)))
         {
-            return firstVolume.CoverImage;
+            return firstVolume;
         }
         // If we have loose leaf chapters
 
@@ -59,11 +59,9 @@ public static class SeriesExtensions
 
             if (looseLeafChapters.Count > 0 && volumes[0].MinNumber > looseLeafChapters[0].MinNumber)
             {
-                var first = looseLeafChapters.Find(c => c.SortOrder.Is(1f));
-                if (first != null) return first.CoverImage;
-                return looseLeafChapters[0].CoverImage;
+                return looseLeafChapters.Find(c => c.SortOrder.Is(1f)) ?? looseLeafChapters[0];
             }
-            return firstVolume.CoverImage;
+            return firstVolume;
         }
 
         var chpts = volumes
@@ -76,9 +74,10 @@ public static class SeriesExtensions
         var exactlyChapter1 = chpts.Find(c => c.MinNumber.Is(1f));
         if (exactlyChapter1 != null)
         {
-            return exactlyChapter1.CoverImage;
+            return exactlyChapter1;
         }
 
-        return chpts.FirstOrDefault()?.CoverImage ?? firstVolume.CoverImage;
+        var firstChapter = chpts.FirstOrDefault();
+        return firstChapter?.CoverImageFileId != null ? firstChapter : firstVolume;
     }
 }

@@ -36,6 +36,8 @@ import {tap} from "rxjs";
 import {AgeRating} from "../_models/metadata/age-rating";
 import {LibraryType} from "../_models/library/library";
 import {ThemeService} from "../_services/theme.service";
+import {ColorscapeService} from "../_services/colorscape.service";
+import {ColorScapeKind} from "../_models/theme/colorscape";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
 import {ReaderService} from "../_services/reader.service";
@@ -134,6 +136,7 @@ export class ChapterDetailComponent implements OnInit {
   protected readonly imageService = inject(ImageService);
   private readonly chapterService = inject(ChapterService);
   private readonly themeService = inject(ThemeService);
+  private readonly colorScapeService = inject(ColorscapeService);
   private readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly readerService = inject(ReaderService);
   protected readonly accountService = inject(AccountService);
@@ -237,7 +240,7 @@ export class ChapterDetailComponent implements OnInit {
       if (event.event === EVENTS.CoverUpdate) {
         const coverUpdateEvent = event.payload as CoverUpdateEvent;
         if (coverUpdateEvent.entityType === 'chapter' && coverUpdateEvent.id === this.chapterId()) {
-          this.themeService.refreshColorScape('chapter', coverUpdateEvent.id).subscribe();
+          this.colorScapeService.loadColorScape(ColorScapeKind.Chapter, coverUpdateEvent.id).subscribe();
         }
       } else if (event.event === EVENTS.ChapterRemoved) {
         const removedEvent = event.payload as ChapterRemovedEvent;
@@ -248,6 +251,7 @@ export class ChapterDetailComponent implements OnInit {
       }
     });
 
+    this.colorScapeService.loadColorScape(ColorScapeKind.Chapter, this.chapterId()).subscribe();
 
     this.chapterService.chapterDetailPlus(this.seriesId(), this.chapterId()).subscribe(chapterDetail => {
 
@@ -256,9 +260,6 @@ export class ChapterDetailComponent implements OnInit {
     this.rating.set(chapterDetail.rating);
     this.hasBeenRated.set(chapterDetail.hasBeenRated);
     this.ratings.set(chapterDetail.ratings);
-
-
-    this.themeService.setColorScape(this.chapter().primaryColor, this.chapter().secondaryColor);
 
     this.loadReadingListsForChapter(this.chapterId());
 

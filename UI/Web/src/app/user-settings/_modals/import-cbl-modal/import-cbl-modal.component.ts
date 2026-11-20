@@ -470,4 +470,8 @@ export class ImportCblModalComponent implements OnInit {
   protected readonly CblImportReason = CblImportReason;
   protected readonly CblMatchTier = CblMatchTier;
   protected readonly WikiLink = WikiLink;
+
+  protected getCoverImage(item: Chapter) {
+    return this.imageService.getChapterCoverImage(item.id);
+  }
 }

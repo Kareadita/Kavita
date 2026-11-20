@@ -12,6 +12,9 @@ public enum MetadataSettingField
     Genres = 4,
     Tags = 5,
     LocalizedName = 6,
+    /// <remarks>
+    /// ImageFile.Origin maintains the cover image impl
+    /// </remarks>
     Covers = 7,
     AgeRating = 8,
     People = 9,

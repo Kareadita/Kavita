@@ -5,6 +5,9 @@ using System.IO.Compression;
 using Kavita.API.Services;
 using Kavita.Models.DTOs.Archive;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Extensions;
+using Kavita.Models.Images;
+using Kavita.Services.Images;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 using NetVips;
@@ -25,9 +28,7 @@ public class ArchiveServiceTests
     public ArchiveServiceTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
-        _archiveService = new ArchiveService(_logger, _directoryService,
-            new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService),
-            Substitute.For<IMediaErrorService>());
+        _archiveService = new ArchiveService(_logger, _directoryService, Substitute.For<IMediaErrorService>());
     }
 
     [Theory]
@@ -182,8 +183,7 @@ public class ArchiveServiceTests
     public void GetCoverImage_Default_Test(string inputFile, string expectedOutputFile)
     {
         var ds = Substitute.For<DirectoryService>(_directoryServiceLogger, new FileSystem());
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), ds);
-        var archiveService =  Substitute.For<ArchiveService>(_logger, ds, imageService, Substitute.For<IMediaErrorService>());
+        var archiveService =  Substitute.For<ArchiveService>(_logger, ds, Substitute.For<IMediaErrorService>());
 
         var testDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ArchiveService/CoverImages"));
         var expectedBytes = Image.Thumbnail(Path.Join(testDirectory, expectedOutputFile), 320).WriteToBuffer(".png");
@@ -194,8 +194,8 @@ public class ArchiveServiceTests
         _directoryService.ClearDirectory(outputDir);
         _directoryService.ExistOrCreate(outputDir);
 
-        var coverImagePath = archiveService.GetCoverImage(Path.Join(testDirectory, inputFile),
-            Path.GetFileNameWithoutExtension(inputFile) + "_output", outputDir, EncodeFormat.PNG);
+        var coverImagePath = WriteCover(archiveService, Path.Join(testDirectory, inputFile), outputDir,
+            Path.GetFileNameWithoutExtension(inputFile) + "_output");
         var actual = File.ReadAllBytes(Path.Join(outputDir, coverImagePath));
 
 
@@ -213,10 +213,8 @@ public class ArchiveServiceTests
     [InlineData("sorting.zip", "sorting.expected.png")]
     public void GetCoverImage_SharpCompress_Test(string inputFile, string expectedOutputFile)
     {
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService);
         var archiveService =  Substitute.For<ArchiveService>(_logger,
-            new DirectoryService(_directoryServiceLogger, new FileSystem()), imageService,
-            Substitute.For<IMediaErrorService>());
+            new DirectoryService(_directoryServiceLogger, new FileSystem()), Substitute.For<IMediaErrorService>());
         var testDirectory = Parser.NormalizePath(Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ArchiveService/CoverImages")));
 
         var outputDir = Path.Join(testDirectory, "output");
@@ -224,8 +222,8 @@ public class ArchiveServiceTests
         _directoryService.ExistOrCreate(outputDir);
 
         archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.SharpCompress);
-        var coverOutputFile = archiveService.GetCoverImage(Path.Join(testDirectory, inputFile),
-            Path.GetFileNameWithoutExtension(inputFile), outputDir, EncodeFormat.PNG);
+        var coverOutputFile = WriteCover(archiveService, Path.Join(testDirectory, inputFile), outputDir,
+            Path.GetFileNameWithoutExtension(inputFile));
         var actualBytes = File.ReadAllBytes(Path.Join(outputDir, coverOutputFile));
         var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
         Assert.Equal(expectedBytes, actualBytes);
@@ -238,17 +236,63 @@ public class ArchiveServiceTests
     [InlineData("Formats/One File with DB_Supported.zip")]
     public void CanParseCoverImage(string inputFile)
     {
-        var imageService = Substitute.For<IImageService>();
-        imageService.WriteCoverThumbnail(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EncodeFormat>())
-            .Returns(x => "cover.jpg");
-        var archiveService = new ArchiveService(_logger, _directoryService, imageService, Substitute.For<IMediaErrorService>());
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ArchiveService/");
         var inputPath = Path.GetFullPath(Path.Join(testDirectory, inputFile));
-        var outputPath = Path.Join(testDirectory, Path.GetFileNameWithoutExtension(inputFile) + "_output");
-        new DirectoryInfo(outputPath).Create();
-        var expectedImage = archiveService.GetCoverImage(inputPath, inputFile, outputPath, EncodeFormat.PNG);
-        Assert.Equal("cover.jpg", expectedImage);
-        new DirectoryInfo(outputPath).Delete();
+
+        using var cover = _archiveService.OpenCover(inputPath);
+
+        Assert.NotNull(cover);
+    }
+
+    [Fact]
+    public void OpenCover_AvifPages_WritesCover()
+    {
+        var root = Path.Join(Path.GetTempPath(), "kavita-avif-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        try
+        {
+            var archivePath = Path.Join(root, "avif-manga.zip");
+            using (var zip = ZipFile.Open(archivePath, ZipArchiveMode.Create))
+            {
+                foreach (var page in new[] { "001.avif", "002.avif" })
+                {
+                    using var black = NetVips.Image.Black(600, 900, bands: 3);
+                    using var colored = black + new double[] { 200, 80, 40 };
+                    using var image = colored.Cast(NetVips.Enums.BandFormat.Uchar);
+                    // #4747's pages were 10-bit 4:4:4, which the 8-bit 4:2:0 default does not exercise
+                    var bytes = image.HeifsaveBuffer(compression: NetVips.Enums.ForeignHeifCompression.Av1, bitdepth: 10,
+                        subsampleMode: NetVips.Enums.ForeignSubsample.Off);
+                    using var entry = zip.CreateEntry(page).Open();
+                    entry.Write(bytes);
+                }
+            }
+
+            var coverFile = WriteCover(_archiveService, archivePath, root, "cover");
+
+            using var written = NetVips.Image.NewFromFile(Path.Join(root, coverFile));
+            Assert.Equal(320, written.Width);
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(root, true);
+            }
+            catch (IOException)
+            {
+                // A file still held open must not fail the test
+            }
+        }
+    }
+
+    private static string WriteCover(IArchiveService archiveService, string archivePath, string outputDir, string fileName)
+    {
+        using var cover = archiveService.OpenCover(archivePath);
+        Assert.NotNull(cover);
+        return new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>())
+            .Write(cover.Source, ImageKind.ChapterCover, new ImagePolicy(EncodeFormat.PNG, CoverImageSize.Default), outputDir,
+                fileName + EncodeFormat.PNG.GetExtension())
+            .FileName;
     }
 
     #region ShouldHaveComicInfo

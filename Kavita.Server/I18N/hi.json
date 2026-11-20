@@ -124,7 +124,6 @@
     "age-restriction-not-applicable": "कोई प्रतिबंध नहीं",
     "generic-relationship": "रिश्तों को अपडेट करने में एक समस्या हुई",
     "generic-cover-series-save": "श्रृंखला(Series) के लिए कवर छवि(Cover Image) को बचाने में असमर्थ",
-    "encode-as-warning": "आप पीएनजी में परिवर्तित नहीं कर सकते। कवर के लिए, रिफ्रेश कवर का उपयोग करें। बुकमार्क और favicons को वापस कोडित नहीं किया जा सकता है।।",
     "chapter-num": "अध्याय {0}",
     "bookmark-dir-permissions": "Bookmark डायरेक्टरी के पास Kavita के लिए सही अनुमति नहीं है",
     "stats-permission-denied": "आप किसी अन्य उपयोगकर्ता के आंकड़े देखने के लिए अधिकृत नहीं हैं",

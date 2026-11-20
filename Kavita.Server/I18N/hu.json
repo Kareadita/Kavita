@@ -109,7 +109,6 @@
     "age-restriction-not-applicable": "Nincs korlátozás",
     "generic-relationship": "Probléma volt a kapcsolatok frissítése közben",
     "job-already-running": "Már fut a munkamenet",
-    "encode-as-warning": "Nem konvertálhasz PNG-be. Borítókhoz használd a Borítók frissítését. Könyvjelzőket és Favikononkat nem lehet vissza kódolni.",
     "ip-address-invalid": "IP cím '{0}' nem érvényes",
     "bookmark-dir-permissions": "Könyvjelző könyvtárnak nincs helyes jogosultsága a Kavitának",
     "total-backups": "Az Összes Mentésnek 1 és 30 között kell lennie",

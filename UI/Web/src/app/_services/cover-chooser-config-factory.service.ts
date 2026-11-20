@@ -119,7 +119,7 @@ export class CoverChooserConfigFactoryService {
 
   public forReadingList(list: ReadingList): CoverImageChooserConfig {
     return {
-      isLocked: list.coverImageLocked || list.coverImage != null,
+      isLocked: list.coverImageLocked || list.hasCoverImage,
       resetFunc: () => this.uploadService.updateReadingListCoverImage(list.id, '', false),
       selected: { url: this.imageService.getReadingListCoverImage(list.id), title: list.title },
       chapterFunc: this.readinglistService.getListItems(list.id).pipe(map(items => {
@@ -147,9 +147,9 @@ export class CoverChooserConfigFactoryService {
 
   public forLibrary(library: Library | undefined): CoverImageChooserConfig {
     return {
-      isLocked: library?.coverImage != null,
+      isLocked: library?.hasCoverImage,
       resetFunc: library ? () => this.uploadService.updateLibraryCoverImage(library.id, '', false) : undefined,
-      selected: (library?.coverImage != null && library?.coverImage !== '')
+      selected: library?.hasCoverImage
         ? { url: this.imageService.getLibraryCoverImage(library!.id), title: library!.name }
         : undefined,
     };

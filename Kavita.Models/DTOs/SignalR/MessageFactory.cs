@@ -116,13 +116,9 @@ public static class MessageFactory
     /// </summary>
     public const string UserUpdate = "UserUpdate";
     /// <summary>
-    /// When bulk bookmarks are being converted
+    /// When managed media (covers, bookmarks, favicons, ...) is being converted or cleaned up
     /// </summary>
-    private const string ConvertBookmarksProgress = "ConvertBookmarksProgress";
-    /// <summary>
-    /// When bulk covers are being converted
-    /// </summary>
-    private const string ConvertCoversProgress = "ConvertCoversProgress";
+    private const string ConvertMediaProgress = "ConvertMediaProgress";
     /// <summary>
     /// When files are being scanned to calculate word count
     /// </summary>
@@ -844,6 +840,38 @@ public static class MessageFactory
             new DebugExportReadyEventBodyDto(Info, title, exportId, exportId, bytes));
     }
 
+    /// <summary>
+    /// This is a one time event for a ManualMigration to inform of status
+    /// </summary>
+    public static SignalRMessageDto ImageMigrationSummaryEvent(int corrected, int deleted, long bytesSaved, int missing, int unreadable)
+    {
+        const string title = "Image migration finished";
+        var subtitle = $"Cleaned up {corrected} images, deleted {deleted} and saved {bytesSaved} bytes. {missing} were missing and {unreadable} could not be read";
+
+        return CodedEvent(Info, MessageEventCode.ImageMigrationSummary, title, subtitle,
+            new ImageCleanupSummaryEventBodyDto(Info, title, subtitle, corrected, deleted, bytesSaved, missing, unreadable));
+    }
+
+    public static SignalRMessageDto MediaConversionSummaryEvent(int corrected, int deleted, long bytesSaved, int missing, int unreadable)
+    {
+        const string title = "Media conversion finished";
+        var subtitle = $"Cleaned up {corrected} images, deleted {deleted} and saved {bytesSaved} bytes. {missing} were missing and {unreadable} could not be read";
+
+        return CodedEvent(Info, MessageEventCode.MediaConversionSummary, title, subtitle,
+            new ImageCleanupSummaryEventBodyDto(Info, title, subtitle, corrected, deleted, bytesSaved, missing, unreadable));
+    }
+
+    public static SignalRMessageDto BookmarkDirectoryMovedEvent(string path, int moved, int skipped)
+    {
+        const string title = "Bookmarks moved";
+        var subtitle = $"Moved {moved} bookmark files to {path}. {skipped} were left in the old folder because the name was taken";
+
+        var name = skipped > 0 ? Error : Info;
+
+        return CodedEvent(name, MessageEventCode.BookmarkDirectoryMoved, title, subtitle,
+            new BookmarkDirectoryMovedEventBodyDto(name, title, subtitle, path, moved, skipped));
+    }
+
     public static SignalRMessageDto DebugExportFailedEvent(string exportId, string error)
     {
         const string title = "Debug export failed";
@@ -1105,31 +1133,18 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessageDto ConvertBookmarksProgressEvent(float progress, string eventType)
+    public static SignalRMessageDto ConvertMediaProgressEvent(float progress, string eventType, string subtitle = "",
+        int? current = null, int? total = null)
     {
         return new SignalRMessageDto()
         {
-            Name = ConvertBookmarksProgress,
+            Name = ConvertMediaProgress,
             Priority = MessageEventPriority.Activity,
-            Title = "Converting Bookmarks",
-            SubTitle = string.Empty,
+            Title = "Converting Media",
+            SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Determinate,
-            Body = new ConvertBookmarksProgressEventBodyDto(progress, DateTime.Now)
-        };
-    }
-
-    public static SignalRMessageDto ConvertCoverProgressEvent(float progress, string eventType)
-    {
-        return new SignalRMessageDto()
-        {
-            Name = ConvertCoversProgress,
-            Priority = MessageEventPriority.Activity,
-            Title = "Converting Covers",
-            SubTitle = string.Empty,
-            EventType = eventType,
-            Progress = ProgressType.Determinate,
-            Body = new ConvertCoverProgressEventBodyDto(progress, DateTime.Now)
+            Body = new ConvertMediaProgressEventBodyDto(progress, DateTime.Now, current, total)
         };
     }
 

@@ -15,6 +15,8 @@ export class EncodeFormatPipe implements PipeTransform {
         return 'WebP';
       case EncodeFormat.AVIF:
         return 'AVIF';
+      case EncodeFormat.JPEG:
+        return 'JPEG';
     }
   }
 

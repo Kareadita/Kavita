@@ -33,6 +33,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.TaskCblSync:
                     destination.TaskCblSync = row.Value;
                     break;
+                case ServerSettingKey.TaskCompositeCovers:
+                    destination.TaskCompositeCovers = row.Value;
+                    break;
                 case ServerSettingKey.LoggingLevel:
                     destination.LoggingLevel = row.Value;
                     break;

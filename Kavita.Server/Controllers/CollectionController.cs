@@ -17,6 +17,7 @@ using Kavita.Models.DTOs.CollectionTags;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Images;
 using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,7 @@ namespace Kavita.Server.Controllers;
 public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService collectionService,
     ILocalizationService localizationService, IExternalMetadataService externalMetadataService,
     ISmartCollectionSyncService collectionSyncService, ILogger<CollectionController> logger,
-    IEventHub eventHub) : BaseApiController
+    IEventHub eventHub, ICompositeCoverService compositeCoverService) : BaseApiController
 {
 
     /// <summary>
@@ -52,6 +53,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
     /// <param name="collectionId"></param>
     /// <returns></returns>
     [HttpGet("single")]
+    [CollectionTagAccess]
     public async Task<ActionResult<AppUserCollectionDto>> GetTag(int collectionId)
     {
         var ct = HttpContext.RequestAborted;
@@ -212,7 +214,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesIds, ct))
             return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList(), false);
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList(), false, ct);
 
         var changed = false;
         foreach (var s in series)
@@ -223,15 +225,20 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             changed = true;
         }
 
-        if (changed)
+        if (changed && tag.Id != 0)
         {
             unitOfWork.CollectionTagRepository.Update(tag);
         }
 
         unitOfWork.UserRepository.Update(user);
-        if (await unitOfWork.CommitAsync(ct)) return Ok();
+        if (!await unitOfWork.CommitAsync(ct))
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
+        }
 
-        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
+        await compositeCoverService.CreateIfMissingAsync(ImageKind.CollectionCover, tag.Id, ct);
+
+        return Ok();
     }
 
     /// <summary>
@@ -272,6 +279,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
     /// <returns></returns>
     [HttpDelete]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    [CollectionTagAccess(collectionIdKey: "tagId")]
     public async Task<ActionResult> DeleteTag(int tagId)
     {
         var ct = HttpContext.RequestAborted;

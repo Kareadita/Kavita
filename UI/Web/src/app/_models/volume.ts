@@ -25,10 +25,8 @@ export interface Volume extends IHasCover, IHasReadingTime, IHasProgress, IHasMe
   maxHoursToRead: number;
   avgHoursToRead: number;
 
-  coverImage?: string;
+  hasCoverImage: boolean;
   coverImageLocked: boolean;
-  primaryColor: string;
-  secondaryColor: string;
 
   aniListId: number;
   malId: number;

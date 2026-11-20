@@ -26,7 +26,7 @@ public class ReadingItemServiceTests : AbstractFsTest
     public ReadingItemServiceTests()
     {
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
-        _readingItemService = new ReadingItemService(_archiveService, _bookService, Substitute.For<IImageService>(),
+        _readingItemService = new ReadingItemService(_archiveService, _bookService,
             directoryService, Substitute.For<ILogger<ReadingItemService>>());
     }
 

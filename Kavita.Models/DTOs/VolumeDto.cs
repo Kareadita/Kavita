@@ -4,7 +4,7 @@ using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.DTOs;
 
-public sealed record VolumeDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds
+public sealed record VolumeDto : IHasReadTimeEstimate, IHasCoverImageDto, IHasMetadataIds
 {
     /// <inheritdoc cref="API.Entities.Volume.Id"/>
     public int Id { get; set; }
@@ -47,14 +47,9 @@ public sealed record VolumeDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     public float AvgHoursToRead { get; set; }
     public long WordCount { get; set; }
 
-    /// <inheritdoc cref="API.Entities.Volume.CoverImage"/>
-    public string CoverImage { get; set; }
     /// <inheritdoc cref="API.Entities.Volume.CoverImageLocked"/>
     public bool CoverImageLocked { get; set; }
-    /// <inheritdoc cref="API.Entities.Volume.PrimaryColor"/>
-    public string? PrimaryColor { get; set; } = string.Empty;
-    /// <inheritdoc cref="API.Entities.Volume.SecondaryColor"/>
-    public string? SecondaryColor { get; set; } = string.Empty;
+    public bool HasCoverImage { get; set; }
 
     #region Metadata
     public int AniListId { get; set; }
@@ -67,9 +62,5 @@ public sealed record VolumeDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
 
     #endregion
 
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
+
 }

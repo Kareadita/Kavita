@@ -14,7 +14,7 @@ public class ManualMigrateFolderWatchingOn : ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrateFolderWatchingOn);
 
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var updated = await context.ServerSetting
             .Where(s => s.Key == ServerSettingKey.EnableFolderWatching && s.Value != "true")

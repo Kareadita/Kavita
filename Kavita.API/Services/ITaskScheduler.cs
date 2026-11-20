@@ -26,7 +26,6 @@ public interface ITaskScheduler
     void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void CancelStatsTasks();
     Task RunStatCollection();
-    void ConvertAllCoversToEncoding();
     Task CleanupDbEntries();
     Task CheckForUpdate(CancellationToken cancellationToken = default);
 }

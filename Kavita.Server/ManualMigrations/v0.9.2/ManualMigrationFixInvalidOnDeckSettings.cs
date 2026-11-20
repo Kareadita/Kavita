@@ -13,7 +13,7 @@ public class ManualMigrationFixInvalidOnDeckSettings: ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrationFixInvalidOnDeckSettings);
 
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         await context.AppUserPreferences
             .Where(p => p.OnDeckProgressDays == null || p.OnDeckProgressDays == 0)

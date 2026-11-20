@@ -26,7 +26,7 @@ public class ManualMigrationMetadataSettingFieldRenumber : ManualMigration
         ("14", "24"), ("16", "25"), ("15", "40"),
     };
 
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         foreach (var (table, column) in Targets)
         {

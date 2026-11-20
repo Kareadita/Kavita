@@ -16,7 +16,7 @@ public class ManualMigrateRemoveLegacyGithubCaches(IDirectoryService directorySe
 {
     protected override string MigrationName => nameof(ManualMigrateRemoveLegacyGithubCaches);
 
-    protected override Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var cacheLong = directoryService.LongTermCacheDirectory;
 

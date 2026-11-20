@@ -64,7 +64,7 @@ public class ProgressExport
 /// </summary>
 public static class MigrateProgressExport
 {
-    public static async Task Migrate(DataContext dataContext, IDirectoryService directoryService, ILogger<Program> logger)
+    public static async Task Migrate(DataContext dataContext, IDirectoryService directoryService, ILogger logger)
     {
         try
         {

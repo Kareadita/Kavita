@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs;
+using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 
@@ -18,7 +19,8 @@ public enum VolumeIncludes
     /// <summary>
     /// This will include Chapters by default
     /// </summary>
-    Files = 1 << 4
+    Files = 1 << 4,
+    CoverImageFile = 1 << 5,
 }
 
 public interface IVolumeRepository
@@ -34,11 +36,11 @@ public interface IVolumeRepository
     Task<List<VolumeDto>> GetVolumesDtosAsync(IEnumerable<int> volumeIds, CancellationToken ct = default);
     Task<Volume?> GetVolumeByIdAsync(int volumeId, VolumeIncludes includes = VolumeIncludes.Files, CancellationToken ct = default);
     Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId, CancellationToken ct = default);
-    Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false, CancellationToken ct = default);
-    Task<IEnumerable<Volume>> GetVolumes(int seriesId, CancellationToken ct = default);
+    Task<IEnumerable<Volume>> GetVolumesForSeriesIdsAsync(IList<int> seriesIds, bool includeChapters = false, CancellationToken ct = default);
+    Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int seriesId, VolumeIncludes includes = VolumeIncludes.Chapters | VolumeIncludes.Files,
+        CancellationToken ct = default);
     Task<IList<Volume>> GetVolumesById(IList<int> volumeIds, VolumeIncludes includes = VolumeIncludes.None, CancellationToken ct = default);
-    Task<IList<Volume>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, CancellationToken ct = default);
-    Task<IEnumerable<string>> GetCoverImagesForLockedVolumesAsync(CancellationToken ct = default);
     Task<long> GetFilesizeAsync(int volumeId, CancellationToken ct = default);
     Task<Dictionary<int, long>> GetFilesizesAsync(int userId, IList<int> volumeIds, CancellationToken ct = default);
+    Task<ColorScapeDto?> GetColorScapeAsync(int volumeId, CancellationToken ct = default);
 }

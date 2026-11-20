@@ -13,7 +13,7 @@ namespace Kavita.Server.ManualMigrations.v0._8._7;
 
 public static class ManualMigrateReadingProfiles
 {
-    public static async Task Migrate(DataContext context, ILogger<Program> logger)
+    public static async Task Migrate(DataContext context, ILogger logger)
     {
         if (await context.ManualMigrationHistory.AnyAsync(m => m.Name == "ManualMigrateReadingProfiles"))
         {

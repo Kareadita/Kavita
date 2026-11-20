@@ -29,7 +29,7 @@
               class="series-cover-wrapper"
               role="listitem"
               [title]="series.name">
-              @if (series.coverImage) {
+              @if (series.hasCoverImage) {
                 <app-image [imageUrl]="imageService.getSeriesCoverImage(series.id)"
                            [width]="'60px'" [height]="'90px'"
                            classes="series-cover" [attr.alt]="series.name" />
