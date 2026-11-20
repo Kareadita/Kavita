@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.23",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.24",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.1.23"
+    "version": "0.9.1.24"
   },
   "servers": [
     {
@@ -3348,9 +3348,8 @@
         "summary": "Returns the color scape for a series",
         "parameters": [
           {
-            "name": "id",
+            "name": "seriesId",
             "in": "query",
-            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3389,9 +3388,8 @@
         "summary": "Returns the color scape for a volume",
         "parameters": [
           {
-            "name": "id",
+            "name": "volumeId",
             "in": "query",
-            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3430,9 +3428,128 @@
         "summary": "Returns the color scape for a chapter",
         "parameters": [
           {
-            "name": "id",
+            "name": "chapterId",
             "in": "query",
-            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ColorScape/person": {
+      "get": {
+        "tags": [
+          "ColorScape"
+        ],
+        "summary": "Returns the color scape for a person",
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ColorScape/reading-list": {
+      "get": {
+        "tags": [
+          "ColorScape"
+        ],
+        "summary": "Returns the color scape for a reading list",
+        "parameters": [
+          {
+            "name": "readingListId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorScapeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ColorScape/collection": {
+      "get": {
+        "tags": [
+          "ColorScape"
+        ],
+        "summary": "Returns the color scape for a collection",
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "query",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -17521,7 +17638,7 @@
         "tags": [
           "Server"
         ],
-        "summary": "Triggers the scheduling of the convert media job. This will convert all media to the target encoding (except for PNG). Only one job will run at a time.",
+        "summary": "Triggers the scheduling of the convert media job. This will convert all media to the target encoding. Only one job will run at a time.",
         "responses": {
           "200": {
             "description": "OK"
@@ -23612,21 +23729,6 @@
           "ageRating": {
             "$ref": "#/components/schemas/AgeRating"
           },
-          "coverImage": {
-            "type": "string",
-            "nullable": true
-          },
-          "primaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "secondaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "coverImageLocked": {
-            "type": "boolean"
-          },
           "itemCount": {
             "type": "integer",
             "format": "int32"
@@ -23653,6 +23755,12 @@
           "missingSeriesFromSource": {
             "type": "string",
             "nullable": true
+          },
+          "hasCoverImage": {
+            "type": "boolean"
+          },
+          "coverImageLocked": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -24268,20 +24376,11 @@
             "type": "string",
             "nullable": true
           },
-          "coverImageLocked": {
+          "hasCoverImage": {
             "type": "boolean"
           },
-          "primaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "secondaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "coverImage": {
-            "type": "string",
-            "nullable": true
+          "coverImageLocked": {
+            "type": "boolean"
           },
           "aliases": {
             "type": "array",
@@ -25278,17 +25377,8 @@
           "sortOrderLocked": {
             "type": "boolean"
           },
-          "coverImage": {
-            "type": "string",
-            "nullable": true
-          },
-          "primaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "secondaryColor": {
-            "type": "string",
-            "nullable": true
+          "hasCoverImage": {
+            "type": "boolean"
           },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
@@ -26352,20 +26442,23 @@
         "enum": [
           0,
           1,
-          2
+          2,
+          3
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — PNG\n- `1` — WebP (WEBP)\n- `2` — AVIF",
+        "description": "Members:\n- `0` — PNG\n- `1` — WebP (WEBP)\n- `2` — AVIF\n- `3` — JPEG",
         "format": "int32",
         "x-enum-varnames": [
           "PNG",
           "WEBP",
-          "AVIF"
+          "AVIF",
+          "JPEG"
         ],
         "x-enum-descriptions": [
           "PNG",
           "WebP",
-          "AVIF"
+          "AVIF",
+          "JPEG"
         ]
       },
       "EpubFontDto": {
@@ -28707,10 +28800,6 @@
             "type": "string",
             "format": "date-time"
           },
-          "coverImage": {
-            "type": "string",
-            "nullable": true
-          },
           "folderWatchMode": {
             "$ref": "#/components/schemas/FolderWatchMode"
           },
@@ -28774,6 +28863,9 @@
           },
           "metadataProvider": {
             "$ref": "#/components/schemas/MetadataProvider"
+          },
+          "hasCoverImage": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -29579,10 +29671,6 @@
           "createdUtc": {
             "type": "string",
             "format": "date-time"
-          },
-          "coverImage": {
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -30399,20 +30487,11 @@
             "type": "string",
             "nullable": true
           },
-          "coverImageLocked": {
+          "hasCoverImage": {
             "type": "boolean"
           },
-          "primaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "secondaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "coverImage": {
-            "type": "string",
-            "nullable": true
+          "coverImageLocked": {
+            "type": "boolean"
           },
           "aliases": {
             "type": "array",
@@ -30909,11 +30988,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "favoriteCount": {
-            "type": "integer",
-            "format": "int32",
-            "deprecated": true
-          },
           "provider": {
             "$ref": "#/components/schemas/ScrobbleProvider"
           },
@@ -31248,18 +31322,6 @@
           "coverImageLocked": {
             "type": "boolean"
           },
-          "coverImage": {
-            "type": "string",
-            "nullable": true
-          },
-          "primaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "secondaryColor": {
-            "type": "string",
-            "nullable": true
-          },
           "itemCount": {
             "type": "integer",
             "format": "int32"
@@ -31324,6 +31386,9 @@
             "nullable": true
           },
           "canSync": {
+            "type": "boolean"
+          },
+          "hasCoverImage": {
             "type": "boolean"
           }
         },
@@ -33241,6 +33306,9 @@
             "type": "string",
             "format": "date-time"
           },
+          "hasCoverImage": {
+            "type": "boolean"
+          },
           "dontMatch": {
             "type": "boolean"
           },
@@ -33252,18 +33320,6 @@
           },
           "metadataProviderOverride": {
             "$ref": "#/components/schemas/MetadataProvider"
-          },
-          "coverImage": {
-            "type": "string",
-            "nullable": true
-          },
-          "primaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "secondaryColor": {
-            "type": "string",
-            "nullable": true
           },
           "aniListId": {
             "type": "integer",
@@ -33889,6 +33945,10 @@
             "nullable": true
           },
           "taskCblSync": {
+            "type": "string",
+            "nullable": true
+          },
+          "taskCompositeCovers": {
             "type": "string",
             "nullable": true
           },
@@ -34618,17 +34678,8 @@
           "sortOrderLocked": {
             "type": "boolean"
           },
-          "coverImage": {
-            "type": "string",
-            "nullable": true
-          },
-          "primaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "secondaryColor": {
-            "type": "string",
-            "nullable": true
+          "hasCoverImage": {
+            "type": "boolean"
           },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
@@ -35046,17 +35097,8 @@
           "sortOrderLocked": {
             "type": "boolean"
           },
-          "coverImage": {
-            "type": "string",
-            "nullable": true
-          },
-          "primaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "secondaryColor": {
-            "type": "string",
-            "nullable": true
+          "hasCoverImage": {
+            "type": "boolean"
           },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
@@ -36628,17 +36670,8 @@
             },
             "nullable": true
           },
-          "coverImage": {
-            "type": "string",
-            "nullable": true
-          },
-          "primaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "secondaryColor": {
-            "type": "string",
-            "nullable": true
+          "hasCoverImage": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -37289,20 +37322,11 @@
             "type": "integer",
             "format": "int64"
           },
-          "coverImage": {
-            "type": "string",
-            "nullable": true
-          },
           "coverImageLocked": {
             "type": "boolean"
           },
-          "primaryColor": {
-            "type": "string",
-            "nullable": true
-          },
-          "secondaryColor": {
-            "type": "string",
-            "nullable": true
+          "hasCoverImage": {
+            "type": "boolean"
           },
           "aniListId": {
             "type": "integer",
