@@ -69,10 +69,8 @@ export class EventTitlePipe implements PipeTransform {
         return this.translocoService.translate(`${PREFIX}.debug-export-progress`);
       case EVENTS.CleanupProgress:
         return this.translocoService.translate(`${PREFIX}.cleanup-progress`);
-      case EVENTS.ConvertBookmarksProgress:
-        return this.translocoService.translate(`${PREFIX}.convert-bookmarks-progress`);
-      case EVENTS.ConvertCoversProgress:
-        return this.translocoService.translate(`${PREFIX}.convert-covers-progress`);
+      case EVENTS.ConvertMediaProgress:
+        return this.translocoService.translate(`${PREFIX}.convert-media-progress`);
       case EVENTS.SmartCollectionSync:
         if (!body.collectionName) return source.title;
         return this.translocoService.translate(`${PREFIX}.smart-collection-sync`, {collectionName: body.collectionName});

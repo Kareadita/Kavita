@@ -116,13 +116,9 @@ public static class MessageFactory
     /// </summary>
     public const string UserUpdate = "UserUpdate";
     /// <summary>
-    /// When bulk bookmarks are being converted
+    /// When managed media (covers, bookmarks, favicons, ...) is being converted or cleaned up
     /// </summary>
-    private const string ConvertBookmarksProgress = "ConvertBookmarksProgress";
-    /// <summary>
-    /// When bulk covers are being converted
-    /// </summary>
-    private const string ConvertCoversProgress = "ConvertCoversProgress";
+    private const string ConvertMediaProgress = "ConvertMediaProgress";
     /// <summary>
     /// When files are being scanned to calculate word count
     /// </summary>
@@ -856,6 +852,15 @@ public static class MessageFactory
             new ImageCleanupSummaryEventBodyDto(Info, title, subtitle, corrected, deleted, bytesSaved, missing, unreadable));
     }
 
+    public static SignalRMessageDto MediaConversionSummaryEvent(int corrected, int deleted, long bytesSaved, int missing, int unreadable)
+    {
+        const string title = "Media conversion finished";
+        var subtitle = $"Cleaned up {corrected} images, deleted {deleted} and saved {bytesSaved} bytes. {missing} were missing and {unreadable} could not be read";
+
+        return CodedEvent(Info, MessageEventCode.MediaConversionSummary, title, subtitle,
+            new ImageCleanupSummaryEventBodyDto(Info, title, subtitle, corrected, deleted, bytesSaved, missing, unreadable));
+    }
+
     public static SignalRMessageDto BookmarkDirectoryMovedEvent(string path, int moved, int skipped)
     {
         const string title = "Bookmarks moved";
@@ -1128,32 +1133,18 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessageDto ConvertBookmarksProgressEvent(float progress, string eventType)
-    {
-        return new SignalRMessageDto()
-        {
-            Name = ConvertBookmarksProgress,
-            Priority = MessageEventPriority.Activity,
-            Title = "Converting Bookmarks",
-            SubTitle = string.Empty,
-            EventType = eventType,
-            Progress = ProgressType.Determinate,
-            Body = new ConvertBookmarksProgressEventBodyDto(progress, DateTime.Now)
-        };
-    }
-
-    public static SignalRMessageDto ConvertCoverProgressEvent(float progress, string eventType, string subtitle = "",
+    public static SignalRMessageDto ConvertMediaProgressEvent(float progress, string eventType, string subtitle = "",
         int? current = null, int? total = null)
     {
         return new SignalRMessageDto()
         {
-            Name = ConvertCoversProgress,
+            Name = ConvertMediaProgress,
             Priority = MessageEventPriority.Activity,
-            Title = "Converting Covers",
+            Title = "Converting Media",
             SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Determinate,
-            Body = new ConvertCoverProgressEventBodyDto(progress, DateTime.Now, current, total)
+            Body = new ConvertMediaProgressEventBodyDto(progress, DateTime.Now, current, total)
         };
     }
 

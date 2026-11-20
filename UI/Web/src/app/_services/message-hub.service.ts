@@ -75,14 +75,10 @@ export enum EVENTS {
     * A user updates account or preferences
     */
   UserUpdate = 'UserUpdate',
-   /**
-    * When bulk bookmarks are being converted
-    */
-  ConvertBookmarksProgress = 'ConvertBookmarksProgress',
   /**
-   * When bulk covers are being converted
+   * When managed media (covers, bookmarks, favicons, ...) is being converted or cleaned up
    */
-  ConvertCoversProgress = 'ConvertCoversProgress',
+  ConvertMediaProgress = 'ConvertMediaProgress',
    /**
     * When files are being scanned to calculate word count
     */

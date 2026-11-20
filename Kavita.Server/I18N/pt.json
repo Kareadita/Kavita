@@ -144,7 +144,6 @@
     "no-cover-image": "Sem imagem de capa",
     "no-image-for-page": "Não existe a imagem para a página {0}. Tente refrescar para refazer a cache.",
     "duplicate-bookmark": "Um registo duplicado deste marcador já existe",
-    "encode-as-warning": "Não pode converter para PNG. Para as capas, use a funcionalidade Refrescar Capas. Os marcadores e os favicons não podem novamente codificados.",
     "browse-reading-lists": "Explorar por Listas de Leituras",
     "browse-libraries": "Explorar por Bibliotecas",
     "browse-collections": "Explorar por Coleções",

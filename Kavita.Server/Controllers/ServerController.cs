@@ -136,9 +136,9 @@ public class ServerController(
     /// </summary>
     /// <returns></returns>
     [HttpPost("convert-media")]
-    public async Task<ActionResult> ScheduleConvertCovers()
+    public async Task<ActionResult> ScheduleConvertMedia()
     {
-        if (!TaskScheduler.QueueImageCleanup())
+        if (!TaskScheduler.QueueImageCleanup(reportSummary: true))
         {
             return BadRequest(await localizationService.TranslateAsync(UserId, "job-already-running"));
         }

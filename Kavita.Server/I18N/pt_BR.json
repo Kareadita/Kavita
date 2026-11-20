@@ -76,7 +76,6 @@
     "update-metadata-fail": "Não foi possível atualizar os metadados",
     "age-restriction-not-applicable": "Sem Restrição",
     "job-already-running": "Tarefa já em execução",
-    "encode-as-warning": "Você não pode converter para PNG. Para capas, use Atualizar capas. Marcadores e favicons não podem ser codificados de volta.",
     "ip-address-invalid": "O endereço IP '{0}' é inválido",
     "total-logs": "O total de registros deve estar entre 1 e 30",
     "stats-permission-denied": "Você não está autorizado a visualizar as estatísticas de outro usuário",
@@ -187,7 +186,7 @@
     "backup": "Backup",
     "update-yearly-stats": "Atualizar Estatísticas Anuais",
     "check-scrobbling-tokens": "Verificar Tokens de Scrobble",
-    "cleanup": "Limpar",
+    "cleanup": "Limpeza",
     "kavita+-data-refresh": "Atualização de Dados do Kavita+",
     "account-email-invalid": "O e-mail cadastrado para a conta de administrador não é válido. Não é possível enviar o e-mail de teste.",
     "email-settings-invalid": "As configurações de e-mail estão incompletas. Certifique-se de que todas as configurações de e-mail foram salvas.",
@@ -287,5 +286,14 @@
     "mappings-re-run-libraries-overlap": "ExcludedLibraries e IncludedLibraries não podem conter as mesmas bibliotecas",
     "series-name-orphans-files": "Alterar este nome dividiria arquivos que estão atualmente mesclados nesta série",
     "series-localized-name-exists": "Outra série nesta biblioteca já usa esse nome",
-    "series-localized-name-orphans-files": "Alterar este nome localizado dividiria arquivos que estão atualmente mesclados nesta série"
+    "series-localized-name-orphans-files": "Alterar este nome localizado dividiria arquivos que estão atualmente mesclados nesta série",
+    "email.token-invalidated.subject": "Kavita - Seu token do {{Provider}} foi invalidado e os eventos de scrobbling foram interrompidos",
+    "email.token-invalidated.header": "Seu token do {{Provider}} foi invalidado devido a repetidas falhas de atualização!",
+    "email.token-invalidated.description": "Kavita irá parar de sincronizar com {{Provider}} até que você renove sua conexão.",
+    "email.token-invalidated.cta": "RENOVAR",
+    "email.token-invalidated.fallback-link-label": "Se o botão acima não funcionar, encontre o link aqui:",
+    "cbl-repo-path-not-found": "{0} não foi encontrado no repositório CBL",
+    "cbl-repo-download-failed": "Não é possível fazer download de {0} do repositório CBL",
+    "github-unavailable": "GitHub não está disponível, tente novamente mais tarde",
+    "kobo-sync-disabled": "O KoboSync não está habilitado neste servidor"
 }

@@ -72,7 +72,7 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
         Link(library, libraryRow);
         await context.SaveChangesAsync();
 
-        await service.CleanupImages();
+        await service.CleanupImages(false);
 
         context.ChangeTracker.Clear();
         foreach (var (row, stem) in new[] { (chapterRow, $"v{volume.Id}_c{chapter.Id}"), (personRow, $"person{person.Id}"), (libraryRow, $"l{library.Id}") })
@@ -102,7 +102,7 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
         var favicon = AddRow(context, _favicons, ImageKind.Favicon, "anilist.co.webp", EncodeFormat.WEBP, 32, 32);
         await context.SaveChangesAsync();
 
-        await service.CleanupImages();
+        await service.CleanupImages(false);
 
         context.ChangeTracker.Clear();
         Assert.False(await context.ImageFile.AnyAsync(f => f.Id == orphan.Id));
@@ -120,7 +120,7 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
         var bookmark = AddRow(context, _bookmarks, ImageKind.Bookmark, "1/1/1/1.png", EncodeFormat.PNG, 1200, 1800);
         await context.SaveChangesAsync();
 
-        await service.CleanupImages();
+        await service.CleanupImages(false);
 
         context.ChangeTracker.Clear();
         var saved = await context.ImageFile.SingleAsync(f => f.Id == bookmark.Id);
@@ -129,6 +129,32 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
         Assert.Equal(1200, saved.Width);
         Assert.True(File.Exists(Path.Join(_bookmarks, "1/1/1/1.webp")));
         Assert.False(File.Exists(Path.Join(_bookmarks, "1/1/1/1.png")));
+    }
+
+    [Fact]
+    public async Task Cleanup_Manual_SendsSummary()
+    {
+        var (service, context, eventHub, _, _) = await Setup(EncodeFormat.WEBP);
+        AddRow(context, _bookmarks, ImageKind.Bookmark, "1/1/1/1.png", EncodeFormat.PNG, 1200, 1800);
+        await context.SaveChangesAsync();
+
+        await service.CleanupImages(true);
+
+        var summary = SummaryOf(eventHub, MessageEventCode.MediaConversionSummary);
+        Assert.NotNull(summary);
+        Assert.Equal(1, summary.Corrected);
+    }
+
+    [Fact]
+    public async Task Cleanup_Nightly_NoSummary()
+    {
+        var (service, context, eventHub, _, _) = await Setup(EncodeFormat.WEBP);
+        AddRow(context, _bookmarks, ImageKind.Bookmark, "1/1/1/1.png", EncodeFormat.PNG, 1200, 1800);
+        await context.SaveChangesAsync();
+
+        await service.CleanupImages(false);
+
+        Assert.Null(SummaryOf(eventHub, MessageEventCode.MediaConversionSummary));
     }
 
     [Fact]
@@ -404,7 +430,7 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
         await service.FinishImageFileMigration(DateTime.UtcNow.AddMinutes(1));
         var before = Directory.GetFiles(_covers).ToDictionary(f => f, File.GetLastWriteTimeUtc);
 
-        await service.CleanupImages();
+        await service.CleanupImages(false);
 
         var after = Directory.GetFiles(_covers).ToDictionary(f => f, File.GetLastWriteTimeUtc);
         Assert.Equal(before, after);
@@ -489,11 +515,11 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
     private static async Task<bool> HasMigrationHistory(DataContext context) =>
         await context.ManualMigrationHistory.AnyAsync(m => m.Name == CleanupService.ImageFileMigrationName);
 
-    private static ImageCleanupSummaryEventBodyDto? SummaryOf(IEventHub eventHub) =>
+    private static ImageCleanupSummaryEventBodyDto? SummaryOf(IEventHub eventHub, string code = MessageEventCode.ImageMigrationSummary) =>
         eventHub.ReceivedCalls()
             .SelectMany(c => c.GetArguments())
             .OfType<SignalRMessageDto>()
-            .Where(m => m.Code == MessageEventCode.ImageMigrationSummary)
+            .Where(m => m.Code == code)
             .Select(m => (ImageCleanupSummaryEventBodyDto) m.Body!)
             .SingleOrDefault();
 

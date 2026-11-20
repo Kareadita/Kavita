@@ -123,6 +123,8 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.debug-export-failed-label`, {}, fallback);
       case MessageEventCode.ImageMigrationSummary:
         return this.translate(`${PREFIX}.image-migration-summary-label`, {}, fallback);
+      case MessageEventCode.MediaConversionSummary:
+        return this.translate(`${PREFIX}.media-conversion-summary-label`, {}, fallback);
       case MessageEventCode.BookmarkDirectoryMoved:
         return this.translate(`${PREFIX}.bookmark-directory-moved-label`, {}, fallback);
       case MessageEventCode.KepubifyChecked:
@@ -190,6 +192,7 @@ export class EventMessagePipe implements PipeTransform {
       case MessageEventCode.DebugExportReady:
         return this.debugExportReadyDescription(source, body, fallback);
       case MessageEventCode.ImageMigrationSummary:
+      case MessageEventCode.MediaConversionSummary:
         return this.imageCleanupSummaryDescription(body, fallback);
       case MessageEventCode.BookmarkDirectoryMoved:
         return this.bookmarkDirectoryMovedDescription(body, fallback);

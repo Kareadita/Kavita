@@ -51,8 +51,7 @@ public class CleanupService(
     /// <param name="ct"></param>
     public async Task Cleanup(CancellationToken ct = default)
     {
-        if (TaskScheduler.HasAlreadyEnqueuedTask<ICleanupService>(s => s.CleanupImages(CancellationToken.None),
-                checkRunningJobs: true))
+        if (TaskScheduler.IsImageCleanupQueuedOrRunning())
         {
             logger.LogInformation("Cleanup put on hold as an image cleanup is in progress");
             await eventHub.SendMessageAsync(MessageFactory.Info,
@@ -106,7 +105,7 @@ public class CleanupService(
 
     private static Task QueueImageCleanup(CancellationToken ct)
     {
-        TaskScheduler.QueueImageCleanup();
+        TaskScheduler.QueueImageCleanup(reportSummary: false);
         return Task.CompletedTask;
     }
 
@@ -363,7 +362,7 @@ public class CleanupService(
     }
 
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
-    public async Task CleanupImages(CancellationToken ct = default)
+    public async Task CleanupImages(bool reportSummary, CancellationToken ct = default)
     {
         if (TaskScheduler.HasAlreadyEnqueuedTask<ICleanupService>(s => s.FinishImageFileMigration(CancellationToken.None),
                 checkRunningJobs: true))
@@ -383,6 +382,13 @@ public class CleanupService(
             "[CleanupService] Deleted {Deleted} unused images and re-encoded {Reencoded}; skipped {Missing} missing and {Unreadable} unreadable",
             tally.Deleted, tally.Reencoded, tally.MissingCount, tally.UnreadableCount);
         await LogSkippedImages(tally, ct);
+
+        if (reportSummary)
+        {
+            await eventHub.SendMessageAsync(MessageFactory.Info,
+                MessageFactory.MediaConversionSummaryEvent(tally.Reencoded, tally.Deleted, tally.BytesSaved,
+                    tally.MissingCount, tally.UnreadableCount), ct: ct);
+        }
 
         await SendImageProgress(1F, ProgressEventType.Ended, ct);
     }
@@ -444,14 +450,14 @@ public class CleanupService(
     private async Task SendImageProgress(float progress, string eventType, CancellationToken ct)
     {
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.ConvertCoverProgressEvent(progress, eventType), ct: ct);
+            MessageFactory.ConvertMediaProgressEvent(progress, eventType), ct: ct);
     }
 
     private async Task SendStageProgress(float start, float end, string subtitle, int current, int total, CancellationToken ct)
     {
         var done = total == 0 ? 1F : Math.Min(1F, (float) current / total);
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.ConvertCoverProgressEvent(start + (end - start) * done,
+            MessageFactory.ConvertMediaProgressEvent(start + (end - start) * done,
                 ProgressEventType.Updated, subtitle, current, total), ct: ct);
     }
 

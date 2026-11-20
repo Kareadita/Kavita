@@ -37,6 +37,7 @@ export enum MessageEventCode {
   DebugExportReady = 'debug-export-ready',
   DebugExportFailed = 'debug-export-failed',
   ImageMigrationSummary = 'image-migration-summary',
+  MediaConversionSummary = 'media-conversion-summary',
   BookmarkDirectoryMoved = 'bookmark-directory-moved',
 
   KepubifyChecked = 'kepubify-checked',

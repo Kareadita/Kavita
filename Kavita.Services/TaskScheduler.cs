@@ -415,14 +415,19 @@ public class TaskScheduler : ITaskScheduler
 
 
     // TODO: See if we can bring this to an Extension and make all cases do it this way (the check then call)
-    public static bool QueueImageCleanup()
+    public static bool QueueImageCleanup(bool reportSummary)
     {
-        if (HasAlreadyEnqueuedTask<ICleanupService>(s => s.CleanupImages(CancellationToken.None), checkRunningJobs: true)) return false;
+        if (IsImageCleanupQueuedOrRunning()) return false;
 
-        BackgroundJob.Enqueue<ICleanupService>(s => s.CleanupImages(CancellationToken.None));
+        BackgroundJob.Enqueue<ICleanupService>(s => s.CleanupImages(reportSummary, CancellationToken.None));
 
         return true;
     }
+
+    // HasAlreadyEnqueuedTask matches on arguments, so a nightly (false) run is invisible to a check for a manual (true) one
+    public static bool IsImageCleanupQueuedOrRunning() =>
+        HasAlreadyEnqueuedTask<ICleanupService>(s => s.CleanupImages(true, CancellationToken.None), checkRunningJobs: true) ||
+        HasAlreadyEnqueuedTask<ICleanupService>(s => s.CleanupImages(false, CancellationToken.None), checkRunningJobs: true);
 
     #endregion
 

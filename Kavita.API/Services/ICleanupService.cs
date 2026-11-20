@@ -25,10 +25,11 @@ public interface ICleanupService
     Task ConsolidateProgress(CancellationToken ct = default);
     /// <summary>
     /// Deletes image rows with no FK (entity deleted/changed) and their files, then re-encodes rows whose format/size no longer
-    /// match the settings. Rows never probed (no <c>Format</c>) and bookmarks not included.
+    /// match the settings. Rows never probed (no <c>Format</c>) are not included.
     /// </summary>
+    /// <param name="reportSummary">Send the summary to the events widget, for a run the user started</param>
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
-    Task CleanupImages(CancellationToken ct = default);
+    Task CleanupImages(bool reportSummary, CancellationToken ct = default);
     /// <summary>
     /// One time, queued on every startup by ManualMigrateImageFileBackfillPart2 until it writes that migration's history row.
     /// The v0.9.2 backfill created image rows from the old CoverImage strings without opening the files, so their format
