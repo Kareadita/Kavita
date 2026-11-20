@@ -53,11 +53,4 @@ public class Person : IHasLockableCoverImageFile
     // Relationships
     public ICollection<ChapterPeople> ChapterPeople { get; set; } = [];
     public ICollection<SeriesMetadataPeople> SeriesMetadataPeople { get; set; } = [];
-
-
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
 }

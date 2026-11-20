@@ -128,10 +128,4 @@ public class ReadingList : IEntityDate, IHasTags<ReadingListTag>, IHasLockableCo
     // Relationships
     public int AppUserId { get; set; }
     public AppUser AppUser { get; set; } = null!;
-
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
 }

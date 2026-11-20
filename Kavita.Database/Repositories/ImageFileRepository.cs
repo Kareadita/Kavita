@@ -172,7 +172,7 @@ public class ImageFileRepository(DataContext context) : IImageFileRepository
 
     private IQueryable<ImageFile> GetImageFilesNeedingMigrationQuery()
     {
-        return context.ImageFile.Where(f => f.Format == null && f.Kind != ImageKind.Bookmark);
+        return context.ImageFile.Where(f => f.Format == null);
     }
 
     #endregion

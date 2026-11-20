@@ -132,6 +132,29 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
     }
 
     [Fact]
+    public async Task FirstPass_LegacyBookmark_Reencoded()
+    {
+        var (service, context, _, _, _) = await Setup(EncodeFormat.WEBP);
+        var path = Path.Join(_bookmarks, "1/1/1/1.png");
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        WriteImage(path, EncodeFormat.PNG, 1200, 1800);
+        var row = new ImageFile { Kind = ImageKind.Bookmark, FileName = "1/1/1/1.png", Origin = ImageOrigin.Legacy };
+        context.ImageFile.Add(row);
+        await context.SaveChangesAsync();
+
+        await service.FinishImageFileMigration(DateTime.UtcNow.AddMinutes(1));
+
+        context.ChangeTracker.Clear();
+        var saved = await context.ImageFile.SingleAsync(f => f.Id == row.Id);
+        Assert.Equal("1/1/1/1.webp", saved.FileName);
+        Assert.Equal(EncodeFormat.WEBP, saved.Format);
+        Assert.Equal(1200, saved.Width);
+        Assert.Equal(1800, saved.Height);
+        Assert.True(File.Exists(Path.Join(_bookmarks, "1/1/1/1.webp")));
+        Assert.False(File.Exists(path));
+    }
+
+    [Fact]
     public async Task FirstPass_BackupFails_ChangesNothing()
     {
         var (service, context, _, backup, _) = await Setup(EncodeFormat.WEBP);

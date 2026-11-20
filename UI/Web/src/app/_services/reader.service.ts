@@ -115,6 +115,7 @@ export class ReaderService {
    */
   promptRateAndReview(prompt: RateReviewPrompt): Observable<boolean> {
     if (this.rateReviewPromptActive) return EMPTY;
+    if (this.accountService.hasReadOnlyRole()) return EMPTY; 
     if (prompt.readingListMode) return of(false);
 
     const status = prompt.publicationStatus;

@@ -57,11 +57,11 @@ public interface IImageFileRepository
     #region Migration Only
 
     /// <summary>
-    /// Whether any non-bookmark row still has no <see cref="ImageFile.Format"/>, as the v0.9.2 backfill left it
+    /// Whether any row still has no <see cref="ImageFile.Format"/>, as the v0.9.2 backfill left it
     /// </summary>
     Task<bool> HasImageFilesNeedingMigrationAsync(CancellationToken ct = default);
     /// <summary>
-    /// Non-bookmark rows with no <see cref="ImageFile.Format"/>, as the v0.9.2 backfill left them
+    /// Rows with no <see cref="ImageFile.Format"/>, as the v0.9.2 backfill left them
     /// </summary>
     Task<int> CountImageFilesNeedingMigrationAsync(CancellationToken ct = default);
     /// <summary>

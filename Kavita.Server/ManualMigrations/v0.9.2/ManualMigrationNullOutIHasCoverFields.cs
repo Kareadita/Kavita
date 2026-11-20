@@ -57,6 +57,9 @@ public class ManualMigrationNullOutIHasCoverFields : ManualMigration
             .ExecuteUpdateAsync(s => s.SetProperty(c => c.CoverImage, (string?) null)
                 .SetProperty(c => c.PrimaryColor, (string?) null)
                 .SetProperty(c => c.SecondaryColor, (string?) null)));
+
+        await NullOut(nameof(context.AppUserBookmark), logger, () => context.AppUserBookmark.Where(c => c.FileName != null)
+            .ExecuteUpdateAsync(s => s.SetProperty(c => c.FileName, (string?) null)));
     }
 
     private static async Task NullOut(string table, ILogger logger, Func<Task<int>> update)
