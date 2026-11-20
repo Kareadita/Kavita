@@ -307,11 +307,15 @@ public class KoboController(
         }
 
         var fullPath = Path.Join(directoryService.CoverImageDirectory, coverPath);
+        if (!directoryService.FileSystem.File.Exists(fullPath)) return NotFound();
+
+        // BUG: a JPEG cover is returned as is, so the requested size and greyscale are ignored
         if (string.Equals(Path.GetExtension(fullPath), ".jpg", StringComparison.OrdinalIgnoreCase))
         {
             return PhysicalFile(fullPath, "image/jpeg");
         }
 
+        // TODO: Refactor this method into Service and refactor this into a Steps approach with the Pipeline
         var q = int.TryParse(quality, out var parsedQ) ? Math.Clamp(parsedQ, 1, 100) : 85;
 
         var bytes = await Task.Run(() =>
