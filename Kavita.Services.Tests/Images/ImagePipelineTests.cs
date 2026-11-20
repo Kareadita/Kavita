@@ -30,6 +30,25 @@ public class ImagePipelineTests : IDisposable
         Assert.Empty(Directory.GetFiles(_directory));
     }
 
+    [Theory]
+    [InlineData("../series1.webp")]
+    [InlineData("1/../../series1.webp")]
+    [InlineData("..")]
+    [InlineData("")]
+    public void Write_NameOutsideFolder_ThrowsAndWritesNothing(string fileName)
+    {
+        var source = new ImageSource.FromBytes(TransparentPng());
+
+        Assert.Throws<ArgumentException>(() =>
+            _pipeline.Write(source, ImageKind.SeriesCover, Policy, _directory, fileName));
+        Assert.Throws<ArgumentException>(() =>
+            _pipeline.Reencode(TransparentPng(), ImageKind.SeriesCover, Policy, _directory, fileName));
+
+        Assert.Empty(Directory.GetFileSystemEntries(Path.GetDirectoryName(_directory)!, Path.GetFileName(_directory) + "*")
+            .Where(p => p != _directory));
+        Assert.Empty(Directory.GetFileSystemEntries(_directory));
+    }
+
     [Fact]
     public void Write_Jpeg_TransparencyBecomesWhite()
     {

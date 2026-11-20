@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using Kavita.API.Services;
+using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
@@ -34,6 +35,7 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
             height = header.Height;
         }
 
+        EnsureInsideFolder(directory, fileName);
         Directory.CreateDirectory(directory);
         var tmpPath = Path.Join(directory, $"{Path.GetFileNameWithoutExtension(fileName)}.{Guid.NewGuid():N}.tmp");
 
@@ -75,6 +77,7 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
 
     private ImageWriteResult StageAndMove(string directory, string fileName, Func<string, StagedImage> stage)
     {
+        EnsureInsideFolder(directory, fileName);
         Directory.CreateDirectory(directory);
         var tmpPath = Path.Join(directory, $"{Path.GetFileNameWithoutExtension(fileName)}.{Guid.NewGuid():N}.tmp");
 
@@ -216,6 +219,15 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             return ex;
+        }
+    }
+
+    private static void EnsureInsideFolder(string directory, string fileName)
+    {
+        var target = Path.GetFullPath(Path.Join(directory, fileName));
+        if (!target.IsInsideFolder(Path.GetFullPath(directory)))
+        {
+            throw new ArgumentException($"An image name cannot point outside {directory}: {fileName}", nameof(fileName));
         }
     }
 

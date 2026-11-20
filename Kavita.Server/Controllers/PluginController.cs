@@ -54,7 +54,10 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
         }
 
         var roles = await unitOfWork.UserRepository.GetRoles(userId, ct);
-        if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await localizationService.TranslateAsync(userId, "disabled-account"));
+        if (!roles.Contains(PolicyConstants.LoginRole) && !roles.Contains(PolicyConstants.AdminRole))
+        {
+            return Unauthorized(await localizationService.TranslateAsync(userId, "disabled-account"));
+        }
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({AppUserId})'s API Key", pluginName.Replace(Environment.NewLine, string.Empty), user!.UserName, userId);

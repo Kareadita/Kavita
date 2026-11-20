@@ -51,11 +51,9 @@ import {
 import {EditModalShellComponent} from "../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../shared/_directive/edit-tab.directive";
 import {MangaFormat} from "../../_models/manga-format";
-import {lockGroup, writeFieldLocks} from "../../_helpers/field-lock";
+import {standaloneLocks} from "../../_helpers/field-lock";
 
 interface FormModel {
-  coverImageLocked: boolean;
-
   aniListId: number;
   malId: number;
   hardcoverId: number;
@@ -114,7 +112,6 @@ export class EditVolumeModalComponent {
   private coverImageDirty = false;
 
   private readonly formModel = signal<FormModel>({
-    coverImageLocked: false,
     aniListId: 0,
     malId: 0,
     hardcoverId: 0,
@@ -126,12 +123,10 @@ export class EditVolumeModalComponent {
   formGroup = form(this.formModel, p => {
     applyExternalMetadataIdRules(p);
   });
-  protected readonly locks = lockGroup(this.formGroup, () => this.volume(), [
-    'coverImage',
-  ]);
+  protected readonly coverLocks = standaloneLocks(() => this.volume(), ['coverImageLocked']);
   protected readonly chooserConfig = computed<CoverImageChooserConfig>(() => ({
     ...this.coverChooserConfigFactory.forVolume(this.volume(), this.libraryType()),
-    isLocked: this.locks.coverImage()
+    isLocked: this.coverLocks.coverImageLocked()
   }));
 
   tasks = computed(() => {
@@ -156,7 +151,6 @@ export class EditVolumeModalComponent {
     effect(() => {
       untracked(() => {
         this.formModel.set({
-          coverImageLocked: this.volume().coverImageLocked,
           aniListId: this.volume().aniListId,
           malId: this.volume().malId,
           hardcoverId: this.volume().hardcoverId,
@@ -166,7 +160,6 @@ export class EditVolumeModalComponent {
           cbrId: this.volume().cbrId,
         });
       });
-      this.locks.coverImage.set(this.volume().coverImageLocked);
     });
   }
 
@@ -183,7 +176,6 @@ export class EditVolumeModalComponent {
     const model = this.formModel();
 
     const updateData = {id: this.volume().id, ...model} as UpdateVolumeRequest;
-    writeFieldLocks(updateData, this.locks);
 
     this.volumeService.updateVolume(updateData).pipe(
       switchMap(vol => this.coverImageDirty
@@ -228,8 +220,7 @@ export class EditVolumeModalComponent {
 
   handleReset() {
     this.coverImageReset = true;
-    this.formModel.update(m => ({...m, coverImageLocked: false}));
-    this.locks.coverImage.set(false);
+    this.coverLocks.coverImageLocked.set(false);
   }
 
   changeTab(tab?: Tabs) {
