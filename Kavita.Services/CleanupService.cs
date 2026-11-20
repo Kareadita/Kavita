@@ -430,7 +430,7 @@ public class CleanupService(
         await CompleteImageFileMigration(ct);
 
         await eventHub.SendMessageAsync(MessageFactory.Info,
-            MessageFactory.ImageCleanupSummaryEvent(tally.Reencoded + tally.Renamed, tally.Deleted, tally.BytesSaved,
+            MessageFactory.ImageMigrationSummaryEvent(tally.Reencoded + tally.Renamed, tally.Deleted, tally.BytesSaved,
                 tally.MissingCount, tally.UnreadableCount), ct: ct);
         await SendImageProgress(1F, ProgressEventType.Ended, ct);
     }

@@ -56,7 +56,7 @@ public static class MessageEventCode
     public const string WordCountFailed = "word-count-failed";
     public const string DebugExportReady = "debug-export-ready";
     public const string DebugExportFailed = "debug-export-failed";
-    public const string ImageCleanupSummary = "image-cleanup-summary";
+    public const string ImageMigrationSummary = "image-migration-summary";
     public const string BookmarkDirectoryMoved = "bookmark-directory-moved";
 
     #endregion

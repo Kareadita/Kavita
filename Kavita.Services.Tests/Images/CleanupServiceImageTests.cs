@@ -493,7 +493,7 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
         eventHub.ReceivedCalls()
             .SelectMany(c => c.GetArguments())
             .OfType<SignalRMessageDto>()
-            .Where(m => m.Code == MessageEventCode.ImageCleanupSummary)
+            .Where(m => m.Code == MessageEventCode.ImageMigrationSummary)
             .Select(m => (ImageCleanupSummaryEventBodyDto) m.Body!)
             .SingleOrDefault();
 

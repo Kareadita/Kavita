@@ -844,12 +844,15 @@ public static class MessageFactory
             new DebugExportReadyEventBodyDto(Info, title, exportId, exportId, bytes));
     }
 
-    public static SignalRMessageDto ImageCleanupSummaryEvent(int corrected, int deleted, long bytesSaved, int missing, int unreadable)
+    /// <summary>
+    /// This is a one time event for a ManualMigration to inform of status
+    /// </summary>
+    public static SignalRMessageDto ImageMigrationSummaryEvent(int corrected, int deleted, long bytesSaved, int missing, int unreadable)
     {
-        const string title = "Image cleanup finished";
+        const string title = "Image migration finished";
         var subtitle = $"Cleaned up {corrected} images, deleted {deleted} and saved {bytesSaved} bytes. {missing} were missing and {unreadable} could not be read";
 
-        return CodedEvent(Info, MessageEventCode.ImageCleanupSummary, title, subtitle,
+        return CodedEvent(Info, MessageEventCode.ImageMigrationSummary, title, subtitle,
             new ImageCleanupSummaryEventBodyDto(Info, title, subtitle, corrected, deleted, bytesSaved, missing, unreadable));
     }
 

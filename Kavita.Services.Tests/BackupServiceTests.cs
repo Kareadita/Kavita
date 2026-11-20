@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.IO.Abstractions.TestingHelpers;
+using System.IO.Compression;
 using System.Reflection;
 using AutoMapper;
 using Hangfire;
@@ -15,6 +16,7 @@ using Kavita.Models.Images;
 using Kavita.Models.Sqlite;
 using Kavita.Services.Images;
 using Kavita.Services.Scanner;
+using Kavita.Services.Tests.Helpers;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -300,40 +302,77 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
 
     #region BackupFiles
 
-    // I don't think I can unit test this due to ZipFile.Create
-    // [Fact]
-    // public async Task BackupDatabase_ExpectAllFiles()
-    // {
-    //     var filesystem = CreateFileSystem();
-    //     filesystem.AddFile($"{LogDirectory}kavita.log", new MockFileData(""));
-    //     filesystem.AddFile($"{ConfigDirectory}kavita.db", new MockFileData(""));
-    //     filesystem.AddFile($"{CoverImageDirectory}1.png", new MockFileData(""));
-    //     filesystem.AddFile($"{BookmarkDirectory}1.png", new MockFileData(""));
-    //     filesystem.AddFile($"{ConfigDirectory}appsettings.json", new MockFileData(""));
-    //     filesystem.AddFile($"{ThemesDirectory}joe.css", new MockFileData(""));
-    //
-    //
-    //     var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-    //     var inMemorySettings = new Dictionary<string, string> {
-    //         {"Logging:File:Path", $"{LogDirectory}kavita.log"},
-    //         {"Logging:File:MaxRollingFiles", "0"},
-    //     };
-    //     IConfiguration configuration = new ConfigurationBuilder()
-    //         .AddInMemoryCollection(inMemorySettings)
-    //         .Build();
-    //
-    //     var backupService = new BackupService(_logger, _unitOfWork, ds, configuration, _messageHub);
-    //
-    //     await backupService.BackupDatabase();
-    //
-    //
-    //     var files = ds.GetFiles(BackupDirectory).ToList();
-    //     Assert.NotEmpty(files);
-    //     var zipFile = files.FirstOrDefault();
-    //     Assert.NotNull(zipFile);
-    //     using var zipArchive = ZipFile.OpenRead(zipFile);
-    //
-    // }
+    [Fact]
+    public async Task BackupDatabase_ZipHoldsEverythingBackedUp()
+    {
+        var root = Path.Join(Path.GetTempPath(), "kavita-backup-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            var (unitOfWork, context, _) = await CreateDatabase();
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new RootedFileSystem(root));
+            var imageFileService = new ImageFileService(unitOfWork, Substitute.For<IImagePipeline>(), ds, _messageHub,
+                Substitute.For<ILogger<ImageFileService>>());
+
+            var backups = Path.Join(root, "config", "backups");
+            var bookmarks = Path.Join(root, "config", "bookmarks");
+            (await context.ServerSetting.SingleAsync(s => s.Key == ServerSettingKey.BackupDirectory)).Value = backups;
+            (await context.ServerSetting.SingleAsync(s => s.Key == ServerSettingKey.BookmarkDirectory)).Value = bookmarks;
+            context.ImageFile.AddRange(
+                new ImageFile { Kind = ImageKind.PersonCover, FileName = "person1.webp", Origin = ImageOrigin.Upload },
+                new ImageFile { Kind = ImageKind.ChapterCover, FileName = "v1_c1.webp", Origin = ImageOrigin.Scan });
+            await context.SaveChangesAsync();
+
+            WriteFile(ds.ConfigDirectory, "appsettings.json");
+            WriteFile(ds.ConfigDirectory, "progress_export.csv");
+            WriteFile(ds.LogDirectory, "kavita.log");
+            WriteFile(ds.LogDirectory, "kavita20261119.log");
+            WriteFile(ds.CoverImageDirectory, "person1.webp");
+            WriteFile(ds.CoverImageDirectory, "v1_c1.webp");
+            WriteFile(ds.TemplateDirectory, "EmailConfirm.html");
+            WriteFile(ds.EpubFontDirectory, "Fira.woff2");
+            WriteFile(ds.SiteThemeDirectory, "joe.css");
+            WriteFile(Path.Join(bookmarks, "1", "10", "100"), "001.webp");
+
+            var backupService = new BackupService(_logger, unitOfWork, ds, imageFileService, _messageHub);
+
+            Assert.True(await backupService.BackupDatabase());
+
+            var zip = Assert.Single(Directory.GetFiles(backups, "*.zip"));
+            using var archive = ZipFile.OpenRead(zip);
+            var entries = archive.Entries.Select(e => e.FullName).ToList();
+            Assert.Equivalent(new[]
+            {
+                "kavita.db",
+                "appsettings.json",
+                "progress_export.csv",
+                "logs/kavita.log",
+                "logs/kavita20261119.log",
+                "covers/person1.webp",
+                "templates/EmailConfirm.html",
+                "fonts/Fira.woff2",
+                "themes/joe.css",
+                "bookmarks/1/10/100/001.webp",
+            }, entries.Where(e => !e.EndsWith('/')).ToList());
+            Assert.False(Directory.Exists(Path.Join(backups, ".staging")));
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(root, true);
+            }
+            catch (IOException)
+            {
+                // A file still held open must not fail the test
+            }
+        }
+    }
+
+    private static void WriteFile(string directory, string fileName)
+    {
+        Directory.CreateDirectory(directory);
+        File.WriteAllBytes(Path.Join(directory, fileName), [1, 2, 3]);
+    }
 
     #endregion
 }
