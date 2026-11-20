@@ -17,7 +17,7 @@ using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Kavita.Services.Helpers;
 
 namespace Kavita.Services.Images;
@@ -197,6 +197,12 @@ public class ImageFileService(
         if (kind is not (ImageKind.Favicon or ImageKind.Publisher))
         {
             throw new ArgumentOutOfRangeException(nameof(kind), kind, "Only favicons and publishers are keyed");
+        }
+
+        // The name is built from a request value (a host or a publisher name), so it must not reach outside the folder
+        if (Path.GetFileName(fileName) != fileName)
+        {
+            throw new ArgumentException($"A keyed image name cannot contain a folder: {fileName}", nameof(fileName));
         }
 
         var directory = await GetImageDirectoryAsync(kind, ct);

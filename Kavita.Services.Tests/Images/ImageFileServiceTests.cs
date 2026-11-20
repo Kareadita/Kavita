@@ -318,6 +318,25 @@ public class ImageFileServiceTests : AbstractDbTest, IDisposable
         Assert.Equal(row.Id, (await context.Series.SingleAsync(s => s.Id == series.Id)).CoverImageFileId);
     }
 
+    [Theory]
+    [InlineData("../escape.png")]
+    [InlineData("DC/Vertigo.png")]
+    public async Task WriteKeyed_NameWithFolder_Refused(string fileName)
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var publishers = Path.Join(_covers, "publishers");
+        var directoryService = DirectoryServiceSubstitute.OnDisk(_covers, publishers: publishers);
+        var pipeline = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>());
+        var service = new ImageFileService(unitOfWork, pipeline, directoryService, _eventHub, Substitute.For<ILogger<ImageFileService>>());
+        using var image = Image.Black(40, 30, bands: 3);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => service.WriteKeyedAsync(new ImageSource.FromBytes(image.PngsaveBuffer()),
+            ImageKind.Publisher, "escape", fileName, ImageOrigin.CoversDb));
+
+        Assert.False(File.Exists(Path.Join(_covers, "escape.png")));
+        Assert.False(Directory.Exists(Path.Join(publishers, "DC")));
+    }
+
     private async Task<(IImageFileService Service, IUnitOfWork UnitOfWork, DataContext Context)> Setup(EncodeFormat format)
     {
         var (unitOfWork, context, _) = await CreateDatabase();

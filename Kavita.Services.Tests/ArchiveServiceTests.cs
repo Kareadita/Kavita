@@ -244,6 +244,45 @@ public class ArchiveServiceTests
         Assert.NotNull(cover);
     }
 
+    [Fact]
+    public void OpenCover_AvifPages_WritesCover()
+    {
+        var root = Path.Join(Path.GetTempPath(), "kavita-avif-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        try
+        {
+            var archivePath = Path.Join(root, "avif-manga.zip");
+            using (var zip = ZipFile.Open(archivePath, ZipArchiveMode.Create))
+            {
+                foreach (var page in new[] { "001.avif", "002.avif" })
+                {
+                    using var black = NetVips.Image.Black(600, 900, bands: 3);
+                    using var colored = black + new double[] { 200, 80, 40 };
+                    using var image = colored.Cast(NetVips.Enums.BandFormat.Uchar);
+                    var bytes = image.HeifsaveBuffer(compression: NetVips.Enums.ForeignHeifCompression.Av1);
+                    using var entry = zip.CreateEntry(page).Open();
+                    entry.Write(bytes);
+                }
+            }
+
+            var coverFile = WriteCover(_archiveService, archivePath, root, "cover");
+
+            using var written = NetVips.Image.NewFromFile(Path.Join(root, coverFile));
+            Assert.Equal(320, written.Width);
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(root, true);
+            }
+            catch (IOException)
+            {
+                // A file still held open must not fail the test
+            }
+        }
+    }
+
     private static string WriteCover(IArchiveService archiveService, string archivePath, string outputDir, string fileName)
     {
         using var cover = archiveService.OpenCover(archivePath);
