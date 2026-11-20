@@ -38,17 +38,8 @@ public class CblGithubService : ICblGithubService
         }
 
         var items = tree.Value.GetChildren(normalizedPath)
-            .Select(e => new CblRepoItemDto
-            {
-                Name = e.Name,
-                Path = e.Path,
-                IsDirectory = e.IsFolder,
-                Sha = e.Sha,
-                Size = e.Size,
-                DownloadUrl = e.IsFile ? _githubApiService.GetRawUrl(Repo, Branch, e.Path) : null
-            })
-            .Where(i => !i.Name.StartsWith('.')) // Insure .github or other meta files/directories are excluded
-            .Where(i => i.IsDirectory || i.Name.EndsWith(CblExtension, StringComparison.OrdinalIgnoreCase) || i.Name.EndsWith(Cblv2Extension, StringComparison.OrdinalIgnoreCase))
+            .Select(ToItemDto)
+            .Where(IsListed)
             .OrderBy(i => !i.IsDirectory)
             .ThenBy(i => i.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
@@ -73,12 +64,50 @@ public class CblGithubService : ICblGithubService
         return entry.Sha;
     }
 
+    public async Task<CblRepoItemDto> GetFile(string filePath)
+    {
+        var tree = await _githubApiService.GetTreeAsync(Repo, Branch, CacheTtl);
+        if (!tree.HasValue) throw new KavitaException("github-unavailable");
+
+        if (tree.Value.Find(NormalizePath(filePath)) is not {IsFile: true} entry) throw new KavitaException("cbl-repo-path-not-found");
+
+        var item = ToItemDto(entry);
+        if (!IsListed(item)) throw new KavitaException("cbl-repo-path-not-found");
+
+        return item;
+    }
+
     public async Task<string> GetFileContent(string filePath)
     {
-        var content = await _githubApiService.DownloadRawAsync(Repo, Branch, NormalizePath(filePath));
+        var file = await GetFile(filePath);
+
+        var content = await _githubApiService.DownloadRawAsync(Repo, Branch, file.Path);
         if (!content.HasValue) throw new KavitaException("cbl-repo-download-failed");
 
         return content.Value;
+    }
+
+    private CblRepoItemDto ToItemDto(GithubTree.Entry entry)
+    {
+        return new CblRepoItemDto
+        {
+            Name = entry.Name,
+            Path = entry.Path,
+            IsDirectory = entry.IsFolder,
+            Sha = entry.Sha,
+            Size = entry.Size,
+            DownloadUrl = entry.IsFile ? _githubApiService.GetRawUrl(Repo, Branch, entry.Path) : null
+        };
+    }
+
+    private static bool IsListed(CblRepoItemDto item)
+    {
+        // Insure .github or other meta files/directories are excluded
+        if (item.Name.StartsWith('.')) return false;
+
+        return item.IsDirectory
+               || item.Name.EndsWith(CblExtension, StringComparison.OrdinalIgnoreCase)
+               || item.Name.EndsWith(Cblv2Extension, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string NormalizePath(string path)

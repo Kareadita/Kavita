@@ -85,6 +85,7 @@ export class ServerService {
   }
 
   bustCache() {
+    // TODO: This should be hooked up I think
     return this.http.post(this.baseUrl + 'server/bust-kavitaplus-cache', {});
   }
 
