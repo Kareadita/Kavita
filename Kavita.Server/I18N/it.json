@@ -137,7 +137,7 @@
     "total-logs": "I log totali devono essere compresi tra 1 e 30",
     "stats-permission-denied": "Non sei autorizzato a visualizzare le statistiche di un altro utente",
     "url-not-valid": "L'URL non restituisce un'immagine valida o richiede l'autorizzazione",
-    "url-required": "Devi fornire un URL",
+    "url-required": "Devi fornire un URL da usare",
     "generic-cover-collection-save": "Impossibile salvare l'immagine di copertina nella raccolta",
     "generic-cover-reading-list-save": "Impossibile salvare l'immagine di copertina nella lista di lettura",
     "generic-cover-library-save": "Impossibile salvare l'immagine di copertina nella Libreria",
@@ -291,5 +291,9 @@
     "email.send-to-device.description": "In allegato trovi i file che hai inviato.",
     "email.username-change.subject": "Il tuo nome utente è stato modificato sul server di {{InvitingUser}}",
     "email.username-change.title": "Modifica del Nome Utente",
-    "email.username-change.description": "Il nome utente del tuo account è stato aggiornato sull'istanza Kavita di {{InvitingUser}}. Non è richiesta alcuna azione da parte tua."
+    "email.username-change.description": "Il nome utente del tuo account è stato aggiornato sull'istanza Kavita di {{InvitingUser}}. Non è richiesta alcuna azione da parte tua.",
+    "cbl-repo-download-failed": "Il caricamento di un font tramite url è consentito solo da Google Fonts",
+    "github-unavailable": "GitHub non è disponibile, riprovare più tardi",
+    "kobo-sync-disabled": "KoboSync non è abilitato su questo server",
+    "cbl-repo-path-not-found": "[0] non è stato trovato nel repository CBL"
 }
