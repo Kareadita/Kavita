@@ -9,7 +9,9 @@ using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Common.Extensions;
+using Kavita.Common.Helpers;
 using Kavita.Models;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Font;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums.Font;
@@ -190,10 +192,12 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
             await urlValidationService.ValidateUrlAsync(fontRef.url);
 
             // Remote metadata names can hold separators ('static/...'), which would write outside temp
-            var fileName = directoryService.FileSystem.Path.GetFileName(fontRef.filename.Replace('\\', '/'));
+            var fileName = fontRef.filename.SanitizeFileName();
+            if (string.IsNullOrEmpty(fileName)) throw new KavitaException("errors.font-not-found");
 
             logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily.Sanitize(), fileName.Sanitize(), fontRef.url);
-            var path = await fontRef.url.DownloadFileAsync(directoryService.TempDirectory, fileName, cancellationToken: ct);
+            var path = directoryService.FileSystem.Path.Join(directoryService.TempDirectory, fileName);
+            await FlurlConfiguration.DownloadToFileAsync(fontRef.url, path, ControllerConstants.MaxUploadSizeBytes, ct);
 
             var result = await CreateFontFromFileAsync(path, ct);
             finalRef.Add(result);

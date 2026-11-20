@@ -10,6 +10,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.ReadingLists;
 using Kavita.Common;
 using Kavita.Common.Extensions;
+using Kavita.Common.Helpers;
 using Kavita.Database;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.ReadingLists.CBL;
@@ -96,31 +97,21 @@ public class CblController(IReadingListService readingListService, IDirectorySer
             return BadRequest(ex.Message);
         }
 
+        var filename = dto.Url.UrlFilePath().SanitizeFileName();
+
+        var invalidFileName = await ValidateCblFileNameAsync(filename);
+        if (invalidFileName != null) return invalidFileName;
+
         var dir = GetCblManagerFolder(UserId);
         Directory.CreateDirectory(dir);
 
-        string fullPath;
-        string filename;
         try
         {
-            fullPath = await dto.Url.DownloadFileAsync(dir, cancellationToken: ct);
-            filename = Path.GetFileName(fullPath);
+            await FlurlConfiguration.DownloadToFileAsync(dto.Url, Path.Join(dir, filename), ControllerConstants.MaxUploadSizeBytes, ct);
         }
-        catch (FlurlHttpException)
+        catch (Exception ex) when (ex is FlurlHttpException or KavitaException)
         {
             return BadRequest(await localizationService.TranslateAsync("cbl-import-download-from-url"));
-        }
-
-        var invalidFileName = await ValidateCblFileNameAsync(filename);
-        if (invalidFileName != null)
-        {
-            // The remote server names the downloaded file, so it is only ours to delete if it landed in our folder
-            if (IsPathWithinDirectory(dir, Path.GetRelativePath(dir, fullPath)) && System.IO.File.Exists(fullPath))
-            {
-                System.IO.File.Delete(fullPath);
-            }
-
-            return invalidFileName;
         }
 
         return Ok(new CblSavedFileDto
