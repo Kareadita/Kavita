@@ -4,10 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Models.DTOs.Reader;
+using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
@@ -22,7 +25,8 @@ public class BookmarkService(
     ILogger<BookmarkService> logger,
     IUnitOfWork unitOfWork,
     IDirectoryService directoryService,
-    IImageFileService imageFileService)
+    IImageFileService imageFileService,
+    IEventHub eventHub)
     : IBookmarkService
 {
     /// <summary>
@@ -174,6 +178,77 @@ public class BookmarkService(
                 fileSystem.Directory.Delete(folder, false);
                 folder = Parser.NormalizePath(fileSystem.Path.GetDirectoryName(folder));
             }
+        }
+    }
+
+    [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
+    public async Task MoveBookmarkDirectory(string to, CancellationToken ct = default)
+    {
+        var fileSystem = directoryService.FileSystem;
+        var setting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory, ct);
+        var source = fileSystem.Path.GetFullPath(setting.Value);
+        var target = fileSystem.Path.GetFullPath(to);
+        if (Parser.NormalizePath(source).TrimEnd('/') == Parser.NormalizePath(target).TrimEnd('/')) return;
+
+        directoryService.ExistOrCreate(target);
+
+        var moved = 0;
+        var skipped = new List<string>();
+        if (fileSystem.Directory.Exists(source))
+        {
+            foreach (var file in fileSystem.Directory.GetFiles(source, "*", SearchOption.AllDirectories))
+            {
+                var destination = fileSystem.Path.Join(target, fileSystem.Path.GetRelativePath(source, file));
+                if (fileSystem.File.Exists(destination))
+                {
+                    skipped.Add(file);
+                    continue;
+                }
+
+                fileSystem.Directory.CreateDirectory(fileSystem.Path.GetDirectoryName(destination)!);
+                fileSystem.File.Move(file, destination);
+                moved++;
+            }
+        }
+        else
+        {
+            logger.LogWarning("The old bookmark folder {Folder} does not exist, nothing to move to {Target}", source, target);
+        }
+
+        setting.Value = target;
+        unitOfWork.SettingsRepository.Update(setting);
+        await unitOfWork.CommitAsync(ct);
+
+        if (fileSystem.Directory.Exists(source))
+        {
+            DeleteEmptyFolders(source);
+        }
+
+        foreach (var file in skipped)
+        {
+            logger.LogWarning("Left bookmark file {File} in the old folder, {Target} already has a file of that name", file, target);
+        }
+
+        logger.LogInformation("Moved {Moved} bookmark files from {Source} to {Target}, {Skipped} left behind", moved, source, target,
+            skipped.Count);
+        await eventHub.SendMessageAsync(MessageFactory.Info,
+            MessageFactory.BookmarkDirectoryMovedEvent(target, moved, skipped.Count), ct: ct);
+    }
+
+    /// <summary>
+    /// Deletes <paramref name="folder"/> and every folder under it that holds no file
+    /// </summary>
+    private void DeleteEmptyFolders(string folder)
+    {
+        var fileSystem = directoryService.FileSystem;
+        foreach (var child in fileSystem.Directory.GetDirectories(folder))
+        {
+            DeleteEmptyFolders(child);
+        }
+
+        if (!fileSystem.Directory.EnumerateFileSystemEntries(folder).Any())
+        {
+            fileSystem.Directory.Delete(folder, false);
         }
     }
 

@@ -7,6 +7,8 @@ using Kavita.Database;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.Reader;
+using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.DTOs.SignalR.Bodies;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
@@ -163,7 +165,79 @@ public class BookmarkServiceTests(ITestOutputHelper outputHelper): AbstractDbTes
 
     #endregion
 
-    private BookmarkService Create(IUnitOfWork unitOfWork)
+    #region MoveBookmarkDirectory
+
+    private static readonly string NewBookmarkDirectory = Root + "new/bookmarks/";
+
+    [Fact]
+    public async Task MoveBookmarkDirectory_MovesFilesThenSavesSetting()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        _fileSystem.AddFile(BookmarkDirectory + "1/1/1/0001.png", new MockFileData("one"));
+        _fileSystem.AddFile(BookmarkDirectory + "4/2/7/0003.png", new MockFileData("three"));
+        var bookmarkService = Create(unitOfWork);
+
+        await bookmarkService.MoveBookmarkDirectory(NewBookmarkDirectory);
+
+        Assert.Equal("one", _fileSystem.File.ReadAllText(NewBookmarkDirectory + "1/1/1/0001.png"));
+        Assert.Equal("three", _fileSystem.File.ReadAllText(NewBookmarkDirectory + "4/2/7/0003.png"));
+        Assert.False(_fileSystem.Directory.Exists(BookmarkDirectory));
+        await AssertBookmarkSetting(unitOfWork, NewBookmarkDirectory);
+    }
+
+    [Fact]
+    public async Task MoveBookmarkDirectory_NameTaken_LeavesFileInOldFolder()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        _fileSystem.AddFile(BookmarkDirectory + "1/1/1/0001.png", new MockFileData("old"));
+        _fileSystem.AddFile(BookmarkDirectory + "1/1/1/0002.png", new MockFileData("two"));
+        _fileSystem.AddFile(NewBookmarkDirectory + "1/1/1/0001.png", new MockFileData("already there"));
+        var eventHub = Substitute.For<IEventHub>();
+        var bookmarkService = Create(unitOfWork, eventHub);
+
+        await bookmarkService.MoveBookmarkDirectory(NewBookmarkDirectory);
+
+        Assert.Equal("already there", _fileSystem.File.ReadAllText(NewBookmarkDirectory + "1/1/1/0001.png"));
+        Assert.Equal("old", _fileSystem.File.ReadAllText(BookmarkDirectory + "1/1/1/0001.png"));
+        Assert.Equal("two", _fileSystem.File.ReadAllText(NewBookmarkDirectory + "1/1/1/0002.png"));
+        Assert.False(_fileSystem.File.Exists(BookmarkDirectory + "1/1/1/0002.png"));
+
+        var summary = MoveSummaryOf(eventHub);
+        Assert.NotNull(summary);
+        Assert.Equal(1, summary.Moved);
+        Assert.Equal(1, summary.Skipped);
+    }
+
+    [Fact]
+    public async Task MoveBookmarkDirectory_SourceMissing_SavesSetting()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        _fileSystem.Directory.Delete(BookmarkDirectory, true);
+        var bookmarkService = Create(unitOfWork);
+
+        await bookmarkService.MoveBookmarkDirectory(NewBookmarkDirectory);
+
+        Assert.True(_fileSystem.Directory.Exists(NewBookmarkDirectory));
+        await AssertBookmarkSetting(unitOfWork, NewBookmarkDirectory);
+    }
+
+    private static async Task AssertBookmarkSetting(IUnitOfWork unitOfWork, string expected)
+    {
+        var value = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+        Assert.Equal(Parser.NormalizePath(expected).TrimEnd('/'), Parser.NormalizePath(value).TrimEnd('/'));
+    }
+
+    private static BookmarkDirectoryMovedEventBodyDto? MoveSummaryOf(IEventHub eventHub) =>
+        eventHub.ReceivedCalls()
+            .SelectMany(c => c.GetArguments())
+            .OfType<SignalRMessageDto>()
+            .Where(m => m.Code == MessageEventCode.BookmarkDirectoryMoved)
+            .Select(m => (BookmarkDirectoryMovedEventBodyDto) m.Body!)
+            .SingleOrDefault();
+
+    #endregion
+
+    private BookmarkService Create(IUnitOfWork unitOfWork, IEventHub? eventHub = null)
     {
         _imagePipeline.Write(Arg.Any<ImageSource>(), Arg.Any<ImageKind>(), Arg.Any<ImagePolicy>(), Arg.Any<string>(), Arg.Any<string>())
             .Returns(ci => AddWrittenFile(ci.ArgAt<string>(3), ci.ArgAt<string>(4)));
@@ -173,7 +247,8 @@ public class BookmarkServiceTests(ITestOutputHelper outputHelper): AbstractDbTes
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), _fileSystem);
         var imageFileService = new ImageFileService(unitOfWork, _imagePipeline, ds,
             Substitute.For<IEventHub>(), Substitute.For<ILogger<ImageFileService>>());
-        return new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), unitOfWork, ds, imageFileService);
+        return new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), unitOfWork, ds, imageFileService,
+            eventHub ?? Substitute.For<IEventHub>());
     }
 
     private ImageWriteResult AddWrittenFile(string directory, string fileName)

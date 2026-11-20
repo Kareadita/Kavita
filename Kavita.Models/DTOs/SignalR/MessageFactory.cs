@@ -853,6 +853,17 @@ public static class MessageFactory
             new ImageCleanupSummaryEventBodyDto(Info, title, subtitle, corrected, deleted, bytesSaved, missing, unreadable));
     }
 
+    public static SignalRMessageDto BookmarkDirectoryMovedEvent(string path, int moved, int skipped)
+    {
+        const string title = "Bookmarks moved";
+        var subtitle = $"Moved {moved} bookmark files to {path}. {skipped} were left in the old folder because the name was taken";
+
+        var name = skipped > 0 ? Error : Info;
+
+        return CodedEvent(name, MessageEventCode.BookmarkDirectoryMoved, title, subtitle,
+            new BookmarkDirectoryMovedEventBodyDto(name, title, subtitle, path, moved, skipped));
+    }
+
     public static SignalRMessageDto DebugExportFailedEvent(string exportId, string error)
     {
         const string title = "Debug export failed";

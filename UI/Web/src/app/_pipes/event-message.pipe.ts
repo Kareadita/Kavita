@@ -40,6 +40,8 @@ type MessageBody = Partial<{
   bytesSaved: number;
   missing: number;
   unreadable: number;
+  moved: number;
+  skipped: number;
 }>;
 
 type Params = Record<string, string | undefined>;
@@ -121,6 +123,8 @@ export class EventMessagePipe implements PipeTransform {
         return this.translate(`${PREFIX}.debug-export-failed-label`, {}, fallback);
       case MessageEventCode.ImageCleanupSummary:
         return this.translate(`${PREFIX}.image-cleanup-summary-label`, {}, fallback);
+      case MessageEventCode.BookmarkDirectoryMoved:
+        return this.translate(`${PREFIX}.bookmark-directory-moved-label`, {}, fallback);
       case MessageEventCode.KepubifyChecked:
         return body.status?.status === KepubifyCheckStatus.NotSupported
           ? this.translate(`${PREFIX}.kepubify-checked-failed-label`, {}, fallback)
@@ -187,6 +191,8 @@ export class EventMessagePipe implements PipeTransform {
         return this.debugExportReadyDescription(source, body, fallback);
       case MessageEventCode.ImageCleanupSummary:
         return this.imageCleanupSummaryDescription(body, fallback);
+      case MessageEventCode.BookmarkDirectoryMoved:
+        return this.bookmarkDirectoryMovedDescription(body, fallback);
       case MessageEventCode.KepubifyChecked: {
         const status = body.status;
         if (status?.status !== KepubifyCheckStatus.NotSupported) return fallback;
@@ -224,6 +230,19 @@ export class EventMessagePipe implements PipeTransform {
 
     return this.translate(`${PREFIX}.image-cleanup-summary-skipped-description`,
       {...params, missing: missing.toLocaleString(), unreadable: unreadable.toLocaleString()}, fallback);
+  }
+
+  private bookmarkDirectoryMovedDescription(body: MessageBody, fallback: string): string {
+    if (body.moved === undefined || body.path === undefined) return fallback;
+
+    const params: Params = {moved: body.moved.toLocaleString(), path: body.path};
+    const skipped = body.skipped ?? 0;
+    if (skipped === 0) {
+      return this.translate(`${PREFIX}.bookmark-directory-moved-description`, params, fallback);
+    }
+
+    return this.translate(`${PREFIX}.bookmark-directory-moved-skipped-description`,
+      {...params, skipped: skipped.toLocaleString()}, fallback);
   }
 
   private unreadableFoldersDescription(body: MessageBody, fallback: string): string {
