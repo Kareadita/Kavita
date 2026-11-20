@@ -58,7 +58,7 @@ public static class KoboQueryExtensions
             {
                 if (preferences.SyncCollections.Count > 0)
                 {
-                    sources.Add(c => c.Volume.Series.Collections.Any(col => preferences.SyncCollections.Contains(col.Id) || col.Promoted));
+                    sources.Add(c => c.Volume.Series.Collections.Any(col => preferences.SyncCollections.Contains(col.Id)));
                 }
                 else
                 {
@@ -68,7 +68,7 @@ public static class KoboQueryExtensions
 
             if (preferences.HasManagedCollection)
             {
-                sources.Add(c => c.Volume.Series.Collections.Any(col => col.Id == preferences.ManagedCollection));
+                sources.Add(c => c.Volume.Series.Collections.Any(col => col.AppUserId == userId && col.Id == preferences.ManagedCollection));
             }
 
             if (sources.Count == 0)
