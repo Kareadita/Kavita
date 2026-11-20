@@ -449,13 +449,11 @@ public class CleanupServiceImageTests : AbstractDbTest, IDisposable
         var pipeline = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>());
         var imageFileService = new ImageFileService(unitOfWork, pipeline, directoryService, Substitute.For<IEventHub>(),
             Substitute.For<ILogger<ImageFileService>>());
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService, pipeline);
         var eventHub = Substitute.For<IEventHub>();
         var backup = Substitute.For<IBackupService>();
         backup.BackupDatabase(Arg.Any<CancellationToken>()).Returns(true);
         var logger = Substitute.For<ILogger<CleanupService>>();
-        var service = new CleanupService(logger, unitOfWork, eventHub, directoryService, pipeline, imageFileService, backup,
-            imageService);
+        var service = new CleanupService(logger, unitOfWork, eventHub, directoryService, pipeline, imageFileService, backup);
 
         return new ImageTestSetup(service, context, eventHub, backup, logger);
     }

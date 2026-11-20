@@ -37,7 +37,6 @@ namespace Kavita.Services.ReadingLists;
 public class ReadingListService(
     IUnitOfWork unitOfWork,
     ILogger<ReadingListService> logger,
-    IImageService imageService,
     IEntityNamingService namingService,
     IImageFileService imageFileService,
     ICompositeCoverService compositeCoverService)

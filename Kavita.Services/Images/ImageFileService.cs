@@ -17,7 +17,8 @@ using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
+using Kavita.Services.Helpers;
 
 namespace Kavita.Services.Images;
 
@@ -67,7 +68,7 @@ public class ImageFileService(
         var oldFileName = row?.FileName;
 
         var written = imagePipeline.Write(source, target.Kind, policy, directoryService.CoverImageDirectory, fileName);
-        var colors = ImageService.CalculateColorScape(Path.Join(directoryService.CoverImageDirectory, written.FileName));
+        var colors = ImageHelper.CalculateColorScape(Path.Join(directoryService.CoverImageDirectory, written.FileName));
 
         if (row == null)
         {
@@ -163,7 +164,7 @@ public class ImageFileService(
         var path = Path.Join(directoryService.CoverImageDirectory, row.FileName);
         if (!File.Exists(path)) return;
 
-        var colors = ImageService.CalculateColorScape(path);
+        var colors = ImageHelper.CalculateColorScape(path);
         row.PrimaryColor = colors.Primary;
         row.SecondaryColor = colors.Secondary;
 
@@ -469,21 +470,21 @@ public class ImageFileService(
 
     private static CoverTarget Describe(IHasCoverImageFile entity) => entity switch
     {
-        Chapter chapter => new CoverTarget(ImageKind.ChapterCover, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId),
+        Chapter chapter => new CoverTarget(ImageKind.ChapterCover, ImageHelper.GetChapterFormat(chapter.Id, chapter.VolumeId),
             MessageFactoryEntityTypes.Chapter),
-        Volume volume => new CoverTarget(ImageKind.VolumeCover, ImageService.GetVolumeFormat(volume.Id),
+        Volume volume => new CoverTarget(ImageKind.VolumeCover, ImageHelper.GetVolumeFormat(volume.Id),
             MessageFactoryEntityTypes.Volume),
-        Series series => new CoverTarget(ImageKind.SeriesCover, ImageService.GetSeriesFormat(series.Id),
+        Series series => new CoverTarget(ImageKind.SeriesCover, ImageHelper.GetSeriesFormat(series.Id),
             MessageFactoryEntityTypes.Series),
-        Library library => new CoverTarget(ImageKind.LibraryIcon, ImageService.GetLibraryFormat(library.Id),
+        Library library => new CoverTarget(ImageKind.LibraryIcon, ImageHelper.GetLibraryFormat(library.Id),
             MessageFactoryEntityTypes.Library),
-        Person person => new CoverTarget(ImageKind.PersonCover, ImageService.GetPersonFormat(person.Id),
+        Person person => new CoverTarget(ImageKind.PersonCover, ImageHelper.GetPersonFormat(person.Id),
             MessageFactoryEntityTypes.Person),
-        ReadingList readingList => new CoverTarget(ImageKind.ReadingListCover, ImageService.GetReadingListFormat(readingList.Id),
+        ReadingList readingList => new CoverTarget(ImageKind.ReadingListCover, ImageHelper.GetReadingListFormat(readingList.Id),
             MessageFactoryEntityTypes.ReadingList),
-        AppUser user => new CoverTarget(ImageKind.UserCover, ImageService.GetUserFormat(user.Id),
+        AppUser user => new CoverTarget(ImageKind.UserCover, ImageHelper.GetUserFormat(user.Id),
             MessageFactoryEntityTypes.User),
-        AppUserCollection collection => new CoverTarget(ImageKind.CollectionCover, ImageService.GetCollectionTagFormat(collection.Id),
+        AppUserCollection collection => new CoverTarget(ImageKind.CollectionCover, ImageHelper.GetCollectionTagFormat(collection.Id),
             MessageFactoryEntityTypes.Collection),
         _ => throw new ArgumentOutOfRangeException(nameof(entity), entity.GetType().Name, null),
     };

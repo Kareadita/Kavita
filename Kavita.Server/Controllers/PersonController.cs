@@ -29,7 +29,6 @@ public class PersonController(
     ILocalizationService localizationService,
     IMapper mapper,
     ICoverDbService coverDbService,
-    IImageService imageService,
     IEventHub eventHub,
     IPersonService personService,
     IImageFileService imageFileService)

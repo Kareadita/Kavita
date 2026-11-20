@@ -35,7 +35,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
         var readingListService = new ReadingListService(unitOfWork, Substitute.For<ILogger<ReadingListService>>(),
-            Substitute.For<IImageService>(), new EntityNamingService(),
+            new EntityNamingService(),
             Substitute.For<IImageFileService>(), Substitute.For<ICompositeCoverService>());
 
         var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),

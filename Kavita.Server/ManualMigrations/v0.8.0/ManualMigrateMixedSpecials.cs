@@ -14,7 +14,8 @@ using Kavita.Models.Extensions;
 using Kavita.Services;
 using Kavita.Services.Builders;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
+using Kavita.Services.Helpers;
 
 namespace Kavita.Server.ManualMigrations.v0._8._0;
 
@@ -192,8 +193,8 @@ public static class MigrateMixedSpecials
         string extension, Volume newVolume)
     {
         // We need to migrate cover images as well
-        var existingCover = ImageService.GetChapterFormat(specialChapter.Id, specialChapter.VolumeId) + extension;
-        var newCover = ImageService.GetChapterFormat(specialChapter.Id, newVolume.Id) + extension;
+        var existingCover = ImageHelper.GetChapterFormat(specialChapter.Id, specialChapter.VolumeId) + extension;
+        var newCover = ImageHelper.GetChapterFormat(specialChapter.Id, newVolume.Id) + extension;
         try
         {
 

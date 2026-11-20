@@ -14,7 +14,8 @@ using Kavita.Models.Extensions;
 using Kavita.Services;
 using Kavita.Services.Builders;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
+using Kavita.Services.Helpers;
 
 namespace Kavita.Server.ManualMigrations.v0._8._0;
 
@@ -174,8 +175,8 @@ public static class MigrateLooseLeafChapters
     private static void UpdateCoverImage(IDirectoryService directoryService, ILogger logger, Chapter chapter,
         string extension, Volume newVolume)
     {
-        var existingCover = ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId) + extension;
-        var newCover = ImageService.GetChapterFormat(chapter.Id, newVolume.Id) + extension;
+        var existingCover = ImageHelper.GetChapterFormat(chapter.Id, chapter.VolumeId) + extension;
+        var newCover = ImageHelper.GetChapterFormat(chapter.Id, newVolume.Id) + extension;
         try
         {
             if (!chapter.CoverImageLocked)

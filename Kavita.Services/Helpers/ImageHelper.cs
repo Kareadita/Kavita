@@ -3,47 +3,26 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Threading;
-using System.Threading.Tasks;
-using Kavita.API.Services;
-using Kavita.Common;
-using Kavita.Common.Helpers;
-using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
-using Kavita.Services.Scanner;
-using Microsoft.Extensions.Logging;
 using NetVips;
 using Image = NetVips.Image;
 
-namespace Kavita.Services;
+namespace Kavita.Services.Helpers;
 
-public class ImageService(ILogger<ImageService> logger, IDirectoryService directoryService, IImagePipeline imagePipeline)
-    : IImageService
+public static class ImageHelper
 {
     // Fixed seed for generation of ColorScapes. Do not change
     private const int ColorScapeSeed = 7;
 
-
-    public void ExtractImages(string? fileFilePath, string targetDirectory, int fileCount = 1)
-    {
-        if (string.IsNullOrEmpty(fileFilePath)) return;
-        directoryService.ExistOrCreate(targetDirectory);
-        if (fileCount == 1)
-        {
-            directoryService.CopyFileToDirectory(fileFilePath, targetDirectory);
-        }
-        else
-        {
-            directoryService.CopyDirectoryToDirectory(directoryService.FileSystem.Path.GetDirectoryName(fileFilePath), targetDirectory,
-                Parser.ImageFileExtensions);
-        }
-    }
-
-    public string? GetImageExtension(string filePath)
+    /// <summary>
+    /// Reads the image format from the file header, never the file name
+    /// </summary>
+    /// <returns>The extension with its dot (<c>.png</c>, <c>.jpg</c>, <c>.webp</c>, <c>.gif</c>, <c>.avif</c>), or null
+    /// when the file is not an image or is a format Kavita does not take for covers</returns>
+    public static string? GetImageExtension(string filePath)
     {
         try
         {
@@ -56,7 +35,11 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         }
     }
 
-    public ImageHeader? GetImageHeader(byte[] bytes)
+    /// <summary>
+    /// <see cref="GetImageExtension"/> and the size, read from the header of an image already in memory
+    /// </summary>
+    /// <returns>Null when the bytes are not an image or are a format Kavita does not take for covers</returns>
+    public static ImageHeader? GetImageHeader(byte[] bytes)
     {
         try
         {
@@ -208,54 +191,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     }
 
 
-
-    /// <inheritdoc />
-    public string CreateThumbnailFromBase64(string encodedImage, string fileName, ImageKind kind, ImagePolicy policy,
-        string? targetDirectory = null)
-    {
-        byte[] bytes;
-        try
-        {
-            bytes = Convert.FromBase64String(encodedImage);
-        }
-        catch (FormatException e)
-        {
-            throw new KavitaException("Invalid Base64 string", e);
-        }
-
-        try
-        {
-            return WriteThumbnail(new ImageSource.FromBytes(bytes), fileName, kind, policy, targetDirectory);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error creating thumbnail from base64");
-        }
-
-        return string.Empty;
-    }
-
-    /// <inheritdoc />
-    public string CreateThumbnailFromFile(string sourceFile, string fileName, ImageKind kind, ImagePolicy policy,
-        string? targetDirectory = null)
-    {
-        try
-        {
-            return WriteThumbnail(new ImageSource.FromFile(sourceFile), fileName, kind, policy, targetDirectory);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error creating thumbnail from file {SourceFile}", sourceFile);
-        }
-
-        return string.Empty;
-    }
-
-    private string WriteThumbnail(ImageSource source, string fileName, ImageKind kind, ImagePolicy policy, string? targetDirectory)
-    {
-        return imagePipeline.Write(source, kind, policy, targetDirectory ?? directoryService.CoverImageDirectory,
-            fileName + policy.Format.ForKind(kind).GetExtension()).FileName;
-    }
 
 
     /// <summary>

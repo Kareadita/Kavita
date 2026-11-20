@@ -1,5 +1,6 @@
 using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
+using Kavita.Services.Helpers;
 using Kavita.Services.Tests.Helpers;
 using Image = NetVips.Image;
 
@@ -64,7 +65,7 @@ public class NetVipsFileHandleTests : IDisposable
 
         var cover = WriteWebp("cover.webp", 640, 909);
 
-        ImageService.CalculateColorScape(cover);
+        ImageHelper.CalculateColorScape(cover);
 
         AssertReplaceable(cover);
     }
@@ -77,7 +78,7 @@ public class NetVipsFileHandleTests : IDisposable
         var first = WriteWebp("first.webp", 640, 909);
         var second = WriteWebp("second.webp", 640, 909);
 
-        ImageService.CreateMergedImageBuffer([first, second], CoverImageSize.Default);
+        ImageHelper.CreateMergedImageBuffer([first, second], CoverImageSize.Default);
 
         AssertReplaceable(first);
         AssertReplaceable(second);

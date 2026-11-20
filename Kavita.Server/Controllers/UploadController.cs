@@ -23,6 +23,7 @@ using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Images;
 using Kavita.Server.Attributes;
 using Kavita.Services;
+using Kavita.Services.Helpers;
 using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -35,7 +36,6 @@ namespace Kavita.Server.Controllers;
 public class UploadController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IImageService _imageService;
     private readonly ILogger<UploadController> _logger;
     private readonly ITaskScheduler _taskScheduler;
     private readonly IDirectoryService _directoryService;
@@ -46,7 +46,7 @@ public class UploadController : BaseApiController
     private readonly ICompositeCoverService _compositeCoverService;
 
     /// <inheritdoc />
-    public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger,
+    public UploadController(IUnitOfWork unitOfWork, ILogger<UploadController> logger,
         ITaskScheduler taskScheduler, IDirectoryService directoryService, IReadingListService readingListService,
         ILocalizationService localizationService, IUrlValidationService urlValidationService,
         IImageFileService imageFileService, ICompositeCoverService compositeCoverService)
@@ -54,7 +54,6 @@ public class UploadController : BaseApiController
         _imageFileService = imageFileService;
         _compositeCoverService = compositeCoverService;
         _unitOfWork = unitOfWork;
-        _imageService = imageService;
         _logger = logger;
         _taskScheduler = taskScheduler;
         _directoryService = directoryService;
@@ -91,7 +90,7 @@ public class UploadController : BaseApiController
         {
             await FlurlConfiguration.DownloadToFileAsync(dto.Url, downloadPath, ControllerConstants.MaxUploadSizeBytes, ct);
 
-            var extension = _imageService.GetImageExtension(downloadPath);
+            var extension = ImageHelper.GetImageExtension(downloadPath);
             if (extension == null)
             {
                 _logger.LogWarning("Rejected cover from {Url} - content is not a supported image", dto.Url.Sanitize());
@@ -205,7 +204,7 @@ public class UploadController : BaseApiController
         {
             var path = await UploadToTempAsync(file, fileName);
 
-            if (!_directoryService.FileSystem.File.Exists(path) || _imageService.GetImageExtension(path) == null)
+            if (!_directoryService.FileSystem.File.Exists(path) || ImageHelper.GetImageExtension(path) == null)
             {
                 _directoryService.DeleteFiles([path]);
                 _logger.LogWarning("Rejected cover upload '{FileName}' - content is not a valid image", file.FileName.Sanitize());

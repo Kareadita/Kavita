@@ -63,7 +63,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var namingService = new EntityNamingService();
 
         var readingListService = new ReadingListService(unitOfWork, Substitute.For<ILogger<ReadingListService>>(),
-            Substitute.For<IImageService>(), namingService, Substitute.For<IImageFileService>(),
+            namingService, Substitute.For<IImageFileService>(),
             Substitute.For<ICompositeCoverService>());
 
         var seriesService = new SeriesService(unitOfWork, Substitute.For<IEventHub>(), Substitute.For<ITaskScheduler>(),

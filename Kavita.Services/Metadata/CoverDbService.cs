@@ -26,7 +26,8 @@ using Kavita.Models.Entities.User;
 using Kavita.Models.Images;
 using Kavita.Services.Repositories;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
+using Kavita.Services.Helpers;
 
 namespace Kavita.Services.Metadata;
 
@@ -167,7 +168,7 @@ public class CoverDbService : ICoverDbService
 
             _logger.LogTrace("Fetching favicon from {Url}", finalUrl);
             var filename = await DownloadKeyedAsync(finalUrl, ImageKind.Favicon, domain,
-                ImageService.GetWebLinkFormat(baseUrl, encodeFormat), origin, ct);
+                ImageHelper.GetWebLinkFormat(baseUrl, encodeFormat), origin, ct);
             _logger.LogDebug("Favicon for {Domain} downloaded and saved successfully", domain);
 
             return filename;
@@ -203,7 +204,7 @@ public class CoverDbService : ICoverDbService
 
             _logger.LogTrace("Fetching publisher image from {Url}", publisherLink.Sanitize());
             var filename = await DownloadKeyedAsync(publisherLink, ImageKind.Publisher, publisherName,
-                ImageService.GetPublisherFormat(publisherName, encodeFormat), ImageOrigin.CoversDb, ct);
+                ImageHelper.GetPublisherFormat(publisherName, encodeFormat), ImageOrigin.CoversDb, ct);
 
             _logger.LogDebug("Publisher image for {PublisherName} downloaded and saved successfully", publisherName.Sanitize());
 

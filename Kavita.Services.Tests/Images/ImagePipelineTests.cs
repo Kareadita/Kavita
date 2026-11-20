@@ -4,6 +4,7 @@ using Kavita.Services.Images;
 using Microsoft.Extensions.Logging;
 using NetVips;
 using NSubstitute;
+using Kavita.Services.Helpers;
 
 namespace Kavita.Services.Tests.Images;
 
@@ -43,7 +44,7 @@ public class ImagePipelineTests : IDisposable
     [Fact]
     public void Write_JpegSetting_FaviconWrittenAndLookedUpAsPng()
     {
-        var fileName = ImageService.GetWebLinkFormat("https://anilist.co", EncodeFormat.JPEG);
+        var fileName = ImageHelper.GetWebLinkFormat("https://anilist.co", EncodeFormat.JPEG);
 
         _pipeline.Write(new ImageSource.FromBytes(TransparentPng()), ImageKind.Favicon,
             Policy with { Format = EncodeFormat.JPEG }, _directory, fileName);

@@ -27,7 +27,8 @@ using Kavita.Services.Comparators;
 using Kavita.Services.Extensions;
 using Kavita.Services.Metadata;
 using Kavita.Services.Scanner;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
+using Kavita.Services.Helpers;
 
 namespace Kavita.Services.Reading;
 
@@ -777,7 +778,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         CancellationToken ct = default)
     {
         var outputDirectory =
-            directoryService.FileSystem.Path.Join(directoryService.TempDirectory, ImageService.GetThumbnailFormat(chapter.Id));
+            directoryService.FileSystem.Path.Join(directoryService.TempDirectory, ImageHelper.GetThumbnailFormat(chapter.Id));
         try
         {
             var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);

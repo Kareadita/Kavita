@@ -16,7 +16,8 @@ using Kavita.Server.Attributes;
 using Kavita.Services;
 using Kavita.Services.Plus;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Kavita.Services.Helpers;
 
 namespace Kavita.Server.Controllers;
 
@@ -170,7 +171,7 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
 
         var encodeFormat = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
 
-        var webLinkFileName = ImageService.GetWebLinkFormat(url, encodeFormat);
+        var webLinkFileName = ImageHelper.GetWebLinkFormat(url, encodeFormat);
         if (!IsPathWithinDirectory(directoryService.FaviconDirectory, webLinkFileName)) return BadRequest();
 
         // Check if the domain exists
@@ -206,7 +207,7 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
 
         var encodeFormat = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
 
-        var publisherFileName = ImageService.GetPublisherFormat(publisherName, encodeFormat);
+        var publisherFileName = ImageHelper.GetPublisherFormat(publisherName, encodeFormat);
         if (!IsPathWithinDirectory(directoryService.PublisherDirectory, publisherFileName)) return BadRequest();
 
         // Check if the domain exists

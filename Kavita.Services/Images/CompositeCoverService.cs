@@ -13,6 +13,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Images;
 using Microsoft.Extensions.Logging;
+using Kavita.Services.Helpers;
 
 namespace Kavita.Services.Images;
 
@@ -108,7 +109,7 @@ public class CompositeCoverService(
 
         var picked = tiles.OrderBy(_ => Random.Shared.Next()).Take(MaxTiles).ToList();
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
-        var buffer = ImageService.CreateMergedImageBuffer(picked, settings.CoverImageSize);
+        var buffer = ImageHelper.CreateMergedImageBuffer(picked, settings.CoverImageSize);
 
         await imageFileService.SetCoverAsync(entity, new ImageSource.FromBytes(buffer),
             new CoverWrite(ImageOrigin.Composite, Lock: false, InputHash: hash), ct: ct);

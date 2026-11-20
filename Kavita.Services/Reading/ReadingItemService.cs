@@ -14,7 +14,6 @@ public class ReadingItemService : IReadingItemService
 {
     private readonly IArchiveService _archiveService;
     private readonly IBookService _bookService;
-    private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
     private readonly ILogger<ReadingItemService> _logger;
     private readonly BasicParser _basicParser;
@@ -23,12 +22,11 @@ public class ReadingItemService : IReadingItemService
     private readonly BookParser _bookParser;
     private readonly PdfParser _pdfParser;
 
-    public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService,
+    public ReadingItemService(IArchiveService archiveService, IBookService bookService,
         IDirectoryService directoryService, ILogger<ReadingItemService> logger)
     {
         _archiveService = archiveService;
         _bookService = bookService;
-        _imageService = imageService;
         _directoryService = directoryService;
         _logger = logger;
 
@@ -177,7 +175,7 @@ public class ReadingItemService : IReadingItemService
                 _archiveService.ExtractArchive(fileFilePath, targetDirectory);
                 break;
             case MangaFormat.Image:
-                _imageService.ExtractImages(fileFilePath, targetDirectory, imageCount);
+                ExtractImages(fileFilePath, targetDirectory, imageCount);
                 break;
             case MangaFormat.Pdf:
                 _bookService.ExtractPdfImages(fileFilePath, targetDirectory);
@@ -202,5 +200,20 @@ public class ReadingItemService : IReadingItemService
         if (_basicParser.IsApplicable(path, type)) return _basicParser;
 
         return null;
+    }
+
+    private void ExtractImages(string? fileFilePath, string targetDirectory, int fileCount)
+    {
+        if (string.IsNullOrEmpty(fileFilePath)) return;
+        _directoryService.ExistOrCreate(targetDirectory);
+        if (fileCount == 1)
+        {
+            _directoryService.CopyFileToDirectory(fileFilePath, targetDirectory);
+        }
+        else
+        {
+            _directoryService.CopyDirectoryToDirectory(_directoryService.FileSystem.Path.GetDirectoryName(fileFilePath), targetDirectory,
+                Parser.ImageFileExtensions);
+        }
     }
 }

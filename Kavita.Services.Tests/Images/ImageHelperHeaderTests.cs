@@ -1,21 +1,17 @@
 using System.Text;
-using Kavita.API.Services;
+using Kavita.Services.Helpers;
 using Kavita.Services.Tests.Helpers;
-using Microsoft.Extensions.Logging;
 using NetVips;
-using NSubstitute;
 using Image = NetVips.Image;
 
 namespace Kavita.Services.Tests.Images;
 
 [Collection(NetVipsGlobalStateCollection.Name)]
-public class ImageServiceHeaderTests : IDisposable
+public class ImageHelperHeaderTests : IDisposable
 {
     private readonly int _maxFiles = NetVips.Cache.MaxFiles;
-    private readonly ImageService _service = new(Substitute.For<ILogger<ImageService>>(), Substitute.For<IDirectoryService>(),
-        Substitute.For<IImagePipeline>());
 
-    public ImageServiceHeaderTests()
+    public ImageHelperHeaderTests()
     {
         NetVips.Cache.MaxFiles = 0;
     }
@@ -47,9 +43,9 @@ public class ImageServiceHeaderTests : IDisposable
 
         try
         {
-            Assert.Equal(expected, _service.GetImageExtension(path));
+            Assert.Equal(expected, ImageHelper.GetImageExtension(path));
 
-            var header = _service.GetImageHeader(bytes);
+            var header = ImageHelper.GetImageHeader(bytes);
             Assert.Equal(expected, header?.Extension);
             if (header != null)
             {

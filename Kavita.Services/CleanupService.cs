@@ -21,6 +21,7 @@ using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
+using Kavita.Services.Helpers;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -38,8 +39,7 @@ public class CleanupService(
     IDirectoryService directoryService,
     IImagePipeline imagePipeline,
     IImageFileService imageFileService,
-    IBackupService backupService,
-    IImageService imageService)
+    IBackupService backupService)
     : ICleanupService
 {
     private const int ImageBatchSize = 500;
@@ -582,7 +582,7 @@ public class CleanupService(
                     try
                     {
                         var bytes = await File.ReadAllBytesAsync(source, ct);
-                        var header = imageService.GetImageHeader(bytes);
+                        var header = ImageHelper.GetImageHeader(bytes);
                         var inLine = header != null && header.Extension == format.GetExtension() &&
                                      (box is not { } b || (header.Width <= b.Width && header.Height <= b.Height));
 
