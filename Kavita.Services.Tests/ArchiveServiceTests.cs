@@ -259,7 +259,9 @@ public class ArchiveServiceTests
                     using var black = NetVips.Image.Black(600, 900, bands: 3);
                     using var colored = black + new double[] { 200, 80, 40 };
                     using var image = colored.Cast(NetVips.Enums.BandFormat.Uchar);
-                    var bytes = image.HeifsaveBuffer(compression: NetVips.Enums.ForeignHeifCompression.Av1);
+                    // #4747's pages were 10-bit 4:4:4, which the 8-bit 4:2:0 default does not exercise
+                    var bytes = image.HeifsaveBuffer(compression: NetVips.Enums.ForeignHeifCompression.Av1, bitdepth: 10,
+                        subsampleMode: NetVips.Enums.ForeignSubsample.Off);
                     using var entry = zip.CreateEntry(page).Open();
                     entry.Write(bytes);
                 }
