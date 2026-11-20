@@ -42,7 +42,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var logger = Substitute.For<ILogger<CleanupService>>();
         var messageHub = Substitute.For<IEventHub>();
         var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>(),
-            Substitute.For<IImageService>(),
+            Substitute.For<IImagePipeline>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
             Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
             Substitute.For<IClientInfoAccessor>(),

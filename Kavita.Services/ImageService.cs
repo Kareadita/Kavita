@@ -43,53 +43,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         }
     }
 
-    /// <summary>
-    /// Creates a thumbnail out of a stream and saves it to <paramref name="outputDirectory"/> with the passed
-    /// fileName and the appropriate extension.
-    /// </summary>
-    /// <param name="stream">Stream to read; rewound first when it can seek</param>
-    /// <param name="fileName">filename to save as without extension</param>
-    /// <param name="outputDirectory">Where to output the file</param>
-    /// <param name="encodeFormat">Export the file as the passed encoding</param>
-    /// <param name="size">Cover size to scale and crop to</param>
-    /// <returns>File name with extension of the file</returns>
-    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
-    {
-        return WriteCover(new ImageSource.FromStream(stream), fileName, outputDirectory, encodeFormat, size);
-    }
-
-    public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
-    {
-        return WriteCover(new ImageSource.FromFile(sourceFile), fileName, outputDirectory, encodeFormat, size);
-    }
-
-    private string WriteCover(ImageSource source, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
-    {
-        return imagePipeline.Write(source, ImageKind.ChapterCover, new ImagePolicy(encodeFormat, size), outputDirectory,
-            fileName + encodeFormat.GetExtension()).FileName;
-    }
-
-    public Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat,
-        CancellationToken ct = default)
-    {
-        var file = directoryService.FileSystem.FileInfo.New(filePath);
-        var fileName = file.Name.Replace(file.Extension, string.Empty);
-        var outputFile = Path.Join(outputPath, fileName + encodeFormat.GetExtension());
-
-        // Use load from buffer to avoid a disposal issue on Windows for the delete later
-        using var sourceImage = Image.NewFromBuffer(File.ReadAllBytes(filePath));
-        if (encodeFormat == EncodeFormat.JPEG)
-        {
-            sourceImage.Jpegsave(outputFile, background: [255, 255, 255]);
-        }
-        else
-        {
-            sourceImage.WriteToFile(outputFile);
-        }
-
-        return Task.FromResult(outputFile);
-    }
-
     public string? GetImageExtension(string filePath)
     {
         try

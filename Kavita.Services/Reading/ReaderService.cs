@@ -21,6 +21,8 @@ using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 using Kavita.Services.Comparators;
 using Kavita.Services.Extensions;
 using Kavita.Services.Metadata;
@@ -29,7 +31,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Reading;
 
-public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
+public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImagePipeline imagePipeline,
     IDirectoryService directoryService, IScrobblingService scrobblingService, IReadingSessionService readingSessionService,
     IClientInfoAccessor clientInfoAccessor, IEntityNamingService namingService,
     ILocalizationService localizationService, IBookService bookService)
@@ -778,15 +780,17 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             directoryService.FileSystem.Path.Join(directoryService.TempDirectory, ImageService.GetThumbnailFormat(chapter.Id));
         try
         {
-            var encodeFormat =
-                (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).EncodeMediaAs;
+            var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+            var policy = new ImagePolicy(settings.EncodeMediaAs, settings.CoverImageSize);
+            var extension = policy.Format.ForKind(ImageKind.ReaderPageThumb).GetExtension();
 
             if (!Directory.Exists(outputDirectory))
             {
                 var outputtedThumbnails = cachedImages
                     .Select((img, idx) =>
                         directoryService.FileSystem.Path.Join(outputDirectory,
-                            imageService.WriteCoverThumbnail(img, $"{idx}", outputDirectory, encodeFormat)))
+                            imagePipeline.Write(new ImageSource.FromFile(img), ImageKind.ReaderPageThumb, policy,
+                                outputDirectory, idx + extension).FileName))
                     .ToArray();
                 return CacheService.GetPageFromFiles(outputtedThumbnails, pageNum);
             }
