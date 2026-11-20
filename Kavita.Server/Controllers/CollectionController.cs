@@ -225,7 +225,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             changed = true;
         }
 
-        if (changed)
+        if (changed && tag.Id != 0)
         {
             unitOfWork.CollectionTagRepository.Update(tag);
         }
@@ -237,6 +237,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         }
 
         await compositeCoverService.CreateIfMissingAsync(ImageKind.CollectionCover, tag.Id, ct);
+
         return Ok();
     }
 
