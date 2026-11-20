@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Kavita.Models.Attributes;
@@ -16,6 +17,9 @@ public class KoboSyncPoint
 
     [ExportScrub(ExportScrubKind.Random)]
     public string KoboDeviceId { get; set; }
+
+    public int? DeviceId { get; set; }
+    public Device? Device { get; set; }
 
     /// <summary>
     /// Sync token of the upstream Kobo store, used when forwarding requests

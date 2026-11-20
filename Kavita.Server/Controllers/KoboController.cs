@@ -42,7 +42,8 @@ public class KoboController(
     IUnitOfWork unitOfWork,
     IKoboSyncService koboSyncService,
     IDirectoryService directoryService,
-    IDownloadService downloadService): BaseApiController
+    IDownloadService downloadService,
+    IClientInfoAccessor clientInfoAccessor): BaseApiController
 {
 
     private const string KoboImageHost = "https://cdn.kobo.com/book-images/";
@@ -109,9 +110,10 @@ public class KoboController(
         var syncPoint = await unitOfWork.KoboSyncPointRepository.GetSyncPoint(UserId,
             decodedToken.Token.SyncPointId, decodedToken.KoboStoreSyncToken, ct);
 
-        // Delete all other KoboSyncPoints for this device id as they'll not be used anymore
+        // Delete all other KoboSyncPoints for this device id as they'll not be used any more
         await unitOfWork.KoboSyncPointRepository.DeleteOthersForDeviceId(syncPoint.Id, deviceId, ct);
         syncPoint.KoboDeviceId = deviceId;
+        syncPoint.DeviceId = clientInfoAccessor.CurrentDeviceId;
 
         var (kavitaChanges, completedSync) = await koboSyncService.GetChangesSinceAsync(UserId, syncSettings, syncPoint, ct);
 

@@ -721,6 +721,7 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.PrimitiveCollection<string>("ChapterIds")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("ChapterIndex")
@@ -730,6 +731,7 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.PrimitiveCollection<string>("CollectionsIds")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CollectionsSyncTime")
@@ -738,7 +740,11 @@ namespace Kavita.Database.Migrations
                     b.Property<int>("CollectionsSyncedUntilIndex")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("DeviceId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("KoboDeviceId")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("KoboStoreSyncToken")
@@ -754,6 +760,7 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.PrimitiveCollection<string>("ReadingListsIds")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ReadingListsSyncTime")
@@ -763,6 +770,7 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("RemovedChapterIds")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasDefaultValue("[]");
@@ -771,6 +779,8 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DeviceId");
 
                     b.HasIndex("UserId");
 
@@ -4193,11 +4203,17 @@ namespace Kavita.Database.Migrations
 
             modelBuilder.Entity("Kavita.Models.Entities.Kobo.KoboSyncPoint", b =>
                 {
+                    b.HasOne("Kavita.Models.Entities.Device", "Device")
+                        .WithMany()
+                        .HasForeignKey("DeviceId");
+
                     b.HasOne("Kavita.Models.Entities.User.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Device");
 
                     b.Navigation("User");
                 });
