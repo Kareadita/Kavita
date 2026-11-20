@@ -6,11 +6,15 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Kavita.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class ImageFile : Migration
+    public partial class ManagedImageStore : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "FavoriteCount",
+                table: "ExternalRating");
+
             migrationBuilder.AddColumn<int>(
                 name: "CoverImageFileId",
                 table: "Volume",
@@ -72,7 +76,7 @@ namespace Kavita.Database.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Kind = table.Column<int>(type: "INTEGER", nullable: false),
-                    FileName = table.Column<string>(type: "TEXT", nullable: true),
+                    FileName = table.Column<string>(type: "TEXT", nullable: false),
                     Origin = table.Column<int>(type: "INTEGER", nullable: false),
                     Format = table.Column<int>(type: "INTEGER", nullable: true),
                     Width = table.Column<int>(type: "INTEGER", nullable: true),
@@ -80,6 +84,7 @@ namespace Kavita.Database.Migrations
                     SourceWidth = table.Column<int>(type: "INTEGER", nullable: true),
                     SourceHeight = table.Column<int>(type: "INTEGER", nullable: true),
                     Key = table.Column<string>(type: "TEXT", nullable: true),
+                    InputHash = table.Column<string>(type: "TEXT", nullable: true),
                     PrimaryColor = table.Column<string>(type: "TEXT", nullable: true),
                     SecondaryColor = table.Column<string>(type: "TEXT", nullable: true),
                     Created = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -334,6 +339,13 @@ namespace Kavita.Database.Migrations
             migrationBuilder.DropColumn(
                 name: "ImageFileId",
                 table: "AppUserBookmark");
+
+            migrationBuilder.AddColumn<int>(
+                name: "FavoriteCount",
+                table: "ExternalRating",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: 0);
         }
     }
 }
