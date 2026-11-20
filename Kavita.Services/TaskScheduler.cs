@@ -415,11 +415,13 @@ public class TaskScheduler : ITaskScheduler
 
 
     // TODO: See if we can bring this to an Extension and make all cases do it this way (the check then call)
-    public static void QueueImageCleanup()
+    public static bool QueueImageCleanup()
     {
-        if (HasAlreadyEnqueuedTask<ICleanupService>(s => s.CleanupImages(CancellationToken.None), checkRunningJobs: true)) return;
+        if (HasAlreadyEnqueuedTask<ICleanupService>(s => s.CleanupImages(CancellationToken.None), checkRunningJobs: true)) return false;
 
         BackgroundJob.Enqueue<ICleanupService>(s => s.CleanupImages(CancellationToken.None));
+
+        return true;
     }
 
     #endregion
