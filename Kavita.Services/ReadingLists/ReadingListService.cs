@@ -159,6 +159,7 @@ public class ReadingListService(
             if (readingList == null) return true;
             await CalculateReadingListAgeRating(readingList);
             await CalculateStartAndEndDates(readingList);
+            unitOfWork.ReadingListRepository.Update(readingList);
 
             if (!unitOfWork.HasChanges()) return true;
             return await unitOfWork.CommitAsync();
@@ -195,6 +196,7 @@ public class ReadingListService(
     {
         var readingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
         if (readingList == null) return false;
+        var previousItemCount = readingList.Items.Count;
         readingList.Items = readingList.Items.Where(r => r.Id != dto.ReadingListItemId).OrderBy(r => r.Order).ToList();
 
         var index = 0;
@@ -206,6 +208,11 @@ public class ReadingListService(
 
         await CalculateReadingListAgeRating(readingList);
         await CalculateStartAndEndDates(readingList);
+
+        if (readingList.Items.Count < previousItemCount)
+        {
+            unitOfWork.ReadingListRepository.Update(readingList);
+        }
 
         if (!unitOfWork.HasChanges()) return true;
 

@@ -75,6 +75,7 @@ public class AnnotationService(
 
             var annotation = new AppUserAnnotation()
             {
+                KoboId = Guid.NewGuid().ToString(),
                 XPath = dto.XPath,
                 EndingXPath = dto.EndingXPath,
                 ChapterId = dto.ChapterId,

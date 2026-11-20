@@ -234,6 +234,7 @@ public class MigrationService(IUnitOfWork unitOfWork, DataContext context, IVers
             await new ManualMigrationFixInvalidOnDeckSettings().RunAsync(context, logger);
             await new ManualMigrationClearRootLowestFolderPath().RunAsync(context, logger);
             await new ManualMigrateRemoveLegacyGithubCaches(directoryService).RunAsync(context, logger);
+            await new ManualMigrationBackfillKoboAnnotationIds().RunAsync(context, logger);
             await new ManualMigrateImageFileBackfill(directoryService).RunAsync(context, logger);
             await new ManualMigrateCompositeCovers(backgroundJobClient).RunAsync(context, logger);
             await ManualMigrateImageFileBackfillPart2.Migrate(context, backgroundJobClient, logger);

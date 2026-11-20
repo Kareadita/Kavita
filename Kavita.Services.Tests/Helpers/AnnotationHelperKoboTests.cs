@@ -1,0 +1,213 @@
+using System.Collections.Generic;
+using System.Linq;
+using HtmlAgilityPack;
+using Kavita.Models.Entities;
+using Kavita.Models.Entities.User;
+using Kavita.Services.Helpers;
+
+namespace Kavita.Services.Tests.Helpers;
+
+public class AnnotationHelperKoboTests
+{
+    /// <summary>
+    /// From Spice and Wolf, Vol. 1
+    /// </summary>
+    private const string KoboHtml = """
+                                    <html><body>
+                                    <p><span class="koboSpan" id="kobo.1.1">Lawrence mulled it over. </span><span class="koboSpan" id="kobo.1.2">Holo seemed confident that she could sell the marten pelts higher than he could. </span><span class="koboSpan" id="kobo.1.3">Wisewolf or no, he had seven years of experience as a traveling merchant. </span><span class="koboSpan" id="kobo.1.4">He wasn’t such a weak dealer that a few words tossed in from the side would bring up his prices, and there was no guarantee the buyer would accept such prices.</span></p>
+                                    <p id="p-2"><span class="koboSpan" id="kobo.2.1">Yet his curiosity at exactly how she would attempt this farce overpowered his doubt that it would actually happen, so in the end he said, “Agreed.”</span></p>
+                                    <p><span class="koboSpan" id="kobo.3.1">“It’s done, then!” </span><span class="koboSpan" id="kobo.3.2">replied Holo, burping.</span></p>
+                                    <p><span class="koboSpan" id="kobo.4.1">“But this isn’t just limited to our pelts. </span><span class="koboSpan" id="kobo.4.2">You’re a merchant, too—there may be no chance for me to talk up our price.”</span></p>
+                                    <p><span class="koboSpan" id="kobo.5.1">“How modest of you.”</span></p>
+                                    <p><span class="koboSpan" id="kobo.6.1">“Wisdom is knowing thyself first.”</span></p>
+                                    <p><span class="koboSpan" id="kobo.7.1">The statement would’ve sounded better had she not said it while casting her gaze longingly back toward the remaining pile of apples.</span></p>
+                                    </body></html>
+                                    """;
+
+    public static HtmlDocument Load(string html = KoboHtml)
+    {
+        var doc = new HtmlDocument();
+        doc.LoadHtml(html);
+        return doc;
+    }
+
+    [Fact]
+    public void Test_TryResolveAnchors_AcrossTwoParagraphs()
+    {
+        var doc = Load();
+
+        const string selected = "replied Holo, burping.\n\n“But this isn’t just limited to our pelts. You’re a merchant, too—there may be no chance for me to talk";
+
+        var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[3]", "//body/p[4]", selected, out var start, out var end);
+
+        Assert.True(result);
+
+        // "“It’s done, then!” " is all kobo.3.1, so the start lands at the very beginning of kobo.3.2
+        Assert.Equal(@"span#kobo\.3\.2", start.Path);
+        Assert.Equal(0, start.Offset);
+
+        Assert.Equal(@"span#kobo\.4\.2", end.Path);
+        Assert.Equal("You’re a merchant, too—there may be no chance for me to talk".Length, end.Offset);
+    }
+
+    [Fact]
+    public void Test_TryResolveAnchors_SingleSpan()
+    {
+        var doc = Load();
+
+        var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[1]", "//body/p[1]", "Holo seemed confident", out var start, out var end);
+
+        Assert.True(result);
+        Assert.Equal(@"span#kobo\.1\.2", start.Path);
+        Assert.Equal(0, start.Offset);
+        Assert.Equal(@"span#kobo\.1\.2", end.Path);
+        Assert.Equal("Holo seemed confident".Length, end.Offset);
+    }
+
+    [Fact]
+    public void Test_TryResolveAnchors_SingleParagraphAcrossSpans()
+    {
+        var doc = Load();
+
+        var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[1]", "//body/p[1]", "mulled it over. Holo seemed", out var start, out var end);
+
+        Assert.True(result);
+        Assert.Equal(@"span#kobo\.1\.1", start.Path);
+        Assert.Equal("Lawrence ".Length, start.Offset);
+        Assert.Equal(@"span#kobo\.1\.2", end.Path);
+        Assert.Equal("Holo seemed".Length, end.Offset);
+    }
+
+    [Fact]
+    public void Test_TryResolveAnchors_StartsMidSpan_EndsMidSpan()
+    {
+        var doc = Load();
+
+        var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[5]", "//body/p[6]", "modest of you.”\n\n“Wisdom is knowing", out var start, out var end);
+
+        Assert.True(result);
+        Assert.Equal(@"span#kobo\.5\.1", start.Path);
+        Assert.Equal("“How ".Length, start.Offset);
+        Assert.Equal(@"span#kobo\.6\.1", end.Path);
+        Assert.Equal("“Wisdom is knowing".Length, end.Offset);
+    }
+
+    [Fact]
+    public void Test_TryResolveAnchors_WhitespaceInSelectionIsNormalized()
+    {
+        var doc = Load();
+
+        // Browsers collapse the paragraph break to a single space (or a newline); both must match
+        var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[5]", "//body/p[6]", "you.” “Wisdom", out var start, out var end);
+
+        Assert.True(result);
+        Assert.Equal(@"span#kobo\.5\.1", start.Path);
+        Assert.Equal(@"span#kobo\.6\.1", end.Path);
+        Assert.Equal("“Wisdom".Length, end.Offset);
+    }
+
+    [Fact]
+    public void Test_TryResolveAnchors_OffsetCountsDecodedCharacterReferences()
+    {
+        var doc = Load("<html><body><p><span id=\"kobo.1.1\">Spice &amp; Wolf</span></p></body></html>");
+
+        var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[1]", "//body/p[1]", "Wolf", out var start, out var end);
+
+        Assert.True(result);
+        Assert.Equal(@"span#kobo\.1\.1", start.Path);
+        // "&amp;" is a single character, so "Spice & " is 6 characters, not 10
+        Assert.Equal("Spice & ".Length, start.Offset);
+        Assert.Equal("Spice & Wolf".Length, end.Offset);
+    }
+
+    [Fact]
+    public void Test_TryResolveAnchors_NoIdFallsBackToXPath()
+    {
+        var doc = Load("<html><body><p>Hello</p><p>World</p></body></html>");
+
+        var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[1]", "//body/p[2]", "lo\n\nWor", out var start, out var end);
+
+        Assert.True(result);
+        Assert.Equal("/html[1]/body[1]/p[1]", start.Path);
+        Assert.Equal(3, start.Offset);
+        Assert.Equal("/html[1]/body[1]/p[2]", end.Path);
+        Assert.Equal(3, end.Offset);
+    }
+
+    [Fact]
+    public void Test_TryResolveAnchors_TextNotFound_ReturnsFalse()
+    {
+        var doc = Load();
+
+        var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[3]", "//body/p[4]", "this text is not in the book", out var start, out var end);
+
+        Assert.False(result);
+        Assert.Equal(default, start);
+        Assert.Equal(default, end);
+    }
+
+    [Fact]
+    public void Test_TryResolveAnchors_ElementNotFound_ReturnsFalse()
+    {
+        var doc = Load();
+
+        var result = AnnotationHelper.TryResolveAnchors(doc, "//body/p[99]", "//body/p[4]", "replied Holo", out _, out _);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void BuildKoboAnnotations_UsesHighlightAndNoteTypes()
+    {
+        var doc = Load();
+        var slots = new List<HighlightSlot>
+        {
+            new() { Id = 1, SlotNumber = 0, Color = new RgbaColor { R = 255, A = 1 } }
+        };
+
+        var result = AnnotationHelper.BuildKoboAnnotations("file.xhtml", doc,
+            [MakeAnnotation(1, null), MakeAnnotation(2, "a note")], slots).ToList();
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal("highlight", result[0].Type);
+        Assert.Equal("note", result[1].Type);
+        Assert.True(Guid.TryParse(result[0].Id, out _));
+        Assert.Empty(result[0].Attachments);
+        Assert.Null(result[0].Context);
+
+        static AppUserAnnotation MakeAnnotation(int id, string? comment)
+        {
+            return new AppUserAnnotation
+            {
+                Id = id,
+                KoboId = "11111111-1111-4111-8111-111111111111",
+                XPath = "//body/p[1]",
+                EndingXPath = "//body/p[1]",
+                SelectedText = "Holo seemed confident",
+                SelectedSlotIndex = 0,
+                CommentPlainText = comment,
+                LibraryId = 1,
+                SeriesId = 1,
+                VolumeId = 1,
+                ChapterId = 1,
+                AppUserId = 1,
+            };
+        }
+    }
+
+    [Fact]
+    public void Test_TryResolveAnchors_WithKepubWrapper()
+    {
+        const string kepub = """
+                             <html><body><div id="book-columns"><div id="book-inner"><div class="galley-rw"><section>
+                             <p><span class="koboSpan" id="kobo.1.1">Nico &amp; Tucker</span></p>
+                             </section></div></div></div></body></html>
+                             """;
+        var doc = Load(kepub);
+
+        var result = AnnotationHelper.TryResolveAnchors(doc, "//body/div[1]/section[1]/p[1]", "//body/div[1]/section[1]/p[1]", "Nico & Tucker", out var start, out _);
+
+        Assert.True(result);
+        Assert.Equal(@"span#kobo\.1\.1", start.Path);
+    }
+}

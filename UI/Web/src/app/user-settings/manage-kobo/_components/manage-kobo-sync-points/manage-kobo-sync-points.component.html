@@ -1,0 +1,133 @@
+<ng-container *transloco="let t; prefix: 'manage-kobo'">
+  <div class="setting-section-break"></div>
+
+  <h4 class="mt-4">{{t('kobo-devices-title')}}</h4>
+  <p>{{t('kobo-devices-description')}}</p>
+
+  @if (syncPointsLoading()) {
+    <app-loading [loading]="true" />
+  } @else if (syncPointsError()) {
+    <app-empty-state [isError]="true" [titleKey]="'load-error-title'" [descriptionKey]="'load-error-description'"
+                     [i18nPrefix]="'manage-kobo'">
+      <i icon class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+    </app-empty-state>
+  } @else if (syncPoints().length === 0) {
+    <app-empty-state [titleKey]="'no-devices-title'" [descriptionKey]="'no-devices-description'"
+                     [i18nPrefix]="'manage-kobo'">
+      <i icon class="fa-solid fa-tablet-screen-button" aria-hidden="true"></i>
+    </app-empty-state>
+  } @else {
+    <app-responsive-table [rows]="syncPoints()" [trackByFn]="trackBySyncPoint">
+      <ng-template #tableTemplate>
+        <ngx-datatable
+          class="bootstrap"
+          [rows]="syncPoints()"
+          [columnMode]="'flex'"
+          rowHeight="auto"
+          [footerHeight]="50"
+          [limit]="15"
+        >
+          <ngx-datatable-column prop="deviceId" [sortable]="true" [draggable]="false" [resizeable]="false"
+                                [flexGrow]="3">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('device-id-label')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              <span class="text-break">{{item.deviceId | biTruncate:4}}</span>
+              <button class="btn btn-sm" (click)="copyDeviceId(item)">
+                <i class="fa fa-copy"></i>
+              </button>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column prop="removedChapterIds" [sortable]="false" [draggable]="false" [resizeable]="false"
+                                [flexGrow]="1">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('removed-chapters-label')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              @if (item.removedChapterCount > 0) {
+                <button type="button" class="btn btn-link p-0" container="body"
+                        [ngbTooltip]="t('view-removed-chapters-tooltip')"
+                        [attr.aria-label]="t('view-removed-chapters-alt', {count: item.removedChapterCount})"
+                        (click)="openRemovedChapters(item)">
+                  {{item.removedChapterCount}}
+                </button>
+              } @else {
+                <span class="text-muted">0</span>
+              }
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column prop="lastSync" [sortable]="true" [draggable]="false" [resizeable]="false"
+                                [flexGrow]="2">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('last-sync-label')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              <span container="body" tabindex="0"
+                    [ngbTooltip]="item.lastSync | utcToLocalTime">{{item.lastSync | utcToLocalDate | timeDifference}}</span>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [resizeable]="false"
+                                [flexGrow]="1">
+            <ng-template let-column="column" ngx-datatable-header-template />
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              <div class="float-end">
+                <button type="button" class="btn btn-danger btn-sm" [disabled]="isReadOnly()"
+                        [attr.aria-label]="t('delete-sync-point-alt', {device: item.deviceId})"
+                        (click)="deleteSyncPoint(item)">
+                  <i class="fa fa-trash" aria-hidden="true"></i>
+                </button>
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+        </ngx-datatable>
+      </ng-template>
+
+      <ng-template #cardTemplate let-item>
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <h5 class="card-title mb-0 text-break">
+                {{item.deviceId | biTruncate:4}}
+                <button class="btn btn-sm" (click)="copyDeviceId(item)">
+                  <i class="fa fa-copy"></i>
+                </button>
+              </h5>
+
+              <button type="button" class="btn btn-danger btn-sm" [disabled]="isReadOnly()"
+                      [attr.aria-label]="t('delete-sync-point-alt', {device: item.deviceId})"
+                      (click)="deleteSyncPoint(item)">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+              </button>
+            </div>
+
+            <div class="row g-2">
+              <div class="col-12">
+                <div class="text-muted small">{{t('removed-chapters-label')}}</div>
+                @if (item.removedChapterCount > 0) {
+                  <button type="button" class="btn btn-link p-0"
+                          [attr.aria-label]="t('view-removed-chapters-alt', {count: item.removedChapterCount})"
+                          (click)="openRemovedChapters(item)">
+                    {{item.removedChapterCount}}
+                  </button>
+                } @else {
+                  <span class="text-muted">0</span>
+                }
+              </div>
+
+              <div class="col-12">
+                <div class="text-muted small">{{t('last-sync-label')}}</div>
+                <span container="body" tabindex="0"
+                      [ngbTooltip]="item.lastSync | utcToLocalTime">{{item.lastSync | utcToLocalDate | timeDifference}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </app-responsive-table>
+  }
+
+</ng-container>

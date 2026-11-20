@@ -63,20 +63,11 @@ export class ManageUserPreferencesComponent implements OnInit {
   protected readonly hasDownloadRole = computed(() => {
     return this.accountService.hasAdminRole() || this.accountService.hasDownloadRole();
   });
-  protected readonly koboEnabledRsc = this.settingsService.getKoboEnabledResource();
 
   loading = signal(true);
   ageRatings = signal<AgeRatingDto[]>([]);
   locales = signal<KavitaLocale[]>([]);
   socialLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
-  koboLibrariesTypeaheadSettings = signal<TypeaheadConfig<Library> | null>(null);
-  koboCollectionTypeaheadSettings = signal<TypeaheadConfig<UserCollection> | null>(null);
-
-  koboEnabled = computed(() => {
-    return this.koboEnabledRsc.isLoading() || (this.koboEnabledRsc.hasValue() && this.koboEnabledRsc.value());
-  });
-  protected readonly koboOff = computed(() => this.koboEnabledRsc.hasValue() && !this.koboEnabledRsc.value());
-  protected readonly koboEditable = computed(() => this.koboEnabled() && this.hasDownloadRole());
 
   formModel = signal<Preferences>({
     aniListScrobblingEnabled: false,
@@ -107,9 +98,13 @@ export class ManageUserPreferencesComponent implements OnInit {
     koboSyncPreferences: {
       syncItemLimit: 25,
       forwardToKoboStore: false,
-      allLibraries: false,
+      librarySyncEnabled: false,
       syncLibraries: [],
-      syncCollection: 0
+      readingListSyncEnabled: false,
+      syncReadingLists: [],
+      collectionSyncEnabled: false,
+      syncCollections: [],
+      managedCollection: 0
     },
     theme: {
       id: 0,
@@ -135,11 +130,6 @@ export class ManageUserPreferencesComponent implements OnInit {
     min(path.onDeckProgressDays, 1);
     min(path.onDeckUpdateDays, 1);
     required(path.promptForRereadsAfter);
-
-    disabled(path.koboSyncPreferences, {when: () => !this.koboEditable()})
-    min(path.koboSyncPreferences.syncItemLimit, 25);
-    max(path.koboSyncPreferences.syncItemLimit, 100);
-    disabled(path.koboSyncPreferences.syncLibraries, {when: () => this.formModel().koboSyncPreferences.allLibraries})
   });
 
   selectedLocale = computed(() => {
@@ -173,8 +163,6 @@ export class ManageUserPreferencesComponent implements OnInit {
       collections: this.collectionTagService.allCollections(true)
     }).subscribe(({pref, libraries, ageRatings, collections}) => {
       const socialLibs = this.accountService.userPreferences()?.socialPreferences.socialLibraries ?? [];
-      const syncLibs = pref.koboSyncPreferences.syncLibraries;
-      const selectedCollection = pref.koboSyncPreferences.syncCollection;
 
       this.ageRatings.set([{value: AgeRating.NotApplicable, title: '',}, ...ageRatings]);
       this.socialLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({
@@ -182,19 +170,6 @@ export class ManageUserPreferencesComponent implements OnInit {
         libraries,
         savedData: libraries.filter(l => socialLibs.includes(l.id))
       }));
-      this.koboLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({
-        id: 'kobo-sync-libraries',
-        libraries,
-        savedData: libraries.filter(l => syncLibs.includes(l.id))
-      }));
-      this.koboCollectionTypeaheadSettings.set(this.typeaheadSettingFactory.forCollections({
-        id: 'kobo-collection',
-        collections,
-        savedData: collections.filter(l => selectedCollection == l.id),
-        overrides: {
-          multiple: false
-        }
-      }))
       this.formModel.set(pref);
 
       this.loading.set(false);
@@ -203,14 +178,5 @@ export class ManageUserPreferencesComponent implements OnInit {
 
   syncFormWithTypeahead(libs: Library[] | Library) {
     this.formGroup.socialPreferences.socialLibraries().value.set((libs as Library[]).map(l => l.id));
-  }
-
-  syncKoboSyncLibrariesWithTypeahead(libs: Library[] | Library) {
-    this.formGroup.koboSyncPreferences.syncLibraries().value.set((libs as Library[]).map(l => l.id));
-  }
-
-  syncKoboSyncCollectionWithTypeahead(collections: UserCollection[] | UserCollection) {
-    const collection = (collections as UserCollection[])[0];
-    this.formGroup.koboSyncPreferences.syncCollection().value.set(collection?.id ?? 0);
   }
 }

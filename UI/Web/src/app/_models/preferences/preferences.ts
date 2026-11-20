@@ -51,9 +51,13 @@ export interface OpdsPreferences {
 export interface KoboSyncPreferences {
   syncItemLimit: number;
   forwardToKoboStore: boolean;
-  allLibraries: boolean;
+  librarySyncEnabled: boolean;
   syncLibraries: number[];
-  syncCollection: number;
+  readingListSyncEnabled: boolean;
+  syncReadingLists: number[];
+  collectionSyncEnabled: boolean;
+  syncCollections: number[];
+  managedCollection: number;
 }
 
 export interface KeyBind {

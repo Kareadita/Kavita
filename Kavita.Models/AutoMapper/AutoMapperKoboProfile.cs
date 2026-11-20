@@ -24,17 +24,15 @@ public class AutoMapperKoboProfile: Profile
         CreateMap<Chapter, KoboSeriesDto>()
             .ForMemberSimple(d => d.Id, c => c.Volume.SeriesId.ToString())
             .ForMemberSimple(d => d.Name, c => c.Volume.Series.Name)
-            .ForMemberSimple(d => d.NumberFloat,
-                c => c.Volume.MinNumber == ParserConstants.LooseLeafVolumeNumber
-                    ? 0
-                    : c.MinNumber != ParserConstants.DefaultChapterNumber
-                        ? c.MinNumber
-                        : c.Volume.MinNumber == ParserConstants.SpecialVolumeNumber
-                            ? 0
-                            : c.Volume.MinNumber);
+            .ForMemberSimple(d => d.NumberFloat, c => c.SortOrder)
+            .ForMemberSimple(d => d.Number, c =>
+                c.Volume.MinNumber == ParserConstants.LooseLeafVolumeNumber ? c.Range
+                : c.MinNumber != ParserConstants.DefaultChapterNumber ? c.Range
+                    : c.Volume.MinNumber == ParserConstants.SpecialVolumeNumber ? string.Empty
+                        : c.Volume.MinNumber.ToString());
 
         CreateMap<Chapter, KoboBookMetadataDto>()
-            .ForMemberSimple(d => d.Title, c => c.TitleName)
+            .ForMemberSimple(d => d.Title, c => string.IsNullOrEmpty(c.TitleName) ? c.Title : c.TitleName)
             .ForMemberSimple(d => d.LibraryType, c => c.Volume.Series.Library.Type)
             .ForMemberSimple(d => d.WorkId, c => c.Id.ToString())
             .ForMemberSimple(d => d.CoverImageId, c => c.Id.ToString())
@@ -62,7 +60,7 @@ public class AutoMapperKoboProfile: Profile
             .ForMemberSimple(d => d.Id, c => c.Id.ToString())
             .ForMemberSimple(d => d.CrossRevisionId, c => c.Id.ToString())
             .ForMemberSimple(d => d.ImageId, c => c.Id.ToString())
-            .ForMemberSimple(d => d.Title, c => c.TitleName)
+            .ForMemberSimple(d => d.Title, c => string.IsNullOrEmpty(c.TitleName) ? c.Title : c.TitleName)
             .ForMemberSimple(d => d.Description, c => c.Summary)
             .ForMemberSimple(d => d.Language, c => c.Language ?? "en")
             .ForMember(d => d.Locale, opt => opt.MapFrom(c => new KoboLocaleDto
@@ -91,7 +89,7 @@ public class AutoMapperKoboProfile: Profile
             .ForMemberSimple(d => d.WorkId, c => c.Id.ToString())
             .ForMemberSimple(d => d.CrossRevisionId, c => c.Id.ToString())
             .ForMemberSimple(d => d.ImageId, c => c.Id.ToString())
-            .ForMemberSimple(d => d.Title, c => c.TitleName)
+            .ForMemberSimple(d => d.Title, c => string.IsNullOrEmpty(c.TitleName) ? c.Title : c.TitleName)
             .ForMemberSimple(d => d.Description, c => c.Summary)
             .ForMemberSimple(d => d.Language, c => string.IsNullOrEmpty(c.Language) ? "en" : c.Language)
             .ForMemberSimple(d => d.Locale, c => new KoboLocaleDto

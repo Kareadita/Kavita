@@ -17,6 +17,7 @@ using Kavita.Models.DTOs.KavitaPlus.Account;
 using Kavita.Models.DTOs.KavitaPlus.Manage;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
+using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.MediaErrors;
 using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Person;
@@ -35,6 +36,7 @@ using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
+using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Person;
@@ -42,6 +44,7 @@ using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Extensions;
 using Kavita.Models.Parser;
 
 namespace Kavita.Models.AutoMapper;
@@ -447,6 +450,11 @@ public class AutoMapperProfiles : Profile
         CreateMap<AppUserAuthKey, AuthKeyDto>();
         CreateMap<AppUserScrobbleProvider, ScrobbleProviderDto>();
         CreateMap<AppUserRating, UserRatingAndReviewDto>();
+
+        CreateMap<KoboSyncPoint, KoboSyncPointDto>()
+            .ForMemberSimple(dest => dest.DeviceId, src => src.KoboDeviceId)
+            .ForMemberSimple(dest => dest.RemovedChapterCount, src => src.RemovedChapterIds.Count)
+            .ForMemberSimple(dest => dest.LastSync, src => new[] { src.ProgressSyncTime, src.ChapterSyncTime }.Max());
 
 
     }

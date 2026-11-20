@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.ReadingLists;
@@ -80,6 +82,21 @@ public sealed class LocalizedNamingContext
         ChapterLabel = chapterLabel;
         IssueLabel = issueLabel;
         BookLabel = bookLabel;
+    }
+
+    public static async Task<Dictionary<LibraryType, LocalizedNamingContext>> CreateAsync(
+        IEntityNamingService namingService,
+        ILocalizationService localizationService,
+        int userId,
+        List<LibraryType> libraryTypes)
+    {
+        var namingContexts = new Dictionary<LibraryType, LocalizedNamingContext>();
+        foreach (var libraryType in libraryTypes.Distinct())
+        {
+            namingContexts[libraryType] = await CreateAsync(namingService, localizationService, userId, libraryType);
+        }
+
+        return namingContexts;
     }
 
     public static async Task<LocalizedNamingContext> CreateAsync(

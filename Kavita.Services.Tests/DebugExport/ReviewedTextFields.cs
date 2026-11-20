@@ -17,6 +17,7 @@ public static class ReviewedTextFields
         "AppUserAnnotation.EndingXPath",
         "AppUserAnnotation.SelectedText",
         "AppUserAnnotation.XPath",
+        "AppUserAnnotation.KoboId",
         "AppUserAuthKey.Name",
         "AppUserBookmark.ChapterTitle",
         "AppUserBookmark.FileName",

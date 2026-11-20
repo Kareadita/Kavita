@@ -7,13 +7,13 @@ namespace Kavita.Services.Helpers.Kobo;
 
 public static class KoboSyncTokenHelper
 {
-    private const string TokenPrefix = "kavita.";
+    internal const string TokenPrefix = "kavita.";
 
-    public static KoboSyncToken Decode(string? token)
+    public static KoboSyncTokenDecodeResult Decode(string? token)
     {
         if (string.IsNullOrEmpty(token))
         {
-            return new KoboSyncToken();
+            return new KoboSyncTokenDecodeResult();
         }
 
         try
@@ -21,7 +21,17 @@ public static class KoboSyncTokenHelper
             if (token.StartsWith(TokenPrefix))
             {
                 var decodedBase64 = Encoding.UTF8.GetString(Convert.FromBase64String(token[TokenPrefix.Length..]));
-                return JsonSerializer.Deserialize<KoboSyncToken>(decodedBase64) ?? new KoboSyncToken();
+                var legacy = JsonSerializer.Deserialize<LegacyToken>(decodedBase64);
+
+                return new KoboSyncTokenDecodeResult
+                {
+                    Token = new KoboSyncToken
+                    {
+                        Version = legacy?.Version ?? 1,
+                        SyncPointId = legacy?.SyncPointId,
+                    },
+                    KoboStoreSyncToken = legacy?.KoboStoreSyncToken,
+                };
             }
 
             // CalibreWeb token
@@ -37,7 +47,7 @@ public static class KoboSyncTokenHelper
 
                     if (!string.IsNullOrEmpty(koboStoreSyncToken))
                     {
-                        return new KoboSyncToken { KoboStoreSyncToken = koboStoreSyncToken, };
+                        return new KoboSyncTokenDecodeResult { KoboStoreSyncToken = koboStoreSyncToken, };
                     }
                 }
                 catch
@@ -46,20 +56,30 @@ public static class KoboSyncTokenHelper
                 }
             }
 
-            return new KoboSyncToken { KoboStoreSyncToken = token };
+            return new KoboSyncTokenDecodeResult { KoboStoreSyncToken = token };
         }
         catch
         {
             /* Swallow */
         }
 
-        return new KoboSyncToken();
+        return new KoboSyncTokenDecodeResult();
     }
 
-    public static string Encode(KoboSyncToken token)
+    public static string Encode(int syncPointId)
     {
-        var s = JsonSerializer.Serialize(token);
+        var s = JsonSerializer.Serialize(new KoboSyncToken { SyncPointId = syncPointId });
         return TokenPrefix + Convert.ToBase64String(Encoding.UTF8.GetBytes(s));
+    }
+
+    /// <summary>
+    /// Token from before header fix. See https://github.com/Kareadita/Kavita/issues/5008#issuecomment-6728032994
+    /// </summary>
+    private sealed record LegacyToken
+    {
+        public int Version { get; set; } = 1;
+        public string? KoboStoreSyncToken { get; set; }
+        public int? SyncPointId { get; set; }
     }
 
 }

@@ -17,6 +17,8 @@ export class ClientDeviceAuthTypePipe implements PipeTransform {
         return translate('client-device-auth-type-pipe.auth-key');
       case AuthenticationType.OIDC:
         return translate('client-device-auth-type-pipe.oidc');
+      case AuthenticationType.Kobo:
+        return translate('client-device-auth-type-pipe.kobo');
     }
   }
 

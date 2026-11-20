@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.History;
+using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Person;
@@ -91,6 +92,8 @@ public interface IDataContext : IDisposable
     DbSet<KavitaPlusAuditLog> KavitaPlusAuditLogs { get; }
 
     DbSet<ScrobbleRuleHistory> ScrobbleRuleHistory { get; }
+
+    public DbSet<KoboSyncPoint> KoboSyncPoints { get; }
 
     // Change Tracking and Saving
     ChangeTracker ChangeTracker { get; }

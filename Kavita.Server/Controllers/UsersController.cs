@@ -13,6 +13,7 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.KavitaPlus.Account;
+using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Authorization;
@@ -157,6 +158,10 @@ public class UsersController(
 
         var allLibs = (await unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id, ct))
             .Select(l => l.Id).ToList();
+        var allCollections = (await unitOfWork.CollectionTagRepository.GetCollectionsForUserAsync(user.Id, true, ct: ct))
+            .Select(l => l.Id).ToList();
+        var allReadingLists = (await unitOfWork.ReadingListRepository.GetReadingListsForUserAsync(user.Id, true, ct: ct))
+            .Select(l => l.Id).ToList();
 
         preferencesDto.SocialPreferences.SocialLibraries = preferencesDto.SocialPreferences.SocialLibraries
             .Where(allLibs.Contains).ToList();
@@ -164,15 +169,34 @@ public class UsersController(
 
         existingPreferences.OpdsPreferences = preferencesDto.OpdsPreferences;
 
-        if (preferencesDto.KoboSyncPreferences.IsSyncingCollection && !await unitOfWork.UserRepository.HasAccessToCollection(user.Id,
-                preferencesDto.KoboSyncPreferences.SyncCollection, false, ct))
+        #region Kobo Preferences
+
+        if (preferencesDto.KoboSyncPreferences.HasManagedCollection && !allCollections.Contains(preferencesDto.KoboSyncPreferences.ManagedCollection))
         {
             return BadRequest();
         }
 
-        existingPreferences.KoboSyncPreferences = preferencesDto.KoboSyncPreferences;
-        existingPreferences.KoboSyncPreferences.SyncLibraries = existingPreferences.KoboSyncPreferences.SyncLibraries
+        var koboPreferences = existingPreferences.KoboSyncPreferences;
+
+        koboPreferences.SyncItemLimit =  preferencesDto.KoboSyncPreferences.SyncItemLimit;
+        koboPreferences.ManagedCollection = preferencesDto.KoboSyncPreferences.ManagedCollection;
+        koboPreferences.ForwardToKoboStore = preferencesDto.KoboSyncPreferences.ForwardToKoboStore;
+
+        koboPreferences.LibrarySyncEnabled = preferencesDto.KoboSyncPreferences.LibrarySyncEnabled;
+        koboPreferences.SyncLibraries = preferencesDto.KoboSyncPreferences.SyncLibraries
             .Where(allLibs.Contains).ToList();
+
+        koboPreferences.CollectionSyncEnabled = preferencesDto.KoboSyncPreferences.CollectionSyncEnabled;
+        koboPreferences.SyncCollections = preferencesDto.KoboSyncPreferences.SyncCollections
+            .Where(allCollections.Contains).ToList();
+
+        koboPreferences.ReadingListSyncEnabled = preferencesDto.KoboSyncPreferences.ReadingListSyncEnabled;
+        koboPreferences.SyncReadingLists = preferencesDto.KoboSyncPreferences.SyncReadingLists
+            .Where(allReadingLists.Contains).ToList();
+
+        #endregion
+
+
 
         if (preferencesDto.Theme != null && existingPreferences.Theme.Id != preferencesDto.Theme?.Id)
         {
@@ -203,6 +227,54 @@ public class UsersController(
         var ct = HttpContext.RequestAborted; // TODO: Why isn't this a Project?
         return mapper.Map<UserPreferencesDto>(
             await unitOfWork.UserRepository.GetPreferencesAsync(Username!, ct));
+    }
+
+    /// <summary>
+    /// Returns all sync points for the currently active user
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("kobo-sync-points")]
+    public async Task<List<KoboSyncPointDto>> GetKoboSyncPoints()
+    {
+        var syncPoints = await unitOfWork.KoboSyncPointRepository.GetSyncPoints(UserId, HttpContext.RequestAborted);
+        return syncPoints;
+    }
+
+    /// <summary>
+    /// Delete a kobo sync point. By id
+    /// </summary>
+    /// <param name="syncPointId"></param>
+    /// <returns></returns>
+    [HttpDelete("kobo-sync-point")]
+    public async Task<ActionResult> DeleteKoboSyncPoint(int syncPointId)
+    {
+        await unitOfWork.KoboSyncPointRepository.DeleteSyncPoint(UserId, syncPointId, HttpContext.RequestAborted);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Undo removal of books for the given sync point
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("kobo-sync-point/undo-remove-books")]
+    public async Task<ActionResult> UndoRemoveBooks(UndoKoboRemoveBookDto dto)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        var syncPoint = await unitOfWork.KoboSyncPointRepository.GetSyncPoint(UserId, dto.SyncPointId, ct);
+        if (syncPoint == null)
+        {
+            return NotFound();
+        }
+
+        syncPoint.RemovedChapterIds = syncPoint.RemovedChapterIds
+            .Where(rc => !dto.UndoBookIds.Contains(rc.ChapterId))
+            .ToList();
+
+        await unitOfWork.CommitAsync(ct);
+
+        return Ok();
     }
 
     /// <summary>

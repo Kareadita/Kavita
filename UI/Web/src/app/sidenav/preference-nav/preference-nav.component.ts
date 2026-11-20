@@ -74,6 +74,7 @@ export enum SettingsTabId {
   Customize = 'customize',
   CBLImport = 'cbl-import',
   RemapRules = 'remap-rules',
+  Kobo = 'kobo',
 }
 
 export enum SettingSectionId {
@@ -252,6 +253,7 @@ export class PreferenceNavComponent implements AfterViewInit {
           new SideNavItem(SettingsTabId.ReadingProfiles),
           new SideNavItem(SettingsTabId.Customize, [], undefined, [Role.ReadOnly]),
           new SideNavItem(SettingsTabId.Clients),
+          new SideNavItem(SettingsTabId.Kobo),
           new SideNavItem(SettingsTabId.Theme),
           new SideNavItem(SettingsTabId.Font),
           new SideNavItem(SettingsTabId.Devices),

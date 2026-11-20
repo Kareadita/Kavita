@@ -55,7 +55,7 @@ public interface ICollectionTagRepository
     /// <paramref name="onlyMissing"/>, those whose cover Kavita built
     /// </summary>
     Task<IList<int>> GetCompositeCoverIdsAsync(bool onlyMissing, CancellationToken ct = default);
-    Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
+    Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, bool includePromoted, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
     Task UpdateCollectionAgeRating(AppUserCollection tag, CancellationToken ct = default);
     Task<IEnumerable<AppUserCollection>> GetCollectionsByIds(IEnumerable<int> tags, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
     Task<IList<AppUserCollection>> GetAllCollectionsForSyncing(DateTime expirationTime, CancellationToken ct = default);

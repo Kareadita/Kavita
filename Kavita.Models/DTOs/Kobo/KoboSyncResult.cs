@@ -16,4 +16,13 @@ public sealed record KoboSyncItem
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public KoboWrappedReadingStateDto? ChangedReadingState { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public KoboWrappedTagDto? NewTag { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public KoboWrappedTagDto? ChangedTag { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public KoboWrappedTagDto? DeletedTag { get; init; }
 }
