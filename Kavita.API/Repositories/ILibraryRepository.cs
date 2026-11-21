@@ -19,7 +19,8 @@ public enum LibraryIncludes
     AppUser = 1 << 2,
     Folders = 1 << 3,
     FileTypes = 1 << 4,
-    ExcludePatterns = 1 << 5
+    ExcludePatterns = 1 << 5,
+    CoverImageFile = 1 << 6,
 }
 
 public interface ILibraryRepository
@@ -45,8 +46,6 @@ public interface ILibraryRepository
     IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds, CancellationToken ct = default);
     Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders, CancellationToken ct = default);
     Task<string?> GetLibraryCoverImageAsync(int libraryId, CancellationToken ct = default);
-    Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default);
-    Task<IList<Library>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, CancellationToken ct = default);
     Task<bool> GetAllowsScrobblingBySeriesId(int seriesId, CancellationToken ct = default);
 
     Task<IDictionary<int, LibraryType>> GetLibraryTypesBySeriesIdsAsync(IList<int> seriesIds, CancellationToken ct = default);

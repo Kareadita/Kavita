@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
+using Kavita.API.Services;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.SignalR;
 using Kavita.Database;
@@ -79,7 +80,8 @@ public class SmartCollectionSyncServiceTests(ITestOutputHelper outputHelper) : A
             Substitute.For<ILogger<SmartCollectionSyncService>>(),
             Substitute.For<IEventHub>(),
             Substitute.For<ILicenseService>(),
-            _auditService);
+            _auditService,
+            Substitute.For<ICompositeCoverService>());
     }
 
     private async Task<AppUserCollection> GetCollection(IUnitOfWork unitOfWork)

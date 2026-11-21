@@ -18,10 +18,6 @@ export interface User extends IHasCover {
   scrobbleEventGenerationRan: string; // datetime
   identityProvider: IdentityProvider;
   authKeys: AuthKey[];
-
-  coverImage?: string;
-  primaryColor: string;
-  secondaryColor: string;
 }
 
 export enum IdentityProvider {

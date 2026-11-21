@@ -21,6 +21,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Extensions;
+using Kavita.Models.DTOs.Theme;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Database.Repositories;
@@ -46,27 +47,31 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         context.Add(list);
     }
 
-    public async Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default)
+    public async Task<IList<ImageFile>> GetItemCoverFilesAsync(int readingListId, CancellationToken ct = default)
     {
-        return (await context.ReadingList
-            .Select(t => t.CoverImage)
-            .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync(ct))!;
+        return await context.ReadingListItem
+            .AsNoTracking()
+            .Where(ri => ri.ReadingListId == readingListId && ri.Chapter.CoverImageFile != null)
+            .Select(ri => ri.Chapter.CoverImageFile!)
+            .ToListAsync(ct);
     }
 
-    public async Task<IList<string>> GetRandomCoverImagesAsync(int readingListId, CancellationToken ct = default)
+    public async Task<IList<int>> GetCompositeCoverIdsAsync(bool onlyMissing, CancellationToken ct = default)
     {
-        var random = new Random();
-        var data = await context.ReadingList
-                .Where(r => r.Id == readingListId)
-                .SelectMany(r => r.Items.Select(ri => ri.Chapter.CoverImage))
-                .Where(t => !string.IsNullOrEmpty(t))
-                .ToListAsync(ct);
+        return await context.ReadingList
+            .Where(r => !r.CoverImageLocked)
+            .Where(r => (r.CoverImageFileId == null && r.Items.Any(ri => ri.Chapter.CoverImageFileId != null))
+                        || (!onlyMissing && r.CoverImageFile!.Origin == ImageOrigin.Composite))
+            .Select(r => r.Id)
+            .ToListAsync(ct);
+    }
 
-        return data
-            .OrderBy(_ => random.Next())
-            .Take(4)
-            .ToList();
+    public async Task<string?> GetCoverImageAsync(int collectionTagId, CancellationToken ct = default)
+    {
+        return await context.ReadingList
+            .Where(r => r.Id == collectionTagId && r.CoverImageFileId != null)
+            .Select(r => r.CoverImageFile!.FileName)
+            .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
 
@@ -160,15 +165,6 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         }
 
         return cast;
-    }
-
-    public async Task<IList<ReadingList>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
-        CancellationToken ct = default)
-    {
-        var extension = encodeFormat.GetExtension();
-        return await context.ReadingList
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
-            .ToListAsync(ct);
     }
 
 
@@ -610,5 +606,13 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
             ReadingListFilterField.MissingItemCount => query.HasMissingCount(true, statement.Comparison, (int) value),
             _ => throw new ArgumentOutOfRangeException(nameof(statement.Field), $"Unexpected value for field: {statement.Field}")
         };
+    }
+
+    public async Task<ColorScapeDto?> GetColorScapeAsync(int readingListId, CancellationToken ct = default)
+    {
+        return await context.ReadingList
+            .Where(r => r.Id == readingListId && r.CoverImageFile != null)
+            .Select(r => new ColorScapeDto(r.CoverImageFile!.PrimaryColor, r.CoverImageFile.SecondaryColor))
+            .FirstOrDefaultAsync(ct);
     }
 }

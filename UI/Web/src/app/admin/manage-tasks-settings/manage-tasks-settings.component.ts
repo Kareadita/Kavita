@@ -58,6 +58,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   taskBackup = signal('');
   taskCleanup = signal('');
   taskCblSync = signal('');
+  taskCompositeCovers = signal('');
 
   cleanupFrequencies: CronFrequency[] = [CronFrequency.Daily, CronFrequency.Weekly, CronFrequency.Custom];
 
@@ -134,6 +135,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   private readonly taskBackup$ = toObservable(this.taskBackup);
   private readonly taskCleanup$ = toObservable(this.taskCleanup);
   private readonly taskCblSync$ = toObservable(this.taskCblSync);
+  private readonly taskCompositeCovers$ = toObservable(this.taskCompositeCovers);
 
   ngOnInit(): void {
     this.settingsService.getServerSettings().subscribe(settings => {
@@ -143,17 +145,19 @@ export class ManageTasksSettingsComponent implements OnInit {
       this.taskBackup.set(settings.taskBackup);
       this.taskCleanup.set(settings.taskCleanup);
       this.taskCblSync.set(settings.taskCblSync);
+      this.taskCompositeCovers.set(settings.taskCompositeCovers);
 
       combineLatest([
         this.taskScan$,
         this.taskBackup$,
         this.taskCleanup$,
-        this.taskCblSync$
+        this.taskCblSync$,
+        this.taskCompositeCovers$
       ]).pipe(
         skip(1), // Skips the initial values being saved so we avoid a save with no changes
         debounceTime(500),
-        switchMap(([scan, backup, cleanup, cblSync]) => {
-          const data = this.packData(scan, backup, cleanup, cblSync);
+        switchMap(([scan, backup, cleanup, cblSync, compositeCovers]) => {
+          const data = this.packData(scan, backup, cleanup, cblSync, compositeCovers);
           return this.settingsService.updateServerSettings(data).pipe(catchError(err => {
             console.error(err);
             return of(null);
@@ -175,12 +179,13 @@ export class ManageTasksSettingsComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  packData(scan: string, backup: string, cleanup: string, cblSync: string) {
+  packData(scan: string, backup: string, cleanup: string, cblSync: string, compositeCovers: string) {
     const modelSettings = Object.assign({}, this.serverSettings);
     modelSettings.taskScan = scan;
     modelSettings.taskBackup = backup;
     modelSettings.taskCleanup = cleanup;
     modelSettings.taskCblSync = cblSync;
+    modelSettings.taskCompositeCovers = compositeCovers;
     return modelSettings;
   }
 

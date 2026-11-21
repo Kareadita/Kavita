@@ -28,7 +28,7 @@ public class FolderValidationServiceTests : IDisposable
         Directory.CreateDirectory(_folder);
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
         var archiveService = new ArchiveService(Substitute.For<ILogger<ArchiveService>>(), directoryService,
-            Substitute.For<IImageService>(), Substitute.For<IMediaErrorService>());
+            Substitute.For<IMediaErrorService>());
         _service = new FolderValidationService(Substitute.For<IUnitOfWork>(), archiveService, directoryService, _eventHub,
             Substitute.For<ILogger<FolderValidationService>>());
     }

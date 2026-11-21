@@ -5,6 +5,7 @@ using HtmlAgilityPack;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Images;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
 using VersOne.Epub;
@@ -14,7 +15,11 @@ namespace Kavita.API.Services;
 public interface IBookService
 {
     int GetNumberOfPages(string filePath);
-    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
+    /// <summary>
+    /// Opens an epub's cover image (the OPF cover, else an image named like a cover, else the first image) or renders a
+    /// PDF's first page. Null when the file cannot be read or has no image, after filing a media issue
+    /// </summary>
+    OpenedCover? OpenCover(string fileFilePath);
     /// <param name="strictOpenError">Set when an epub only opened with lenient parsing, why the strict open failed</param>
     /// <exception cref="System.Exception">The file or its metadata cannot be read</exception>
     ComicInfo? GetComicInfo(string filePath, out string? strictOpenError);

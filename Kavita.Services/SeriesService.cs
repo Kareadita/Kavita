@@ -423,8 +423,7 @@ public class SeriesService(
                 MalId =  personDto.MalId,
                 HardcoverId = personDto.HardcoverId,
                 Description = personDto.Description,
-                Asin = personDto.Asin,
-                CoverImage = personDto.CoverImage,
+                Asin = personDto.Asin
             };
 
             peopleToAdd.Add(newPerson);

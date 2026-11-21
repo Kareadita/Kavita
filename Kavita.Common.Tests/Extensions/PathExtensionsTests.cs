@@ -93,4 +93,45 @@ public class PathExtensionsTests
     }
 
     #endregion
+
+    #region SanitizeFileName
+
+    [Theory]
+    [InlineData("Civil War.cbl", "Civil War.cbl")]
+    [InlineData("Marvel – 日本.cbl", "Marvel – 日本.cbl")]
+    [InlineData("a/b.cbl", "b.cbl")]
+    [InlineData(@"..\..\kavita.cbl", "kavita.cbl")]
+    [InlineData("../../config/kavita.db", "kavita.db")]
+    [InlineData("list\n.cbl", "list.cbl")]
+    [InlineData("..", "")]
+    [InlineData(".", "")]
+    [InlineData("folder/", "")]
+    [InlineData("", "")]
+    public void SanitizeFileName_KeepsOnlyABareName(string input, string expected)
+    {
+        Assert.Equal(expected, input.SanitizeFileName());
+    }
+
+    #endregion
+
+    #region UrlFilePath
+
+    [Theory]
+    [InlineData("https://x.invalid/lists/Civil%20War.cbl?dl=1", "/lists/Civil War.cbl")]
+    [InlineData("https://x.invalid/a%2Fb.cbl", "/a/b.cbl")]
+    [InlineData("https://x.invalid/", "/")]
+    [InlineData("not a url", "")]
+    [InlineData("", "")]
+    public void UrlFilePath_ReturnsTheDecodedPath(string input, string expected)
+    {
+        Assert.Equal(expected, input.UrlFilePath());
+    }
+
+    [Fact]
+    public void UrlFilePath_EncodedTraversal_SanitizesToABareName()
+    {
+        Assert.Equal("kavita.cbl", "https://x.invalid/a/..%2F..%2Fkavita.cbl".UrlFilePath().SanitizeFileName());
+    }
+
+    #endregion
 }

@@ -26,6 +26,10 @@ public interface IDirectoryService
     string TemplateDirectory { get; }
     string PublisherDirectory { get; }
     /// <summary>
+    /// Holds db file while pre- / post-migrations are running in case of restoration
+    /// </summary>
+    string MigrationDirectory { get; }
+    /// <summary>
     /// Used for caching documents that may need to stay on disk for more than a day
     /// </summary>
     string LongTermCacheDirectory { get; }
@@ -68,6 +72,11 @@ public interface IDirectoryService
     IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly);
     bool ExistOrCreate(string directoryPath);
     void DeleteFiles(IEnumerable<string> files);
+    /// <summary>
+    /// Deletes <paramref name="path"/>, logging a warning instead of throwing when the file is in use or not allowed
+    /// </summary>
+    /// <returns>False when the file is still there</returns>
+    bool DeleteFileQuietly(string path);
     void CopyFile(string sourcePath, string destinationPath, bool overwrite = true);
     void RemoveNonImages(string directoryName);
     void Flatten(string directoryName);

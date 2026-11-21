@@ -28,7 +28,7 @@ public static class ManualMigrateBookReadingProgress
     /// </summary>
     private const string ReplacementScope = "//BODY/DIV[1]";
 
-    public static async Task Migrate(DataContext context, IUnitOfWork unitOfWork, ILogger<Program> logger)
+    public static async Task Migrate(DataContext context, IUnitOfWork unitOfWork, ILogger logger)
     {
         if (await context.ManualMigrationHistory.AnyAsync(m => m.Name == "ManualMigrateBookReadingProgress"))
         {

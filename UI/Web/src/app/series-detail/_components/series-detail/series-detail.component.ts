@@ -136,6 +136,8 @@ import {ServerService} from "../../../_services/server.service";
 import {
   GenericListModalComponent
 } from "../../../statistics/_components/_modals/generic-list-modal/generic-list-modal.component";
+import {ColorscapeService} from "../../../_services/colorscape.service";
+import {ColorScapeKind} from "../../../_models/theme/colorscape";
 
 interface StoryLineItem {
   chapter?: ChapterCardEntity;
@@ -184,6 +186,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   protected readonly navService = inject(NavService);
   protected readonly readerService = inject(ReaderService);
   protected readonly themeService = inject(ThemeService);
+  private readonly colorScapeService = inject(ColorscapeService);
   protected readonly annotationService = inject(AnnotationService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly scrobbleService = inject(ScrobblingService);
@@ -559,7 +562,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
       } else if (event.event === EVENTS.CoverUpdate) {
         const coverUpdateEvent = event.payload as CoverUpdateEvent;
         if (coverUpdateEvent.id === this.seriesId() && coverUpdateEvent.entityType === 'series') {
-          this.themeService.refreshColorScape('series', this.seriesId()).subscribe();
+          this.colorScapeService.loadColorScape(ColorScapeKind.Series, this.seriesId()).subscribe();
         }
       } else if (event.event === EVENTS.ChapterRemoved) {
         const removedEvent = event.payload as ChapterRemovedEvent;
@@ -685,7 +688,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
     this.setContinuePoint();
 
-    this.themeService.setColorScape(this.series().primaryColor, this.series().secondaryColor);
+    this.colorScapeService.loadColorScape(ColorScapeKind.Series, this.seriesId()).subscribe();
 
     if (loadExternal) {
       this.loadPlusMetadata(this.seriesId(), this.library().type);

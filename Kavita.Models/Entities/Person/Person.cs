@@ -1,18 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.Entities.Person;
 
-public class Person : IHasCoverImage
+public class Person : IHasLockableCoverImageFile
 {
     public int Id { get; set; }
     public required string Name { get; set; }
     public required string NormalizedName { get; set; }
     public ICollection<PersonAlias> Aliases { get; set; } = [];
 
+    [Obsolete("Use CoverImageFile")]
     public string? CoverImage { get; set; }
+    public int? CoverImageFileId { get; set; }
+    public ImageFile? CoverImageFile { get; set; }
     public bool CoverImageLocked { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string PrimaryColor { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string SecondaryColor { get; set; }
 
     public string Description { get; set; }
@@ -47,11 +53,4 @@ public class Person : IHasCoverImage
     // Relationships
     public ICollection<ChapterPeople> ChapterPeople { get; set; } = [];
     public ICollection<SeriesMetadataPeople> SeriesMetadataPeople { get; set; } = [];
-
-
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
 }

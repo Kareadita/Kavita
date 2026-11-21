@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Xml.Serialization;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.API.Services.Metadata;
 using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.SignalR;
 using Kavita.Models.Builders;
@@ -156,7 +157,8 @@ public class CblTestHelper : IDisposable
             Substitute.For<IDirectoryService>(),
             Substitute.For<IReadingListService>(),
             Substitute.For<IUrlValidationService>(),
-            Substitute.For<IImageService>(),
+            Substitute.For<ICoverDbService>(),
+            Substitute.For<ICompositeCoverService>(),
             Substitute.For<ILogger<CblImportService>>()
         );
     }
@@ -174,7 +176,8 @@ public class CblTestHelper : IDisposable
             directoryService,
             readingListService,
             Substitute.For<IUrlValidationService>(),
-            Substitute.For<IImageService>(),
+            Substitute.For<ICoverDbService>(),
+            Substitute.For<ICompositeCoverService>(),
             Substitute.For<ILogger<CblImportService>>()
         );
     }

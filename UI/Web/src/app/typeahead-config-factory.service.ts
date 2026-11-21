@@ -159,8 +159,7 @@ export class TypeaheadConfigFactoryService {
       .pipe(map(items => settings.compareFn(items, filter)));
 
     settings.addTransformFn = (title) => {
-      const newPerson = {id: 0, name: title, aliases: [], description: '', coverImage: '',
-        coverImageLocked: false, primaryColor: '', secondaryColor: ''};
+      const newPerson = {id: 0, name: title, aliases: [], description: '', coverImageLocked: false, hasCoverImage: false};
       return role ? {role, ...newPerson} : newPerson;
     };
 

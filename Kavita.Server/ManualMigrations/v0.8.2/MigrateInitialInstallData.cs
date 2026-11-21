@@ -18,7 +18,7 @@ namespace Kavita.Server.ManualMigrations.v0._8._2;
 /// </summary>
 public static class MigrateInitialInstallData
 {
-    public static async Task Migrate(DataContext dataContext, ILogger<Program> logger, IDirectoryService directoryService)
+    public static async Task Migrate(DataContext dataContext, ILogger logger, IDirectoryService directoryService)
     {
         if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateInitialInstallData"))
         {

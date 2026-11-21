@@ -13,7 +13,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._1;
 public class ManualMigrationCorrectAuditStatus : ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrationCorrectAuditStatus);
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         await context.KavitaPlusAuditLogs
             .Where(s => s.Status == AuditStatus.Info && (s.ErrorMessage == "series-missing-required-ids" ||

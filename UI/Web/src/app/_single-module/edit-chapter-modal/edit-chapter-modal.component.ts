@@ -80,7 +80,6 @@ interface FormModel extends IHasMetadataIds, PersonFields {
   releaseDate: string;
   genres: Genre[];
   tags: Tag[];
-  coverImage: string;
 
   aniListId: number;
   malId: number;
@@ -154,7 +153,6 @@ export class EditChapterModalComponent implements OnInit {
     aniListId: 0,
     cbrId: 0,
     comicVineId: null,
-    coverImage: '',
     genres: [],
     hardcoverId: 0,
     isbn: '',
@@ -180,10 +178,11 @@ export class EditChapterModalComponent implements OnInit {
 
   protected readonly locks = lockGroup(this.formGroup, () => this.chapter(), [
     'titleName', 'sortOrder', 'isbn', 'ageRating', 'summary',
-    'releaseDate', 'genres', 'tags', 'language', 'coverImage',
+    'releaseDate', 'genres', 'tags', 'language',
   ]);
   protected readonly personLocks = standaloneLocks(() => this.chapter(),
     Object.values(personFields).map(f => f.lock));
+  protected readonly coverLocks = standaloneLocks(() => this.chapter(), ['coverImageLocked']);
 
   protected readonly tagsSettings = computed(() =>
     this.typeaheadSettingsFactory.forTag({id: 'tags', savedData: this.chapter().tags ?? []}));
@@ -194,7 +193,7 @@ export class EditChapterModalComponent implements OnInit {
 
   protected readonly chooserConfig = computed<CoverImageChooserConfig>(() => ({
     ...this.coverChooserConfigFactory.forChapter(this.chapter(), this.libraryType(), this.seriesId()),
-    isLocked: this.locks.coverImage()
+    isLocked: this.coverLocks.coverImageLocked()
   }));
 
   protected readonly tasks = computed(() => this.actionFactoryService.getActionablesForSettingsPage(
@@ -232,7 +231,6 @@ export class EditChapterModalComponent implements OnInit {
       comicVineId: this.chapter().comicVineId,
       mangaBakaId: this.chapter().mangaBakaId,
       cbrId: this.chapter().cbrId,
-      coverImage: this.chapter().coverImage,
       ...personFieldsFrom(this.chapter()),
     });
 
@@ -258,6 +256,7 @@ export class EditChapterModalComponent implements OnInit {
 
     writeFieldLocks(payload, this.locks);
     writeNamedLocks(payload, this.personLocks);
+    writeNamedLocks(payload, this.coverLocks);
 
     this.chapterService.updateChapter(payload).pipe(
       switchMap(vol => this.coverImageDirty
@@ -346,7 +345,7 @@ export class EditChapterModalComponent implements OnInit {
 
   handleReset() {
     this.coverImageReset = true;
-    this.locks.coverImage.set(false);
+    this.coverLocks.coverImageLocked.set(false);
   }
 
   getPersonsSettings(role: PersonRole) {

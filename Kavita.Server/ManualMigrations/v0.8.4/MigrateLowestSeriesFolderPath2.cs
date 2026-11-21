@@ -15,7 +15,7 @@ namespace Kavita.Server.ManualMigrations.v0._8._4;
 /// </summary>
 public static class MigrateLowestSeriesFolderPath2
 {
-    public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, ILogger<Program> logger)
+    public static async Task Migrate(DataContext dataContext, IUnitOfWork unitOfWork, ILogger logger)
     {
         if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateLowestSeriesFolderPath2"))
         {

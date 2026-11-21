@@ -11,7 +11,7 @@ public class ManualMigrationOAuthMigration: ManualMigration
 {
     protected override string MigrationName { get; } = nameof(ManualMigrationOAuthMigration);
 
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         logger.LogWarning("Removing connection details for MangaBaka and Mal, users will need to connect again via the OAuth flow.");
 

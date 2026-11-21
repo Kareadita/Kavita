@@ -47,7 +47,8 @@ public class SeriesController(
     IEasyCachingProviderFactory cachingProviderFactory,
     ILocalizationService localizationService,
     IExternalMetadataService externalMetadataService,
-    IHostEnvironment environment)
+    IHostEnvironment environment,
+    IImageFileService imageFileService)
     : BaseApiController
 {
     private readonly IEasyCachingProvider _externalSeriesCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
@@ -178,7 +179,7 @@ public class SeriesController(
     {
         var ct = HttpContext.RequestAborted;
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id,
-            SeriesIncludes.Metadata | SeriesIncludes.Library, ct);
+            SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.CoverImageFile, ct);
         if (series == null)
             return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
@@ -257,19 +258,8 @@ public class SeriesController(
 
         ExternalMetadataIdHelper.SetExternalMetadataIds(series, updateSeries);
 
-        var needsRefreshMetadata = false;
         // This is when you hit Reset
-        if (series.CoverImageLocked && !updateSeries.CoverImageLocked)
-        {
-            // Trigger a refresh when we are moving from a locked image to a non-locked
-            needsRefreshMetadata = true;
-            series.CoverImage = null;
-            series.CoverImageLocked = false;
-            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Covers);
-            logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null: {SeriesId}", series.Id);
-            series.ResetColorScape();
-
-        }
+        var resetCover = series.CoverImageLocked && !updateSeries.CoverImageLocked;
 
         unitOfWork.SeriesRepository.Update(series);
 
@@ -278,10 +268,15 @@ public class SeriesController(
             return BadRequest(await localizationService.TranslateAsync(UserId, "generic-series-update"));
         }
 
+        if (resetCover)
+        {
+            await imageFileService.ClearCoverAsync(series, ct: ct);
+        }
+
         // Pulls a fresh Series, must be after commit
         await externalMetadataService.UpdateSeriesMetadataProviderOverride(series.Id, updateSeries.MetadataProviderOverride, ct);
 
-        if (needsRefreshMetadata)
+        if (resetCover)
         {
             await taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
         }

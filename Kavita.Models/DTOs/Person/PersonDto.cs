@@ -2,20 +2,18 @@
 using Kavita.Models.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
 using Kavita.Models.Attributes;
+using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.DTOs.Person;
 #nullable enable
 
-public class PersonDto
+public record PersonDto : IHasCoverImageDto
 {
     public int Id { get; set; }
     public required string Name { get; set; }
 
+    public bool HasCoverImage { get; set; }
     public bool CoverImageLocked { get; set; }
-    public string? PrimaryColor { get; set; }
-    public string? SecondaryColor { get; set; }
-
-    public string? CoverImage { get; set; }
     public List<string> Aliases { get; set; } = [];
 
     public string? Description { get; set; }
@@ -53,5 +51,4 @@ public class PersonDto
     /// <remarks>Only present when retrieving from person info endpoint</remarks>
     [EnumCollection(typeof(PersonRole))]
     public IList<PersonRole>? Roles { get; set; } = [];
-
 }

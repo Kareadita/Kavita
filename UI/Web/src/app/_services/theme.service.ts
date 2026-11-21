@@ -25,7 +25,6 @@ import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 import {NgxFileDropEntry} from "ngx-file-drop";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
 import {ColorscapeService} from "./colorscape.service";
-import {ColorScape} from "../_models/theme/colorscape";
 import {AccountService} from "./account.service";
 
 @Injectable({
@@ -208,17 +207,6 @@ export class ThemeService {
    */
   setColorScape(primaryColor: string, complementaryColor: string | null = null) {
     this.colorTransitionService.setColorScape(primaryColor, complementaryColor);
-  }
-
-  /**
-   * Trigger a request to get the colors for a given entity and apply them
-   * @param entity
-   * @param id
-   */
-  refreshColorScape(entity: 'series' | 'volume' | 'chapter' | 'person', id: number) {
-    return this.httpClient.get<ColorScape>(`${this.baseUrl}colorscape/${entity}?id=${id}`).pipe(tap((cs) => {
-      this.setColorScape(cs.primary || '', cs.secondary);
-    }));
   }
 
   /**

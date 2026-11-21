@@ -10,7 +10,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._2;
 public class ManualMigrationUnassignDefaultReadingProfile: ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrationUnassignDefaultReadingProfile);
-    protected override Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override Task ExecuteAsync(DataContext context, ILogger logger)
     {
         return context.AppUserReadingProfiles
             .Where(p => p.Kind == ReadingProfileKind.Default)

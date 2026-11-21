@@ -12,6 +12,8 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Collection;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
+using Kavita.Services.Images;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit.Abstractions;
 
@@ -25,7 +27,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
 
         if (context.AppUserCollection.Any())
         {
-            return new CollectionTagService(unitOfWork, Substitute.For<IEventHub>(), Substitute.For<IDirectoryService>());
+            return CreateService(unitOfWork);
         }
 
         var s1 = new SeriesBuilder("Series 1").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Mature).Build()).Build();
@@ -45,7 +47,14 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
 
         await unitOfWork.CommitAsync();
 
-        return new CollectionTagService(unitOfWork, Substitute.For<IEventHub>(), Substitute.For<IDirectoryService>());
+        return CreateService(unitOfWork);
+    }
+
+    private static CollectionTagService CreateService(IUnitOfWork unitOfWork)
+    {
+        var imageFileService = new ImageFileService(unitOfWork, Substitute.For<IImagePipeline>(),
+            Substitute.For<IDirectoryService>(), Substitute.For<IEventHub>(), Substitute.For<ILogger<ImageFileService>>());
+        return new CollectionTagService(unitOfWork, imageFileService, Substitute.For<ICompositeCoverService>());
     }
 
     #region DeleteTag
@@ -277,7 +286,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
         tag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(1);
         Assert.NotNull(tag);
         Assert.False(tag.CoverImageLocked);
-        Assert.Equal(string.Empty, tag.CoverImage);
+        Assert.Null(tag.CoverImageFileId);
     }
 
     [Fact]

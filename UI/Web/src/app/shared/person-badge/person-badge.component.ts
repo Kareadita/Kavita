@@ -30,7 +30,7 @@ export class PersonBadgeComponent {
   });
 
   hasCoverImage = computed(() => {
-    return this.isStaff() || !!(this.person() as Person).coverImage;
+    return this.isStaff() || !!(this.person() as Person).hasCoverImage;
   });
 
   imageUrl = computed(() => {

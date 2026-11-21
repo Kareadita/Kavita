@@ -13,7 +13,7 @@ namespace Kavita.Server.ManualMigrations.v0._9._1;
 public class ManualMigrateVersionCacheFiles(IDirectoryService directoryService) : ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrateVersionCacheFiles);
-    protected override Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override Task ExecuteAsync(DataContext context, ILogger logger)
     {
         var updateScopePath = Path.Combine(directoryService.LongTermCacheDirectory, "update");
 

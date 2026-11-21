@@ -15,7 +15,7 @@ public class MigrateMissingAppUserRatingDateColumns : ManualMigration
 {
     protected override string MigrationName => nameof(MigrateMissingAppUserRatingDateColumns );
 
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         logger.LogDebug("Checking for missing date columns on AppUserRating table");
 
@@ -84,7 +84,7 @@ public class MigrateMissingAppUserRatingDateColumns : ManualMigration
         await dataContext.Database.ExecuteSqlRawAsync(sql);
     }
 
-    private static async Task BackfillDateColumnsAsync(DataContext dataContext, ILogger<Program> logger, List<string> columnsToBackfill)
+    private static async Task BackfillDateColumnsAsync(DataContext dataContext, ILogger logger, List<string> columnsToBackfill)
     {
         if (columnsToBackfill.Count == 0)
         {

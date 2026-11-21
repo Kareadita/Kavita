@@ -77,11 +77,9 @@ public class TaskSchedulerDuplicateJobTests
     private static TaskScheduler CreateTaskScheduler(IMetadataService metadataService)
     {
         return new TaskScheduler(Substitute.For<ICacheService>(), Substitute.For<ILogger<TaskScheduler>>(),
-            Substitute.For<IScannerService>(), Substitute.For<IUnitOfWork>(), metadataService,
-            Substitute.For<IBackupService>(), Substitute.For<ICleanupService>(), Substitute.For<IStatsService>(),
+            Substitute.For<IScannerService>(), Substitute.For<IUnitOfWork>(), metadataService, Substitute.For<ICleanupService>(), Substitute.For<IStatsService>(),
             Substitute.For<IVersionUpdaterService>(), Substitute.For<IWordCountAnalyzerService>(),
-            Substitute.For<IMediaConversionService>(), Substitute.For<IScrobblingService>(),
-            Substitute.For<ILicenseService>(), Substitute.For<IExternalMetadataService>(),
+            Substitute.For<IScrobblingService>(), Substitute.For<ILicenseService>(), Substitute.For<IExternalMetadataService>(),
             Substitute.For<ISmartCollectionSyncService>(), Substitute.For<IWantToReadSyncService>(), Substitute.For<IEventHub>(),
             Substitute.For<IEmailService>(), Substitute.For<IAuthKeyService>());
     }

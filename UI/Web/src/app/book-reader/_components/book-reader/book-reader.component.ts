@@ -9,12 +9,14 @@ import {
   effect,
   ElementRef,
   EventEmitter,
-  inject, Injector,
+  inject,
+  Injector,
   OnDestroy,
   OnInit,
   Renderer2,
   RendererStyleFlags2,
-  resource, SecurityContext,
+  resource,
+  SecurityContext,
   signal,
   Signal,
   viewChild,
@@ -26,7 +28,7 @@ import {ToastrService} from '@openng/ngx-toastr';
 import {EMPTY, firstValueFrom, forkJoin, fromEvent, merge, of, switchMap} from 'rxjs';
 import {catchError, debounceTime, distinctUntilChanged, filter, take, tap} from 'rxjs/operators';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { Tooltip } from 'bootstrap';
+import {Tooltip} from 'bootstrap';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.component";
 import {BookInfo} from "../../_models/book-info";
@@ -35,7 +37,7 @@ import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {ReadingProfileSessionService} from '../../../_services/reading-profile-session.service';
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
-import {EpubReaderSettingsService, ReaderSettingUpdate} from "../../../_services/epub-reader-settings.service";
+import {EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
 import {ColumnLayoutClassPipe} from "../../_pipes/column-layout-class.pipe";
 import {WritingStyleClassPipe} from "../../_pipes/writing-style-class.pipe";
 import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
@@ -2076,7 +2078,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     // Traverse up from target to find the similar parent with nextSibling
     current = target;
     while (current && current !== root) {
-      let parent: Element | null = current.parentElement;
+      const parent: Element | null = current.parentElement;
 
       if (parent && ancestors.includes(parent)) {
         return current;
@@ -2322,8 +2324,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
       afterFrame(() => {
         // scrollIntoView method will only scroll to the visible area of the element (not including margin)
         // so we need to apply scroll-margin to that element to correctly scroll into it
-        let margin = window.getComputedStyle(element).margin;
-        if(margin !== '0px') element.style.scrollMargin = margin;
+        const margin = window.getComputedStyle(element).margin;
+        if(margin !== '0px') {
+          element.style.scrollMargin = margin;
+        }
 
         this.scrollService.scrollIntoView(element, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}})
       });

@@ -7,13 +7,12 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.User;
-using NotImplementedException = System.NotImplementedException;
 using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs;
 #nullable enable
 
-public sealed record UserDto : IHasCoverImage
+public sealed record UserDto : IHasCoverImageDto
 {
     public int Id { get; init; }
     public string? OidcId { get; init; }
@@ -36,12 +35,5 @@ public sealed record UserDto : IHasCoverImage
     /// </summary>
     public ICollection<AuthKeyDto> AuthKeys { get; set; }
 
-    public string? CoverImage { get; set; }
-    public string? PrimaryColor { get; set; }
-    public string? SecondaryColor { get; set; }
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
+    public bool HasCoverImage { get; set; }
 }

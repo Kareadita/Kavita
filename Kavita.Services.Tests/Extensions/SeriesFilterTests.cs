@@ -56,7 +56,7 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
 
         // Create read progress on Partial and Full
         var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
-            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
+            Substitute.For<IEventHub>(), Substitute.For<IImagePipeline>(),
             Substitute.For<IDirectoryService>(), Substitute.For<IScrobblingService>(),
             Substitute.For<IReadingSessionService>(), Substitute.For<IClientInfoAccessor>(), Substitute.For<IEntityNamingService>(),
             Substitute.For<ILocalizationService>(), Substitute.For<IBookService>());
@@ -197,7 +197,7 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
         await context.SaveChangesAsync();
 
         var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
-            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
+            Substitute.For<IEventHub>(), Substitute.For<IImagePipeline>(),
             Substitute.For<IDirectoryService>(),
             Substitute.For<IScrobblingService>(),
             Substitute.For<IReadingSessionService>(), Substitute.For<IClientInfoAccessor>(), Substitute.For<IEntityNamingService>(),

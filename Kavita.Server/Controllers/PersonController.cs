@@ -29,9 +29,9 @@ public class PersonController(
     ILocalizationService localizationService,
     IMapper mapper,
     ICoverDbService coverDbService,
-    IImageService imageService,
     IEventHub eventHub,
-    IPersonService personService)
+    IPersonService personService,
+    IImageFileService imageFileService)
     : BaseApiController
 {
     [HttpGet]
@@ -133,7 +133,7 @@ public class PersonController(
     {
         var ct = HttpContext.RequestAborted;
         // This needs to get all people and update them equally
-        var person = await unitOfWork.PersonRepository.GetPersonById(dto.Id, PersonIncludes.Aliases, ct);
+        var person = await unitOfWork.PersonRepository.GetPersonById(dto.Id, PersonIncludes.Aliases | PersonIncludes.CoverImageFile, ct);
         if (person == null) return BadRequest(await localizationService.TranslateAsync(UserId, "person-doesnt-exist"));
 
         if (string.IsNullOrEmpty(dto.Name)) return BadRequest(await localizationService.TranslateAsync(UserId, "person-name-required"));
@@ -154,7 +154,7 @@ public class PersonController(
 
 
         person.Description = dto.Description ?? string.Empty;
-        person.CoverImageLocked = dto.CoverImageLocked;
+        await imageFileService.UpdateLockAsync(person, dto.CoverImageLocked, commit: false, ct: ct);
 
         if (dto.MalId is > 0)
         {

@@ -6,6 +6,7 @@ using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
+using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.ReadingLists;
@@ -19,6 +20,7 @@ public enum ReadingListIncludes
     Items = 1 << 1,
     ItemChapter = 1 << 2,
     Tags = 1 << 3,
+    CoverImageFile = 1 << 4,
 }
 
 public interface IReadingListRepository
@@ -39,12 +41,19 @@ public interface IReadingListRepository
         bool includePromoted, CancellationToken ct = default);
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForChapterAndUserAsync(int userId, int chapterId,
         bool includePromoted, CancellationToken ct = default);
-    Task<IList<string>> GetRandomCoverImagesAsync(int readingListId, CancellationToken ct = default);
-    Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default);
+    /// <summary>
+    /// Cover rows of the list's chapters, untracked. Items with no cover are left out
+    /// </summary>
+    Task<IList<ImageFile>> GetItemCoverFilesAsync(int readingListId, CancellationToken ct = default);
+    /// <summary>
+    /// Unlocked reading lists with no cover row and at least one chapter with a cover, plus, unless
+    /// <paramref name="onlyMissing"/>, those whose cover Kavita built
+    /// </summary>
+    Task<IList<int>> GetCompositeCoverIdsAsync(bool onlyMissing, CancellationToken ct = default);
+    Task<string?> GetCoverImageAsync(int collectionTagId, CancellationToken ct = default);
     Task<bool> ReadingListExists(string name, int? readingListId = null, CancellationToken ct = default);
     IEnumerable<PersonDto> GetReadingListPeopleAsync(int readingListId, PersonRole role, CancellationToken ct = default);
     Task<ReadingListCast> GetReadingListAllPeopleAsync(int readingListId, CancellationToken ct = default);
-    Task<IList<ReadingList>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, CancellationToken ct = default);
     Task<int> RemoveReadingListsWithoutSeries(CancellationToken ct = default);
     Task<ReadingList?> GetReadingListByTitleAsync(string name, int userId, ReadingListIncludes includes = ReadingListIncludes.Items, CancellationToken ct = default);
     Task<IEnumerable<ReadingList>> GetReadingListsByIds(IList<int> ids, ReadingListIncludes includes = ReadingListIncludes.Items, CancellationToken ct = default);
@@ -63,4 +72,5 @@ public interface IReadingListRepository
     Task<List<ReadingListTagDto>> GetAllReadingListTagDtosAsync(int userId, CancellationToken ct = default);
     Task<PagedList<ReadingListDto>> GetBrowseReadingListDtos(int userId, ReadingListFilterDto filter, UserParams userParams, CancellationToken ct = default);
     Task<ReadingList?> GetReadingListBySourcePathStemAsync(string sourcePathStem, int userId, ReadingListIncludes includes = ReadingListIncludes.Items, CancellationToken ct = default);
+    Task<ColorScapeDto?> GetColorScapeAsync(int readingListId, CancellationToken ct = default);
 }

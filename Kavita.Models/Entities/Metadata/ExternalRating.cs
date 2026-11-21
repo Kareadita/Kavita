@@ -1,14 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.Entities.Metadata;
+#nullable enable
 
 public class ExternalRating
 {
     public int Id { get; set; }
 
     public int AverageScore { get; set; }
-    public int FavoriteCount { get; set; }
     public ScrobbleProvider Provider { get; set; }
     /// <summary>
     /// Where this rating comes from: Critic or User

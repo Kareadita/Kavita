@@ -23,6 +23,7 @@ using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
 using Kavita.Services.Extensions;
@@ -42,7 +43,6 @@ namespace Kavita.Services;
 public partial class BookService(
     ILogger<BookService> logger,
     IDirectoryService directoryService,
-    IImageService imageService,
     IMediaErrorService mediaErrorService,
     IUnitOfWork unitOfWork)
     : IBookService
@@ -1951,25 +1951,17 @@ public partial class BookService(
         throw new KavitaException("epub-html-missing");
     }
 
-    /// <summary>
-    /// Extracts the cover image to covers directory and returns file path back
-    /// </summary>
-    /// <param name="fileFilePath"></param>
-    /// <param name="fileName">Name of the new file.</param>
-    /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
-    /// <param name="encodeFormat">When saving the file, use encoding</param>
-    /// <returns></returns>
-    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
+    public OpenedCover? OpenCover(string fileFilePath)
     {
-        if (!IsValidFile(fileFilePath)) return string.Empty;
+        if (!IsValidFile(fileFilePath)) return null;
 
         if (Parser.IsPdf(fileFilePath))
         {
-            return GetPdfCoverImage(fileFilePath, fileName, outputDirectory, encodeFormat, size);
+            return OpenPdfCover(fileFilePath);
         }
 
-        using var epubBook = EpubReader.OpenBook(fileFilePath, LenientBookReaderOptions);
-        if (epubBook == null) return string.Empty;
+        var epubBook = EpubReader.OpenBook(fileFilePath, LenientBookReaderOptions);
+        if (epubBook == null) return null;
 
         try
         {
@@ -1978,18 +1970,22 @@ public partial class BookService(
                                     ?? epubBook.Content.Images.Local.FirstOrDefault(file => Parser.IsCoverImage(file.FilePath))
                                     ?? epubBook.Content.Images.Local.FirstOrDefault();
 
-            if (coverImageContent == null) return string.Empty;
-            using var stream = coverImageContent.GetContentStream();
+            if (coverImageContent == null)
+            {
+                epubBook.Dispose();
+                return null;
+            }
 
-            return imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat, size);
+            return new OpenedCover(new ImageSource.FromStream(coverImageContent.GetContentStream()), epubBook);
         }
         catch (Exception ex)
         {
+            epubBook.Dispose();
             logger.LogWarning(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
             mediaErrorService.ReportMediaIssue(fileFilePath, MediaErrorProducer.BookService, MediaErrorReason.CoverFailed, ex);
         }
 
-        return string.Empty;
+        return null;
     }
 
     public static string? GetChapterTitleFromToC(ICollection<BookChapterItem>? tableOfContents, int pageNumber)
@@ -2015,28 +2011,29 @@ public partial class BookService(
     }
 
 
-    private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
+    private OpenedCover? OpenPdfCover(string fileFilePath)
     {
+        Stream? stream = null;
         try
         {
             using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
-            if (docReader.GetPageCount() == 0) return string.Empty;
+            if (docReader.GetPageCount() == 0) return null;
 
-            using var stream = StreamManager.GetStream("BookService.GetPdfPage");
+            stream = StreamManager.GetStream("BookService.GetPdfPage");
             GetPdfPage(docReader, 0, stream);
 
-            return imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat, size);
-
+            return new OpenedCover(new ImageSource.FromStream(stream));
         }
         catch (Exception ex)
         {
+            stream?.Dispose();
             logger.LogWarning(ex,
                 "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image",
                 fileFilePath);
             mediaErrorService.ReportMediaIssue(fileFilePath, MediaErrorProducer.BookService, MediaErrorReason.CoverFailed, ex);
         }
 
-        return string.Empty;
+        return null;
     }
 
     /// <summary>

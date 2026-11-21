@@ -3,6 +3,7 @@ using System.Linq;
 using AutoMapper;
 using Kavita.Models.DTOs;
 using Kavita.Models.Entities;
+using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.AutoMapper;
 
@@ -16,6 +17,7 @@ public class AutoMapperSeriesProfile : Profile
         int userId = 0; // Placeholder, will be replaced at runtime
 
         CreateMap<Series, SeriesDto>()
+            .IncludeBase<IHasCoverImageFile, IHasCoverImageDto>()
             .ForMember(dest => dest.LibraryName,
                 opt => opt.MapFrom(src => src.Library.Name))
             .ForMember(dest => dest.PagesRead,

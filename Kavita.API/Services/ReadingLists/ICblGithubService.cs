@@ -16,7 +16,12 @@ public interface ICblGithubService
     /// </summary>
     Task<string> GetFileSha(string filePath);
     /// <summary>
-    /// Downloads the raw content of a .cbl file by its repo path.
+    /// The listed .cbl/.json file at this repo path, from the cached repo tree
+    /// </summary>
+    /// <exception cref="Kavita.Common.KavitaException">cbl-repo-path-not-found when the path is not a listed file in the tree</exception>
+    Task<CblRepoItemDto> GetFile(string filePath);
+    /// <summary>
+    /// Downloads the raw content of a listed .cbl/.json file by its repo path. Paths outside the repo tree are refused
     /// </summary>
     Task<string> GetFileContent(string filePath);
 }

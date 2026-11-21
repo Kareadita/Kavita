@@ -56,6 +56,7 @@ import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {ColorscapeService} from "../../../_services/colorscape.service";
+import {ColorScapeKind} from "../../../_models/theme/colorscape";
 import {DateYearRangePipe} from "../../../_pipes/date-year-range.pipe";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
@@ -233,9 +234,7 @@ export class ReadingListDetailComponent implements OnInit {
 
     const id = this.readingListId();
 
-    if (this.readingList().coverImage) {
-      this.colorscapeService.setColorScape(this.readingList().primaryColor, this.readingList().secondaryColor);
-    }
+    this.colorscapeService.loadColorScape(ColorScapeKind.ReadingList, id).subscribe();
 
     this.readingListService.getAllPeople(id).subscribe(allPeople => {
       this.castInfo.set(allPeople);

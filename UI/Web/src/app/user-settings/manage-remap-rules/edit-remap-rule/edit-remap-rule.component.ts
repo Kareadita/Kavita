@@ -134,4 +134,8 @@ export class EditRemapRuleComponent implements OnInit {
   private createChapterTypeahead(seriesId: number): TypeaheadConfig<Chapter> {
     return this.typeaheadSettingsFactory.forChapter({id: `remap-chapter-${seriesId}`, seriesId});
   }
+
+  protected getCoverImage(item: Chapter) {
+    return this.imageService.getChapterCoverImage(item.id);
+  }
 }

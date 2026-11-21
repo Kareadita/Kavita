@@ -24,7 +24,10 @@ public class AppUserBookmark : IEntityDate
     /// <summary>
     /// Filename in the Bookmark Directory
     /// </summary>
+    [Obsolete("Use ImageFile")]
     public string FileName { get; set; } = string.Empty;
+    public int? ImageFileId { get; set; }
+    public ImageFile? ImageFile { get; set; }
     /// <summary>
     /// Only applicable for Epubs - handles multiple images on one page
     /// </summary>

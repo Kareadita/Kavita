@@ -64,6 +64,33 @@ public static class PathExtensions
         };
     }
 
+    /// <summary>
+    /// Reduces untrusted input to a bare file name: <c>../../config/kavita.db</c> gives <c>kavita.db</c>.
+    /// Returns empty when no file name is left, for example <c>..</c> or <c>folder/</c>
+    /// </summary>
+    public static string SanitizeFileName(this string? path)
+    {
+        if (string.IsNullOrEmpty(path)) return string.Empty;
+
+        // Linux does not treat '\' as a separator, so a Windows-style name would otherwise keep its folders
+        var name = Path.GetFileName(path.Replace('\\', '/'));
+        if (name is "." or "..") return string.Empty;
+
+        var invalid = Path.GetInvalidFileNameChars();
+        return string.Concat(name.Where(c => !char.IsControl(c) && !invalid.Contains(c)));
+    }
+
+    /// <summary>
+    /// The decoded path of an absolute URL, without the query: <c>https://x/a%20b.cbl?dl=1</c> gives <c>/a b.cbl</c>.
+    /// Empty when the string is not an absolute URL
+    /// </summary>
+    public static string UrlFilePath(this string? url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return string.Empty;
+
+        return Uri.UnescapeDataString(uri.AbsolutePath);
+    }
+
     // A Linux root "/" trims to "", which makes "/" the prefix every absolute path starts with
     private static string TrimmedPath(string path) => path.NormalizePath().TrimEnd('/');
 }

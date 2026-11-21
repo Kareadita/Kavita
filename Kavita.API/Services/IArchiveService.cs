@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kavita.Common;
 using Kavita.Models.DTOs.Archive;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Images;
 using Kavita.Models.Metadata;
 
 namespace Kavita.API.Services;
@@ -13,7 +14,11 @@ public interface IArchiveService
 {
     void ExtractArchive(string archivePath, string extractPath);
     int GetNumberOfPagesFromArchive(string archivePath);
-    string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat format, CoverImageSize size = CoverImageSize.Default);
+    /// <summary>
+    /// Opens the archive's cover image: a folder or cover entry, else the first image. Null when the archive cannot be
+    /// read or has no image, after filing a media issue
+    /// </summary>
+    OpenedCover? OpenCover(string archivePath);
     bool IsValidArchive(string archivePath);
     ComicInfo? GetComicInfo(string archivePath);
     ArchiveLibrary CanOpen(string archivePath);

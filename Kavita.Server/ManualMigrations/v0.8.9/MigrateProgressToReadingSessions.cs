@@ -78,7 +78,7 @@ public class MigrateProgressToReadingSessions : ManualMigration
     }
 
     protected override string MigrationName => nameof(MigrateProgressToReadingSessions);
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         try
         {

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.Models.Images;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
 using Kavita.Database;
@@ -867,9 +868,7 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
 
         public int GetNumberOfPages(string filePath, MangaFormat format) => inner.GetNumberOfPages(filePath, format);
 
-        public string GetCoverImage(string filePath, string fileName, MangaFormat format, EncodeFormat encodeFormat,
-            CoverImageSize size = CoverImageSize.Default) =>
-            inner.GetCoverImage(filePath, fileName, format, encodeFormat, size);
+        public OpenedCover? OpenCover(string filePath, MangaFormat format) => inner.OpenCover(filePath, format);
 
         public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1) =>
             inner.Extract(fileFilePath, targetDirectory, format, imageCount);
@@ -1385,9 +1384,7 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
 
         public int GetNumberOfPages(string filePath, MangaFormat format) => inner.GetNumberOfPages(filePath, format);
 
-        public string GetCoverImage(string filePath, string fileName, MangaFormat format, EncodeFormat encodeFormat,
-            CoverImageSize size = CoverImageSize.Default) =>
-            inner.GetCoverImage(filePath, fileName, format, encodeFormat, size);
+        public OpenedCover? OpenCover(string filePath, MangaFormat format) => inner.OpenCover(filePath, format);
 
         public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1) =>
             inner.Extract(fileFilePath, targetDirectory, format, imageCount);
@@ -1545,9 +1542,7 @@ public class ScannerServiceChangeDetectionTests(ITestOutputHelper testOutputHelp
     {
         public int GetNumberOfPages(string filePath, MangaFormat format) => inner.GetNumberOfPages(filePath, format);
 
-        public string GetCoverImage(string filePath, string fileName, MangaFormat format, EncodeFormat encodeFormat,
-            CoverImageSize size = CoverImageSize.Default) =>
-            inner.GetCoverImage(filePath, fileName, format, encodeFormat, size);
+        public OpenedCover? OpenCover(string filePath, MangaFormat format) => inner.OpenCover(filePath, format);
 
         public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1) =>
             inner.Extract(fileFilePath, targetDirectory, format, imageCount);

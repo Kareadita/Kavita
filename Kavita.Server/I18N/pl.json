@@ -149,7 +149,6 @@
     "anilist-cred-expired": "Poświadczenia AniList wygasły lub nie zostały ustawione",
     "collection-tag-title-required": "Tytuł Kolekcji nie może być pusty",
     "job-already-running": "Zadanie już uruchomione",
-    "encode-as-warning": "Nie można konwertować do formatu PNG. W przypadku okładek należy użyć opcji Odśwież okładki. Zakładek i ikon ulubionych nie można zakodować z powrotem.",
     "favicon-doesnt-exist": "Favicon nie istnieje",
     "theme-doesnt-exist": "Brak pliku motywu lub jest on nieprawidłowy",
     "libraries": "Wszystkie biblioteki",

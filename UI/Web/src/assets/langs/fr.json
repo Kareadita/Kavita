@@ -128,7 +128,9 @@
         "embed-progress-indicator-label": "Indicateur intégré de progression",
         "embed-progress-indicator-tooltip": "Indicateur intégré de progression dans le Titre",
         "include-continue-from-label": "Inclure Continuer à partir de",
-        "include-continue-from-tooltip": "Insère un élément \"Continuer depuis X\" dans les champs OPDS pour éviter d'avoir à chercher votre dernier point de lecture (simule le bouton \"Reprendre\" de Kavita)"
+        "include-continue-from-tooltip": "Insère un élément \"Continuer depuis X\" dans les champs OPDS pour éviter d'avoir à chercher votre dernier point de lecture (simule le bouton \"Reprendre\" de Kavita)",
+        "ondeck-progress-days-label": "Dernière progression sur le pont (jours)",
+        "sync-all-libraries-label": "Toutes les Bibliothèques"
     },
     "user-holds": {
         "title": "Séries en attente de synchronisation",
@@ -684,8 +686,6 @@
         "manage-reading-list-tooltip": "Est-ce que Kavita doit créer des listes de lecture à partir des étiquettes StoryArc/StoryArcNumber et AlternativeSeries/AlternativeCount trouvés à l'intérieur des fichiers ComicInfo.xml",
         "allow-scrobbling-label": "Autoriser le suivi d'activité (Scrobbling)",
         "allow-scrobbling-tooltip": "Est-ce que Kavita doit suivre l'activité des événements de lecture, du statut à lire, les notes et les avis vers les fournisseurs configurés. Cela ne se produira que si le serveur dispose d'un abonnement Kavita+ actif.",
-        "folder-watching-label": "Surveillance de dossiers",
-        "folder-watching-tooltip": "Surcharger la surveillance des dossiers par le serveur pour cette bibliothèque. Si désactivé, la surveillance des dossiers ne sera pas exécutée pour les dossiers de cette bibliothèque.",
         "include-in-dashboard-label": "Inclure dans le tableau de bord",
         "include-in-dashboard-tooltip": "Les séries de la bibliothèque doivent-elles être incluses sur le tableau de bord. Cela affecte tous les flux, comme On Deck, Récemment mis à jour, Récemment ajouté ou tout ajout personnalisé.",
         "include-in-search-label": "Inclure dans la recherche",
@@ -713,7 +713,8 @@
         "default-language-label": "Langage par défaut",
         "default-language-tooltip": "Langage par défaut si absent des métadonnées",
         "metadata-provider-label": "Fournisseur de métadonnées",
-        "metadata-provider-tooltip": "Sélectionnez la source à partir de laquelle Kavita récupère les métadonnées."
+        "metadata-provider-tooltip": "Sélectionnez la source à partir de laquelle Kavita récupère les métadonnées.",
+        "watch-status-label": "Statut"
     },
     "file-type-group-pipe": {
         "archive": "Archive",
@@ -912,13 +913,7 @@
         "open-external": "Ouvrir à l'extérieur"
     },
     "manage-media-issues": {
-        "description-part-1": "Ce tableau contient des problèmes détectés lors de l'analyse ou de la lecture de vos médias. Vous pouvez l'effacer à tout moment et utiliser Library (Force) Scan pour effectuer l'analyse. Une liste des erreurs les plus courantes et de leur signification est disponible sur le ",
-        "description-part-2": "wiki.",
         "filter-label": "{{common.filter}}",
-        "clear-alerts": "Supprimer les alertes",
-        "file-header": "Fichier",
-        "comment-header": "Commentaire",
-        "created-header": "Créé",
         "no-data": "{{common.no-data}}"
     },
     "manage-email-settings": {
@@ -990,7 +985,6 @@
         "encode-as-description-part-1": "WebP/AVIF peut réduire considérablement l'espace requis pour les fichiers. WebP/AVIF n'est pas pris en charge sur tous les navigateurs ou versions. Pour savoir si ces paramètres sont appropriés à votre configuration, visitez ",
         "encode-as-description-part-2": "Puis-je utiliser WebP ?",
         "encode-as-description-part-3": "Puis-je utiliser AVIF ?",
-        "encode-as-warning": "Vous ne pouvez pas reconvertir en PNG une fois que vous êtes passé à WebP/AVIF. Vous devrez actualiser les couvertures de vos bibliothèques pour régénérer toutes les couvertures. Les marque-pages et les favicons ne peuvent pas être convertis.",
         "media-warning": "Vous devez déclencher la tâche de conversion des médias dans l'onglet Tâches après l'enregistrement.",
         "encode-as-label": "Enregistrer le média sous",
         "encode-as-tooltip": "Tous les médias gérés par Kavita (couvertures, marque-pages, favicons) seront encodés avec ce type.",
@@ -1116,9 +1110,6 @@
         "bust-cache-task": "Supprimer le cache",
         "bust-cache-task-desc": "Nettoie le cache de Kavita+ - ne doit être utilisé que lors du débogage de mauvaises correspondances.",
         "bust-cache-task-success": "Cache de Kavita+ nettoyé",
-        "bust-locale-task": "Nettoyer le cache local",
-        "bust-locale-task-desc": "Détruit le cache local. Cela peut résoudre les problèmes liés aux chaînes de caractères qui ne s'affichent pas correctement après une mise à jour.",
-        "bust-locale-task-success": "Cache local nettoyé",
         "clear-reading-cache-task": "Effacer le cache de lecture",
         "clear-reading-cache-task-desc": "Efface les fichiers mis en cache pour la lecture. Utile lorsque vous venez de mettre à jour un fichier que vous étiez en train de lire au cours des dernières 24 heures.",
         "clear-reading-cache-task-success": "Le cache a été effacé",
@@ -1316,19 +1307,8 @@
     },
     "events-widget": {
         "title-alt": "Activité",
-        "dismiss-all": "Rejeter tout",
-        "update-available": "Mise à jour disponible",
-        "downloading-item": "Téléchargement de {{item}}",
-        "more-info": "Cliquez pour plus d'informations",
-        "close": "{{common.close}}",
-        "users-online-count": "{{num}} Utilisateurs en ligne",
-        "active-events-title": "Événements actifs :",
-        "no-data": "Il ne se passe pas grand-chose ici",
-        "left-to-process": "Reste à traiter : {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} téléchargements dans la file d'attente",
         "reading-now": "{{num}} en cours de lecture",
-        "downloads-active": "{{count}} téléchargement(s) en cours",
-        "not-connected": "Non connecté, essayez d'actualiser"
+        "filter-all-label": "Tout"
     },
     "shortcuts-modal": {
         "title": "Raccourcis clavier",
@@ -1481,9 +1461,7 @@
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "Faire défiler vers le haut pour passer au chapitre précédent",
-        "continuous-reading-prev-chapter": "Chapitre précédent",
-        "continuous-reading-next-chapter-alt": "Faire défiler vers le haut pour passer au chapitre suivant",
-        "continuous-reading-next-chapter": "Chapitre suivant"
+        "continuous-reading-prev-chapter": "Chapitre précédent"
     },
     "manga-reader": {
         "back": "Retour",
@@ -3105,7 +3083,8 @@
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "never": "Jamais"
+        "never": "Jamais",
+        "duplicate-name-validation": "Le nom de la clé d'authentification doit être unique"
     },
     "server-activity": {
         "no-data": "Rien à voir ici"
@@ -3196,12 +3175,12 @@
         "combo": "{{hour}}h {{min}}mn"
     },
     "reading-progress-status-pipe": {
-        "no-progress": "Lu",
-        "no-progress-incognito": "Lu incognito",
+        "no-progress": "Lire",
+        "no-progress-incognito": "Lecture incognito",
         "progress": "Continuer",
         "progress-incognito": "Continuer incognito",
         "full-read": "(Re)Lecture",
-        "full-read-incognito": "Lecture incognito"
+        "full-read-incognito": "Lu incognito"
     },
     "profile-image": {
         "edit-image-alt": "Editer l'image",
@@ -4403,5 +4382,8 @@
         "excluded-libraries-tooltip": "Bibliothèques à éviter",
         "queued-title": "Relance mise en file d'attente",
         "queued-description": "Le traitement débutera sous peu ; veuillez faire preuve de patience."
+    },
+    "upcoming-task-name-pipe": {
+        "cleanup": "Nettoyage"
     }
 }

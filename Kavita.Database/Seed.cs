@@ -153,6 +153,7 @@ public static class Seed
         ServerSettingKey.TaskBackup,
         ServerSettingKey.TaskCleanup,
         ServerSettingKey.TaskCblSync,
+        ServerSettingKey.TaskCompositeCovers,
     ];
 
     public static async Task SeedSettings(IDataContext context, IDirectoryService directoryService)
@@ -166,6 +167,7 @@ public static class Seed
                 new() {Key = ServerSettingKey.TaskBackup, Value = "daily"},
                 new() {Key = ServerSettingKey.TaskCleanup, Value = "daily"},
                 new() {Key = ServerSettingKey.TaskCblSync, Value = "0 4 * * *"}, // 4am daily
+                new() {Key = ServerSettingKey.TaskCompositeCovers, Value = "0 5 * * *"}, // 5am daily, an hour after CBL sync
                 new() {Key = ServerSettingKey.LoggingLevel, Value = "Debug"},
                 new()
                 {

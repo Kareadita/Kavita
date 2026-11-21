@@ -7,6 +7,7 @@ using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Metadata.Browse;
 using Kavita.Models.DTOs.Person;
+using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Person;
 
@@ -19,8 +20,9 @@ public enum PersonIncludes
     Aliases = 1 << 1,
     ChapterPeople = 1 << 2,
     SeriesPeople = 1 << 3,
+    CoverImageFile = 1 << 4,
 
-    All = Aliases | ChapterPeople | SeriesPeople,
+    All = Aliases | ChapterPeople | SeriesPeople | CoverImageFile,
 }
 
 public interface IPersonRepository
@@ -37,7 +39,6 @@ public interface IPersonRepository
     Task<int> RemoveAllPeopleNoLongerAssociated(CancellationToken ct = default);
     Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null, PersonIncludes includes = PersonIncludes.None, CancellationToken ct = default);
 
-    Task<IList<string?>> GetAllCoverImagesAsync(CancellationToken ct = default);
     Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId, CancellationToken ct = default);
     Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, PersonFilterDto filter, UserParams userParams, CancellationToken ct = default);
     Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.None, CancellationToken ct = default);
@@ -70,4 +71,5 @@ public interface IPersonRepository
     Task<IList<PersonDto>> SearchPeople(string searchQuery, PersonIncludes includes = PersonIncludes.Aliases, CancellationToken ct = default);
 
     Task<bool> AnyAliasExist(string alias, CancellationToken ct = default);
+    Task<ColorScapeDto?> GetColorScapeAsync(int personId, CancellationToken ct = default);
 }

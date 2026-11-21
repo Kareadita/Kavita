@@ -10,6 +10,7 @@ export interface ServerSettings {
   taskBackup: string;
   taskCleanup: string;
   taskCblSync: string;
+  taskCompositeCovers: string;
   loggingLevel: string;
   port: number;
   ipAddresses: string;

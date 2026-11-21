@@ -15,6 +15,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Services.DebugExport;
 using Kavita.Services.Helpers;
 using Kavita.Services.HostedServices;
+using Kavita.Services.Images;
 using Kavita.Services.Kobo;
 using Kavita.Services.Metadata;
 using Kavita.Services.Plus;
@@ -62,7 +63,6 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IDeviceService, DeviceService>();
         services.AddScoped<IStatisticService, StatisticService>();
         services.AddScoped<IMediaErrorService, MediaErrorService>();
-        services.AddScoped<IMediaConversionService, MediaConversionService>();
         services.AddScoped<IStreamService, StreamService>();
         services.AddScoped<IRatingService, RatingService>();
         services.AddScoped<IPersonService, PersonService>();
@@ -98,8 +98,11 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IDirectoryService, DirectoryService>();
         services.AddScoped<IEventHub, EventHub>();
         services.AddScoped<IPresenceTracker, PresenceTracker>();
-        services.AddScoped<IImageService, ImageService>();
+
+        services.AddSingleton<IImagePipeline, ImagePipeline>();
         services.AddScoped<ICoverDbService, CoverDbService>();
+        services.AddScoped<IImageFileService, ImageFileService>();
+        services.AddScoped<ICompositeCoverService, CompositeCoverService>();
 
         services.AddScoped<ILocalizationService, LocalizationService>();
         services.AddScoped<ISettingsService, SettingsService>();

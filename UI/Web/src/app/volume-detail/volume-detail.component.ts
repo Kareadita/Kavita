@@ -16,7 +16,8 @@ import {
 import {DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
-import {ThemeService} from "../_services/theme.service";
+import {ColorscapeService} from "../_services/colorscape.service";
+import {ColorScapeKind} from "../_models/theme/colorscape";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
 import {ReaderService} from "../_services/reader.service";
 import {AccountService} from "../_services/account.service";
@@ -172,7 +173,7 @@ export class VolumeDetailComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly imageService = inject(ImageService);
   private readonly volumeService = inject(VolumeService);
-  private readonly themeService = inject(ThemeService);
+  private readonly colorScapeService = inject(ColorscapeService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly readerService = inject(ReaderService);
   protected readonly accountService = inject(AccountService);
@@ -379,7 +380,7 @@ export class VolumeDetailComponent implements OnInit {
       if (event.event === EVENTS.CoverUpdate) {
         const coverUpdateEvent = event.payload as CoverUpdateEvent;
         if (coverUpdateEvent.entityType === 'volume' && coverUpdateEvent.id === this.volumeId()) {
-          this.themeService.refreshColorScape('volume', coverUpdateEvent.id).subscribe();
+          this.colorScapeService.loadColorScape(ColorScapeKind.Volume, coverUpdateEvent.id).subscribe();
         }
       } else if (event.event === EVENTS.ChapterRemoved) {
         const removedEvent = event.payload as ChapterRemovedEvent;
@@ -413,7 +414,7 @@ export class VolumeDetailComponent implements OnInit {
 
     }
 
-    this.themeService.setColorScape(this.volume()!.primaryColor, this.volume()!.secondaryColor);
+    this.colorScapeService.loadColorScape(ColorScapeKind.Volume, this.volumeId()).subscribe();
 
     this.route.fragment.pipe(tap(frag => {
       if (frag !== null && this.activeTabId !== (frag as Tabs)) {

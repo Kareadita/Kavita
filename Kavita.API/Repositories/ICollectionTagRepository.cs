@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Collection;
+using Kavita.Models.DTOs.Theme;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 
@@ -22,6 +24,7 @@ public enum CollectionIncludes
 {
     None = 1 << 0,
     Series = 1 << 1,
+    CoverImageFile = 1 << 2,
 }
 
 public interface ICollectionTagRepository
@@ -38,20 +41,23 @@ public interface ICollectionTagRepository
     /// <summary>
     /// Returns all the user's collections with the option of other user's promoted
     /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="includePromoted"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosAsync(int userId, bool includePromoted = false, bool sortByLastModified = false, CancellationToken ct = default);
     Task<PagedList<AppUserCollectionDto>> GetCollectionDtosPagedAsync(int userId, UserParams userParams, bool includePromoted = false, CancellationToken ct = default);
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosBySeriesAsync(int userId, int seriesId, bool includePromoted = false, CancellationToken ct = default);
 
-    Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default);
     Task<bool> CollectionExists(string title, int userId, CancellationToken ct = default);
-    Task<IList<AppUserCollection>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, CancellationToken ct = default);
-    Task<IList<string>> GetRandomCoverImagesAsync(int collectionId, CancellationToken ct = default);
+    /// <summary>
+    /// Cover rows of the collection's series, untracked. Series with no cover are left out
+    /// </summary>
+    Task<IList<ImageFile>> GetItemCoverFilesAsync(int collectionId, CancellationToken ct = default);
+    /// <summary>
+    /// Unlocked collections with no cover row and at least one series with a cover, plus, unless
+    /// <paramref name="onlyMissing"/>, those whose cover Kavita built
+    /// </summary>
+    Task<IList<int>> GetCompositeCoverIdsAsync(bool onlyMissing, CancellationToken ct = default);
     Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, bool includePromoted, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
     Task UpdateCollectionAgeRating(AppUserCollection tag, CancellationToken ct = default);
     Task<IEnumerable<AppUserCollection>> GetCollectionsByIds(IEnumerable<int> tags, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
     Task<IList<AppUserCollection>> GetAllCollectionsForSyncing(DateTime expirationTime, CancellationToken ct = default);
+    Task<ColorScapeDto?> GetColorScapeAsync(int collectionId, CancellationToken ct = default);
 }

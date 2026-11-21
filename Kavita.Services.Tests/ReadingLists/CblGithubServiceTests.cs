@@ -1,5 +1,6 @@
 using Flurl.Http.Testing;
 using Kavita.API.Services;
+using Kavita.Common;
 using Kavita.Services.ReadingLists;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -87,6 +88,22 @@ public class CblGithubServiceTests : IDisposable
         Assert.Equal("b3", await _sut.GetFileSha("Marvel/Events/Secret Wars.cbl"));
         Assert.Equal("b5", await _sut.GetFileSha("Top.cbl"));
 
+        Assert.Single(_httpTest.CallLog);
+    }
+
+    [Theory]
+    [InlineData("/kavita/config/kavita.db")]
+    [InlineData("../../../Kareadita/Kavita/develop/README.md")]
+    [InlineData("README.md")]
+    [InlineData(".github/workflow.yml")]
+    [InlineData("Marvel")]
+    public async Task GetFileContent_RefusesPathsThatAreNotListedFiles(string path)
+    {
+        _httpTest.RespondWith(Tree);
+
+        var ex = await Assert.ThrowsAsync<KavitaException>(() => _sut.GetFileContent(path));
+
+        Assert.Equal("cbl-repo-path-not-found", ex.Message);
         Assert.Single(_httpTest.CallLog);
     }
 }

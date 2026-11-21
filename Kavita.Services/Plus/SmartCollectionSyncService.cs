@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Flurl.Http;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
+using Kavita.API.Services;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
@@ -21,6 +22,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Plus;
@@ -56,7 +58,8 @@ public class SmartCollectionSyncService(
     ILogger<SmartCollectionSyncService> logger,
     IEventHub eventHub,
     ILicenseService licenseService,
-    IKavitaPlusAuditService auditService)
+    IKavitaPlusAuditService auditService,
+    ICompositeCoverService compositeCoverService)
     : ISmartCollectionSyncService
 {
     private const int SyncDelta = -2;
@@ -187,6 +190,7 @@ public class SmartCollectionSyncService(
             await unitOfWork.CommitAsync(ct);
 
             await unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(collection, ct);
+            await compositeCoverService.CreateIfMissingAsync(ImageKind.CollectionCover, collection.Id, ct);
 
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.SmartCollectionProgressEvent(info.Title, string.Empty, info.TotalItems, info.TotalItems, ProgressEventType.Ended), ct: ct);

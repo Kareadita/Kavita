@@ -15,7 +15,7 @@ public static class MigrateEmailTemplates
     private const string SendToDevice = "https://raw.githubusercontent.com/Kareadita/KavitaEmail/main/KavitaEmail/config/templates/SendToDevice.html";
     private const string EmailTest = "https://raw.githubusercontent.com/Kareadita/KavitaEmail/main/KavitaEmail/config/templates/EmailTest.html";
 
-    public static async Task Migrate(IDirectoryService directoryService, ILogger<Program> logger)
+    public static async Task Migrate(IDirectoryService directoryService, ILogger logger)
     {
         var files = directoryService.GetFiles(directoryService.CustomizedTemplateDirectory);
         if (files.Any())
@@ -36,7 +36,7 @@ public static class MigrateEmailTemplates
         logger.LogCritical("Running MigrateEmailTemplates migration - Completed. This is not an error");
     }
 
-    private static async Task DownloadAndWriteToFile(string url, string filePath, ILogger<Program> logger)
+    private static async Task DownloadAndWriteToFile(string url, string filePath, ILogger logger)
     {
         try
         {

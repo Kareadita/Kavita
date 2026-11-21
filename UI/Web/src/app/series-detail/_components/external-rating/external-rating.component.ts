@@ -1,16 +1,17 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   DestroyRef,
-  inject, input,
-  Input, model,
-  OnInit, signal,
+  inject,
+  input,
+  model,
+  OnInit,
+  signal,
   ViewEncapsulation
 } from '@angular/core';
 import {Rating, RatingAuthority} from "../../../_models/rating";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
-import {NgbPopover} from "@ng-bootstrap/ng-bootstrap";
+import {NgbPopover, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {LibraryType} from "../../../_models/library/library";
 import {NgxStarsModule} from "ngx-stars";
@@ -29,7 +30,7 @@ import {ModalService} from "../../../_services/modal.service";
 @Component({
   selector: 'app-external-rating',
   imports: [ProviderImagePipe, NgbPopover, LoadingComponent, NgxStarsModule, ImageComponent,
-    TranslocoDirective, SafeHtmlPipe, NgOptimizedImage, NgTemplateOutlet, ScrobbleProviderNamePipe],
+    TranslocoDirective, SafeHtmlPipe, NgOptimizedImage, NgTemplateOutlet, ScrobbleProviderNamePipe, NgbTooltip],
   templateUrl: './external-rating.component.html',
   styleUrls: ['./external-rating.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

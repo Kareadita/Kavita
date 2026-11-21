@@ -13,7 +13,8 @@ public class EncodeFormatExtensionsTests
         {
             { EncodeFormat.PNG, ".png" },
             { EncodeFormat.WEBP, ".webp" },
-            { EncodeFormat.AVIF, ".avif" }
+            { EncodeFormat.AVIF, ".avif" },
+            { EncodeFormat.JPEG, ".jpg" }
         };
 
         // Act & Assert

@@ -12,9 +12,9 @@ namespace Kavita.Models.Entities.ReadingLists;
 /// <summary>
 /// This is a collection of <see cref="ReadingListItem"/> which represent individual chapters and an order.
 /// </summary>
-public class ReadingList : IEntityDate, IHasCoverImage, IHasTags<ReadingListTag>
+public class ReadingList : IEntityDate, IHasTags<ReadingListTag>, IHasLockableCoverImageFile
 {
-    public int Id { get; init; }
+    public int Id { get; set; }
     public required string Title { get; set; }
     /// <summary>
     /// A normalized string used to check if the reading list already exists in the DB
@@ -24,8 +24,13 @@ public class ReadingList : IEntityDate, IHasCoverImage, IHasTags<ReadingListTag>
     /// Promotion allows non-owners to view the list
     /// </summary>
     public bool Promoted { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string? CoverImage { get; set; }
+    public int? CoverImageFileId { get; set; }
+    public ImageFile? CoverImageFile { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string? PrimaryColor { get; set; }
+    [Obsolete("Use CoverImageFile")]
     public string? SecondaryColor { get; set; }
     /// <summary>
     /// Denotes if the CoverImage has been overridden by the user. If so, it will not be updated during normal scan operations.
@@ -123,10 +128,4 @@ public class ReadingList : IEntityDate, IHasCoverImage, IHasTags<ReadingListTag>
     // Relationships
     public int AppUserId { get; set; }
     public AppUser AppUser { get; set; } = null!;
-
-    public void ResetColorScape()
-    {
-        PrimaryColor = string.Empty;
-        SecondaryColor = string.Empty;
-    }
 }

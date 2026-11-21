@@ -22,7 +22,10 @@ using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Person;
+using Kavita.Models.DTOs.KavitaPlus;
+using Kavita.Models.Images;
 using Kavita.Services.Builders;
+using Kavita.Services.Images;
 using Kavita.Services.Plus;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
@@ -107,7 +110,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
            mapper, Substitute.For<ILicenseService>(), Substitute.For<IScrobblingService>(),
            Substitute.For<IEventHub>(), Substitute.For<ICoverDbService>(),
            Substitute.For<IKavitaPlusApiService>(), Substitute.For<IFileCacheService>(),
-           Substitute.For<IKavitaPlusAuditService>());
+           Substitute.For<IKavitaPlusAuditService>(), Substitute.For<IImageFileService>());
 
        // Clear tracker so test body starts with a clean slate
        context.ChangeTracker.Clear();
@@ -4355,6 +4358,210 @@ public class ExternalMetadataServiceTests: AbstractDbTest
     #endregion
 
     #region Series Cover
+
+    [Fact]
+    public async Task KPlusRefresh_LockedUploadSeries_Skipped()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Locked Upload Cover";
+        var row = new ImageFile
+        {
+            Kind = ImageKind.SeriesCover,
+            FileName = "series1.webp",
+            Origin = ImageOrigin.Upload,
+            Format = EncodeFormat.WEBP,
+        };
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        series.CoverImageFile = row;
+        series.CoverImageLocked = true;
+        series.Metadata.KPlusOverrides = [MetadataSettingField.Covers];
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableCoverImage = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        var coverDbService = Substitute.For<ICoverDbService>();
+        var externalMetadataService = new ExternalMetadataService(unitOfWork,
+            Substitute.For<ILogger<ExternalMetadataService>>(),
+            mapper, Substitute.For<ILicenseService>(), Substitute.For<IScrobblingService>(),
+            Substitute.For<IEventHub>(), coverDbService,
+            Substitute.For<IKavitaPlusApiService>(), Substitute.For<IFileCacheService>(),
+            Substitute.For<IKavitaPlusAuditService>(), Substitute.For<IImageFileService>());
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto
+        {
+            Name = seriesName,
+            CoverUrl = "https://example.com/cover.png",
+        }, series.Id);
+
+        Assert.Empty(coverDbService.ReceivedCalls());
+    }
+
+    [Fact]
+    public async Task KPlusRefresh_LockedUploadVolume_Skipped()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Test - Locked Upload Volume")
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder("2").Build())
+                .Build())
+            .Build();
+        var volume = series.Volumes[0];
+        volume.CoverImageFile = new ImageFile
+        {
+            Kind = ImageKind.VolumeCover,
+            FileName = "v1.webp",
+            Origin = ImageOrigin.Upload,
+            Format = EncodeFormat.WEBP,
+        };
+        volume.CoverImageLocked = true;
+        volume.KPlusOverrides = [MetadataSettingField.VolumeCovers];
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        var coverDbService = Substitute.For<ICoverDbService>();
+        var externalMetadataService = CreateCoverService(unitOfWork, mapper, coverDbService,
+            Substitute.For<IImageFileService>(), [new ExternalCoverResponseDto
+            {
+                Url = "https://example.com/v1.png", Type = ExternalCoverImageType.Volume, Number = 1, Language = "en",
+            }]);
+
+        var loaded = (await unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Metadata | SeriesIncludes.Library))!;
+        await externalMetadataService.ApplyExternalCovers(loaded, await CoverSettings(unitOfWork), new ExternalSeriesDetailDto());
+
+        Assert.Empty(coverDbService.ReceivedCalls());
+    }
+
+    [Fact]
+    public async Task KPlusVolume_SharesChapterRow_LocksBoth()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Test - Shared Volume Cover")
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+            .Build();
+        var chapterRow = new ImageFile
+        {
+            Kind = ImageKind.ChapterCover,
+            FileName = "v1_c1.webp",
+            Origin = ImageOrigin.Scan,
+            Format = EncodeFormat.WEBP,
+        };
+        series.Volumes[0].Chapters[0].CoverImageFile = chapterRow;
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        var imageFileService = new ImageFileService(unitOfWork, Substitute.For<IImagePipeline>(),
+            Substitute.For<IDirectoryService>(), Substitute.For<IEventHub>(), Substitute.For<ILogger<ImageFileService>>());
+        var externalMetadataService = CreateCoverService(unitOfWork, mapper, Substitute.For<ICoverDbService>(),
+            imageFileService, [new ExternalCoverResponseDto
+            {
+                Url = "https://example.com/v1.png", Type = ExternalCoverImageType.Volume, Number = 1, Language = "en",
+            }]);
+
+        var loaded = (await unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Metadata | SeriesIncludes.Library))!;
+        await externalMetadataService.ApplyExternalCovers(loaded, await CoverSettings(unitOfWork), new ExternalSeriesDetailDto());
+
+        context.ChangeTracker.Clear();
+        var volume = await context.Volume.Include(v => v.Chapters).SingleAsync(v => v.SeriesId == series.Id);
+        Assert.Equal(chapterRow.Id, volume.CoverImageFileId);
+        Assert.True(volume.CoverImageLocked);
+        Assert.True(volume.Chapters[0].CoverImageLocked);
+    }
+
+    [Fact]
+    public async Task KPlusVolume_LockedChapterUpload_Kept()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Test - Locked Chapter Upload")
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+            .Build();
+        var chapter = series.Volumes[0].Chapters[0];
+        var chapterRow = new ImageFile
+        {
+            Kind = ImageKind.ChapterCover,
+            FileName = "v1_c1.webp",
+            Origin = ImageOrigin.Upload,
+            Format = EncodeFormat.WEBP,
+        };
+        chapter.CoverImageFile = chapterRow;
+        chapter.CoverImageLocked = true;
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        var coverDbService = Substitute.For<ICoverDbService>();
+        var imageFileService = new ImageFileService(unitOfWork, Substitute.For<IImagePipeline>(),
+            Substitute.For<IDirectoryService>(), Substitute.For<IEventHub>(), Substitute.For<ILogger<ImageFileService>>());
+        var externalMetadataService = CreateCoverService(unitOfWork, mapper, coverDbService, imageFileService,
+            [new ExternalCoverResponseDto
+            {
+                Url = "https://example.com/v1.png", Type = ExternalCoverImageType.Volume, Number = 1, Language = "en",
+            }]);
+
+        var loaded = (await unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Metadata | SeriesIncludes.Library))!;
+        await externalMetadataService.ApplyExternalCovers(loaded, await CoverSettings(unitOfWork), new ExternalSeriesDetailDto());
+
+        Assert.Empty(coverDbService.ReceivedCalls());
+        context.ChangeTracker.Clear();
+        var volume = await context.Volume.SingleAsync(v => v.SeriesId == series.Id);
+        Assert.Equal(chapterRow.Id, volume.CoverImageFileId);
+        Assert.True(volume.CoverImageLocked);
+    }
+
+    private static ExternalMetadataService CreateCoverService(IUnitOfWork unitOfWork, IMapper mapper,
+        ICoverDbService coverDbService, IImageFileService imageFileService, IList<ExternalCoverResponseDto> covers)
+    {
+        var fileCacheService = Substitute.For<IFileCacheService>();
+        fileCacheService.GetOrFetchAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<TimeSpan>(),
+                Arg.Any<Func<CancellationToken, Task<KPlusResult<IList<ExternalCoverResponseDto>>?>>>(),
+                Arg.Any<Func<KPlusResult<IList<ExternalCoverResponseDto>>?, bool>?>(), Arg.Any<CancellationToken>())
+            .Returns(KPlusResult<IList<ExternalCoverResponseDto>>.Success(covers));
+
+        return new ExternalMetadataService(unitOfWork,
+            Substitute.For<ILogger<ExternalMetadataService>>(),
+            mapper, Substitute.For<ILicenseService>(), Substitute.For<IScrobblingService>(),
+            Substitute.For<IEventHub>(), coverDbService,
+            Substitute.For<IKavitaPlusApiService>(), fileCacheService,
+            Substitute.For<IKavitaPlusAuditService>(), imageFileService);
+    }
+
+    private static async Task<MetadataSettingsDto> CoverSettings(IUnitOfWork unitOfWork)
+    {
+        var settings = await unitOfWork.SettingsRepository.GetMetadataSettingDto();
+        settings.Enabled = true;
+        settings.EnableVolumeCoverImage = true;
+        settings.EnableChapterCoverImage = false;
+        return settings;
+    }
 
     [Theory]
     [InlineData(new[] { "Volume|1|en|vol", "Chapter|1|en|chap" }, 1f, 1f, "en", null, "chap")]

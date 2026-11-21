@@ -411,10 +411,10 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         // Only sync if the user has no image, I know this is no true sync as changing it in your idp
         // will require action on Kavita. But it's less effort than saving if the user has set it themselves
         // Will just need to be documented on the wiki.
-        if (!string.IsNullOrEmpty(picture) && string.IsNullOrEmpty(user.CoverImage))
+        if (!string.IsNullOrEmpty(picture) && user.CoverImageFileId == null)
         {
             // Run in the background to not block http thread, pass id to Hangfire doesn't kill itself
-            BackgroundJob.Enqueue(() => coverDbService.SetUserCoverByUrl(user.Id, picture, false));
+            BackgroundJob.Enqueue(() => coverDbService.SetOidcUserCoverAsync(user.Id, picture, CancellationToken.None));
         }
     }
 

@@ -10,6 +10,7 @@ using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.Collection;
+using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
@@ -110,16 +111,8 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
     {
         return await context.AppUserCollection
             .Where(c => c.Id == collectionTagId)
-            .Select(c => c.CoverImage)
+            .Select(c => c.CoverImageFile!.FileName)
             .SingleOrDefaultAsync(ct);
-    }
-
-    public async Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default)
-    {
-        return await context.AppUserCollection
-            .Select(t => t.CoverImage)
-            .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync(ct);
     }
 
     /// <summary>
@@ -137,28 +130,23 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
             .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized), ct);
     }
 
-    public async Task<IList<AppUserCollection>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
-        CancellationToken ct = default)
+    public async Task<IList<ImageFile>> GetItemCoverFilesAsync(int collectionId, CancellationToken ct = default)
     {
-        var extension = encodeFormat.GetExtension();
         return await context.AppUserCollection
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
+            .AsNoTracking()
+            .Where(c => c.Id == collectionId)
+            .SelectMany(c => c.Items.Where(s => s.CoverImageFile != null).Select(s => s.CoverImageFile!))
             .ToListAsync(ct);
     }
 
-    public async Task<IList<string>> GetRandomCoverImagesAsync(int collectionId, CancellationToken ct = default)
+    public async Task<IList<int>> GetCompositeCoverIdsAsync(bool onlyMissing, CancellationToken ct = default)
     {
-        var random = new Random();
-        var data = await context.AppUserCollection
-            .Where(t => t.Id == collectionId)
-            .SelectMany(uc => uc.Items.Select(series => series.CoverImage))
-            .Where(t => !string.IsNullOrEmpty(t))
+        return await context.AppUserCollection
+            .Where(c => !c.CoverImageLocked)
+            .Where(c => (c.CoverImageFileId == null && c.Items.Any(i => i.CoverImageFile != null))
+                        || (!onlyMissing && c.CoverImageFile!.Origin == ImageOrigin.Composite))
+            .Select(c => c.Id)
             .ToListAsync(ct);
-
-        return data
-            .OrderBy(_ => random.Next())
-            .Take(4)
-            .ToList();
     }
 
     public async Task<IList<AppUserCollection>> GetCollectionsForUserAsync(int userId, bool includePromoted,
@@ -202,6 +190,14 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
             .Include(c => c.Items)
             .AsSplitQuery()
             .ToListAsync(ct);
+    }
+
+    public async Task<ColorScapeDto?> GetColorScapeAsync(int collectionId, CancellationToken ct = default)
+    {
+        return await context.AppUserCollection
+            .Where(s => s.Id == collectionId && s.CoverImageFileId != null)
+            .Select(s => new ColorScapeDto(s.CoverImageFile!.PrimaryColor, s.CoverImageFile.SecondaryColor))
+            .FirstOrDefaultAsync(ct);
     }
 
     public async Task<AppUserCollection?> GetCollectionAsync(int tagId,

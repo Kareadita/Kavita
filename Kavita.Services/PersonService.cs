@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,10 +8,12 @@ using Kavita.API.Services;
 using Kavita.Common.Extensions;
 using Kavita.Models.Builders;
 using Kavita.Models.Entities.Person;
+using Kavita.Models.Images;
+using SQLitePCL;
 
 namespace Kavita.Services;
 
-public class PersonService(IUnitOfWork unitOfWork): IPersonService
+public class PersonService(IUnitOfWork unitOfWork, IImageFileService imageFileService): IPersonService
 {
 
     public async Task MergePeopleAsync(Person src, Person dst, CancellationToken ct = default)
@@ -42,10 +45,16 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
             dst.Asin = src.Asin;
         }
 
-        if (dst.CoverImage == null && src.CoverImage != null)
+        // If src has a cover and dst doesn't, copy it over
+        if (src.CoverImageFileId != null && dst.CoverImageFileId == null)
         {
-            dst.CoverImage = src.CoverImage;
+            var dir = await imageFileService.GetImageDirectoryAsync(ImageKind.PersonCover, ct);
+            var source = new ImageSource.FromFile(Path.Join(dir, src.CoverImageFile!.FileName));
+            var write = new CoverWrite(src.CoverImageFile.Origin, src.CoverImageLocked);
+            await imageFileService.SetCoverAsync(dst, source, write, false, ct);
         }
+
+        await imageFileService.ClearCoverAsync(src, false, ct);
 
         MergeChapterPeople(dst, src);
         MergeSeriesMetadataPeople(dst, src);

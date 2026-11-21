@@ -27,6 +27,7 @@ using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Extensions;
@@ -54,7 +55,6 @@ public class TaskScheduler : ITaskScheduler
     private readonly IStatsService _statsService;
     private readonly IVersionUpdaterService _versionUpdaterService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
-    private readonly IMediaConversionService _mediaConversionService;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILicenseService _licenseService;
     private readonly IExternalMetadataService _externalMetadataService;
@@ -74,6 +74,7 @@ public class TaskScheduler : ITaskScheduler
     public const string CleanupDbTaskId = TaskSchedulerConstants.CleanupDbTaskId;
     public const string CleanupTaskId = TaskSchedulerConstants.CleanupTaskId;
     public const string TaskCblSyncId = TaskSchedulerConstants.TaskCblSyncId;
+    public const string RefreshCompositeCoversId = TaskSchedulerConstants.RefreshCompositeCoversId;
     public const string BackupTaskId = TaskSchedulerConstants.BackupTaskId;
     public const string ScanLibrariesTaskId = TaskSchedulerConstants.ScanLibrariesTaskId;
     public const string ReportStatsTaskId = TaskSchedulerConstants.ReportStatsTaskId;
@@ -120,10 +121,9 @@ public class TaskScheduler : ITaskScheduler
 
 
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
-        IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
+        IUnitOfWork unitOfWork, IMetadataService metadataService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
-        IWordCountAnalyzerService wordCountAnalyzerService,
-        IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService,
+        IWordCountAnalyzerService wordCountAnalyzerService, IScrobblingService scrobblingService, ILicenseService licenseService,
         IExternalMetadataService externalMetadataService, ISmartCollectionSyncService smartCollectionSyncService,
         IWantToReadSyncService wantToReadSyncService, IEventHub eventHub, IEmailService emailService,
         IAuthKeyService authKeyService)
@@ -137,7 +137,6 @@ public class TaskScheduler : ITaskScheduler
         _statsService = statsService;
         _versionUpdaterService = versionUpdaterService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
-        _mediaConversionService = mediaConversionService;
         _scrobblingService = scrobblingService;
         _licenseService = licenseService;
         _externalMetadataService = externalMetadataService;
@@ -236,6 +235,21 @@ public class TaskScheduler : ITaskScheduler
         }
 
 
+        setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskCompositeCovers, cancellationToken)).Value;
+        if (IsInvalidCronSetting(setting))
+        {
+            _logger.LogError("Composite Cover Refresh Task has invalid cron, defaulting to Daily");
+            RecurringJob.AddOrUpdate<ICompositeCoverService>(RefreshCompositeCoversId, service => service.RefreshAllAsync(CancellationToken.None),
+                "0 5 * * *", RecurringJobOptions);
+        }
+        else
+        {
+            _logger.LogDebug("Scheduling Composite Cover Refresh Task for {Setting}", setting);
+            RecurringJob.AddOrUpdate<ICompositeCoverService>(RefreshCompositeCoversId, service => service.RefreshAllAsync(CancellationToken.None),
+                CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
+        }
+
+
         RecurringJob.AddOrUpdate<ICleanupService>(RemoveFromWantToReadTaskId,
             (service) => service.CleanupWantToRead(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
@@ -263,6 +277,7 @@ public class TaskScheduler : ITaskScheduler
             "*/5 * * * *", RecurringJobOptions);
 
     }
+
 
     private static bool IsInvalidCronSetting(string? setting)
     {
@@ -398,12 +413,21 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Schedule(() => _statsService.Send(), DateTimeOffset.Now.AddDays(1));
     }
 
-    public void ConvertAllCoversToEncoding()
-    {
-        if (HasAlreadyEnqueuedTask<IMediaConversionService>(s => s.ConvertAllManagedMediaToEncodingFormat(CancellationToken.None), checkRunningJobs: true)) return;
 
-        BackgroundJob.Enqueue(() => _mediaConversionService.ConvertAllManagedMediaToEncodingFormat());
+    // TODO: See if we can bring this to an Extension and make all cases do it this way (the check then call)
+    public static bool QueueImageCleanup(bool reportSummary)
+    {
+        if (IsImageCleanupQueuedOrRunning()) return false;
+
+        BackgroundJob.Enqueue<ICleanupService>(s => s.CleanupImages(reportSummary, CancellationToken.None));
+
+        return true;
     }
+
+    // HasAlreadyEnqueuedTask matches on arguments, so a nightly (false) run is invisible to a check for a manual (true) one
+    public static bool IsImageCleanupQueuedOrRunning() =>
+        HasAlreadyEnqueuedTask<ICleanupService>(s => s.CleanupImages(true, CancellationToken.None), checkRunningJobs: true) ||
+        HasAlreadyEnqueuedTask<ICleanupService>(s => s.CleanupImages(false, CancellationToken.None), checkRunningJobs: true);
 
     #endregion
 
@@ -1021,7 +1045,7 @@ public class TaskScheduler : ITaskScheduler
     /// </summary>
     public static IList<UpcomingTaskDto> GetUpcomingTasks()
     {
-        string[] taskIds = [ScanLibrariesTaskId, CleanupTaskId, BackupTaskId, TaskCblSyncId];
+        string[] taskIds = [ScanLibrariesTaskId, CleanupTaskId, BackupTaskId, TaskCblSyncId, RefreshCompositeCoversId];
 
         using var connection = JobStorage.Current.GetConnection();
         return connection.GetRecurringJobs(taskIds)

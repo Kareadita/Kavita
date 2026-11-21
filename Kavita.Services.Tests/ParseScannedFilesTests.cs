@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
+using Kavita.Models.Images;
 using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -49,9 +50,9 @@ public class MockReadingItemService : IReadingItemService
         return 1;
     }
 
-    public string GetCoverImage(string fileFilePath, string fileName, MangaFormat format, EncodeFormat encodeFormat, CoverImageSize size  = CoverImageSize.Default)
+    public OpenedCover? OpenCover(string filePath, MangaFormat format)
     {
-        return string.Empty;
+        return null;
     }
 
     public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1)
@@ -871,8 +872,7 @@ public class ParseScannedFilesTests: AbstractDbTest
 
         public int GetNumberOfPages(string filePath, MangaFormat format) => _inner.GetNumberOfPages(filePath, format);
 
-        public string GetCoverImage(string fileFilePath, string fileName, MangaFormat format, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
-            => _inner.GetCoverImage(fileFilePath, fileName, format, encodeFormat, size);
+        public OpenedCover? OpenCover(string filePath, MangaFormat format) => _inner.OpenCover(filePath, format);
 
         public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1)
             => _inner.Extract(fileFilePath, targetDirectory, format, imageCount);

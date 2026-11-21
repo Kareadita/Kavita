@@ -11,6 +11,7 @@ public static class TaskSchedulerConstants
     public const string CleanupDbTaskId = "cleanup-db";
     public const string CleanupTaskId = "cleanup";
     public const string TaskCblSyncId = "sync-cbl";
+    public const string RefreshCompositeCoversId = "refresh-composite-covers";
     public const string BackupTaskId = "backup";
     public const string ScanLibrariesTaskId = "scan-libraries";
     public const string ReportStatsTaskId = "report-stats";

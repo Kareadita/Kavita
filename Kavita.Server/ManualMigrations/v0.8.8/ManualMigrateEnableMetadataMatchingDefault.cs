@@ -15,7 +15,7 @@ namespace Kavita.Server.ManualMigrations.v0._8._8;
 /// </summary>
 public static class ManualMigrateEnableMetadataMatchingDefault
 {
-    public static async Task Migrate(DataContext context, IUnitOfWork unitOfWork, ILogger<Program> logger)
+    public static async Task Migrate(DataContext context, IUnitOfWork unitOfWork, ILogger logger)
     {
         if (await context.ManualMigrationHistory.AnyAsync(m => m.Name == "ManualMigrateEnableMetadataMatchingDefault"))
         {

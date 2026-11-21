@@ -132,9 +132,9 @@ public class ScannerHelper
         eventHub ??= Substitute.For<IEventHub>();
 
         var archiveService = new ArchiveService(Substitute.For<ILogger<ArchiveService>>(), ds,
-            Substitute.For<IImageService>(), Substitute.For<IMediaErrorService>());
+            Substitute.For<IMediaErrorService>());
         var readingItemService = new ReadingItemService(archiveService, Substitute.For<IBookService>(),
-            Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>());
+            ds, Substitute.For<ILogger<ReadingItemService>>());
 
 
 

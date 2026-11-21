@@ -22,6 +22,7 @@ using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Models.Helpers;
+using Kavita.Models.Images;
 using Kavita.Services.Helpers;
 using Kavita.Services.Reading;
 using Kavita.Services.Scanner;
@@ -36,10 +37,9 @@ namespace Kavita.Services.ReadingLists;
 public class ReadingListService(
     IUnitOfWork unitOfWork,
     ILogger<ReadingListService> logger,
-    IEventHub eventHub,
-    IImageService imageService,
-    IDirectoryService directoryService,
-    IEntityNamingService namingService)
+    IEntityNamingService namingService,
+    IImageFileService imageFileService,
+    ICompositeCoverService compositeCoverService)
     : IReadingListService
 {
     /// <summary>
@@ -85,7 +85,12 @@ public class ReadingListService(
         readingList.Title = dto.Title.Trim();
         readingList.NormalizedTitle = Parser.Normalize(readingList.Title);
         readingList.Promoted = dto.Promoted;
-        readingList.CoverImageLocked = dto.CoverImageLocked;
+
+        var resetCover = readingList.CoverImageLocked && !dto.CoverImageLocked;
+        if (!resetCover)
+        {
+            await imageFileService.UpdateLockAsync(readingList, dto.CoverImageLocked, commit: false);
+        }
 
         if (readingList.Tags == null)
         {
@@ -113,19 +118,18 @@ public class ReadingListService(
         }
 
 
-        if (!dto.CoverImageLocked)
-        {
-            readingList.CoverImageLocked = false;
-            readingList.CoverImage = string.Empty;
-            await eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false);
-            unitOfWork.ReadingListRepository.Update(readingList);
-        }
-
         unitOfWork.ReadingListRepository.Update(readingList);
 
-        if (!unitOfWork.HasChanges()) return;
-        await unitOfWork.CommitAsync();
+        if (unitOfWork.HasChanges())
+        {
+            await unitOfWork.CommitAsync();
+        }
+
+        if (resetCover)
+        {
+            await imageFileService.ClearCoverAsync(readingList);
+            await compositeCoverService.CreateIfMissingAsync(ImageKind.ReadingListCover, readingList.Id);
+        }
     }
 
     /// <summary>
@@ -416,8 +420,6 @@ public class ReadingListService(
 
                 if (!unitOfWork.HasChanges()) continue;
 
-
-                imageService.UpdateColorScape(readingList);
                 await CalculateReadingListAgeRating(readingList);
 
                 await unitOfWork.CommitAsync(); // TODO: See if we can avoid this extra commit by reworking bottom logic
@@ -457,62 +459,6 @@ public class ReadingListService(
         return data;
     }
 
-
-    public async Task<string> GenerateReadingListCoverImage(int readingListId, bool commit = false)
-    {
-        var readingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
-        if (readingList == null) return string.Empty;
-
-        var path =  await GenerateReadingListCoverImage(readingList);
-
-        if (!commit) return path;
-
-        await unitOfWork.CommitAsync();
-
-        await eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-            MessageFactory.CoverUpdateEvent(readingListId, MessageFactoryEntityTypes.ReadingList), false);
-
-        return path;
-    }
-
-    public async Task<string> GenerateReadingListCoverImage(ReadingList readingList)
-    {
-        var covers = await unitOfWork.ReadingListRepository.GetRandomCoverImagesAsync(readingList.Id);
-        if (covers.Count == 0) return string.Empty;
-
-        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        var fileName = ImageService.GetReadingListFormat(readingList.Id);
-        var destFile = directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory,
-            fileName + settings.EncodeMediaAs.GetExtension());
-
-        ImageService.CreateMergedImage(
-            covers.Select(c => directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, c)).ToList(),
-            settings.CoverImageSize,
-            destFile);
-
-        if (!directoryService.FileSystem.File.Exists(destFile)) return string.Empty;
-
-        readingList.CoverImage = fileName + settings.EncodeMediaAs.GetExtension();
-        imageService.UpdateColorScape(readingList);
-
-        return readingList.CoverImage;
-    }
-
-    /// <summary>
-    /// Generates a cover image for the reading list if it has more than 3 items and doesn't already have a locked/set cover.
-    /// </summary>
-    /// <remarks>Commits changes if a cover was generated</remarks>
-    public async Task UpdateReadingListCoverImage(ReadingList readingList)
-    {
-        if (readingList.CoverImageLocked || !string.IsNullOrEmpty(readingList.CoverImage)) return;
-        if (readingList.Items == null || readingList.Items.Count < 4) return;
-
-        var coverImage = await GenerateReadingListCoverImage(readingList);
-        if (!string.IsNullOrEmpty(coverImage))
-        {
-            await unitOfWork.CommitAsync();
-        }
-    }
 
     public async Task UpdateReadingListAgeRatingForSeries(int seriesId, AgeRating ageRating)
     {

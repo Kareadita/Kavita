@@ -14,7 +14,7 @@ public class ManualMigrateCoverImageSettings: ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrateCoverImageSettings);
 
-    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
+    protected override async Task ExecuteAsync(DataContext context, ILogger logger)
     {
         await context.ServerSetting
             .Where(s => s.Key == ServerSettingKey.CoverImageSize)
