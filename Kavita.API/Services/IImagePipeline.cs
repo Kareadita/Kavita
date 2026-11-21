@@ -12,7 +12,7 @@ public interface IImagePipeline
 
     /// <summary>
     /// Copies <paramref name="sourcePath"/> byte for byte to <paramref name="fileName"/> in <paramref name="directory"/>.
-    /// The caller picks the extension; it should match the content, since the bytes are not re-encoded
+    /// The caller picks the extension; it should match the content, since the bytes are not re-encoded. Will overwrite if destination occupied
     /// </summary>
     ImageWriteResult Copy(string sourcePath, ImageKind kind, string directory, string fileName);
 

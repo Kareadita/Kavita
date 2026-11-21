@@ -6,6 +6,7 @@ using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
+using Kavita.Services.Images.ImageSteps;
 using Microsoft.Extensions.Logging;
 using NetVips;
 using Image = NetVips.Image;
@@ -329,8 +330,6 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
         var aspectRatio = (double) width / height;
         return aspectRatio > 1.25;
     }
-
-    private readonly record struct ThumbnailTarget(int Width, int Height, Enums.Size Size, Enums.Interesting? Crop);
 
     private readonly record struct StagedImage(int Width, int Height, int SourceWidth, int SourceHeight);
 }
