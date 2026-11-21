@@ -18,8 +18,8 @@ public class KoboSyncPoint
     [ExportScrub(ExportScrubKind.Random)]
     public string KoboDeviceId { get; set; }
 
-    public int? DeviceId { get; set; }
-    public Device? Device { get; set; }
+    public int? ClientDeviceId { get; set; }
+    public ClientDevice? ClientDevice { get; set; }
 
     /// <summary>
     /// Sync token of the upstream Kobo store, used when forwarding requests

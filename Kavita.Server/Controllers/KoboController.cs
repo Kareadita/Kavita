@@ -113,7 +113,7 @@ public class KoboController(
         // Delete all other KoboSyncPoints for this device id as they'll not be used any more
         await unitOfWork.KoboSyncPointRepository.DeleteOthersForDeviceId(syncPoint.Id, deviceId, ct);
         syncPoint.KoboDeviceId = deviceId;
-        syncPoint.DeviceId = clientInfoAccessor.CurrentDeviceId;
+        syncPoint.ClientDeviceId = clientInfoAccessor.CurrentDeviceId;
 
         var (kavitaChanges, completedSync) = await koboSyncService.GetChangesSinceAsync(UserId, syncSettings, syncPoint, ct);
 
