@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using Kavita.Database;
-using Kavita.Models.Entities.MetadataMatching;
-using Kavita.Models.Entities.Progress;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -32,7 +30,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("ItemsId");
 
-                    b.ToTable("AppUserCollectionSeries");
+                    b.ToTable("AppUserCollectionSeries", (string)null);
                 });
 
             modelBuilder.Entity("AppUserLibrary", b =>
@@ -47,7 +45,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("LibrariesId");
 
-                    b.ToTable("AppUserLibrary");
+                    b.ToTable("AppUserLibrary", (string)null);
                 });
 
             modelBuilder.Entity("ChapterGenre", b =>
@@ -62,7 +60,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("GenresId");
 
-                    b.ToTable("ChapterGenre");
+                    b.ToTable("ChapterGenre", (string)null);
                 });
 
             modelBuilder.Entity("ChapterTag", b =>
@@ -77,7 +75,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("TagsId");
 
-                    b.ToTable("ChapterTag");
+                    b.ToTable("ChapterTag", (string)null);
                 });
 
             modelBuilder.Entity("CollectionTagSeriesMetadata", b =>
@@ -92,7 +90,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesMetadatasId");
 
-                    b.ToTable("CollectionTagSeriesMetadata");
+                    b.ToTable("CollectionTagSeriesMetadata", (string)null);
                 });
 
             modelBuilder.Entity("ExternalRatingExternalSeriesMetadata", b =>
@@ -107,7 +105,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("ExternalSeriesMetadatasId");
 
-                    b.ToTable("ExternalRatingExternalSeriesMetadata");
+                    b.ToTable("ExternalRatingExternalSeriesMetadata", (string)null);
                 });
 
             modelBuilder.Entity("ExternalRecommendationExternalSeriesMetadata", b =>
@@ -122,7 +120,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("ExternalSeriesMetadatasId");
 
-                    b.ToTable("ExternalRecommendationExternalSeriesMetadata");
+                    b.ToTable("ExternalRecommendationExternalSeriesMetadata", (string)null);
                 });
 
             modelBuilder.Entity("ExternalReviewExternalSeriesMetadata", b =>
@@ -137,7 +135,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("ExternalSeriesMetadatasId");
 
-                    b.ToTable("ExternalReviewExternalSeriesMetadata");
+                    b.ToTable("ExternalReviewExternalSeriesMetadata", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Chapter", b =>
@@ -363,7 +361,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("VolumeId");
 
-                    b.ToTable("Chapter");
+                    b.ToTable("Chapter", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.CollectionTag", b =>
@@ -398,7 +396,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("Id", "Promoted")
                         .IsUnique();
 
-                    b.ToTable("CollectionTag");
+                    b.ToTable("CollectionTag", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Device", b =>
@@ -444,7 +442,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("Device");
+                    b.ToTable("Device", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.EmailHistory", b =>
@@ -495,7 +493,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("Sent", "AppUserId", "EmailTemplate", "SendDate");
 
-                    b.ToTable("EmailHistory");
+                    b.ToTable("EmailHistory", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.EpubFont", b =>
@@ -539,7 +537,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EpubFont");
+                    b.ToTable("EpubFont", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.FolderPath", b =>
@@ -558,7 +556,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("LibraryId");
 
-                    b.ToTable("FolderPath");
+                    b.ToTable("FolderPath", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Genre", b =>
@@ -578,7 +576,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("NormalizedTitle")
                         .IsUnique();
 
-                    b.ToTable("Genre");
+                    b.ToTable("Genre", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.History.KavitaPlusAuditLog", b =>
@@ -642,7 +640,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("SubjectType", "SubjectId")
                         .HasDatabaseName("IX_KavitaPlusAuditLog_SubjectType_SubjectId");
 
-                    b.ToTable("KavitaPlusAuditLogs");
+                    b.ToTable("KavitaPlusAuditLogs", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.History.ManualMigrationHistory", b =>
@@ -662,7 +660,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ManualMigrationHistory");
+                    b.ToTable("ManualMigrationHistory", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.History.ScrobbleRuleHistory", b =>
@@ -711,7 +709,7 @@ namespace Kavita.Database.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_ScrobbleRuleHistory_User_Provider_Rule_Series_Chapter");
 
-                    b.ToTable("ScrobbleRuleHistory");
+                    b.ToTable("ScrobbleRuleHistory", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Kobo.KoboSyncPoint", b =>
@@ -721,7 +719,6 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.PrimitiveCollection<string>("ChapterIds")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("ChapterIndex")
@@ -731,7 +728,6 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.PrimitiveCollection<string>("CollectionsIds")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CollectionsSyncTime")
@@ -740,11 +736,7 @@ namespace Kavita.Database.Migrations
                     b.Property<int>("CollectionsSyncedUntilIndex")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("DeviceId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("KoboDeviceId")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("KoboStoreSyncToken")
@@ -760,7 +752,6 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.PrimitiveCollection<string>("ReadingListsIds")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ReadingListsSyncTime")
@@ -770,7 +761,6 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("RemovedChapterIds")
-                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasDefaultValue("[]");
@@ -780,11 +770,9 @@ namespace Kavita.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DeviceId");
-
                     b.HasIndex("UserId");
 
-                    b.ToTable("KoboSyncPoints");
+                    b.ToTable("KoboSyncPoints", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Library", b =>
@@ -884,7 +872,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Library");
+                    b.ToTable("Library", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.LibraryExcludePattern", b =>
@@ -903,7 +891,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("LibraryId");
 
-                    b.ToTable("LibraryExcludePattern");
+                    b.ToTable("LibraryExcludePattern", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.LibraryFileTypeGroup", b =>
@@ -922,7 +910,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("LibraryId");
 
-                    b.ToTable("LibraryFileTypeGroup");
+                    b.ToTable("LibraryFileTypeGroup", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.MangaFile", b =>
@@ -986,7 +974,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("FilePath")
                         .HasDatabaseName("IX_MangaFile_FilePath");
 
-                    b.ToTable("MangaFile");
+                    b.ToTable("MangaFile", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.MediaError", b =>
@@ -1049,7 +1037,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("MediaError");
+                    b.ToTable("MediaError", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Metadata.ExternalRating", b =>
@@ -1083,7 +1071,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("ChapterId");
 
-                    b.ToTable("ExternalRating");
+                    b.ToTable("ExternalRating", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Metadata.ExternalRecommendation", b =>
@@ -1135,7 +1123,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("ExternalRecommendation");
+                    b.ToTable("ExternalRecommendation", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Metadata.ExternalReview", b =>
@@ -1187,7 +1175,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("ChapterId");
 
-                    b.ToTable("ExternalReview");
+                    b.ToTable("ExternalReview", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Metadata.ExternalSeriesMetadata", b =>
@@ -1243,7 +1231,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("SeriesId")
                         .IsUnique();
 
-                    b.ToTable("ExternalSeriesMetadata");
+                    b.ToTable("ExternalSeriesMetadata", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Metadata.GenreSeriesMetadata", b =>
@@ -1258,7 +1246,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesMetadatasId");
 
-                    b.ToTable("GenreSeriesMetadata");
+                    b.ToTable("GenreSeriesMetadata", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Metadata.SeriesBlacklist", b =>
@@ -1277,7 +1265,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("SeriesBlacklist");
+                    b.ToTable("SeriesBlacklist", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Metadata.SeriesMetadata", b =>
@@ -1398,7 +1386,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("SeriesId", "AgeRating")
                         .HasDatabaseName("IX_SeriesMetadata_SeriesId_AgeRating");
 
-                    b.ToTable("SeriesMetadata");
+                    b.ToTable("SeriesMetadata", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Metadata.SeriesMetadataTag", b =>
@@ -1413,7 +1401,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("TagsId");
 
-                    b.ToTable("SeriesMetadataTag");
+                    b.ToTable("SeriesMetadataTag", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Metadata.SeriesRelation", b =>
@@ -1437,7 +1425,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("TargetSeriesId");
 
-                    b.ToTable("SeriesRelation");
+                    b.ToTable("SeriesRelation", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.MetadataFieldMapping", b =>
@@ -1468,7 +1456,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("MetadataSettingsId");
 
-                    b.ToTable("MetadataFieldMapping");
+                    b.ToTable("MetadataFieldMapping", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.MetadataMatching.MetadataSettings", b =>
@@ -1581,7 +1569,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MetadataSettings");
+                    b.ToTable("MetadataSettings", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Person.ChapterPeople", b =>
@@ -1605,7 +1593,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("ChapterPeople");
+                    b.ToTable("ChapterPeople", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Person.Person", b =>
@@ -1649,7 +1637,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Person");
+                    b.ToTable("Person", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Person.PersonAlias", b =>
@@ -1671,7 +1659,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("PersonAlias");
+                    b.ToTable("PersonAlias", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Person.SeriesMetadataPeople", b =>
@@ -1697,7 +1685,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("SeriesMetadataPeople");
+                    b.ToTable("SeriesMetadataPeople", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Progress.AppUserProgress", b =>
@@ -1753,7 +1741,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("AppUserProgresses");
+                    b.ToTable("AppUserProgresses", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Progress.AppUserReadingHistory", b =>
@@ -1783,7 +1771,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("AppUserId", "DateUtc")
                         .HasDatabaseName("IX_AppUserReadingHistory_AppUserId_DateUtc");
 
-                    b.ToTable("AppUserReadingHistory");
+                    b.ToTable("AppUserReadingHistory", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Progress.AppUserReadingSession", b =>
@@ -1837,7 +1825,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("IsActive", "LastModifiedUtc")
                         .HasDatabaseName("IX_AppUserReadingSession_IsActive_LastModifiedUtc");
 
-                    b.ToTable("AppUserReadingSession");
+                    b.ToTable("AppUserReadingSession", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Progress.AppUserReadingSessionActivityData", b =>
@@ -1954,7 +1942,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("StartTimeUtc", "LibraryId")
                         .HasDatabaseName("IX_ActivityData_StartTimeUtc_LibraryId");
 
-                    b.ToTable("AppUserReadingSessionActivityData");
+                    b.ToTable("AppUserReadingSessionActivityData", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.ReadingLists.ReadingList", b =>
@@ -2046,7 +2034,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("ReadingList");
+                    b.ToTable("ReadingList", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.ReadingLists.ReadingListItem", b =>
@@ -2080,7 +2068,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("VolumeId");
 
-                    b.ToTable("ReadingListItem");
+                    b.ToTable("ReadingListItem", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.ReadingLists.ReadingListRemapRule", b =>
@@ -2138,7 +2126,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("NormalizedCblSeriesName", "IsGlobal", "AppUserId")
                         .HasDatabaseName("IX_ReadingListRemapRule_NormalizedCblSeriesName_IsGlobal_AppUserId");
 
-                    b.ToTable("ReadingListRemapRule");
+                    b.ToTable("ReadingListRemapRule", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.ReadingLists.ReadingListTag", b =>
@@ -2158,7 +2146,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("NormalizedTitle")
                         .IsUnique();
 
-                    b.ToTable("ReadingListTag");
+                    b.ToTable("ReadingListTag", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Scrobble.ScrobbleError", b =>
@@ -2208,7 +2196,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("ScrobbleError");
+                    b.ToTable("ScrobbleError", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Scrobble.ScrobbleEvent", b =>
@@ -2314,7 +2302,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("ScrobbleEvent");
+                    b.ToTable("ScrobbleEvent", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Scrobble.ScrobbleHold", b =>
@@ -2347,7 +2335,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("ScrobbleHold");
+                    b.ToTable("ScrobbleHold", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Series", b =>
@@ -2499,7 +2487,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("LibraryId", "Format", "NormalizedOriginalName")
                         .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedOriginalName");
 
-                    b.ToTable("Series");
+                    b.ToTable("Series", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.ServerSetting", b =>
@@ -2516,7 +2504,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("ServerSetting");
+                    b.ToTable("ServerSetting", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.ServerStatistics", b =>
@@ -2554,7 +2542,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ServerStatistics");
+                    b.ToTable("ServerStatistics", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.SiteTheme", b =>
@@ -2610,7 +2598,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SiteTheme");
+                    b.ToTable("SiteTheme", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Tag", b =>
@@ -2630,7 +2618,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("NormalizedTitle")
                         .IsUnique();
 
-                    b.ToTable("Tag");
+                    b.ToTable("Tag", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppRole", b =>
@@ -2878,7 +2866,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("AppUserAnnotation");
+                    b.ToTable("AppUserAnnotation", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserAuthKey", b =>
@@ -2919,7 +2907,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("Key")
                         .IsUnique();
 
-                    b.ToTable("AppUserAuthKey");
+                    b.ToTable("AppUserAuthKey", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserBookmark", b =>
@@ -2978,7 +2966,7 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("AppUserId", "SeriesId")
                         .HasDatabaseName("IX_AppUserBookmark_AppUserId_SeriesId");
 
-                    b.ToTable("AppUserBookmark");
+                    b.ToTable("AppUserBookmark", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserChapterRating", b =>
@@ -3025,7 +3013,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("AppUserChapterRating");
+                    b.ToTable("AppUserChapterRating", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserCollection", b =>
@@ -3097,7 +3085,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("AppUserCollection");
+                    b.ToTable("AppUserCollection", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserDashboardStream", b =>
@@ -3137,7 +3125,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("Visible");
 
-                    b.ToTable("AppUserDashboardStream");
+                    b.ToTable("AppUserDashboardStream", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserExternalSource", b =>
@@ -3162,7 +3150,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("AppUserExternalSource");
+                    b.ToTable("AppUserExternalSource", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserOnDeckRemoval", b =>
@@ -3183,7 +3171,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("AppUserOnDeckRemoval");
+                    b.ToTable("AppUserOnDeckRemoval", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserPreferences", b =>
@@ -3369,7 +3357,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("ThemeId");
 
-                    b.ToTable("AppUserPreferences");
+                    b.ToTable("AppUserPreferences", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserRating", b =>
@@ -3411,7 +3399,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("AppUserRating");
+                    b.ToTable("AppUserRating", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserReadingProfile", b =>
@@ -3540,7 +3528,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("AppUserReadingProfiles");
+                    b.ToTable("AppUserReadingProfiles", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserRole", b =>
@@ -3601,7 +3589,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("Visible");
 
-                    b.ToTable("AppUserSideNavStream");
+                    b.ToTable("AppUserSideNavStream", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserSmartFilter", b =>
@@ -3626,7 +3614,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("AppUserSmartFilter");
+                    b.ToTable("AppUserSmartFilter", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserTableOfContent", b =>
@@ -3685,7 +3673,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("AppUserTableOfContent");
+                    b.ToTable("AppUserTableOfContent", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.AppUserWantToRead", b =>
@@ -3706,7 +3694,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("AppUserWantToRead");
+                    b.ToTable("AppUserWantToRead", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.ClientDevice", b =>
@@ -3748,7 +3736,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("ClientDevice");
+                    b.ToTable("ClientDevice", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.User.ClientDeviceHistory", b =>
@@ -3772,7 +3760,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("DeviceId");
 
-                    b.ToTable("ClientDeviceHistory");
+                    b.ToTable("ClientDeviceHistory", (string)null);
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Volume", b =>
@@ -3868,7 +3856,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("Volume");
+                    b.ToTable("Volume", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
@@ -3885,7 +3873,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DataProtectionKeys");
+                    b.ToTable("DataProtectionKeys", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -3984,7 +3972,7 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("TagsId");
 
-                    b.ToTable("ReadingListReadingListTag");
+                    b.ToTable("ReadingListReadingListTag", (string)null);
                 });
 
             modelBuilder.Entity("AppUserCollectionSeries", b =>
@@ -4203,17 +4191,11 @@ namespace Kavita.Database.Migrations
 
             modelBuilder.Entity("Kavita.Models.Entities.Kobo.KoboSyncPoint", b =>
                 {
-                    b.HasOne("Kavita.Models.Entities.Device", "Device")
-                        .WithMany()
-                        .HasForeignKey("DeviceId");
-
                     b.HasOne("Kavita.Models.Entities.User.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Device");
 
                     b.Navigation("User");
                 });
