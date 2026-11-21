@@ -12,7 +12,7 @@ namespace Kavita.Benchmark
     [SimpleJob(launchCount: 1, warmupCount: 5, invocationCount: 20)]
     public class KoreaderHashBenchmark
     {
-        private const string sourceEpub = "./Data/AesopsFables.epub";
+        private const string sourceEpub = "./Test Data/AesopsFables.epub";
 
         [Benchmark(Baseline = true)]
         public void TestBuildManga_baseline()

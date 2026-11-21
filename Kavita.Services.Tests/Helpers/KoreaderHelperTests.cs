@@ -162,7 +162,7 @@ public class KoreaderHelperTests
     #region HashContents Tests
 
     [Theory]
-    [InlineData("./Data/AesopsFables.epub", "8795ACA4BF264B57C1EEDF06A0CEE688")]
+    [InlineData("./Test Data/AesopsFables.epub", "8795ACA4BF264B57C1EEDF06A0CEE688")]
     public void HashContents_ValidFile_ReturnsExpectedHash(string filePath, string expectedHash)
     {
         Assert.Equal(expectedHash, KoreaderHelper.HashContents(filePath));
@@ -171,7 +171,7 @@ public class KoreaderHelperTests
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    [InlineData("./Data/NonExistent.epub")]
+    [InlineData("./Test Data/NonExistent.epub")]
     public void HashContents_InvalidFile_ReturnsNull(string? filePath)
     {
         Assert.Null(KoreaderHelper.HashContents(filePath!));

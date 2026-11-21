@@ -30,7 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Data\AesopsFables.epub">
+      <None Update="Test Data\AesopsFables.epub">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <Content Include="..\Kavita.Server\I18N\**\*.*">
