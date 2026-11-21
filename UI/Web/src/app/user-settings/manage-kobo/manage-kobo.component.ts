@@ -27,6 +27,10 @@ import {TypeaheadConfig} from '../../typeahead/_models/typeahead-config';
 import {LoadingComponent} from '../../shared/loading/loading.component';
 import {EmptyStateComponent} from '../../shared/_components/empty-state/empty-state.component';
 import {LicenseService} from "../../_services/license.service";
+import {WikiLink} from "../../_models/wiki";
+import {TranslocoInjectComponent} from "../../shared/_components/transloco-inject/transloco-inject.component";
+import {TranslocoSlotDirective} from "../../_directives/transloco-slot.directive";
+import {ApiKeyComponent} from "../api-key/api-key.component";
 
 interface SyncSourceItem {
   id: number;
@@ -53,7 +57,10 @@ interface SyncSource {
     SettingSwitchComponent,
     TypeaheadComponent,
     LoadingComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
+    TranslocoInjectComponent,
+    TranslocoSlotDirective,
+    ApiKeyComponent
   ],
   templateUrl: './manage-kobo.component.html',
   styleUrl: './manage-kobo.component.scss',
@@ -81,6 +88,7 @@ export class ManageKoboComponent implements OnInit {
   protected readonly preferencesError = signal(false);
   protected readonly syncSources = signal<SyncSource[]>([]);
   protected readonly managedCollectionTypeahead = signal<TypeaheadConfig<SyncSourceItem> | null>(null);
+  protected readonly hostname = signal<string>('');
 
   private readonly managedCollectionTypeaheadRef = viewChild<TypeaheadComponent<SyncSourceItem>>('managedCollectionTypeahead');
 
@@ -110,6 +118,7 @@ export class ManageKoboComponent implements OnInit {
   });
 
   protected readonly managedCollectionId = computed(() => this.formModel().managedCollection);
+  protected readonly hostNameNotSetup = computed(() => this.hostname() === '');
 
   private lastPersistedPreferences = '';
 
@@ -124,6 +133,10 @@ export class ManageKoboComponent implements OnInit {
       switchMap(pref => this.savePreferences(pref)),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
+
+    this.settingsService.getHostname().subscribe(hostName => {
+      this.hostname.set(hostName);
+    });
   }
 
   ngOnInit(): void {
@@ -227,4 +240,6 @@ export class ManageKoboComponent implements OnInit {
     config.savedData = items.filter(item => selectedIds.includes(item.id));
     return config;
   }
+
+  protected readonly WikiLink = WikiLink;
 }

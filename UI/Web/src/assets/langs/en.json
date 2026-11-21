@@ -2927,8 +2927,14 @@
 
     "manage-kobo": {
         "kobo-sync-settings-title": "Sync Settings",
+        "setup-title": "Setup your Kobo",
+        "description": "Setup how your content from Kavita will sync to your Kobo. You can learn how to setup your device {{wikiLink}}",
+        "wiki": "here",
         "kobo-sync-disabled-alert": "Kobo Sync has been disabled by your administrator.",
         "kobo-sync-no-download-role": "Kobo Sync requires the Download role. Ask your administrator for help.",
+        "kobo-sync-no-host-name": "Kobo Sync requires a Hostname set. Ask your administrator for help.",
+        "hostname-label": "{{manage-email-settings.host-name-label}}",
+        "hostname-tooltip": "This tells Kobo how to reach the Kavita server.",
         "sync-item-limit-label": "Sync Item Limit",
         "sync-item-limit-tooltip": "Maximum number of items sent to the device per sync request. Between 25 and 100.",
         "forward-to-kobo-store-label": "Forward to Kobo Store",

@@ -53,6 +53,19 @@ public class SettingsController(
     }
 
     /// <summary>
+    /// Returns the Host name if set, empty string if not
+    /// </summary>
+    /// <returns></returns>
+    [Authorize]
+    [HttpGet("hostname")]
+    public async Task<ActionResult<string>> GetServerHostName()
+    {
+        var ct = HttpContext.RequestAborted;
+        var settingsDto = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        return Ok(settingsDto.HostName);
+    }
+
+    /// <summary>
     /// Returns the server settings
     /// </summary>
     /// <returns></returns>

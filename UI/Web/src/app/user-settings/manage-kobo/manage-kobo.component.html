@@ -6,13 +6,35 @@
       <i icon class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
     </app-empty-state>
   } @else {
-    <h4>{{t('kobo-sync-settings-title')}}</h4>
-
     @if (koboOff()) {
       <div class="alert alert-warning" role="alert">{{t('kobo-sync-disabled-alert')}}</div>
     } @else if (!accountService.hasDownloadRole() && !accountService.hasAdminRole()) {
       <div class="alert alert-warning" role="alert">{{t('kobo-sync-no-download-role')}}</div>
+    } @else if (hostNameNotSetup()) {
+      <div class="alert alert-warning" role="alert">{{t('kobo-sync-no-host-name')}}</div>
     }
+
+    <h4>{{t('setup-title')}}</h4>
+    <p>
+      <app-transloco-inject key="manage-kobo.description">
+        <ng-template translocoSlot="wikiLink">
+          <a rel="noopener noreferrer" target="_blank" [href]="WikiLink.KoboSync">{{t('wiki')}}</a>
+        </ng-template>
+      </app-transloco-inject>
+    </p>
+
+    <!--Hostname here-->
+    @if(!hostNameNotSetup()) {
+      <app-api-key
+        [title]="t('hostname-label')" [tooltipText]="t('hostname-tooltip')"
+        [hideData]="false" [key]="hostname()" />
+    }
+
+
+    <div class="setting-section-break"></div>
+
+    <!--Subtitles-->
+    <h4>{{t('kobo-sync-settings-title')}}</h4>
 
     <div class="row g-0 mt-4">
       <app-setting-item [title]="t('sync-item-limit-label')" [subtitle]="t('sync-item-limit-tooltip')"

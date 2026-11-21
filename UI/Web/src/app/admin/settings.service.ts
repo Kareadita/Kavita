@@ -29,6 +29,10 @@ export class SettingsService {
 
   baseUrl = environment.apiUrl;
 
+  getHostname() {
+    return this.http.get<string>(`${this.baseUrl}settings/hostname`, TextResonse);
+  }
+
   getServerSettings() {
     return this.http.get<ServerSettings>(this.baseUrl + 'settings');
   }
