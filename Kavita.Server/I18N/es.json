@@ -39,7 +39,6 @@
     "greater-0": "{0} debe ser mayor que 0",
     "send-to-kavita-email": "Enviar al dispositivo no se puede utilizar sin configurar el correo electrónico",
     "no-cover-image": "No hay imagen de cubierta",
-    "bookmark-doesnt-exist": "El marcador no existe",
     "generic-favicon": "Ha ocurrido un error al obtener el icono para el dominio",
     "file-doesnt-exist": "El archivo no existe",
     "generic-library": "Ha ocurrido un error grave. Inténtelo de nuevo.",

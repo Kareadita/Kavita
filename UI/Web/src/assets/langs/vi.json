@@ -3996,8 +3996,6 @@
         "cleanup-progress": "Đang dọn dẹp",
         "cover-update-progress": "Đang làm mới ảnh bìa: {{libraryName}}",
         "word-count-analyzer-progress": "Đang đếm số từ: {{libraryName}}",
-        "convert-bookmarks-progress": "Đang chuyển đổi dấu trang",
-        "convert-covers-progress": "Đang chuyển đổi ảnh bìa",
         "smart-collection-sync": "Đang đồng bộ {{collectionName}}",
         "rerun-metadata-mappings-progress": "Đang áp dụng lại ánh xạ siêu dữ liệu",
         "sending-to-device": "Đang gửi các tệp tới thiết bị",

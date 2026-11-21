@@ -120,7 +120,6 @@
     "series-doesnt-exist": "Sarjaa ei ole olemassa",
     "volume-doesnt-exist": "Nidosta ei ole olemassa",
     "bookmarks-empty": "Kirjanmerkit eivät voi olla tyhjiä",
-    "bookmark-doesnt-exist": "Kirjanmerkkiä ei ole olemassa",
     "must-be-defined": "{0} on määriteltävä",
     "generic-favicon": "Verkkotunnuksen faviconin noutamisessa ilmeni ongelma",
     "invalid-filename": "Virheellinen tiedostonimi",

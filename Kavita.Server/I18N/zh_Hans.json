@@ -42,7 +42,6 @@
     "series-doesnt-exist": "系列不存在",
     "bookmarks-empty": "书签不能为空",
     "no-cover-image": "无封面",
-    "bookmark-doesnt-exist": "书签不存在",
     "must-be-defined": "必须定义{0}",
     "invalid-filename": "无效的文件名",
     "file-doesnt-exist": "文件不存在",

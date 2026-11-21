@@ -104,7 +104,6 @@
     "volume-doesnt-exist": "ไม่มีชุดหนังสือนี้",
     "bookmarks-empty": "บุ๊กมาร์กต้องไม่ว่างเปล่า",
     "no-cover-image": "ไม่มีภาพหน้าปก",
-    "bookmark-doesnt-exist": "ไม่มีบุ๊กมาร์ก",
     "must-be-defined": "ต้องกำหนด {0}",
     "generic-favicon": "มีปัญหาในการเรียก favicon สำหรับโดเมน",
     "invalid-filename": "ชื่อไฟล์ไม่ถูกต้อง",

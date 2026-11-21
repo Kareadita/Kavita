@@ -28,7 +28,6 @@
     "generic-send-to": "Tekkis viga faili(de) seadmele saatmisel",
     "bookmarks-empty": "Järjehoidjad ei saa olla tühjad",
     "no-cover-image": "Pole kaanepilti",
-    "bookmark-doesnt-exist": "Järjehoidjat ei eksisteeri",
     "must-be-defined": "{0} peab olema sätestatud",
     "generic-favicon": "Domeeni favicon laadimisel tekkis probleem",
     "generic-library": "Tekkis möödapääsmatu probleem. Palun proovi uuesti.",

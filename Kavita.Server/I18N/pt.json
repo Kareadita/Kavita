@@ -20,7 +20,6 @@
     "generic-device-update": "Ocorreu um erro ao atualizar o dispositivo",
     "greater-0": "{0} tem de ser superior a 0",
     "send-to-kavita-email": "Enviar para dispositivo não pode ser usado sem a configuração de Email",
-    "bookmark-doesnt-exist": "Marcador inexistente",
     "file-doesnt-exist": "Ficheiro inexistente",
     "delete-library-while-scan": "Não pode eliminar a biblioteca enquanto uma análise está em curso. Por favor aguarde que a análise termine ou reinicie o Kavita e depois tente eliminar novamente",
     "generic-favicon": "Ocorreu um problema a obter o favicon do domínio",
