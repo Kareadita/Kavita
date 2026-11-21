@@ -85,7 +85,6 @@
     "age-restriction-not-applicable": "Ingen Restriktioner",
     "job-already-running": "Opgaven kører allerede",
     "ip-address-invalid": "IP-adressen '{0}' er ugyldig",
-    "bookmark-doesnt-exist": "Bogmærket eksistere ikke",
     "must-be-defined": "{0} skal være defineret",
     "library-doesnt-exist": "Biblioteket eksistere ikke",
     "invalid-filename": "ugyldigt filnavn",

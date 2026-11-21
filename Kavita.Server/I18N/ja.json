@@ -103,7 +103,6 @@
     "job-already-running": "ジョブはすでに実行中です",
     "total-logs": "ログの合計数は 1 から 30 の間でなければなりません",
     "stats-permission-denied": "他のユーザーの統計情報を表示する権限がありません",
-    "bookmark-doesnt-exist": "ブックマークが存在しません",
     "must-be-defined": "{0} を定義する必要があります｡",
     "generic-favicon": "ドメインのファビコンの取得中に問題が発生しました",
     "invalid-filename": "無効なファイル名",

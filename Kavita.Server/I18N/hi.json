@@ -21,7 +21,6 @@
     "generic-device-delete": "डिवाइस को हटाते समय एक त्रुटि हुई",
     "send-to-device-status": "अपने डिवाइस पर फ़ाइलों को स्थानांतरित करना",
     "volume-doesnt-exist": "वोलूम(Volume) मौजूद नहीं है",
-    "bookmark-doesnt-exist": "बुकमार्क मौजूद नहीं है",
     "invalid-filename": "अमान्य फ़ाइल नाम",
     "library-name-exists": "पुस्तकालय का नाम पहले से ही मौजूद है। कृपया सर्वर पर एक अद्वितीय नाम चुनें।।",
     "no-library-access": "उपयोगकर्ता के पास इस पुस्तकालय तक पहुंच नहीं है",

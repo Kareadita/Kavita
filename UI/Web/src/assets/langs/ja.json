@@ -128,19 +128,7 @@
         "embed-progress-indicator-label": "進捗インジケーターを埋め込む",
         "embed-progress-indicator-tooltip": "タイトルに進捗インジケーターを埋め込みます",
         "include-continue-from-label": "エントリーからの継続を含める",
-        "include-continue-from-tooltip": "OPDS フィールドに「X から続きを読む」エントリーを挿入して、前回読み終えた箇所を探す手間を省きます（Kavita の「続きを読む」ボタンをエミュレートします）",
-        "kobo-sync-settings-title": "Kobo Sync",
-        "kobo-sync-disabled-alert": "Kobo Sync は管理者によって無効化されています",
-        "kobo-sync-no-download-role": "Kobo Sync には「ダウンロード権限」が必要です。管理者にご相談ください",
-        "sync-item-limit-label": "同期アイテム数制限",
-        "sync-item-limit-tooltip": "一度の同期リクエストでデバイスに送信されるアイテムの最大数です。25 ～ 100 の間で設定ができます。",
-        "forward-to-kobo-store-label": "Kobo Store へ転送",
-        "forward-to-kobo-store-tooltip": "Kavita ライブラリ外の書籍に関するリクエストを、Kobo 公式ストアに転送します。無効にすると、デバイスから Kobo サーバーへの通信が停止します。",
-        "sync-all-libraries-label": "すべてのライブラリ",
-        "sync-all-libraries-tooltip": "すべてのライブラリから書籍を同期します。無効にすると、同期対象を以下で選択したライブラリのみに制限できます。",
-        "sync-libraries-label": "ライブラリの同期",
-        "sync-collection-label": "コレクションの同期",
-        "sync-collection-tooltip": "設定すると、このコレクション内のシリーズの書籍のみが同期されます。ライブラリの選択よりも優先されます。"
+        "include-continue-from-tooltip": "OPDS フィールドに「X から続きを読む」エントリーを挿入して、前回読み終えた箇所を探す手間を省きます（Kavita の「続きを読む」ボタンをエミュレートします）"
     },
     "user-holds": {
         "title": "Scrobble を一時停止",

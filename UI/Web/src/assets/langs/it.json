@@ -132,16 +132,7 @@
         "embed-progress-indicator-label": "Integra Indicatore di Avanzamento",
         "embed-progress-indicator-tooltip": "Integra l'indicatore di avanzamento nel titolo",
         "include-continue-from-label": "Includi Voce Continua Da",
-        "include-continue-from-tooltip": "Inserisce una voce \"Continua da X\" nei campi OPDS per evitare di dover cercare il punto in cui eri arrivato (emula il pulsante Continua di Kavita)",
-        "kobo-sync-settings-title": "Sincronizza con Kobo",
-        "kobo-sync-disabled-alert": "La sincronizzazione con Kobo è stata disabilitata dal tuo amministratore",
-        "kobo-sync-no-download-role": "La sincronizzazione con Kobo richiede il ruolo Download, chiedi aiuto all'amministratore",
-        "sync-item-limit-label": "Limite oggetti sincronizzati",
-        "sync-item-limit-tooltip": "Numero massimo di oggetti inviati al dispositivo per richiesta di sincronizzazione, Compreso tra 25 e 100.",
-        "forward-to-kobo-store-label": "Inoltra al Kobo Store",
-        "sync-all-libraries-label": "Tutte le librerie",
-        "sync-libraries-label": "Sincronizza librerie",
-        "sync-collection-label": "Sincronizza collezione"
+        "include-continue-from-tooltip": "Inserisce una voce \"Continua da X\" nei campi OPDS per evitare di dover cercare il punto in cui eri arrivato (emula il pulsante Continua di Kavita)"
     },
     "user-holds": {
         "title": "Scrobble in Sospeso",
@@ -4071,8 +4062,6 @@
         "cleanup-progress": "Pulizia in corso",
         "cover-update-progress": "Aggiornamento copertine: {{libraryName}}",
         "word-count-analyzer-progress": "Conteggio parole: {{libraryName}}",
-        "convert-bookmarks-progress": "Conversione segnalibri",
-        "convert-covers-progress": "Conversione copertine",
         "smart-collection-sync": "Sincronizzazione di {{collectionName}}",
         "rerun-metadata-mappings-progress": "Riapplicazione delle mappature dei metadati",
         "sending-to-device": "Invio dei file al dispositivo",
