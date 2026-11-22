@@ -249,6 +249,8 @@
         "disable-animations-tooltip": "Turns off animations in the site. Useful for e-ink readers.",
         "collapse-series-relationships-label": "Collapse Series Relationships",
         "collapse-series-relationships-tooltip": "Should Kavita show Series that have no relationships or is the parent/prequel",
+        "show-series-item-count-label": "Show Series Item Count",
+        "show-series-item-count-tooltip": "Show a badge on Series covers with the number of Volumes (or Chapters, for Series with no Volumes)",
         "highlight-bar-label": "Annotations highlight colors",
         "highlight-bar-tooltip": "These colors are shared between all books",
         "colorscape-label": "Use ColorScape",
