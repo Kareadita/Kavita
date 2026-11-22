@@ -582,7 +582,7 @@ public class CleanupService(
                     try
                     {
                         var bytes = await File.ReadAllBytesAsync(source, ct);
-                        var header = ImageHelper.GetImageHeader(bytes);
+                        var header = imagePipeline.Inspect(new ImageSource.FromBytes(bytes));
                         var inLine = header != null && header.Extension == format.GetExtension() &&
                                      (box is not { } b || (header.Width <= b.Width && header.Height <= b.Height));
 

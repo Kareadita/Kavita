@@ -108,6 +108,22 @@ public class NetVipsFileHandleTests : IDisposable
         AssertReplaceable(cover);
     }
 
+    /// <summary>
+    /// The reader's page dimensions read every cached page, and the chapter cache is deleted after
+    /// </summary>
+    [Fact]
+    public void Inspect_FromFile_LeavesFileReplaceable()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+
+        var page = WriteWebp("page.webp", 640, 909);
+
+        var header = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>()).Inspect(new ImageSource.FromFile(page));
+
+        Assert.Equal((640, 909), (header!.Width, header.Height));
+        AssertReplaceable(page);
+    }
+
     private string WriteWebp(string fileName, int width, int height)
     {
         var path = Path.Join(_directory, fileName);

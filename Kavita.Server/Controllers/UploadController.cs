@@ -44,13 +44,15 @@ public class UploadController : BaseApiController
     private readonly IUrlValidationService _urlValidationService;
     private readonly IImageFileService _imageFileService;
     private readonly ICompositeCoverService _compositeCoverService;
+    private readonly IImagePipeline _imagePipeline;
 
     /// <inheritdoc />
     public UploadController(IUnitOfWork unitOfWork, ILogger<UploadController> logger,
         ITaskScheduler taskScheduler, IDirectoryService directoryService, IReadingListService readingListService,
         ILocalizationService localizationService, IUrlValidationService urlValidationService,
-        IImageFileService imageFileService, ICompositeCoverService compositeCoverService)
+        IImageFileService imageFileService, ICompositeCoverService compositeCoverService, IImagePipeline imagePipeline)
     {
+        _imagePipeline = imagePipeline;
         _imageFileService = imageFileService;
         _compositeCoverService = compositeCoverService;
         _unitOfWork = unitOfWork;
@@ -90,7 +92,7 @@ public class UploadController : BaseApiController
         {
             await FlurlConfiguration.DownloadToFileAsync(dto.Url, downloadPath, ControllerConstants.MaxUploadSizeBytes, ct);
 
-            var extension = ImageHelper.GetImageExtension(downloadPath);
+            var extension = _imagePipeline.Inspect(new ImageSource.FromFile(downloadPath))?.Extension;
             if (extension == null)
             {
                 _logger.LogWarning("Rejected cover from {Url} - content is not a supported image", dto.Url.Sanitize());
@@ -204,7 +206,7 @@ public class UploadController : BaseApiController
         {
             var path = await UploadToTempAsync(file, fileName);
 
-            if (!_directoryService.FileSystem.File.Exists(path) || ImageHelper.GetImageExtension(path) == null)
+            if (!_directoryService.FileSystem.File.Exists(path) || _imagePipeline.Inspect(new ImageSource.FromFile(path))?.Extension == null)
             {
                 _directoryService.DeleteFiles([path]);
                 _logger.LogWarning("Rejected cover upload '{FileName}' - content is not a valid image", file.FileName.Sanitize());

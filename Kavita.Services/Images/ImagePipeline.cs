@@ -81,6 +81,35 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
         return bytes;
     }
 
+    /// <inheritdoc />
+    public ImageHeader? Inspect(ImageSource source)
+    {
+        try
+        {
+            using var header = OpenHeader(source);
+            return new ImageHeader(GetExtension(header), header.Width, header.Height);
+        }
+        catch (VipsException)
+        {
+            return null;
+        }
+    }
+
+    private static string? GetExtension(Image image)
+    {
+        // libvips names the loader by source: pngload from a file, pngload_buffer from memory, pngload_source from a stream
+        return (string) image.Get("vips-loader") switch
+        {
+            "pngload" or "pngload_buffer" or "pngload_source" => ".png",
+            "jpegload" or "jpegload_buffer" or "jpegload_source" => ".jpg",
+            "webpload" or "webpload_buffer" or "webpload_source" => ".webp",
+            "gifload" or "gifload_buffer" or "gifload_source" => ".gif",
+            // heifload also opens HEIC, which browsers can't show
+            "heifload" or "heifload_buffer" or "heifload_source" when image.Contains("heif-compression") && (string) image.Get("heif-compression") == "av1" => ".avif",
+            _ => null,
+        };
+    }
+
     private ImageWriteResult StageAndMove(string directory, string fileName, Func<string, StagedImage> stage)
     {
         EnsureInsideFolder(directory, fileName);

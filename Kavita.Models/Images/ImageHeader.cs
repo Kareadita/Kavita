@@ -4,5 +4,6 @@ namespace Kavita.Models.Images;
 /// <summary>
 /// What an encoded image holds, read from its header rather than its file name
 /// </summary>
-/// <param name="Extension">With its dot, as <c>ImageHelper.GetImageExtension</c> returns it</param>
-public sealed record ImageHeader(string Extension, int Width, int Height);
+/// <param name="Extension">With its dot (<c>.png</c>, <c>.jpg</c>, <c>.webp</c>, <c>.gif</c>, <c>.avif</c>). Null when
+/// libvips reads the image but Kavita does not store that format, such as HEIC</param>
+public sealed record ImageHeader(string? Extension, int Width, int Height);

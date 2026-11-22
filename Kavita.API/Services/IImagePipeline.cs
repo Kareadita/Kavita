@@ -30,4 +30,10 @@ public interface IImagePipeline
     /// The render's format is used as is: no <see cref="ImageKind"/> rule (such as keeping transparency) applies
     /// </summary>
     byte[] Render(ImageSource source, ImageRender render);
+
+    /// <summary>
+    /// Reads the format and size from the image's header, never its file name. Decodes no pixels
+    /// </summary>
+    /// <returns>Null when the source is not an image libvips can read</returns>
+    ImageHeader? Inspect(ImageSource source);
 }
