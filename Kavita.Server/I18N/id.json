@@ -121,7 +121,6 @@
     "volume-doesnt-exist": "Volume tersebut tidak ada",
     "bookmarks-empty": "Penanda tidak bisa dikosongkan",
     "no-cover-image": "Tidak ada gambar sampul",
-    "bookmark-doesnt-exist": "Penanda tersebut tidak ada",
     "must-be-defined": "{0} harus ditentukan",
     "generic-favicon": "Ada masalah saat mengambil favicon untuk domain",
     "invalid-filename": "Nama file tidak sah",

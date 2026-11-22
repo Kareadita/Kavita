@@ -159,7 +159,6 @@
     "send-to-unallowed": "Du kan inte skicka till en enhet som inte är din",
     "send-to-device-status": "Överför filer till din enhet",
     "no-cover-image": "Omslagsbild saknas",
-    "bookmark-doesnt-exist": "Bokmärke saknas",
     "delete-library-while-scan": "Du kan inte ta bort ett bibliotek medan en skanning pågår. Vänligen vänta tills skanningen är färdig eller starta om Kavita för att försöka ta bort igen",
     "perform-scan": "Vänligen utför en skanning av denna serie eller bibliotek och försök igen",
     "bookmark-permission": "Du har inte behörighet att bokmärka/ta bort bokmärke",

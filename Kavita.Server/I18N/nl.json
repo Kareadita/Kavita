@@ -65,7 +65,6 @@
     "generic-device-update": "Er is een fout opgetreden bij het updaten van het apparaat",
     "generic-device-delete": "Er is een fout opgetreden bij het verwijderen van het apparaat",
     "no-cover-image": "Geen omslagafbeelding",
-    "bookmark-doesnt-exist": "Bladwijzer bestaat niet",
     "must-be-defined": "{0} moet gedefinieerd zijn",
     "generic-favicon": "Er is een probleem opgetreden bij het ophalen van de favicon voor het domein",
     "invalid-filename": "Ongeldige bestandsnaam",

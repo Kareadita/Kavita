@@ -53,7 +53,6 @@
     "generic-device-create": "Wystąpił błąd podczas tworzenia urządzenia",
     "generic-device-update": "Wystąpił błąd podczas aktualizacji urządzenia",
     "send-to-kavita-email": "Funkcja Wyślij do urządzenia nie może być używana bez konfiguracji poczty e-mail",
-    "bookmark-doesnt-exist": "Zakładka nie istnieje",
     "series-doesnt-exist": "Seria nie istnieje",
     "must-be-defined": "{0} musi być zdefiniowane",
     "email-not-enabled": "E-mail nie jest włączony na tym serwerze. Nie można wykonać tej akcji.",
