@@ -128,9 +128,9 @@ public class ImagePipelineTests : IDisposable
     [Fact]
     public void Render_PngWithAlpha_FormatIsUsedAsIs()
     {
-        var bytes = _pipeline.Render(new ImageSource.FromBytes(TransparentPng()), new ImageRender(EncodeFormat.PNG, []));
+        var result = _pipeline.Render(new ImageSource.FromBytes(TransparentPng()), new ImageRender(EncodeFormat.PNG, []));
 
-        using var rendered = Image.NewFromBuffer(bytes);
+        using var rendered = Image.NewFromBuffer(result.Data);
         Assert.Equal("pngload_buffer", rendered.Get("vips-loader"));
         Assert.True(rendered.HasAlpha());
     }

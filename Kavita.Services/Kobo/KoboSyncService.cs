@@ -1381,7 +1381,7 @@ public class KoboSyncService(
         if (!fileSystem.File.Exists(fullPath)) return null;
 
         var render = GetKoboRender(width, height, quality, isGreyScale);
-        return await Task.Run(() => imagePipeline.Render(new ImageSource.FromFile(fullPath), render), ct);
+        return await Task.Run(() => imagePipeline.Render(new ImageSource.FromFile(fullPath), render).Data, ct);
     }
 
     internal static ImageRender GetKoboRender(string width, string height, string? quality, bool isGreyScale)

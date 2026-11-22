@@ -247,7 +247,7 @@ public class AnnotationService(
         }
     }
 
-    private string StripHtml(string? html)
+    internal string StripHtml(string? html)
     {
         if (string.IsNullOrEmpty(html))
         {

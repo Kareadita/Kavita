@@ -74,11 +74,11 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
     }
 
     /// <inheritdoc />
-    public byte[] Render(ImageSource source, ImageRender render)
+    public ImageRenderResult Render(ImageSource source, ImageRender render)
     {
         byte[] bytes = [];
-        Run(source, render.Steps, img => bytes = EncodeToBuffer(img, render.Format, render.Quality));
-        return bytes;
+        var staged = Run(source, render.Steps, img => bytes = EncodeToBuffer(img, render.Format, render.Quality));
+        return new ImageRenderResult(bytes, staged.Width, staged.Height);
     }
 
     /// <inheritdoc />

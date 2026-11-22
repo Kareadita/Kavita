@@ -73,11 +73,12 @@ public class ImageStepTests(ITestOutputHelper output) : AbstractImageTest
         var stepCase = Cases.Single(c => c.Name == caseName);
         var path = Path.Join(ImageServiceDirectory, sample);
 
-        var bytes = _pipeline.Render(new ImageSource.FromFile(path), stepCase.Render);
+        var result = _pipeline.Render(new ImageSource.FromFile(path), stepCase.Render);
 
         using var source = Image.NewFromFile(path);
-        using var rendered = Image.NewFromBuffer(bytes);
+        using var rendered = Image.NewFromBuffer(result.Data);
         stepCase.Check(source, rendered);
+        Assert.Equal((rendered.Width, rendered.Height), (result.Width, result.Height));
     }
 
     // [Fact]
@@ -92,7 +93,7 @@ public class ImageStepTests(ITestOutputHelper output) : AbstractImageTest
             foreach (var stepCase in Cases)
             {
                 var outputPath = OutputPath(sample, stepCase.Name, stepCase.Render.Format.GetExtension());
-                File.WriteAllBytes(outputPath, _pipeline.Render(new ImageSource.FromFile(sample), stepCase.Render));
+                File.WriteAllBytes(outputPath, _pipeline.Render(new ImageSource.FromFile(sample), stepCase.Render).Data);
                 cells.Add(Cell(stepCase.Title, outputPath, CheckResult(stepCase, sample, outputPath), stepCase.BoxWidth, stepCase.BoxHeight));
             }
 

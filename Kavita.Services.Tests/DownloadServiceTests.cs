@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.API.Services.Kobo;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Builders;
 using NSubstitute;
@@ -19,7 +20,7 @@ public class DownloadServiceTests
 
         var service = new DownloadService(Substitute.For<ICacheService>(), Substitute.For<ILocalizationService>(),
             Substitute.For<IDirectoryService>(), kepubify, Substitute.For<IFileSystem>(), Substitute.For<IEntityNamingService>(),
-            Substitute.For<IUnitOfWork>());
+            Substitute.For<IUnitOfWork>(), Substitute.For<IEpubBuilderService>());
         var chapter = new ChapterBuilder("1")
             .WithFile(new MangaFileBuilder(epubPath, MangaFormat.Epub).Build())
             .Build();

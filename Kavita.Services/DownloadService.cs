@@ -12,6 +12,7 @@ using Kavita.API.Services.Kobo;
 using Kavita.Common;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Images;
 using Kavita.Services.Kobo;
 using Microsoft.AspNetCore.StaticFiles;
 using MimeTypes;
@@ -176,6 +177,16 @@ public class DownloadService(
         {
             return outputPath;
         }
+
+        var chapter = await cacheService.Ensure(chapterId, false, ct);
+        if (chapter is null)
+        {
+            throw new KavitaException(await localizationService.TranslateAsync("cache-file-find"));
+        }
+
+        var renderSettings = new ImageRender(EncodeFormat.JPEG, []); // Note the steps will come from KoboOptimizationService
+        var options = new BuildEpubOptions(cacheService.GetCachedPages(chapterId).ToList(), renderSettings, ReadingDirection.LeftToRight,
+            outputPath);
 
         return await epubBuilderService.BuildEpubAsync(userId, chapterId, outputPath, ct);
     }

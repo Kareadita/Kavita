@@ -26,10 +26,10 @@ public interface IImagePipeline
     ImageWriteResult Reencode(byte[] sourceBytes, ImageKind kind, ImagePolicy policy, string directory, string fileName);
 
     /// <summary>
-    /// Decodes <paramref name="source"/>, applies the render's steps and returns the encoded bytes. Writes nothing to disk.
+    /// Decodes <paramref name="source"/>, applies the render's steps and returns the encoded bytes with their size. Writes nothing to disk.
     /// The render's format is used as is: no <see cref="ImageKind"/> rule (such as keeping transparency) applies
     /// </summary>
-    byte[] Render(ImageSource source, ImageRender render);
+    ImageRenderResult Render(ImageSource source, ImageRender render);
 
     /// <summary>
     /// Reads the format and size from the image's header, never its file name. Decodes no pixels
