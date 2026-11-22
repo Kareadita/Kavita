@@ -8,11 +8,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.API.Services.Kobo;
 using Kavita.Common;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Services.Kobo;
 using Microsoft.AspNetCore.StaticFiles;
 using MimeTypes;
+using OfficeIMO.Epub;
 using QuickEPUB;
 
 namespace Kavita.Services;
@@ -24,7 +27,8 @@ public class DownloadService(
     IKepubifyConverterService kepubifyConverterService,
     IFileSystem fileSystem,
     IEntityNamingService namingService,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    IEpubBuilderService epubBuilderService
     ) : IDownloadService
 {
     private readonly FileExtensionContentTypeProvider _fileTypeProvider = new();
@@ -173,69 +177,6 @@ public class DownloadService(
             return outputPath;
         }
 
-        var chapter = await cacheService.Ensure(chapterId, false, ct);
-        if (chapter is null)
-        {
-            throw new KavitaException(await localizationService.TranslateAsync("cache-file-find"));
-        }
-
-        var libraryType = await unitOfWork.ChapterRepository.GetLibraryTypeAsync(chapter.Id, ct);
-        var chapterDto = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId, ct);
-        var volumeDto = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, userId, ct);
-        if (libraryType is null || chapterDto is null || volumeDto is null)
-        {
-            throw new KavitaException();
-        }
-
-        var namingCtx = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType.Value);
-
-        var epub = new Epub(namingCtx.BuildChapterTitle(volumeDto, chapterDto), chapterDto.Writers.FirstOrDefault()?.Name ?? "Kavita");
-        var openFiles = new List<Stream>();
-
-        try
-        {
-            var cover = await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId, ct);
-            var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
-            var path = Path.Join(directoryService.CoverImageDirectory, cover);
-
-            if (chapterDto.HasCoverImage && fileSystem.File.Exists(path))
-            {
-                var fs = fileSystem.File.OpenRead(path);
-                openFiles.Add(fs);
-
-                if (serverSettings.EncodeMediaAs != EncodeFormat.JPEG &&
-                    serverSettings.EncodeMediaAs != EncodeFormat.PNG)
-                {
-                    // TODO: We need to convert this to JPEG/PNG
-                }
-
-                epub.AddResource(cover, EpubResourceType.JPEG, fs, true);
-            }
-
-            var index = 0;
-            foreach (var cachedPage in cacheService.GetCachedPages(chapterId))
-            {
-                ct.ThrowIfCancellationRequested();
-
-                var fs = fileSystem.File.OpenRead(cachedPage);
-                openFiles.Add(fs);
-
-                var fileName = $"page_{index++:D4}";
-                epub.AddResource(fileName, EpubResourceType.JPEG, fs);
-                epub.AddSection($"Page {index}", $"<div style=\"text-align:center\"><img src=\"{fileName}\" style=\"max-width:100%;max-height:100%\"/></div>");
-            }
-        }
-        finally
-        {
-            foreach (var fs in openFiles)
-            {
-                await fs.DisposeAsync();
-            }
-        }
-
-        await using var epubFileStream = fileSystem.File.Create(outputPath);
-        epub.Export(epubFileStream);
-
-        return outputPath;
+        return await epubBuilderService.BuildEpubAsync(userId, chapterId, outputPath, ct);
     }
 }

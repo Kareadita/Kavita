@@ -5,6 +5,7 @@ using System.Net.Http;
 using System;
 using Kavita.API.Services;
 using Kavita.API.Services.Helpers;
+using Kavita.API.Services.Kobo;
 using Kavita.API.Services.Metadata;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.Reading;
@@ -129,6 +130,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IDeviceTrackingService, DeviceTrackingService>();
 
         services.AddScoped<IKoboSyncService, KoboSyncService>();
+        services.AddScoped<IKoboOptimizationService, KoboOptimizationService>();
+        services.AddScoped<IEpubBuilderService, EpubBuilderService>();
         services.AddHttpClient("Kobo", builder =>
         {
             builder.BaseAddress = new Uri("https://storeapi.kobo.com");
