@@ -16,19 +16,15 @@ using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.User;
-using Kavita.Models.Images;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers.Kobo;
-using Kavita.Services.Kobo;
-using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using NetVips;
 
 namespace Kavita.Server.Controllers;
 
@@ -45,7 +41,7 @@ public class KoboController(
     IKoboSyncService koboSyncService,
     IDirectoryService directoryService,
     IDownloadService downloadService,
-    IClientInfoAccessor clientInfoAccessor, IImagePipeline imagePipeline): BaseApiController
+    IClientInfoAccessor clientInfoAccessor): BaseApiController
 {
 
     private const string KoboImageHost = "https://cdn.kobo.com/book-images/";
@@ -286,36 +282,8 @@ public class KoboController(
             return NotFound();
         }
 
-        var coverInfo = await unitOfWork.DataContext.Chapter
-            .Where(c => c.Id == kavitaId)
-            .Select(c => new
-            {
-                ChapterCoverImage = c.CoverImageFile!.FileName,
-                VolumeCoverImage = c.Volume.CoverImageFile!.FileName,
-                c.MinNumber
-            })
-            .FirstOrDefaultAsync(ct);
-
-        if (coverInfo is null)
-        {
-            return NotFound();
-        }
-
-        var coverPath = coverInfo.MinNumber.Is(Parser.DefaultChapterNumber)
-            ? coverInfo.VolumeCoverImage
-            : coverInfo.ChapterCoverImage;
-
-        if (string.IsNullOrEmpty(coverPath))
-        {
-            return NotFound();
-        }
-
-        var fullPath = Path.Join(directoryService.CoverImageDirectory, coverPath);
-        if (!directoryService.FileSystem.File.Exists(fullPath)) return NotFound();
-
-
-        var renderer = KoboSyncService.GetKoboRenderer(width, height, quality, isGreyScale);
-        var bytes = imagePipeline.Render(new ImageSource.FromFile(fullPath), renderer);
+        var bytes = await koboSyncService.GetBookCoverAsync(kavitaId, width, height, quality, isGreyScale, ct);
+        if (bytes is null) return NotFound();
 
         return File(bytes, "image/jpeg");
     }

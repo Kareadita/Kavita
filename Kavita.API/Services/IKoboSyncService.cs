@@ -51,4 +51,13 @@ public interface IKoboSyncService
     Task<ActionResult> ProxyRequestIfEnabled(HttpClient? httpClient = null, object? body = null);
 
     Task<(JsonNode?, bool)> ProxyRequest(KoboSyncPoint? syncPoint, CancellationToken ct, bool copyResponse = true, object? body = null, HttpClient? httpClient = null, bool writeResponseOnError = true);
+    /// <summary>
+    /// The chapter's cover (its volume's for a loose-leaf chapter) as a JPEG, shrunk to fit the requested size
+    /// </summary>
+    /// <param name="width">Raw route value; one that does not parse leaves that side unbounded</param>
+    /// <param name="height">Raw route value; one that does not parse leaves that side unbounded</param>
+    /// <param name="quality">JPEG quality, clamped to 1-100; 85 when it does not parse</param>
+    /// <returns>Null when the chapter, its cover or the file is missing</returns>
+    Task<byte[]?> GetBookCoverAsync(int chapterId, string width, string height, string? quality,
+        bool isGreyScale, CancellationToken ct = default);
 }

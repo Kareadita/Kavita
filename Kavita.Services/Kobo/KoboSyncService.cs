@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Net.Http;
@@ -35,6 +36,7 @@ using Kavita.Services.Extensions;
 using Kavita.Services.Helpers;
 using Kavita.Services.Helpers.Kobo;
 using Kavita.Services.Images.ImageSteps;
+using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -64,7 +66,9 @@ public class KoboSyncService(
     IHttpClientFactory httpClientFactory,
     IKepubifyConverterService kepubifyConverterService,
     IFileSystem fileSystem,
-    ILocalizationService localizationService
+    ILocalizationService localizationService,
+    IDirectoryService directoryService,
+    IImagePipeline imagePipeline
     ): IKoboSyncService
 {
     private static readonly TimeSpan ProgressConversionWait = TimeSpan.FromSeconds(30);
@@ -1345,22 +1349,56 @@ public class KoboSyncService(
 
     #endregion
 
+    #region Cover
 
-    /// <summary>
-    /// Given a request from Kobo, return the appropriate pipeline steps
-    /// </summary>
-    public static ImageRender GetKoboRenderer(string width, string height, string? quality, bool isGreyScale)
+    public async Task<byte[]?> GetBookCoverAsync(int chapterId, string width, string height, string? quality, bool isGreyScale, CancellationToken ct = default)
     {
-        var parsedWidth = int.TryParse(width, out var w) ? w : 1000000;
-        var parsedHeight = int.TryParse(height, out var h) ? h : 1000000;
+        var coverInfo = await unitOfWork.DataContext.Chapter
+            .Where(c => c.Id == chapterId)
+            .Select(c => new
+            {
+                ChapterCoverImage = c.CoverImageFile!.FileName,
+                VolumeCoverImage = c.Volume.CoverImageFile!.FileName,
+                c.MinNumber
+            })
+            .FirstOrDefaultAsync(ct);
+
+        if (coverInfo is null)
+        {
+            return null;
+        }
+
+        var coverPath = coverInfo.MinNumber.Is(Parser.DefaultChapterNumber)
+            ? coverInfo.VolumeCoverImage
+            : coverInfo.ChapterCoverImage;
+
+        if (string.IsNullOrEmpty(coverPath))
+        {
+            return null;
+        }
+
+        var fullPath = Path.Join(directoryService.CoverImageDirectory, coverPath);
+        if (!fileSystem.File.Exists(fullPath)) return null;
+
+        var render = GetKoboRender(width, height, quality, isGreyScale);
+        return await Task.Run(() => imagePipeline.Render(new ImageSource.FromFile(fullPath), render), ct);
+    }
+
+    internal static ImageRender GetKoboRender(string width, string height, string? quality, bool isGreyScale)
+    {
+        // 1,000,000 leaves a side that did not parse unbounded, since FitWithinStep never enlarges
+        var parsedWidth = int.TryParse(width, out var w) ? w : 1_000_000;
+        var parsedHeight = int.TryParse(height, out var h) ? h : 1_000_000;
         var q = int.TryParse(quality, out var parsedQ) ? Math.Clamp(parsedQ, 1, 100) : 85;
 
-        IList<IImageStep> steps = [new FitWithinStep(parsedWidth, parsedHeight)];
+        List<IImageStep> steps = [new FitWithinStep(parsedWidth, parsedHeight)];
         if (isGreyScale)
         {
             steps.Add(new GreyscaleStep());
         }
 
-        return new ImageRender(EncodeFormat.JPEG, (IReadOnlyList<IImageStep>) steps, q);
+        return new ImageRender(EncodeFormat.JPEG, steps, q);
     }
+
+    #endregion
 }
