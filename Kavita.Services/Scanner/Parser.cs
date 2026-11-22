@@ -262,6 +262,12 @@ public static partial class Parser
         new Regex(
             @"(?<Series>.*)(\s|_)(?:Episode|Ep\.?)(\s|_)(?<Chapter>\d+(?:.\d+|-\d+)?)",
             MatchOptions, RegexTimeout),
+        // Kodoja #001 (March 2016), Ladies Top 100 - #1, Ladies Top 100 - #1 (2016) (Digital)
+        // A # marks the chapter explicitly, so a trailing number before it belongs to the series (Ladies Top 100).
+        // Must stay below the Vol/Chapter marker regexes above (Monster #8 Ch. 001) and above the (year) regex below, to make sure all test cases still work :)
+        new Regex(
+            @"^(?!Vol)(?!Chapter)(?<Series>.*)(\s|_|-)+#\d+",
+            MatchOptions, RegexTimeout),
         // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
         new Regex(
             @"(?<Series>.*)\(\d",
