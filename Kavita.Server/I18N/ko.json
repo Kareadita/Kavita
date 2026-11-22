@@ -72,7 +72,6 @@
     "no-cover-image": "커버 이미지가 없습니다",
     "series-doesnt-exist": "시리즈가 존재하지 않습니다",
     "bookmarks-empty": "북마크는 비워둘 수 없습니다",
-    "bookmark-doesnt-exist": "북마크가 존재하지 않습니다",
     "must-be-defined": "{0}은(는) 정의되어야 합니다",
     "generic-library": "심각한 문제가 발생했습니다. 다시 시도해주세요.",
     "invalid-filename": "잘못된 파일 이름입니다",

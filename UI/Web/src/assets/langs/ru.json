@@ -4384,8 +4384,6 @@
         "cleanup-progress": "Наводим порядок",
         "cover-update-progress": "Обновляем обложки: «{{libraryName}}»",
         "word-count-analyzer-progress": "Считаем слова: «{{libraryName}}»",
-        "convert-bookmarks-progress": "Преобразуем закладки",
-        "convert-covers-progress": "Преобразуем обложки",
         "smart-collection-sync": "Синхронизируем «{{collectionName}}»",
         "rerun-metadata-mappings-progress": "Применяем правила метаданных заново",
         "sending-to-device": "Отправляем файлы на устройство",

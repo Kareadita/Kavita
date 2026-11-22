@@ -46,7 +46,6 @@
     "generic-send-to": "Ocorreu um erro ao enviar o(s) arquivo(s) para o dispositivo",
     "series-doesnt-exist": "A série não existe",
     "bookmarks-empty": "Os marcadores não podem estar vazios",
-    "bookmark-doesnt-exist": "O marcador não existe",
     "must-be-defined": "{0} deve ser definido",
     "generic-favicon": "Ocorreu um problema ao buscar o favicon do domínio",
     "library-name-exists": "O nome da biblioteca já existe. Por favor, escolha um nome exclusivo para o servidor.",

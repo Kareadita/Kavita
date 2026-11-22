@@ -78,7 +78,6 @@
     "series-doesnt-exist": "A sorozat nem létezik",
     "bookmarks-empty": "A könyvjelzők nem lehetnek üresek",
     "no-cover-image": "Nincs borítókép",
-    "bookmark-doesnt-exist": "A könyvjelző nem létezik",
     "generic-favicon": "Probléma volt a domainhez tartozó favicon lekérésekor",
     "must-be-defined": "{0} definiálni kell",
     "invalid-filename": "Hibás filenév",

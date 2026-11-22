@@ -57,7 +57,6 @@
     "volume-doesnt-exist": "Le volume n'existe pas",
     "bookmarks-empty": "Les marque-pages ne peuvent pas être vides",
     "no-cover-image": "Aucune image de couverture",
-    "bookmark-doesnt-exist": "Ce marque-page n'existe pas",
     "must-be-defined": "{0} doit être défini",
     "invalid-filename": "Nom de fichier invalide",
     "file-doesnt-exist": "Le fichier n'existe pas",

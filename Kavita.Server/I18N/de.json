@@ -43,7 +43,6 @@
     "series-doesnt-exist": "Die Serie existiert nicht",
     "volume-doesnt-exist": "Der Band existiert nicht",
     "no-cover-image": "Kein Coverbild",
-    "bookmark-doesnt-exist": "Lesezeichen ist nicht vorhanden",
     "must-be-defined": "{0} muss definiert sein",
     "generic-favicon": "Es gab ein Problem beim Abrufen des Favicons für die Domain",
     "invalid-filename": "Ungültiger Dateiname",

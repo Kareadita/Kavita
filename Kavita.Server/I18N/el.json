@@ -65,7 +65,6 @@
     "series-doesnt-exist": "Η σειρά δεν υπάρχει",
     "volume-doesnt-exist": "Ο τόμος δεν υπάρχει",
     "bookmarks-empty": "Οι σελιδοδείκτες δεν μπορούν να είναι άδειοι",
-    "bookmark-doesnt-exist": "Δεν υπάρχει ο σελιδοδείκτης",
     "must-be-defined": "{0} πρέπει να οριστεί",
     "file-doesnt-exist": "Το αρχείο δεν υπάρχει"
 }
