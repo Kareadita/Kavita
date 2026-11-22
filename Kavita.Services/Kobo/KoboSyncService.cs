@@ -30,9 +30,11 @@ using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers;
 using Kavita.Services.Helpers.Kobo;
+using Kavita.Services.Images.ImageSteps;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -1342,4 +1344,23 @@ public class KoboSyncService(
     }
 
     #endregion
+
+
+    /// <summary>
+    /// Given a request from Kobo, return the appropriate pipeline steps
+    /// </summary>
+    public static ImageRender GetKoboRenderer(string width, string height, string? quality, bool isGreyScale)
+    {
+        var parsedWidth = int.TryParse(width, out var w) ? w : 1000000;
+        var parsedHeight = int.TryParse(height, out var h) ? h : 1000000;
+        var q = int.TryParse(quality, out var parsedQ) ? Math.Clamp(parsedQ, 1, 100) : 85;
+
+        IList<IImageStep> steps = [new FitWithinStep(parsedWidth, parsedHeight)];
+        if (isGreyScale)
+        {
+            steps.Add(new GreyscaleStep());
+        }
+
+        return new ImageRender(EncodeFormat.JPEG, (IReadOnlyList<IImageStep>) steps, q);
+    }
 }

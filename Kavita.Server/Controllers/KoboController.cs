@@ -16,10 +16,12 @@ using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Images;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers.Kobo;
+using Kavita.Services.Kobo;
 using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -43,7 +45,7 @@ public class KoboController(
     IKoboSyncService koboSyncService,
     IDirectoryService directoryService,
     IDownloadService downloadService,
-    IClientInfoAccessor clientInfoAccessor): BaseApiController
+    IClientInfoAccessor clientInfoAccessor, IImagePipeline imagePipeline): BaseApiController
 {
 
     private const string KoboImageHost = "https://cdn.kobo.com/book-images/";
@@ -311,25 +313,9 @@ public class KoboController(
         var fullPath = Path.Join(directoryService.CoverImageDirectory, coverPath);
         if (!directoryService.FileSystem.File.Exists(fullPath)) return NotFound();
 
-        // BUG: a JPEG cover is returned as is, so the requested size and greyscale are ignored
-        if (string.Equals(Path.GetExtension(fullPath), ".jpg", StringComparison.OrdinalIgnoreCase))
-        {
-            return PhysicalFile(fullPath, "image/jpeg");
-        }
 
-        // TODO: Refactor this method into Service and refactor this into a Steps approach with the Pipeline
-        var q = int.TryParse(quality, out var parsedQ) ? Math.Clamp(parsedQ, 1, 100) : 85;
-
-        var bytes = await Task.Run(() =>
-        {
-            using var img = Image.Thumbnail(fullPath, int.TryParse(width, out var w) ? w : 1000000,
-                height: int.TryParse(height, out var h) ? h : 1000000,
-                size: Enums.Size.Down);
-
-            using var final = isGreyScale ? img.Colourspace(Enums.Interpretation.Bw) : img;
-
-            return final.JpegsaveBuffer(q: q);
-        }, ct);
+        var renderer = KoboSyncService.GetKoboRenderer(width, height, quality, isGreyScale);
+        var bytes = imagePipeline.Render(new ImageSource.FromFile(fullPath), renderer);
 
         return File(bytes, "image/jpeg");
     }
