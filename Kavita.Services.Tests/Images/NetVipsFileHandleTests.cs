@@ -1,7 +1,12 @@
 using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Images;
 using Kavita.Services.Helpers;
+using Kavita.Services.Images;
+using Kavita.Services.Images.ImageSteps;
 using Kavita.Services.Tests.Helpers;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using Image = NetVips.Image;
 
 namespace Kavita.Services.Tests.Images;
@@ -82,6 +87,25 @@ public class NetVipsFileHandleTests : IDisposable
 
         AssertReplaceable(first);
         AssertReplaceable(second);
+    }
+
+    /// <summary>
+    /// A Kobo cover is rendered from the stored file while a cover refresh may be replacing it
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Render_FromFile_LeavesFileReplaceable(bool greyscale)
+    {
+        if (!OperatingSystem.IsWindows()) return;
+
+        var cover = WriteWebp("cover.webp", 640, 909);
+        IImageStep[] steps = greyscale ? [new FitWithinStep(355, 530), new GreyscaleStep()] : [new FitWithinStep(355, 530)];
+
+        new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>())
+            .Render(new ImageSource.FromFile(cover), new ImageRender(EncodeFormat.JPEG, steps, 85));
+
+        AssertReplaceable(cover);
     }
 
     private string WriteWebp(string fileName, int width, int height)

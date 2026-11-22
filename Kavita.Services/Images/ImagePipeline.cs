@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Kavita.API.Services;
 using Kavita.Common.Extensions;
@@ -21,9 +23,10 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
     /// <inheritdoc />
     public ImageWriteResult Write(ImageSource source, ImageKind kind, ImagePolicy policy, string directory, string fileName)
     {
-        var profile = ImageProfile.For(kind);
-        return StageAndMove(directory, fileName,
-            tmpPath => Stage(source, profile, policy, policy.Format.ForKind(kind), tmpPath));
+        var steps = GetNewImageSteps(ImageProfile.For(kind), policy);
+        var format = policy.Format.ForKind(kind);
+
+        return StageAndMove(directory, fileName, tmpPath => Run(source, steps, img => EncodeToFile(img, tmpPath, format)));
     }
 
     /// <inheritdoc />
@@ -63,17 +66,19 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
     /// <inheritdoc />
     public ImageWriteResult Reencode(byte[] sourceBytes, ImageKind kind, ImagePolicy policy, string directory, string fileName)
     {
-        var box = ImageProfile.For(kind).GetBox(policy);
+        var steps = GetReencodeSteps(ImageProfile.For(kind), policy);
+        var format = policy.Format.ForKind(kind);
 
-        return StageAndMove(directory, fileName, tmpPath =>
-        {
-            using var source = Image.NewFromBuffer(sourceBytes);
-            using var shrunk = box is { } b
-                ? Image.ThumbnailBuffer(sourceBytes, b.Width, height: b.Height, size: Enums.Size.Down)
-                : null;
+        return StageAndMove(directory, fileName,
+            tmpPath => Run(new ImageSource.FromBytes(sourceBytes), steps, img => EncodeToFile(img, tmpPath, format)));
+    }
 
-            return Save(shrunk ?? source, source, tmpPath, policy.Format.ForKind(kind));
-        });
+    /// <inheritdoc />
+    public byte[] Render(ImageSource source, ImageRender render)
+    {
+        byte[] bytes = [];
+        Run(source, render.Steps, img => bytes = EncodeToBuffer(img, render.Format, render.Quality));
+        return bytes;
     }
 
     private ImageWriteResult StageAndMove(string directory, string fileName, Func<string, StagedImage> stage)
@@ -95,81 +100,130 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
         }
     }
 
-    private static StagedImage Stage(ImageSource source, ImageProfile profile, ImagePolicy policy, EncodeFormat format, string tmpPath)
-    {
-        switch (source)
-        {
-            case ImageSource.FromFile file:
-            {
-                using var header = Image.NewFromFile(file.Path, access: Enums.Access.Sequential);
-                var target = GetThumbnailTarget(header, profile, policy);
-                using var thumbnail = target is { } t
-                    ? Image.Thumbnail(file.Path, t.Width, height: t.Height, size: t.Size, crop: t.Crop)
-                    : null;
-
-                return Save(thumbnail ?? header, header, tmpPath, format);
-            }
-            case ImageSource.FromBytes bytes:
-            {
-                using var header = Image.NewFromBuffer(bytes.Data);
-                var target = GetThumbnailTarget(header, profile, policy);
-                using var thumbnail = target is { } t
-                    ? Image.ThumbnailBuffer(bytes.Data, t.Width, height: t.Height, size: t.Size, crop: t.Crop)
-                    : null;
-
-                return Save(thumbnail ?? header, header, tmpPath, format);
-            }
-            case ImageSource.FromStream fromStream:
-                return StageStream(fromStream.Stream, profile, policy, format, tmpPath);
-            default:
-                throw new ArgumentOutOfRangeException(nameof(source), source.GetType().Name, null);
-        }
-    }
-
-    private static StagedImage StageStream(Stream stream, ImageProfile profile, ImagePolicy policy, EncodeFormat format, string tmpPath)
-    {
-        if (stream.CanSeek) stream.Position = 0;
-        using var source = Image.NewFromStream(stream);
-
-        var target = GetThumbnailTarget(source, profile, policy);
-        if (target is not { } t)
-        {
-            return Save(source, source, tmpPath, format);
-        }
-
-        using var thumbnail = source.ThumbnailImage(t.Width, t.Height, size: t.Size, crop: t.Crop);
-        try
-        {
-            return Save(thumbnail, source, tmpPath, format);
-        }
-        catch (VipsException)
-        {
-            // Saving a PDF cover decoded from a stream can fail: https://github.com/kleisauke/net-vips/issues/234
-            if (stream.CanSeek) stream.Position = 0;
-            using var retry = Image.ThumbnailStream(stream, t.Width, height: t.Height, size: t.Size, crop: t.Crop);
-
-            return Save(retry, source, tmpPath, format);
-        }
-    }
-
-    private static ThumbnailTarget? GetThumbnailTarget(Image source, ImageProfile profile, ImagePolicy policy)
+    internal static IReadOnlyList<IImageStep> GetNewImageSteps(ImageProfile profile, ImagePolicy policy)
     {
         switch (profile.Size)
         {
             case ImageSizeRule.CoverSize:
                 var (width, height) = policy.CoverSize.GetDimensions();
-                return new ThumbnailTarget(width, height, GetSizeForDimensions(source, width, height),
-                    GetCropForDimensions(source, width, height));
+                return [new CoverThumbnailStep(width, height)];
             case ImageSizeRule.FitWithin:
-                return new ThumbnailTarget(profile.Width, profile.Height, Enums.Size.Down, null);
+                return [new FitWithinStep(profile.Width, profile.Height)];
             case ImageSizeRule.Original:
-                return null;
+                return []; // No IResizeStep to run
             default:
                 throw new ArgumentOutOfRangeException(nameof(profile), profile.Size, null);
         }
     }
 
-    private static StagedImage Save(Image output, Image source, string path, EncodeFormat format)
+    internal static IReadOnlyList<IImageStep> GetReencodeSteps(ImageProfile profile, ImagePolicy policy)
+    {
+        var box = profile.GetBox(policy);
+        if (box == null) return [];
+        return [new FitWithinStep(box.Value.Width, box.Value.Height)];
+    }
+
+    /// <summary>
+    /// Decodes <paramref name="source"/>, applies <paramref name="steps"/> in order and hands the final image to <paramref name="encode"/>.
+    /// A resize step at index 0 is done while decoding
+    /// </summary>
+    internal static StagedImage Run(ImageSource source, IReadOnlyList<IImageStep> steps, Action<Image> encode)
+    {
+        var images = new List<Image>();
+        try
+        {
+            var header = OpenHeader(source);
+            images.Add(header);
+
+            ThumbnailTarget? target = steps.Count > 0 && steps[0] is IResizeStep resize
+                ? resize.TargetFor(header.Width, header.Height)
+                : null;
+            var remaining = target == null ? steps : steps.Skip(1).ToList();
+
+            var loaded = target is { } t ? LoadWithTarget(source, header, t) : header;
+            if (!ReferenceEquals(loaded, header))
+            {
+                images.Add(loaded);
+            }
+
+            var image = ApplySteps(loaded, remaining, images);
+            try
+            {
+                encode(image);
+            }
+            catch (VipsException) when (target is { } retryTarget && source is ImageSource.FromStream { Stream.CanSeek: true } fromStream)
+            {
+                // Saving a PDF cover decoded from a stream can fail: https://github.com/kleisauke/net-vips/issues/234
+                fromStream.Stream.Position = 0;
+                var retry = Image.ThumbnailStream(fromStream.Stream, retryTarget.Width, height: retryTarget.Height,
+                    size: retryTarget.Size, crop: retryTarget.Crop);
+                images.Add(retry);
+
+                image = ApplySteps(retry, remaining, images);
+                encode(image);
+            }
+
+            return new StagedImage(image.Width, image.Height, header.Width, header.Height);
+        }
+        finally
+        {
+            foreach (var image in images)
+            {
+                image.Dispose();
+            }
+        }
+    }
+
+    private static Image ApplySteps(Image image, IReadOnlyList<IImageStep> steps, List<Image> images)
+    {
+        foreach (var step in steps)
+        {
+            image = step.Apply(image);
+            images.Add(image);
+        }
+
+        return image;
+    }
+
+    private static Image OpenHeader(ImageSource source)
+    {
+        switch (source)
+        {
+            case ImageSource.FromBytes bytes:
+                return Image.NewFromBuffer(bytes.Data);
+            case ImageSource.FromFile file:
+                return Image.NewFromFile(file.Path, access: Enums.Access.Sequential);
+            case ImageSource.FromStream fromStream:
+                if (fromStream.Stream.CanSeek)
+                {
+                    fromStream.Stream.Position = 0;
+                }
+
+                return Image.NewFromStream(fromStream.Stream);
+            default:
+                throw new ArgumentOutOfRangeException(nameof(source), source.GetType().Name, null);
+        }
+    }
+
+    private static Image LoadWithTarget(ImageSource source, Image header, ThumbnailTarget target)
+    {
+        switch (source)
+        {
+            case ImageSource.FromBytes fromBytes:
+                return Image.ThumbnailBuffer(fromBytes.Data, target.Width, height: target.Height, size: target.Size,
+                    crop: target.Crop);
+            case ImageSource.FromFile fromFile:
+                return Image.Thumbnail(fromFile.Path, target.Width, height: target.Height, size: target.Size,
+                    crop: target.Crop);
+            case ImageSource.FromStream:
+                // A stream can't be read once for the header and again to shrink while decoding, so the decoded image is resized
+                return header.ThumbnailImage(target.Width, height: target.Height, size: target.Size, crop: target.Crop);
+            default:
+                throw new ArgumentOutOfRangeException(nameof(source));
+        }
+    }
+
+    private static void EncodeToFile(Image output, string path, EncodeFormat format)
     {
         switch (format)
         {
@@ -190,8 +244,20 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
             default:
                 throw new ArgumentOutOfRangeException(nameof(format), format, null);
         }
+    }
 
-        return new StagedImage(output.Width, output.Height, source.Width, source.Height);
+    private static byte[] EncodeToBuffer(Image output, EncodeFormat format, int? quality)
+    {
+        return format switch
+        {
+            EncodeFormat.PNG => output.PngsaveBuffer(),
+            EncodeFormat.WEBP => output.WebpsaveBuffer(),
+            // Same as EncodeToFile: HeifsaveBuffer defaults to HEVC
+            EncodeFormat.AVIF => output.HeifsaveBuffer(compression: Enums.ForeignHeifCompression.Av1),
+            // Same as EncodeToFile: JpegsaveBuffer flattens transparency onto black
+            EncodeFormat.JPEG => output.JpegsaveBuffer(q: quality, background: [255, 255, 255]),
+            _ => throw new ArgumentOutOfRangeException(nameof(format), format, null),
+        };
     }
 
     private void MoveIntoPlace(string tmpPath, string targetPath)
@@ -251,11 +317,11 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
     /// <param name="targetWidth">Width of the cover being produced</param>
     /// <param name="targetHeight">Height of the cover being produced</param>
     /// <returns><see cref="Enums.Size.Force"/> when the image will scale well or is wide, otherwise <see cref="Enums.Size.Both"/></returns>
-    public static Enums.Size GetSizeForDimensions(Image image, int targetWidth, int targetHeight)
+    public static Enums.Size GetSizeForDimensions(int sourceWidth, int sourceHeight, int targetWidth, int targetHeight)
     {
         try
         {
-            if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
+            if (WillScaleWell(sourceWidth, sourceHeight, targetWidth, targetHeight) || IsLikelyWideImage(sourceWidth, sourceHeight))
             {
                 return Enums.Size.Force;
             }
@@ -271,15 +337,14 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
     /// <summary>
     /// Picks the crop to pair with <see cref="GetSizeForDimensions"/>
     /// </summary>
-    /// <param name="image">Source image, only its dimensions are read</param>
     /// <param name="targetWidth">Width of the cover being produced</param>
     /// <param name="targetHeight">Height of the cover being produced</param>
     /// <returns>No crop when the image will scale well or is wide, otherwise <see cref="Enums.Interesting.Attention"/></returns>
-    public static Enums.Interesting? GetCropForDimensions(Image image, int targetWidth, int targetHeight)
+    public static Enums.Interesting? GetCropForDimensions(int sourceWidth, int sourceHeight, int targetWidth, int targetHeight)
     {
         try
         {
-            if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
+            if (WillScaleWell(sourceWidth, sourceHeight, targetWidth, targetHeight) || IsLikelyWideImage(sourceWidth, sourceHeight))
             {
                 return null;
             }
@@ -295,15 +360,14 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
     /// <summary>
     /// Checks if the image can be resized to the target without cropping or a large upscale
     /// </summary>
-    /// <param name="sourceImage">Source image, only its dimensions are read</param>
     /// <param name="targetWidth">Width of the cover being produced</param>
     /// <param name="targetHeight">Height of the cover being produced</param>
     /// <param name="tolerance">How far the two aspect ratios may differ</param>
     /// <returns>True when the aspect ratios are within <paramref name="tolerance"/> and neither side grows more than 2x</returns>
-    public static bool WillScaleWell(Image sourceImage, int targetWidth, int targetHeight, double tolerance = 0.1)
+    public static bool WillScaleWell(int sourceWidth, int sourceHeight, int targetWidth, int targetHeight, double tolerance = 0.1)
     {
         // Calculate the aspect ratios
-        var sourceAspectRatio = (double) sourceImage.Width / sourceImage.Height;
+        var sourceAspectRatio = (double) sourceWidth / sourceHeight;
         var targetAspectRatio = (double) targetWidth / targetHeight;
 
         // Compare aspect ratios
@@ -313,8 +377,8 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
         }
 
         // Calculate scaling factors
-        var widthScaleFactor = (double) targetWidth / sourceImage.Width;
-        var heightScaleFactor = (double) targetHeight / sourceImage.Height;
+        var widthScaleFactor = (double) targetWidth / sourceWidth;
+        var heightScaleFactor = (double) targetHeight / sourceHeight;
 
         // Check resolution quality (example thresholds)
         if (widthScaleFactor > 2.0 || heightScaleFactor > 2.0)
@@ -331,5 +395,5 @@ public class ImagePipeline(ILogger<ImagePipeline> logger) : IImagePipeline
         return aspectRatio > 1.25;
     }
 
-    private readonly record struct StagedImage(int Width, int Height, int SourceWidth, int SourceHeight);
+    internal readonly record struct StagedImage(int Width, int Height, int SourceWidth, int SourceHeight);
 }

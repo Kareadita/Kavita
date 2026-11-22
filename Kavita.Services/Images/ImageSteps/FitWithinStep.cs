@@ -1,14 +1,18 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Kavita.Models.Images;
+﻿using Kavita.Models.Images;
 using NetVips;
 
 namespace Kavita.Services.Images.ImageSteps;
 
-public record FitWithinStep() : IImageStep
+public sealed record FitWithinStep(int Width, int Height) : IResizeStep
 {
+    public ThumbnailTarget TargetFor(int sourceWidth, int sourceHeight)
+    {
+        return new ThumbnailTarget(Width, Height, Enums.Size.Down, null);
+    }
+
     public Image Apply(Image image)
     {
-        throw new System.NotImplementedException();
+        var target = TargetFor(image.Width, image.Height);
+        return image.ThumbnailImage(target.Width, height: target.Height, size: target.Size, crop: target.Crop);
     }
 }

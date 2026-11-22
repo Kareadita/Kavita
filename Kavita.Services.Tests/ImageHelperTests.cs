@@ -57,8 +57,8 @@ public class ImageHelperTests
             var dims = CoverImageSize.Default.GetDimensions();
             using var sourceImage = Image.NewFromFile(imagePath, false, Enums.Access.SequentialUnbuffered);
 
-            var size = ImagePipeline.GetSizeForDimensions(sourceImage, dims.Width, dims.Height);
-            var crop = ImagePipeline.GetCropForDimensions(sourceImage, dims.Width, dims.Height);
+            var size = ImagePipeline.GetSizeForDimensions(sourceImage.Width, sourceImage.Height, dims.Width, dims.Height);
+            var crop = ImagePipeline.GetCropForDimensions(sourceImage.Width, sourceImage.Height, dims.Width, dims.Height);
 
             using var thumbnail = Image.Thumbnail(imagePath, dims.Width, dims.Height,
                 size: size,
@@ -102,7 +102,7 @@ public class ImageHelperTests
 
             using var sourceImage = Image.NewFromFile(imagePath, false, Enums.Access.SequentialUnbuffered);
             htmlBuilder.AppendLine("<div class=\"image-row\">");
-            htmlBuilder.AppendLine($"<p>{fileName} ({((double) sourceImage.Width / sourceImage.Height).ToString("F2")}) - {ImagePipeline.WillScaleWell(sourceImage, dims.Width, dims.Height)}</p>");
+            htmlBuilder.AppendLine($"<p>{fileName} ({((double) sourceImage.Width / sourceImage.Height).ToString("F2")}) - {ImagePipeline.WillScaleWell(sourceImage.Width, sourceImage.Height, dims.Width, dims.Height)}</p>");
             htmlBuilder.AppendLine($"<img src=\"./{Path.GetFileName(imagePath)}\" alt=\"{fileName}\">");
             if (File.Exists(baselinePath))
             {

@@ -3,6 +3,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
 using Kavita.Services.Images;
+using Kavita.Services.Images.ImageSteps;
 using Microsoft.Extensions.Logging;
 using NetVips;
 using NSubstitute;
@@ -34,6 +35,18 @@ public class ImagePipelineBaseline(ITestOutputHelper output)
     private static readonly ImagePolicy Policy = new(EncodeFormat.WEBP, CoverImageSize.Default);
 
     private readonly ImagePipeline _pipeline = new(Substitute.For<ILogger<ImagePipeline>>());
+
+    /// <summary>
+    /// Run once on its own first: making the page in a scenario's process would count its decode in that scenario's highwater
+    /// </summary>
+    [Fact(Skip = Manual)]
+    public void Scenario0_MakeLargePage()
+    {
+        Directory.CreateDirectory(OutputDirectory);
+        using var source = Image.NewFromFile(Path.Join(CoversDirectory, "comic-normal-3.jpg"));
+        using var large = source.Resize(2);
+        large.Jpegsave(LargePage, q: 90);
+    }
 
     [Fact(Skip = Manual)]
     public void Scenario1_WriteLargePage_File()
@@ -96,6 +109,22 @@ public class ImagePipelineBaseline(ITestOutputHelper output)
         Measure($"4 Kobo {format} greyscale={greyscale}", 50, _ => KoboCoverAsOfToday(cover, greyscale));
     }
 
+    [Theory(Skip = Manual)]
+    [InlineData(EncodeFormat.WEBP, false)]
+    [InlineData(EncodeFormat.WEBP, true)]
+    [InlineData(EncodeFormat.JPEG, false)]
+    [InlineData(EncodeFormat.JPEG, true)]
+    public void Scenario4_KoboCover_Render(EncodeFormat format, bool greyscale)
+    {
+        var cover = EnsureKoboCover(format);
+        IImageStep[] steps = greyscale
+            ? [new FitWithinStep(KoboWidth, KoboHeight), new GreyscaleStep()]
+            : [new FitWithinStep(KoboWidth, KoboHeight)];
+        var render = new ImageRender(EncodeFormat.JPEG, steps, KoboQuality);
+
+        Measure($"4 Kobo Render {format} greyscale={greyscale}", 50, _ => _pipeline.Render(new ImageSource.FromFile(cover), render));
+    }
+
     /// <summary>
     /// A copy of KoboController.GetBookCover's render as of 2026-11-21, so the new code has something to be compared with.
     /// Today's controller skips this for a .jpg file, the comparison runs it for both
@@ -152,16 +181,11 @@ public class ImagePipelineBaseline(ITestOutputHelper output)
     }
 
     /// <summary>
-    /// comic-normal-3.jpg (1988x3056) enlarged 2x, about 4000x6000; made once and gitignored by its _output name
+    /// comic-normal-3.jpg (1988x3056) enlarged 2x to 3976x6112 by <see cref="Scenario0_MakeLargePage"/>; gitignored by its _output name
     /// </summary>
     private static string EnsureLargePage()
     {
-        if (File.Exists(LargePage)) return LargePage;
-
-        Directory.CreateDirectory(OutputDirectory);
-        using var source = Image.NewFromFile(Path.Join(CoversDirectory, "comic-normal-3.jpg"));
-        using var large = source.Resize(2);
-        large.Jpegsave(LargePage, q: 90);
+        Assert.True(File.Exists(LargePage), $"Run Scenario0_MakeLargePage first: {LargePage} is missing");
         return LargePage;
     }
 
