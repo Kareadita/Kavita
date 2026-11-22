@@ -1177,7 +1177,9 @@
         "debug-export-task": "Criar exportação de depuração",
         "debug-export-task-desc": "Uma cópia higienizada do seu banco de dados, com logs e informações do sistema, para enviar junto com um relatório de bug.",
         "debug-export-task-confirm": "Isto gera um arquivo zip com o seu banco de dados, os logs dos últimos 5 dias e algumas informações do sistema (SO, velocidade do disco, status do Kavita+) para a equipe do Kavita usar na depuração. Senhas, chaves de API, e-mails, nomes de usuário e endereços IP são substituídos antes de qualquer coisa ser gravada. Caminhos de arquivos e nomes de bibliotecas e séries são mantidos como estão, pois os bugs muitas vezes dependem deles.",
-        "debug-export-task-success": "Exportação de depuração iniciada. Você receberá uma notificação para baixá-la quando estiver pronta."
+        "debug-export-task-success": "Exportação de depuração iniciada. Você receberá uma notificação para baixá-la quando estiver pronta.",
+        "composite-covers-label": "O arquivo neste URL é maior que 30 MBLista de Leitura & Capas da Coleção",
+        "composite-covers-tooltip": "Com que frequência Kavita irá reconstruir a lista de leitura e as capas da coleção que cria a partir de seus itens, incluindo os itens adicionados ou removidos desde a última execução. Recomenda-se executar após a Sincronização da Lista de Leitura. Por padrão, ocorre diariamente às 5h da manhã."
     },
     "manage-users": {
         "invite": "Convite",
@@ -1279,7 +1281,8 @@
         "remap-rules": "Regras de Remapeamento",
         "my-activity": "Minha Atividade",
         "admin-manage-kavitaplus-activity": "Atividade do Kavita+",
-        "scrobble-settings": "Conexões"
+        "scrobble-settings": "Conexões",
+        "kobo": "Sincronização do Kobo"
     },
     "collection-detail": {
         "no-data": "Não há itens. Tente adicionar uma série.",
@@ -4745,5 +4748,43 @@
         "finish-hint": "Clique para finalizar",
         "end-of-series": "Fim da série",
         "end-of-reading-list": "Fim da lista de leitura"
+    },
+    "manage-kobo": {
+        "kobo-sync-settings-title": "Configurações de Sincronização",
+        "kobo-sync-disabled-alert": "O Kobo Sync foi desativado pelo seu administrador.",
+        "kobo-sync-no-download-role": "O Kobo Sync requer a função de Download. Peça ajuda ao seu administrador.",
+        "sync-item-limit-label": "Limite de Sincronização de Itens",
+        "sync-item-limit-tooltip": "Número máximo de itens enviados para o dispositivo por solicitação de sincronização. Entre 25 e 100.",
+        "forward-to-kobo-store-label": "Encaminhar para a Loja Kobo",
+        "forward-to-kobo-store-tooltip": "Encaminhe pedidos de livros fora da sua biblioteca Kavita para a loja oficial da Kobo. Desative para impedir que o dispositivo se comunique com os servidores da Kobo.",
+        "sync-sources-title": "Sincronizar Fontes",
+        "sync-libraries-label": "Bibliotecas",
+        "sync-libraries-tooltip": "Habilite para sincronizar capítulos em suas bibliotecas. Se nenhum estiver selecionado, todos serão sincronizados",
+        "sync-libraries-selection-label": "Bibliotecas para sincronizar",
+        "sync-reading-lists-label": "Listas de Leitura",
+        "sync-reading-lists-tooltip": "Habilite para sincronizar listas de leitura com seu Kobo como etiquetas. Se nenhuma for selecionada, todas serão sincronizadas",
+        "sync-reading-lists-selection-label": "Listas de leitura para sincronizar",
+        "sync-collections-label": "Coleções",
+        "sync-collections-tooltip": "Habilite para sincronizar coleções no seu Kobo como etiquetas. Se nenhuma for selecionada, todas serão sincronizadas",
+        "sync-collections-selection-label": "Coleções para sincronizar",
+        "sync-smart-filters-label": "Sincronizar Filtros Inteligentes",
+        "sync-smart-filters-tooltip": "Em breve. Filtros Inteligentes ainda não podem ser usados como fonte de sincronização do Kobo",
+        "managed-collection-label": "Coleção Gerenciada",
+        "managed-collection-tooltip": "Coleção usada para adicionar recomendação ao \"comprar\" eles no seu Kobo. Necessário para que o recurso funcione",
+        "kobo-devices-title": "Dispositivos Kobo",
+        "kobo-devices-description": "Cada dispositivo tem um ponto de sincronização associado. Gerencie os capítulos excluídos ou exclua o ponto de sincronização para redefinir",
+        "device-id-label": "ID do dispositivo",
+        "removed-chapters-label": "Capítulos Removidos",
+        "view-removed-chapters-tooltip": "Ver os capítulos removidos neste dispositivo",
+        "view-removed-chapters-alt": "Ver capítulos removidos, {{count}}",
+        "last-sync-label": "Última Sincronização",
+        "delete-sync-point-alt": "Excluir o ponto de sincronização do dispositivo {{device}}",
+        "no-devices-title": "Nenhum dispositivo Kobo",
+        "no-devices-description": "Um dispositivo aparecerá aqui depois que ele sincronizar com sua conta pela primeira vez.",
+        "load-error-title": "Não foi possível carregar as configurações do Kobo",
+        "load-error-description": "Atualize a página para tentar novamente."
+    },
+    "restore-chapters-modal": {
+        "title": "Capítulos Removidos"
     }
 }
