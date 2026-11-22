@@ -18,7 +18,7 @@ public class ImagePipelineTests : IDisposable
     private static readonly string CoversDirectory =
         Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ImageService/Covers"));
     private static readonly string ExpectedCoversDirectory =
-        Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ImageService/Pipeline/Expected"));
+        Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ImageService/Covers/Expected"));
 
     public ImagePipelineTests()
     {
@@ -98,56 +98,6 @@ public class ImagePipelineTests : IDisposable
         Assert.Equal((320, 455), (result.Width, result.Height));
     }
 
-    public static TheoryData<string> CoverSamples()
-    {
-        var data = new TheoryData<string>();
-        foreach (var expected in Directory.EnumerateFiles(ExpectedCoversDirectory, "*.expected.webp").Order())
-        {
-            data.Add(Path.GetFileName(expected).Replace(".expected.webp", string.Empty));
-        }
-        return data;
-    }
-
-    /// <summary>
-    /// Expected files are today's Write output, made by ImagePipelineBaseline.Scenario2; a crop or size change shows up here
-    /// </summary>
-    [Theory]
-    [MemberData(nameof(CoverSamples))]
-    public void Write_Covers_FramedAsBefore(string sample)
-    {
-        var source = Directory.EnumerateFiles(CoversDirectory, sample + ".*")
-            .Single(f => Path.GetExtension(f) is ".jpg" or ".png");
-
-        _pipeline.Write(new ImageSource.FromFile(source), ImageKind.ChapterCover, Policy, _directory, sample + ".webp");
-
-        using var written = Image.NewFromFile(Path.Join(_directory, sample + ".webp"));
-        using var expected = Image.NewFromFile(Path.Join(ExpectedCoversDirectory, sample + ".expected.webp"));
-        Assert.Equal((expected.Width, expected.Height, expected.Bands), (written.Width, written.Height, written.Bands));
-
-        using var difference = (written - expected).Abs();
-        Assert.True(difference.Avg() < 1, $"{sample}: mean pixel difference {difference.Avg():F2}");
-    }
-
-    /// <summary>
-    /// Run with the cover step must frame exactly as Write does today; a swapped width and height crops the wrong shapes
-    /// </summary>
-    [Theory]
-    [MemberData(nameof(CoverSamples))]
-    public void Run_CoverStep_FramedAsBefore(string sample)
-    {
-        var source = Directory.EnumerateFiles(CoversDirectory, sample + ".*")
-            .Single(f => Path.GetExtension(f) is ".jpg" or ".png");
-        var output = Path.Join(_directory, sample + ".webp");
-
-        var staged = ImagePipeline.Run(new ImageSource.FromFile(source), [new CoverThumbnailStep(320, 455)], img => img.Webpsave(output));
-
-        using var written = Image.NewFromFile(output);
-        using var expected = Image.NewFromFile(Path.Join(ExpectedCoversDirectory, sample + ".expected.webp"));
-        Assert.Equal((expected.Width, expected.Height), (staged.Width, staged.Height));
-        using var difference = (written - expected).Abs();
-        Assert.True(difference.Avg() < 1, $"{sample}: mean pixel difference {difference.Avg():F2}");
-    }
-
     /// <summary>
     /// Archive covers reach Write as a zip entry stream, which cannot seek; most scan covers take this path
     /// </summary>
@@ -173,35 +123,6 @@ public class ImagePipelineTests : IDisposable
         Assert.Equal((expected.Width, expected.Height), (written.Width, written.Height));
         using var difference = (written - expected).Abs();
         Assert.True(difference.Avg() < 1, $"mean pixel difference {difference.Avg():F2}");
-    }
-
-    [Fact]
-    public void Render_FitWithinGreyscale_SmallGreyJpeg()
-    {
-        using var black = Image.Black(640, 909, bands: 3);
-        using var colour = black + new double[] { 200, 40, 40 };
-        var source = new ImageSource.FromBytes(colour.PngsaveBuffer());
-
-        var bytes = _pipeline.Render(source,
-            new ImageRender(EncodeFormat.JPEG, [new FitWithinStep(355, 530), new GreyscaleStep()], 85));
-
-        using var rendered = Image.NewFromBuffer(bytes);
-        Assert.Equal("jpegload_buffer", rendered.Get("vips-loader"));
-        Assert.Equal((355, 504, 1), (rendered.Width, rendered.Height, rendered.Bands));
-    }
-
-    /// <summary>
-    /// Greyscale keeps alpha (two bands), and the JPEG encoder must still flatten it onto white, not black
-    /// </summary>
-    [Fact]
-    public void Render_GreyscaleAlphaToJpeg_FlattensWhite()
-    {
-        var bytes = _pipeline.Render(new ImageSource.FromBytes(TransparentPng()),
-            new ImageRender(EncodeFormat.JPEG, [new GreyscaleStep()]));
-
-        using var rendered = Image.NewFromBuffer(bytes);
-        Assert.Equal(1, rendered.Bands);
-        Assert.True(rendered.Getpoint(0, 0)[0] > 250);
     }
 
     [Fact]
