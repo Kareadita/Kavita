@@ -15,6 +15,15 @@ import {TextResonse} from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LicenseService} from "./license.service";
 import {LocalizationService} from "./localization.service";
+import {
+  KavitaLocaleKey,
+  KavitaLocalePromotedKey,
+  KavitaLocaleSourceKey,
+  LocaleSourceExplicit,
+  normalizeLocaleTag,
+  safeGet,
+  safeSet
+} from "../../libs/locale-utils";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AuthKey, ImageOnlyName, OpdsName} from "../_models/user/auth-key";
 import {Action} from "../_models/actionables/action";
@@ -57,7 +66,8 @@ export class AccountService {
   baseUrl = environment.apiUrl;
   public static userKey = 'kavita-user';
   public static lastLoginKey = 'kavita-lastlogin';
-  public static localeKey = 'kavita-locale';
+  // Single source of truth for the locale key, shared with libs/locale-utils
+  public static localeKey = KavitaLocaleKey;
 
   private readonly _currentUser = signal<User | undefined>(undefined);
   public readonly currentUser = this._currentUser.asReadonly();
@@ -404,6 +414,35 @@ export class AccountService {
       if (current) this.setCurrentUser({ ...current, preferences: pref });
       return pref;
     }), takeUntilDestroyed(this.destroyRef));
+  }
+
+  /**
+   * Persist the pre-login language choice once at login time (same as changing it in settings).
+   * Rules: read-only users are never written; identical values are skipped; an explicit
+   * pick always wins; an auto-match is promoted only when the server still holds the
+   * factory default 'en' and this browser never promoted before, so the account wins afterwards.
+   */
+  syncLocaleAfterLogin(): Observable<void> {
+    const current = this._currentUser();
+    if (!current || this.hasReadOnlyRole()) return of(undefined);
+
+    const serverLocale = current.preferences?.locale || 'en';
+    const localLocale = safeGet(KavitaLocaleKey);
+    // Compare normalized so 'zh-Hans' vs 'zh_Hans' never triggers a spurious write
+    if (!localLocale || normalizeLocaleTag(localLocale) === normalizeLocaleTag(serverLocale)) return of(undefined);
+
+    const source = safeGet(KavitaLocaleSourceKey);
+    const explicit = source === LocaleSourceExplicit;
+    const promoted = safeGet(KavitaLocalePromotedKey);
+    const autoPromote = !explicit && normalizeLocaleTag(serverLocale) === 'en' && !promoted;
+    if (!explicit && !autoPromote) return of(undefined);
+
+    return this.updatePreferences({ ...current.preferences, locale: localLocale }).pipe(
+      map(() => {
+        safeSet(KavitaLocalePromotedKey, '1');
+        return undefined;
+      })
+    );
   }
 
   updatePreferences(userPreferences: Preferences) {
