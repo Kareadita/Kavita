@@ -19,8 +19,11 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Images;
 using Kavita.Services.Builders;
+using Kavita.Services.Images;
 using Kavita.Services.Kobo;
+using NetVips;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -37,7 +40,9 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         IReaderService? readerService = null,
         IBookService? bookService = null,
         IFileSystem? fileSystem = null,
-        IKepubifyConverterService? kepubifyConverterService = null
+        IKepubifyConverterService? kepubifyConverterService = null,
+        IDirectoryService? directoryService = null,
+        IImagePipeline? imagePipeline = null
         )
     {
         var userContext = Substitute.For<IUserContext>();
@@ -57,8 +62,8 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
             kepubifyConverterService ?? Substitute.For<IKepubifyConverterService>(),
             fileSystem ?? Substitute.For<IFileSystem>(),
             Substitute.For<ILocalizationService>(),
-            Substitute.For<IDirectoryService>(),
-            Substitute.For<IImagePipeline>()
+            directoryService ?? Substitute.For<IDirectoryService>(),
+            imagePipeline ?? Substitute.For<IImagePipeline>()
             );
     }
 
@@ -618,4 +623,103 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         Assert.Empty(changes);
         Assert.True(exhausted);
     }
+
+    [Fact]
+    public async Task GetBookCoverAsync_ChapterCover_JpegWithinRequest()
+    {
+        await WithCoverChapters(async (service, covers) =>
+        {
+            var bytes = await service.GetBookCoverAsync(covers.ChapterId, "355", "530", null, false);
+
+            using var image = Image.NewFromBuffer(bytes!);
+            Assert.Equal("jpegload_buffer", image.Get("vips-loader"));
+            Assert.Equal((355, 504), (image.Width, image.Height));
+        });
+    }
+
+    /// <summary>
+    /// A chapter numbered -100000 is the volume itself, so the Kobo shows the volume's cover
+    /// </summary>
+    [Fact]
+    public async Task GetBookCoverAsync_VolumeOnlyChapter_UsesVolumeCover()
+    {
+        await WithCoverChapters(async (service, covers) =>
+        {
+            var bytes = await service.GetBookCoverAsync(covers.VolumeOnlyChapterId, "355", "530", null, false);
+
+            using var image = Image.NewFromBuffer(bytes!);
+            Assert.Equal((355, 355), (image.Width, image.Height));
+        });
+    }
+
+    [Fact]
+    public async Task GetBookCoverAsync_CoverFileMissing_Null()
+    {
+        await WithCoverChapters(async (service, covers) =>
+        {
+            File.Delete(Path.Join(covers.Directory, "chapter.jpg"));
+
+            Assert.Null(await service.GetBookCoverAsync(covers.ChapterId, "355", "530", null, false));
+        });
+    }
+
+    [Fact]
+    public async Task GetBookCoverAsync_UnknownChapter_Null()
+    {
+        await WithCoverChapters(async (service, _) =>
+        {
+            Assert.Null(await service.GetBookCoverAsync(int.MaxValue, "355", "530", null, false));
+        });
+    }
+
+    /// <summary>
+    /// Chapter 5 has a 640x909 JPEG cover; the volume-only chapter's volume has a 400x400 PNG, so the rendered size
+    /// tells which one was used
+    /// </summary>
+    private async Task WithCoverChapters(Func<IKoboSyncService, CoverChapters, Task> test)
+    {
+        var directory = Path.Join(Path.GetTempPath(), "kavita-kobo-covers-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        try
+        {
+            using (var black = Image.Black(640, 909, bands: 3))
+            using (var red = black + new double[] { 200, 30, 30 })
+            {
+                red.Jpegsave(Path.Join(directory, "chapter.jpg"));
+            }
+            using (var black = Image.Black(400, 400, bands: 3))
+            using (var blue = black + new double[] { 30, 30, 200 })
+            {
+                blue.Pngsave(Path.Join(directory, "volume.png"));
+            }
+
+            var (unitOfWork, ctx, mapper) = await CreateDatabase();
+            var library = await ctx.Library.FirstAsync();
+            var chapter = new ChapterBuilder("5").Build();
+            chapter.CoverImageFile = new ImageFile { Kind = ImageKind.ChapterCover, FileName = "chapter.jpg", Origin = ImageOrigin.Scan };
+            var volumeOnlyChapter = new ChapterBuilder(ParserConstants.DefaultChapter).Build();
+            var volume = new VolumeBuilder("2").WithChapter(volumeOnlyChapter).Build();
+            volume.CoverImageFile = new ImageFile { Kind = ImageKind.VolumeCover, FileName = "volume.png", Origin = ImageOrigin.Scan };
+
+            ctx.Series.Add(new SeriesBuilder("Covers")
+                .WithLibraryId(library.Id)
+                .WithVolume(new VolumeBuilder("1").WithChapter(chapter).Build())
+                .WithVolume(volume)
+                .Build());
+            await ctx.SaveChangesAsync();
+
+            var directoryService = Substitute.For<IDirectoryService>();
+            directoryService.CoverImageDirectory.Returns(directory);
+            var service = SetupSyncService(unitOfWork, mapper, fileSystem: new FileSystem(), directoryService: directoryService,
+                imagePipeline: new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>()));
+
+            await test(service, new CoverChapters(chapter.Id, volumeOnlyChapter.Id, directory));
+        }
+        finally
+        {
+            try { Directory.Delete(directory, recursive: true); } catch (IOException) { }
+        }
+    }
+
+    private sealed record CoverChapters(int ChapterId, int VolumeOnlyChapterId, string Directory);
 }

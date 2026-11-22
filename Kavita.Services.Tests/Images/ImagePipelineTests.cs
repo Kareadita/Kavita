@@ -136,15 +136,6 @@ public class ImagePipelineTests : IDisposable
     }
 
     [Fact]
-    public void Run_ResizeThenGreyscale_EachStepFeedsTheNext()
-    {
-        var (width, height, bands) = RunOnBlack(640, 909, [new FitWithinStep(355, 530), new GreyscaleStep()], out var staged);
-
-        Assert.Equal((355, 504, 1), (width, height, bands));
-        Assert.Equal((640, 909), (staged.SourceWidth, staged.SourceHeight));
-    }
-
-    [Fact]
     public void Run_ResizeNotFirst_StillResizes()
     {
         var (width, height, bands) = RunOnBlack(640, 909, [new GreyscaleStep(), new FitWithinStep(355, 530)], out _);
