@@ -294,5 +294,6 @@
     "cbl-repo-path-not-found": "{0} nebylo nalezeno v repozitáři CBL",
     "cbl-repo-download-failed": "Nelze stáhnout {0} z repozitáře CBL",
     "github-unavailable": "GitHub není k dispozici, zkuste to prosím později",
-    "kobo-sync-disabled": "Na tomto serveru není služba KoboSync povolena"
+    "kobo-sync-disabled": "Na tomto serveru není služba KoboSync povolena",
+    "download-over-size-limit": "Soubor na této adrese URL má větší velikost než 30 MB"
 }
