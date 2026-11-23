@@ -71,6 +71,12 @@ public sealed record KoboSeriesDto
 {
     public string Id { get; set; }
     public string Name { get; set; }
+    /// <summary>
+    /// Shown to the user
+    /// </summary>
     public string Number { get; set; }
+    /// <summary>
+    /// Actual sort order
+    /// </summary>
     public float NumberFloat { get; set; }
 }

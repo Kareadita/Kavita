@@ -9,6 +9,7 @@ using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.API.Store;
+using Kavita.Common.Extensions;
 using Kavita.Database.Extensions;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
@@ -34,6 +35,8 @@ namespace Kavita.Services.Tests.Kobo;
 
 public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTest(testOutputHelper)
 {
+    private const int DefaultUserId = 1;
+
     private IKoboSyncService SetupSyncService(
         IUnitOfWork unitOfWork,
         IMapper mapper,
@@ -42,12 +45,20 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         IFileSystem? fileSystem = null,
         IKepubifyConverterService? kepubifyConverterService = null,
         IDirectoryService? directoryService = null,
-        IImagePipeline? imagePipeline = null
+        IImagePipeline? imagePipeline = null,
+        ILocalizationService? localizationService = null
         )
     {
         var userContext = Substitute.For<IUserContext>();
         userContext.AuthKey().Returns("abc");
+        userContext.GetUserId().Returns(DefaultUserId);
+        userContext.GetUserIdOrThrow().Returns(DefaultUserId);
 
+        var httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+        httpContextAccessor.HttpContext.Returns(new DefaultHttpContext
+        {
+            Request = { Host = new HostString("localhost") },
+        });
 
         return new KoboSyncService(
             Substitute.For<ILogger<KoboSyncService>>(),
@@ -57,14 +68,26 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
             bookService ?? Substitute.For<IBookService>(),
             Substitute.For<IReadingSessionService>(),
             userContext,
-            Substitute.For<IHttpContextAccessor>(),
+            httpContextAccessor,
             Substitute.For<IHttpClientFactory>(),
             kepubifyConverterService ?? Substitute.For<IKepubifyConverterService>(),
             fileSystem ?? Substitute.For<IFileSystem>(),
-            Substitute.For<ILocalizationService>(),
+            localizationService ?? SetupLocalizationService(),
             directoryService ?? Substitute.For<IDirectoryService>(),
-            imagePipeline ?? Substitute.For<IImagePipeline>()
+            imagePipeline ?? Substitute.For<IImagePipeline>(),
+            new EntityNamingService()
             );
+    }
+
+    private static ILocalizationService SetupLocalizationService()
+    {
+        var localizationService = Substitute.For<ILocalizationService>();
+        localizationService.TranslateAsync(Arg.Any<int>(), "volume-num", Arg.Any<object[]>()).Returns("Volume {0}");
+        localizationService.TranslateAsync(Arg.Any<int>(), "chapter-num", Arg.Any<object[]>()).Returns("Chapter {0}");
+        localizationService.TranslateAsync(Arg.Any<int>(), "issue-num", Arg.Any<object[]>()).Returns("Issue {0}{1}");
+        localizationService.TranslateAsync(Arg.Any<int>(), "book-num", Arg.Any<object[]>()).Returns("Book {0}");
+
+        return localizationService;
     }
 
     private async Task SetupCollection(IDataContext ctx)
@@ -687,6 +710,92 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
 
         (syncItems, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
         Assert.Empty(syncItems);
+    }
+
+    [Fact]
+    public async Task BuildBookMetadata_OrdersSeriesByDefaultChapterOrdering()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var library = await ctx.Library.FirstAsync();
+        var user = new AppUserBuilder("Amelia", "amelia@localhost").WithLibrary(library).Build();
+
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("7").WithSortOrder(0).Build())
+                .WithChapter(new ChapterBuilder("10").WithSortOrder(0).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("5").WithSortOrder(0).Build())
+                .Build())
+            .Build();
+
+        ctx.Series.Add(series);
+        ctx.Users.Add(user);
+        await ctx.SaveChangesAsync();
+
+        var volume1Chapter = series.Volumes.Single(v => v.MinNumber.Is(1f)).Chapters.Single();
+        var volume2Chapters = series.Volumes.Single(v => v.MinNumber.Is(2f)).Chapters.ToList();
+
+        var metadata = await koboSyncService.BuildBookMetadata(
+            series.Volumes.SelectMany(v => v.Chapters).Select(c => c.Id), CancellationToken.None);
+
+        Assert.Equal(3, metadata.Count);
+
+        Assert.Equal(1f, metadata[volume1Chapter.Id].Series!.NumberFloat);
+        Assert.Equal(new[] { 2f, 3f }, metadata.Values
+            .Where(m => m.Series!.Number.StartsWith("Volume 2"))
+            .Select(m => m.Series!.NumberFloat)
+            .Order().ToList());
+    }
+
+    [Fact]
+    public async Task BuildBookMetadata_OrdersLooseLeafAndSpecialVolumesLast()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var library = await ctx.Library.FirstAsync();
+        var user = new AppUserBuilder("Amelia", "amelia@localhost").WithLibrary(library).Build();
+
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder(ParserConstants.SpecialVolume)
+                .WithChapter(new ChapterBuilder("2")
+                    .WithTitle("Omake")
+                    .WithIsSpecial(true)
+                    .WithSortOrder(0)
+                    .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(ParserConstants.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder("3").WithSortOrder(0).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("9").WithSortOrder(0).Build())
+                .Build())
+            .Build();
+
+        ctx.Series.Add(series);
+        ctx.Users.Add(user);
+        await ctx.SaveChangesAsync();
+
+        var regularChapter = series.Volumes.Single(v => v.MinNumber.Is(1f)).Chapters.Single();
+        var looseLeafChapter = series.Volumes
+            .Single(v => v.MinNumber.Is(ParserConstants.LooseLeafVolumeNumber)).Chapters.Single();
+        var specialChapter = series.Volumes
+            .Single(v => v.MinNumber.Is(ParserConstants.SpecialVolumeNumber)).Chapters.Single();
+
+        var metadata = await koboSyncService.BuildBookMetadata(
+            series.Volumes.SelectMany(v => v.Chapters).Select(c => c.Id), CancellationToken.None);
+
+        // Real volumes, loose-leaf chapters, specials
+        Assert.Equal(1f, metadata[regularChapter.Id].Series!.NumberFloat);
+        Assert.Equal(2f, metadata[looseLeafChapter.Id].Series!.NumberFloat);
+        Assert.Equal(3f, metadata[specialChapter.Id].Series!.NumberFloat);
     }
 
     [Fact]

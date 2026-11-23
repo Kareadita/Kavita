@@ -23,6 +23,7 @@ using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
 using Kavita.Models.Constants;
+using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Progress;
 using Kavita.Models.DTOs.Reader;
@@ -69,7 +70,8 @@ public class KoboSyncService(
     IFileSystem fileSystem,
     ILocalizationService localizationService,
     IDirectoryService directoryService,
-    IImagePipeline imagePipeline
+    IImagePipeline imagePipeline,
+    IEntityNamingService entityNamingService
     ): IKoboSyncService
 {
     private static readonly TimeSpan ProgressConversionWait = TimeSpan.FromSeconds(30);
@@ -609,6 +611,8 @@ public class KoboSyncService(
             .ProjectTo<KoboBookMetadataDto>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
+        await ApplySeriesOrderingAsync(metadata, cancellationToken);
+
         return metadata.ToDictionary(m => m.Id, m =>
         {
             var canKepubify = m.FileCount == 1 && kepubifyConverterService.KepubifySupported;
@@ -628,10 +632,102 @@ public class KoboSyncService(
         });
     }
 
-    private string CreateTagName(string name)
+    private async Task ApplySeriesOrderingAsync(List<KoboBookMetadataDto> metadata, CancellationToken cancellationToken)
+    {
+        if (metadata.Count == 0) return;
+
+        var userId = userContext.GetUserIdOrThrow();
+        var chapterIds = metadata.Select(m => m.Id).ToList();
+
+        var seriesIds = await unitOfWork.DataContext.Chapter
+            .Where(c => chapterIds.Contains(c.Id))
+            .Select(c => c.Volume.SeriesId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        if (seriesIds.Count == 0) return;
+
+        var chapters = await unitOfWork.DataContext.Chapter
+            .Where(c => seriesIds.Contains(c.Volume.SeriesId))
+            .ApplyDefaultChapterOrdering()
+            .Select(c => new
+            {
+                c.Id,
+                c.Volume.SeriesId,
+                c.VolumeId,
+                VolumeName = c.Volume.Name,
+                VolumeMinNumber = c.Volume.MinNumber,
+                c.Range,
+                c.Title,
+                c.TitleName,
+                c.IsSpecial,
+            })
+            .ToListAsync(cancellationToken);
+
+        if (chapters.Count == 0) return;
+
+        // Create fake dtos for naming
+        var chapterDtos = chapters.ToDictionary(c => c.Id, c => new ChapterDto
+        {
+            Id = c.Id,
+            Range = c.Range,
+            Title = c.Title,
+            TitleName = c.TitleName,
+            IsSpecial = c.IsSpecial,
+        });
+        var volumes = chapters
+            .GroupBy(c => c.VolumeId)
+            .ToDictionary(g => g.Key, g => new VolumeDto
+            {
+                Id = g.Key,
+                Name = g.First().VolumeName,
+                MinNumber = g.First().VolumeMinNumber,
+                MaxNumber = g.First().VolumeMinNumber,
+                Chapters = [.. g.Select(c => chapterDtos[c.Id])],
+            });
+
+        var chaptersById = chapters.ToDictionary(c => c.Id);
+
+        var chapterPositions = new Dictionary<int, int>();
+        var seriesPositionProgres = new Dictionary<int, int>();
+        foreach (var chapter in chapters)
+        {
+            // position defaults to 0
+            seriesPositionProgres.TryGetValue(chapter.SeriesId, out var position);
+
+            position++;
+
+            seriesPositionProgres[chapter.SeriesId] = position;
+            chapterPositions[chapter.Id] = position;
+        }
+
+        var namingContexts = await LocalizedNamingContext
+            .CreateAsync(entityNamingService, localizationService, userId,
+                metadata.Select(m => m.LibraryType));
+
+        foreach (var book in metadata)
+        {
+            if (book.Series is null
+                || !chapterPositions.TryGetValue(book.Id, out var position)
+                || !chaptersById.TryGetValue(book.Id, out var chapter)
+                || !namingContexts.TryGetValue(book.LibraryType, out var namingContext))
+            {
+                continue;
+            }
+
+            var chapterDto = chapterDtos[chapter.Id];
+            var number = namingContext.BuildChapterTitle(volumes[chapter.VolumeId], chapterDto);
+
+            book.Series.Number = string.IsNullOrEmpty(number) ? namingContext.FormatChapterTitle(chapterDto) : number;
+            book.Series.NumberFloat = position;
+        }
+    }
+
+    private static string CreateTagName(string name)
     {
         return $"Kavita: {name}";
     }
+
 
     #endregion
 
