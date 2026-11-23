@@ -799,6 +799,37 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
     }
 
     [Fact]
+    public async Task BuildBookMetadata_NoSeriesForSingleBooks()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var library = new LibraryBuilder("Books", LibraryType.Book).Build();
+
+        var series = new SeriesBuilder("Bury Our Bones in the Midnight Soil")
+            .WithLibraryId(2)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder(ParserConstants.SpecialVolume)
+                .WithChapter(new ChapterBuilder("")
+                    .WithIsSpecial(true)
+                    .WithTitle("Bury Our Bones in the Midnight Soil")
+                    .Build())
+                .Build())
+            .Build();
+
+        ctx.Library.Add(library);
+        ctx.Series.Add(series);
+
+        await ctx.SaveChangesAsync();
+
+        var metadata = await koboSyncService.BuildBookMetadata(
+            series.Volumes.SelectMany(v => v.Chapters).Select(c => c.Id), CancellationToken.None);
+
+        Assert.Single(metadata.Values);
+        Assert.Null(metadata.Values.First().Series);
+    }
+
+    [Fact]
     public async Task GetBookCoverAsync_ChapterCover_JpegWithinRequest()
     {
         await WithCoverChapters(async (service, covers) =>

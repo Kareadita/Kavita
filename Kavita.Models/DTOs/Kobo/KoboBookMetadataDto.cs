@@ -48,6 +48,17 @@ public sealed record KoboBookMetadataDto
     public KoboPublisherDto Publisher { get; set; }
     public KoboSeriesDto? Series { get; set; }
 
+    /// <summary>
+    /// Not sent to the device, only used when mapping to <see cref="KoboBookDetailsDto"/>
+    /// </summary>
+    [JsonIgnore]
+    public string ISBN { get; set; } = string.Empty;
+    /// <summary>
+    /// Not sent to the device, only used when mapping to <see cref="KoboBookDetailsDto"/>
+    /// </summary>
+    [JsonIgnore]
+    public List<KoboContributorRoleDto> ContributorRoles { get; set; } = [];
+
     public bool IsEligibleForKoboLove { get; set; } = false;
     public bool IsInternetArchive { get; set; } = false;
     public bool IsPreOrder { get; set; } = false;

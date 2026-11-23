@@ -31,6 +31,15 @@ public interface IKoboSyncService
     Task<Dictionary<int, KoboBookMetadataDto>> BuildBookMetadata(IEnumerable<int> chapterIds,
         CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Builds book details (as served on the products endpoint) for a single chapter, mapped from
+    /// the sync metadata so standalone books don't get a redundant series
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<KoboBookDetailsDto?> GetKoboBookDetailsAsync(int chapterId, CancellationToken cancellationToken);
+
     Task<IList<KoboAnnotationDto>> GetKoboAnnotationsAsync(int userId, IEnumerable<int> chapterIds, CancellationToken cancellationToken);
     /// <summary>
     /// ETags for the user's annotations per chapter, used by Kobo's annotation sync

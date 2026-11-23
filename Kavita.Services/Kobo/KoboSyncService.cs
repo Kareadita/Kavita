@@ -637,6 +637,12 @@ public class KoboSyncService(
         });
     }
 
+    public async Task<KoboBookDetailsDto?> GetKoboBookDetailsAsync(int chapterId, CancellationToken cancellationToken)
+    {
+        var metadata = await BuildBookMetadata([chapterId], cancellationToken);
+        return metadata.TryGetValue(chapterId, out var book) ? mapper.Map<KoboBookDetailsDto>(book) : null;
+    }
+
     private async Task ApplySeriesOrderingAsync(List<KoboBookMetadataDto> metadata, CancellationToken cancellationToken)
     {
         if (metadata.Count == 0) return;
@@ -692,6 +698,9 @@ public class KoboSyncService(
             });
 
         var chaptersById = chapters.ToDictionary(c => c.Id);
+        var chaptersBySeries = chapters
+            .GroupBy(c => c.SeriesId)
+            .ToDictionary(g => g.Key, g => g.ToList());
 
         var chapterPositions = new Dictionary<int, int>();
         var seriesPositionProgres = new Dictionary<int, int>();
@@ -712,9 +721,19 @@ public class KoboSyncService(
 
         foreach (var book in metadata)
         {
+            if (!chaptersById.TryGetValue(book.Id, out var chapter)) continue;
+
+            // Null out series for single books
+            if (book.LibraryType is LibraryType.Book or LibraryType.LightNovel
+                && chaptersBySeries.TryGetValue(chapter.SeriesId, out var seriesChapters)
+                && seriesChapters is [{ IsSpecial: true }])
+            {
+                book.Series = null;
+                continue;
+            }
+
             if (book.Series is null
                 || !chapterPositions.TryGetValue(book.Id, out var position)
-                || !chaptersById.TryGetValue(book.Id, out var chapter)
                 || !namingContexts.TryGetValue(book.LibraryType, out var namingContext))
             {
                 continue;

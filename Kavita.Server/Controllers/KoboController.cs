@@ -486,7 +486,7 @@ public class KoboController(
             return await koboSyncService.ProxyRequestIfEnabled();
         }
 
-        var detail = await unitOfWork.ChapterRepository.GetKoboBookDetailsAsync(kavitaId, ct);
+        var detail = await koboSyncService.GetKoboBookDetailsAsync(kavitaId, ct);
         if (detail is null)
         {
             return NotFound();

@@ -66,7 +66,6 @@ public interface IChapterRepository
     Task<(int VolumeId, int SeriesId, int LibraryId)?> GetParentIdsForChapter(int chapterId, CancellationToken ct = default);
     Task<LibraryType?> GetLibraryTypeAsync(int chapterId, CancellationToken ct = default);
     Task<IEnumerable<int>> GetChapterIdsInSeries(int seriesId, IEnumerable<int> chapterIds, CancellationToken ct = default);
-    Task<KoboBookDetailsDto?> GetKoboBookDetailsAsync(int chapterId, CancellationToken ct = default);
     /// <summary>
     /// Returns recommendations for a chapter. These are the first chapters for the recommended series
     /// </summary>
