@@ -75,7 +75,7 @@ export class ManageKoboSyncPointsComponent implements OnInit {
 
       patchEntitySignal(this.syncPoints, {
         ...point,
-        removedChapterCount: result.data ?? 0
+        removedChapterCount: point.removedChapterCount - (result.data ?? 0)
       });
     });
   }
