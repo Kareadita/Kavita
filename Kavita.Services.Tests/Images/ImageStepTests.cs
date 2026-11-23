@@ -28,7 +28,10 @@ public class ImageStepTests(ITestOutputHelper output) : AbstractImageTest
             (_, rendered) => Assert.Equal((320, 455), (rendered.Width, rendered.Height))),
         new("fit-within", "FitWithinStep 320x455",
             new ImageRender(EncodeFormat.WEBP, [new FitWithinStep(320, 455)]), 320, 455,
-            (source, rendered) => AssertShrunkToFit(source, rendered, 320, 455)),
+            (source, rendered) => AssertFitsBox(source, rendered, 320, 455, canEnlarge: false)),
+        new("fit-to", "FitToStep 1264x1680",
+            new ImageRender(EncodeFormat.JPEG, [new FitToStep(1264, 1680)], 90), 1264, 1680,
+            (source, rendered) => AssertFitsBox(source, rendered, 1264, 1680, canEnlarge: true)),
         new("greyscale", "GreyscaleStep (PNG)",
             new ImageRender(EncodeFormat.PNG, [new GreyscaleStep()]), null, null,
             (source, rendered) =>
@@ -138,6 +141,33 @@ public class ImageStepTests(ITestOutputHelper output) : AbstractImageTest
         using var source = Image.Black(sourceWidth, sourceHeight, bands: 3);
 
         using var result = new FitWithinStep(320, 455).Apply(source);
+
+        Assert.Equal((expectedWidth, expectedHeight), (result.Width, result.Height));
+    }
+
+    [Theory]
+    [InlineData(600, 1200)]
+    [InlineData(100, 100)]
+    public void FitTo_TargetFor_IgnoresSourceAndAllowsEnlarging(int sourceWidth, int sourceHeight)
+    {
+        var target = new FitToStep(1264, 1680).TargetFor(sourceWidth, sourceHeight);
+
+        Assert.Equal((1264, 1680, Enums.Size.Both, (Enums.Interesting?) null), (target.Width, target.Height, target.Size, target.Crop));
+    }
+
+    /// <summary>
+    /// The 728x1040 page and the 1456x993 spread are from the .hack//Legend of the Twilight chapter tested on a Libra 2
+    /// </summary>
+    [Theory]
+    [InlineData(728, 1040, 1176, 1680)]
+    [InlineData(1456, 993, 1264, 862)]
+    [InlineData(2000, 3000, 1120, 1680)]
+    [InlineData(1264, 1680, 1264, 1680)]
+    public void FitTo_Apply_FillsBoxKeepingShape(int sourceWidth, int sourceHeight, int expectedWidth, int expectedHeight)
+    {
+        using var source = Image.Black(sourceWidth, sourceHeight, bands: 3);
+
+        using var result = new FitToStep(1264, 1680).Apply(source);
 
         Assert.Equal((expectedWidth, expectedHeight), (result.Width, result.Height));
     }
@@ -252,9 +282,14 @@ public class ImageStepTests(ITestOutputHelper output) : AbstractImageTest
         }
     }
 
-    private static void AssertShrunkToFit(Image source, Image rendered, int boxWidth, int boxHeight)
+    private static void AssertFitsBox(Image source, Image rendered, int boxWidth, int boxHeight, bool canEnlarge)
     {
-        var scale = Math.Min(1.0, Math.Min((double) boxWidth / source.Width, (double) boxHeight / source.Height));
+        var scale = Math.Min((double) boxWidth / source.Width, (double) boxHeight / source.Height);
+        if (!canEnlarge)
+        {
+            scale = Math.Min(1.0, scale);
+        }
+
         Assert.InRange(rendered.Width, source.Width * scale - 1, source.Width * scale + 1);
         Assert.InRange(rendered.Height, source.Height * scale - 1, source.Height * scale + 1);
         Assert.True(rendered.Width <= boxWidth && rendered.Height <= boxHeight, $"{rendered.Width}x{rendered.Height} outside {boxWidth}x{boxHeight}");
@@ -278,7 +313,7 @@ public class ImageStepTests(ITestOutputHelper output) : AbstractImageTest
     private static void AssertKoboJpeg(Image source, Image rendered)
     {
         Assert.Equal("jpegload_buffer", rendered.Get("vips-loader"));
-        AssertShrunkToFit(source, rendered, 355, 530);
+        AssertFitsBox(source, rendered, 355, 530, canEnlarge: false);
         if (!source.HasAlpha()) return;
 
         // Transparency samples are fully transparent in their top-left 200x200

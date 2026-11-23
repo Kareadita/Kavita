@@ -172,10 +172,13 @@ public class DownloadService(
     private async Task<string> ConvertImagesToEpub(int userId, int chapterId, CancellationToken ct)
     {
         // TODO: Validate this wont fail if we have a file named "book.kepub.2008.kepub"
+
+        // BUG: If Kepubify is off, we cannot have .kepub in the target filename as it will open the file in a different reader
         var outputPath = kepubifyConverterService.BuildKepubifyPath(chapterId).Replace(".kepub", string.Empty);
         if (fileSystem.File.Exists(outputPath))
         {
-            return outputPath;
+            // TODO: Bring proper caching - temp delete each file to allow testing
+            directoryService.DeleteFileQuietly(outputPath);
         }
 
         var chapter = await cacheService.Ensure(chapterId, false, ct);
@@ -184,10 +187,23 @@ public class DownloadService(
             throw new KavitaException(await localizationService.TranslateAsync("cache-file-find"));
         }
 
-        var renderSettings = new ImageRender(EncodeFormat.JPEG, []); // Note the steps will come from KoboOptimizationService
-        var options = new BuildEpubOptions(cacheService.GetCachedPages(chapterId).ToList(), renderSettings, ReadingDirection.LeftToRight,
-            outputPath);
+        var libraryType = await unitOfWork.ChapterRepository.GetLibraryTypeAsync(chapter.Id, ct);
+        var chapterDto = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId, ct);
+        var volumeDto = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, userId, ct);
+        if (libraryType is null || chapterDto is null || volumeDto is null)
+        {
+            throw new KavitaException();
+        }
 
-        return await epubBuilderService.BuildEpubAsync(userId, chapterId, outputPath, ct);
+
+        var namingCtx = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType.Value);
+        var title = namingCtx.BuildChapterTitle(volumeDto, chapterDto);
+
+
+        var renderSettings = new ImageRender(EncodeFormat.JPEG, []); // Note the steps will come from KoboOptimizationService
+        var options = new BuildEpubOptions(title, cacheService.GetCachedPages(chapterId).ToList(), renderSettings, ReadingDirection.LeftToRight,
+            chapterDto, outputPath);
+
+        return await epubBuilderService.BuildEpubAsync(options, ct);
     }
 }

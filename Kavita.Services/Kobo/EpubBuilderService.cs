@@ -19,11 +19,9 @@ using QuickEPUB;
 
 namespace Kavita.Services.Kobo;
 
-public sealed record BuildEpubOptions(List<string> Pages, ImageRender Render,
-    ReadingDirection ReadingDirection, string OutputPath); // I probably need Metadata and explicit cover
 
-public class EpubBuilderService(ICacheService cacheService, ILocalizationService localizationService,
-    IUnitOfWork unitOfWork, IEntityNamingService namingService, IDirectoryService directoryService, IImagePipeline imagePipeline) : IEpubBuilderService
+
+public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService directoryService, IImagePipeline imagePipeline) : IEpubBuilderService
 {
     private const string GlobalStyles = """
                                 @page { margin: 0; }
@@ -31,25 +29,13 @@ public class EpubBuilderService(ICacheService cacheService, ILocalizationService
                                 .page { width: 100%; height: 100%; }
                                 .page img { display: block; width: 100%; height: 100%; }
                                 """;
-    public async Task<string> BuildEpubAsync(int userId, int chapterId, string outputPath, CancellationToken ct = default)
+    private const string PageChapterHtml = """<div class="page"><img src="images/{{fileName}}" alt="" width="{{width}}" height="{{height}}"/></div>""";
+
+    public async Task<string> BuildEpubAsync(BuildEpubOptions options, CancellationToken ct = default)
     {
-        var chapter = await cacheService.Ensure(chapterId, false, ct);
-        if (chapter is null)
-        {
-            throw new KavitaException(await localizationService.TranslateAsync("cache-file-find"));
-        }
+        var chapterDto = options.Chapter;
+        var title = options.BookTitle;
 
-        var libraryType = await unitOfWork.ChapterRepository.GetLibraryTypeAsync(chapter.Id, ct);
-        var chapterDto = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId, ct);
-        var volumeDto = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, userId, ct);
-        if (libraryType is null || chapterDto is null || volumeDto is null)
-        {
-            throw new KavitaException();
-        }
-
-
-        var namingCtx = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType.Value);
-        var title = namingCtx.BuildChapterTitle(volumeDto, chapterDto);
 
 
         var language = string.IsNullOrEmpty(chapterDto.Language) ? "en" : chapterDto.Language;
@@ -60,7 +46,7 @@ public class EpubBuilderService(ICacheService cacheService, ILocalizationService
         publication.AddStylesheet("style", "EPUB/style.css", GlobalStyles);
         const string mediaOutput = "image/jpeg";
 
-        var cover = await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId, ct);
+        var cover = await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterDto.Id, ct);
         var path = Path.Join(directoryService.CoverImageDirectory, cover);
 
         if (chapterDto.HasCoverImage && File.Exists(path))
@@ -72,14 +58,8 @@ public class EpubBuilderService(ICacheService cacheService, ILocalizationService
             publication.SetCoverImage("cover");
         }
 
-
-
-        const string PageChapterHtml = """<div class="page"><img src="images/{{fileName}}" alt="" width="{{width}}" height="{{height}}"/></div>""";
-
-
-
         var index = 1;
-        foreach (var cachedPage in cacheService.GetCachedPages(chapterId))
+        foreach (var cachedPage in options.Pages)
         {
             ct.ThrowIfCancellationRequested();
 
@@ -88,14 +68,15 @@ public class EpubBuilderService(ICacheService cacheService, ILocalizationService
 
             // We need to map from Office.IMO 1-based indexing to Kobo's indexing and handle split pages using a - (once I code that up)
             var fileName = $"page_{index:D4}";
-            var imageId = fileName + "-img";
+            var imageId = $"image-{index:D4}";
+            var imageFile = $"{imageId}.jpeg";
 
-            var htmlPage = PageChapterHtml.Replace("{{fileName}}", fileName).Replace("{{width}}", $"{image.Width}").Replace("{{height}}", $"{image.Height}");
+            var htmlPage = PageChapterHtml.Replace("{{fileName}}", imageFile).Replace("{{width}}", $"{image.Width}").Replace("{{height}}", $"{image.Height}");
 
 
             publication.AddChapter(fileName, $"EPUB/{fileName}.xhtml", $"Page {index}",
                 htmlPage, ["style"]);
-            publication.AddResource(imageId, $"EPUB/images/{imageId}.jpeg", mediaOutput, image.Data);
+            publication.AddResource(imageId, $"EPUB/images/{imageFile}", mediaOutput, image.Data);
             publication.SetFixedLayoutPage(fileName, new EpubFixedLayoutPage(image.Width, image.Height)
             {
                 Spread = EpubPageSpread.None,
@@ -108,9 +89,10 @@ public class EpubBuilderService(ICacheService cacheService, ILocalizationService
         //     new EpubNavigationEntry("Cover", "EPUB/cover.xhtml"),
         //     // ... Every page
         // ]);
-        (await publication.SaveAsync(outputPath, cancellationToken: ct)).ThrowIfLoss();
 
-        return outputPath;
+        (await publication.SaveAsync(options.OutputPath, cancellationToken: ct)).ThrowIfLoss();
+
+        return options.OutputPath;
 
 
     }

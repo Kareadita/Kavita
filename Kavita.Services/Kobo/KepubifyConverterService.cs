@@ -64,11 +64,13 @@ public class KepubifyConverterService(
 
     public string BuildKepubifyPath(int chapterId)
     {
+        // TODO: This needs device Id for the hashing
         using var scope = serviceScopeFactory.CreateScope();
         var directoryService = scope.ServiceProvider.GetRequiredService<IDirectoryService>();
 
         var dateStr = DateTime.UtcNow.ToShortDateString().Replace("/", "_");
         var fileName = $"kavita_kepubify_c{chapterId}_{dateStr}.kepub.epub";
+
         return Path.Join(directoryService.TempDirectory, fileName);
     }
 

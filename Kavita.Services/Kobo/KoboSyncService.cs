@@ -534,6 +534,7 @@ public class KoboSyncService(
 
         return metadata.ToDictionary(m => m.Id, m =>
         {
+            // BUG: This is no longer true. Loose images get packed into an epub, so file count can likely go
             var canKepubify = m.FileCount == 1 && kepubifyConverterService.KepubifySupported;
 
             return m with
