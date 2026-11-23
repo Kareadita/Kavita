@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using Kavita.Models.Kobo;
 
 namespace Kavita.Services.Helpers.Kobo;
 
@@ -46,6 +48,20 @@ public static class KoboEpubHelper
 
         var suffix = part == 1 ? string.Empty : $"-{part}";
         return $"EPUB/{SectionPrefix}{page + 1}{suffix}.html";
+    }
+
+    /// <summary>
+    /// Splits a chapter's pages into table of contents groups. Tries chapter numbers in the page file names first,
+    /// then the folder index Kavita's cache flattening puts in nested page names ("002_0015"), then runs of
+    /// <paramref name="pagesPerGroup"/> pages
+    /// </summary>
+    /// <param name="pages">Page file paths in reading order</param>
+    /// <param name="pagesPerGroup">Size of each group when falling back to runs of pages</param>
+    public static IList<EpubTocGroup> GroupPages(IReadOnlyList<string> pages, int pagesPerGroup = 20)
+    {
+        // Pages come as paths, sometimes packers use subfolders for chapters
+
+        throw new NotImplementedException();
     }
 
     private static bool TryParsePositive(ReadOnlySpan<char> value, out int number)
