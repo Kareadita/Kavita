@@ -437,6 +437,10 @@ export class AccountService {
     return httpResource.text<string>(() =>this.baseUrl + 'account/opds-url?authKeyName=' + keyName());
   }
 
+  koboSyncUrlRsc(keyName: () => string) {
+    return httpResource.text<string>(() =>this.baseUrl + 'account/kobo-sync-url?authKeyName=' + keyName());
+  }
+
   getAuthKeys() {
     return this.httpClient.get<AuthKey[]>(this.baseUrl + `account/auth-keys`);
   }

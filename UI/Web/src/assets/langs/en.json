@@ -2936,6 +2936,7 @@
         "kobo-sync-disabled-alert": "Kobo Sync has been disabled by your administrator.",
         "kobo-sync-no-download-role": "Kobo Sync requires the Download role. Ask your administrator for help.",
         "kobo-sync-no-host-name": "Kobo Sync requires a Hostname set. Ask your administrator for help.",
+        "kobo-sync-no-host-name-admin-action": "Setup a hostname so Kobo Sync can be used by everyone",
         "hostname-label": "{{manage-email-settings.host-name-label}}",
         "hostname-tooltip": "This tells Kobo how to reach the Kavita server.",
         "sync-item-limit-label": "Sync Item Limit",
@@ -2967,7 +2968,13 @@
         "no-devices-title": "No Kobo devices",
         "no-devices-description": "A device appears here after it syncs with your account for the first time.",
         "load-error-title": "Could not load Kobo settings",
-        "load-error-description": "Refresh the page to try again."
+        "load-error-description": "Refresh the page to try again.",
+        "kobo-sync-url-label": "Kobo Sync url",
+        "kobo-sync": "{{manage-auth-keys.kobo-sync}}",
+        "image-only": "{{manage-auth-keys.image-only}}",
+        "opds": "{{manage-auth-keys.opds}}",
+        "host-name-label": "{{manage-settings.host-name-label}}",
+        "host-name-tooltip": "{{manage-settings.host-name-tooltip}}"
     },
 
     "restore-chapters-modal": {

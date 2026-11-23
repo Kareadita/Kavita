@@ -11,7 +11,7 @@ import {
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {disabled, FieldTree, form, FormField, max, min, required} from '@angular/forms/signals';
 import {TranslocoDirective} from '@jsverse/transloco';
-import {debounceTime, distinctUntilChanged, EMPTY, filter, finalize, forkJoin, map, of, switchMap} from 'rxjs';
+import {debounceTime, distinctUntilChanged, EMPTY, filter, finalize, forkJoin, map, of, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../../admin/settings.service';
 import {AccountService} from '../../_services/account.service';
 import {CollectionTagService} from '../../_services/collection-tag.service';
@@ -31,6 +31,13 @@ import {WikiLink} from "../../_models/wiki";
 import {TranslocoInjectComponent} from "../../shared/_components/transloco-inject/transloco-inject.component";
 import {TranslocoSlotDirective} from "../../_directives/transloco-slot.directive";
 import {ApiKeyComponent} from "../api-key/api-key.component";
+import {AuthKeyProvider, KoboSyncName} from "../../_models/user/auth-key";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
+import {url} from "../../_validators/url.validator";
+import {FormsModule} from "@angular/forms";
+import {ServerSettings} from "../../admin/_models/server-settings";
 
 interface SyncSourceItem {
   id: number;
@@ -60,7 +67,11 @@ interface SyncSource {
     EmptyStateComponent,
     TranslocoInjectComponent,
     TranslocoSlotDirective,
-    ApiKeyComponent
+    ApiKeyComponent,
+    DefaultValuePipe,
+    EnterBlurDirective,
+    ValidationErrorsComponent,
+    FormsModule
   ],
   templateUrl: './manage-kobo.component.html',
   styleUrl: './manage-kobo.component.scss',
@@ -88,9 +99,16 @@ export class ManageKoboComponent implements OnInit {
   protected readonly preferencesError = signal(false);
   protected readonly syncSources = signal<SyncSource[]>([]);
   protected readonly managedCollectionTypeahead = signal<TypeaheadConfig<SyncSourceItem> | null>(null);
-  protected readonly hostname = signal<string>('');
+  private serverSettings: ServerSettings | undefined;
 
-  private readonly managedCollectionTypeaheadRef = viewChild<TypeaheadComponent<SyncSourceItem>>('managedCollectionTypeahead');
+  koboAuthKeyModel = signal<string>(KoboSyncName);
+  koboAuthKeyFormGroup = form(this.koboAuthKeyModel);
+  koboUrlRsc = this.accountService.koboSyncUrlRsc(() => this.koboAuthKeyModel());
+
+  private readonly hostNameFormModel = signal<string>('');
+  protected readonly hostNameFormGroup = form(this.hostNameFormModel, path => {
+    url(path, {requireTls: false});
+  });
 
   private readonly formModel = signal<KoboSyncPreferences>({
     collectionSyncEnabled: false,
@@ -118,7 +136,7 @@ export class ManageKoboComponent implements OnInit {
   });
 
   protected readonly managedCollectionId = computed(() => this.formModel().managedCollection);
-  protected readonly hostNameNotSetup = computed(() => this.hostname() === '');
+  protected readonly hostNameNotSetup = computed(() => this.hostNameFormModel() === '');
 
   private lastPersistedPreferences = '';
 
@@ -134,8 +152,24 @@ export class ManageKoboComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
 
-    this.settingsService.getHostname().subscribe(hostName => {
-      this.hostname.set(hostName);
+    toObservable(this.hostNameFormModel).pipe(
+      debounceTime(150),
+      distinctUntilChanged(),
+      filter(() => !!this.serverSettings),
+      map(hostname => ({
+        ...this.serverSettings!,
+        hostname
+      })),
+      switchMap(settings => this.settingsService.updateServerSettings(settings)),
+      tap(settings => {
+        this.serverSettings = settings;
+        this.hostNameFormModel.set(settings.hostName);
+      })
+    ).subscribe()
+
+    this.settingsService.getServerSettings().subscribe(settings => {
+      this.hostNameFormModel.set(settings.hostName);
+      this.serverSettings = settings;
     });
   }
 
@@ -242,4 +276,5 @@ export class ManageKoboComponent implements OnInit {
   }
 
   protected readonly WikiLink = WikiLink;
+  protected readonly AuthKeyProvider = AuthKeyProvider;
 }
