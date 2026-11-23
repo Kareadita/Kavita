@@ -98,6 +98,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     koboSyncPreferences: {
       syncItemLimit: 25,
       forwardToKoboStore: false,
+      createOnDeckCollection: false,
       librarySyncEnabled: false,
       syncLibraries: [],
       readingListSyncEnabled: false,

@@ -822,6 +822,10 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("KoboStoreSyncToken")
                         .HasColumnType("TEXT");
 
+                    b.PrimitiveCollection<string>("OnDeckIds")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("ProgressSyncTime")
                         .HasColumnType("TEXT");
 
@@ -3386,7 +3390,7 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("KoboSyncPreferences")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue("{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"LibrarySyncEnabled\":false,\"SyncLibraries\":[],\"ReadingListSyncEnabled\":false,\"SyncReadingLists\":[],\"CollectionSyncEnabled\":false,\"SyncCollections\":[],\"ManagedCollection\":0,\"HasManagedCollection\":false}");
+                        .HasDefaultValue("{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"CreateOnDeckCollection\":true,\"LibrarySyncEnabled\":false,\"SyncLibraries\":[],\"ReadingListSyncEnabled\":false,\"SyncReadingLists\":[],\"CollectionSyncEnabled\":false,\"SyncCollections\":[],\"ManagedCollection\":0,\"HasManagedCollection\":false}");
 
                     b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");

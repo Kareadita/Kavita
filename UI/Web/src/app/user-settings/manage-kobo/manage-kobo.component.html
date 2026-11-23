@@ -73,89 +73,67 @@
 
     <div class="setting-section-break"></div>
 
-    <!--Subtitles-->
     <h4>{{t('kobo-sync-settings-title')}}</h4>
 
-    <div class="row g-0 mt-4">
-      <app-setting-item [title]="t('sync-item-limit-label')" [subtitle]="t('sync-item-limit-tooltip')"
-                        [canEdit]="!isReadOnly() && koboEditable()" [control]="formGroup.syncItemLimit"
-                        labelId="kobo-sync-item-limit">
-        <ng-template #view>
-          <span>{{formGroup.syncItemLimit().value()}}</span>
-        </ng-template>
-        <ng-template #edit>
-          <input type="number" id="kobo-sync-item-limit" [formField]="formGroup.syncItemLimit" class="form-control"
-                 [appFormField]="formGroup.syncItemLimit">
-        </ng-template>
-      </app-setting-item>
-    </div>
-
-    <div class="row g-0 mt-4">
-      <app-setting-switch [title]="t('forward-to-kobo-store-label')" [subtitle]="t('forward-to-kobo-store-tooltip')"
-                          [control]="formGroup.forwardToKoboStore">
-        <ng-template>
-          <div class="form-check form-switch float-end">
-            <input type="checkbox" role="switch" [formField]="formGroup.forwardToKoboStore" class="form-check-input">
-          </div>
-        </ng-template>
-      </app-setting-switch>
-    </div>
-
-    <div class="setting-section-break"></div>
-
-    <h4>{{t('sync-sources-title')}}</h4>
-
-    @for (source of syncSources(); track source.key) {
+    <div class="col-xxl-6 col-12">
       <div class="row g-0 mt-4">
-        <app-setting-switch [title]="t(source.titleKey)" [subtitle]="t(source.tooltipKey)" [control]="source.enabled">
+        <app-setting-item [title]="t('sync-item-limit-label')" [subtitle]="t('sync-item-limit-tooltip')"
+                          [canEdit]="!isReadOnly() && koboEditable()" [control]="formGroup.syncItemLimit"
+                          labelId="kobo-sync-item-limit">
+          <ng-template #view>
+            <span>{{formGroup.syncItemLimit().value()}}</span>
+          </ng-template>
+          <ng-template #edit>
+            <input type="number" id="kobo-sync-item-limit" [formField]="formGroup.syncItemLimit" class="form-control"
+                   [appFormField]="formGroup.syncItemLimit">
+          </ng-template>
+        </app-setting-item>
+      </div>
+
+      <div class="row g-0 mt-4">
+        <app-setting-switch [title]="t('forward-to-kobo-store-label')" [subtitle]="t('forward-to-kobo-store-tooltip')"
+                            [control]="formGroup.forwardToKoboStore">
           <ng-template>
             <div class="form-check form-switch float-end">
-              <input type="checkbox" role="switch" [formField]="source.enabled" class="form-check-input">
+              <input type="checkbox" role="switch" [formField]="formGroup.forwardToKoboStore" class="form-check-input">
             </div>
           </ng-template>
         </app-setting-switch>
       </div>
 
-      <div class="row g-0 my-2">
-        <app-setting-item [title]="t(source.selectionLabelKey)" [showEdit]="false" [canEdit]="false"
-                          [control]="source.ids">
-          <ng-template #view>
-            <app-typeahead [config]="source.typeahead" (selectedData)="onSourceSelectionChange(source, $event)"
-                           [disabled]="!koboEditable() || isReadOnly() || !source.enabled().value()">
-              <ng-template #optionItem let-item>
-                {{item.title}}
-              </ng-template>
-              <ng-template #badgeItem let-item>
-                {{item.title}}
-              </ng-template>
-            </app-typeahead>
+      <div class="row g-0 mt-4">
+        <app-setting-switch [title]="t('create-on-deck-collection-label')" [subtitle]="t('create-on-deck-collection-tooltip')"
+                            [control]="formGroup.createOnDeckCollection">
+          <ng-template>
+            <div class="form-check form-switch float-end">
+              <input type="checkbox" role="switch" [formField]="formGroup.createOnDeckCollection" class="form-check-input">
+            </div>
           </ng-template>
-        </app-setting-item>
+        </app-setting-switch>
       </div>
-    }
 
-    <div class="row g-0 mt-4">
-      <app-setting-switch [title]="t('sync-smart-filters-label')" [subtitle]="t('sync-smart-filters-tooltip')">
-        <ng-template>
-          <div class="form-check form-switch float-end">
-            <input type="checkbox" role="switch" class="form-check-input" disabled>
-          </div>
-        </ng-template>
-      </app-setting-switch>
-    </div>
-
-    @if (licenseService.hasActiveLicense()) {
       <div class="setting-section-break"></div>
 
-      <div class="row g-0 mt-4">
-        <app-setting-item [title]="t('managed-collection-label')" [subtitle]="t('managed-collection-tooltip')"
-                          [showEdit]="false" [canEdit]="false" [control]="formGroup.managedCollection">
-          <ng-template #view>
-            @let collectionConfig = managedCollectionTypeahead();
-            @if (collectionConfig) {
-              <app-typeahead #managedCollectionTypeahead [config]="collectionConfig"
-                             (selectedData)="onManagedCollectionChange($event)"
-                             [disabled]="!koboEditable() || isReadOnly()">
+      <h4>{{t('sync-sources-title')}}</h4>
+      <p>{{t('sync-sources-tooltip')}}</p>
+
+      @for (source of syncSources(); track source.key) {
+        <div class="row g-0 mt-4">
+          <app-setting-switch [title]="t(source.titleKey)" [subtitle]="t(source.tooltipKey)" [control]="source.enabled">
+            <ng-template>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch" [formField]="source.enabled" class="form-check-input">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
+
+        <div class="row g-0 my-2">
+          <app-setting-item [title]="t(source.selectionLabelKey)" [showEdit]="false" [canEdit]="false"
+                            [control]="source.ids">
+            <ng-template #view>
+              <app-typeahead [config]="source.typeahead" (selectedData)="onSourceSelectionChange(source, $event)"
+                             [disabled]="!koboEditable() || isReadOnly() || !source.enabled().value()">
                 <ng-template #optionItem let-item>
                   {{item.title}}
                 </ng-template>
@@ -163,11 +141,46 @@
                   {{item.title}}
                 </ng-template>
               </app-typeahead>
-            }
+            </ng-template>
+          </app-setting-item>
+        </div>
+      }
+
+      <div class="row g-0 mt-4">
+        <app-setting-switch [title]="t('sync-smart-filters-label')" [subtitle]="t('sync-smart-filters-tooltip')">
+          <ng-template>
+            <div class="form-check form-switch float-end">
+              <input type="checkbox" role="switch" class="form-check-input" disabled>
+            </div>
           </ng-template>
-        </app-setting-item>
+        </app-setting-switch>
       </div>
-    }
+
+      @if (licenseService.hasActiveLicense()) {
+        <div class="setting-section-break"></div>
+
+        <div class="row g-0 mt-4">
+          <app-setting-item [title]="t('managed-collection-label')" [subtitle]="t('managed-collection-tooltip')"
+                            [showEdit]="false" [canEdit]="false" [control]="formGroup.managedCollection">
+            <ng-template #view>
+              @let collectionConfig = managedCollectionTypeahead();
+              @if (collectionConfig) {
+                <app-typeahead #managedCollectionTypeahead [config]="collectionConfig"
+                               (selectedData)="onManagedCollectionChange($event)"
+                               [disabled]="!koboEditable() || isReadOnly()">
+                  <ng-template #optionItem let-item>
+                    {{item.title}}
+                  </ng-template>
+                  <ng-template #badgeItem let-item>
+                    {{item.title}}
+                  </ng-template>
+                </app-typeahead>
+              }
+            </ng-template>
+          </app-setting-item>
+        </div>
+      }
+    </div>
   }
 
 </ng-container>

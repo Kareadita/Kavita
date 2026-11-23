@@ -20,6 +20,7 @@ using Kavita.API.Services.Reading;
 using Kavita.API.Store;
 using Kavita.Common;
 using Kavita.Common.Extensions;
+using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Kobo;
@@ -95,13 +96,17 @@ public class KoboSyncService(
         remaining -= collectionChanges.Count;
 
         var (readingListsChanges, readingListsExhausted) = await AccumulateReadingListChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
+        remaining -= readingListsChanges.Count;
+
+        var (onDeckTagChanges, onDeckTagExhausted) = await AccumulateOnDeckCollectionChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
 
         syncResults.AddRange(chapterChanges);
         syncResults.AddRange(progressChanges);
         syncResults.AddRange(collectionChanges);
         syncResults.AddRange(readingListsChanges);
+        syncResults.AddRange(onDeckTagChanges);
 
-        var localChangesExhausted = chaptersExhausted && progressExhausted && collectionsExhausted && readingListsExhausted;
+        var localChangesExhausted = chaptersExhausted && progressExhausted&& collectionsExhausted && readingListsExhausted && onDeckTagExhausted;
 
         // All exhausted = sync done
         if (localChangesExhausted)
@@ -495,6 +500,75 @@ public class KoboSyncService(
         return new SyncAccumulationResult(changes, exhausted);
     }
 
+    private async Task<SyncAccumulationResult> AccumulateOnDeckCollectionChanges(int userId,
+        AppUserKoboSyncPreferences syncPreferences,
+        KoboSyncPoint syncPoint,
+        int limit,
+        AgeRestriction ageRestriction,
+        CancellationToken cancellationToken)
+    {
+        const string onDeckId = "col:on-deck";
+
+        if (limit <= 0) return new SyncAccumulationResult([], false);
+
+        if (!syncPreferences.CreateOnDeckCollection) return new SyncAccumulationResult([], true);
+
+        var onDeckSeries = await unitOfWork.SeriesRepository
+            .GetOnDeckAsync(userId, 0, UserParams.Infinite, cancellationToken);
+
+        var seriesIds = onDeckSeries.Select(series => series.Id).ToList();
+
+        var chapters = seriesIds.Count > 0 ? await KoboEligibleChapters(userId, ageRestriction, syncPreferences, syncPoint)
+            .Where(c => seriesIds.Contains(c.Volume.SeriesId))
+            .Select(c => new {c.Id, c.CreatedUtc, c.LastModifiedUtc})
+            .ToListAsync(cancellationToken) : [];
+
+        var changes = new List<KoboSyncItem>();
+
+        if (onDeckSeries.Count == 0 || chapters.Count == 0)
+        {
+            if (syncPoint.OnDeckIds.Count > 0)
+            {
+                changes.Add(new KoboSyncItem
+                {
+                    DeletedTag = new KoboWrappedTagDto {Tag = new KoboTagDto { Id = onDeckId, }}
+                });
+            }
+
+            syncPoint.OnDeckIds.Clear();
+            return new SyncAccumulationResult(changes, true);
+        }
+
+        // No new/deleted chapters
+        if (syncPoint.OnDeckIds.ToHashSet().SetEquals(chapters.Select(c => c.Id)))
+        {
+            return new SyncAccumulationResult(changes, true);
+        }
+
+        var tag = new KoboWrappedTagDto
+        {
+            Tag = new KoboTagDto
+            {
+                Id = onDeckId,
+                Created = chapters.Min(c => c.CreatedUtc),
+                LastModified = chapters.Max(c => c.LastModifiedUtc),
+                Name = CreateTagName(await localizationService.TranslateAsync(userId, "kobo-sync-on-deck-tag")),
+                Items = chapters.Select(item => new KoboTagItemDto
+                {
+                    RevisionId = item.Id.ToString(),
+                }).ToList(),
+            },
+        };
+
+        changes.Add(syncPoint.OnDeckIds.Count == 0
+            ? new KoboSyncItem { NewTag = tag }
+            : new KoboSyncItem { ChangedTag = tag });
+
+        syncPoint.OnDeckIds = chapters.Select(c => c.Id).ToList();
+
+        return new SyncAccumulationResult(changes, true);
+    }
+
     private IQueryable<Chapter> KoboEligibleChapters(int userId,
         AgeRestriction ageRestriction, AppUserKoboSyncPreferences syncPreferences, KoboSyncPoint syncPoint)
     {
@@ -549,6 +623,11 @@ public class KoboSyncService(
                 ],
             };
         });
+    }
+
+    private string CreateTagName(string name)
+    {
+        return $"Kavita: {name}";
     }
 
     #endregion

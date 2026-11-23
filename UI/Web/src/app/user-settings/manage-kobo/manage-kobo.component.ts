@@ -113,6 +113,7 @@ export class ManageKoboComponent implements OnInit {
   private readonly formModel = signal<KoboSyncPreferences>({
     collectionSyncEnabled: false,
     forwardToKoboStore: false,
+    createOnDeckCollection: false,
     librarySyncEnabled: false,
     managedCollection: 0,
     readingListSyncEnabled: false,

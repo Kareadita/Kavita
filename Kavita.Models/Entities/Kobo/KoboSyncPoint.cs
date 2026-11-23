@@ -59,6 +59,8 @@ public class KoboSyncPoint
     public List<int> ReadingListsIds { get; set; } = [];
     public int ReadingListsSyncedUntilIndex { get; set; }
 
+    public List<int> OnDeckIds { get; set; } = [];
+
     public void Reset()
     {
         ChapterIndex = 0;
