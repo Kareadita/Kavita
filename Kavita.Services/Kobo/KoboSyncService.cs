@@ -520,6 +520,9 @@ public class KoboSyncService(
 
         var chapters = seriesIds.Count > 0 ? await KoboEligibleChapters(userId, ageRestriction, syncPreferences, syncPoint)
             .Where(c => seriesIds.Contains(c.Volume.SeriesId))
+            .Where(c => unitOfWork.DataContext.AppUserProgresses
+                .Where(p => p.AppUserId == userId && p.ChapterId == c.Id)
+                .Any(p => p.PagesRead > 0 && p.PagesRead < c.Pages))
             .Select(c => new {c.Id, c.CreatedUtc, c.LastModifiedUtc})
             .ToListAsync(cancellationToken) : [];
 
