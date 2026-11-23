@@ -2254,7 +2254,13 @@
         "confirm-delete-collections-kobo": "Tem certeza de que deseja excluir várias coleções? Uma delas é usada para sincronizar sua mídia com o seu Kobo. Ao excluí-la, todas as suas bibliotecas serão sincronizadas em seguida.",
         "reading-profile-switched": "Usando o perfil de leitura {{name}}",
         "reading-profile-switched-series": "Usando suas configurações para {{seriesName}}",
-        "reading-profile-switch-failed": "O perfil de leitura para {{seriesName}} não pôde ser carregado, as configurações não serão salvas"
+        "reading-profile-switch-failed": "O perfil de leitura para {{seriesName}} não pôde ser carregado, as configurações não serão salvas",
+        "kobo-sync-point": {
+            "confirm-delete": "Tem certeza de que deseja excluir este ponto de sincronização? O dispositivo iniciará uma nova sincronização na próxima vez que se conectar.",
+            "deleted": "Ponto de sincronização excluído",
+            "restored": "Capítulos restaurados",
+            "copied": "ID do dispositivo copiado para sua área de transferência"
+        }
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",
@@ -3318,7 +3324,8 @@
         "unknown": "Desconhecido",
         "oidc": "OIDC",
         "jwt": "JWT",
-        "auth-key": "Chave de Autenticação"
+        "auth-key": "Chave de Autenticação",
+        "kobo": "Kobo"
     },
     "client-device-platform-pipe": {
         "unknown": "{{client-device-auth-type-pipe.unknown}}"
@@ -4571,7 +4578,8 @@
         "external-match-rate-limit": "Limite de requisições do Kavita+ atingido",
         "scan-series-progress": "Verificando {{seriesName}}",
         "scan-series-done": "{{seriesName}} Verificado",
-        "debug-export-progress": "Gerando exportação de depuração"
+        "debug-export-progress": "Gerando exportação de depuração",
+        "convert-media-progress": "Convertendo mídia"
     },
     "event-message-pipe": {
         "root-folders-inaccessible-label": "Não é possível acessar as pastas da biblioteca",
@@ -4622,7 +4630,14 @@
         "debug-export-ready-description": "{{size}}, mantido até {{time}}",
         "debug-export-failed-label": "Falha na exportação de depuração",
         "kepubify-checked-failed-label": "O Kepubify está desativado",
-        "kepubify-checked-failed-description": "{{path}}: {{reason}}. Os livros são sincronizados com o Kobo como epub simples."
+        "kepubify-checked-failed-description": "{{path}}: {{reason}}. Os livros são sincronizados com o Kobo como epub simples.",
+        "image-migration-summary-label": "Migração da imagem concluída",
+        "media-conversion-summary-label": "Conversão de mídia concluída",
+        "image-cleanup-summary-description": "Limpei {{corrected}} imagens, excluí {{deleted}} e salvei {{size}}.",
+        "image-cleanup-summary-skipped-description": "Limpei {{corrected}} imagens, excluí {{deleted}} e salvei {{size}}. {{missing}} estavam ausentes e {{unreadable}} não puderam ser lidas. O log lista cada uma.",
+        "bookmark-directory-moved-label": "Marcadores movidos",
+        "bookmark-directory-moved-description": "Moveu {{moved}} imagens de marcadores para {{path}}.",
+        "bookmark-directory-moved-skipped-description": "Movidas {{moved}} imagens de marcadores para {{path}}. {{skipped}} permaneceram na pasta antiga porque {{path}} já tinha um arquivo com o mesmo nome. O registro lista cada uma delas."
     },
     "event-action-pipe": {
         "reconnect": "Reconectar",
@@ -4651,7 +4666,8 @@
         "scan-libraries": "Verificar todas as bibliotecas",
         "cleanup": "Limpar",
         "backup": "Backup",
-        "sync-cbl": "Sincronizar listas de leitura"
+        "sync-cbl": "Sincronizar listas de leitura",
+        "refresh-composite-covers": "Atualizar lista de leitura e capas da coleção"
     },
     "media-issues-table": {
         "select-alt": "Selecionar {{file}}",
@@ -4791,6 +4807,16 @@
         "no-data-description": "Não há capítulos disponíveis para restaurar neste dispositivo.",
         "selected-count": "{{selected}} de {{total}} selecionado",
         "select-all": "{{common.select-all}}",
-        "clear-selection": "Limpar"
+        "clear-selection": "Limpar",
+        "load-error-title": "Não foi possível carregar os detalhes do capítulo",
+        "load-error-description": "Feche o diálogo e tente novamente.",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "restore-selected": "Restaurar Selecionado ({{count}})",
+        "series-label": "Nome da série",
+        "chapter-title-label": "Título do capítulo",
+        "removed-at-label": "Removido",
+        "select-chapter-alt": "Selecione {{title}}",
+        "unselect-chapter-alt": "Desmarcar {{title}}"
     }
 }
