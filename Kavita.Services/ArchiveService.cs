@@ -510,16 +510,79 @@ public class ArchiveService(
         }
     }
 
-    private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
+    private void ExtractArchiveEntries(ZipArchive archive, string archivePath, string extractPath)
     {
         var needsFlattening = ArchiveNeedsFlattening(archive);
         if (!archive.HasFiles() && !needsFlattening) return;
 
-        archive.ExtractToDirectory(extractPath, true);
+        ExtractEntriesUsingUnicodeNames(archive, archivePath, extractPath);
         if (!needsFlattening) return;
 
         logger.LogDebug("Extracted archive is nested in root folder, flattening...");
         directoryService.Flatten(extractPath);
+    }
+
+    /// <summary>
+    /// Extracts every entry, preferring the Info-ZIP Unicode Path extra field (0x7075) over the name that
+    /// <see cref="ZipArchive"/> decoded. Tools that write a legacy code page (CP949, CP932, GBK, ...) without setting
+    /// the UTF-8 flag produce names that decode to replacement characters, and distinct pages then extract onto the
+    /// same file name, silently losing pages. See https://github.com/Kareadita/Kavita/issues/2234
+    /// </summary>
+    private void ExtractEntriesUsingUnicodeNames(ZipArchive archive, string archivePath, string extractPath)
+    {
+        var unicodeNames = ZipArchiveExtensions.ReadUnicodePathExtraFields(archivePath);
+        if (unicodeNames.Count != archive.Entries.Count || unicodeNames.All(string.IsNullOrEmpty))
+        {
+            if (unicodeNames.Count != 0)
+            {
+                logger.LogDebug("[ExtractArchive] Falling back to default extraction for {ArchivePath}: parsed {Parsed} entries, archive reports {Expected}",
+                    archivePath, unicodeNames.Count, archive.Entries.Count);
+            }
+
+            archive.ExtractToDirectory(extractPath, true);
+            return;
+        }
+
+        directoryService.ExistOrCreate(extractPath);
+        var root = Path.GetFullPath(extractPath);
+        var written = new HashSet<string>(StringComparer.Ordinal);
+
+        for (var i = 0; i < archive.Entries.Count; i++)
+        {
+            var entry = archive.Entries[i];
+            var entryName = ZipArchiveExtensions.SanitizeEntryName((string.IsNullOrEmpty(unicodeNames[i]) ? entry.FullName : unicodeNames[i]!)
+                .Replace('\\', '/')
+                .TrimStart('/'));
+
+            if (string.IsNullOrWhiteSpace(entryName) || entryName.EndsWith('/'))
+            {
+                if (!string.IsNullOrWhiteSpace(entryName) && Path.GetFullPath(Path.Join(root, entryName)).StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+                {
+                    directoryService.ExistOrCreate(Path.GetFullPath(Path.Join(root, entryName)));
+                }
+
+                continue;
+            }
+
+            var destination = Path.GetFullPath(Path.Join(root, entryName));
+            if (!destination.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            {
+                logger.LogDebug("[ExtractArchive] Skipping {EntryName} as it would extract outside of {ExtractPath}",
+                    entry.FullName, extractPath);
+                continue;
+            }
+
+            if (!written.Add(destination))
+            {
+                logger.LogWarning("[ExtractArchive] Two entries in {ArchivePath} resolve to the same name {EntryName}; the later one wins",
+                    archivePath, entryName);
+            }
+
+            var parent = Path.GetDirectoryName(destination);
+            if (!string.IsNullOrEmpty(parent)) directoryService.ExistOrCreate(parent);
+
+            entry.ExtractToFile(destination, true);
+        }
     }
 
     /// <summary>
@@ -552,7 +615,7 @@ public class ArchiveService(
                 case ArchiveLibrary.Default:
                 {
                     using var archive = ZipFile.OpenRead(archivePath);
-                    ExtractArchiveEntries(archive, extractPath);
+                    ExtractArchiveEntries(archive, archivePath, extractPath);
                     break;
                 }
                 case ArchiveLibrary.SharpCompress:

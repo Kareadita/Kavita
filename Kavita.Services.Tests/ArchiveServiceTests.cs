@@ -7,6 +7,7 @@ using Kavita.Models.DTOs.Archive;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
+using Kavita.Services.Extensions;
 using Kavita.Services.Images;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
@@ -452,6 +453,85 @@ public class ArchiveServiceTests
         var fileSystem = new MockFileSystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         //_archiveService.CreateZipForDownload(new []{}, outputDirectory)
+    }
+
+    #endregion
+
+    #region Unicode Path extra field (0x7075)
+    /// <summary>
+    /// The fixture was built by an archiver that stored names in a legacy code page without setting the UTF-8 flag,
+    /// but wrote the real name into the Info-ZIP Unicode Path extra field. Two pairs of entries decode to the same
+    /// replacement-character name, so extraction used to overwrite pages and lose them.
+    /// https://github.com/Kareadita/Kavita/issues/2234
+    /// </summary>
+    [Fact]
+    public void ReadUnicodePathExtraFields_ReturnsUtf8NamesForLegacyEncodedArchive()
+    {
+        var fixture = Path.Join(Directory.GetCurrentDirectory(), "Data", "unicode-path-extra-field.zip");
+
+        var names = ZipArchiveExtensions.ReadUnicodePathExtraFields(fixture);
+
+        Assert.Equal(40, names.Count);
+        Assert.Equal("겜발부1.png", names[1]);
+        Assert.Equal("겜발부2.png", names[2]);
+        Assert.Contains("마리히나타_001.png", names);
+        // The ASCII-named entry has no Unicode Path field; every named entry is distinct once the field is honoured
+        Assert.Null(names[0]);
+        Assert.Equal(39, names.Count(n => !string.IsNullOrEmpty(n)));
+        Assert.Equal(39, names.Where(n => !string.IsNullOrEmpty(n)).Distinct().Count());
+    }
+
+    [Fact]
+    public void ReadUnicodePathExtraFields_ReturnsNullsForArchiveWithoutTheField()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ArchiveService/Archives");
+
+        var names = ZipArchiveExtensions.ReadUnicodePathExtraFields(Path.Join(testDirectory, "flat file.zip"));
+
+        Assert.Single(names);
+        Assert.Null(names[0]);
+    }
+
+    /// <summary>
+    /// A true name from the extra field can hold characters Windows forbids. Old code only ever produced legal
+    /// (mangled) names, so this must not become a way to abort extraction on a Windows host.
+    /// </summary>
+    [Theory]
+    [InlineData("Chapter 1: Intro.png", "Chapter 1_ Intro.png")]
+    [InlineData("vol 2/01?.jpg", "vol 2/01_.jpg")]
+    [InlineData("plain.png", "plain.png")]
+    [InlineData("日本語/001.png", "日本語/001.png")]
+    public void SanitizeEntryName_ReplacesWindowsInvalidCharacters(string input, string expected)
+    {
+        // Windows' invalid set, exercised on Linux so the rule is covered where the tests run
+        var windowsInvalid = new[] { '<', '>', ':', '"', '|', '?', '*', '\\', '/' };
+
+        Assert.Equal(expected, ZipArchiveExtensions.SanitizeEntryName(input, windowsInvalid));
+    }
+
+    [Fact]
+    public void ExtractArchive_KeepsEveryPageOfLegacyEncodedArchive()
+    {
+        var fixture = Path.Join(Directory.GetCurrentDirectory(), "Data", "unicode-path-extra-field.zip");
+        var extractDirectory = Path.Join(Path.GetTempPath(), $"kavita-unicode-archive-{Guid.NewGuid():N}");
+
+        try
+        {
+            _archiveService.ExtractArchive(fixture, extractDirectory);
+
+            var files = _directoryService.GetFiles(extractDirectory, searchOption: SearchOption.AllDirectories)
+                .Select(Path.GetFileName)
+                .ToList();
+
+            Assert.Equal(40, files.Count);
+            Assert.Contains("겜발부1.png", files);
+            Assert.Contains("나쁜사키쟝4.png", files);
+            Assert.Contains("히메히나.png", files);
+        }
+        finally
+        {
+            _directoryService.ClearAndDeleteDirectory(extractDirectory);
+        }
     }
 
     #endregion

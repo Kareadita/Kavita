@@ -33,6 +33,9 @@
       <None Update="Data\AesopsFables.epub">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="Data\unicode-path-extra-field.zip">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <Content Include="..\Kavita.Server\I18N\**\*.*">
         <Link>I18N\%(RecursiveDir)%(FileName)%(Extension)</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
