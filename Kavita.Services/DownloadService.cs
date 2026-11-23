@@ -15,12 +15,8 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Images;
 using Kavita.Models.Kobo;
 using Kavita.Services.Images.ImageSteps;
-using Kavita.Services.Kobo;
 using Microsoft.AspNetCore.StaticFiles;
 using MimeTypes;
-using OfficeIMO.Epub;
-using QuickEPUB;
-
 namespace Kavita.Services;
 
 public class DownloadService(

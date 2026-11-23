@@ -10,6 +10,7 @@ using Kavita.API.Services.Kobo;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Extensions;
 using Kavita.Models.Images;
 using Nager.ArticleNumber;
 using OfficeIMO.Epub;
@@ -32,16 +33,17 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
     {
         var chapterDto = options.Chapter;
         var title = options.BookTitle;
-
-
-
         var language = string.IsNullOrEmpty(chapterDto.Language) ? "en" : chapterDto.Language;
+
+
         var publication = EpubPublication.Create(title, language);
         publication.SetRenditionLayout(EpubRenditionLayout.PrePaginated);
         AddMetadata(publication, chapterDto);
 
         publication.AddStylesheet("style", "EPUB/style.css", GlobalStyles);
-        const string mediaOutput = "image/jpeg";
+        const string mediaOutput = "image/jpeg"; // This needs to be driven from the ImageRender
+        var extension = options.Render.Format.GetExtension();
+        var mediaEncoding = mediaOutput; // TODO: Need to refactor GetContentTypeFromFile out of DownloadService
 
         var cover = await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterDto.Id, ct);
         var path = Path.Join(directoryService.CoverImageDirectory, cover);
@@ -49,9 +51,9 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         if (chapterDto.HasCoverImage && File.Exists(path))
         {
             var source = new ImageSource.FromFile(path);
-            var coverBytes = imagePipeline.Render(source, options.Render);
+            var coverImageResult = imagePipeline.Render(source, options.Render);
 
-            publication.AddResource("cover", "EPUB/images/cover.jpeg", mediaOutput, coverBytes.Data);
+            publication.AddResource("cover", $"EPUB/images/cover{extension}", mediaEncoding, coverImageResult.Data);
             publication.SetCoverImage("cover");
         }
 
@@ -60,26 +62,15 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         {
             ct.ThrowIfCancellationRequested();
 
-            var source = new ImageSource.FromFile(cachedPage);
-            var image = imagePipeline.Render(source, options.Render);
-
-            // We need to map from Office.IMO 1-based indexing to Kobo's indexing and handle split pages using a - (once I code that up)
-            var fileName = $"page_{index:D4}";
-            var imageId = $"image-{index:D4}";
-            var imageFile = $"{imageId}.jpeg";
-
-            var htmlPage = PageChapterHtml.Replace("{{fileName}}", imageFile).Replace("{{width}}", $"{image.Width}").Replace("{{height}}", $"{image.Height}");
-
-
-            publication.AddChapter(fileName, $"EPUB/{fileName}.xhtml", $"Page {index}",
-                htmlPage, ["style"]);
-            publication.AddResource(imageId, $"EPUB/images/{imageFile}", mediaOutput, image.Data);
-            publication.SetFixedLayoutPage(fileName, new EpubFixedLayoutPage(image.Width, image.Height)
-            {
-                Spread = EpubPageSpread.None,
-            }, ct);
+            AddPage(options, ct, cachedPage, index, extension, publication, mediaEncoding);
             index++;
         }
+
+        // Table of Content ideas:
+        // 1 - 1 ToC per page
+        // 2 - 1 ToC per group of pages for easy jumping
+        // 3 - Parse chapters out of filenames (some packers pack with cXX) and group that way
+        // 4 - If a volume of chapters, split each chapter as it's own ToC element
 
         // Table of Content generation
         // publication.SetNavigation([
@@ -92,6 +83,29 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         return options.OutputPath;
 
 
+    }
+
+    private void AddPage(BuildEpubOptions options, CancellationToken ct, string cachedPage, int index, string extension,
+        EpubPublication publication, string mediaEncoding)
+    {
+        var source = new ImageSource.FromFile(cachedPage);
+        var image = imagePipeline.Render(source, options.Render);
+
+        // We need to map from Office.IMO 1-based indexing to Kobo's indexing and handle split pages using a - (once I code that up)
+        var fileName = $"page_{index:D4}";
+        var imageId = $"image-{index:D4}";
+        var imageFile = $"{imageId}{extension}";
+
+        var htmlPage = PageChapterHtml.Replace("{{fileName}}", imageFile).Replace("{{width}}", $"{image.Width}").Replace("{{height}}", $"{image.Height}");
+
+
+        publication.AddChapter(fileName, $"EPUB/{fileName}.xhtml", $"Page {index}",
+            htmlPage, ["style"]);
+        publication.AddResource(imageId, $"EPUB/images/{imageFile}", mediaEncoding, image.Data);
+        publication.SetFixedLayoutPage(fileName, new EpubFixedLayoutPage(image.Width, image.Height)
+        {
+            Spread = EpubPageSpread.None,
+        }, ct);
     }
 
     private static void AddMetadata(EpubPublication publication, ChapterDto chapterDto)

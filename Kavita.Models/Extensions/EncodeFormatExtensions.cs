@@ -6,6 +6,9 @@ namespace Kavita.Models.Extensions;
 
 public static class EncodeFormatExtensions
 {
+    /// <summary>
+    /// Returns the extension (.png)
+    /// </summary>
     public static string GetExtension(this EncodeFormat encodeFormat)
     {
         return encodeFormat switch
