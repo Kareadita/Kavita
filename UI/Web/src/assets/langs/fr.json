@@ -129,7 +129,8 @@
         "embed-progress-indicator-tooltip": "Indicateur intégré de progression dans le Titre",
         "include-continue-from-label": "Inclure Continuer à partir de",
         "include-continue-from-tooltip": "Insère un élément \"Continuer depuis X\" dans les champs OPDS pour éviter d'avoir à chercher votre dernier point de lecture (simule le bouton \"Reprendre\" de Kavita)",
-        "ondeck-progress-days-label": "Dernière progression sur le pont (jours)"
+        "ondeck-progress-days-label": "Dernière progression sur le pont (jours)",
+        "ondeck-update-days-label": "On Deck  dernier chapitre ajouté (jours)"
     },
     "user-holds": {
         "title": "Séries en attente de synchronisation",
