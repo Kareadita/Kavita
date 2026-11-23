@@ -7,6 +7,7 @@ using Kavita.Models.DTOs;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
+using Microsoft.AspNetCore.StaticFiles;
 using NetVips;
 using Image = NetVips.Image;
 
@@ -16,8 +17,6 @@ public static class ImageHelper
 {
     // Fixed seed for generation of ColorScapes. Do not change
     private const int ColorScapeSeed = 7;
-
-
 
     private static (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath)
     {

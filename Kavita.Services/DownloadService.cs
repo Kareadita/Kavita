@@ -30,7 +30,7 @@ public class DownloadService(
     IEpubBuilderService epubBuilderService
     ) : IDownloadService
 {
-    private readonly FileExtensionContentTypeProvider _fileTypeProvider = new();
+    private static readonly FileExtensionContentTypeProvider FileTypeProvider = new();
 
     /// <summary>
     /// Downloads the first file in the file enumerable for download
@@ -43,10 +43,15 @@ public class DownloadService(
         return Tuple.Create(firstFile, GetContentTypeFromFile(firstFile), Path.GetFileName(firstFile));
     }
 
-    public string GetContentTypeFromFile(string filepath)
+    /// <summary>
+    /// Returns MIME type for the given path (ie application/x-cbz, image/jpeg)
+    /// </summary>
+    /// <param name="filepath"></param>
+    /// <returns></returns>
+    public static string GetContentTypeFromFile(string filepath)
     {
         // Figures out what the content type should be based on the file name.
-        if (!_fileTypeProvider.TryGetContentType(filepath, out var contentType))
+        if (!FileTypeProvider.TryGetContentType(filepath, out var contentType))
         {
             if (contentType == null)
             {
@@ -71,7 +76,7 @@ public class DownloadService(
             };
         }
 
-        return contentType!;
+        return contentType;
     }
 
     public async Task<string> DownloadChapter(int userId, Chapter chapter, DownloadFormat format, CancellationToken cancellationToken)

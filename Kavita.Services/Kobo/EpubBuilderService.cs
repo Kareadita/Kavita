@@ -41,28 +41,17 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         AddMetadata(publication, chapterDto);
 
         publication.AddStylesheet("style", "EPUB/style.css", GlobalStyles);
-        const string mediaOutput = "image/jpeg"; // This needs to be driven from the ImageRender
         var extension = options.Render.Format.GetExtension();
-        var mediaEncoding = mediaOutput; // TODO: Need to refactor GetContentTypeFromFile out of DownloadService
 
-        var cover = await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterDto.Id, ct);
-        var path = Path.Join(directoryService.CoverImageDirectory, cover);
 
-        if (chapterDto.HasCoverImage && File.Exists(path))
-        {
-            var source = new ImageSource.FromFile(path);
-            var coverImageResult = imagePipeline.Render(source, options.Render);
-
-            publication.AddResource("cover", $"EPUB/images/cover{extension}", mediaEncoding, coverImageResult.Data);
-            publication.SetCoverImage("cover");
-        }
+        await AddCoverImage(options, ct, chapterDto, publication, extension);
 
         var index = 1;
         foreach (var cachedPage in options.Pages)
         {
             ct.ThrowIfCancellationRequested();
 
-            AddPage(options, ct, cachedPage, index, extension, publication, mediaEncoding);
+            AddPage(options, ct, cachedPage, index, extension, publication);
             index++;
         }
 
@@ -85,11 +74,29 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
 
     }
 
+    private async Task AddCoverImage(BuildEpubOptions options, CancellationToken ct, ChapterDto chapterDto,
+        EpubPublication publication, string extension)
+    {
+        var cover = await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterDto.Id, ct);
+        var path = Path.Join(directoryService.CoverImageDirectory, cover);
+
+        if (chapterDto.HasCoverImage && File.Exists(path))
+        {
+            var source = new ImageSource.FromFile(path);
+            var coverImageResult = imagePipeline.Render(source, options.Render);
+            var mediaEncoding = DownloadService.GetContentTypeFromFile(path);
+
+            publication.AddResource("cover", $"EPUB/images/cover{extension}", mediaEncoding, coverImageResult.Data);
+            publication.SetCoverImage("cover");
+        }
+    }
+
     private void AddPage(BuildEpubOptions options, CancellationToken ct, string cachedPage, int index, string extension,
-        EpubPublication publication, string mediaEncoding)
+        EpubPublication publication)
     {
         var source = new ImageSource.FromFile(cachedPage);
         var image = imagePipeline.Render(source, options.Render);
+        var mediaEncoding = DownloadService.GetContentTypeFromFile(cachedPage);
 
         // We need to map from Office.IMO 1-based indexing to Kobo's indexing and handle split pages using a - (once I code that up)
         var fileName = $"page_{index:D4}";
