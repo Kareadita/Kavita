@@ -7,15 +7,12 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Kobo;
-using Kavita.Common;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Entities.Person;
 using Kavita.Models.Images;
 using Nager.ArticleNumber;
 using OfficeIMO.Epub;
-using QuickEPUB;
 
 namespace Kavita.Services.Kobo;
 
@@ -52,7 +49,7 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         if (chapterDto.HasCoverImage && File.Exists(path))
         {
             var source = new ImageSource.FromFile(path);
-            var coverBytes = imagePipeline.Render(source, new ImageRender(EncodeFormat.JPEG, []));
+            var coverBytes = imagePipeline.Render(source, options.Render);
 
             publication.AddResource("cover", "EPUB/images/cover.jpeg", mediaOutput, coverBytes.Data);
             publication.SetCoverImage("cover");
@@ -64,7 +61,7 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
             ct.ThrowIfCancellationRequested();
 
             var source = new ImageSource.FromFile(cachedPage);
-            var image = imagePipeline.Render(source, new ImageRender(EncodeFormat.JPEG, []));
+            var image = imagePipeline.Render(source, options.Render);
 
             // We need to map from Office.IMO 1-based indexing to Kobo's indexing and handle split pages using a - (once I code that up)
             var fileName = $"page_{index:D4}";

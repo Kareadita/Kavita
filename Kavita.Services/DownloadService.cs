@@ -13,6 +13,8 @@ using Kavita.Common;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Images;
+using Kavita.Models.Kobo;
+using Kavita.Services.Images.ImageSteps;
 using Kavita.Services.Kobo;
 using Microsoft.AspNetCore.StaticFiles;
 using MimeTypes;
@@ -199,8 +201,23 @@ public class DownloadService(
         var namingCtx = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType.Value);
         var title = namingCtx.BuildChapterTitle(volumeDto, chapterDto);
 
+        var deviceProfile = new KoboDeviceProfile
+        {
+            Name = "Libra 2",
+            Width = 1264,
+            Height = 1680,
+            IsGreyscale = true
+        };
 
-        var renderSettings = new ImageRender(EncodeFormat.JPEG, []); // Note the steps will come from KoboOptimizationService
+        // Note the steps will come from KoboOptimizationService
+        List<IImageStep> steps = [new FitToStep(deviceProfile.Width, deviceProfile.Height)];
+        if (deviceProfile.IsGreyscale)
+        {
+            steps.Add(new GreyscaleStep());
+        }
+
+
+        var renderSettings = new ImageRender(EncodeFormat.JPEG, steps, 90);
         var options = new BuildEpubOptions(title, cacheService.GetCachedPages(chapterId).ToList(), renderSettings, ReadingDirection.LeftToRight,
             chapterDto, outputPath);
 
