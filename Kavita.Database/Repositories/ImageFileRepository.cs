@@ -15,6 +15,8 @@ namespace Kavita.Database.Repositories;
 
 public class ImageFileRepository(DataContext context) : IImageFileRepository
 {
+    private const int HolderLookupBatchSize = 1000;
+
     public void Add(ImageFile file)
     {
         context.ImageFile.Add(file);
@@ -112,20 +114,32 @@ public class ImageFileRepository(DataContext context) : IImageFileRepository
         return query.Where(f => f.Format != format);
     }
 
-    public async Task<IList<IHasCoverImageFile>> GetAllHoldersAsync(IList<int> imageFileIds, CancellationToken ct = default)
+    public async Task<IList<ImageFileHolder>> GetAllHoldersAsync(IList<int> imageFileIds, CancellationToken ct = default)
     {
-        // TODO: See if running in parallel can speed this up
-        var holders = new List<IHasCoverImageFile>();
-        holders.AddRange(await context.Chapter.Where(e => imageFileIds.Contains(e.CoverImageFileId!.Value)).ToListAsync(ct));
-        holders.AddRange(await context.Volume.Where(e => imageFileIds.Contains(e.CoverImageFileId!.Value)).ToListAsync(ct));
-        holders.AddRange(await context.Series.Where(e => imageFileIds.Contains(e.CoverImageFileId!.Value)).ToListAsync(ct));
-        holders.AddRange(await context.Library.Where(e => imageFileIds.Contains(e.CoverImageFileId!.Value)).ToListAsync(ct));
-        holders.AddRange(await context.Person.Where(e => imageFileIds.Contains(e.CoverImageFileId!.Value)).ToListAsync(ct));
-        holders.AddRange(await context.ReadingList.Where(e => imageFileIds.Contains(e.CoverImageFileId!.Value)).ToListAsync(ct));
-        holders.AddRange(await context.Users.Where(e => imageFileIds.Contains(e.CoverImageFileId!.Value)).ToListAsync(ct));
-        holders.AddRange(await context.AppUserCollection.Where(e => imageFileIds.Contains(e.CoverImageFileId!.Value)).ToListAsync(ct));
+        var holders = new List<ImageFileHolder>();
+        foreach (var ids in imageFileIds.Distinct().Chunk(HolderLookupBatchSize))
+        {
+            holders.AddRange(await GetHoldersOfAsync(context.Chapter, ids, ct));
+            holders.AddRange(await GetHoldersOfAsync(context.Volume, ids, ct));
+            holders.AddRange(await GetHoldersOfAsync(context.Series, ids, ct));
+            holders.AddRange(await GetHoldersOfAsync(context.Library, ids, ct));
+            holders.AddRange(await GetHoldersOfAsync(context.Person, ids, ct));
+            holders.AddRange(await GetHoldersOfAsync(context.ReadingList, ids, ct));
+            holders.AddRange(await GetHoldersOfAsync(context.Users, ids, ct));
+            holders.AddRange(await GetHoldersOfAsync(context.AppUserCollection, ids, ct));
+        }
 
         return holders;
+    }
+
+    private static async Task<List<ImageFileHolder>> GetHoldersOfAsync<T>(IQueryable<T> source, IList<int> imageFileIds,
+        CancellationToken ct) where T : class, IHasCoverImageFile
+    {
+        var holder = typeof(T).Name;
+        return await source
+            .Where(e => e.CoverImageFileId != null && imageFileIds.Contains(e.CoverImageFileId.Value))
+            .Select(e => new ImageFileHolder(e.CoverImageFileId!.Value, holder, e.Id))
+            .ToListAsync(ct);
     }
 
     #region Migration Only

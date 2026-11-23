@@ -1103,7 +1103,7 @@ public class OpdsService(
 
         var file = chapter.Files.First();
         // We know chapters can only contain files from the same format so this is fine
-        var fileType = downloadService.GetContentTypeFromFile(file.FilePath);
+        var fileType = DownloadService.GetContentTypeFromFile(file.FilePath);
         // This isn't really file, as it is wrong. But the filename isn't truly used by the api, see OpdsController.DownloadFile
         // So it's good enough
         var filename = Uri.EscapeDataString(Path.GetFileName(file.FilePath));
@@ -1204,7 +1204,7 @@ public class OpdsService(
 
         var file = chapter.Files.First();
         // We know chapters can only contain files from the same format so this is fine
-        var fileType = downloadService.GetContentTypeFromFile(file.FilePath);
+        var fileType = DownloadService.GetContentTypeFromFile(file.FilePath);
         // This isn't really file, as it is wrong. But the filename isn't truly used by the api, see OpdsController.DownloadFile
         // So it's good enough
         var filename = Uri.EscapeDataString(Path.GetFileName(file.FilePath));

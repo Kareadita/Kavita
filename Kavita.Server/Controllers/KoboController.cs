@@ -18,6 +18,7 @@ using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.User;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
+using Kavita.Services;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers.Kobo;
 using Microsoft.AspNetCore.Authorization;
@@ -247,7 +248,7 @@ public class KoboController(
         var downloadFormat = convert ? DownloadFormat.Kepub : DownloadFormat.Epub;
         var path = await downloadService.DownloadChapter(UserId, chapter, downloadFormat, ct);
 
-        return PhysicalFile(path, downloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
+        return PhysicalFile(path, DownloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
     }
 
     /// <summary>

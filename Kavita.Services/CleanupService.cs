@@ -43,6 +43,7 @@ public class CleanupService(
     : ICleanupService
 {
     private const int ImageBatchSize = 500;
+    private const int MaxSkippedImagesLogged = 100;
     public const string ImageFileMigrationName = "ManualMigrateImageFileBackfillPart2";
 
     /// <summary>
@@ -753,14 +754,21 @@ public class CleanupService(
     {
         if (tally.Skipped.Count == 0) return;
 
-        var holders = (await unitOfWork.ImageFileRepository.GetAllHoldersAsync(tally.Skipped.Select(s => s.RowId).Distinct().ToList(), ct))
-            .ToLookup(h => h.CoverImageFileId!.Value);
+        var listed = tally.Skipped.Take(MaxSkippedImagesLogged).ToList();
+        var holders = (await unitOfWork.ImageFileRepository.GetAllHoldersAsync(listed.Select(s => s.RowId).ToList(), ct))
+            .ToLookup(h => h.ImageFileId);
 
-        foreach (var skipped in tally.Skipped)
+        foreach (var skipped in listed)
         {
-            var heldBy = string.Join(", ", holders[skipped.RowId].Select(h => $"{h.GetType().Name} {h.Id}"));
+            var heldBy = string.Join(", ", holders[skipped.RowId].Select(h => $"{h.Holder} {h.HolderId}"));
             logger.LogInformation("[CleanupService] {Reason} image: {File} ({Kind}, {HeldBy})",
                 skipped.Unreadable ? "Unreadable" : "Missing", skipped.Path, skipped.Kind, heldBy);
+        }
+
+        if (tally.Skipped.Count > listed.Count)
+        {
+            logger.LogInformation("[CleanupService] {Count} more missing or unreadable images not listed",
+                tally.Skipped.Count - listed.Count);
         }
     }
 

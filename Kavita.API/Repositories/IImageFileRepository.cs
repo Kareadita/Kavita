@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Images;
 
 namespace Kavita.API.Repositories;
@@ -50,9 +49,9 @@ public interface IImageFileRepository
     /// <inheritdoc cref="GetImageFilesForReencodeAsync"/>
     Task<int> CountImageFilesForReencodeAsync(ImageKind kind, EncodeFormat format, ImageBox? box, CancellationToken ct = default);
     /// <summary>
-    /// Tracked entities of every kind whose cover is one of <paramref name="imageFileIds"/>
+    /// Entities of every kind whose cover is one of <paramref name="imageFileIds"/>
     /// </summary>
-    Task<IList<IHasCoverImageFile>> GetAllHoldersAsync(IList<int> imageFileIds, CancellationToken ct = default);
+    Task<IList<ImageFileHolder>> GetAllHoldersAsync(IList<int> imageFileIds, CancellationToken ct = default);
 
     #region Migration Only
 
