@@ -625,6 +625,71 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
     }
 
     [Fact]
+    public async Task GetChangesSyncAsync_OnDeckTag()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var library = await ctx.Library.FirstAsync();
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
+                    .WithTitle("Spice and Wolf")
+                    .WithPages(10)
+                    .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
+                    .WithTitle("Spice and Wolf")
+                    .Build())
+                .Build())
+            .Build();
+
+        var user = new AppUserBuilder("Amelia", "amelia@localhost")
+            .WithLibrary(library)
+            .WithRole(PolicyConstants.AdminRole)
+            .Build();
+
+        ctx.Series.Add(series);
+        ctx.AppUser.Add(user);
+
+        await ctx.SaveChangesAsync();
+
+        var syncPreferences = new AppUserKoboSyncPreferences {LibrarySyncEnabled = true, CreateOnDeckCollection = true};
+
+        var syncPoint = new KoboSyncPoint();
+        var syncItems = new List<KoboSyncItem>();
+
+        // Process items added
+        await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+
+        ctx.AppUserProgresses.Add(new AppUserProgress
+        {
+            PagesRead = 1,
+            VolumeId = series.Volumes.First().Id,
+            SeriesId = series.Id,
+            LibraryId = 1,
+            ChapterId = series.Volumes.First().Chapters.First().Id,
+            AppUserId = user.Id,
+        });
+
+        await ctx.SaveChangesAsync();
+
+        (syncItems, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Contains(syncItems, c => c.NewTag?.Tag.Id == "col:on-deck");
+
+        await ctx.AppUserProgresses.ExecuteDeleteAsync();
+
+        (syncItems, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Contains(syncItems, c => c.DeletedTag?.Tag.Id == "col:on-deck");
+
+        (syncItems, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Empty(syncItems);
+    }
+
+    [Fact]
     public async Task GetBookCoverAsync_ChapterCover_JpegWithinRequest()
     {
         await WithCoverChapters(async (service, covers) =>
