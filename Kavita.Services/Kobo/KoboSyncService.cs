@@ -378,7 +378,7 @@ public class KoboSyncService(
                     Id = $"col:{collection.Id.ToString()}",
                     Created = collection.CreatedUtc,
                     LastModified = collection.LastModifiedUtc,
-                    Name = collection.Title,
+                    Name = CreateTagName(collection.Title),
                     Items = collectionChapters.Select(id => new KoboTagItemDto
                     {
                         RevisionId = id.ToString(),
@@ -479,7 +479,7 @@ public class KoboSyncService(
                     Id = $"rl:{readingList.Id.ToString()}",
                     Created = readingList.CreatedUtc,
                     LastModified = readingList.LastModifiedUtc,
-                    Name = readingList.Title,
+                    Name = CreateTagName(readingList.Title),
                     Items = readingList.Items.Select(item => new KoboTagItemDto
                     {
                         RevisionId = item.ChapterId.ToString(),
@@ -583,6 +583,11 @@ public class KoboSyncService(
             .FilterByKoboSyncSettings(syncPreferences, userId)
             .Where(c => !syncPoint.RemovedChapterIds.Select(rc => rc.ChapterId).Contains(c.Id))
             .Includes(ChapterIncludes.Files);
+    }
+
+    private static string CreateTagName(string name)
+    {
+        return $"Kavita: {name}";
     }
 
     #endregion
@@ -722,12 +727,6 @@ public class KoboSyncService(
             book.Series.NumberFloat = position;
         }
     }
-
-    private static string CreateTagName(string name)
-    {
-        return $"Kavita: {name}";
-    }
-
 
     #endregion
 
