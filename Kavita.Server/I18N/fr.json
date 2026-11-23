@@ -290,5 +290,10 @@
     "email.token-invalidated.header": "Votre jeton {{Provider}} a été invalidé en raison d'échecs de rafraîchissement répétés !",
     "email.token-invalidated.description": "Kavita ne se synchronisera plus avec {{Provider}} jusqu'au renouvellement de votre connexion.",
     "email.token-invalidated.cta": "RENOUVELER",
-    "email.token-invalidated.fallback-link-label": "Si le bouton ci-dessus ne fonctionne pas, veuillez trouver le lien ici :"
+    "email.token-invalidated.fallback-link-label": "Si le bouton ci-dessus ne fonctionne pas, veuillez trouver le lien ici :",
+    "download-over-size-limit": "Le fichier correspondant à cette URL fait plus de 30Mio",
+    "cbl-repo-path-not-found": "{0} n'a pas de correspondance dans le dépôt CBL",
+    "cbl-repo-download-failed": "Impossible de télécharger {0} du dépôt CBL",
+    "github-unavailable": "Github est injoignable, merci de réessayer plus tard",
+    "kobo-sync-disabled": "Kobosync n'est pas activé sur ce serveur"
 }
