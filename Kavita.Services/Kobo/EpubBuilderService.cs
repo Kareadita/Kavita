@@ -37,6 +37,7 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
                                 .page img { display: block; width: 100%; height: 100%; }
                                 """;
     private const string XhtmlMediaType = "application/xhtml+xml";
+    private const int MaxParallelRenders = 4;
 
     public async Task<string> BuildEpubAsync(BuildEpubOptions options, CancellationToken ct = default)
     {
@@ -53,19 +54,20 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         await AddCoverImage(options, ct, chapterDto, publication, extension);
 
 
-
         var imageMediaType = DownloadService.GetContentTypeFromFile(extension);
         var tableOfContents = new List<EpubNavigationEntry>(options.Pages.Count);
 
-        var index = 1;
+        // Pre-render images in parallel to validate the time savings
         var sw = Stopwatch.StartNew();
-        foreach (var cachedPage in options.Pages)
-        {
-            tableOfContents.Add(AddPage(options, cachedPage, index, extension, imageMediaType, language, publication, ct));
-            index++;
-        }
+        var rendered = RenderPages(options, ct);
+        logger.LogDebug("Took {Time}ms to render {Count} pages", sw.ElapsedMilliseconds, rendered.Length);
 
-        logger.LogDebug("Took {Time}ms to add render/add pages", sw.ElapsedMilliseconds);
+        for (var i = 0; i < rendered.Length; i++)
+        {
+            tableOfContents.Add(AddPage(rendered[i], i + 1, extension, imageMediaType, language, publication));
+            ct.ThrowIfCancellationRequested();
+        }
+        logger.LogDebug("Took {Time}ms to add pages", sw.ElapsedMilliseconds);
 
         // Table of Content ideas:
         // 1 - 1 ToC per page
@@ -81,6 +83,24 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
 
         return options.OutputPath;
     }
+
+    private ImageRenderResult[] RenderPages(BuildEpubOptions options, CancellationToken ct)
+    {
+        var rendered = new ImageRenderResult[options.Pages.Count];
+        var parallelOptions = new ParallelOptions
+        {
+            MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount, MaxParallelRenders),
+            CancellationToken = ct,
+        };
+
+        Parallel.For(0, options.Pages.Count, parallelOptions, i =>
+        {
+            rendered[i] = imagePipeline.Render(new ImageSource.FromFile(options.Pages[i]), options.Render);
+        });
+
+        return rendered;
+    }
+
 
     private static void SetupEpub(BuildEpubOptions options, EpubPublication publication)
     {
@@ -115,13 +135,9 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
     /// <remarks>
     /// Pages are written as whole XHTML and added as plain resources
     /// </remarks>
-    private EpubNavigationEntry AddPage(BuildEpubOptions options, string cachedPage, int index, string extension,
-        string imageMediaType, string language, EpubPublication publication, CancellationToken ct)
+    private static EpubNavigationEntry AddPage(ImageRenderResult image, int index, string extension,
+        string imageMediaType, string language, EpubPublication publication)
     {
-        ct.ThrowIfCancellationRequested();
-
-        var image = imagePipeline.Render(new ImageSource.FromFile(cachedPage), options.Render);
-
         var pageId = $"page_{index:D4}";
         var imageId = $"image-{index:D4}";
         var imageFile = $"{imageId}{extension}";
@@ -136,6 +152,7 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
 
         return new EpubNavigationEntry(title, sectionPath);
     }
+
 
     private static string BuildPageXhtml(string title, string language, string imageFile, int width, int height)
     {
