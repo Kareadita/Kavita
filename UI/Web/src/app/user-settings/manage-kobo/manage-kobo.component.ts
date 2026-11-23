@@ -101,7 +101,7 @@ export class ManageKoboComponent implements OnInit {
   protected readonly managedCollectionTypeahead = signal<TypeaheadConfig<SyncSourceItem> | null>(null);
   private serverSettings: ServerSettings | undefined;
 
-  koboAuthKeyModel = signal<string>(KoboSyncName);
+  koboAuthKeyModel = signal<string>('');
   koboAuthKeyFormGroup = form(this.koboAuthKeyModel);
   koboUrlRsc = this.accountService.koboSyncUrlRsc(() => this.koboAuthKeyModel());
 
@@ -176,6 +176,12 @@ export class ManageKoboComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPreferences();
+
+    const authkey = this.accountService.currentUser()?.authKeys.find(k => k.name == KoboSyncName)
+    ?? this.accountService.currentUser()?.authKeys[0];
+    if (authkey) {
+      this.koboAuthKeyModel.set(authkey.name);
+    }
   }
 
   protected onSourceSelectionChange(source: SyncSource, items: SyncSourceItem[]) {

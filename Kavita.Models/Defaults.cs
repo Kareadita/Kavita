@@ -446,10 +446,10 @@ public static class Defaults
             new AppUserAuthKey
             {
                 Name = AuthKeyHelper.KoboKeyName,
-                Key = AuthKeyHelper.GenerateKey(32),
+                Key = AuthKeyHelper.GenerateKey(8),
                 CreatedAtUtc = DateTime.UtcNow,
                 ExpiresAtUtc = null,
-                Provider = AuthKeyProvider.System,
+                Provider = AuthKeyProvider.User,
             }
         ];
     }
