@@ -442,6 +442,14 @@ public static class Defaults
                 CreatedAtUtc = DateTime.UtcNow,
                 ExpiresAtUtc = null,
                 Provider = AuthKeyProvider.System,
+            },
+            new AppUserAuthKey
+            {
+                Name = AuthKeyHelper.KoboKeyName,
+                Key = AuthKeyHelper.GenerateKey(32),
+                CreatedAtUtc = DateTime.UtcNow,
+                ExpiresAtUtc = null,
+                Provider = AuthKeyProvider.System,
             }
         ];
     }

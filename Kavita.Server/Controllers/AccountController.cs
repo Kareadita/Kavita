@@ -32,8 +32,10 @@ using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Server.Middleware;
 using Kavita.Services;
+using Kavita.Services.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -1206,26 +1208,10 @@ public class AccountController(UserManager<AppUser> userManager,
     public async Task<ActionResult<string>> GetOpdsUrl([FromQuery] string? authKeyName = null)
     {
         var ct = HttpContext.RequestAborted;
+
         var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
 
-        var origin = HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
-        if (!string.IsNullOrEmpty(serverSettings.HostName)) origin = serverSettings.HostName;
-
-        var baseUrl = string.Empty;
-        if (!string.IsNullOrEmpty(serverSettings.BaseUrl) &&
-            !serverSettings.BaseUrl.Equals(Configuration.DefaultBaseUrl))
-        {
-            baseUrl = serverSettings.BaseUrl + "/";
-            if (baseUrl.EndsWith("//"))
-            {
-                baseUrl = baseUrl.Replace("//", "/");
-            }
-
-            if (baseUrl.StartsWith('/'))
-            {
-                baseUrl = baseUrl.Substring(1, baseUrl.Length - 1);
-            }
-        }
+        var baseUrl = Request.GetInstanceUrl(serverSettings);
 
         authKeyName ??= AuthKeyHelper.OpdsKeyName;
         var opdsAuthKey = (await unitOfWork.UserRepository.GetAuthKeysForUserId(UserId, ct))
@@ -1236,7 +1222,32 @@ public class AccountController(UserManager<AppUser> userManager,
         if (opdsAuthKey == null)
             return NotFound();
 
-        return Ok(origin + "/" + baseUrl + "api/opds/" + opdsAuthKey);
+        return Ok(baseUrl + "api/opds/" + opdsAuthKey);
+    }
+
+    /// <summary>
+    /// Returns the Kobo Sync url for this user
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("kobo-sync-url")]
+    public async Task<ActionResult<string>> GetKoboUrl([FromQuery] string? authKeyName = null)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+
+        var baseUrl = Request.GetInstanceUrl(serverSettings);
+
+        authKeyName ??= AuthKeyHelper.KoboKeyName;
+        var authKey = (await unitOfWork.UserRepository.GetAuthKeysForUserId(UserId, ct))
+            .Where(k => k.Name == authKeyName)
+            .Select(k => k.Key)
+            .FirstOrDefault();
+
+        if (authKey == null)
+            return NotFound();
+
+        return Ok(baseUrl + "Kobo/" + authKey);
     }
 
 

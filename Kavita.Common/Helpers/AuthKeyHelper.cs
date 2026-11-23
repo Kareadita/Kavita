@@ -11,8 +11,7 @@ public static class AuthKeyHelper
     public const int MaxKeyLength = 32;
     public const string OpdsKeyName = "opds";
     public const string ImageOnlyKeyName = "image-only";
-
-
+    public const string KoboKeyName = "Kobo Sync"; // User-friendly name (Registered as UserKey)
 
     public static string GenerateKey(int keyLength = 8)
     {
