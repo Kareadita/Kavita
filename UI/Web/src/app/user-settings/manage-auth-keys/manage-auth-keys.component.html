@@ -25,7 +25,13 @@
       <label class="form-label d-none d-md-block">&nbsp;</label>
       <select class="form-select" [formField]="opdsAuthKeyForm">
         @for (authKey of authKeys(); track authKey.id) {
-          <option [value]="authKey.name">{{authKey.name}}</option>
+          <option [value]="authKey.name">
+            @if (authKey.provider === AuthKeyProvider.System) {
+              {{ t(authKey.name) }}
+            } @else {
+              {{ authKey.name }}
+            }
+          </option>
         }
       </select>
     </div>
