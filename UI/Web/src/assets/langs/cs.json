@@ -219,7 +219,7 @@
     },
     "change-email": {
         "email-title": "Email",
-        "email-label": "{{common.Nový email}}",
+        "email-label": "Nový e-mail",
         "current-password-label": "Aktuální heslo",
         "email-not-confirmed": "Tento e-mail není potvrzen",
         "email-confirmed": "Tento e-mail je potvrzen",
@@ -381,8 +381,8 @@
         "contains": "Obsahuje",
         "doujinshi": "Dódžinši",
         "other": "Jiný",
-        "prequel": "Prequel",
-        "sequel": "Sequel",
+        "prequel": "Předchůdce",
+        "sequel": "Pokračování",
         "side-story": "Vedlejší příběh",
         "spin-off": "Spin-off",
         "parent": "Rodič",
@@ -486,7 +486,7 @@
         "setup-user-description": "Účet pro svého uživatele můžete nastavit pomocí následujícího odkazu nebo pomocí tlačítka Kopírovat. Před použitím odkazu pro registraci nového uživatele se možná budete muset odhlásit.",
         "setup-user-account": "Nastavení uživatelského účtu",
         "setup-user-account-tooltip": "Zkopírujte toto a vložte na novou kartu. Možná se budete muset odhlásit.",
-        "invite-url-label": "Adresa URL pozvánky",
+        "invite-url-label": "URL pozvánky",
         "invite": "Pozvat",
         "inviting": "Pozvánka…",
         "cancel": "{{common.cancel}}",
@@ -580,7 +580,7 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Upravit informace",
-        "send-to": "Soubor odeslaný e-mailem do {{jménozařízení}}",
+        "send-to": "Soubor byl odeslán e-mailem na {{deviceName}}",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Tento svazek neobsahuje žádné kapitoly. Nelze načíst.",
         "cover-change": "Obnovení obrázku v prohlížeči může trvat až minutu. Do té doby se na některých stránkách může zobrazovat starý obrázek.",
@@ -639,7 +639,7 @@
         "critic": "{{review-card.critic}}"
     },
     "badge-expander": {
-        "more-items": "a {{počet}} více"
+        "more-items": "a dalších {{count}}"
     },
     "read-more": {
         "read-more": "Číst více",
@@ -1030,7 +1030,7 @@
         "field-required": "{{validation.field-required}}",
         "log-label": "Dny záznamů",
         "cache-size-validation": "Musíte mít k dispozici alespoň 50 MB.",
-        "max-logs-validation": "Nemůžete mít více než {{počet}} záznamů",
+        "max-logs-validation": "Nemůžete mít více než {{num}} záznamů",
         "min-backup-validation": "Musíte mít alespoň 1 zálohu",
         "backup-label": "Dny zálohování",
         "min-logs-validation": "Musíte mít alespoň 1 záznam",
@@ -1055,7 +1055,7 @@
         "system-settings-title": "Systém",
         "customization-settings-title": "Přizpůsobení",
         "restart-required": "Změna portu, základní adresy URL, velikosti mezipaměti nebo IP vyžaduje ruční restart Kavity, aby se projevily změny.",
-        "base-url-label": "Základní URL adresa",
+        "base-url-label": "Základní URL",
         "base-url-tooltip": "Tuto možnost použijte, pokud chcete hostovat Kavitu na základní url adrese, tj. yourdomain.com/kavita. Není podporováno v Dockeru při použití uživatele, který není root.",
         "logging-level-label": "Úroveň záznamů",
         "logging-level-tooltip": "Pomocí ladění můžete identifikovat problémy. Ladění může zabírat hodně místa na disku.",
@@ -1123,7 +1123,9 @@
         "debug-export-task": "Vytvořit export pro ladění",
         "debug-export-task-desc": "Vyčištěná kopie vaší databáze, protokolů a systémových informací, kterou je třeba přiložit k hlášení chyby.",
         "debug-export-task-confirm": "Tímto se vytvoří ZIP soubor obsahující vaši databázi, protokoly za posledních 5 dní a některé systémové informace (operační systém, rychlost disku, stav Kavita+) pro účely ladění týmem Kavita. Hesla, klíče API, e-mailové adresy, uživatelská jména a IP adresy jsou před zápisem nahrazeny. Cesty k souborům, názvy knihoven a sérií zůstávají beze změny, protože chyby na nich často závisí.",
-        "debug-export-task-success": "Spuštěn export ladicích dat. Jakmile bude hotový, obdržíte oznámení s výzvou ke stažení."
+        "debug-export-task-success": "Spuštěn export ladicích dat. Jakmile bude hotový, obdržíte oznámení s výzvou ke stažení.",
+        "composite-covers-label": "Seznam četby a obálky sbírek",
+        "composite-covers-tooltip": "Jak často bude Kavita aktualizovat seznam četby a obaly sbírek, kterou z těchto položek vytváří, přičemž zohlední položky přidané nebo odstraněné od posledního spuštění. Doporučuje se spustit po synchronizaci seznamu četby. Výchozí nastavení je denně v 5:00 ráno."
     },
     "manage-users": {
         "change-password-alt": "Změna hesla {{user}}",
@@ -1161,7 +1163,7 @@
         "filter-label": "{{common.filter}}",
         "name-label": "Název",
         "title": "Upravit {{collectionName}} Kolekce",
-        "source-url-title": "Zdrojová URL:",
+        "source-url-title": "URL zdroje:",
         "total-series-title": "Celkový počet sérií:",
         "last-sync-tooltip": "Kavita se denně synchronizuje s poskytovatelem předcházejícího sběru.",
         "summary-label": "Shrnutí",
@@ -1225,7 +1227,8 @@
         "remap-rules": "Pravidla pro přemapování",
         "my-activity": "Moje aktivita",
         "admin-manage-kavitaplus-activity": "Aktivita Kavita+",
-        "scrobble-settings": "Propojení"
+        "scrobble-settings": "Propojení",
+        "kobo": "Kobo Sync"
     },
     "collection-detail": {
         "item-count": "{{common.item-count}}",
@@ -2299,7 +2302,7 @@
         "reviews-tab": "Recenze",
         "recommendations-tab": "Doporučení",
         "info-tab": "Informace",
-        "scrobbling-tab": "Scrobbling",
+        "scrobbling-tab": "Scrobblování",
         "people-tab": "Lidé",
         "series-tab": "Série",
         "stats-tab": "Statistiky",
@@ -2355,7 +2358,7 @@
         "no-data": "{{common.no-data}}"
     },
     "download-indicator": {
-        "progress": "{{procentage}}% staženo",
+        "progress": "{{percentage}} % staženo",
         "completed": "Stahování dokončeno"
     },
     "default-date-pipe": {
@@ -2370,11 +2373,11 @@
         "forced-scan-queued": "Bylo zahájeno nucené skenování pro {{name}}",
         "series-added-to-reading-list": "Série přidána do seznamu četby",
         "pdf-book-mode-screen-size": "Příliš malá obrazovka pro režim Kniha",
-        "k+-delete-key": "Tím se pouze odstraní licenční klíč Kavity a zobrazí se odkaz na zakoupení.<b> Tím se vaše předplatné nezruší!</b> Chcete-li předplatné zrušit, použijte nejprve možnost Spravovat.",
+        "k+-delete-key": "Tím se pouze smaže licenční klíč Kavity a zobrazí se odkaz na nákup. <b>Tím se vaše předplatné nezruší!</b> Chcete-li předplatné zrušit, použijte nejprve možnost „Spravovat“.",
         "device-created": "Zařízení vytvořeno",
         "bulk-covers": "Obnovování obálek ve více knihovnách je náročné a může trvat dlouho. Jste si jisti, že chcete pokračovat?",
         "k+-reset-key-success": "Vaše licence byla odhlášena. Pomocí tlačítka Upravit znovu zaregistrujte svou instanci a znovu aktivujte Kavita+",
-        "entity-unread": "{{jméno}} je nyní nepřečteno",
+        "entity-unread": "{{name}} je nyní nepřečtená",
         "smart-filter-deleted": "Chytrý filtr odstraněn",
         "confirm-download-size": "{{entityType}} je {{size}}. Jste si jisti, že chcete pokračovat?",
         "collections-promoted": "Sbírky propagovány",
@@ -2508,7 +2511,13 @@
         "reading-profile-switched-series": "Použití vašich nastavení pro {{seriesName}}",
         "reading-profile-switch-failed": "Nepodařilo se načíst profil čtení pro {{seriesName}}, nastavení se neuloží",
         "confirm-delete-kobo-collection": "Opravdu chcete sbírku smazat? Slouží k synchronizaci médií s vaším zařízením Kobo. Její smazání způsobí, že se následně synchronizují všechny vaše knihovny.",
-        "confirm-delete-collections-kobo": "Opravdu chcete smazat více sbírek? Jedna z nich slouží k synchronizaci vašich médií s čtečkou Kobo. Její smazání způsobí, že se následně synchronizují všechny vaše knihovny."
+        "confirm-delete-collections-kobo": "Opravdu chcete smazat více sbírek? Jedna z nich slouží k synchronizaci vašich médií s čtečkou Kobo. Její smazání způsobí, že se následně synchronizují všechny vaše knihovny.",
+        "kobo-sync-point": {
+            "confirm-delete": "Opravdu chcete tento synchronizační bod smazat? Zařízení spustí novou synchronizaci při příštím připojení.",
+            "deleted": "Synchronizační bod byl odstraněn",
+            "restored": "Obnovené kapitoly",
+            "copied": "ID zařízení bylo zkopírováno do schránky"
+        }
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",
@@ -2935,7 +2944,7 @@
         "colorist": "Vybarvil {{value}}",
         "publisher": "Vydáno {{value}}",
         "writer": "Napsal {{value}}",
-        "penciller": "Nakreslil tužkou {{hodnota}}"
+        "penciller": "Náčrt: {{value}}"
     },
     "generic-filter-field-pipe": {
         "person-name": "Jméno",
@@ -3315,7 +3324,8 @@
         "unknown": "Neznámé",
         "oidc": "OIDC",
         "jwt": "JWT",
-        "auth-key": "Autorizační klíč"
+        "auth-key": "Autorizační klíč",
+        "kobo": "Kobo"
     },
     "client-device-platform-pipe": {
         "unknown": "{{client-device-auth-type-pipe.unknown}}"
@@ -3580,7 +3590,7 @@
         "close": "{{common.close}}",
         "out-of-date": {
             "title": "Nezůstaňte pozadu!",
-            "subtitle": "Zdá se, že vaše instalace je více než {{počet}} verzí pozadu!",
+            "subtitle": "Zdá se, že vaše instalace je pozadu o více než {{count}} verzí!",
             "description-1": "Zvažte prosím aktualizaci, abyste používali nejnovější verzi systému Kavita.",
             "description-2": "Podívejte se na naši <a href='https://wiki.kavitareader.com/guides/updating' target='_blank' rel='noreferrer noopener'>wiki</a>, kde najdete pokyny k aktualizaci.",
             "description-3": "Pokud máte nějaký konkrétní důvod, proč jste ještě neaktualizovali, rádi bychom věděli, co vás drží na zastaralé verzi! Zastavte se na našem discordu a dejte nám vědět, co vám brání v aktualizaci."
@@ -3932,7 +3942,7 @@
     "audit-subject-title-pipe": {
         "series": "Série",
         "person": "Osoba",
-        "collection": "Kolekce",
+        "collection": "Sbírka",
         "chapter": "Kapitola",
         "global": "Globální",
         "volume": "Svazek"
@@ -3961,7 +3971,7 @@
         "remove-want-to-read": "Odstraněno ze seznamu „Chci přečíst“",
         "review-submitted": "Recenze odeslána",
         "fields-updated": "Bylo aktualizováno {{count}} polí",
-        "chapter-cover-updated": "Aktualizovaná obálka: {{kapitola}}",
+        "chapter-cover-updated": "Aktualizovaná obálka: {{chapter}}",
         "series-cover-updated": "Aktualizovaná obálka série",
         "series-match-fixed": "Série odpovídající {{matchName}}",
         "collection-synced": "{{collectionName}}: synchronizováno {{itemCount}} položek, chybí {{missingCount}} položek",
@@ -4076,7 +4086,7 @@
         "activate-email-label": "{{common.email}}",
         "activate-discordId-label": "Uživatelské jméno na Discordu",
         "activate-discordId-tooltip": "Propojte svůj účet Discord s Kavita+. Získáte tak přístup ke skrytým kanálům, díky kterým můžete pomáhat utvářet Kavitu.",
-        "discord-validation": "Toto není platné uživatelské ID na Discordu. Tvé uživatelské ID se liší od tvého uživatelského jména na Discordu.",
+        "discord-validation": "Toto není platné uživatelské ID na Discord. Tvé uživatelské ID se liší od tvého uživatelského jména na Discord.",
         "email-help": "Toto je e-mailová adresa zaregistrovaná u služby Stripe",
         "license-help": "Z bezpečnostních důvodů je uložený klíč na disku zašifrován. Pro aktualizaci jej zadejte znovu.",
         "help-label": "{{common.help}}",
@@ -4124,7 +4134,7 @@
         "metadata-sync-description": "Aktualizace podrobností o sériích",
         "series-matched-title": "Slazené série",
         "series-matched-description": "Shoda s upstreamovými poskytovateli",
-        "scrobbles-title": "Scrobblování",
+        "scrobbles-title": "Scrobbly",
         "scrobbles-description": "Změny zaslány poskytovatelům",
         "mal-stack-import-title": "Importované balíčky MAL",
         "mal-stack-import-description": "Získané balíčky",
@@ -4288,7 +4298,7 @@
         "showing-latest": "Zobrazuje posledních {{count}} událostí",
         "my-activity": "Moje aktivita",
         "admin-feed": "Správcovský kanál",
-        "read-progress-sent-label": "Čtení – {{kapitola}}",
+        "read-progress-sent-label": "Přečteno - {{chapter}}",
         "fields-updated": "Bylo aktualizováno {{count}} polí",
         "rating-updated": "Hodnocení aktualizováno",
         "add-want-to-read": "Přidáno do seznamu „Chci číst“",
@@ -4384,7 +4394,7 @@
         "not-synced": "Ještě nesynchronizováno",
         "event-generation-label": "Poslední doplňování scrobblováním",
         "event-generation-not-run": "Doplnění ještě nebylo provedeno",
-        "generate": "Vytvořit",
+        "generate": "Generovat",
         "generate-scrobble-events": "Doplnit události",
         "refresh-token-label": "Aktualizovat token",
         "connect-label": "Propojit účet",
@@ -4538,7 +4548,7 @@
         "search-series-alt": "Vyhledat série",
         "tags": "Značky",
         "reading-lists": "Seznamy četby",
-        "collections": "Kolekce"
+        "collections": "Sbírky"
     },
     "locked-field": {
         "field-locked-alt": "Pole je uzamčeno"
@@ -4568,7 +4578,8 @@
         "external-match-rate-limit": "Byl dosažen limit počtu požadavků pro Kavita+",
         "scan-series-progress": "Skenuji {{seriesName}}",
         "scan-series-done": "Naskenováno {{seriesName}}",
-        "debug-export-progress": "Export dat pro ladění sestavení"
+        "debug-export-progress": "Export dat pro ladění sestavení",
+        "convert-media-progress": "Převod médií"
     },
     "event-message-pipe": {
         "root-folders-inaccessible-label": "K složkám knihovny nelze získat přístup",
@@ -4619,7 +4630,14 @@
         "folder-watch-fallback-errors-description": "Při sledování složky {{folder}} došlo k příliš mnoha chybám, proto byla knihovna {{libraryName}} přepnuta do režimu Dotazování. Chcete-li složku sledovat znovu, použijte tlačítko „Zkusit znovu“ na kartě „Složky“ dané knihovny.",
         "folder-watch-fallback-missed-change-description": "Pozorovatel přehlédl změnu ve složce {{folder}}, takže knihovna {{libraryName}} byla přepnuta do režimu dotazování. Chcete-li ji znovu sledovat, použijte tlačítko „Zkusit znovu“ na kartě „Složky“ dané knihovny.",
         "kepubify-checked-failed-label": "Kepubify je vypnuté",
-        "kepubify-checked-failed-description": "{{path}}: {{reason}}. Knihy se do Kobo synchronizují jako prosté soubory ve formátu ePub."
+        "kepubify-checked-failed-description": "{{path}}: {{reason}}. Knihy se do Kobo synchronizují jako prosté soubory ve formátu ePub.",
+        "image-migration-summary-label": "Přenos obrázků byl dokončen",
+        "media-conversion-summary-label": "Převod médií byl dokončen",
+        "image-cleanup-summary-description": "Upravil jsem obrázky {{corrected}}, smazal jsem {{deleted}} a uložil jsem {{size}}.",
+        "image-cleanup-summary-skipped-description": "Byly upraveny obrázky {{corrected}}, odstraněny obrázky {{deleted}} a uloženy obrázky {{size}}. Obrázky {{missing}} chyběly a obrázky {{unreadable}} nebylo možné přečíst. V protokolu jsou uvedeny všechny jednotlivé položky.",
+        "bookmark-directory-moved-label": "Záložky byly přesunuty",
+        "bookmark-directory-moved-description": "Obrázky záložek z adresáře {{moved}} byly přesunuty do adresáře {{path}}.",
+        "bookmark-directory-moved-skipped-description": "Obrázky záložek {{moved}} byly přesunuty do složky {{path}}. {{skipped}} zůstal ve staré složce, protože ve složce {{path}} již existoval soubor se stejným názvem. V protokolu jsou uvedeny všechny položky."
     },
     "event-action-pipe": {
         "reconnect": "Znovu se připojit",
@@ -4648,7 +4666,8 @@
         "scan-libraries": "Skenovat všechny knihovny",
         "cleanup": "Úklid",
         "sync-cbl": "Synchronizovat seznamy čtení",
-        "backup": "Záloha"
+        "backup": "Záloha",
+        "refresh-composite-covers": "Obnovit seznam četby a obálky sbírek"
     },
     "media-issues-table": {
         "select-all-label": "{{common.select-all}}",
@@ -4745,5 +4764,59 @@
         "finish-hint": "Klikněte pro dokončení",
         "end-of-series": "Konec série",
         "end-of-reading-list": "Konec seznamu četby"
+    },
+    "manage-kobo": {
+        "kobo-sync-settings-title": "Nastavení synchronizace",
+        "kobo-sync-disabled-alert": "Správce vám deaktivoval službu Kobo Sync.",
+        "kobo-sync-no-download-role": "Kobo Sync vyžaduje roli „Stahování“. Požádejte správce o pomoc.",
+        "sync-item-limit-label": "Limit synchronizovaných položek",
+        "sync-item-limit-tooltip": "Maximální počet položek odeslaných do zařízení na jeden synchronizační požadavek. Mezi 25 a 100.",
+        "forward-to-kobo-store-label": "Přejít do obchodu Kobo",
+        "forward-to-kobo-store-tooltip": "Žádosti o knihy, které nejsou k dispozici ve vaší knihovně Kavita, přeposílejte do oficiálního obchodu Kobo. Tuto funkci deaktivujte, chcete-li zabránit zařízení v komunikaci se servery Kobo.",
+        "sync-sources-title": "Synchronizovat zdroje",
+        "sync-libraries-label": "Knihovny",
+        "sync-libraries-tooltip": "Povolit synchronizaci kapitol ve vašich knihovnách. Pokud není vybrána žádná, synchronizují se všechny",
+        "sync-libraries-selection-label": "Knihovny k synchronizaci",
+        "sync-reading-lists-label": "Seznamy četby",
+        "sync-reading-lists-tooltip": "Umožňuje synchronizovat seznamy čtení s vaším zařízením Kobo jako štítky. Pokud není vybrán žádný, synchronizují se všechny",
+        "sync-reading-lists-selection-label": "Seznamy četby k synchronizaci",
+        "sync-collections-label": "Kolekce",
+        "sync-collections-tooltip": "Umožňuje synchronizovat sbírky do vašeho zařízení Kobo jako štítky. Pokud není vybrána žádná, synchronizují se všechny",
+        "sync-collections-selection-label": "Kolekce k synchronizaci",
+        "sync-smart-filters-label": "Synchronizovat chytré filtry",
+        "sync-smart-filters-tooltip": "Již brzy. Chytré filtry zatím nelze použít jako zdroj synchronizace pro Kobo",
+        "managed-collection-label": "Spravovaná sbírka",
+        "managed-collection-tooltip": "Sbírka použitá k přidání doporučení při jejich „nákupu“ ve vašem zařízení Kobo. Je nezbytná pro fungování této funkce",
+        "kobo-devices-title": "Zařízení Kobo",
+        "kobo-devices-description": "Každému zařízení je přiřazen synchronizační bod. Spravujte smazané kapitoly nebo smažte synchronizační bod, chcete-li provést reset",
+        "device-id-label": "ID zařízení",
+        "removed-chapters-label": "Odstraněné kapitoly",
+        "view-removed-chapters-tooltip": "Zobrazit kapitoly, které byly z tohoto zařízení odstraněny",
+        "view-removed-chapters-alt": "Zobrazit odstraněné kapitoly, {{count}}",
+        "last-sync-label": "Poslední synch",
+        "delete-sync-point-alt": "Odstranit synchronizační bod pro zařízení {{device}}",
+        "no-devices-title": "Žádná zařízení Kobo",
+        "no-devices-description": "Zařízení se zde zobrazí poté, co se poprvé synchronizuje s vaším účtem.",
+        "load-error-title": "Nelze načíst nastavení Kobo",
+        "load-error-description": "Obnovte stránku a zkuste to znovu."
+    },
+    "restore-chapters-modal": {
+        "title": "Odstraněné kapitoly",
+        "description": "Tyto kapitoly byly z vašeho zařízení Kobo odstraněny a při synchronizaci se přeskočí. Vyberte kapitoly, které chcete znovu synchronizovat, a poté je obnovte",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "Pro toto zařízení nejsou k dispozici žádné kapitoly, které by bylo možné obnovit.",
+        "selected-count": "{{selected}} z {{total}} vybraných",
+        "select-all": "{{common.select-all}}",
+        "clear-selection": "Vymazat",
+        "load-error-title": "Nepodařilo se načíst podrobnosti o kapitole",
+        "load-error-description": "Zavřete dialogové okno a zkuste to znovu.",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "restore-selected": "Obnovit vybrané ({{count}})",
+        "series-label": "Název série",
+        "chapter-title-label": "Název kapitoly",
+        "removed-at-label": "Odstraněno",
+        "select-chapter-alt": "Vyberte {{title}}",
+        "unselect-chapter-alt": "Zrušit výběr {{title}}"
     }
 }
