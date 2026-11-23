@@ -779,5 +779,30 @@ public class SeriesController(
         return Ok(await unitOfWork.AnnotationRepository.GetSeriesWithAnnotations(UserId, ct));
     }
 
+    /// <summary>
+    /// Reset all external ids for the given series (Hardcover, Mangabaka, etc.)
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpPost("clear-external-ids")]
+    public async Task<ActionResult> ClearExternalIds([FromQuery] int seriesId)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Chapters ,ct);
+        if (series is null) return NotFound();
+
+        series.ResetExternalMetadataIds();
+        foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
+        {
+            chapter.ResetExternalMetadataIds();
+        }
+
+        await unitOfWork.CommitAsync(ct);
+
+        return Ok();
+    }
+
 
 }

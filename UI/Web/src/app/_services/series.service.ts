@@ -283,4 +283,8 @@ export class SeriesService {
   getMatchInfo(seriesId: number) {
     return this.httpClient.get<MatchSeriesInfo>(this.baseUrl + 'series/match-info?seriesId=' + seriesId);
   }
+
+  resetExternalIds(seriesId: number) {
+    return this.httpClient.post(this.baseUrl + 'series/clear-external-ids?seriesId=' + seriesId, {});
+  }
 }

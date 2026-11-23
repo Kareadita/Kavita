@@ -10,62 +10,73 @@
 
     @let match = matchInfo();
 
-    <div class="match-subheader d-flex align-items-center flex-wrap gap-3 pt-1">
-      <div class="match-description flex-fill">
+    <div class="match-subheader d-flex flex-column gap-3 pt-1">
+      <div class="match-description">
         <p class="mb-1">{{ t('description') }}</p>
         <p class="mb-0 text-muted small">{{ t('dont-match-hint') }}</p>
       </div>
-      <div class="in-kavita-chip d-flex flex-column flex-shrink-0 gap-2">
-        <div class="d-flex align-items-center gap-2">
-          <app-image [imageUrl]="coverImageUrl()" width="32px" height="46px" />
-          <div class="d-flex flex-column gap-0">
-            <div class="in-kavita-label text-uppercase">{{ t('in-kavita') }}</div>
-            <div class="in-kavita-name fw-bold">{{ series().name }}</div>
-            @if (peopleHint(); as hint) {
+
+      <div class="match-panels d-flex flex-column flex-md-row align-items-stretch gap-3">
+
+        <div class="in-kavita-chip d-flex flex-column flex-grow-1 gap-2 min-w-0">
+          <div class="d-flex align-items-center gap-2">
+            <app-image [imageUrl]="coverImageUrl()" width="32px" height="46px" />
+            <div class="d-flex flex-column gap-0">
+              <div class="in-kavita-label text-uppercase">{{ t('in-kavita') }}</div>
+              <div class="in-kavita-name fw-bold">{{ series().name }}</div>
+              @if (peopleHint(); as hint) {
+                <div class="in-kavita-meta text-muted small">
+                  {{hint}}
+                </div>
+              }
               <div class="in-kavita-meta text-muted small">
-                {{hint}}
+                @if (kavitaVolumeCount() > 0) {
+                  {{ t('volume-count', {num: kavitaVolumeCount()}) }}
+                }
+                @if (kavitaChapterCount() > 0) {
+                  {{ t('chapter-count', {num: kavitaChapterCount()}) }}
+                }
+                @if (kavitaSpecialCount() > 0) {
+                  {{ t('special-count', {num: kavitaSpecialCount()}) }}
+                }
+                <app-series-format [format]="series().format" [useTitle]="false" />
+                @if (match) {
+                  {{match.libraryType | libraryType}}
+                }
               </div>
-            }
-            <div class="in-kavita-meta text-muted small">
-              @if (kavitaVolumeCount() > 0) {
-                {{ t('volume-count', {num: kavitaVolumeCount()}) }}
-              }
-              @if (kavitaChapterCount() > 0) {
-                {{ t('chapter-count', {num: kavitaChapterCount()}) }}
-              }
-              @if (kavitaSpecialCount() > 0) {
-                {{ t('special-count', {num: kavitaSpecialCount()}) }}
-              }
-              <app-series-format [format]="series().format" [useTitle]="false" />
-              @if (match) {
-                {{match.libraryType | libraryType}}
-              }
             </div>
           </div>
+
+          @if (match && match.hasMatch) {
+            <div class="setting-section-break m-0"></div>
+            <div class="d-flex align-items-center justify-content-between gap-2">
+              <div class="matched-to text-muted d-flex align-items-center gap-2">
+                <span>{{t('matched-to')}}</span>
+
+                @if (match.isLegacy) {
+                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.AniList" [id]="match.aniListId" />
+                } @else {
+                  @switch (match.metadataProvider) {
+                    @case (MetadataProvider.Mangabaka) {
+                      <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.MangaBaka" [id]="match.mangaBakaId" />
+                    }
+                    @case (MetadataProvider.ComicBookRoundup) {
+                      <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Cbr" [id]="match.cbrId" />
+                    }
+                    @case (MetadataProvider.Hardcover) {
+                      <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="match.hardcoverId" [isStandAlone]="match.isStandAlone" />
+                    }
+                  }
+                }
+              </div>
+
+              <button type="button" class="btn btn-sm btn-danger flex-shrink-0" [ngbTooltip]="t('bad-match-tooltip')" (click)="resetExternalIds()">
+                {{ t('bad-match') }}
+              </button>
+            </div>
+          }
         </div>
 
-        @if (match && match.hasMatch) {
-          <div class="setting-section-break m-0"></div>
-          <div class="matched-to text-muted d-flex align-items-center gap-2">
-            <span>{{t('matched-to')}}</span>
-
-            @if (match.isLegacy) {
-              <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.AniList" [id]="match.aniListId" />
-            } @else {
-              @switch (match.metadataProvider) {
-                @case (MetadataProvider.Mangabaka) {
-                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.MangaBaka" [id]="match.mangaBakaId" />
-                }
-                @case (MetadataProvider.ComicBookRoundup) {
-                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Cbr" [id]="match.cbrId" />
-                }
-                @case (MetadataProvider.Hardcover) {
-                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="match.hardcoverId" [isStandAlone]="match.isStandAlone" />
-                }
-              }
-            }
-          </div>
-        }
       </div>
     </div>
 

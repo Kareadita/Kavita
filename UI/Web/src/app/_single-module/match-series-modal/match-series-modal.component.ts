@@ -347,6 +347,12 @@ export class MatchSeriesModalComponent implements OnInit {
     });
   }
 
+  resetExternalIds() {
+    this.seriesService.resetExternalIds(this.series().id).pipe(
+      tap(() => this.search())
+    ).subscribe();
+  }
+
   protected readonly MetadataProvider = MetadataProvider;
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly allMetadataProviders = AllMetadataProviders;
