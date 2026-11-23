@@ -5,16 +5,17 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using HtmlAgilityPack;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
+using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Annotations;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.User;
+using Kavita.Services.Extensions;
 using Kavita.Services.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -86,7 +87,7 @@ public class AnnotationService(
                 SelectedText = dto.SelectedText,
                 Comment = dto.Comment,
                 CommentHtml = dto.CommentHtml,
-                CommentPlainText = StripHtml(dto.CommentHtml),
+                CommentPlainText = HtmlHelper.ToPlainText(dto.CommentHtml),
                 ContainsSpoiler = dto.ContainsSpoiler,
                 PageNumber = dto.PageNumber,
                 SelectedSlotIndex = dto.SelectedSlotIndex,
@@ -126,7 +127,7 @@ public class AnnotationService(
             annotation.SelectedSlotIndex = dto.SelectedSlotIndex;
             annotation.Comment = dto.Comment;
             annotation.CommentHtml = dto.CommentHtml;
-            annotation.CommentPlainText = StripHtml(dto.CommentHtml);
+            annotation.CommentPlainText = HtmlHelper.ToPlainText(dto.CommentHtml);
 
             unitOfWork.AnnotationRepository.Update(annotation);
 
@@ -244,27 +245,6 @@ public class AnnotationService(
         {
             logger.LogError(ex, "Failed to export annotations for user {UserId}", userId);
             throw new KavitaException("annotation-export-failed");
-        }
-    }
-
-    internal string StripHtml(string? html)
-    {
-        if (string.IsNullOrEmpty(html))
-        {
-            return string.Empty;
-        }
-
-        try
-        {
-            var document = new HtmlDocument();
-            document.LoadHtml(html);
-
-            return document.DocumentNode.InnerText.Replace("&nbsp;", " ");
-        }
-        catch (Exception exception)
-        {
-            logger.LogError(exception, "Invalid html, cannot parse plain text");
-            return string.Empty;
         }
     }
 }

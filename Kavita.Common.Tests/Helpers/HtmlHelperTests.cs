@@ -131,4 +131,60 @@ public class HtmlHelperTests
     }
 
     #endregion
+
+    #region ToPlainText Tests
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("<p></p>")]
+    [InlineData("<div><br/></div>")]
+    [InlineData("<script>alert(1)</script>")]
+    public void ToPlainText_NoText_ReturnsEmpty(string? html)
+    {
+        Assert.Equal(string.Empty, HtmlHelper.ToPlainText(html));
+    }
+
+    [Theory]
+    [InlineData("Plain text", "Plain text")]
+    [InlineData("<p>First.</p><p>Second.</p>", "First. Second.")]
+    [InlineData("<h1>Title</h1>Body", "Title Body")]
+    [InlineData("Line one<br>Line two", "Line one Line two")]
+    [InlineData("<ul><li>One</li><li>Two</li></ul>", "One Two")]
+    [InlineData("<table><tr><td>A</td><td>B</td></tr></table>", "A B")]
+    public void ToPlainText_BlockElements_SeparateWords(string html, string expected)
+    {
+        Assert.Equal(expected, HtmlHelper.ToPlainText(html));
+    }
+
+    [Theory]
+    [InlineData("<b>Tom</b>'s", "Tom's")]
+    [InlineData("Spi<i>ce</i> and <em>Wolf</em>", "Spice and Wolf")]
+    [InlineData("<p><span>Holo</span>, <a href=\"#\">the wise</a> wolf</p>", "Holo, the wise wolf")]
+    public void ToPlainText_InlineElements_KeepWordsTogether(string html, string expected)
+    {
+        Assert.Equal(expected, HtmlHelper.ToPlainText(html));
+    }
+
+    [Theory]
+    [InlineData("Tom &amp; Jerry", "Tom & Jerry")]
+    [InlineData("5 &lt; 6", "5 < 6")]
+    [InlineData("a&nbsp;&nbsp;b", "a b")]
+    [InlineData("<p>\r\n    Indented\n    text\n</p>", "Indented text")]
+    public void ToPlainText_DecodesEntitiesAndCollapsesWhitespace(string html, string expected)
+    {
+        Assert.Equal(expected, HtmlHelper.ToPlainText(html));
+    }
+
+    [Theory]
+    [InlineData("<style>p{color:red}</style><p>Hi</p>", "Hi")]
+    [InlineData("<p>Hi<!-- note --></p>", "Hi")]
+    [InlineData("<p>Unclosed <b>bold", "Unclosed bold")]
+    public void ToPlainText_SkipsNonTextAndToleratesBrokenMarkup(string html, string expected)
+    {
+        Assert.Equal(expected, HtmlHelper.ToPlainText(html));
+    }
+
+    #endregion
 }

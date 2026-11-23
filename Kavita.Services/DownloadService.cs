@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Kobo;
+using Kavita.API.Services.Reading;
 using Kavita.Common;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -17,6 +18,8 @@ using Kavita.Models.Kobo;
 using Kavita.Services.Images.ImageSteps;
 using Microsoft.AspNetCore.StaticFiles;
 using MimeTypes;
+using Serilog.Core;
+
 namespace Kavita.Services;
 
 public class DownloadService(
@@ -27,7 +30,8 @@ public class DownloadService(
     IFileSystem fileSystem,
     IEntityNamingService namingService,
     IUnitOfWork unitOfWork,
-    IEpubBuilderService epubBuilderService
+    IEpubBuilderService epubBuilderService,
+    IReadingProfileService readingProfileService
     ) : IDownloadService
 {
     private static readonly FileExtensionContentTypeProvider FileTypeProvider = new();
@@ -46,18 +50,14 @@ public class DownloadService(
     /// <summary>
     /// Returns MIME type for the given path (ie application/x-cbz, image/jpeg)
     /// </summary>
-    /// <param name="filepath"></param>
+    /// <param name="filepath">Doesn't need to exist on disk</param>
     /// <returns></returns>
     public static string GetContentTypeFromFile(string filepath)
     {
         // Figures out what the content type should be based on the file name.
         if (!FileTypeProvider.TryGetContentType(filepath, out var contentType))
         {
-            if (contentType == null)
-            {
-                // Get extension
-                contentType = Path.GetExtension(filepath);
-            }
+            contentType ??= Path.GetExtension(filepath);
 
             contentType = Path.GetExtension(filepath).ToLowerInvariant() switch
             {
@@ -174,13 +174,11 @@ public class DownloadService(
     /// <exception cref="KavitaException"></exception>
     private async Task<string> ConvertImagesToEpub(int userId, int chapterId, CancellationToken ct)
     {
-        // TODO: Validate this wont fail if we have a file named "book.kepub.2008.kepub"
-
-        // BUG: If Kepubify is off, we cannot have .kepub in the target filename as it will open the file in a different reader
-        var outputPath = kepubifyConverterService.BuildKepubifyPath(chapterId).Replace(".kepub", string.Empty);
+        var outputPath = kepubifyConverterService.BuildKepubifyPath(chapterId);
         if (fileSystem.File.Exists(outputPath))
         {
             // TODO: Bring proper caching - temp delete each file to allow testing
+
             directoryService.DeleteFileQuietly(outputPath);
         }
 
@@ -193,11 +191,15 @@ public class DownloadService(
         var libraryType = await unitOfWork.ChapterRepository.GetLibraryTypeAsync(chapter.Id, ct);
         var chapterDto = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId, ct);
         var volumeDto = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, userId, ct);
+
         if (libraryType is null || chapterDto is null || volumeDto is null)
         {
             throw new KavitaException();
         }
 
+        // TODO: make this less painful
+        var seriesDto = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(volumeDto.SeriesId, userId, ct: ct);
+        var readingProfile = await readingProfileService.GetReadingProfileDtoForSeries(userId, seriesDto!.LibraryId, volumeDto.SeriesId, null, ct: ct); // active device id lookup
 
         var namingCtx = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType.Value);
         var title = namingCtx.BuildChapterTitle(volumeDto, chapterDto);
@@ -218,9 +220,12 @@ public class DownloadService(
         }
 
 
+
+
         var renderSettings = new ImageRender(EncodeFormat.JPEG, steps, 90);
-        var options = new BuildEpubOptions(title, cacheService.GetCachedPages(chapterId).ToList(), renderSettings, ReadingDirection.LeftToRight,
+        var options = new BuildEpubOptions(title, cacheService.GetCachedPages(chapterId).ToList(), renderSettings, readingProfile.ReadingDirection,
             chapterDto, outputPath);
+
 
         return await epubBuilderService.BuildEpubAsync(options, ct);
     }

@@ -64,7 +64,7 @@ public class KepubifyConverterService(
 
     public string BuildKepubifyPath(int chapterId)
     {
-        // TODO: This needs device Id for the hashing
+        // TODO: This needs device Id and userId for the hashing (2 users, same book collide for conversion)
         using var scope = serviceScopeFactory.CreateScope();
         var directoryService = scope.ServiceProvider.GetRequiredService<IDirectoryService>();
 

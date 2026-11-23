@@ -534,8 +534,8 @@ public class KoboSyncService(
 
         return metadata.ToDictionary(m => m.Id, m =>
         {
-            // BUG: This is no longer true. Loose images get packed into an epub, so file count can likely go
-            var canKepubify = m.FileCount == 1 && kepubifyConverterService.KepubifySupported;
+            var isEpub = m.Format == MangaFormat.Epub;
+            var canKepubify = !isEpub || (m.FileCount == 1 && kepubifyConverterService.KepubifySupported); // Archives always go thru kepub and get named that way as well
 
             return m with
             {
@@ -1052,10 +1052,9 @@ public class KoboSyncService(
 
         if (chapter.Files.First().Format != MangaFormat.Epub)
         {
-            var page = fileSystem.Path.GetFileNameWithoutExtension(file).TrimPrefix("section");
-            if (int.TryParse(page, out var pageNumber))
+            if (KoboEpubHelper.TryGetPage(file, out var page))
             {
-                progress.PageNum = pageNumber - 1; // sections are 1 indexed
+                progress.PageNum = page;
                 progress.BookScrollId = null;
                 progress.KoboSpan = null;
             }
@@ -1222,7 +1221,7 @@ public class KoboSyncService(
             return new KoboLocationDto
             {
                 Value = string.Empty,
-                Source = $"EPUB/section{progress.PagesRead + 1}.html"
+                Source = KoboEpubHelper.GetPath(progress.PagesRead)
             };
         }
 

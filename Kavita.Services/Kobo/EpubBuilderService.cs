@@ -4,14 +4,18 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Kobo;
+using Kavita.Common.Helpers;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
+using Kavita.Services.Extensions;
+using Kavita.Services.Helpers.Kobo;
 using Nager.ArticleNumber;
 using OfficeIMO.Epub;
 
@@ -40,6 +44,12 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         publication.SetRenditionLayout(EpubRenditionLayout.PrePaginated);
         AddMetadata(publication, chapterDto);
 
+        if (options.ReadingDirection == ReadingDirection.RightToLeft)
+        {
+            publication.PageProgressionDirection = "rtl";
+        }
+
+
         publication.AddStylesheet("style", "EPUB/style.css", GlobalStyles);
         var extension = options.Render.Format.GetExtension();
 
@@ -49,9 +59,7 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         var index = 1;
         foreach (var cachedPage in options.Pages)
         {
-            ct.ThrowIfCancellationRequested();
-
-            AddPage(options, ct, cachedPage, index, extension, publication);
+            AddPage(options, cachedPage, index, extension, publication, ct);
             index++;
         }
 
@@ -84,29 +92,31 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         {
             var source = new ImageSource.FromFile(path);
             var coverImageResult = imagePipeline.Render(source, options.Render);
-            var mediaEncoding = DownloadService.GetContentTypeFromFile(path);
+            var mediaEncoding = DownloadService.GetContentTypeFromFile(options.Render.Format.GetExtension());
 
             publication.AddResource("cover", $"EPUB/images/cover{extension}", mediaEncoding, coverImageResult.Data);
             publication.SetCoverImage("cover");
         }
     }
 
-    private void AddPage(BuildEpubOptions options, CancellationToken ct, string cachedPage, int index, string extension,
-        EpubPublication publication)
+    private void AddPage(BuildEpubOptions options, string cachedPage, int index, string extension,
+        EpubPublication publication, CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         var source = new ImageSource.FromFile(cachedPage);
         var image = imagePipeline.Render(source, options.Render);
-        var mediaEncoding = DownloadService.GetContentTypeFromFile(cachedPage);
+        var mediaEncoding = DownloadService.GetContentTypeFromFile(options.Render.Format.GetExtension());
 
-        // We need to map from Office.IMO 1-based indexing to Kobo's indexing and handle split pages using a - (once I code that up)
         var fileName = $"page_{index:D4}";
         var imageId = $"image-{index:D4}";
         var imageFile = $"{imageId}{extension}";
+        var sectionPath = KoboEpubHelper.GetPath(index - 1);
 
         var htmlPage = PageChapterHtml.Replace("{{fileName}}", imageFile).Replace("{{width}}", $"{image.Width}").Replace("{{height}}", $"{image.Height}");
 
 
-        publication.AddChapter(fileName, $"EPUB/{fileName}.xhtml", $"Page {index}",
+        publication.AddChapter(fileName, sectionPath, $"Page {index}",
             htmlPage, ["style"]);
         publication.AddResource(imageId, $"EPUB/images/{imageFile}", mediaEncoding, image.Data);
         publication.SetFixedLayoutPage(fileName, new EpubFixedLayoutPage(image.Width, image.Height)
@@ -128,7 +138,7 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
 
         publication.SetPublicationDetails(new EpubPublicationDetails()
         {
-            Description = chapterDto.Summary, // TODO: AnnotationService.StripHtml(chapterDto.Summary) - Need to refactor that elsewhere to avoid html encoding into summary
+            Description = HtmlHelper.ToPlainText(chapterDto.Summary),
             PublicationDate = chapterDto.ReleaseDate == DateTime.MinValue ? null : chapterDto.ReleaseDate,
             Publisher = chapterDto.Publishers.FirstOrDefault()?.Name,
         });
