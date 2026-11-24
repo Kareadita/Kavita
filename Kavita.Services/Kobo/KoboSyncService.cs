@@ -532,10 +532,13 @@ public class KoboSyncService(
             .ProjectTo<KoboBookMetadataDto>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
+        var deviceId = request.Headers[KoboHeaders.KoboDeviceId].FirstOrDefault();
+        var deviceQuery = string.IsNullOrEmpty(deviceId) ? string.Empty : $"&koboDeviceId={Uri.EscapeDataString(deviceId)}";
+
         return metadata.ToDictionary(m => m.Id, m =>
         {
             var isEpub = m.Format == MangaFormat.Epub;
-            var canKepubify = !isEpub || (m.FileCount == 1 && kepubifyConverterService.KepubifySupported); // Archives always go thru kepub and get named that way as well
+            var canKepubify = !isEpub || (m.FileCount == 1 && kepubifyConverterService.KepubifySupported); // Archives always go thru epubification and get named with .kepub for correct layout engine
 
             return m with
             {
@@ -545,7 +548,7 @@ public class KoboSyncService(
                     {
                         Format = canKepubify ? KoboFormat.Kepub : KoboFormat.Epub3,
                         Size = m.FileSize,
-                        Url = $"{instanceUrl}kobo/{authKey}/v1/library/{m.WorkId}/file/epub?convert={canKepubify}"
+                        Url = $"{instanceUrl}kobo/{authKey}/v1/library/{m.WorkId}/file/epub?convert={canKepubify}{deviceQuery}"
                     }
                 ],
             };

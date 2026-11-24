@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
+using Kavita.API.Services.Kobo;
+using Kavita.Common;
 using Kavita.Common.Extensions;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
@@ -42,7 +44,8 @@ public class KoboController(
     IKoboSyncService koboSyncService,
     IDirectoryService directoryService,
     IDownloadService downloadService,
-    IClientInfoAccessor clientInfoAccessor): BaseApiController
+    IClientInfoAccessor clientInfoAccessor,
+    IKoboOptimizationService koboOptimizationService): BaseApiController
 {
 
     private const string KoboImageHost = "https://cdn.kobo.com/book-images/";
@@ -232,23 +235,45 @@ public class KoboController(
     /// </summary>
     /// <param name="bookId"></param>
     /// <param name="convert"></param>
+    /// <param name="koboDeviceId">Kobo Device Id is injected by Kavita for Optimizations</param>
     /// <returns></returns>
     [ChapterAccess(chapterIdKey: "bookId")]
     [HttpGet("v1/library/{bookId:int}/file/epub")]
-    public async Task<ActionResult> GetBookFile(int bookId, [FromQuery] bool convert = true)
+    public async Task<ActionResult> GetBookFile(int bookId, [FromQuery] bool convert = true, [FromQuery] string? koboDeviceId = null)
     {
         var ct = HttpContext.RequestAborted;
 
-        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(bookId, ct: ct);
-        if (chapter is null)
+        if (string.IsNullOrEmpty(koboDeviceId))
         {
-            return NotFound();
+            logger.LogWarning("Chapter {ChapterId} was downloaded from a Kobo link synced before device optimization, so it uses the default device profile. Re-sync the Kobo to fix this. User: {UserName}", bookId, Username);
         }
 
+        // var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(bookId, ct: ct);
+        // if (chapter is null)
+        // {
+        //     return NotFound();
+        // }
+
         var downloadFormat = convert ? DownloadFormat.Kepub : DownloadFormat.Epub;
-        var path = await downloadService.DownloadChapter(UserId, chapter, downloadFormat, ct);
+       // var path = await downloadService.DownloadChapter(UserId, chapter, downloadFormat, ct);
+
+        var path = await koboOptimizationService.GetKoboDownloadPathAsync(UserId, bookId, convert, koboDeviceId, ct);
+        return PhysicalFile(path, DownloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
+
+
+        // try
+        // {
+        //     var path = await koboOptimizationService.GetKoboDownloadPathAsync(UserId, bookId, convert, koboDeviceId,
+        //         ct);
+        //     return PhysicalFile(path, DownloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
+        // }
+        // catch (KavitaException ex)
+        // {
+        //     // TODO: Figure out how to handle validation to return NotFound or other things?
+        // }
 
         return PhysicalFile(path, DownloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
+        // return NotFound();
     }
 
     /// <summary>

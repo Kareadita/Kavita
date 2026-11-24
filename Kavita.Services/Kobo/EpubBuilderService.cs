@@ -77,7 +77,18 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         publication.SetNavigation(tableOfContents, pageList);
 
         sw.Restart();
-        (await publication.SaveAsync(options.OutputPath, cancellationToken: ct)).ThrowIfLoss();
+
+        var contentBytes = rendered.Sum(r => (long) r.Data.Length);
+        var limit = contentBytes * 2 + 10 * 1024 * 1024;   // xhtml, nav, cover and zip overhead are small next to the images
+
+        var saveOptions = new EpubSaveOptions
+        {
+            CompressEntries = false, // JPEGs barely deflate, and it cost 5.2 secs on my 213-page volume
+            MaxOutputBytes = limit,
+            MaxExpandedBytes = limit,
+        };
+        (await publication.SaveAsync(options.OutputPath, saveOptions, ct)).ThrowIfLoss();
+
         logger.LogDebug("Took {Time}ms to write epub", sw.ElapsedMilliseconds);
 
         return options.OutputPath;
