@@ -10,6 +10,7 @@ using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common.Constants;
 using Kavita.Common.Helpers;
+using Kavita.Models.Constants;
 using Kavita.Models.Entities.Progress;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -75,6 +76,12 @@ public class AuthKeyAuthenticationHandler(
             if (user?.Id == null || string.IsNullOrEmpty(user.Username))
             {
                 return AuthenticateResult.Fail("Invalid API Key");
+            }
+
+            if (user.Roles != null && !(user.Roles.Contains(PolicyConstants.AdminRole) ||
+                                        user.Roles.Contains(PolicyConstants.LoginRole)))
+            {
+                return AuthenticateResult.Fail("User is not allowed to login");
             }
 
             var claims = new List<Claim>()
