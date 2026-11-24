@@ -728,7 +728,7 @@
         "left-to-right": "左から右へ",
         "horizontal": "水平",
         "vertical": "垂直",
-        "writing-style-label": "{{user-preferences.writing-style-label}}",
+        "writing-style-label": "{{manage-reading-profiles.writing-style-label}}",
         "writing-style-tooltip": "テキストの方向を変更します。水平は横書き、垂直は縦書きです。",
         "tap-to-paginate-label": "タップでページ移動",
         "tap-to-paginate-tooltip": "画面の端をタップしてページをめくります",
@@ -3976,7 +3976,7 @@
         "cbr-label": "コミック"
     },
     "scrobble-health": {
-        "checked-ago-label": "{{tine}} 前に確認済み",
+        "checked-ago-label": "{{time}} 前に確認済み",
         "title-label": "上流プロバイダー",
         "live-label": "ライブ",
         "refresh-alt": "プロバイダーのステータスを更新",

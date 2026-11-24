@@ -294,5 +294,6 @@
     "cbl-repo-path-not-found": "CBL リポジトリには {0} が見つかりませんでした",
     "cbl-repo-download-failed": "CBL リポジトリから {0} をダウンロードできませんでした",
     "github-unavailable": "GitHub は現在ご利用いただけません。しばらくしてからもう一度お試しください",
-    "kobo-sync-disabled": "このサーバーでは KoboSync は有効になっていません"
+    "kobo-sync-disabled": "このサーバーでは KoboSync は有効になっていません",
+    "download-over-size-limit": "この URL のファイルは 30 MB を超えています"
 }

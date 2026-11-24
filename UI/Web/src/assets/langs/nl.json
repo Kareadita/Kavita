@@ -1628,7 +1628,8 @@
         "bookmarks": "Bladwijzers",
         "collections": "Collecties",
         "all-series": "Alle reeksen",
-        "reading-lists": "Leeslijsten"
+        "reading-lists": "Leeslijsten",
+        "settings": "Instellingen"
     },
     "view-bookmark-drawer": {
         "title": "Bladwijzers",
