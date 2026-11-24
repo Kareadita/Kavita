@@ -1348,6 +1348,9 @@ public class AccountController(UserManager<AppUser> userManager,
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.AuthKeys, ct);
         if (user is null) return NotFound();
 
+        // Depends on auth key values. Run first
+        await authKeyService.InvalidateAllForUserAsync(user, ct);
+
         foreach (var authKey in user.AuthKeys)
         {
             if (authKey.ExpiresAtUtc is not null)
@@ -1356,10 +1359,8 @@ public class AccountController(UserManager<AppUser> userManager,
                 authKey.ExpiresAtUtc = DateTime.UtcNow.Add(originalDuration);
             }
 
-            authKey.Key = AuthKeyHelper.GenerateKey(authKey.Key.Length);
+            authKey.Key = AuthKeyHelper.GenerateKey(AuthKeyHelper.BoundedKeyLength(authKey.Key.Length));
         }
-
-        await authKeyService.InvalidateAllForUserAsync(user, ct);
 
         await unitOfWork.CommitAsync(ct);
 

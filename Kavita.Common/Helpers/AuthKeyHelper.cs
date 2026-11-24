@@ -24,6 +24,11 @@ public static class AuthKeyHelper
         return RandomNumberGenerator.GetString(AllowedCharacters, keyLength);
     }
 
+    public static int BoundedKeyLength(int keyLength)
+    {
+        return Math.Min(Math.Max(MinKeyLength, keyLength), MaxKeyLength);
+    }
+
     public static bool IsValidAuthKey(string key)
     {
         return (key.Length is >= MinKeyLength and <= MaxKeyLength && key.All(AllowedCharacters.Contains))
