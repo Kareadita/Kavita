@@ -10,8 +10,6 @@ your reading collection with your friends and family!
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat)](https://github.com/Kareadita/Kavita/blob/master/LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/Kareadita/Kavita/total.svg?style=flat)](https://github.com/Kareadita/Kavita/releases)
 [![Docker Pulls](https://img.shields.io/docker/pulls/jvmilazz0/kavita.svg)](https://hub.docker.com/r/jvmilazz0/kavita)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Kareadita_Kavita&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=Kareadita_Kavita)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Kareadita_Kavita&metric=security_rating)](https://sonarcloud.io/dashboard?id=Kareadita_Kavita)
 [![Backers on Open Collective](https://opencollective.com/kavita/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/kavita/sponsors/badge.svg)](#sponsors)
 <a href="https://translate.kavitareader.com">
