@@ -58,9 +58,8 @@ public class JwtBearerEventsHelper : JwtBearerEvents
             return;
         }
 
-        // Don't enforce check on old tokens
         var stampClaim = ctx.Principal?.FindFirst(TokenService.SecurityStampClaimType)?.Value;
-        if (!string.IsNullOrEmpty(stampClaim) && stampClaim != securityStamp)
+        if (stampClaim != securityStamp)
         {
             logger.LogDebug("[JwtBearer] Rejecting token: security stamp mismatch for user {UserId}", userId);
             ctx.Fail("Security stamp has changed");

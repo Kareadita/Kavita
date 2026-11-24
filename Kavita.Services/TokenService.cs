@@ -126,9 +126,8 @@ public class TokenService(
                 return null;
             }
 
-            // Don't enforce check on old tokens
             var stampClaim = principal.Claims.FirstOrDefault(q => q.Type == SecurityStampClaimType)?.Value;
-            if (!string.IsNullOrEmpty(stampClaim) && stampClaim != user.SecurityStamp)
+            if (stampClaim != user.SecurityStamp)
             {
                 logger.LogDebug("[RefreshToken] failed to validate due to security stamp mismatch");
                 return null;
