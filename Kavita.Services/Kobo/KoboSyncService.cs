@@ -678,6 +678,7 @@ public class KoboSyncService(
 
         var epubPath = chapter.Files.First().FilePath;
         var kepubPath = kepubifyConverterService.BuildKepubifyPath(chapterId);
+
         if (!fileSystem.File.Exists(kepubPath)
             && !await kepubifyConverterService.ConvertEpubToKepub(epubPath, kepubPath, cancellationToken))
         {

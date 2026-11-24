@@ -50,33 +50,28 @@ public class KoboOptimizationService(ICacheService cacheService,
             throw new KavitaException("Chapter or files don't exist");
         }
 
-        var format = chapter.Files.First().Format;
-
-        var outputPath = format switch
+        return chapter.Files.First().Format switch
         {
-            MangaFormat.Epub => CollectEpubFiles(chapter),
-            MangaFormat.Archive or MangaFormat.Image or MangaFormat.Pdf => await CollectImageFiles(userId, chapter, koboDeviceId, ct),
+            MangaFormat.Epub => await GetEpubDownloadPath(chapter, convert, ct),
+            MangaFormat.Archive or MangaFormat.Image or MangaFormat.Pdf => await GetImageDownloadPath(userId, chapter, convert, koboDeviceId, ct),
             _ => throw new NotSupportedException()
         };
-
-        // Call kepubify and return its path
-        if (convert)
-        {
-            return await ConvertToKepub(chapterId, outputPath, ct);
-        }
-
-        return outputPath;
     }
 
-    private async Task<string> CollectImageFiles(int userId, ChapterDto chapter, string? koboDeviceId,
-        CancellationToken ct = default)
+    private async Task<string> GetEpubDownloadPath(ChapterDto chapter, bool convert, CancellationToken ct)
     {
-        var cachedChapter = await cacheService.Ensure(chapter.Id, true, ct);
-        if (cachedChapter is null)
-        {
-            throw new KavitaException(await localizationService.TranslateAsync("cache-file-find"));
-        }
+        if (chapter.Files.Count > 1) throw new NotSupportedException("Kavita doesn't support multi-part epub files");
 
+        var epubPath = chapter.Files.First().FilePath;
+        if (!convert) return epubPath;
+
+        // KoboSyncService reads annotations and progress from this kepub, so it must stay on BuildKepubifyPath
+        return await ConvertToKepub(epubPath, kepubifyConverterService.BuildKepubifyPath(chapter.Id), ct);
+    }
+
+    private async Task<string> GetImageDownloadPath(int userId, ChapterDto chapter, bool convert, string? koboDeviceId,
+        CancellationToken ct)
+    {
         // TODO: make this less painful
         //var (volumeId, seriesId, libraryId) = await unitOfWork.ChapterRepository.GetParentIdsForChapter(chapter.Id, ct);
         var libraryType = await unitOfWork.ChapterRepository.GetLibraryTypeAsync(chapter.Id, ct);
@@ -89,12 +84,37 @@ public class KoboOptimizationService(ICacheService cacheService,
 
         var renderSettings = await GetRenderer(userId, koboDeviceId);
         var cacheKey = BuildCacheKey(chapter, title, readingProfile.ReadingDirection, namingCtx, renderSettings);
-        var outputPath = Path.Join(directoryService.TempDirectory, $"kavita_kobo_c{chapter.Id}_{cacheKey}.epub");
+        var basePath = Path.Join(directoryService.TempDirectory, $"kavita_kobo_c{chapter.Id}_{cacheKey}");
+        var epubPath = $"{basePath}.epub";
+        var kepubPath = $"{basePath}.kepub.epub";
 
-        var options = new BuildEpubOptions(title, cacheService.GetCachedPages(chapter.Id).ToList(), renderSettings,
-            readingProfile.ReadingDirection, chapter, outputPath);
+        if (convert && fileSystem.File.Exists(kepubPath)) return kepubPath;
 
-        return await epubBuilderService.BuildEpubAsync(options, userId, namingCtx, ct);
+        if (!fileSystem.File.Exists(epubPath))
+        {
+            if (await cacheService.Ensure(chapter.Id, true, ct) is null)
+            {
+                throw new KavitaException(await localizationService.TranslateAsync("cache-file-find"));
+            }
+
+            // Built under a temp name and moved, so a failed build never leaves a half-written epub that the Exists check would serve
+            var buildPath = $"{basePath}.{Guid.NewGuid():N}.tmp.epub";
+            var options = new BuildEpubOptions(title, cacheService.GetCachedPages(chapter.Id).ToList(), renderSettings,
+                readingProfile.ReadingDirection, chapter, buildPath);
+
+            try
+            {
+                await epubBuilderService.BuildEpubAsync(options, userId, namingCtx, ct);
+                fileSystem.File.Move(buildPath, epubPath, true);
+            }
+            catch
+            {
+                directoryService.DeleteFileQuietly(buildPath);
+                throw;
+            }
+        }
+
+        return convert ? await ConvertToKepub(epubPath, kepubPath, ct) : epubPath;
     }
 
     private Task<ImageRender> GetRenderer(int userId, string? koboDeviceId)
@@ -145,19 +165,10 @@ public class KoboOptimizationService(ICacheService cacheService,
         return hash;
     }
 
-    private static string CollectEpubFiles(ChapterDto chapter)
+    private async Task<string> ConvertToKepub(string epubPath, string kepubPath, CancellationToken ct)
     {
-        if (chapter.Files.Count > 1) throw new NotSupportedException("Kavita doesn't support multi-part epub files");
+        var converted = await kepubifyConverterService.ConvertEpubToKepub(epubPath, kepubPath, ct);
 
-        return chapter.Files.First().FilePath;
-    }
-
-    private async Task<string> ConvertToKepub(int chapterId, string pathToEpub, CancellationToken ct)
-    {
-        var outputPath = kepubifyConverterService.BuildKepubifyPath(chapterId);
-
-        var converted = await kepubifyConverterService.ConvertEpubToKepub(pathToEpub, outputPath, ct);
-
-        return converted ? outputPath : pathToEpub;
+        return converted ? kepubPath : epubPath;
     }
 }
