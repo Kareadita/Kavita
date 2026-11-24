@@ -670,9 +670,9 @@ public class KoboSyncService(
 
         if (seriesIds.Count == 0) return;
 
+        // Only load full rows for the chapters actually being synced (batch is capped by SyncItemLimit)
         var chapters = await unitOfWork.DataContext.Chapter
-            .Where(c => seriesIds.Contains(c.Volume.SeriesId))
-            .ApplyDefaultChapterOrdering()
+            .Where(c => chapterIds.Contains(c.Id))
             .Select(c => new
             {
                 c.Id,
@@ -688,6 +688,20 @@ public class KoboSyncService(
             .ToListAsync(cancellationToken);
 
         if (chapters.Count == 0) return;
+
+        var chapterPositions = await unitOfWork.DataContext.Chapter
+            .GetSeriesPositionsAsync(chapterIds, cancellationToken);
+
+        var seriesChapterCounts = await unitOfWork.DataContext.Chapter
+            .Where(c => seriesIds.Contains(c.Volume.SeriesId))
+            .GroupBy(c => c.Volume.SeriesId)
+            .ToDictionaryAsync(g => g.Key, g => g.Count(), cancellationToken);
+
+        var volumeIds = chapters.Select(c => c.VolumeId).Distinct().ToList();
+        var volumeChapterCounts = await unitOfWork.DataContext.Chapter
+            .Where(c => volumeIds.Contains(c.VolumeId))
+            .GroupBy(c => c.VolumeId)
+            .ToDictionaryAsync(g => g.Key, g => g.Count(), cancellationToken);
 
         // Create fake dtos for naming
         var chapterDtos = chapters.ToDictionary(c => c.Id, c => new ChapterDto
@@ -706,26 +720,10 @@ public class KoboSyncService(
                 Name = g.First().VolumeName,
                 MinNumber = g.First().VolumeMinNumber,
                 MaxNumber = g.First().VolumeMinNumber,
-                Chapters = [.. g.Select(c => chapterDtos[c.Id])],
+                Chapters = [.. Enumerable.Repeat(new ChapterDto(), volumeChapterCounts[g.Key])],
             });
 
         var chaptersById = chapters.ToDictionary(c => c.Id);
-        var chaptersBySeries = chapters
-            .GroupBy(c => c.SeriesId)
-            .ToDictionary(g => g.Key, g => g.ToList());
-
-        var chapterPositions = new Dictionary<int, int>();
-        var seriesPositionProgress = new Dictionary<int, int>();
-        foreach (var chapter in chapters)
-        {
-            // position defaults to 0
-            seriesPositionProgress.TryGetValue(chapter.SeriesId, out var position);
-
-            position++;
-
-            seriesPositionProgress[chapter.SeriesId] = position;
-            chapterPositions[chapter.Id] = position;
-        }
 
         var namingContexts = await LocalizedNamingContext
             .CreateAsync(entityNamingService, localizationService, userId,
@@ -737,8 +735,9 @@ public class KoboSyncService(
 
             // Null out series for single books
             if (book.LibraryType is LibraryType.Book or LibraryType.LightNovel
-                && chaptersBySeries.TryGetValue(chapter.SeriesId, out var seriesChapters)
-                && seriesChapters is [{ IsSpecial: true }])
+                && seriesChapterCounts.TryGetValue(chapter.SeriesId, out var seriesChapterCount)
+                && seriesChapterCount == 1
+                && chapter.IsSpecial)
             {
                 book.Series = null;
                 continue;
