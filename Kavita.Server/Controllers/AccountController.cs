@@ -680,11 +680,14 @@ public class AccountController(UserManager<AppUser> userManager,
             if (!roleResult.Succeeded) return BadRequest(roleResult.Errors);
 
             await authKeyService.InvalidateAllForUserAsync(user, ct);
+
+            // Force token revoke when admin role is removed
+            if (existingRoles.Contains(PolicyConstants.AdminRole) && !dto.Roles.Contains(PolicyConstants.AdminRole))
+            {
+                logger.LogDebug("Updating security stamp for {UserId}", user.Id);
+                await userManager.UpdateSecurityStampAsync(user);
+            }
         }
-
-        // We might want to check if they had admin and no longer, if so:
-        // await _userManager.UpdateSecurityStampAsync(user); to force them to re-authenticate
-
 
         var allLibraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync(ct: ct)).ToList();
         List<Library> libraries;
