@@ -25,13 +25,7 @@ namespace Kavita.Services;
 public class DownloadService(
     ICacheService cacheService,
     ILocalizationService localizationService,
-    IDirectoryService directoryService,
-    IKepubifyConverterService kepubifyConverterService,
-    IFileSystem fileSystem,
-    IEntityNamingService namingService,
-    IUnitOfWork unitOfWork,
-    IEpubBuilderService epubBuilderService,
-    IReadingProfileService readingProfileService
+    IDirectoryService directoryService
     ) : IDownloadService
 {
     private static readonly FileExtensionContentTypeProvider FileTypeProvider = new();
@@ -79,7 +73,7 @@ public class DownloadService(
         return contentType;
     }
 
-    public async Task<string> DownloadChapter(int userId, Chapter chapter, DownloadFormat format, CancellationToken cancellationToken)
+    public async Task<string> DownloadChapter(int userId, Chapter chapter, CancellationToken cancellationToken)
     {
         if (chapter.Files is null)
         {
@@ -91,46 +85,9 @@ public class DownloadService(
             return string.Empty;
         }
 
-        return format switch
-        {
-            DownloadFormat.Default => await CollectFiles(chapter, cancellationToken),
-            DownloadFormat.Kepub => await ConvertToKepub(userId, chapter, cancellationToken),
-            DownloadFormat.Epub => await ConvertToEpub(userId, chapter, cancellationToken),
-            _ => throw new NotImplementedException($"Download format {format} not implemented")
-        };
+        return await CollectFiles(chapter, cancellationToken);
     }
 
-    private async Task<string> ConvertToEpub(int userId, Chapter chapter, CancellationToken cancellationToken)
-    {
-        var format = chapter.Files.First().Format;
-        return format switch
-        {
-            MangaFormat.Epub => await CollectFiles(chapter, cancellationToken),
-            MangaFormat.Archive or MangaFormat.Image => await ConvertImagesToEpub(userId, chapter.Id, cancellationToken),
-            _ => throw new NotSupportedException()
-        };
-    }
-
-    private async Task<string> ConvertToKepub(int userId, Chapter chapter, CancellationToken cancellationToken)
-    {
-        var format = chapter.Files.First().Format;
-        var filePath = chapter.Files.First().FilePath;
-
-        if (format is MangaFormat.Archive or MangaFormat.Image)
-        {
-            filePath = await ConvertImagesToEpub(userId, chapter.Id, cancellationToken);
-        }
-        else if (format is not MangaFormat.Epub || chapter.Files.Count != 1 )
-        {
-            throw new NotSupportedException();
-        }
-
-        var outputPath = kepubifyConverterService.BuildKepubifyPath(chapter.Id);
-
-        var converted = await kepubifyConverterService.ConvertEpubToKepub(filePath, outputPath, cancellationToken);
-
-        return converted ? outputPath : await ConvertToEpub(userId, chapter, cancellationToken);
-    }
 
     private async Task<string> CollectFiles(Chapter chapter, CancellationToken cancellationToken)
     {
@@ -162,69 +119,5 @@ public class DownloadService(
         }
 
         return outputPath;
-    }
-
-    /// <summary>
-    /// Takes loose images or unpacked archive packages them into an Epub
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="chapterId"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    /// <exception cref="KavitaException"></exception>
-    private async Task<string> ConvertImagesToEpub(int userId, int chapterId, CancellationToken ct)
-    {
-        var outputPath = kepubifyConverterService.BuildKepubifyPath(chapterId);
-        if (fileSystem.File.Exists(outputPath))
-        {
-            // TODO: Bring proper caching - temp delete each file to allow testing
-
-            directoryService.DeleteFileQuietly(outputPath);
-        }
-
-        var chapter = await cacheService.Ensure(chapterId, false, ct);
-        if (chapter is null)
-        {
-            throw new KavitaException(await localizationService.TranslateAsync("cache-file-find"));
-        }
-
-        var libraryType = await unitOfWork.ChapterRepository.GetLibraryTypeAsync(chapter.Id, ct);
-        var chapterDto = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId, ct);
-        var volumeDto = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, userId, ct);
-
-        if (libraryType is null || chapterDto is null || volumeDto is null)
-        {
-            throw new KavitaException();
-        }
-
-        // TODO: make this less painful
-        var seriesDto = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(volumeDto.SeriesId, userId, ct: ct);
-        var readingProfile = await readingProfileService.GetReadingProfileDtoForSeries(userId, seriesDto!.LibraryId, volumeDto.SeriesId, null, ct: ct); // active device id lookup
-
-        var namingCtx = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType.Value);
-        var title = namingCtx.BuildChapterTitle(volumeDto, chapterDto);
-
-        var deviceProfile = new KoboDeviceProfile
-        {
-            Name = "Libra 2",
-            Width = 1264,
-            Height = 1680,
-            IsGreyscale = true
-        };
-
-        // Note the steps will come from KoboOptimizationService
-        List<IImageStep> steps = [new FitToStep(deviceProfile.Width, deviceProfile.Height)];
-        if (deviceProfile.IsGreyscale)
-        {
-            steps.Add(new GreyscaleStep());
-        }
-
-
-        var renderSettings = new ImageRender(EncodeFormat.JPEG, steps, 90);
-        var options = new BuildEpubOptions(title, cacheService.GetCachedPages(chapterId).ToList(), renderSettings, readingProfile.ReadingDirection,
-            chapterDto, outputPath);
-
-
-        return await epubBuilderService.BuildEpubAsync(options, userId, namingCtx, ct);
     }
 }

@@ -648,7 +648,7 @@ public class OpdsController(
             return NotFound();
         }
 
-        var path = await downloadService.DownloadChapter(UserId, chapter, DownloadFormat.Default, ct);
+        var path = await downloadService.DownloadChapter(UserId, chapter, ct);
         var contentType = DownloadService.GetContentTypeFromFile(path);
         return PhysicalFile(path, contentType, Path.GetFileName(path), true);
     }

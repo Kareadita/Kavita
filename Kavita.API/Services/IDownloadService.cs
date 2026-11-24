@@ -14,5 +14,5 @@ public interface IDownloadService
     /// Prepare a chapter for download, and return the path to the file to download. This may be the unmodified library file
     /// if possible.
     /// </summary>
-    Task<string> DownloadChapter(int userId, Chapter chapter, DownloadFormat format, CancellationToken cancellationToken);
+    Task<string> DownloadChapter(int userId, Chapter chapter, CancellationToken cancellationToken);
 }

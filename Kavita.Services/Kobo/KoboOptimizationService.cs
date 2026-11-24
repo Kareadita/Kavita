@@ -45,7 +45,7 @@ public class KoboOptimizationService(ICacheService cacheService,
     public async Task<string> GetKoboDownloadPathAsync(int userId, int chapterId, bool convert, string? koboDeviceId, CancellationToken ct = default)
     {
         var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId, ct);
-        if (chapter == null || chapter.Files == null || chapter.Files.Count == 0)
+        if (chapter?.Files == null || chapter.Files.Count == 0)
         {
             throw new KavitaException("Chapter or files don't exist");
         }

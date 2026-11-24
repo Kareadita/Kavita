@@ -42,15 +42,13 @@ public class KoboController(
     ILogger<KoboController> logger,
     IUnitOfWork unitOfWork,
     IKoboSyncService koboSyncService,
-    IDirectoryService directoryService,
-    IDownloadService downloadService,
     IClientInfoAccessor clientInfoAccessor,
     IKoboOptimizationService koboOptimizationService): BaseApiController
 {
 
     private const string KoboImageHost = "https://cdn.kobo.com/book-images/";
 
-    private JsonSerializerOptions JsonSerializerOptions => KoboJsonOptions.JsonSerializerOptions;
+    private static JsonSerializerOptions JsonSerializerOptions => KoboJsonOptions.JsonSerializerOptions;
 
     #region Sync & State
 
@@ -247,15 +245,6 @@ public class KoboController(
         {
             logger.LogWarning("Chapter {ChapterId} was downloaded from a Kobo link synced before device optimization, so it uses the default device profile. Re-sync the Kobo to fix this. User: {UserName}", bookId, Username);
         }
-
-        // var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(bookId, ct: ct);
-        // if (chapter is null)
-        // {
-        //     return NotFound();
-        // }
-
-        var downloadFormat = convert ? DownloadFormat.Kepub : DownloadFormat.Epub;
-       // var path = await downloadService.DownloadChapter(UserId, chapter, downloadFormat, ct);
 
         var path = await koboOptimizationService.GetKoboDownloadPathAsync(UserId, bookId, convert, koboDeviceId, ct);
         return PhysicalFile(path, DownloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
