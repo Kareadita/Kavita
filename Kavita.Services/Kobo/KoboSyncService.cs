@@ -108,7 +108,7 @@ public class KoboSyncService(
         syncResults.AddRange(readingListsChanges);
         syncResults.AddRange(onDeckTagChanges);
 
-        var localChangesExhausted = chaptersExhausted && progressExhausted&& collectionsExhausted && readingListsExhausted && onDeckTagExhausted;
+        var localChangesExhausted = chaptersExhausted && progressExhausted && collectionsExhausted && readingListsExhausted && onDeckTagExhausted;
 
         // All exhausted = sync done
         if (localChangesExhausted)
@@ -715,15 +715,15 @@ public class KoboSyncService(
             .ToDictionary(g => g.Key, g => g.ToList());
 
         var chapterPositions = new Dictionary<int, int>();
-        var seriesPositionProgres = new Dictionary<int, int>();
+        var seriesPositionProgress = new Dictionary<int, int>();
         foreach (var chapter in chapters)
         {
             // position defaults to 0
-            seriesPositionProgres.TryGetValue(chapter.SeriesId, out var position);
+            seriesPositionProgress.TryGetValue(chapter.SeriesId, out var position);
 
             position++;
 
-            seriesPositionProgres[chapter.SeriesId] = position;
+            seriesPositionProgress[chapter.SeriesId] = position;
             chapterPositions[chapter.Id] = position;
         }
 
