@@ -30,12 +30,10 @@ using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
-using Kavita.Server.Middleware;
 using Kavita.Services;
 using Kavita.Services.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -120,7 +118,7 @@ public class AccountController(UserManager<AppUser> userManager,
     /// <returns></returns>
     [HttpPost("reset-password")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
+    public async Task<ActionResult<TokenRequestDto>> UpdatePassword(ResetPasswordDto resetPasswordDto)
     {
         var ct = HttpContext.RequestAborted;
         var user = await userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName, cancellationToken: ct);
@@ -153,13 +151,32 @@ public class AccountController(UserManager<AppUser> userManager,
             return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-password"));
         }
 
+        // UserManager.AddPasswordAsync updates the stamp so we need to revert to keep logins
+        var oldSecurityStamp = user.SecurityStamp;
+
         var errors = await accountService.ChangeUserPassword(user, resetPasswordDto.Password, ct);
         if (errors.Any())
         {
             return BadRequest(errors);
         }
 
+        if (!resetPasswordDto.LogoutOtherDevices && user.SecurityStamp != oldSecurityStamp)
+        {
+            user.SecurityStamp = oldSecurityStamp;
+            await userManager.UpdateAsync(user);
+        }
+
         logger.LogInformation("{User}'s Password has been reset", user.UserName!.Sanitize());
+
+        if (user.Id == UserId)
+        {
+            return Ok(new TokenRequestDto
+            {
+                Token = await tokenService.CreateToken(user, ct),
+                RefreshToken = await tokenService.CreateRefreshToken(user, ct)
+            });
+        }
+
         return Ok();
     }
 
@@ -1021,7 +1038,13 @@ public class AccountController(UserManager<AppUser> userManager,
             }
 
             var errors = await accountService.ChangeUserPassword(user, dto.Password, ct);
-            return errors.Any() ? BadRequest(errors) : Ok(await localizationService.TranslateAsync(user.Id, "password-updated"));
+            if (errors.Any())
+            {
+                return BadRequest(errors);
+            }
+
+            await userManager.UpdateSecurityStampAsync(user);
+            return Ok(await localizationService.TranslateAsync(user.Id, "password-updated"));
         }
         catch (Exception ex)
         {
@@ -1050,7 +1073,7 @@ public class AccountController(UserManager<AppUser> userManager,
             return Ok(await localizationService.GetAsync("en", "forgot-password-generic"));
         }
 
-        var oidcConfig = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        var oidcConfig = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).OidcConfig;
         if (user.IdentityProvider == IdentityProvider.OpenIdConnect  && oidcConfig is {Enabled: true, SyncUserSettings: true})
         {
             return BadRequest(await localizationService.TranslateAsync(user.Id, "oidc-managed"));

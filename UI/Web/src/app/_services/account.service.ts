@@ -374,8 +374,15 @@ export class AccountService {
     return this.httpClient.post<string>(this.baseUrl + 'account/confirm-password-reset', model, TextResonse);
   }
 
-  resetPassword(username: string, password: string, oldPassword: string) {
-    return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password, oldPassword}, TextResonse);
+  resetPassword(username: string, password: string, oldPassword: string, logoutOtherDevices = true) {
+    return this.httpClient.post<{token: string, refreshToken: string} | null>(
+      this.baseUrl + 'account/reset-password', {username, password, oldPassword, logoutOtherDevices});
+  }
+
+  updateTokens(tokens: {token: string, refreshToken: string}) {
+    const current = this._currentUser();
+    if (!current) return;
+    this.setCurrentUser({...current, token: tokens.token, refreshToken: tokens.refreshToken});
   }
 
   update(model: UpdateUserRequest) {

@@ -11,6 +11,7 @@ import {form, FormField, minLength, required} from "@angular/forms/signals";
 
 interface ResetPasswordForm {
   password: string;
+  logoutOtherDevices: boolean;
 }
 @Component({
   selector: 'app-reset-password-modal',
@@ -28,7 +29,8 @@ export class ResetPasswordModalComponent {
   member = input.required<Member>();
 
   private readonly resetPasswordModel = signal<ResetPasswordForm>({
-    password: ''
+    password: '',
+    logoutOtherDevices: true
   });
   resetPasswordForm = form(this.resetPasswordModel, (schemaPath) => {
     required(schemaPath.password);
@@ -37,7 +39,8 @@ export class ResetPasswordModalComponent {
 
 
   save() {
-    this.accountService.resetPassword(this.member().username, this.resetPasswordForm.password().value(),'').subscribe(() => {
+    const model = this.resetPasswordModel();
+    this.accountService.resetPassword(this.member().username, model.password, '', model.logoutOtherDevices).subscribe(() => {
       this.toastr.success(translate('toasts.password-updated'))
       this.modal.close();
     });

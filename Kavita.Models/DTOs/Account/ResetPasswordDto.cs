@@ -19,4 +19,8 @@ public sealed record ResetPasswordDto
     /// The old, existing password. If an admin is performing the change, this is not required. Otherwise, it is.
     /// </summary>
     public string OldPassword { get; init; } = default!;
+    /// <summary>
+    /// If true, invalidates old tokens
+    /// </summary>
+    public bool LogoutOtherDevices { get; init; } = true;
 }

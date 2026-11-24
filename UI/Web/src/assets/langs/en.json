@@ -477,7 +477,8 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "passwords-must-match": "Passwords must match",
-        "permission-error": "You do not have permission to change your password. Reach out to the admin of the server."
+        "permission-error": "You do not have permission to change your password. Reach out to the admin of the server.",
+        "logout-other-devices-label": "Log out other devices"
     },
 
     "change-username": {
@@ -897,7 +898,8 @@
         "error-label": "Error: ",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "logout-other-devices-label": "Force logout the user everywhere"
     },
 
     "all-series": {
