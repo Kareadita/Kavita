@@ -21,17 +21,16 @@ your reading collection with your friends and family!
 
 ## What Kavita Provides
 - Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar/rar5, 7zip, raw images) and Books (epub, pdf)
-- First class responsive readers that work great on any device (phone, tablet, desktop)
-- Customizable theming support: [Theme Repo](https://github.com/Kareadita/Themes) and [Documentation](https://wiki.kavitareader.com/guides/themes) 
+- First class responsive readers that work great on any device (phone, tablet, desktop) and many native apps
+- Tons of Customization: [Themes](https://github.com/Kareadita/Themes), Dashboard & Side nav can be configured with your own smart shelves (filters)
 - Ability to download metadata, reviews, ratings, recommendations, and more (scrobbling, smart collections, ...) (available via [Kavita+](https://wiki.kavitareader.com/kavita+))
 - Rich Metadata support with filtering, searching, and smart filters
 - Ways to group reading material: Collections, Reading Lists (CBL Import), Want to Read
 - Ability to manage users with rich Role-based management for age restrictions, abilities within the app, OIDC, etc
 - Rich web readers supporting webtoon, continuous reading mode (continue without leaving the reader), virtual pages (epub), etc
-- Ability to customize your dashboard and side nav with smart filters, custom order and visibility toggles
 - Full Localization Support ([Weblate](https://translate.kavitareader.com/))
 - Epub-based Annotation/Highlight support
-- Kobo Sync for Epub/Archives/Images with Annotation sync. Included Kepubify out of the box. [wiki](https://wiki.kavitareader.com/guides/features/kobo-sync/)
+- Kobo Sync for Epub/Archives/Images with Annotation sync. Includes Kepubify out of the box. [wiki](https://wiki.kavitareader.com/guides/features/kobo-sync/)
 
 ## Support
 [![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://discord.gg/eczRp9eeem)
