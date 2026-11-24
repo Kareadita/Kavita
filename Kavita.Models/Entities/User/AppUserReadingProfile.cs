@@ -116,6 +116,15 @@ public class AppUserReadingProfile
     /// </summary>
     public bool BookReaderTapToPaginate { get; set; } = false;
     /// <summary>
+    /// Book Reader Option: Allows swiping left/right to paginate
+    /// </summary>
+    public bool BookReaderSwipeToPaginate { get; set; } = false;
+
+    /// <summary>
+    /// Animate the page turn produced by a swipe. Off keeps the gesture but changes pages instantly.
+    /// </summary>
+    public bool BookReaderSwipeAnimation { get; set; } = true;
+    /// <summary>
     /// Book Reader Option: What direction should the next/prev page buttons go
     /// </summary>
     public ReadingDirection BookReaderReadingDirection { get; set; } = ReadingDirection.LeftToRight;

@@ -3554,6 +3554,12 @@ namespace Kavita.Database.Migrations
                     b.Property<int>("BookReaderReadingDirection")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("BookReaderSwipeAnimation")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("BookReaderSwipeToPaginate")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("BookReaderTapToPaginate")
                         .HasColumnType("INTEGER");
 

@@ -140,6 +140,13 @@ $action-bar-height: 2.375rem;
   opacity: 1;
   transition: opacity 200ms ease;
 
+  &.swipe-paginate {
+    // Horizontal drags belong to the page turn. Without this the browser pans the columns under
+    // the animation and the two motions fight over the last part of every swipe. Pinch stays
+    // allowed so zooming the page still works.
+    touch-action: pan-y pinch-zoom;
+  }
+
   &.is-loading {
     opacity: 0;
   }
