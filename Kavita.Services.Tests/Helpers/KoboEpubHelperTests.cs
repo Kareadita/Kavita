@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Kavita.Models.DTOs;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Kobo;
 using Kavita.Services.Helpers.Kobo;
 using Xunit;
@@ -58,137 +60,141 @@ public class KoboEpubHelperTests
     #region GroupPages
 
     [Fact]
-    public void GroupPages_ChapterNumbersInNames_GroupsByChapter()
+    public void GroupPages_ChapterNumbersInFileNames_GroupsByChapter()
     {
-        var pages = Pages([..Chapter("001", 5), ..Chapter("002", 4), ..Chapter("003", 6)]);
+        MangaFileDto[] files = [Chapter(1, "001", 5), Chapter(2, "002", 4), Chapter(3, "003", 6)];
 
         Assert.Equal(
         [
             new EpubTocGroup(0, 4, EpubTocGroupKind.Chapter, "1"),
             new EpubTocGroup(5, 8, EpubTocGroupKind.Chapter, "2"),
             new EpubTocGroup(9, 14, EpubTocGroupKind.Chapter, "3"),
-        ], KoboEpubHelper.GroupPages(pages));
+        ], Group(files));
     }
 
     [Fact]
-    public void GroupPages_UnparsedFirstPage_JoinsFirstChapter()
+    public void GroupPages_FilesOutOfIdOrder_FollowsIdOrder()
     {
-        var pages = Pages(["cover", ..Chapter("001", 4), ..Chapter("002", 4)]);
+        // The cache extracts each file into a folder named by its id, so pages follow id order
+        MangaFileDto[] files = [Chapter(12, "003", 6), Chapter(7, "001", 5), Chapter(9, "002", 4)];
 
         Assert.Equal(
         [
             new EpubTocGroup(0, 4, EpubTocGroupKind.Chapter, "1"),
             new EpubTocGroup(5, 8, EpubTocGroupKind.Chapter, "2"),
-        ], KoboEpubHelper.GroupPages(pages));
+            new EpubTocGroup(9, 14, EpubTocGroupKind.Chapter, "3"),
+        ], Group(files));
     }
 
     [Fact]
-    public void GroupPages_UnparsedMiddlePage_JoinsPreviousChapter()
+    public void GroupPages_UnparsedFirstFile_JoinsFirstChapter()
     {
-        var pages = Pages([..Chapter("001", 4), "credits", ..Chapter("002", 4)]);
+        MangaFileDto[] files = [File(1, "Akame ga KILL! ZERO Extras", 1), Chapter(2, "001", 4), Chapter(3, "002", 4)];
 
         Assert.Equal(
         [
             new EpubTocGroup(0, 4, EpubTocGroupKind.Chapter, "1"),
             new EpubTocGroup(5, 8, EpubTocGroupKind.Chapter, "2"),
-        ], KoboEpubHelper.GroupPages(pages));
+        ], Group(files));
+    }
+
+    [Fact]
+    public void GroupPages_UnparsedMiddleFile_JoinsPreviousChapter()
+    {
+        MangaFileDto[] files = [Chapter(1, "001", 4), File(2, "Akame ga KILL! ZERO Extras", 1), Chapter(3, "002", 4)];
+
+        Assert.Equal(
+        [
+            new EpubTocGroup(0, 4, EpubTocGroupKind.Chapter, "1"),
+            new EpubTocGroup(5, 8, EpubTocGroupKind.Chapter, "2"),
+        ], Group(files));
+    }
+
+    [Fact]
+    public void GroupPages_SameChapterAcrossFiles_OneGroup()
+    {
+        MangaFileDto[] files = [Chapter(1, "001", 4), Chapter(2, "001", 3), Chapter(3, "002", 4)];
+
+        Assert.Equal(
+        [
+            new EpubTocGroup(0, 6, EpubTocGroupKind.Chapter, "1"),
+            new EpubTocGroup(7, 10, EpubTocGroupKind.Chapter, "2"),
+        ], Group(files));
     }
 
     [Fact]
     public void GroupPages_DecimalChapter_KeptBetweenWholeChapters()
     {
-        var pages = Pages([..Chapter("010", 4), ..Chapter("010.5", 4), ..Chapter("011", 4)]);
+        MangaFileDto[] files = [Chapter(1, "010", 4), Chapter(2, "010.5", 4), Chapter(3, "011", 4)];
 
         Assert.Equal(
         [
             new EpubTocGroup(0, 3, EpubTocGroupKind.Chapter, "10"),
             new EpubTocGroup(4, 7, EpubTocGroupKind.Chapter, "10.5"),
             new EpubTocGroup(8, 11, EpubTocGroupKind.Chapter, "11"),
-        ], KoboEpubHelper.GroupPages(pages));
-    }
-
-    [Fact]
-    public void GroupPages_OneChapterOnly_FallsBackToPageRuns()
-    {
-        var pages = Pages([..Chapter("001", 45)]);
-
-        Assert.Equal(
-        [
-            new EpubTocGroup(0, 19, EpubTocGroupKind.Pages, null),
-            new EpubTocGroup(20, 39, EpubTocGroupKind.Pages, null),
-            new EpubTocGroup(40, 44, EpubTocGroupKind.Pages, null),
-        ], KoboEpubHelper.GroupPages(pages));
-    }
-
-    [Fact]
-    public void GroupPages_EveryPageParsesAsItsOwnChapter_FallsBackToPageRuns()
-    {
-        // "Page 12" parses as chapter 12, which would give one ToC entry per page
-        var pages = Pages(Enumerable.Range(1, 12).Select(p => $"Page {p}").ToArray());
-
-        Assert.Equal([new EpubTocGroup(0, 11, EpubTocGroupKind.Pages, null)], KoboEpubHelper.GroupPages(pages));
+        ], Group(files));
     }
 
     [Fact]
     public void GroupPages_ChapterNumbersGoBackwards_FallsBackToPageRuns()
     {
-        var pages = Pages([..Chapter("002", 4), ..Chapter("001", 4)]);
+        MangaFileDto[] files = [Chapter(1, "002", 4), Chapter(2, "001", 4)];
 
-        Assert.Equal([new EpubTocGroup(0, 7, EpubTocGroupKind.Pages, null)], KoboEpubHelper.GroupPages(pages));
+        Assert.Equal([new EpubTocGroup(0, 7, EpubTocGroupKind.Pages, null)], Group(files));
     }
 
     [Fact]
-    public void GroupPages_FlattenedFolders_GroupsByFolder()
+    public void GroupPages_NoChapterNumbers_FallsBackToPageRuns()
     {
-        var pages = Pages([..Folder(1, 5), ..Folder(2, 4), ..Folder(3, 3)]);
-
-        Assert.Equal(
-        [
-            new EpubTocGroup(0, 4, EpubTocGroupKind.Folder, "1"),
-            new EpubTocGroup(5, 8, EpubTocGroupKind.Folder, "2"),
-            new EpubTocGroup(9, 11, EpubTocGroupKind.Folder, "3"),
-        ], KoboEpubHelper.GroupPages(pages));
-    }
-
-    [Fact]
-    public void GroupPages_OneFolderOnly_FallsBackToPageRuns()
-    {
-        var pages = Pages([..Folder(1, 25)]);
+        MangaFileDto[] files = [File(1, "Akame ga KILL! ZERO Extras", 12), File(2, "Akame ga KILL! ZERO Bonus", 12)];
 
         Assert.Equal(
         [
             new EpubTocGroup(0, 19, EpubTocGroupKind.Pages, null),
-            new EpubTocGroup(20, 24, EpubTocGroupKind.Pages, null),
-        ], KoboEpubHelper.GroupPages(pages));
+            new EpubTocGroup(20, 23, EpubTocGroupKind.Pages, null),
+        ], Group(files));
+    }
+
+    [Fact]
+    public void GroupPages_FilePagesDisagreeWithCache_FallsBackToPageRuns()
+    {
+        // A stale MangaFile.Pages would shift every later group onto the wrong pages
+        MangaFileDto[] files = [Chapter(1, "001", 5), Chapter(2, "002", 4)];
+
+        Assert.Equal([new EpubTocGroup(0, 9, EpubTocGroupKind.Pages, null)], KoboEpubHelper.GroupPages(files, 10, LibraryType.Manga));
     }
 
     [Theory]
     [InlineData(15, new[] { 0, 14 })]
     [InlineData(40, new[] { 0, 19, 20, 39 })]
     [InlineData(45, new[] { 0, 19, 20, 39, 40, 44 })]
-    public void GroupPages_PlainPageNumbers_RunsOfTwenty(int count, int[] bounds)
+    public void GroupPages_OneFile_RunsOfTwenty(int count, int[] bounds)
     {
-        var pages = Pages(Enumerable.Range(1, count).Select(p => $"{p:D3}").ToArray());
+        MangaFileDto[] files = [Chapter(1, "001", count)];
 
         var expected = bounds.Chunk(2).Select(b => new EpubTocGroup(b[0], b[1], EpubTocGroupKind.Pages, null));
-        Assert.Equal(expected, KoboEpubHelper.GroupPages(pages));
+        Assert.Equal(expected, Group(files));
     }
 
     [Fact]
     public void GroupPages_NoPages_ReturnsEmpty()
     {
-        Assert.Empty(KoboEpubHelper.GroupPages([]));
+        Assert.Empty(KoboEpubHelper.GroupPages([], 0, LibraryType.Manga));
     }
 
-    private static List<string> Pages(string[] names) => names.Select(n => $"cache/71416/{n}.jpg").ToList();
+    private static IList<EpubTocGroup> Group(MangaFileDto[] files) =>
+        KoboEpubHelper.GroupPages(files, files.Sum(f => f.Pages), LibraryType.Manga);
 
-    private static string[] Chapter(string chapter, int count) => Enumerable.Range(0, count)
-        .Select(p => $"Akame ga KILL! ZERO - c{chapter} (v01) - p{p:D3} [Digital] [LuCaZ]")
-        .ToArray();
+    private static MangaFileDto Chapter(int id, string chapter, int pages) =>
+        File(id, $"Akame ga KILL! ZERO - c{chapter} (v01) [Digital] [LuCaZ]", pages);
 
-    private static string[] Folder(int folder, int count) => Enumerable.Range(1, count)
-        .Select(p => $"{folder:D3}_{p:D4}")
-        .ToArray();
+    private static MangaFileDto File(int id, string name, int pages) => new()
+    {
+        Id = id,
+        FilePath = $"/manga/Akame ga KILL! ZERO/{name}.cbz",
+        Pages = pages,
+        Format = MangaFormat.Archive,
+    };
 
     #endregion
 }

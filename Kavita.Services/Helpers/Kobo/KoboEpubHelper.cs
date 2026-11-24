@@ -2,7 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using Kavita.Models.DTOs;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Kobo;
+using Kavita.Services.Scanner;
 
 namespace Kavita.Services.Helpers.Kobo;
 
@@ -51,17 +55,94 @@ public static class KoboEpubHelper
     }
 
     /// <summary>
-    /// Splits a chapter's pages into table of contents groups. Tries chapter numbers in the page file names first,
-    /// then the folder index Kavita's cache flattening puts in nested page names ("002_0015"), then runs of
-    /// <paramref name="pagesPerGroup"/> pages
+    /// Splits a chapter's pages into table of contents groups, one per chapter number parsed from the chapter's file
+    /// names, else runs of <paramref name="pagesPerGroup"/> pages
     /// </summary>
-    /// <param name="pages">Page file paths in reading order</param>
+    /// <param name="files">The chapter's files, in any order</param>
+    /// <param name="pageCount">Number of pages in the chapter's cache folder</param>
+    /// <param name="libraryType">Picks the parser for the file names</param>
     /// <param name="pagesPerGroup">Size of each group when falling back to runs of pages</param>
-    public static IList<EpubTocGroup> GroupPages(IReadOnlyList<string> pages, int pagesPerGroup = 20)
+    public static IList<EpubTocGroup> GroupPages(IEnumerable<MangaFileDto> files, int pageCount, LibraryType libraryType,
+        int pagesPerGroup = 20)
     {
-        // Pages come as paths, sometimes packers use subfolders for chapters
+        if (pageCount <= 0) return [];
 
-        throw new NotImplementedException();
+        // The cache extracts each file into a folder named by its id, so pages follow id order
+        var orderedFiles = files.OrderBy(f => f.Id).ToList();
+        if (orderedFiles.Count > 1 && orderedFiles.Sum(f => f.Pages) == pageCount)
+        {
+            var chapterGroups = GroupByChapter(orderedFiles, libraryType);
+            if (chapterGroups.Count > 1) return chapterGroups;
+        }
+
+        return GroupByRuns(pageCount, pagesPerGroup);
+    }
+
+    /// <summary>
+    /// Returns empty when no file has a chapter number, or the numbers do not go up
+    /// </summary>
+    private static List<EpubTocGroup> GroupByChapter(List<MangaFileDto> files, LibraryType libraryType)
+    {
+        var numbers = GetChapterNumbers(files, libraryType);
+        if (numbers.Count == 0) return [];
+
+        var groups = new List<EpubTocGroup>();
+        var groupStart = 0;
+        var nextPage = 0;
+        for (var i = 0; i < files.Count; i++)
+        {
+            nextPage += files[i].Pages;
+
+            var isLastFileOfChapter = i == files.Count - 1 || numbers[i + 1] != numbers[i];
+            if (!isLastFileOfChapter) continue;
+
+            groups.Add(new EpubTocGroup(groupStart, nextPage - 1, EpubTocGroupKind.Chapter, numbers[i]));
+            groupStart = nextPage;
+        }
+
+        var numbersGoUp = groups.Zip(groups.Skip(1))
+            .All(pair => Parser.MinNumberFromRange(pair.Second.Number!) > Parser.MinNumberFromRange(pair.First.Number!));
+
+        return numbersGoUp ? groups : [];
+    }
+
+    /// <summary>
+    /// One chapter number per file. A file without one takes the number before it, or the first number when it leads.
+    /// Returns empty when no file has a number
+    /// </summary>
+    private static List<string> GetChapterNumbers(List<MangaFileDto> files, LibraryType libraryType)
+    {
+        var parsed = files
+            .Select(f => Parser.ParseChapter(Path.GetFileNameWithoutExtension(f.FilePath), libraryType))
+            .ToList();
+
+        var previous = parsed.FirstOrDefault(n => n != Parser.DefaultChapter);
+        if (previous == null) return [];
+
+        var numbers = new List<string>(parsed.Count);
+        foreach (var number in parsed)
+        {
+            if (number != Parser.DefaultChapter)
+            {
+                previous = number;
+            }
+
+            numbers.Add(previous);
+        }
+
+        return numbers;
+    }
+
+    private static List<EpubTocGroup> GroupByRuns(int pageCount, int pagesPerGroup)
+    {
+        var groups = new List<EpubTocGroup>();
+        for (var firstPage = 0; firstPage < pageCount; firstPage += pagesPerGroup)
+        {
+            var lastPage = Math.Min(firstPage + pagesPerGroup, pageCount) - 1;
+            groups.Add(new EpubTocGroup(firstPage, lastPage, EpubTocGroupKind.Pages, null));
+        }
+
+        return groups;
     }
 
     private static bool TryParsePositive(ReadOnlySpan<char> value, out int number)
