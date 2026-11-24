@@ -14,10 +14,10 @@ your reading collection with your friends and family!
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Kareadita_Kavita&metric=security_rating)](https://sonarcloud.io/dashboard?id=Kareadita_Kavita)
 [![Backers on Open Collective](https://opencollective.com/kavita/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/kavita/sponsors/badge.svg)](#sponsors)
-<a href="https://hosted.weblate.org/engage/kavita/">
-<img src="https://hosted.weblate.org/widgets/kavita/-/ui/svg-badge.svg" alt="Translation status" />
+<a href="https://translate.kavitareader.com">
+<img src="https://translate.kavitareader.com/widget/kavita/svg-badge.svg?capitalize=1" alt="Translation status">
 </a>
-<img src="https://img.shields.io/endpoint?url=https://stats.kavitareader.com/api/ui/shield-badge"/>
+
 </div>
 
 
@@ -31,7 +31,7 @@ your reading collection with your friends and family!
 - Ability to manage users with rich Role-based management for age restrictions, abilities within the app, OIDC, etc
 - Rich web readers supporting webtoon, continuous reading mode (continue without leaving the reader), virtual pages (epub), etc
 - Ability to customize your dashboard and side nav with smart filters, custom order and visibility toggles
-- Full Localization Support ([Weblate](https://hosted.weblate.org/engage/kavita/))
+- Full Localization Support ([Weblate](https://translate.kavitareader.com/))
 - Epub-based Annotation/Highlight support
 - Kobo Sync for Epub/Archives/Images with Annotation sync. Included Kepubify out of the box. [wiki](https://wiki.kavitareader.com/guides/features/kobo-sync/)
 
@@ -73,7 +73,7 @@ If you are interested, you can use the promo code [`FIRSTTIME`](https://buy.kavi
 **If you already contribute via OpenCollective, please reach out to majora2007 for a provisioned license.**
 
 ## Localization
-Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our localization infrastructure pro bono. If you want to see Kavita in your language, please help us localize. Drop by the discord and sign up for the `Translator` role.
+If you want to see Kavita in your language, please help us localize. Drop by the discord and sign up for the `Translator` role.
 
 <a href="https://hosted.weblate.org/engage/kavita/">
 <img src="https://hosted.weblate.org/widget/kavita/horizontal-auto.svg" alt="Translation status" />
