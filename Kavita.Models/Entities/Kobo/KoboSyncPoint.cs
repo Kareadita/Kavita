@@ -61,18 +61,6 @@ public class KoboSyncPoint
 
     public List<int> OnDeckIds { get; set; } = [];
 
-    public void Reset()
-    {
-        ChapterIndex = 0;
-        ProgressSyncedUntilIndex = 0;
-        CollectionsSyncedUntilIndex = 0;
-        ReadingListsSyncedUntilIndex = 0;
-        ChapterSyncTime = DateTime.UtcNow;
-        ProgressSyncTime = DateTime.UtcNow;
-        CollectionsSyncTime = DateTime.UtcNow;
-        ReadingListsSyncTime = DateTime.UtcNow;
-    }
-
 }
 
 public sealed class RemovedChapter

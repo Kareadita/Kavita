@@ -85,20 +85,41 @@ public class KoboSyncService(
 
         var syncResults = new List<KoboSyncItem>();
         var remaining = syncPreferences.SyncItemLimit;
+        var syncStartUtc = DateTime.UtcNow;
 
         var ageRestriction = await unitOfWork.DataContext.AppUser.GetUserAgeRestriction(userId, cancellationToken);
 
         var (chapterChanges, chaptersExhausted) = await AccumulateChapterChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
         remaining -= chapterChanges.Count;
+        if (chaptersExhausted)
+        {
+            syncPoint.ChapterIndex = 0;
+            syncPoint.ChapterSyncTime = syncStartUtc;
+        }
 
         var (progressChanges, progressExhausted) = await AccumulateProgressChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
         remaining -= progressChanges.Count;
+        if (progressExhausted)
+        {
+            syncPoint.ProgressSyncedUntilIndex = 0;
+            syncPoint.ProgressSyncTime = syncStartUtc;
+        }
 
         var (collectionChanges, collectionsExhausted) = await AccumulateCollectionsChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
         remaining -= collectionChanges.Count;
+        if (collectionsExhausted)
+        {
+            syncPoint.CollectionsSyncedUntilIndex = 0;
+            syncPoint.CollectionsSyncTime = syncStartUtc;
+        }
 
         var (readingListsChanges, readingListsExhausted) = await AccumulateReadingListChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
         remaining -= readingListsChanges.Count;
+        if (readingListsExhausted)
+        {
+            syncPoint.ReadingListsSyncedUntilIndex = 0;
+            syncPoint.ReadingListsSyncTime = syncStartUtc;
+        }
 
         var (onDeckTagChanges, onDeckTagExhausted) = await AccumulateOnDeckCollectionChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
 
@@ -109,12 +130,6 @@ public class KoboSyncService(
         syncResults.AddRange(onDeckTagChanges);
 
         var localChangesExhausted = chaptersExhausted && progressExhausted && collectionsExhausted && readingListsExhausted && onDeckTagExhausted;
-
-        // All exhausted = sync done
-        if (localChangesExhausted)
-        {
-            syncPoint.Reset();
-        }
 
         if (unitOfWork.HasChanges())
         {
@@ -511,14 +526,14 @@ public class KoboSyncService(
     {
         const string onDeckId = "col:on-deck";
 
-        if (limit <= 0) return new SyncAccumulationResult([], false);
-
         var changes = new List<KoboSyncItem>();
 
         if (!syncPreferences.CreateOnDeckCollection)
         {
             if (syncPoint.OnDeckIds.Count > 0)
             {
+                if (limit <= 0) return new SyncAccumulationResult([], false);
+
                 syncPoint.OnDeckIds.Clear();
                 changes.Add(new KoboSyncItem
                 {
@@ -546,6 +561,8 @@ public class KoboSyncService(
         {
             if (syncPoint.OnDeckIds.Count > 0)
             {
+                if (limit <= 0) return new SyncAccumulationResult([], false);
+
                 changes.Add(new KoboSyncItem
                 {
                     DeletedTag = new KoboWrappedTagDto {Tag = new KoboTagDto { Id = onDeckId, }}
@@ -556,11 +573,12 @@ public class KoboSyncService(
             return new SyncAccumulationResult(changes, true);
         }
 
-        // No new/deleted chapters
         if (syncPoint.OnDeckIds.ToHashSet().SetEquals(chapters.Select(c => c.Id)))
         {
             return new SyncAccumulationResult(changes, true);
         }
+
+        if (limit <= 0) return new SyncAccumulationResult([], false);
 
         var tag = new KoboWrappedTagDto
         {

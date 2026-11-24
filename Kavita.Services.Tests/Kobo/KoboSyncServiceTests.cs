@@ -19,6 +19,7 @@ using Kavita.Models.DTOs.Progress;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.Progress;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Images;
 using Kavita.Services.Builders;
@@ -710,6 +711,122 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
 
         (syncItems, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
         Assert.Empty(syncItems);
+    }
+
+    [Fact]
+    public async Task GetChangesSinceAsync_OnDeckReportsExhaustedWithZeroBudgetWhenNoPendingChange()
+    {
+        var (unitOfWork, ctx, mapper, user, _, list1, list2) = await SetupReadingListsAndOnDeck();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var syncPreferences = new AppUserKoboSyncPreferences
+        {
+            LibrarySyncEnabled = true,
+            ReadingListSyncEnabled = true,
+            CreateOnDeckCollection = false,
+            SyncItemLimit = 2,
+        };
+
+        var chapter = await ctx.Chapter.FirstAsync();
+        var syncPoint = new KoboSyncPoint
+        {
+            ChapterIds = [chapter.Id],
+            ChapterSyncTime = DateTime.UtcNow,
+            ProgressSyncTime = DateTime.UtcNow,
+        };
+
+        var (changes, exhausted) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+
+        Assert.Equal(2, changes.Count(c => c.NewTag != null));
+        Assert.True(exhausted);
+        Assert.Equal(0, syncPoint.ReadingListsSyncedUntilIndex);
+    }
+
+    [Fact]
+    public async Task GetChangesSinceAsync_ReadingListEditDuringOnDeckContinuationIsNotSkipped()
+    {
+        var (unitOfWork, ctx, mapper, user, _, list1, list2) = await SetupReadingListsAndOnDeck();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var syncPreferences = new AppUserKoboSyncPreferences
+        {
+            LibrarySyncEnabled = true,
+            ReadingListSyncEnabled = true,
+            CreateOnDeckCollection = true,
+            SyncItemLimit = 2,
+        };
+
+        var chapter = await ctx.Chapter.FirstAsync();
+        var syncPoint = new KoboSyncPoint
+        {
+            ChapterIds = [chapter.Id],
+            ChapterSyncTime = DateTime.UtcNow,
+            ProgressSyncTime = DateTime.UtcNow,
+        };
+
+        var (changes, exhausted) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+
+        Assert.Equal(2, changes.Count(c => c.NewTag?.Tag.Id?.StartsWith("rl:") == true));
+        Assert.False(exhausted);
+        Assert.Equal(0, syncPoint.ReadingListsSyncedUntilIndex);
+
+        list1.Title = "List 1 (edited)";
+        await ctx.SaveChangesAsync();
+
+        (changes, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Contains(changes, c => c.ChangedTag?.Tag.Id == $"rl:{list1.Id}");
+    }
+
+    private async Task<(IUnitOfWork, IDataContext, IMapper, AppUser, Series, ReadingList, ReadingList)> SetupReadingListsAndOnDeck()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+
+        var library = await ctx.Library.FirstAsync();
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
+                    .WithTitle("Spice and Wolf")
+                    .WithPages(10)
+                    .Build())
+                .Build())
+            .Build();
+
+        var user = new AppUserBuilder("Amelia", "amelia@localhost")
+            .WithLibrary(library)
+            .WithRole(PolicyConstants.AdminRole)
+            .Build();
+
+        ctx.Series.Add(series);
+        ctx.AppUser.Add(user);
+        await ctx.SaveChangesAsync();
+
+        var chapter = series.Volumes.First().Chapters.First();
+
+        ctx.AppUserProgresses.Add(new AppUserProgress
+        {
+            PagesRead = 1,
+            VolumeId = series.Volumes.First().Id,
+            SeriesId = series.Id,
+            LibraryId = 1,
+            ChapterId = chapter.Id,
+            AppUserId = user.Id,
+        });
+
+        var list1 = new ReadingListBuilder("List 1")
+            .WithAppUserId(user.Id)
+            .WithItem(new ReadingListItemBuilder(0, series.Id, series.Volumes.First().Id, chapter.Id).Build())
+            .Build();
+        var list2 = new ReadingListBuilder("List 2")
+            .WithAppUserId(user.Id)
+            .WithItem(new ReadingListItemBuilder(0, series.Id, series.Volumes.First().Id, chapter.Id).Build())
+            .Build();
+        ctx.ReadingList.Add(list1);
+        ctx.ReadingList.Add(list2);
+        await ctx.SaveChangesAsync();
+
+        return (unitOfWork, ctx, mapper, user, series, list1, list2);
     }
 
     [Fact]
