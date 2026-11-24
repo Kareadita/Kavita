@@ -156,10 +156,10 @@ export class ManageKoboComponent implements OnInit {
     toObservable(this.hostNameFormModel).pipe(
       debounceTime(150),
       distinctUntilChanged(),
-      filter(() => !!this.serverSettings),
+      filter(() => !!this.serverSettings && this.accountService.hasAdminRole()),
       map(hostname => ({
         ...this.serverSettings!,
-        hostname
+        hostName: hostname
       })),
       switchMap(settings => this.settingsService.updateServerSettings(settings)),
       tap(settings => {
@@ -167,11 +167,6 @@ export class ManageKoboComponent implements OnInit {
         this.hostNameFormModel.set(settings.hostName);
       })
     ).subscribe()
-
-    this.settingsService.getServerSettings().subscribe(settings => {
-      this.hostNameFormModel.set(settings.hostName);
-      this.serverSettings = settings;
-    });
   }
 
   ngOnInit(): void {
@@ -181,6 +176,17 @@ export class ManageKoboComponent implements OnInit {
     ?? this.accountService.currentUser()?.authKeys[0];
     if (authkey) {
       this.koboAuthKeyModel.set(authkey.name);
+    }
+
+    if (this.accountService.hasAdminRole()) {
+      this.settingsService.getServerSettings().subscribe(settings => {
+        this.hostNameFormModel.set(settings.hostName);
+        this.serverSettings = settings;
+      });
+    } else {
+      this.settingsService.getHostname().subscribe(hostname => {
+        this.hostNameFormModel.set(hostname);
+      });
     }
   }
 
