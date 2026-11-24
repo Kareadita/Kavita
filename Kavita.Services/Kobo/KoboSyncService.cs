@@ -513,7 +513,21 @@ public class KoboSyncService(
 
         if (limit <= 0) return new SyncAccumulationResult([], false);
 
-        if (!syncPreferences.CreateOnDeckCollection) return new SyncAccumulationResult([], true);
+        var changes = new List<KoboSyncItem>();
+
+        if (!syncPreferences.CreateOnDeckCollection)
+        {
+            if (syncPoint.OnDeckIds.Count > 0)
+            {
+                syncPoint.OnDeckIds.Clear();
+                changes.Add(new KoboSyncItem
+                {
+                    DeletedTag = new KoboWrappedTagDto {Tag = new KoboTagDto { Id = onDeckId, }}
+                });
+            }
+
+            return new SyncAccumulationResult(changes, true);
+        }
 
         var onDeckSeries = await unitOfWork.SeriesRepository
             .GetOnDeckAsync(userId, 0, UserParams.Infinite, cancellationToken);
@@ -527,8 +541,6 @@ public class KoboSyncService(
                 .Any(p => p.PagesRead > 0 && p.PagesRead < c.Pages))
             .Select(c => new {c.Id, c.CreatedUtc, c.LastModifiedUtc})
             .ToListAsync(cancellationToken) : [];
-
-        var changes = new List<KoboSyncItem>();
 
         if (onDeckSeries.Count == 0 || chapters.Count == 0)
         {
