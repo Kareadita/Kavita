@@ -105,7 +105,7 @@ export class EditUserComponent implements OnInit {
 
   readOnlyWarning = computed(() => {
     const roles = this.userForm.roles().value();
-    return roles.includes(Role.Admin)
+    return roles.includes(Role.ReadOnly)
       ? translate('edit-user.warning-read-only')
       : undefined;
   });
