@@ -19,6 +19,7 @@ import {ModalService} from "../../_services/modal.service";
 import {form, FormField} from "@angular/forms/signals";
 import {FormsModule} from "@angular/forms";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {filter, switchMap} from "rxjs";
 
 @Component({
   selector: 'app-manage-auth-keys',
@@ -78,6 +79,13 @@ export class ManageAuthKeysComponent implements OnInit {
 
       this.opdsUrlRsc.reload();
     });
+  }
+
+  rotateAll() {
+    this.confirmService.confirm$(translate('manage-auth-keys.confirm-rotate-all')).pipe(
+      filter(b => b),
+      switchMap(() => this.accountService.rotateAllAuthKeys())
+    ).subscribe();
   }
 
   rotate(authKey: AuthKey) {

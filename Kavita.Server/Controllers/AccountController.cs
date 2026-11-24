@@ -1339,6 +1339,32 @@ public class AccountController(UserManager<AppUser> userManager,
         return Ok(newDto);
     }
 
+    [HttpPost("rotate-all-keys")]
+    public async Task<ActionResult> RotateAllAuthKeys()
+    {
+        var ct = HttpContext.RequestAborted;
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.AuthKeys, ct);
+        if (user is null) return NotFound();
+
+        foreach (var authKey in user.AuthKeys)
+        {
+            if (authKey.ExpiresAtUtc is not null)
+            {
+                var originalDuration = authKey.ExpiresAtUtc.Value - authKey.CreatedAtUtc;
+                authKey.ExpiresAtUtc = DateTime.UtcNow.Add(originalDuration);
+            }
+
+            authKey.Key = AuthKeyHelper.GenerateKey(authKey.Key.Length);
+        }
+
+        await authKeyService.InvalidateAllForUserAsync(user, ct);
+
+        await unitOfWork.CommitAsync(ct);
+
+        return Ok();
+    }
+
     /// <summary>
     /// Creates a new Auth Key for a user.
     /// </summary>

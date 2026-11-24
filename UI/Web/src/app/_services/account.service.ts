@@ -465,6 +465,11 @@ export class AccountService {
     return this.httpClient.post(this.baseUrl + `account/rotate-auth-key?authKeyId=${id}`, data);
   }
 
+  rotateAllAuthKeys() {
+    return this.httpClient.post(this.baseUrl + 'account/rotate-all-keys', {}).pipe(
+      switchMap(() => this.refreshAccount())
+    );
+  }
 
   deleteAuthKey(id: number) {
     return this.httpClient.delete(this.baseUrl + `account/auth-key?authKeyId=${id}`);

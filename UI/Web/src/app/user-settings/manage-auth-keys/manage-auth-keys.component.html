@@ -40,10 +40,16 @@
   <h4 class="mt-4">
     {{t('auth-keys-title')}}
     @if (!isReadOnly()) {
-      <button class="btn btn-outline-primary float-end" (click)="createAuthKey()">
-        <i class="fa-solid fa-plus" aria-hidden="true"></i>
-        <span class="ms-1">{{t('add-auth-key')}}</span>
-      </button>
+      <div class="float-end">
+        <button class="btn btn-outline-danger me-2" (click)="rotateAll()">
+          <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+          <span class="ms-1">{{t('rotate-all')}}</span>
+        </button>
+        <button class="btn btn-outline-primary float-end" (click)="createAuthKey()">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i>
+          <span class="ms-1">{{t('add-auth-key')}}</span>
+        </button>
+      </div>
     }
   </h4>
   <p>{{t('description')}}</p>
