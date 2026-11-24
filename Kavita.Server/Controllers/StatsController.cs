@@ -191,6 +191,7 @@ public class StatsController(
     /// <param name="userId">If 0, defaults to all users, else just userId</param>
     /// <param name="filter">Filters against a time frame and a set of libraries</param>
     /// <returns></returns>
+    /// <remarks>Requires admin role to access others stats</remarks>
     [HttpGet("reading-counts")]
     public async Task<ActionResult<IEnumerable<StatCountWithFormat<DateTime>>>> ReadCounts([FromQuery] StatsFilterDto filter, [FromQuery] int userId)
     {
@@ -203,16 +204,11 @@ public class StatsController(
     }
 
     [HttpGet("day-breakdown")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute, VaryByQueryKeys = ["userId"])]
     public async Task<ActionResult<IList<StatCount<DayOfWeek>>>> GetDayBreakdown(int userId = 0)
     {
         var ct = HttpContext.RequestAborted;
-        if (userId != 0)
-        {
-            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, ct: ct);
-            var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user, ct);
-            if (!isAdmin) return BadRequest();
-        }
 
         return Ok(await statService.GetDayBreakdown(userId, ct));
     }
