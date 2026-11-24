@@ -794,12 +794,15 @@ public class SeriesController(
         if (series is null) return NotFound();
 
         series.ResetExternalMetadataIds();
+        series.MangaBakaEditionId = string.Empty;
         foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
         {
             chapter.ResetExternalMetadataIds();
         }
 
         await unitOfWork.CommitAsync(ct);
+
+        await _matchSeriesCacheProvider.RemoveByPrefixAsync($"{MatchSeriesCacheKey}-{seriesId}-", ct);
 
         return Ok();
     }

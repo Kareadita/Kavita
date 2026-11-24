@@ -86,5 +86,12 @@ public class ChapterQueryExtensionsTests(ITestOutputHelper testOutputHelper) : A
         // Seperate ordering
         Assert.Equal(1, actual[otherSeries.Volumes.Single().Chapters.OrderBy(c => c.SortOrder).First().Id]);
         Assert.Equal(2, actual[otherSeries.Volumes.Single().Chapters.OrderBy(c => c.SortOrder).Last().Id]);
+
+        // Correct ordering with not all chapter ids requested
+        actual = await ctx.Chapter.GetSeriesPositionsAsync(allChapterIds.Take(allChapterIds.Count/2));
+        foreach (var c in actual)
+        {
+            Assert.Equal(expected[c.Key], c.Value);
+        }
     }
 }

@@ -702,7 +702,14 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         await ctx.SaveChangesAsync();
 
         (syncItems, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
-        Assert.Contains(syncItems, c => c.NewTag?.Tag.Id == "col:on-deck");
+        var onDeckTag = syncItems.Single(c => c.NewTag?.Tag.Id == "col:on-deck").NewTag!.Tag;
+
+        // Only the partially read chapter; the unread chapter must not be in the tag
+        var partiallyReadChapter = series.Volumes.First().Chapters.First();
+        var unreadChapter = series.Volumes.SelectMany(v => v.Chapters).Single(c => c.Id != partiallyReadChapter.Id);
+        Assert.Single(onDeckTag.Items);
+        Assert.Equal(partiallyReadChapter.Id.ToString(), onDeckTag.Items.Single().RevisionId);
+        Assert.DoesNotContain(onDeckTag.Items, i => i.RevisionId == unreadChapter.Id.ToString());
 
         await ctx.AppUserProgresses.ExecuteDeleteAsync();
 
@@ -927,10 +934,11 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         Assert.Equal(3, metadata.Count);
 
         Assert.Equal(1f, metadata[volume1Chapter.Id].Series!.NumberFloat);
-        Assert.Equal(new[] { 2f, 3f }, metadata.Values
-            .Where(m => m.Series!.Number.StartsWith("Volume 2"))
-            .Select(m => m.Series!.NumberFloat)
-            .Order().ToList());
+
+        var chapter7 = volume2Chapters.Single(c => c.Title == "7");
+        var chapter10 = volume2Chapters.Single(c => c.Title == "10");
+        Assert.Equal(2f, metadata[chapter7.Id].Series!.NumberFloat);
+        Assert.Equal(3f, metadata[chapter10.Id].Series!.NumberFloat);
     }
 
     [Fact]

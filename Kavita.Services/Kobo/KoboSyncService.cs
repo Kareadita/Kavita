@@ -790,7 +790,7 @@ public class KoboSyncService(
                 Name = g.First().VolumeName,
                 MinNumber = g.First().VolumeMinNumber,
                 MaxNumber = g.First().VolumeMinNumber,
-                Chapters = [.. Enumerable.Repeat(new ChapterDto(), volumeChapterCounts[g.Key])],
+                Chapters = [.. Enumerable.Repeat(new ChapterDto(), volumeChapterCounts.TryGetValue(g.Key, out var count) ? count : 0)],
             });
 
         var chaptersById = chapters.ToDictionary(c => c.Id);
@@ -1663,9 +1663,9 @@ public class KoboSyncService(
 
     internal static ImageRender GetKoboRender(string width, string height, string? quality, bool isGreyScale)
     {
-        // 1,000,000 leaves a side that did not parse unbounded, since FitWithinStep never enlarges
-        var parsedWidth = int.TryParse(width, out var w) ? w : 1_000_000;
-        var parsedHeight = int.TryParse(height, out var h) ? h : 1_000_000;
+        // 1,000,000 leaves a side that did not parse (or is out of range) unbounded, since FitWithinStep never enlarges
+        var parsedWidth = ParseDimension(width);
+        var parsedHeight = ParseDimension(height);
         var q = int.TryParse(quality, out var parsedQ) ? Math.Clamp(parsedQ, 1, 100) : 85;
 
         List<IImageStep> steps = [new FitWithinStep(parsedWidth, parsedHeight)];
@@ -1675,6 +1675,12 @@ public class KoboSyncService(
         }
 
         return new ImageRender(EncodeFormat.JPEG, steps, q);
+    }
+
+    private static int ParseDimension(string? value)
+    {
+        const int unbounded = 1_000_000;
+        return int.TryParse(value, out var v) && v is > 0 and <= unbounded ? v : unbounded;
     }
 
     #endregion

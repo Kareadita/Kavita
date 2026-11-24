@@ -440,16 +440,21 @@ export class AccountService {
     return undefined;
   }
 
-  opdsUrlRsc(keyName: () => string) {
-    return httpResource.text<string>(() =>this.baseUrl + 'account/opds-url?authKeyName=' + keyName());
+  opdsUrlRsc(keyId: () => number) {
+    return httpResource.text<string>(() => {
+      const id = keyId();
+      if (id === 0) return undefined;
+
+      return id ? this.baseUrl + 'account/opds-url?authKeyId=' + id : this.baseUrl + 'account/opds-url';
+    });
   }
 
-  koboSyncUrlRsc(keyName: () => string) {
+  koboSyncUrlRsc(keyId: () => number) {
     return httpResource.text<string>(() => {
-      const key = keyName();
-      if (!key) return undefined;
+      const id = keyId();
+      if (id === 0) return undefined;
 
-      return this.baseUrl + 'account/kobo-sync-url?authKeyName=' + key;
+      return id ? this.baseUrl + 'account/kobo-sync-url?authKeyId=' + id : this.baseUrl + 'account/kobo-sync-url';
     });
   }
 

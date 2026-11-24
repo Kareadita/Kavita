@@ -54,7 +54,11 @@ export class ManageAuthKeysComponent implements OnInit {
 
   opdsAuthKeyModel = signal<string>(OpdsName);
   opdsAuthKeyForm = form(this.opdsAuthKeyModel);
-  opdsUrlRsc = this.accountService.opdsUrlRsc(() => this.opdsAuthKeyModel());
+  protected readonly opdsAuthKeyId = computed(() => {
+    const keys = this.accountService.currentUser()?.authKeys ?? [];
+    return keys.find(k => k.name === this.opdsAuthKeyModel())?.id ?? 0;
+  });
+  opdsUrlRsc = this.accountService.opdsUrlRsc(() => this.opdsAuthKeyId());
 
   authKeys = computed(() => {
     const account = this.accountService.currentUser();
@@ -85,7 +89,7 @@ export class ManageAuthKeysComponent implements OnInit {
     this.confirmService.confirm$(translate('manage-auth-keys.confirm-rotate-all')).pipe(
       filter(b => b),
       switchMap(() => this.accountService.rotateAllAuthKeys())
-    ).subscribe();
+    ).subscribe(() => this.opdsUrlRsc.reload());
   }
 
   rotate(authKey: AuthKey) {

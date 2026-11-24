@@ -37,7 +37,11 @@ public class AutoMapperKoboProfile: Profile
                 .Select(p => p.Person.Name)))
             .ForMemberSimple(d => d.Description, c => c.Summary)
             // Kobo has an aneurysm if there is no language present, default to English
-            .ForMemberSimple(d => d.Language, c => c.Language ?? "en")
+            .ForMemberSimple(d => d.Language, c => string.IsNullOrEmpty(c.Language) ? "en" : c.Language)
+            .ForMember(d => d.ContributorRoles, opt => opt.MapFrom(c => c.People
+                .Where(p => p.Role == PersonRole.Writer
+                            || p.Role == PersonRole.Translator
+                            || p.Role == PersonRole.Editor)))
             .ForMember(d => d.Publisher, opt => opt.MapFrom(c => c.People
                 .Where(p => p.Role == PersonRole.Publisher)
                 .OrderBy(p => p.PersonId)

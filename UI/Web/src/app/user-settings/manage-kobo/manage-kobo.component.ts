@@ -103,7 +103,11 @@ export class ManageKoboComponent implements OnInit {
 
   koboAuthKeyModel = signal<string>('');
   koboAuthKeyFormGroup = form(this.koboAuthKeyModel);
-  koboUrlRsc = this.accountService.koboSyncUrlRsc(() => this.koboAuthKeyModel());
+  protected readonly koboAuthKeyId = computed(() => {
+    const keys = this.accountService.currentUser()?.authKeys ?? [];
+    return keys.find(k => k.name === this.koboAuthKeyModel())?.id ?? 0;
+  });
+  koboUrlRsc = this.accountService.koboSyncUrlRsc(() => this.koboAuthKeyId());
 
   private readonly hostNameFormModel = signal<string>('');
   protected readonly hostNameFormGroup = form(this.hostNameFormModel, path => {
@@ -133,6 +137,7 @@ export class ManageKoboComponent implements OnInit {
     disabled(path.librarySyncEnabled, {when: () => !this.koboEditable() || this.isReadOnly()});
     disabled(path.readingListSyncEnabled, {when: () => !this.koboEditable() || this.isReadOnly()});
     disabled(path.collectionSyncEnabled, {when: () => !this.koboEditable() || this.isReadOnly()});
+    disabled(path.createOnDeckCollection, {when: () => !this.koboEditable() || this.isReadOnly()});
     disabled(path.managedCollection, {when: () => !this.koboEditable() || this.isReadOnly()});
   });
 

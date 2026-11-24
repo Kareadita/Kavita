@@ -15,5 +15,5 @@ export enum AuthKeyProvider {
 
 export const ImageOnlyName = 'image-only';
 export const OpdsName = 'opds';
-export const KoboSyncName = 'kobo-sync';
+export const KoboSyncName = 'Kobo Sync';
 

@@ -1232,7 +1232,7 @@ public class AccountController(UserManager<AppUser> userManager,
     /// </summary>
     /// <returns></returns>
     [HttpGet("opds-url")]
-    public async Task<ActionResult<string>> GetOpdsUrl([FromQuery] string? authKeyName = null)
+    public async Task<ActionResult<string>> GetOpdsUrl([FromQuery] int authKeyId)
     {
         var ct = HttpContext.RequestAborted;
 
@@ -1240,16 +1240,10 @@ public class AccountController(UserManager<AppUser> userManager,
 
         var baseUrl = Request.GetInstanceUrl(serverSettings);
 
-        authKeyName ??= AuthKeyHelper.OpdsKeyName;
-        var opdsAuthKey = (await unitOfWork.UserRepository.GetAuthKeysForUserId(UserId, ct))
-            .Where(k => k.Name == authKeyName)
-            .Select(k => k.Key)
-            .FirstOrDefault();
+        var authKey = await unitOfWork.UserRepository.GetAuthKeyById(authKeyId, ct);
+        if (authKey is null || authKey.AppUserId != UserId) return NotFound();
 
-        if (opdsAuthKey == null)
-            return NotFound();
-
-        return Ok(baseUrl + "api/opds/" + opdsAuthKey);
+        return Ok(baseUrl + "api/opds/" + authKey.Key);
     }
 
     /// <summary>
@@ -1257,7 +1251,7 @@ public class AccountController(UserManager<AppUser> userManager,
     /// </summary>
     /// <returns></returns>
     [HttpGet("kobo-sync-url")]
-    public async Task<ActionResult<string>> GetKoboUrl([FromQuery] string? authKeyName = null)
+    public async Task<ActionResult<string>> GetKoboUrl([FromQuery] int authKeyId)
     {
         var ct = HttpContext.RequestAborted;
 
@@ -1265,14 +1259,8 @@ public class AccountController(UserManager<AppUser> userManager,
 
         var baseUrl = Request.GetInstanceUrl(serverSettings);
 
-        authKeyName ??= AuthKeyHelper.KoboKeyName;
-        var authKey = (await unitOfWork.UserRepository.GetAuthKeysForUserId(UserId, ct))
-            .Where(k => k.Name == authKeyName)
-            .Select(k => k.Key)
-            .FirstOrDefault();
-
-        if (authKey == null)
-            return NotFound();
+        var authKey = await unitOfWork.UserRepository.GetAuthKeyById(authKeyId, ct);
+        if (authKey is null || authKey.AppUserId != UserId) return NotFound();
 
         return Ok(baseUrl + "Kobo/" + authKey);
     }

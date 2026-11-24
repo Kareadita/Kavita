@@ -349,7 +349,14 @@ export class MatchSeriesModalComponent implements OnInit {
 
   resetExternalIds() {
     this.seriesService.resetExternalIds(this.series().id).pipe(
-      tap(() => this.search())
+      tap(() => {
+        this.selectedItem.set(null);
+        this.selectedEdition.set(null);
+        this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
+          this.matchInfo.set(res);
+          this.search();
+        });
+      })
     ).subscribe();
   }
 

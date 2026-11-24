@@ -25,7 +25,9 @@ public static class ChapterQueryExtensions
             // Priority 3: Non-special chapters
             .ThenBy(c => c.IsSpecial ? 1 : 0)
             .ThenBy(c => c.Volume.MinNumber)
-            .ThenBy(c => c.SortOrder);
+            .ThenBy(c => c.SortOrder)
+            // Deterministic tiebreaker
+            .ThenBy(c => c.Id);
     }
 
     /// <summary>
@@ -33,7 +35,7 @@ public static class ChapterQueryExtensions
     /// </summary>
     /// <remarks>Positions are 1 based!</remarks>
     public static async Task<Dictionary<int, int>> GetSeriesPositionsAsync(this IQueryable<Chapter> query,
-        ICollection<int> chapterIds, CancellationToken ct = default)
+        IEnumerable<int> chapterIds, CancellationToken ct = default)
     {
         const int looseLeaf = ParserConstants.LooseLeafVolumeNumber;
         const int special = ParserConstants.SpecialVolumeNumber;
