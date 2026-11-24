@@ -114,6 +114,17 @@
                 </div>
               </div>
               <div class="controls d-flex justify-content-between align-items-center">
+                <label for="swipe-animation" class="form-label">{{t('swipe-animation-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="swipeAnimationTooltip" role="button" tabindex="0" aria-describedby="swipeAnimation-help"></i></label>
+                <ng-template #swipeAnimationTooltip>{{t('swipe-animation-tooltip')}}</ng-template>
+                <span class="visually-hidden" id="swipeAnimation-help">
+                  <ng-container [ngTemplateOutlet]="swipeAnimationTooltip" />
+                </span>
+                <div class="form-check form-switch">
+                  <input type="checkbox" id="swipe-animation" [formField]="settingsForm.bookReaderSwipeAnimation" class="form-check-input" aria-labelledby="swipeAnimation-help" switch>
+                  <label>{{settingsForm.bookReaderSwipeAnimation().value() ? t('on') : t('off')}} </label>
+                </div>
+              </div>
+              <div class="controls d-flex justify-content-between align-items-center">
                 <label for="immersive-mode" class="form-label">{{t('immersive-mode-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="immersiveModeTooltip" role="button" tabindex="0" aria-describedby="immersiveMode-help"></i></label>
                 <ng-template #immersiveModeTooltip>{{t('immersive-mode-tooltip')}}</ng-template>
                 <span class="visually-hidden" id="immersiveMode-help">

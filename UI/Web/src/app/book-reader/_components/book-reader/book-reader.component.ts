@@ -455,6 +455,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   protected readonly writingStyle = this.readerSettingsService.writingStyle;
   protected readonly clickToPaginate = this.readerSettingsService.clickToPaginate;
   protected readonly swipeToPaginate = this.readerSettingsService.swipeToPaginate;
+  protected readonly swipeAnimation = this.readerSettingsService.swipeAnimation;
 
   protected columnWidth!: Signal<string>;
   protected columnHeight!: Signal<string>;
@@ -1864,7 +1865,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
     const start = element.scrollLeft;
     const distance = left - start;
-    if (distance === 0 || BookReaderComponent.prefersReducedMotion()) {
+    if (distance === 0 || !this.animatesSwipeTurns()) {
       element.scrollLeft = left;
       onComplete?.();
       return;
@@ -1896,7 +1897,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
    */
   private playPageSlide(forward: boolean) {
     const element = this.readingSectionElemRef()?.nativeElement;
-    if (!element || BookReaderComponent.prefersReducedMotion()) return;
+    if (!element || !this.animatesSwipeTurns()) return;
 
     const offset = forward ? 16 : -16;
     element.style.transition = 'none';
@@ -1933,6 +1934,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
   private static prefersReducedMotion(): boolean {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /**
+   * Swipe turns are only animated when the reader asked for it. With the animation off the gesture still
+   * pages the book, but it commits on release and the page changes in one step, which is what an e-ink
+   * screen and anyone who dislikes motion wants.
+   */
+  private animatesSwipeTurns(): boolean {
+    return this.swipeAnimation() && !BookReaderComponent.prefersReducedMotion();
   }
 
   /**
@@ -2794,8 +2804,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
     this.swipeStart = {x: point.x, y: point.y, time: Date.now(), scroll: this.getReadingScrollOffset()};
 
-    // Column layouts can follow the finger: the columns are a scroll offset we can drive directly
-    if (this.layoutMode() !== BookPageLayoutMode.Default && this.writingStyle() !== WritingStyle.Vertical) {
+    // Column layouts can follow the finger: the columns are a scroll offset we can drive directly.
+    // With the animation off the page must not track the finger, so no drag state is created and the
+    // gesture commits on release instead.
+    if (this.animatesSwipeTurns() && this.layoutMode() !== BookPageLayoutMode.Default && this.writingStyle() !== WritingStyle.Vertical) {
       const [virtualPage, totalPages, pageSize] = this.getVirtualPage();
       if (pageSize > 0) {
         this.swipeDrag = {

@@ -450,6 +450,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         existingProfile.BookReaderFontFamily = dto.BookReaderFontFamily;
         existingProfile.BookReaderTapToPaginate = dto.BookReaderTapToPaginate;
         existingProfile.BookReaderSwipeToPaginate = dto.BookReaderSwipeToPaginate;
+        existingProfile.BookReaderSwipeAnimation = dto.BookReaderSwipeAnimation;
         existingProfile.BookReaderReadingDirection = dto.BookReaderReadingDirection;
         existingProfile.BookReaderWritingStyle = dto.BookReaderWritingStyle;
         existingProfile.BookThemeName = dto.BookReaderThemeName;

@@ -29,6 +29,7 @@ export interface BookReadingProfileFormModel {
   bookReaderFontFamily: string;
   bookReaderTapToPaginate: boolean;
   bookReaderSwipeToPaginate: boolean;
+  bookReaderSwipeAnimation: boolean;
   bookReaderReadingDirection: ReadingDirection;
   bookReaderWritingStyle: WritingStyle;
   bookReaderThemeName: string;
@@ -65,6 +66,7 @@ export class EpubReaderSettingsService {
     bookReaderMargin: 0,
     bookReaderReadingDirection: ReadingDirection.LeftToRight,
     bookReaderSwipeToPaginate: false,
+    bookReaderSwipeAnimation: true,
     bookReaderTapToPaginate: false,
     bookReaderThemeName: "",
     bookReaderWritingStyle: WritingStyle.Horizontal
@@ -102,6 +104,7 @@ export class EpubReaderSettingsService {
   public readonly activeTheme = this._activeTheme.asReadonly();
   public readonly clickToPaginate = computed(() => this.formGroup.bookReaderTapToPaginate().value());
   public readonly swipeToPaginate = computed(() => this.formGroup.bookReaderSwipeToPaginate().value());
+  public readonly swipeAnimation = computed(() => this.formGroup.bookReaderSwipeAnimation().value());
   public readonly immersiveMode = computed(() => this.formGroup.bookReaderImmersiveMode().value());
   public readonly isFullscreen = this._isFullscreen.asReadonly();
   public readonly epubFonts = this._epubFonts.asReadonly();
@@ -284,6 +287,10 @@ export class EpubReaderSettingsService {
     this.formGroup.bookReaderSwipeToPaginate().value.set(value);
   }
 
+  updateSwipeAnimation(value: boolean): void {
+    this.formGroup.bookReaderSwipeAnimation().value.set(value);
+  }
+
   updateReadingDirection(value: ReadingDirection): void {
     this.formGroup.bookReaderReadingDirection().value.set(value);
   }
@@ -332,6 +339,7 @@ export class EpubReaderSettingsService {
       bookReaderLineSpacing: profile.bookReaderLineSpacing,
       bookReaderMargin: profile.bookReaderMargin,
       bookReaderReadingDirection: profile.bookReaderReadingDirection,
+      bookReaderSwipeAnimation: profile.bookReaderSwipeAnimation,
       bookReaderSwipeToPaginate: profile.bookReaderSwipeToPaginate,
       bookReaderTapToPaginate: profile.bookReaderTapToPaginate,
       bookReaderThemeName: profile.bookReaderThemeName,
@@ -381,6 +389,7 @@ export class EpubReaderSettingsService {
 
     // Update from signals
     data.bookReaderTapToPaginate = this.clickToPaginate();
+    data.bookReaderSwipeAnimation = this.swipeAnimation();
     data.bookReaderSwipeToPaginate = this.swipeToPaginate();
     data.bookReaderLayoutMode = this.layoutMode();
     data.bookReaderImmersiveMode = this.immersiveMode();
