@@ -799,6 +799,12 @@ namespace Kavita.Database.Migrations
                     b.Property<int>("ChapterIndex")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ChapterPositions")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{}");
+
                     b.Property<DateTime>("ChapterSyncTime")
                         .HasColumnType("TEXT");
 

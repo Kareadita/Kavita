@@ -38,6 +38,12 @@ public class KoboSyncPoint
     /// </summary>
     public List<int> ChapterIds { get; set; } = [];
     /// <summary>
+    /// Series position (rank) of each chapter as sent to the device, used to detect reorders
+    /// that shift the rank of sibling chapters without touching their timestamps
+    /// </summary>
+    [JsonColumn]
+    public Dictionary<int, int> ChapterPositions { get; set; } = [];
+    /// <summary>
     /// Amount of already processed changes in the current sync.
     /// </summary>
     public int ChapterIndex { get; set; }

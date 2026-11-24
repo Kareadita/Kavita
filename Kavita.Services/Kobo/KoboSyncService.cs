@@ -164,14 +164,26 @@ public class KoboSyncService(
         var deletedBatch = deletedIds.Take(limit).ToList();
 
         changes.AddRange(deletedBatch.Select(BuildDeletedItem));
-        deletedBatch.ForEach(id => syncPoint.ChapterIds.Remove(id));
+        deletedBatch.ForEach(id =>
+        {
+            syncPoint.ChapterIds.Remove(id);
+            syncPoint.ChapterPositions.Remove(id);
+        });
 
-        var pendingIds = eligible
+        var changedIds = eligible
             .Where(kv => !alreadySeenChapters.Contains(kv.Key) || kv.Value > syncPoint.ChapterSyncTime)
-            .OrderBy(kv => kv.Value)
-            .ThenBy(kv => kv.Key)
-            .Skip(syncPoint.ChapterIndex)
             .Select(kv => kv.Key)
+            .ToList();
+
+
+        // Series re-order needs to update all chapters position
+        var positionChangedIds = await GetPositionChangedChapterIds(syncPoint, changedIds, cancellationToken);
+
+        var pendingIds = changedIds
+            .Union(positionChangedIds)
+            .OrderBy(id => eligible[id])
+            .ThenBy(id => id)
+            .Skip(syncPoint.ChapterIndex)
             .ToList();
 
         if (changes.Count >= limit)
@@ -193,6 +205,9 @@ public class KoboSyncService(
         if (chapters.Count == 0)
         {
             syncPoint.ChapterIds = [.. eligible.Keys];
+            syncPoint.ChapterPositions = syncPoint.ChapterPositions
+                .Where(kv => eligible.ContainsKey(kv.Key))
+                .ToDictionary(kv => kv.Key, kv => kv.Value);
 
             logger.LogTrace("No book changes since {BooksSyncTime}", syncPoint.ChapterSyncTime);
             return new SyncAccumulationResult(changes, true);
@@ -200,6 +215,12 @@ public class KoboSyncService(
 
         syncPoint.ChapterIndex += chapters.Count;
         logger.LogTrace("Adding {Count} book changes.", chapters.Count);
+
+        var sentPositions = await unitOfWork.DataContext.Chapter.GetSeriesPositionsAsync(idsToFetch, cancellationToken);
+        foreach (var (chapterId, position) in sentPositions)
+        {
+            syncPoint.ChapterPositions[chapterId] = position;
+        }
 
         var metadata = await BuildBookMetadata(chapters.Select(s => s.Chapter.Id), cancellationToken);
 
@@ -221,9 +242,40 @@ public class KoboSyncService(
         if (exhausted)
         {
             syncPoint.ChapterIds = [.. eligible.Keys];
+            syncPoint.ChapterPositions = syncPoint.ChapterPositions
+                .Where(kv => eligible.ContainsKey(kv.Key))
+                .ToDictionary(kv => kv.Key, kv => kv.Value);
         }
 
         return new SyncAccumulationResult(changes, exhausted);
+    }
+
+    private async Task<List<int>> GetPositionChangedChapterIds(
+        KoboSyncPoint syncPoint,
+        List<int> changedIds,
+        CancellationToken cancellationToken)
+    {
+        if (changedIds.Count == 0) return [];
+
+        var seriesIds = await unitOfWork.DataContext.Chapter
+            .Where(c => changedIds.Contains(c.Id))
+            .Select(c => c.Volume.SeriesId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        if (seriesIds.Count == 0) return [];
+
+        var seriesChapterIds = await unitOfWork.DataContext.Chapter
+            .Where(c => seriesIds.Contains(c.Volume.SeriesId))
+            .Select(c => c.Id)
+            .ToListAsync(cancellationToken);
+
+        var positions = await unitOfWork.DataContext.Chapter.GetSeriesPositionsAsync(seriesChapterIds, cancellationToken);
+
+        return positions
+            .Where(kv => !syncPoint.ChapterPositions.TryGetValue(kv.Key, out var recorded) || recorded != kv.Value)
+            .Select(kv => kv.Key)
+            .ToList();
     }
 
     private static KoboSyncItem BuildDeletedItem(int id) => new()

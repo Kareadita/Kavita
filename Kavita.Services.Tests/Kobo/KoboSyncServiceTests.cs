@@ -777,6 +777,70 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         Assert.Contains(changes, c => c.ChangedTag?.Tag.Id == $"rl:{list1.Id}");
     }
 
+    [Fact]
+    public async Task GetChangesSinceAsync_ReorderResendsSiblingsWhoseRankChanged()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var library = await ctx.Library.FirstAsync();
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("A").WithSortOrder(1).WithPages(10).Build())
+                .WithChapter(new ChapterBuilder("B").WithSortOrder(2).WithPages(10).Build())
+                .Build())
+            .Build();
+
+        var user = new AppUserBuilder("Amelia", "amelia@localhost")
+            .WithLibrary(library)
+            .WithRole(PolicyConstants.AdminRole)
+            .Build();
+
+        ctx.Series.Add(series);
+        ctx.AppUser.Add(user);
+        await ctx.SaveChangesAsync();
+
+        var syncPreferences = new AppUserKoboSyncPreferences { LibrarySyncEnabled = true };
+        var syncPoint = new KoboSyncPoint();
+
+        var chapterA = series.Volumes.First().Chapters.Single(c => c.Title == "A");
+        var chapterB = series.Volumes.First().Chapters.Single(c => c.Title == "B");
+
+        var (changes, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Equal(2, changes.Count(c => c.NewEntitlement != null));
+        Assert.Equal(1, syncPoint.ChapterPositions[chapterA.Id]);
+        Assert.Equal(2, syncPoint.ChapterPositions[chapterB.Id]);
+
+        // A & B need an update as their positions will switch
+        chapterB.SortOrder = 0;
+        await ctx.SaveChangesAsync();
+
+        (changes, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+
+        var sent = changes
+            .Select(c => c.ChangedEntitlement ?? c.NewEntitlement)
+            .Where(e => e != null)
+            .ToDictionary(e => int.Parse(e!.BookEntitlement.Id), e => e.BookMetadata.Series!.NumberFloat);
+        Assert.Equal(2, sent.Count);
+        Assert.Equal(1f, sent[chapterB.Id]);
+        Assert.Equal(2f, sent[chapterA.Id]);
+
+        // A will need an update, B doesn't. Position stays the same
+        chapterA.TitleName = "A (renamed)";
+        await ctx.SaveChangesAsync();
+
+        (changes, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+
+        sent = changes
+            .Select(c => c.ChangedEntitlement ?? c.NewEntitlement)
+            .Where(e => e != null)
+            .ToDictionary(e => int.Parse(e!.BookEntitlement.Id), e => e.BookMetadata.Series!.NumberFloat);
+        Assert.Single(sent);
+        Assert.True(sent.ContainsKey(chapterA.Id));
+    }
+
     private async Task<(IUnitOfWork, IDataContext, IMapper, AppUser, Series, ReadingList, ReadingList)> SetupReadingListsAndOnDeck()
     {
         var (unitOfWork, ctx, mapper) = await CreateDatabase();

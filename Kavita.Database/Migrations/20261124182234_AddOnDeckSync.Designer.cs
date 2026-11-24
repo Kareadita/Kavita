@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20261123185244_AddOnDeckSync")]
+    [Migration("20261124182234_AddOnDeckSync")]
     partial class AddOnDeckSync
     {
         /// <inheritdoc />
@@ -801,6 +801,12 @@ namespace Kavita.Database.Migrations
 
                     b.Property<int>("ChapterIndex")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ChapterPositions")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{}");
 
                     b.Property<DateTime>("ChapterSyncTime")
                         .HasColumnType("TEXT");

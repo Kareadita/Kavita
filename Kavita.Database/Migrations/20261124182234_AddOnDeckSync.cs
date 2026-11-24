@@ -11,6 +11,13 @@ namespace Kavita.Database.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
+                name: "ChapterPositions",
+                table: "KoboSyncPoints",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: "{}");
+
+            migrationBuilder.AddColumn<string>(
                 name: "OnDeckIds",
                 table: "KoboSyncPoints",
                 type: "TEXT",
@@ -32,6 +39,10 @@ namespace Kavita.Database.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "ChapterPositions",
+                table: "KoboSyncPoints");
+
             migrationBuilder.DropColumn(
                 name: "OnDeckIds",
                 table: "KoboSyncPoints");
