@@ -5015,8 +5015,6 @@
         "emulate-comic-book-tooltip": "Applies a shadow effect to emulate reading from a book",
         "swipe-to-paginate-label": "Swipe to Paginate",
         "swipe-to-paginate-tooltip": "Should swiping on the screen cause the next or previous page to be triggered",
-        "swipe-animation-label": "Swipe Animation",
-        "swipe-animation-tooltip": "Glide to the next page instead of jumping. Turn this off to keep swipe pagination but change pages instantly",
         "allow-auto-webtoon-reader-label": "Automatic Webtoon Reader Mode",
         "allow-auto-webtoon-reader-tooltip": "Switch into Webtoon Reader mode if pages look like a webtoon. Some false positives may occur.",
         "width-override-label": "{{manga-reader.width-override-label}}",
