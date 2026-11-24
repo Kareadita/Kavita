@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security;
@@ -11,12 +12,14 @@ using HtmlAgilityPack;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Kobo;
+using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
 using Kavita.Models.Images;
+using Kavita.Models.Kobo;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers.Kobo;
 using Microsoft.Extensions.Logging;
@@ -28,7 +31,7 @@ namespace Kavita.Services.Kobo;
 
 
 public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService directoryService, IImagePipeline imagePipeline,
-    ILogger<EpubBuilderService> logger) : IEpubBuilderService
+    ILocalizationService localizationService, ILogger<EpubBuilderService> logger) : IEpubBuilderService
 {
     private const string GlobalStyles = """
                                 @page { margin: 0; }
@@ -39,7 +42,8 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
     private const string XhtmlMediaType = "application/xhtml+xml";
     private const int MaxParallelRenders = 4;
 
-    public async Task<string> BuildEpubAsync(BuildEpubOptions options, CancellationToken ct = default)
+    public async Task<string> BuildEpubAsync(BuildEpubOptions options, int userId, LocalizedNamingContext naming,
+        CancellationToken ct = default)
     {
         logger.LogDebug("Building kepub file");
         var chapterDto = options.Chapter;
@@ -55,7 +59,7 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
 
 
         var imageMediaType = DownloadService.GetContentTypeFromFile(extension);
-        var tableOfContents = new List<EpubNavigationEntry>(options.Pages.Count);
+        var pageList = new List<EpubNavigationEntry>(options.Pages.Count);
 
         // Pre-render images in parallel to validate the time savings
         var sw = Stopwatch.StartNew();
@@ -64,24 +68,37 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
 
         for (var i = 0; i < rendered.Length; i++)
         {
-            tableOfContents.Add(AddPage(rendered[i], i + 1, extension, imageMediaType, language, publication));
+            pageList.Add(AddPage(rendered[i], i + 1, extension, imageMediaType, language, publication));
             ct.ThrowIfCancellationRequested();
         }
         logger.LogDebug("Took {Time}ms to add pages", sw.ElapsedMilliseconds);
 
-        // Table of Content ideas:
-        // 1 - 1 ToC per page
-        // 2 - 1 ToC per group of pages for easy jumping
-        // 3 - Parse chapters out of filenames (some packers pack with cXX) and group that way
-        // 4 - If a volume of chapters, split each chapter as it's own ToC element
-
-        publication.SetNavigation(tableOfContents);
+        var tableOfContents = await BuildTableOfContents(chapterDto, options.Pages.Count, userId, naming);
+        publication.SetNavigation(tableOfContents, pageList);
 
         sw.Restart();
         (await publication.SaveAsync(options.OutputPath, cancellationToken: ct)).ThrowIfLoss();
         logger.LogDebug("Took {Time}ms to write epub", sw.ElapsedMilliseconds);
 
         return options.OutputPath;
+    }
+
+    private async Task<List<EpubNavigationEntry>> BuildTableOfContents(ChapterDto chapter, int pageCount, int userId,
+        LocalizedNamingContext naming)
+    {
+        var groups = KoboEpubHelper.GroupPages(chapter.Files, pageCount, naming.LibraryType);
+
+        var entries = new List<EpubNavigationEntry>(groups.Count);
+        foreach (var group in groups)
+        {
+            var label = group.Kind == EpubTocGroupKind.Chapter
+                ? naming.FormatChapterNumber(group.Number!)
+                : await localizationService.TranslateAsync(userId, "toc-pages", group.FirstPage + 1, group.LastPage + 1);
+
+            entries.Add(new EpubNavigationEntry(label, KoboEpubHelper.GetPath(group.FirstPage)));
+        }
+
+        return entries;
     }
 
     private ImageRenderResult[] RenderPages(BuildEpubOptions options, CancellationToken ct)
@@ -150,7 +167,7 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
             Encoding.UTF8.GetBytes(BuildPageXhtml(title, language, imageFile, image.Width, image.Height)));
         publication.AddSpineItem(pageId);
 
-        return new EpubNavigationEntry(title, sectionPath);
+        return new EpubNavigationEntry(index.ToString(CultureInfo.InvariantCulture), sectionPath);
     }
 
 

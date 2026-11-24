@@ -127,6 +127,14 @@ public sealed class LocalizedNamingContext
         return _namingService.FormatChapterTitle(LibraryType, chapter, ChapterLabel, IssueLabel, BookLabel);
     }
 
+    /// <summary>
+    /// Formats a bare chapter number or range, e.g. "10.5" -> "Chapter 10.5" or "Issue #10.5"
+    /// </summary>
+    public string FormatChapterNumber(string range)
+    {
+        return _namingService.FormatChapterTitle(LibraryType, false, range, null, ChapterLabel, IssueLabel, BookLabel);
+    }
+
     public string? FormatVolumeName(VolumeDto volume)
     {
         return _namingService.FormatVolumeName(LibraryType, volume, VolumeLabel);

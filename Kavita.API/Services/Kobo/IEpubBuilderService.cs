@@ -6,5 +6,5 @@ namespace Kavita.API.Services.Kobo;
 
 public interface IEpubBuilderService
 {
-    Task<string> BuildEpubAsync(BuildEpubOptions options, CancellationToken ct = default);
+    Task<string> BuildEpubAsync(BuildEpubOptions options, int userId, LocalizedNamingContext naming, CancellationToken ct = default);
 }

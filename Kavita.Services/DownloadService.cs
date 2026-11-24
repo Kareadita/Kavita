@@ -220,13 +220,11 @@ public class DownloadService(
         }
 
 
-
-
         var renderSettings = new ImageRender(EncodeFormat.JPEG, steps, 90);
         var options = new BuildEpubOptions(title, cacheService.GetCachedPages(chapterId).ToList(), renderSettings, readingProfile.ReadingDirection,
             chapterDto, outputPath);
 
 
-        return await epubBuilderService.BuildEpubAsync(options, ct);
+        return await epubBuilderService.BuildEpubAsync(options, userId, namingCtx, ct);
     }
 }
