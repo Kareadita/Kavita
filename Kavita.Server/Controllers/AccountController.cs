@@ -698,8 +698,9 @@ public class AccountController(UserManager<AppUser> userManager,
 
             await authKeyService.InvalidateAllForUserAsync(user, ct);
 
-            // Force token revoke when admin role is removed
-            if (existingRoles.Contains(PolicyConstants.AdminRole) && !dto.Roles.Contains(PolicyConstants.AdminRole))
+            // Force token revoke when admin role is removed or when user can no longer login
+            if ((existingRoles.Contains(PolicyConstants.AdminRole) && !dto.Roles.Contains(PolicyConstants.AdminRole))
+                || (!dto.Roles.Contains(PolicyConstants.AdminRole) && !dto.Roles.Contains(PolicyConstants.LoginRole)))
             {
                 logger.LogDebug("Updating security stamp for {UserId}", user.Id);
                 await userManager.UpdateSecurityStampAsync(user);
