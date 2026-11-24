@@ -9,7 +9,6 @@ using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Database;
 using Kavita.Models.Constants;
-using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
 using Kavita.Server.Helpers;
 using Kavita.Server.Middleware;
@@ -27,7 +26,6 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using MessageReceivedContext = Microsoft.AspNetCore.Authentication.JwtBearer.MessageReceivedContext;
 
 namespace Kavita.Server.Extensions;
 
@@ -128,15 +126,7 @@ public static class IdentityServiceExtensions
                 RoleClaimType = ClaimTypes.Role,
             };
 
-            options.Events = new JwtBearerEvents
-            {
-                OnMessageReceived = SetTokenFromQuery,
-                OnTokenValidated = ctx =>
-                {
-                    (ctx.Principal?.Identity as ClaimsIdentity)?.AddClaim(new Claim("AuthType", nameof(AuthenticationType.JWT)));
-                    return Task.CompletedTask;
-                }
-            };
+            options.Events = new JwtBearerEventsHelper();
         });
 
         // Add Bearer as an alias to LocalIdentity
@@ -291,17 +281,4 @@ public static class IdentityServiceExtensions
         }).Concat(settings.CustomScopes);
     }
 
-    private static Task SetTokenFromQuery(MessageReceivedContext context)
-    {
-        var accessToken = context.Request.Query["access_token"];
-        var path = context.HttpContext.Request.Path;
-
-        // Only use query string based token on SignalR hubs
-        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
-        {
-            context.Token = accessToken;
-        }
-
-        return Task.CompletedTask;
-    }
 }
