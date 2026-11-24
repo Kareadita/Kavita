@@ -1,11 +1,12 @@
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Kavita.API.Database;
+using Kavita.Models.Constants;
 using Kavita.Models.Entities.Progress;
-using Kavita.Models.Entities.User;
 using Kavita.Services;
-using Kavita.Services.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -35,28 +36,31 @@ public class JwtBearerEventsHelper : JwtBearerEvents
 
     private static async Task HandleTokenValidated(TokenValidatedContext ctx)
     {
-        var userManager = ctx.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
+        var unitOfWork = ctx.HttpContext.RequestServices.GetRequiredService<IUnitOfWork>();
         var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEventsHelper>>();
 
-        var userId = ctx.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var user = string.IsNullOrEmpty(userId) ? null : await userManager.FindByIdAsync(userId);
-        if (user == null)
+        if (!int.TryParse(ctx.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
         {
-            logger.LogDebug("[JwtBearer] Rejecting token: user {UserId} no longer exists", userId);
-            ctx.Fail("User no longer exists");
+            ctx.Fail("No valid user id");
             return;
         }
 
-        if (!await userManager.IsEnabledAsync(user))
+        // Hot path, smart select & check
+        var securityStamp = await unitOfWork.DataContext.AppUser
+            .Where(u => u.Id == userId)
+            .Where(u => u.UserRoles.Any(r => r.Role.Name == PolicyConstants.AdminRole)
+            || u.UserRoles.Any(r => r.Role.Name == PolicyConstants.LoginRole))
+            .Select(u => u.SecurityStamp)
+            .FirstOrDefaultAsync(ctx.HttpContext.RequestAborted);
+        if (securityStamp is null)
         {
-            logger.LogDebug("[JwtBearer] Rejecting token: user {UserId} is not allowed to login", userId);
-            ctx.Fail("Account is disabled");
+            ctx.Fail("User does not exist or is not allowed to log in");
             return;
         }
 
         // Don't enforce check on old tokens
         var stampClaim = ctx.Principal?.FindFirst(TokenService.SecurityStampClaimType)?.Value;
-        if (!string.IsNullOrEmpty(stampClaim) && stampClaim != user.SecurityStamp)
+        if (!string.IsNullOrEmpty(stampClaim) && stampClaim != securityStamp)
         {
             logger.LogDebug("[JwtBearer] Rejecting token: security stamp mismatch for user {UserId}", userId);
             ctx.Fail("Security stamp has changed");
