@@ -155,6 +155,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     bookReaderMargin: 0,
     bookReaderReadingDirection: ReadingDirection.LeftToRight,
     bookReaderTapToPaginate: false,
+    bookReaderSwipeToPaginate: false,
     bookReaderThemeName: "",
     bookReaderWritingStyle: WritingStyle.Horizontal,
     deviceIds: [],

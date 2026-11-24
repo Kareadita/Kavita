@@ -120,6 +120,19 @@ const minImageSize = {
  */
 const SCROLL_DELAY = 10;
 
+/**
+ * What a finger drag on the columns needs to settle onto a page boundary afterwards
+ */
+interface SwipeDragState {
+  startScroll: number;
+  virtualPage: number;
+  totalPages: number;
+  pageSize: number;
+  lastX: number;
+  lastTime: number;
+  velocity: number;
+}
+
 const KEYBIND_TARGETS = [
   {keyBindTarget: KeyBindTarget.PageLeft, description: 'prev-page'},
   {keyBindTarget: KeyBindTarget.PageRight, description: 'next-page'},
@@ -167,6 +180,24 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   protected readonly epubMenuService = inject(EpubReaderMenuService);
   protected readonly readerSettingsService = inject(EpubReaderSettingsService);
   private readonly destroyRef = inject(DestroyRef);
+
+  /** Duration of a swipe driven page turn, in milliseconds */
+  private static readonly SWIPE_TURN_MS = 220;
+
+  /** How many rendered pages are kept for instant back and forth turns */
+  private static readonly PAGE_CACHE_LIMIT = 8;
+
+  /** Rendered page html, so a turn does not wait for a round trip */
+  private readonly pageCache = new Map<string, string>();
+
+  private swipeAnimationFrame: number | null = null;
+  /** 1 for a forward swipe turn, -1 for backwards, 0 when nothing is waiting to animate */
+  private readonly pendingTurnDirection = signal<1 | -1 | 0>(0);
+  /** Set while the finger is dragging the columns, so the release can settle instead of paging */
+  private swipeDrag: SwipeDragState | null = null;
+  private swipeDragFrame: number | null = null;
+  private swipeDragTarget = 0;
+  private swipeIsDragging = false;
   private readonly annotationService = inject(AnnotationService);
   private readonly kavitaTitleStrategy = inject(KavitaTitleStrategy);
   private readonly document = inject(DOCUMENT);
@@ -297,6 +328,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
    nextPageDisabled = false;
 
   /**
+   * Start of a swipe gesture, tracked for swipe-to-paginate. Null when no gesture is in progress.
+   */
+  private swipeStart: {x: number, y: number, time: number, scroll: number} | null = null;
+  /**
+   * Fraction of the reading area a swipe must cover before it paginates. A fast flick needs less.
+   */
+  private readonly swipeDistanceRatio = 0.12;
+  /**
+   * Minimum swipe speed in pixels per millisecond that counts as a flick.
+   */
+  private readonly swipeFlickSpeed = 0.4;
+
+  /**
    * Offset for drawer and rendering canvas. Fixed to 62px.
    */
   topOffset: number = 38;
@@ -410,6 +454,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   protected readonly readingDirection = this.readerSettingsService.readingDirection;
   protected readonly writingStyle = this.readerSettingsService.writingStyle;
   protected readonly clickToPaginate = this.readerSettingsService.clickToPaginate;
+  protected readonly swipeToPaginate = this.readerSettingsService.swipeToPaginate;
 
   protected columnWidth!: Signal<string>;
   protected columnHeight!: Signal<string>;
@@ -585,6 +630,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     this.navService.hideSideNav();
     this.themeService.clearThemes();
     this.cdRef.markForCheck();
+    this.destroyRef.onDestroy(() => this.cancelSwipeAnimation());
+
+    // Scroll layout fetches the next page asynchronously, so the slide runs once it has rendered
+    effect(() => {
+      if (this.isLoading() || this.pendingTurnDirection() === 0) return;
+      const forward = this.pendingTurnDirection() === 1;
+      this.pendingTurnDirection.set(0);
+      requestAnimationFrame(() => requestAnimationFrame(() => this.playPageSlide(forward)));
+    });
 
     this.columnWidth = computed(() => {
       const layoutMode = this.layoutMode();
@@ -1417,7 +1471,47 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     this.isLoading.set(true);
     this.cdRef.markForCheck();
 
+    const key = BookReaderComponent.pageCacheKey(this.chapterId, this.pageNum());
+    const cached = this.pageCache.get(key);
+    if (cached !== undefined) {
+      this.renderPage(cached, part, scrollTop);
+      return;
+    }
+
     this.bookService.getBookPage(this.chapterId, this.pageNum()).subscribe(content => {
+      this.cachePage(key, content);
+      this.renderPage(content, part, scrollTop);
+    });
+  }
+
+  private static pageCacheKey(chapterId: number, page: number) {
+    return `${chapterId}:${page}`;
+  }
+
+  private cachePage(key: string, content: string) {
+    if (this.pageCache.size >= BookReaderComponent.PAGE_CACHE_LIMIT) {
+      const oldest = this.pageCache.keys().next();
+      if (!oldest.done) {
+        this.pageCache.delete(oldest.value);
+      }
+    }
+    this.pageCache.set(key, content);
+  }
+
+  /**
+   * Fetch the neighbouring pages in the background so a page turn never waits on the network.
+   */
+  private prefetchPage(page: number) {
+    if (page < 0 || page >= this.maxPages()) return;
+    const key = BookReaderComponent.pageCacheKey(this.chapterId, page);
+    if (this.pageCache.has(key)) return;
+
+    this.bookService.getBookPage(this.chapterId, page)
+      .pipe(take(1))
+      .subscribe(content => this.cachePage(key, content));
+  }
+
+  private renderPage(content: string, part?: string | undefined, scrollTop?: number | undefined) {
       this.isSingleImagePage = this.checkSingleImagePage(content); // This needs be performed before we set this.page to avoid image jumping
       this.updateSingleImagePageStyles();
 
@@ -1446,8 +1540,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
 
         this.firstLoad = false;
+        this.prefetchPage(this.pageNum() + 1);
+        this.prefetchPage(this.pageNum() - 1);
       });
-    });
   }
 
   /**
@@ -1759,21 +1854,104 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
   }
 
   /**
+   * Glides the column scroll to a position instead of asking the browser for a smooth scroll.
+   * WebKit restarts its own smooth scroll from wherever the finger left the content and steps
+   * through it coarsely, which reads as a stutter on a phone. A frame driven tween starts where the
+   * content actually is and can be cancelled by the next swipe.
+   */
+  private glideTo(element: HTMLElement, left: number, onComplete?: () => void, durationMs: number = BookReaderComponent.SWIPE_TURN_MS) {
+    this.cancelSwipeAnimation();
+
+    const start = element.scrollLeft;
+    const distance = left - start;
+    if (distance === 0 || BookReaderComponent.prefersReducedMotion()) {
+      element.scrollLeft = left;
+      onComplete?.();
+      return;
+    }
+
+    const startedAt = performance.now();
+    const step = (now: number) => {
+      const progress = Math.min(1, (now - startedAt) / durationMs);
+      // Ease-out quad keeps some velocity until the end. A cubic tail crawls the last few pixels
+      // for several frames, which is what reads as a stutter right before the page settles.
+      const eased = progress * (2 - progress);
+      element.scrollLeft = progress === 1 ? left : Math.round(start + distance * eased);
+      if (progress < 1) {
+        this.swipeAnimationFrame = requestAnimationFrame(step);
+        return;
+      }
+      this.swipeAnimationFrame = null;
+      // Progress work (xpath walk + save) is heavy; run it after the page has settled, not on the
+      // last frame of the glide.
+      window.setTimeout(() => onComplete?.(), 120);
+    };
+    this.swipeAnimationFrame = requestAnimationFrame(step);
+  }
+
+  /**
+   * Scroll layout replaces the page html asynchronously, so animating around the swap would show a
+   * blank page while the next one is fetched. Instead the incoming page slides the last few pixels
+   * into place once it has rendered.
+   */
+  private playPageSlide(forward: boolean) {
+    const element = this.readingSectionElemRef()?.nativeElement;
+    if (!element || BookReaderComponent.prefersReducedMotion()) return;
+
+    const offset = forward ? 16 : -16;
+    element.style.transition = 'none';
+    element.style.transform = `translate3d(${offset}px, 0, 0)`;
+    element.style.opacity = '0.35';
+    void element.offsetWidth;
+
+    element.style.transition = `transform ${BookReaderComponent.SWIPE_TURN_MS}ms cubic-bezier(.2,.7,.3,1), opacity ${Math.round(BookReaderComponent.SWIPE_TURN_MS / 2)}ms linear`;
+    element.style.transform = 'translate3d(0, 0, 0)';
+    element.style.opacity = '1';
+
+    // Clear on the transition itself, not on a timer: stripping the transform mid-settle forces a
+    // repaint on the last frames and shows up as a hitch.
+    const cleanup = () => {
+      element.style.transition = '';
+      element.style.transform = '';
+      element.style.opacity = '';
+      element.removeEventListener('transitionend', onEnd);
+      window.clearTimeout(fallback);
+    };
+    const onEnd = (event: TransitionEvent) => {
+      if (event.propertyName === 'transform') cleanup();
+    };
+    const fallback = window.setTimeout(cleanup, BookReaderComponent.SWIPE_TURN_MS + 150);
+    element.addEventListener('transitionend', onEnd);
+  }
+
+  private cancelSwipeAnimation() {
+    if (this.swipeAnimationFrame !== null) {
+      cancelAnimationFrame(this.swipeAnimationFrame);
+      this.swipeAnimationFrame = null;
+    }
+  }
+
+  private static prefersReducedMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /**
    * Given a direction, calls the next or prev page method
    * @param direction Direction to move
+   * @param smooth Animate the page turn. Used by swipe pagination so the page glides in.
    */
-  movePage(direction: PAGING_DIRECTION) {
+  movePage(direction: PAGING_DIRECTION, smooth = false) {
     switch (direction) {
       case PAGING_DIRECTION.BACKWARDS:
-        this.prevPage();
+        this.prevPage(smooth);
         break;
       case PAGING_DIRECTION.FORWARD:
-        this.nextPage();
+        this.nextPage(undefined, smooth);
         break;
     }
   }
 
-  prevPage() {
+  prevPage(smooth = false) {
     const oldPageNum = this.pageNum();
 
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
@@ -1791,10 +1969,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
         // -2 apparently goes back 1 virtual page...
         const scrollMethod = isVertical ? 'scrollTo' : 'scrollToX';
+        if (smooth && !isVertical) {
+          this.glideTo(this.bookContentElemRef().nativeElement, targetScroll, () => this.handleScrollEvent());
+          return;
+        }
         this.scrollService[scrollMethod](
           targetScroll,
           this.bookContentElemRef().nativeElement,
-          'auto',
+          smooth ? 'smooth' : 'auto',
           () => {
             this.handleScrollEvent();
           },
@@ -1819,10 +2001,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
     if (oldPageNum === newPageNum) { return; }
 
+    if (smooth) {
+      this.pendingTurnDirection.set(-1);
+      this.loadPage();
+      return;
+    }
     this.loadPage();
   }
 
-  nextPage(event?: any) {
+  nextPage(event?: any, smooth = false) {
     if (event) {
       event.stopPropagation();
       event.preventDefault();
@@ -1843,10 +2030,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
         // +0 apparently goes forward 1 virtual page...
         const scrollMethod = isVertical ? 'scrollTo' : 'scrollToX';
+        if (smooth && !isVertical) {
+          this.glideTo(this.bookContentElemRef().nativeElement, targetScroll, () => this.handleScrollEvent());
+          return;
+        }
         this.scrollService[scrollMethod](
           targetScroll,
           this.bookContentElemRef().nativeElement,
-          'auto',
+          smooth ? 'smooth' : 'auto',
           () => {
             this.handleScrollEvent();
           },
@@ -1870,6 +2061,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
     this.setPageNum(this.pageNum() + 1);
     if (oldPageNum === this.pageNum()) { return; }
 
+    if (smooth) {
+      this.pendingTurnDirection.set(1);
+      this.loadPage();
+      return;
+    }
     this.loadPage();
   }
 
@@ -2577,6 +2773,208 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy, Af
 
   mouseDown($event: MouseEvent) {
     this.mousePosition = {x: $event.clientX, y: $event.clientY};
+  }
+
+  /**
+   * Records the start of a possible swipe. Touch and mouse share this handler so a phone swipe and a
+   * desktop drag behave the same.
+   */
+  onSwipeStart(event: TouchEvent | MouseEvent) {
+    this.swipeStart = null;
+    this.swipeIsDragging = false;
+    this.swipeDrag = null;
+    if (!this.canSwipePaginate()) return;
+    if (event instanceof MouseEvent && event.button !== 0) return;
+    // A second finger means a pinch, not a page turn
+    if (!(event instanceof MouseEvent) && event.touches.length > 1) return;
+    if (this.isSwipeFromInteractiveElement(event)) return;
+
+    const point = BookReaderComponent.getSwipePoint(event, false);
+    if (point === null) return;
+
+    this.swipeStart = {x: point.x, y: point.y, time: Date.now(), scroll: this.getReadingScrollOffset()};
+
+    // Column layouts can follow the finger: the columns are a scroll offset we can drive directly
+    if (this.layoutMode() !== BookPageLayoutMode.Default && this.writingStyle() !== WritingStyle.Vertical) {
+      const [virtualPage, totalPages, pageSize] = this.getVirtualPage();
+      if (pageSize > 0) {
+        this.swipeDrag = {
+          startScroll: this.bookContentElemRef().nativeElement.scrollLeft,
+          virtualPage,
+          totalPages,
+          pageSize,
+          lastX: point.x,
+          lastTime: performance.now(),
+          velocity: 0,
+        };
+      }
+    }
+  }
+
+  /**
+   * Drags the columns with the finger, one to one, so the page answers immediately instead of
+   * jumping at the end of the gesture. The release settles onto a page boundary.
+   */
+  onSwipeMove(event: TouchEvent) {
+    const start = this.swipeStart;
+    const drag = this.swipeDrag;
+    if (start === null || drag === null) return;
+
+    const point = BookReaderComponent.getSwipePoint(event, false);
+    if (point === null) return;
+
+    const dx = point.x - start.x;
+    const dy = point.y - start.y;
+
+    if (!this.swipeIsDragging) {
+      // Only take over once the gesture is clearly horizontal
+      if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+      this.swipeIsDragging = true;
+      this.cancelSwipeAnimation();
+      drag.startScroll = this.bookContentElemRef().nativeElement.scrollLeft;
+    }
+
+    // The drag owns this gesture now, so the page must not scroll under it
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    const element = this.bookContentElemRef().nativeElement;
+    const maxScroll = Math.max(0, element.scrollWidth - element.clientWidth);
+    this.swipeDragTarget = Math.min(Math.max(drag.startScroll - dx, 0), maxScroll);
+
+    const now = performance.now();
+    const elapsed = now - drag.lastTime;
+    if (elapsed > 0) {
+      drag.velocity = (point.x - drag.lastX) / elapsed;
+      drag.lastX = point.x;
+      drag.lastTime = now;
+    }
+
+    if (this.swipeDragFrame === null) {
+      this.swipeDragFrame = requestAnimationFrame(() => {
+        this.swipeDragFrame = null;
+        element.scrollLeft = this.swipeDragTarget;
+      });
+    }
+  }
+
+  /**
+   * Decides where a released drag lands: the next page, the previous one, or back where it started.
+   * A flick wins on velocity, a slow drag has to travel a third of a page. The settle keeps the
+   * release speed, so a fast flick lands quickly and a slow drag eases in.
+   */
+  private settleSwipeDrag(drag: SwipeDragState) {
+    const element = this.bookContentElemRef().nativeElement;
+    const current = element.scrollLeft;
+    const travelled = this.swipeDragTarget - drag.startScroll;
+    const isFlick = Math.abs(drag.velocity) >= 0.35; // px per millisecond
+    const moved = Math.abs(travelled) >= drag.pageSize * 0.3;
+
+    let target = (drag.virtualPage - 1) * drag.pageSize;
+    let paged = false;
+
+    if (isFlick || moved) {
+      const movingLeft = drag.velocity !== 0 ? drag.velocity < 0 : travelled < 0;
+      const forward = movingLeft === (this.readingDirection() === ReadingDirection.LeftToRight);
+
+      if (forward && drag.virtualPage < drag.totalPages) {
+        target = drag.virtualPage * drag.pageSize;
+        paged = true;
+      } else if (!forward && drag.virtualPage > 1) {
+        target = (drag.virtualPage - 2) * drag.pageSize;
+        paged = true;
+      }
+    }
+
+    const remaining = Math.abs(target - current);
+    const speed = Math.max(Math.abs(drag.velocity), 0.6);
+    const duration = Math.min(280, Math.max(110, Math.round(remaining / speed)));
+
+    this.glideTo(element, target, paged ? () => this.handleScrollEvent() : undefined, duration);
+  }
+
+  /**
+   * Pages the book if the finished gesture was a deliberate swipe along the reading axis. A drag that
+   * already panned most of a page, an active text selection, or a diagonal gesture is left to the browser.
+   */
+  onSwipeEnd(event: TouchEvent | MouseEvent) {
+    const start = this.swipeStart;
+    this.swipeStart = null;
+    if (start === null || !this.canSwipePaginate()) return;
+
+    const point = BookReaderComponent.getSwipePoint(event, true);
+    if (point === null) return;
+    // Lifting two fingers is the end of a pinch, not a swipe
+    if ('changedTouches' in event && event.changedTouches.length > 1) return;
+    if ((window.getSelection()?.toString() ?? '').trim().length > 0) return;
+
+    if (this.swipeIsDragging && this.swipeDrag !== null) {
+      this.swipeIsDragging = false;
+      const drag = this.swipeDrag;
+      this.swipeDrag = null;
+      this.settleSwipeDrag(drag);
+      return;
+    }
+
+    const isVertical = this.writingStyle() === WritingStyle.Vertical;
+    const travel = isVertical ? point.y - start.y : point.x - start.x;
+    const cross = isVertical ? point.x - start.x : point.y - start.y;
+
+    // Not a deliberate swipe: the gesture is dominated by the perpendicular axis
+    if (Math.abs(travel) < Math.abs(cross) * 1.5) return;
+
+    // The content already panned most of a page, so this was a scroll, not a flick to the next page
+    const pageSize = this.measuredPageSize();
+    if (pageSize > 0 && Math.abs(this.getReadingScrollOffset() - start.scroll) > pageSize * 0.5) return;
+
+    const viewportSize = isVertical ? window.innerHeight : window.innerWidth;
+    const isFlick = Math.abs(travel) / Math.max(Date.now() - start.time, 1) >= this.swipeFlickSpeed;
+    if (!isFlick && Math.abs(travel) < viewportSize * this.swipeDistanceRatio) return;
+
+    // Moving towards the next page runs against the reading direction
+    const movingLeft = travel < 0;
+    const leftToRight = this.readingDirection() === ReadingDirection.LeftToRight;
+    this.movePage(movingLeft === leftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS, true);
+  }
+
+  /**
+   * The system took the gesture over, for example when iOS cancels the touches as a scroll or an
+   * edge navigation starts. Drop the tracked start so a later touch cannot pair with it.
+   */
+  onSwipeCancel() {
+    this.swipeStart = null;
+    this.swipeIsDragging = false;
+    this.swipeDrag = null;
+    if (this.swipeDragFrame !== null) {
+      cancelAnimationFrame(this.swipeDragFrame);
+      this.swipeDragFrame = null;
+    }
+  }
+
+  private canSwipePaginate(): boolean {
+    return this.swipeToPaginate() && !this.isLoading() && !this.epubMenuService.isDrawerOpen();
+  }
+
+  private isSwipeFromInteractiveElement(event: TouchEvent | MouseEvent): boolean {
+    const target = event.target;
+    if (!(target instanceof Element)) return false;
+    return target.closest('button, input, select, textarea, a, label, .bottom-bar, .fixed-top') !== null;
+  }
+
+  private getReadingScrollOffset(): number {
+    const content = this.bookContentElemRef()?.nativeElement;
+    if (!content) return 0;
+    return this.writingStyle() === WritingStyle.Vertical ? content.scrollTop : content.scrollLeft;
+  }
+
+  private static getSwipePoint(event: TouchEvent | MouseEvent, useChangedTouches: boolean): {x: number, y: number} | null {
+    if ('changedTouches' in event) {
+      const touch = (useChangedTouches ? event.changedTouches : event.touches)[0];
+      return touch === undefined ? null : {x: touch.clientX, y: touch.clientY};
+    }
+
+    return {x: event.clientX, y: event.clientY};
   }
 
   refreshPersonalToC() {

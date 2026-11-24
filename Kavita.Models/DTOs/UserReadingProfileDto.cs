@@ -102,6 +102,10 @@ public sealed record UserReadingProfileDto
     [Required]
     public bool BookReaderTapToPaginate { get; set; }
 
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderSwipeToPaginate"/>
+    [Required]
+    public bool BookReaderSwipeToPaginate { get; set; }
+
     /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderReadingDirection"/>
     [EnumDataType(typeof(ReadingDirection))]
     [Required]

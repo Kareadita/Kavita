@@ -288,6 +288,18 @@
                         </div>
 
                         <div class="row g-0 mt-4 mb-4">
+                          <app-setting-switch [title]="t('swipe-to-paginate-label')" [subtitle]="t('swipe-to-paginate-tooltip')">
+                            <ng-template>
+                              <div class="form-check form-switch float-end">
+                                <input type="checkbox" role="switch"
+                                       [formField]="formGroup.bookReaderSwipeToPaginate" class="form-check-input"
+                                       aria-labelledby="auto-close-label">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+
+                        <div class="row g-0 mt-4 mb-4">
                           <app-setting-switch [title]="t('immersive-mode-label')" [subtitle]="t('immersive-mode-tooltip')">
                             <ng-template>
                               <div class="form-check form-switch float-end">

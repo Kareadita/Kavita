@@ -46,6 +46,7 @@ export interface ReadingProfile {
   bookReaderFontSize: number;
   bookReaderFontFamily: string;
   bookReaderTapToPaginate: boolean;
+  bookReaderSwipeToPaginate: boolean;
   bookReaderReadingDirection: ReadingDirection;
   bookReaderWritingStyle: WritingStyle;
   bookReaderThemeName: string;

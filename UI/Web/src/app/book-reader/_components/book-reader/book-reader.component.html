@@ -32,7 +32,9 @@
     }
     <div #readingSection class="reading-section {{layoutMode() | columnLayoutClass}} {{writingStyle() | writingStyleClass}}"
          [ngStyle]="{'width': pageWidthForPagination()}"
-         [ngClass]="{'immersive' : immersiveMode() || !actionBarVisible(), 'is-loading': isLoading()}" (click)="handleReaderClick($event)">
+         [ngClass]="{'immersive' : immersiveMode() || !actionBarVisible(), 'is-loading': isLoading(), 'swipe-paginate': swipeToPaginate()}" (click)="handleReaderClick($event)"
+         (touchstart)="onSwipeStart($event)" (touchmove)="onSwipeMove($event)" (touchend)="onSwipeEnd($event)" (touchcancel)="onSwipeCancel()"
+         (mousedown)="onSwipeStart($event)" (mouseup)="onSwipeEnd($event)">
 
 
       <div #bookContainer class="book-container {{writingStyle() | writingStyleClass}}"
