@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Services;
 using Kavita.Common.Helpers;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.Internal;
 using Kavita.Models.Entities.User;
@@ -109,6 +110,12 @@ public class TokenService(
             if (user == null)
             {
                 logger.LogDebug("[RefreshToken] failed to validate due to not finding user in DB");
+                return null;
+            }
+
+            if (!(await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole) || await userManager.IsInRoleAsync(user, PolicyConstants.LoginRole)))
+            {
+                logger.LogDebug("[RefreshToken] User is not allowed to login due to missing roles");
                 return null;
             }
 
