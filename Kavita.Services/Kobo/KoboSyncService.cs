@@ -980,7 +980,9 @@ public class KoboSyncService(
         foreach (var dto in annotationDtos)
         {
             var span = dto.Location?.Span;
-            if (span is null || string.IsNullOrWhiteSpace(span.ChapterFilename)
+            var cleanedFilePath = KoboPositionHelper.NormalizeEpubPath(span?.ChapterFilename);
+
+            if (span is null || string.IsNullOrWhiteSpace(cleanedFilePath)
                 || string.IsNullOrWhiteSpace(span.StartPath) || string.IsNullOrWhiteSpace(span.EndPath)
                 || string.IsNullOrWhiteSpace(dto.HighlightedText))
             {
@@ -988,26 +990,26 @@ public class KoboSyncService(
                 continue;
             }
 
-            if (!documentsByFile.TryGetValue(span.ChapterFilename, out var documents))
+            if (!documentsByFile.TryGetValue(cleanedFilePath, out var documents))
             {
-                var (kepubDoc, pageNumber) = await bookService.GetDocumentAsync(kepubPath, span.ChapterFilename, null);
+                var (kepubDoc, pageNumber) = await bookService.GetDocumentAsync(kepubPath, cleanedFilePath, null);
                 if (kepubDoc is null)
                 {
                     logger.LogWarning("Kobo annotation {AnnotationId} references unknown file {File} in chapter {ChapterId}",
-                        dto.Id, span.ChapterFilename, chapterId);
+                        dto.Id, cleanedFilePath.Sanitize(), chapterId);
                     continue;
                 }
 
-                var (readerDoc, _) = await bookService.GetDocumentAsync(epubPath, span.ChapterFilename, pageNumber);
+                var (readerDoc, _) = await bookService.GetDocumentAsync(epubPath, cleanedFilePath, pageNumber);
                 if (readerDoc is null)
                 {
                     logger.LogWarning("Kobo annotation {AnnotationId} could not be matched to {File} in the original epub",
-                        dto.Id, span.ChapterFilename);
+                        dto.Id, cleanedFilePath.Sanitize());
                     continue;
                 }
 
                 documents = (kepubDoc, readerDoc, pageNumber);
-                documentsByFile[span.ChapterFilename] = documents;
+                documentsByFile[cleanedFilePath] = documents;
             }
 
             var startXPath = KoboPositionHelper.Decode(documents.Kepub, documents.Reader, GetKoboSpanId(span.StartPath));
@@ -1021,7 +1023,7 @@ public class KoboSyncService(
             var annotation = FindAnnotation(annotations, dto.Id);
 
             var isNew = annotation is null;
-            if (isNew)
+            if (annotation is null)
             {
                 annotation = new AppUserAnnotation
                 {
@@ -1316,7 +1318,7 @@ public class KoboSyncService(
             return;
         }
 
-        var file = readingState.CurrentBookmark.Location?.Source;
+        var file = KoboPositionHelper.NormalizeEpubPath(readingState.CurrentBookmark.Location?.Source);
         // Start of book
         if (string.IsNullOrEmpty(file))
         {
@@ -1360,7 +1362,7 @@ public class KoboSyncService(
         var (kepubDoc, pageNum) = await bookService.GetDocumentAsync(kepubPath, file, null);
         if (kepubDoc == null)
         {
-            logger.LogWarning("Kepub was not available after conversion");
+            logger.LogWarning("Failed to find {File} in kepub", file.Sanitize());
             await SetFallbackProgress();
             return;
         }

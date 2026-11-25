@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using HtmlAgilityPack;
 
@@ -10,6 +11,33 @@ public static class KoboPositionHelper
     private const string BookColumnsId = "book-columns";
     private const string BookInnerId = "book-inner";
     private const string ReaderBodyScope = "//body";
+
+    /// <summary>
+    /// Collapsed Kobo's nonsense paths. I.e. OEBPS/../OEBPS/text00005.html
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public static string NormalizeEpubPath(string? path)
+    {
+        if (string.IsNullOrEmpty(path)) return string.Empty;
+
+        var parts = new List<string>();
+        foreach (var seg in path.Split('/', StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (seg == "..")
+            {
+                if (parts.Count > 0)
+                {
+                    parts.RemoveAt(parts.Count - 1);
+                }
+            }
+            else if (seg != ".")
+            {
+                parts.Add(seg);
+            }
+        }
+        return string.Join('/', parts);
+    }
 
     /// <summary>
     /// Encodes an XPath as the best fitting KoboSpan
