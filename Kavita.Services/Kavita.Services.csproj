@@ -58,7 +58,6 @@
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="10.0.1" />
-    <PackageReference Include="System.Drawing.Common" Version="10.0.14" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
     <PackageReference Include="System.IO.Abstractions" Version="22.3.0" />
     <PackageReference Include="TimeZoneConverter" Version="8.0.0" />

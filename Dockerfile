@@ -24,7 +24,7 @@ FROM ubuntu:noble
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
-  && apt-get install -y libicu-dev libgdiplus curl tzdata libjemalloc2 \
+  && apt-get install -y libicu74 curl tzdata libjemalloc2 \
   && rm -rf /var/lib/apt/lists/*
 
 COPY --from=copytask /Kavita /kavita
