@@ -313,9 +313,9 @@ export class ReadingListDetailComponent implements OnInit {
     if (!this.readingList()) return;
     this.readingListService.deleteItem(this.readingList().id, removeEvent.item.id).subscribe(() => {
       const currentItems = this.items();
-      const updated = [...currentItems];
 
-      updated.splice(removeEvent.position, 1);
+      // Delete by id as position isn't accurate (derives from order)
+      const updated = currentItems.filter(i => i.id !== removeEvent.item.id)
 
       this.items.set(updated);
       this.toastr.success(translate('toasts.item-removed'));
