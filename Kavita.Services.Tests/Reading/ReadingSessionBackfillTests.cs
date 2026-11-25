@@ -384,6 +384,76 @@ public class ReadingSessionServiceBackfillReportTests(ITestOutputHelper helper) 
         Assert.Equal([BackfillReadingStatus.Applied], second);
         var stored = await f.Context.AppUserProgresses.AsNoTracking().SingleAsync();
         Assert.Equal(25, stored.PagesRead);
-        Assert.Equal(start.AddMinutes(40), stored.LastModifiedUtc);
+        Assert.Equal(start.AddMinutes(40), stored.LastReadUtc);
+        // What devices syncing from the server go by is still when the progress was saved
+        Assert.True(stored.LastModifiedUtc > DateTime.UtcNow.AddMinutes(-5));
+    }
+
+    [Fact]
+    public async Task BackfillReadingSessions_ReadingOlderThanWhatAnEarlierRequestReportedDoesNotMoveProgressBack()
+    {
+        var f = await Setup();
+        var chapter = await f.Context.Chapter.Include(c => c.Volume).ThenInclude(v => v.Series).SingleAsync(c => c.Id == f.ChapterId);
+        var start = DayAtNoon(2);
+        var row = new AppUserProgress
+        {
+            ChapterId = f.ChapterId,
+            VolumeId = chapter.VolumeId,
+            SeriesId = chapter.Volume.SeriesId,
+            LibraryId = chapter.Volume.Series.LibraryId,
+            AppUserId = f.UserId,
+            PagesRead = 25,
+            LastReadUtc = start.AddMinutes(40),
+        };
+        f.Context.AppUserProgresses.Add(row);
+        await f.Context.SaveChangesAsync();
+        // Saved when it was sent, a day after it was read
+        await f.Context.AppUserProgresses.ExecuteUpdateAsync(p => p
+            .SetProperty(x => x.LastModifiedUtc, DateTime.UtcNow)
+            .SetProperty(x => x.LastReadUtc, (DateTime?) start.AddMinutes(40)));
+        f.Progress.GetUserProgressAsync(f.ChapterId, f.UserId, Arg.Any<CancellationToken>())
+            .Returns(_ => f.Context.AppUserProgresses.AsNoTracking().First());
+
+        await f.Service.BackfillReadingSessions(f.UserId, [Entry(f.ChapterId, start, 10, endPage: 10)]);
+
+        await f.Reader.DidNotReceiveWithAnyArgs().SaveReadingProgress(default!, default, default, default);
+    }
+
+    [Fact]
+    public async Task BackfillReadingSessions_ProgressIsNotStampedWhenItCouldNotBeSaved()
+    {
+        var f = await Setup();
+        f.Progress.GetUserProgressAsync(f.ChapterId, f.UserId, Arg.Any<CancellationToken>()).Returns((AppUserProgress?) null);
+        f.Reader.SaveReadingProgress(Arg.Any<ProgressDto>(), f.UserId, false, Arg.Any<CancellationToken>()).Returns(false);
+
+        var results = await f.Service.BackfillReadingSessions(f.UserId, [Entry(f.ChapterId, DayAtNoon(1), 10)]);
+
+        Assert.Equal([BackfillReadingStatus.Applied], results);
+        Assert.Empty(await f.Context.AppUserProgresses.ToListAsync());
+    }
+
+    [Fact]
+    public async Task ChangingProgressClearsWhenItWasRead()
+    {
+        var f = await Setup();
+        var chapter = await f.Context.Chapter.Include(c => c.Volume).ThenInclude(v => v.Series).SingleAsync(c => c.Id == f.ChapterId);
+        var row = new AppUserProgress
+        {
+            ChapterId = f.ChapterId,
+            VolumeId = chapter.VolumeId,
+            SeriesId = chapter.Volume.SeriesId,
+            LibraryId = chapter.Volume.Series.LibraryId,
+            AppUserId = f.UserId,
+            PagesRead = 3,
+            LastReadUtc = DateTime.UtcNow.AddDays(-2),
+        };
+        f.Context.AppUserProgresses.Add(row);
+        await f.Context.SaveChangesAsync();
+        Assert.NotNull((await f.Context.AppUserProgresses.AsNoTracking().SingleAsync()).LastReadUtc);
+
+        row.PagesRead = 4;
+        await f.Context.SaveChangesAsync();
+
+        Assert.Null((await f.Context.AppUserProgresses.AsNoTracking().SingleAsync()).LastReadUtc);
     }
 }

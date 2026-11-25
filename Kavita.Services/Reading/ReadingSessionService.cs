@@ -433,9 +433,10 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         {
             var chapterId = latest.Entry.ChapterId;
             var progress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapterId, userId, ct);
-            if (progress != null && progress.LastModifiedUtc >= latest.End) continue;
+            // Progress put there by earlier backfilled reading counts from when that was read, not from when it was sent
+            if (progress != null && (progress.LastReadUtc ?? progress.LastModifiedUtc) >= latest.End) continue;
 
-            await readerService.SaveReadingProgress(new ProgressDto
+            var saved = await readerService.SaveReadingProgress(new ProgressDto
             {
                 ChapterId = chapterId,
                 PageNum = latest.Entry.EndPage,
@@ -445,12 +446,13 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
                 LibraryId = 0,
                 LastModifiedUtc = latest.End,
             }, userId, saveToReadingSession: false, ct: ct);
+            if (!saved) continue;
 
-            // Saving stamps the row with the time of the upload. It is when the reading happened that later readings
-            // (sent in another request) have to be compared with, and that "last read" should show
+            // The save stamps the row with the time of the upload, which devices syncing from the server rely on. Readings
+            // sent later, in other requests, have to be compared with when this one happened, so that is kept apart
             await context.AppUserProgresses
                 .Where(p => p.AppUserId == userId && p.ChapterId == chapterId)
-                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.LastModifiedUtc, latest.End), ct);
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.LastReadUtc, (DateTime?) latest.End), ct);
         }
     }
 

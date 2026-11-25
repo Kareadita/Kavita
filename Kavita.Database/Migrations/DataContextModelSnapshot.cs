@@ -1799,6 +1799,9 @@ namespace Kavita.Database.Migrations
                     b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("LastReadUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("LibraryId")
                         .HasColumnType("INTEGER");
 

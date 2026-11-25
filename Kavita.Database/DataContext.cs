@@ -761,6 +761,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         if (e.NewState != EntityState.Modified || e.Entry.Entity is not IEntityDate entity) return;
         entity.LastModified = DateTime.Now;
         entity.LastModifiedUtc = DateTime.UtcNow;
+
+        // A time the reading really happened only describes the progress as it was saved with it
+        if (e.Entry.Entity is AppUserProgress progress && !e.Entry.Property(nameof(AppUserProgress.LastReadUtc)).IsModified)
+        {
+            progress.LastReadUtc = null;
+        }
     }
     #nullable disable
 
