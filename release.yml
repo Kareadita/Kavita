@@ -44,9 +44,9 @@ BuildServer:
     - { From: "Kavita.Server/config/appsettings.json", To: "config/appsettings-init.json"}
   DeletePaths: ["BuildHost-net472", "BuildHost-netcore", "bin", "config/cache-long"]
   IncludeExternalFiles:
-    "linux-x64": [ { From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-64bit", To: "kepubify", "Sha256": "37d7628d26c5c906f607f24b36f781f306075e7073a6fe7820a751bb60431fc5" } ]
-    "linux-arm64": [ { From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm64", To: "kepubify", "Sha256": "5a15b8f6f6a96216c69330601bca29638cfee50f7bf48712795cff88ae2d03a3" } ]
-    "linux-arm": [ { From: "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm", To: "kepubify", "Sha256": "07f23275c4e674093443f01a591aa0980b0b87dbb0a10986d5001e9d56b0e1e7" } ]
+    "linux-x64": [ { From: "https://github.com/pgaskin/kepubify/releases/download/v5.0.0/kepubify-linux-64bit", To: "kepubify", "Sha256": "cb77fe364f780feea8de4586600f7160c7516586c21d9a80b1504c6630389069" } ]
+    "linux-arm64": [ { From: "https://github.com/pgaskin/kepubify/releases/download/v5.0.0/kepubify-linux-arm64", To: "kepubify", "Sha256": "6d6b44725f3161f3fa9f364c3c7cabd810a67e90420e18c84fe9f366c80d6782" } ]
+    "linux-arm": [ { From: "https://github.com/pgaskin/kepubify/releases/download/v5.0.0/kepubify-linux-arm", To: "kepubify", "Sha256": "57aa3e1a2d8e30af2ebce70e4c203889ee2b66d4b97c9d88a24b6f40b0de26a5" } ]
 
 Docker:
   Push: true
