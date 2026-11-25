@@ -138,20 +138,24 @@ public class KoboEpubHelperTests
     [Fact]
     public void GroupPages_ChapterNumbersGoBackwards_FallsBackToPageRuns()
     {
-        MangaFileDto[] files = [Chapter(1, "002", 4), Chapter(2, "001", 4)];
+        MangaFileDto[] files = [Chapter(1, "002", 16), Chapter(2, "001", 16)];
 
-        Assert.Equal([new EpubTocGroup(0, 7, EpubTocGroupKind.Pages, null)], Group(files));
+        Assert.Equal(
+        [
+            new EpubTocGroup(0, 19, EpubTocGroupKind.Pages, null),
+            new EpubTocGroup(20, 31, EpubTocGroupKind.Pages, null),
+        ], Group(files));
     }
 
     [Fact]
     public void GroupPages_NoChapterNumbers_FallsBackToPageRuns()
     {
-        MangaFileDto[] files = [File(1, "Akame ga KILL! ZERO Extras", 12), File(2, "Akame ga KILL! ZERO Bonus", 12)];
+        MangaFileDto[] files = [File(1, "Akame ga KILL! ZERO Extras", 20), File(2, "Akame ga KILL! ZERO Bonus", 20)];
 
         Assert.Equal(
         [
             new EpubTocGroup(0, 19, EpubTocGroupKind.Pages, null),
-            new EpubTocGroup(20, 23, EpubTocGroupKind.Pages, null),
+            new EpubTocGroup(20, 39, EpubTocGroupKind.Pages, null),
         ], Group(files));
     }
 
@@ -159,13 +163,40 @@ public class KoboEpubHelperTests
     public void GroupPages_FilePagesDisagreeWithCache_FallsBackToPageRuns()
     {
         // A stale MangaFile.Pages would shift every later group onto the wrong pages
-        MangaFileDto[] files = [Chapter(1, "001", 5), Chapter(2, "002", 4)];
+        MangaFileDto[] files = [Chapter(1, "001", 20), Chapter(2, "002", 19)];
 
-        Assert.Equal([new EpubTocGroup(0, 9, EpubTocGroupKind.Pages, null)], KoboEpubHelper.GroupPages(files, 10, LibraryType.Manga));
+        Assert.Equal(
+        [
+            new EpubTocGroup(0, 19, EpubTocGroupKind.Pages, null),
+            new EpubTocGroup(20, 39, EpubTocGroupKind.Pages, null),
+        ], KoboEpubHelper.GroupPages(files, 40, LibraryType.Manga));
     }
 
     [Theory]
-    [InlineData(15, new[] { 0, 14 })]
+    [InlineData(1)]
+    [InlineData(30)]
+    public void GroupPages_OneFileUpToThirtyPages_OneEntryPerPage(int count)
+    {
+        MangaFileDto[] files = [Chapter(1, "001", count)];
+
+        var expected = Enumerable.Range(0, count).Select(p => new EpubTocGroup(p, p, EpubTocGroupKind.Page, null));
+        Assert.Equal(expected, Group(files));
+    }
+
+    [Fact]
+    public void GroupPages_ShortChapterWithChapterGroups_ChaptersWin()
+    {
+        MangaFileDto[] files = [Chapter(1, "001", 5), Chapter(2, "002", 4)];
+
+        Assert.Equal(
+        [
+            new EpubTocGroup(0, 4, EpubTocGroupKind.Chapter, "1"),
+            new EpubTocGroup(5, 8, EpubTocGroupKind.Chapter, "2"),
+        ], Group(files));
+    }
+
+    [Theory]
+    [InlineData(31, new[] { 0, 19, 20, 30 })]
     [InlineData(40, new[] { 0, 19, 20, 39 })]
     [InlineData(45, new[] { 0, 19, 20, 39, 40, 44 })]
     public void GroupPages_OneFile_RunsOfTwenty(int count, int[] bounds)

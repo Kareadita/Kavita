@@ -13,6 +13,7 @@ namespace Kavita.Services.Helpers.Kobo;
 public static class KoboEpubHelper
 {
     private const string SectionPrefix = "section";
+    public const int MaxSinglePageEntries = 30;
 
     /// <summary>
     /// Returns the 0-based Kavita page for a Kobo section path. A split half maps to its source page
@@ -56,8 +57,9 @@ public static class KoboEpubHelper
 
     /// <summary>
     /// Splits a chapter's pages into table of contents groups, one per chapter number parsed from the chapter's file
-    /// names, else runs of <paramref name="pagesPerGroup"/> pages
+    /// names, else one per page up to <see cref="MaxSinglePageEntries"/> pages, else runs of <paramref name="pagesPerGroup"/> pages
     /// </summary>
+    /// <remarks>The Kobo lists the ToC, not the page-list, so a short chapter needs its pages in the ToC</remarks>
     /// <param name="files">The chapter's files, in any order</param>
     /// <param name="pageCount">Number of pages in the chapter's cache folder</param>
     /// <param name="libraryType">Picks the parser for the file names</param>
@@ -75,7 +77,7 @@ public static class KoboEpubHelper
             if (chapterGroups.Count > 1) return chapterGroups;
         }
 
-        return GroupByRuns(pageCount, pagesPerGroup);
+        return pageCount <= MaxSinglePageEntries ? GroupBySinglePage(pageCount) : GroupByRuns(pageCount, pagesPerGroup);
     }
 
     /// <summary>
@@ -131,6 +133,13 @@ public static class KoboEpubHelper
         }
 
         return numbers;
+    }
+
+    private static List<EpubTocGroup> GroupBySinglePage(int pageCount)
+    {
+        return Enumerable.Range(0, pageCount)
+            .Select(page => new EpubTocGroup(page, page, EpubTocGroupKind.Page, null))
+            .ToList();
     }
 
     private static List<EpubTocGroup> GroupByRuns(int pageCount, int pagesPerGroup)

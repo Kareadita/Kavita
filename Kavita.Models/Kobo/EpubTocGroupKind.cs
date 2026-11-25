@@ -14,4 +14,9 @@ public enum EpubTocGroupKind
     /// </summary>
     [Description("Pages")]
     Pages = 1,
+    /// <summary>
+    /// A single page, used for short chapters with no chapter grouping
+    /// </summary>
+    [Description("Page")]
+    Page = 2,
 }

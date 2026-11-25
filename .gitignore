@@ -544,6 +544,9 @@ kepubify.exe
 Kavita.Services.Tests/Test Data/ImageService/**/*_output*.*
 Kavita.Services.Tests/Test Data/ImageService/**/*_baseline*
 Kavita.Services.Tests/Test Data/ImageService/**/*.html
+Kavita.Services.Tests/Test Data/KoboOptimizationService/*_output*
+Kavita.Services.Tests/Test Data/KoboOptimizationService/*.cb?
+Kavita.Services.Tests/Test Data/KoboOptimizationService/*.zip
 Kavita.Services.Tests/Test Data/ScannerService/ScanTests/**/*
 
 

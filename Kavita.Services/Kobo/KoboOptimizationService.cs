@@ -53,7 +53,7 @@ public class KoboOptimizationService(ICacheService cacheService,
         return chapter.Files.First().Format switch
         {
             MangaFormat.Epub => await GetEpubDownloadPath(chapter, convert, ct),
-            MangaFormat.Archive or MangaFormat.Image or MangaFormat.Pdf => await GetImageDownloadPath(userId, chapter, convert, koboDeviceId, ct),
+            MangaFormat.Archive or MangaFormat.Image or MangaFormat.Pdf => await GetImageDownloadPath(userId, chapter, koboDeviceId, ct),
             _ => throw new NotSupportedException()
         };
     }
@@ -69,8 +69,11 @@ public class KoboOptimizationService(ICacheService cacheService,
         return await ConvertToKepub(epubPath, kepubifyConverterService.BuildKepubifyPath(chapter.Id), ct);
     }
 
-    private async Task<string> GetImageDownloadPath(int userId, ChapterDto chapter, bool convert, string? koboDeviceId,
-        CancellationToken ct)
+    /// <summary>
+    /// Collects images from Archive/Image/PDF (pdf -> image) and bundles into a .kepub.epub file with full metadata.
+    /// </summary>
+    /// <remarks>This does not run Kepubify but always writes as .kepub.epub to ensure Kobo loads the correct renderer</remarks>
+    private async Task<string> GetImageDownloadPath(int userId, ChapterDto chapter, string? koboDeviceId, CancellationToken ct)
     {
         var ids = await unitOfWork.ChapterRepository.GetParentIdsForChapter(chapter.Id, ct);
         if (ids is null) throw new KavitaNotFoundException();
@@ -86,36 +89,32 @@ public class KoboOptimizationService(ICacheService cacheService,
         var renderSettings = await GetRenderer(userId, koboDeviceId);
         var cacheKey = BuildCacheKey(chapter, title, readingProfile.ReadingDirection, namingCtx, renderSettings);
         var basePath = Path.Join(directoryService.TempDirectory, $"kavita_kobo_u{userId}_c{chapter.Id}_{cacheKey}");
-        var epubPath = $"{basePath}.epub";
         var kepubPath = $"{basePath}.kepub.epub";
 
-        if (convert && fileSystem.File.Exists(kepubPath)) return kepubPath;
+        if (fileSystem.File.Exists(kepubPath)) return kepubPath;
 
-        if (!fileSystem.File.Exists(epubPath))
+        if (await cacheService.Ensure(chapter.Id, true, ct) is null)
         {
-            if (await cacheService.Ensure(chapter.Id, true, ct) is null)
-            {
-                throw new KavitaException(await localizationService.TranslateAsync("cache-file-find"));
-            }
-
-            // Built under a temp name and moved, so a failed build never leaves a half-written epub that the Exists check would serve
-            var buildPath = $"{basePath}.{Guid.NewGuid():N}.tmp.epub";
-            var options = new BuildEpubOptions(title, cacheService.GetCachedPages(chapter.Id).ToList(), renderSettings,
-                readingProfile.ReadingDirection, chapter, buildPath);
-
-            try
-            {
-                await epubBuilderService.BuildEpubAsync(options, userId, namingCtx, ct);
-                fileSystem.File.Move(buildPath, epubPath, true);
-            }
-            catch
-            {
-                directoryService.DeleteFileQuietly(buildPath);
-                throw;
-            }
+            throw new KavitaException(await localizationService.TranslateAsync("cache-file-find"));
         }
 
-        return convert ? await ConvertToKepub(epubPath, kepubPath, ct) : epubPath;
+        // Built under a temp name and moved, so a failed build never leaves a half-written file that the Exists check would serve
+        var buildPath = $"{basePath}.{Guid.NewGuid():N}.tmp.epub";
+        var options = new BuildEpubOptions(title, cacheService.GetCachedPages(chapter.Id).ToList(), renderSettings,
+            readingProfile.ReadingDirection, chapter, buildPath);
+
+        try
+        {
+            await epubBuilderService.BuildEpubAsync(options, userId, namingCtx, ct);
+            fileSystem.File.Move(buildPath, kepubPath, true);
+        }
+        catch
+        {
+            directoryService.DeleteFileQuietly(buildPath);
+            throw;
+        }
+
+        return kepubPath;
     }
 
     private Task<ImageRender> GetRenderer(int userId, string? koboDeviceId)

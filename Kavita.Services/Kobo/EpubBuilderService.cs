@@ -102,9 +102,13 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         var entries = new List<EpubNavigationEntry>(groups.Count);
         foreach (var group in groups)
         {
-            var label = group.Kind == EpubTocGroupKind.Chapter
-                ? naming.FormatChapterNumber(group.Number!)
-                : await localizationService.TranslateAsync(userId, "toc-pages", group.FirstPage + 1, group.LastPage + 1);
+            var label = group.Kind switch
+            {
+                EpubTocGroupKind.Chapter => naming.FormatChapterNumber(group.Number!),
+                EpubTocGroupKind.Page => await localizationService.TranslateAsync(userId, "toc-page", group.FirstPage + 1),
+                EpubTocGroupKind.Pages => await localizationService.TranslateAsync(userId, "toc-pages", group.FirstPage + 1, group.LastPage + 1),
+                _ => throw new ArgumentOutOfRangeException(nameof(group), group.Kind, null),
+            };
 
             entries.Add(new EpubNavigationEntry(label, KoboEpubHelper.GetPath(group.FirstPage)));
         }
@@ -209,14 +213,19 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         AddPersonAttribution(publication, chapterDto.Editors, PersonRole.Editor, "edt", isCreator: false);
         AddPersonAttribution(publication, chapterDto.Translators, PersonRole.Translator, "trl", isCreator: false);
 
-        var publisher = chapterDto.Publishers.FirstOrDefault()?.Name ?? string.Empty;
-
-        publication.SetPublicationDetails(new EpubPublicationDetails()
+        var publisher = chapterDto.Publishers.FirstOrDefault()?.Name;
+        var publisherInfo = new EpubPublicationDetails()
         {
             Description = HtmlHelper.ToPlainText(chapterDto.Summary),
             PublicationDate = chapterDto.ReleaseDate == DateTime.MinValue ? null : chapterDto.ReleaseDate,
             Publisher = publisher,
-        });
+        };
+        if (publisher != null)
+        {
+            publisherInfo.Publisher = publisher;
+        }
+
+        publication.SetPublicationDetails(publisherInfo);
 
         var isbn = chapterDto.ISBN;
         if (!string.IsNullOrEmpty(isbn))
