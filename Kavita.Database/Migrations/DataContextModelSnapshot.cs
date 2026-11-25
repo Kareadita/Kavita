@@ -1881,6 +1881,9 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
 
+                    b.Property<bool>("IsBackfilled")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsGenerated")
                         .HasColumnType("INTEGER");
 
