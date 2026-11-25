@@ -230,11 +230,9 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
                 var start = AsUtc(entry.StartTimeUtc);
                 var end = AsUtc(entry.EndTimeUtc);
 
-                // A clock that runs a little ahead is not worth refusing; the reading just ends now
-                if (end > nowUtc && end - nowUtc <= BackfillClockSkew) end = nowUtc;
-
                 if (end < start || entry.StartPage < 0 || entry.EndPage < 0) results[i] = BackfillReadingStatus.Invalid;
-                else if (end > nowUtc) results[i] = BackfillReadingStatus.InFuture;
+                // A clock that runs a little ahead is not worth refusing. The times are kept as sent, so sending them again matches
+                else if (end > nowUtc + BackfillClockSkew) results[i] = BackfillReadingStatus.InFuture;
                 else if (start < oldestUtc) results[i] = BackfillReadingStatus.TooOld;
                 else
                 {
@@ -325,10 +323,28 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
                 results[candidate.Index] = BackfillReadingStatus.Applied;
             }
 
+            // A session does not carry over midnight, as when one is closed. The activity keeps the times it really had
+            foreach (var session in sessions)
+            {
+                var endOfStartDay = session.StartTime.Date.AddDays(1).AddTicks(-1);
+                if (session.EndTime > endOfStartDay)
+                {
+                    session.EndTime = endOfStartDay;
+                    session.EndTimeUtc = TimeZoneInfo.ConvertTimeToUtc(endOfStartDay, TimeZoneInfo.Local);
+                }
+            }
+
+            // Progress first. Doing it again is harmless (it only ever moves forward in reading time), so a request that
+            // stops after this can be sent again and finish
+            await MoveProgressAsync(userId, toRecord, scope, ct);
+
+            // The sessions and the reads they count go in together. Nothing is recorded by a request that fails here, so a
+            // retry is not told that reading it never finished recording is AlreadyRecorded
+            await using var transaction = await context.Database.BeginTransactionAsync(ct);
             context.AppUserReadingSession.AddRange(sessions);
             await context.SaveChangesAsync(ct);
-
-            await MoveProgressAsync(userId, toRecord, scope, ct);
+            await CountCompletedReadsAsync(userId, sessions, context, ct);
+            await transaction.CommitAsync(ct);
 
             _logger.LogInformation("Recorded {Count} backfilled reading sessions for user {UserId} from {EntryCount} entries",
                 sessions.Count, userId, toRecord.Count);
@@ -346,7 +362,9 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
     {
         var entry = candidate.Entry;
         var tz = TimeZoneInfo.Local;
-        var startPage = format == MangaFormat.Epub ? entry.StartPage : Math.Max(entry.StartPage - 1, 0);
+        // Like live progress, nothing is read past the end of the chapter
+        var endPage = Math.Min(entry.EndPage, chapter.Pages);
+        var startPage = Math.Min(format == MangaFormat.Epub ? entry.StartPage : Math.Max(entry.StartPage - 1, 0), endPage);
 
         var activity = new AppUserReadingSessionActivityData
         {
@@ -356,14 +374,14 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
             LibraryId = chapter.LibraryId,
             Format = format,
             StartPage = startPage,
-            EndPage = entry.EndPage,
+            EndPage = endPage,
             StartBookScrollId = entry.StartBookScrollId,
             EndBookScrollId = entry.EndBookScrollId,
             StartTimeUtc = candidate.Start,
             StartTime = TimeZoneInfo.ConvertTimeFromUtc(candidate.Start, tz),
             EndTimeUtc = candidate.End,
             EndTime = TimeZoneInfo.ConvertTimeFromUtc(candidate.End, tz),
-            PagesRead = Math.Max(entry.EndPage - startPage, 0),
+            PagesRead = Math.Max(endPage - startPage, 0),
             TotalPages = chapter.Pages,
             TotalWords = chapter.WordCount,
         };
@@ -403,8 +421,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
     /// <summary>
     /// A chapter's progress moves to where its latest backfilled reading ended, unless progress was saved after that
-    /// (the user kept reading on another device). Chapters that were finished count as read once more, like when a live
-    /// session closes.
+    /// (the user kept reading on another device).
     /// </summary>
     private async Task MoveProgressAsync(int userId, List<BackfillCandidate> recorded, IServiceScope scope, CancellationToken ct)
     {
@@ -414,12 +431,13 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
         foreach (var latest in recorded.GroupBy(c => c.Entry.ChapterId).Select(g => g.MaxBy(c => c.End)!))
         {
-            var progress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(latest.Entry.ChapterId, userId, ct);
+            var chapterId = latest.Entry.ChapterId;
+            var progress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapterId, userId, ct);
             if (progress != null && progress.LastModifiedUtc >= latest.End) continue;
 
             await readerService.SaveReadingProgress(new ProgressDto
             {
-                ChapterId = latest.Entry.ChapterId,
+                ChapterId = chapterId,
                 PageNum = latest.Entry.EndPage,
                 BookScrollId = latest.Entry.EndBookScrollId,
                 VolumeId = 0,
@@ -427,28 +445,34 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
                 LibraryId = 0,
                 LastModifiedUtc = latest.End,
             }, userId, saveToReadingSession: false, ct: ct);
+
+            // Saving stamps the row with the time of the upload. It is when the reading happened that later readings
+            // (sent in another request) have to be compared with, and that "last read" should show
+            await context.AppUserProgresses
+                .Where(p => p.AppUserId == userId && p.ChapterId == chapterId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.LastModifiedUtc, latest.End), ct);
         }
+    }
 
-        var completed = recorded
-            .Where(c => c.Entry.EndPage > 0)
-            .Select(c => c.Entry.ChapterId)
-            .Distinct()
-            .ToList();
-        if (completed.Count == 0) return;
+    /// <summary>
+    /// Each session in which a chapter was finished counts as one more read of it, like when a live session closes
+    /// </summary>
+    private static async Task CountCompletedReadsAsync(int userId, List<AppUserReadingSession> sessions, IDataContext context, CancellationToken ct)
+    {
+        var readsByChapter = sessions
+            .SelectMany(session => session.ActivityData
+                .Where(a => a.TotalPages > 0 && a.EndPage >= a.TotalPages)
+                .Select(a => a.ChapterId)
+                .Distinct())
+            .GroupBy(id => id)
+            .ToDictionary(g => g.Key, g => g.Count());
 
-        var finished = await context.Chapter
-            .Where(c => completed.Contains(c.Id) && c.Pages > 0)
-            .Select(c => new { c.Id, c.Pages })
-            .ToListAsync(ct);
-        var finishedIds = finished
-            .Where(c => recorded.Any(r => r.Entry.ChapterId == c.Id && r.Entry.EndPage >= c.Pages))
-            .Select(c => c.Id)
-            .ToList();
-        if (finishedIds.Count == 0) return;
-
-        await context.AppUserProgresses
-            .Where(p => p.AppUserId == userId && finishedIds.Contains(p.ChapterId))
-            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.TotalReads, x => x.TotalReads + 1), ct);
+        foreach (var (chapterId, reads) in readsByChapter)
+        {
+            await context.AppUserProgresses
+                .Where(p => p.AppUserId == userId && p.ChapterId == chapterId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.TotalReads, x => x.TotalReads + reads), ct);
+        }
     }
 
     private static DateTime AsUtc(DateTime value) => value.Kind switch

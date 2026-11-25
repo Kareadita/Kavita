@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -11,7 +11,9 @@ namespace Kavita.Models.DTOs.Progress;
 public sealed record BackfillReadingDto
 {
     /// <summary>
-    /// At most <see cref="MaxEntries"/>; clients with more should send several requests
+    /// At most <see cref="MaxEntries"/>. Clients with more should send several requests, cutting them where the reading
+    /// paused for longer than a session lasts (10 minutes), since entries in different requests are never joined
+    /// into one session
     /// </summary>
     public required IList<BackfillReadingEntryDto> Entries { get; set; }
 
@@ -73,7 +75,7 @@ public enum BackfillReadingStatus
     /// </summary>
     TooOld = 4,
     /// <summary>
-    /// Ends in the future
+    /// Ends more than a few minutes after the server's clock
     /// </summary>
     InFuture = 5,
 }
