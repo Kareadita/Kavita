@@ -187,7 +187,7 @@ public static partial class AnnotationHelper
             return new KoboAnnotationDto
             {
                 ClientLastModifiedUtc = annotation.LastModifiedUtc,
-                HighlightColor = highlightSlots[annotation.SelectedSlotIndex].Color.ToHex(false).ToUpper(),
+                HighlightColor = GetKoboColourHexFromSlotIndex(annotation.SelectedSlotIndex),
                 HighlightedText = annotation.SelectedText,
                 Id = string.IsNullOrEmpty(annotation.KoboId) ? annotation.Id.ToString() : annotation.KoboId,
                 Type = string.IsNullOrWhiteSpace(annotation.CommentPlainText) ? "highlight" : "note",
@@ -207,6 +207,18 @@ public static partial class AnnotationHelper
                 noteText = annotation.CommentPlainText,
             };
         }).WhereNotNull();
+    }
+
+    private static string GetKoboColourHexFromSlotIndex(int index)
+    {
+        return index switch
+        {
+            0 => "#F6F3B3",
+            1 => "#E8AFCF",
+            2 => "#B2E1E8",
+            3 => "#C6E09E",
+            _ => "#F6F3B3"
+        };
     }
 
     internal static bool TryResolveAnchors(HtmlDocument doc, string startXPath, string endXPath, string selectedText, out TextAnchor start, out TextAnchor end)

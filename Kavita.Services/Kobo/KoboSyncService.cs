@@ -1042,7 +1042,7 @@ public class KoboSyncService(
             annotation.EndingXPath = endXPath;
             annotation.SelectedText = dto.HighlightedText;
             annotation.HighlightCount = dto.HighlightedText.Length;
-            annotation.SelectedSlotIndex = GetHighlightSlotIndex(highlightSlots, dto.HighlightColor);
+            annotation.SelectedSlotIndex = GetHighlightSlotIndex(dto.HighlightColor);
             annotation.PageNumber = documents.PageNumber;
             annotation.ChapterTitle = GetChapterTitle(toc, documents.PageNumber);
             annotation.Comment = BuildComment(dto.noteText);
@@ -1079,22 +1079,20 @@ public class KoboSyncService(
         return spanId.Replace("\\", string.Empty);
     }
 
-    private static int GetHighlightSlotIndex(List<HighlightSlot> highlightSlots, string? koboColor)
+    private static int GetHighlightSlotIndex(string? koboColor)
     {
         if (string.IsNullOrEmpty(koboColor)) return 0;
 
-        // Kobo sends #RRGGBB, tolerate an alpha suffix
-        var color = koboColor.Length == 9 ? koboColor[..7] : koboColor;
-
-        for (var i = 0; i < highlightSlots.Count; i++)
+        // Kobo's colours are fixed. We will just sync to the first 4 slots we have (5th slot will never be used for Kobo
+        // created annotations
+        return koboColor.ToUpperInvariant() switch
         {
-            if (highlightSlots[i].Color.ToHex(false).Equals(color, StringComparison.OrdinalIgnoreCase))
-            {
-                return i;
-            }
-        }
-
-        return 0;
+            "#F6F3B3" => 0, // Yellow
+            "#E8AFCF" => 1, // Pink
+            "#B2E1E8" => 2, // Blue
+            "#C6E09E" => 3, // Green
+            _ => 0
+        };
     }
 
     private static string GetChapterTitle(ICollection<BookChapterItem> toc, int pageNumber)
