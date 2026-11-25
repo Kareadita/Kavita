@@ -302,14 +302,14 @@ export class ReadingListDetailComponent implements OnInit {
     });
   }
 
-  orderUpdated(event: IndexUpdateEvent) {
+  orderUpdated(event: IndexUpdateEvent<ReadingListItem>) {
     if (!this.readingList()) return;
     this.readingListService.updatePosition(this.readingList().id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
       this.getListItems();
     });
   }
 
-  removeItem(removeEvent: ItemRemoveEvent) {
+  removeItem(removeEvent: ItemRemoveEvent<ReadingListItem>) {
     if (!this.readingList()) return;
     this.readingListService.deleteItem(this.readingList().id, removeEvent.item.id).subscribe(() => {
       const currentItems = this.items();

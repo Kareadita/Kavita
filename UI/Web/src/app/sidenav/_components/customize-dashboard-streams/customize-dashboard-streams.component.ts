@@ -61,7 +61,7 @@ export class CustomizeDashboardStreamsComponent {
     });
   }
 
-  orderUpdated(event: IndexUpdateEvent) {
+  orderUpdated(event: IndexUpdateEvent<DashboardStream>) {
     this.dashboardService.updateDashboardStreamPosition(event.item.name, event.item.id, event.fromPosition, event.toPosition).subscribe();
   }
 
