@@ -161,7 +161,7 @@ public class ReadingListService(
             await CalculateStartAndEndDates(readingList);
 
             var index = 0;
-            foreach (var readingListItem in readingList.Items)
+            foreach (var readingListItem in readingList.Items.Where(i => !itemIdsToRemove.Contains(i.Id)))
             {
                 readingListItem.Order = index;
                 index++;

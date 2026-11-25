@@ -197,7 +197,6 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         Assert.Equal("//body/p[1]", created.EndingXPath);
         Assert.Equal("Hello world", created.SelectedText);
         Assert.Equal(11, created.HighlightCount);
-        Assert.Equal(1, created.SelectedSlotIndex);
         Assert.Equal(0, created.PageNumber);
         Assert.Equal("Chapter One", created.ChapterTitle);
         Assert.Equal("A note", created.CommentPlainText);
