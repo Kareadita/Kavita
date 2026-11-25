@@ -15,4 +15,15 @@ public static class ExternalMetadataIdHelper
         entity.CbrId = dto.CbrId ?? 0;
         entity.ComicVineId = dto.ComicVineId;
     }
+
+    public static void ResetExternalMetadataIds(this IHasMetadataIds entity)
+    {
+        entity.AniListId = 0;
+        entity.MalId = 0;
+        entity.MangaBakaId = 0;
+        entity.HardcoverId = 0;
+        entity.MetronId = 0;
+        entity.CbrId = 0;
+        entity.ComicVineId = string.Empty;
+    }
 }

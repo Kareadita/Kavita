@@ -418,14 +418,6 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .ToListAsync(ct);
     }
 
-    public Task<KoboBookDetailsDto?> GetKoboBookDetailsAsync(int chapterId, CancellationToken ct = default)
-    {
-        return context.Chapter
-            .Where(c => c.Id == chapterId)
-            .ProjectTo<KoboBookDetailsDto>(mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync(ct);
-    }
-
     public async Task<KoboRecommendationResponseDto> GetKoboRecommendationAsync(int userId, int chapterId, CancellationToken ct = default)
     {
         const int maxRecommendationCount = 25;

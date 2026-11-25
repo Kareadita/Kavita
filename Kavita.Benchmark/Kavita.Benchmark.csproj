@@ -6,15 +6,15 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.15.8" />
     <PackageReference Include="NSubstitute" Version="6.2.0" />
   </ItemGroup>
-  
+
     <ItemGroup>
-      <None Update="Data\AesopsFables.epub">
+      <None Update="Test Data\AesopsFables.epub">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
@@ -31,7 +31,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Update="Data\AesopsFables.epub">
+    <None Update="Test Data\AesopsFables.epub">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

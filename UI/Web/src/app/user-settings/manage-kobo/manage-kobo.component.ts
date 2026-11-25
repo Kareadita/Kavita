@@ -11,7 +11,7 @@ import {
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {disabled, FieldTree, form, FormField, max, min, required} from '@angular/forms/signals';
 import {TranslocoDirective} from '@jsverse/transloco';
-import {debounceTime, distinctUntilChanged, EMPTY, filter, finalize, forkJoin, map, of, switchMap} from 'rxjs';
+import {debounceTime, distinctUntilChanged, EMPTY, filter, finalize, forkJoin, map, of, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../../admin/settings.service';
 import {AccountService} from '../../_services/account.service';
 import {CollectionTagService} from '../../_services/collection-tag.service';
@@ -27,6 +27,17 @@ import {TypeaheadConfig} from '../../typeahead/_models/typeahead-config';
 import {LoadingComponent} from '../../shared/loading/loading.component';
 import {EmptyStateComponent} from '../../shared/_components/empty-state/empty-state.component';
 import {LicenseService} from "../../_services/license.service";
+import {WikiLink} from "../../_models/wiki";
+import {TranslocoInjectComponent} from "../../shared/_components/transloco-inject/transloco-inject.component";
+import {TranslocoSlotDirective} from "../../_directives/transloco-slot.directive";
+import {ApiKeyComponent} from "../api-key/api-key.component";
+import {AuthKeyProvider, KoboSyncName} from "../../_models/user/auth-key";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
+import {url} from "../../_validators/url.validator";
+import {FormsModule} from "@angular/forms";
+import {ServerSettings} from "../../admin/_models/server-settings";
 
 interface SyncSourceItem {
   id: number;
@@ -53,7 +64,14 @@ interface SyncSource {
     SettingSwitchComponent,
     TypeaheadComponent,
     LoadingComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
+    TranslocoInjectComponent,
+    TranslocoSlotDirective,
+    ApiKeyComponent,
+    DefaultValuePipe,
+    EnterBlurDirective,
+    ValidationErrorsComponent,
+    FormsModule
   ],
   templateUrl: './manage-kobo.component.html',
   styleUrl: './manage-kobo.component.scss',
@@ -81,12 +99,25 @@ export class ManageKoboComponent implements OnInit {
   protected readonly preferencesError = signal(false);
   protected readonly syncSources = signal<SyncSource[]>([]);
   protected readonly managedCollectionTypeahead = signal<TypeaheadConfig<SyncSourceItem> | null>(null);
+  private serverSettings: ServerSettings | undefined;
 
-  private readonly managedCollectionTypeaheadRef = viewChild<TypeaheadComponent<SyncSourceItem>>('managedCollectionTypeahead');
+  koboAuthKeyModel = signal<string>('');
+  koboAuthKeyFormGroup = form(this.koboAuthKeyModel);
+  protected readonly koboAuthKeyId = computed(() => {
+    const keys = this.accountService.currentUser()?.authKeys ?? [];
+    return keys.find(k => k.name === this.koboAuthKeyModel())?.id ?? 0;
+  });
+  koboUrlRsc = this.accountService.koboSyncUrlRsc(() => this.koboAuthKeyId());
+
+  private readonly hostNameFormModel = signal<string>('');
+  protected readonly hostNameFormGroup = form(this.hostNameFormModel, path => {
+    url(path, {requireTls: false});
+  });
 
   private readonly formModel = signal<KoboSyncPreferences>({
     collectionSyncEnabled: false,
     forwardToKoboStore: false,
+    createOnDeckCollection: false,
     librarySyncEnabled: false,
     managedCollection: 0,
     readingListSyncEnabled: false,
@@ -106,10 +137,12 @@ export class ManageKoboComponent implements OnInit {
     disabled(path.librarySyncEnabled, {when: () => !this.koboEditable() || this.isReadOnly()});
     disabled(path.readingListSyncEnabled, {when: () => !this.koboEditable() || this.isReadOnly()});
     disabled(path.collectionSyncEnabled, {when: () => !this.koboEditable() || this.isReadOnly()});
+    disabled(path.createOnDeckCollection, {when: () => !this.koboEditable() || this.isReadOnly()});
     disabled(path.managedCollection, {when: () => !this.koboEditable() || this.isReadOnly()});
   });
 
   protected readonly managedCollectionId = computed(() => this.formModel().managedCollection);
+  protected readonly hostNameNotSetup = computed(() => this.hostNameFormModel() === '');
 
   private lastPersistedPreferences = '';
 
@@ -124,10 +157,42 @@ export class ManageKoboComponent implements OnInit {
       switchMap(pref => this.savePreferences(pref)),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
+
+    toObservable(this.hostNameFormModel).pipe(
+      debounceTime(150),
+      distinctUntilChanged(),
+      filter(() => !!this.serverSettings && this.accountService.hasAdminRole()),
+      map(hostname => ({
+        ...this.serverSettings!,
+        hostName: hostname
+      })),
+      switchMap(settings => this.settingsService.updateServerSettings(settings)),
+      tap(settings => {
+        this.serverSettings = settings;
+        this.hostNameFormModel.set(settings.hostName);
+      })
+    ).subscribe()
   }
 
   ngOnInit(): void {
     this.loadPreferences();
+
+    const authkey = this.accountService.currentUser()?.authKeys.find(k => k.name == KoboSyncName)
+    ?? this.accountService.currentUser()?.authKeys[0];
+    if (authkey) {
+      this.koboAuthKeyModel.set(authkey.name);
+    }
+
+    if (this.accountService.hasAdminRole()) {
+      this.settingsService.getServerSettings().subscribe(settings => {
+        this.hostNameFormModel.set(settings.hostName);
+        this.serverSettings = settings;
+      });
+    } else {
+      this.settingsService.getHostname().subscribe(hostname => {
+        this.hostNameFormModel.set(hostname);
+      });
+    }
   }
 
   protected onSourceSelectionChange(source: SyncSource, items: SyncSourceItem[]) {
@@ -227,4 +292,7 @@ export class ManageKoboComponent implements OnInit {
     config.savedData = items.filter(item => selectedIds.includes(item.id));
     return config;
   }
+
+  protected readonly WikiLink = WikiLink;
+  protected readonly AuthKeyProvider = AuthKeyProvider;
 }

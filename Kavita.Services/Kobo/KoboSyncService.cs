@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Net.Http;
@@ -19,8 +20,10 @@ using Kavita.API.Services.Reading;
 using Kavita.API.Store;
 using Kavita.Common;
 using Kavita.Common.Extensions;
+using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
 using Kavita.Models.Constants;
+using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Progress;
 using Kavita.Models.DTOs.Reader;
@@ -30,9 +33,12 @@ using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
+using Kavita.Models.Images;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers;
 using Kavita.Services.Helpers.Kobo;
+using Kavita.Services.Images.ImageSteps;
+using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -62,7 +68,10 @@ public class KoboSyncService(
     IHttpClientFactory httpClientFactory,
     IKepubifyConverterService kepubifyConverterService,
     IFileSystem fileSystem,
-    ILocalizationService localizationService
+    ILocalizationService localizationService,
+    IDirectoryService directoryService,
+    IImagePipeline imagePipeline,
+    IEntityNamingService entityNamingService
     ): IKoboSyncService
 {
     private static readonly TimeSpan ProgressConversionWait = TimeSpan.FromSeconds(30);
@@ -76,32 +85,51 @@ public class KoboSyncService(
 
         var syncResults = new List<KoboSyncItem>();
         var remaining = syncPreferences.SyncItemLimit;
+        var syncStartUtc = DateTime.UtcNow;
 
         var ageRestriction = await unitOfWork.DataContext.AppUser.GetUserAgeRestriction(userId, cancellationToken);
 
         var (chapterChanges, chaptersExhausted) = await AccumulateChapterChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
         remaining -= chapterChanges.Count;
+        if (chaptersExhausted)
+        {
+            syncPoint.ChapterIndex = 0;
+            syncPoint.ChapterSyncTime = syncStartUtc;
+        }
 
         var (progressChanges, progressExhausted) = await AccumulateProgressChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
         remaining -= progressChanges.Count;
+        if (progressExhausted)
+        {
+            syncPoint.ProgressSyncedUntilIndex = 0;
+            syncPoint.ProgressSyncTime = syncStartUtc;
+        }
 
         var (collectionChanges, collectionsExhausted) = await AccumulateCollectionsChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
         remaining -= collectionChanges.Count;
+        if (collectionsExhausted)
+        {
+            syncPoint.CollectionsSyncedUntilIndex = 0;
+            syncPoint.CollectionsSyncTime = syncStartUtc;
+        }
 
         var (readingListsChanges, readingListsExhausted) = await AccumulateReadingListChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
+        remaining -= readingListsChanges.Count;
+        if (readingListsExhausted)
+        {
+            syncPoint.ReadingListsSyncedUntilIndex = 0;
+            syncPoint.ReadingListsSyncTime = syncStartUtc;
+        }
+
+        var (onDeckTagChanges, onDeckTagExhausted) = await AccumulateOnDeckCollectionChanges(userId, syncPreferences, syncPoint, remaining, ageRestriction, cancellationToken);
 
         syncResults.AddRange(chapterChanges);
         syncResults.AddRange(progressChanges);
         syncResults.AddRange(collectionChanges);
         syncResults.AddRange(readingListsChanges);
+        syncResults.AddRange(onDeckTagChanges);
 
-        var localChangesExhausted = chaptersExhausted && progressExhausted && collectionsExhausted && readingListsExhausted;
-
-        // All exhausted = sync done
-        if (localChangesExhausted)
-        {
-            syncPoint.Reset();
-        }
+        var localChangesExhausted = chaptersExhausted && progressExhausted && collectionsExhausted && readingListsExhausted && onDeckTagExhausted;
 
         if (unitOfWork.HasChanges())
         {
@@ -136,14 +164,26 @@ public class KoboSyncService(
         var deletedBatch = deletedIds.Take(limit).ToList();
 
         changes.AddRange(deletedBatch.Select(BuildDeletedItem));
-        deletedBatch.ForEach(id => syncPoint.ChapterIds.Remove(id));
+        deletedBatch.ForEach(id =>
+        {
+            syncPoint.ChapterIds.Remove(id);
+            syncPoint.ChapterPositions.Remove(id);
+        });
 
-        var pendingIds = eligible
+        var changedIds = eligible
             .Where(kv => !alreadySeenChapters.Contains(kv.Key) || kv.Value > syncPoint.ChapterSyncTime)
-            .OrderBy(kv => kv.Value)
-            .ThenBy(kv => kv.Key)
-            .Skip(syncPoint.ChapterIndex)
             .Select(kv => kv.Key)
+            .ToList();
+
+
+        // Series re-order needs to update all chapters position
+        var positionChangedIds = await GetPositionChangedChapterIds(syncPoint, changedIds, cancellationToken);
+
+        var pendingIds = changedIds
+            .Union(positionChangedIds)
+            .OrderBy(id => eligible[id])
+            .ThenBy(id => id)
+            .Skip(syncPoint.ChapterIndex)
             .ToList();
 
         if (changes.Count >= limit)
@@ -165,6 +205,9 @@ public class KoboSyncService(
         if (chapters.Count == 0)
         {
             syncPoint.ChapterIds = [.. eligible.Keys];
+            syncPoint.ChapterPositions = syncPoint.ChapterPositions
+                .Where(kv => eligible.ContainsKey(kv.Key))
+                .ToDictionary(kv => kv.Key, kv => kv.Value);
 
             logger.LogTrace("No book changes since {BooksSyncTime}", syncPoint.ChapterSyncTime);
             return new SyncAccumulationResult(changes, true);
@@ -172,6 +215,12 @@ public class KoboSyncService(
 
         syncPoint.ChapterIndex += chapters.Count;
         logger.LogTrace("Adding {Count} book changes.", chapters.Count);
+
+        var sentPositions = await unitOfWork.DataContext.Chapter.GetSeriesPositionsAsync(idsToFetch, cancellationToken);
+        foreach (var (chapterId, position) in sentPositions)
+        {
+            syncPoint.ChapterPositions[chapterId] = position;
+        }
 
         var metadata = await BuildBookMetadata(chapters.Select(s => s.Chapter.Id), cancellationToken);
 
@@ -193,9 +242,40 @@ public class KoboSyncService(
         if (exhausted)
         {
             syncPoint.ChapterIds = [.. eligible.Keys];
+            syncPoint.ChapterPositions = syncPoint.ChapterPositions
+                .Where(kv => eligible.ContainsKey(kv.Key))
+                .ToDictionary(kv => kv.Key, kv => kv.Value);
         }
 
         return new SyncAccumulationResult(changes, exhausted);
+    }
+
+    private async Task<List<int>> GetPositionChangedChapterIds(
+        KoboSyncPoint syncPoint,
+        List<int> changedIds,
+        CancellationToken cancellationToken)
+    {
+        if (changedIds.Count == 0) return [];
+
+        var seriesIds = await unitOfWork.DataContext.Chapter
+            .Where(c => changedIds.Contains(c.Id))
+            .Select(c => c.Volume.SeriesId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        if (seriesIds.Count == 0) return [];
+
+        var seriesChapterIds = await unitOfWork.DataContext.Chapter
+            .Where(c => seriesIds.Contains(c.Volume.SeriesId))
+            .Select(c => c.Id)
+            .ToListAsync(cancellationToken);
+
+        var positions = await unitOfWork.DataContext.Chapter.GetSeriesPositionsAsync(seriesChapterIds, cancellationToken);
+
+        return positions
+            .Where(kv => !syncPoint.ChapterPositions.TryGetValue(kv.Key, out var recorded) || recorded != kv.Value)
+            .Select(kv => kv.Key)
+            .ToList();
     }
 
     private static KoboSyncItem BuildDeletedItem(int id) => new()
@@ -365,7 +445,7 @@ public class KoboSyncService(
                     Id = $"col:{collection.Id.ToString()}",
                     Created = collection.CreatedUtc,
                     LastModified = collection.LastModifiedUtc,
-                    Name = collection.Title,
+                    Name = CreateTagName(collection.Title),
                     Items = collectionChapters.Select(id => new KoboTagItemDto
                     {
                         RevisionId = id.ToString(),
@@ -466,7 +546,7 @@ public class KoboSyncService(
                     Id = $"rl:{readingList.Id.ToString()}",
                     Created = readingList.CreatedUtc,
                     LastModified = readingList.LastModifiedUtc,
-                    Name = readingList.Title,
+                    Name = CreateTagName(readingList.Title),
                     Items = readingList.Items.Select(item => new KoboTagItemDto
                     {
                         RevisionId = item.ChapterId.ToString(),
@@ -489,6 +569,93 @@ public class KoboSyncService(
         return new SyncAccumulationResult(changes, exhausted);
     }
 
+    private async Task<SyncAccumulationResult> AccumulateOnDeckCollectionChanges(int userId,
+        AppUserKoboSyncPreferences syncPreferences,
+        KoboSyncPoint syncPoint,
+        int limit,
+        AgeRestriction ageRestriction,
+        CancellationToken cancellationToken)
+    {
+        const string onDeckId = "col:on-deck";
+
+        var changes = new List<KoboSyncItem>();
+
+        if (!syncPreferences.CreateOnDeckCollection)
+        {
+            if (syncPoint.OnDeckIds.Count > 0)
+            {
+                if (limit <= 0) return new SyncAccumulationResult([], false);
+
+                syncPoint.OnDeckIds.Clear();
+                changes.Add(new KoboSyncItem
+                {
+                    DeletedTag = new KoboWrappedTagDto {Tag = new KoboTagDto { Id = onDeckId, }}
+                });
+            }
+
+            return new SyncAccumulationResult(changes, true);
+        }
+
+        var onDeckSeries = await unitOfWork.SeriesRepository
+            .GetOnDeckAsync(userId, 0, UserParams.Infinite, cancellationToken);
+
+        var seriesIds = onDeckSeries.Select(series => series.Id).ToList();
+
+        var chapters = seriesIds.Count > 0 ? await KoboEligibleChapters(userId, ageRestriction, syncPreferences, syncPoint)
+            .Where(c => seriesIds.Contains(c.Volume.SeriesId))
+            .Where(c => unitOfWork.DataContext.AppUserProgresses
+                .Where(p => p.AppUserId == userId && p.ChapterId == c.Id)
+                .Any(p => p.PagesRead > 0 && p.PagesRead < c.Pages))
+            .Select(c => new {c.Id, c.CreatedUtc, c.LastModifiedUtc})
+            .ToListAsync(cancellationToken) : [];
+
+        if (onDeckSeries.Count == 0 || chapters.Count == 0)
+        {
+            if (syncPoint.OnDeckIds.Count > 0)
+            {
+                if (limit <= 0) return new SyncAccumulationResult([], false);
+
+                changes.Add(new KoboSyncItem
+                {
+                    DeletedTag = new KoboWrappedTagDto {Tag = new KoboTagDto { Id = onDeckId, }}
+                });
+            }
+
+            syncPoint.OnDeckIds.Clear();
+            return new SyncAccumulationResult(changes, true);
+        }
+
+        if (syncPoint.OnDeckIds.ToHashSet().SetEquals(chapters.Select(c => c.Id)))
+        {
+            return new SyncAccumulationResult(changes, true);
+        }
+
+        if (limit <= 0) return new SyncAccumulationResult([], false);
+
+        var tag = new KoboWrappedTagDto
+        {
+            Tag = new KoboTagDto
+            {
+                Id = onDeckId,
+                Created = chapters.Min(c => c.CreatedUtc),
+                LastModified = chapters.Max(c => c.LastModifiedUtc),
+                Name = CreateTagName(await localizationService.TranslateAsync(userId, "kobo-sync-on-deck-tag")),
+                Items = chapters.Select(item => new KoboTagItemDto
+                {
+                    RevisionId = item.Id.ToString(),
+                }).ToList(),
+            },
+        };
+
+        changes.Add(syncPoint.OnDeckIds.Count == 0
+            ? new KoboSyncItem { NewTag = tag }
+            : new KoboSyncItem { ChangedTag = tag });
+
+        syncPoint.OnDeckIds = chapters.Select(c => c.Id).ToList();
+
+        return new SyncAccumulationResult(changes, true);
+    }
+
     private IQueryable<Chapter> KoboEligibleChapters(int userId,
         AgeRestriction ageRestriction, AppUserKoboSyncPreferences syncPreferences, KoboSyncPoint syncPoint)
     {
@@ -498,6 +665,11 @@ public class KoboSyncService(
             .FilterByKoboSyncSettings(syncPreferences, userId)
             .Where(c => !syncPoint.RemovedChapterIds.Select(rc => rc.ChapterId).Contains(c.Id))
             .Includes(ChapterIncludes.Files);
+    }
+
+    private static string CreateTagName(string name)
+    {
+        return $"Kavita: {name}";
     }
 
     #endregion
@@ -526,6 +698,8 @@ public class KoboSyncService(
             .ProjectTo<KoboBookMetadataDto>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
+        await ApplySeriesOrderingAsync(metadata, cancellationToken);
+
         return metadata.ToDictionary(m => m.Id, m =>
         {
             var canKepubify = m.FileCount == 1 && kepubifyConverterService.KepubifySupported;
@@ -543,6 +717,115 @@ public class KoboSyncService(
                 ],
             };
         });
+    }
+
+    public async Task<KoboBookDetailsDto?> GetKoboBookDetailsAsync(int chapterId, CancellationToken cancellationToken)
+    {
+        var metadata = await BuildBookMetadata([chapterId], cancellationToken);
+        return metadata.TryGetValue(chapterId, out var book) ? mapper.Map<KoboBookDetailsDto>(book) : null;
+    }
+
+    private async Task ApplySeriesOrderingAsync(List<KoboBookMetadataDto> metadata, CancellationToken cancellationToken)
+    {
+        if (metadata.Count == 0) return;
+
+        var userId = userContext.GetUserIdOrThrow();
+        var chapterIds = metadata.Select(m => m.Id).ToList();
+
+        var seriesIds = await unitOfWork.DataContext.Chapter
+            .Where(c => chapterIds.Contains(c.Id))
+            .Select(c => c.Volume.SeriesId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        if (seriesIds.Count == 0) return;
+
+        // Only load full rows for the chapters actually being synced (batch is capped by SyncItemLimit)
+        var chapters = await unitOfWork.DataContext.Chapter
+            .Where(c => chapterIds.Contains(c.Id))
+            .Select(c => new
+            {
+                c.Id,
+                c.Volume.SeriesId,
+                c.VolumeId,
+                VolumeName = c.Volume.Name,
+                VolumeMinNumber = c.Volume.MinNumber,
+                c.Range,
+                c.Title,
+                c.TitleName,
+                c.IsSpecial,
+            })
+            .ToListAsync(cancellationToken);
+
+        if (chapters.Count == 0) return;
+
+        var chapterPositions = await unitOfWork.DataContext.Chapter
+            .GetSeriesPositionsAsync(chapterIds, cancellationToken);
+
+        var seriesChapterCounts = await unitOfWork.DataContext.Chapter
+            .Where(c => seriesIds.Contains(c.Volume.SeriesId))
+            .GroupBy(c => c.Volume.SeriesId)
+            .ToDictionaryAsync(g => g.Key, g => g.Count(), cancellationToken);
+
+        var volumeIds = chapters.Select(c => c.VolumeId).Distinct().ToList();
+        var volumeChapterCounts = await unitOfWork.DataContext.Chapter
+            .Where(c => volumeIds.Contains(c.VolumeId))
+            .GroupBy(c => c.VolumeId)
+            .ToDictionaryAsync(g => g.Key, g => g.Count(), cancellationToken);
+
+        // Create fake dtos for naming
+        var chapterDtos = chapters.ToDictionary(c => c.Id, c => new ChapterDto
+        {
+            Id = c.Id,
+            Range = c.Range,
+            Title = c.Title,
+            TitleName = c.TitleName,
+            IsSpecial = c.IsSpecial,
+        });
+        var volumes = chapters
+            .GroupBy(c => c.VolumeId)
+            .ToDictionary(g => g.Key, g => new VolumeDto
+            {
+                Id = g.Key,
+                Name = g.First().VolumeName,
+                MinNumber = g.First().VolumeMinNumber,
+                MaxNumber = g.First().VolumeMinNumber,
+                Chapters = [.. Enumerable.Repeat(new ChapterDto(), volumeChapterCounts.TryGetValue(g.Key, out var count) ? count : 0)],
+            });
+
+        var chaptersById = chapters.ToDictionary(c => c.Id);
+
+        var namingContexts = await LocalizedNamingContext
+            .CreateAsync(entityNamingService, localizationService, userId,
+                metadata.Select(m => m.LibraryType));
+
+        foreach (var book in metadata)
+        {
+            if (!chaptersById.TryGetValue(book.Id, out var chapter)) continue;
+
+            // Null out series for single books
+            if (book.LibraryType is LibraryType.Book or LibraryType.LightNovel
+                && seriesChapterCounts.TryGetValue(chapter.SeriesId, out var seriesChapterCount)
+                && seriesChapterCount == 1
+                && chapter.IsSpecial)
+            {
+                book.Series = null;
+                continue;
+            }
+
+            if (book.Series is null
+                || !chapterPositions.TryGetValue(book.Id, out var position)
+                || !namingContexts.TryGetValue(book.LibraryType, out var namingContext))
+            {
+                continue;
+            }
+
+            var chapterDto = chapterDtos[chapter.Id];
+            var number = namingContext.BuildChapterTitle(volumes[chapter.VolumeId], chapterDto);
+
+            book.Series.Number = string.IsNullOrEmpty(number) ? namingContext.FormatChapterTitle(chapterDto) : number;
+            book.Series.NumberFloat = position;
+        }
     }
 
     #endregion
@@ -697,7 +980,9 @@ public class KoboSyncService(
         foreach (var dto in annotationDtos)
         {
             var span = dto.Location?.Span;
-            if (span is null || string.IsNullOrWhiteSpace(span.ChapterFilename)
+            var cleanedFilePath = KoboPositionHelper.NormalizeEpubPath(span?.ChapterFilename);
+
+            if (span is null || string.IsNullOrWhiteSpace(cleanedFilePath)
                 || string.IsNullOrWhiteSpace(span.StartPath) || string.IsNullOrWhiteSpace(span.EndPath)
                 || string.IsNullOrWhiteSpace(dto.HighlightedText))
             {
@@ -705,26 +990,26 @@ public class KoboSyncService(
                 continue;
             }
 
-            if (!documentsByFile.TryGetValue(span.ChapterFilename, out var documents))
+            if (!documentsByFile.TryGetValue(cleanedFilePath, out var documents))
             {
-                var (kepubDoc, pageNumber) = await bookService.GetDocumentAsync(kepubPath, span.ChapterFilename, null);
+                var (kepubDoc, pageNumber) = await bookService.GetDocumentAsync(kepubPath, cleanedFilePath, null);
                 if (kepubDoc is null)
                 {
                     logger.LogWarning("Kobo annotation {AnnotationId} references unknown file {File} in chapter {ChapterId}",
-                        dto.Id, span.ChapterFilename, chapterId);
+                        dto.Id, cleanedFilePath.Sanitize(), chapterId);
                     continue;
                 }
 
-                var (readerDoc, _) = await bookService.GetDocumentAsync(epubPath, span.ChapterFilename, pageNumber);
+                var (readerDoc, _) = await bookService.GetDocumentAsync(epubPath, cleanedFilePath, pageNumber);
                 if (readerDoc is null)
                 {
                     logger.LogWarning("Kobo annotation {AnnotationId} could not be matched to {File} in the original epub",
-                        dto.Id, span.ChapterFilename);
+                        dto.Id, cleanedFilePath.Sanitize());
                     continue;
                 }
 
                 documents = (kepubDoc, readerDoc, pageNumber);
-                documentsByFile[span.ChapterFilename] = documents;
+                documentsByFile[cleanedFilePath] = documents;
             }
 
             var startXPath = KoboPositionHelper.Decode(documents.Kepub, documents.Reader, GetKoboSpanId(span.StartPath));
@@ -738,7 +1023,7 @@ public class KoboSyncService(
             var annotation = FindAnnotation(annotations, dto.Id);
 
             var isNew = annotation is null;
-            if (isNew)
+            if (annotation is null)
             {
                 annotation = new AppUserAnnotation
                 {
@@ -757,7 +1042,7 @@ public class KoboSyncService(
             annotation.EndingXPath = endXPath;
             annotation.SelectedText = dto.HighlightedText;
             annotation.HighlightCount = dto.HighlightedText.Length;
-            annotation.SelectedSlotIndex = GetHighlightSlotIndex(highlightSlots, dto.HighlightColor);
+            annotation.SelectedSlotIndex = GetHighlightSlotIndex(dto.HighlightColor);
             annotation.PageNumber = documents.PageNumber;
             annotation.ChapterTitle = GetChapterTitle(toc, documents.PageNumber);
             annotation.Comment = BuildComment(dto.noteText);
@@ -794,22 +1079,20 @@ public class KoboSyncService(
         return spanId.Replace("\\", string.Empty);
     }
 
-    private static int GetHighlightSlotIndex(List<HighlightSlot> highlightSlots, string? koboColor)
+    private static int GetHighlightSlotIndex(string? koboColor)
     {
         if (string.IsNullOrEmpty(koboColor)) return 0;
 
-        // Kobo sends #RRGGBB, tolerate an alpha suffix
-        var color = koboColor.Length == 9 ? koboColor[..7] : koboColor;
-
-        for (var i = 0; i < highlightSlots.Count; i++)
+        // Kobo's colours are fixed. We will just sync to the first 4 slots we have (5th slot will never be used for Kobo
+        // created annotations
+        return koboColor.ToUpperInvariant() switch
         {
-            if (highlightSlots[i].Color.ToHex(false).Equals(color, StringComparison.OrdinalIgnoreCase))
-            {
-                return i;
-            }
-        }
-
-        return 0;
+            "#F6F3B3" => 0, // Yellow
+            "#E8AFCF" => 1, // Pink
+            "#B2E1E8" => 2, // Blue
+            "#C6E09E" => 3, // Green
+            _ => 0
+        };
     }
 
     private static string GetChapterTitle(ICollection<BookChapterItem> toc, int pageNumber)
@@ -1033,7 +1316,7 @@ public class KoboSyncService(
             return;
         }
 
-        var file = readingState.CurrentBookmark.Location?.Source;
+        var file = KoboPositionHelper.NormalizeEpubPath(readingState.CurrentBookmark.Location?.Source);
         // Start of book
         if (string.IsNullOrEmpty(file))
         {
@@ -1077,7 +1360,7 @@ public class KoboSyncService(
         var (kepubDoc, pageNum) = await bookService.GetDocumentAsync(kepubPath, file, null);
         if (kepubDoc == null)
         {
-            logger.LogWarning("Kepub was not available after conversion");
+            logger.LogWarning("Failed to find {File} in kepub", file.Sanitize());
             await SetFallbackProgress();
             return;
         }
@@ -1339,6 +1622,65 @@ public class KoboSyncService(
         }
 
         return (await upstreamResponse.Content.ReadFromJsonAsync<JsonNode>(ct), false);
+    }
+
+    #endregion
+
+    #region Cover
+
+    public async Task<byte[]?> GetBookCoverAsync(int chapterId, string width, string height, string? quality, bool isGreyScale, CancellationToken ct = default)
+    {
+        var coverInfo = await unitOfWork.DataContext.Chapter
+            .Where(c => c.Id == chapterId)
+            .Select(c => new
+            {
+                ChapterCoverImage = c.CoverImageFile!.FileName,
+                VolumeCoverImage = c.Volume.CoverImageFile!.FileName,
+                c.MinNumber
+            })
+            .FirstOrDefaultAsync(ct);
+
+        if (coverInfo is null)
+        {
+            return null;
+        }
+
+        var coverPath = coverInfo.MinNumber.Is(Parser.DefaultChapterNumber)
+            ? coverInfo.VolumeCoverImage
+            : coverInfo.ChapterCoverImage;
+
+        if (string.IsNullOrEmpty(coverPath))
+        {
+            return null;
+        }
+
+        var fullPath = Path.Join(directoryService.CoverImageDirectory, coverPath);
+        if (!fileSystem.File.Exists(fullPath)) return null;
+
+        var render = GetKoboRender(width, height, quality, isGreyScale);
+        return await Task.Run(() => imagePipeline.Render(new ImageSource.FromFile(fullPath), render), ct);
+    }
+
+    internal static ImageRender GetKoboRender(string width, string height, string? quality, bool isGreyScale)
+    {
+        // 1,000,000 leaves a side that did not parse (or is out of range) unbounded, since FitWithinStep never enlarges
+        var parsedWidth = ParseDimension(width);
+        var parsedHeight = ParseDimension(height);
+        var q = int.TryParse(quality, out var parsedQ) ? Math.Clamp(parsedQ, 1, 100) : 85;
+
+        List<IImageStep> steps = [new FitWithinStep(parsedWidth, parsedHeight)];
+        if (isGreyScale)
+        {
+            steps.Add(new GreyscaleStep());
+        }
+
+        return new ImageRender(EncodeFormat.JPEG, steps, q);
+    }
+
+    private static int ParseDimension(string? value)
+    {
+        const int unbounded = 1_000_000;
+        return int.TryParse(value, out var v) && v is > 0 and <= unbounded ? v : unbounded;
     }
 
     #endregion

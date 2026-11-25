@@ -1,6 +1,5 @@
 using System.Linq;
 using AutoMapper;
-using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -23,13 +22,7 @@ public class AutoMapperKoboProfile: Profile
 
         CreateMap<Chapter, KoboSeriesDto>()
             .ForMemberSimple(d => d.Id, c => c.Volume.SeriesId.ToString())
-            .ForMemberSimple(d => d.Name, c => c.Volume.Series.Name)
-            .ForMemberSimple(d => d.NumberFloat, c => c.SortOrder)
-            .ForMemberSimple(d => d.Number, c =>
-                c.Volume.MinNumber == ParserConstants.LooseLeafVolumeNumber ? c.Range
-                : c.MinNumber != ParserConstants.DefaultChapterNumber ? c.Range
-                    : c.Volume.MinNumber == ParserConstants.SpecialVolumeNumber ? string.Empty
-                        : c.Volume.MinNumber.ToString());
+            .ForMemberSimple(d => d.Name, c => c.Volume.Series.Name);
 
         CreateMap<Chapter, KoboBookMetadataDto>()
             .ForMemberSimple(d => d.Title, c => string.IsNullOrEmpty(c.TitleName) ? c.Title : c.TitleName)
@@ -44,7 +37,11 @@ public class AutoMapperKoboProfile: Profile
                 .Select(p => p.Person.Name)))
             .ForMemberSimple(d => d.Description, c => c.Summary)
             // Kobo has an aneurysm if there is no language present, default to English
-            .ForMemberSimple(d => d.Language, c => c.Language ?? "en")
+            .ForMemberSimple(d => d.Language, c => string.IsNullOrEmpty(c.Language) ? "en" : c.Language)
+            .ForMember(d => d.ContributorRoles, opt => opt.MapFrom(c => c.People
+                .Where(p => p.Role == PersonRole.Writer
+                            || p.Role == PersonRole.Translator
+                            || p.Role == PersonRole.Editor)))
             .ForMember(d => d.Publisher, opt => opt.MapFrom(c => c.People
                 .Where(p => p.Role == PersonRole.Publisher)
                 .OrderBy(p => p.PersonId)
@@ -82,40 +79,33 @@ public class AutoMapperKoboProfile: Profile
                             || p.Role == PersonRole.Translator
                             || p.Role == PersonRole.Editor)))
             .ForMember(d => d.Series, opt => opt.MapFrom(c => c))
-            ;
-
-        CreateMap<Chapter, KoboBookDetailsDto>()
-            .ForMemberSimple(d => d.KoboId, c => c.Id.ToString())
-            .ForMemberSimple(d => d.WorkId, c => c.Id.ToString())
-            .ForMemberSimple(d => d.CrossRevisionId, c => c.Id.ToString())
-            .ForMemberSimple(d => d.ImageId, c => c.Id.ToString())
-            .ForMemberSimple(d => d.Title, c => string.IsNullOrEmpty(c.TitleName) ? c.Title : c.TitleName)
-            .ForMemberSimple(d => d.Description, c => c.Summary)
-            .ForMemberSimple(d => d.Language, c => string.IsNullOrEmpty(c.Language) ? "en" : c.Language)
-            .ForMemberSimple(d => d.Locale, c => new KoboLocaleDto
-            {
-                LanguageCode = ToIso6392(c.Language)
-            })
             .ForMemberSimple(d => d.ISBN, c => c.ISBN ?? string.Empty)
-            .ForMember(d => d.Contributors, opt => opt.MapFrom(c => string.Join(", ",
-                c.People
-                    .Where(p => p.Role == PersonRole.Writer)
-                    .OrderBy(p => p.PersonId)
-                    .Select(p => p.Person.Name))))
             .ForMember(d => d.ContributorRoles, opt => opt.MapFrom(c => c.People
                 .Where(p => p.Role == PersonRole.Writer
                             || p.Role == PersonRole.Translator
                             || p.Role == PersonRole.Editor)))
-            .ForMemberSimple(d => d.PublisherName, c => c.People
-                .Where(p => p.Role == PersonRole.Publisher)
-                .OrderBy(p => p.PersonId)
-                .Select(p => p.Person.Name)
-                .FirstOrDefault() ?? string.Empty)
-            .ForMember(d => d.SeriesName, opt => opt.MapFrom(c => c.Volume.Series.Name))
-            .ForMember(d => d.SeriesNumber, opt => opt.MapFrom(c =>
-                c.MinNumber == ParserConstants.DefaultChapterNumber
-                    ? c.Volume.MinNumber.ToString()
-                    : c.MinNumber.ToString()));
+            ;
+
+        CreateMap<KoboBookMetadataDto, KoboBookDetailsDto>()
+            .ForMemberSimple(d => d.KoboId, m => m.WorkId)
+            .ForMemberSimple(d => d.WorkId, m => m.WorkId)
+            .ForMemberSimple(d => d.CrossRevisionId, m => m.CrossRevisionId)
+            .ForMemberSimple(d => d.ImageId, m => m.CoverImageId)
+            .ForMemberSimple(d => d.Title, m => m.Title)
+            .ForMemberSimple(d => d.Description, m => m.Description)
+            .ForMemberSimple(d => d.Language, m => m.Language)
+            .ForMemberSimple(d => d.Locale, m => new KoboLocaleDto
+            {
+                LanguageCode = ToIso6392(m.Language)
+            })
+            .ForMemberSimple(d => d.ISBN, m => m.ISBN)
+            .ForMember(d => d.Contributors, opt => opt.MapFrom(m => string.Join(", ", m.Contributors)))
+            .ForMemberSimple(d => d.ContributorRoles, m => m.ContributorRoles)
+            .ForMemberSimple(d => d.PublisherName, m => m.Publisher != null ? m.Publisher.Name : string.Empty)
+            .ForMemberSimple(d => d.PublicationDate, m => m.PublicationDate)
+            .ForMember(d => d.SeriesName, opt => opt.MapFrom(m => m.Series != null ? m.Series.Name : string.Empty))
+            .ForMember(d => d.SeriesNumber, opt => opt.MapFrom(m => m.Series != null ? m.Series.Number : string.Empty))
+            ;
 
         CreateMap<AppUserChapterRating, KoboReviewDto>()
             .ForMemberSimple(d => d.AuthorDisplayName, r => r.AppUser.UserName)

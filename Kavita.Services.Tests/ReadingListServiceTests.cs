@@ -418,6 +418,59 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
         Assert.DoesNotContain(readingList.Items, i => i.Id == 2);
     }
 
+    [Fact]
+    public async Task RemoveFullyReadItems_ReindexesRemainingItemOrders()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        context.AppUser.Add(new AppUser
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>
+            {
+                new LibraryBuilder("Test LIb", LibraryType.Book)
+                    .WithSeries(new SeriesBuilder("Test")
+                        .WithMetadata(new SeriesMetadataBuilder().Build())
+                        .WithVolumes([
+
+                            new VolumeBuilder(Parser.LooseLeafVolume)
+                                .WithChapter(new ChapterBuilder("1").WithAgeRating(AgeRating.Everyone).Build())
+                                .WithChapter(new ChapterBuilder("2").WithAgeRating(AgeRating.Everyone).Build())
+                                .WithChapter(new ChapterBuilder("3").WithAgeRating(AgeRating.Everyone).Build())
+                                .Build()
+                        ])
+                        .Build())
+                    .Build()
+            }
+        });
+
+        await context.SaveChangesAsync();
+
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var readingList = new ReadingListBuilder("test").Build();
+        Assert.NotNull(user);
+        user.ReadingLists = new List<ReadingList>() { readingList };
+
+        await readingListService.AddChaptersToReadingList([1, 2, 3], readingList);
+        await unitOfWork.CommitAsync();
+        Assert.Equal(3, readingList.Items.Count);
+
+        // Mark the middle item (order 1) as fully read
+        await readerService.MarkChaptersAsRead(user, 1,
+            (await unitOfWork.ChapterRepository.GetChaptersByIdsAsync([2])).ToList());
+        await unitOfWork.CommitAsync();
+
+        await readingListService.RemoveFullyReadItems(readingList.Id, user);
+
+        // Re-fetch from the database to see the persisted state
+        var postList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingList.Id);
+        Assert.NotNull(postList);
+        var remaining = postList.Items.OrderBy(i => i.Order).ToList();
+        Assert.Equal(2, remaining.Count);
+        Assert.Equal([0, 1], remaining.Select(i => i.Order).ToArray());
+    }
+
 
     #endregion
 

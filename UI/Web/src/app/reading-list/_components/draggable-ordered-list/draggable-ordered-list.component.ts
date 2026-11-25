@@ -16,16 +16,22 @@ import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {BulkSelectionEntityDataSource, BulkSelectionService} from "../../../cards/bulk-selection.service";
 
-export interface IndexUpdateEvent {
+export interface DraggableOrderedItem {
+  id: number;
+  order: number;
+  title?: string;
+}
+
+export interface IndexUpdateEvent<T extends DraggableOrderedItem> {
   fromPosition: number;
   toPosition: number;
-  item: any;
+  item: T;
   fromAccessibilityMode: boolean;
 }
 
-export interface ItemRemoveEvent {
+export interface ItemRemoveEvent<T extends DraggableOrderedItem> {
   position: number;
-  item: any;
+  item: T;
 }
 
 @Component({
@@ -36,16 +42,16 @@ export interface ItemRemoveEvent {
   imports: [VirtualScrollerComponent, NgTemplateOutlet, CdkDropList, CdkDrag,
     CdkDragHandle, TranslocoDirective, NgClass]
 })
-export class DraggableOrderedListComponent {
+export class DraggableOrderedListComponent<T extends DraggableOrderedItem> {
 
   protected readonly bulkSelectionService = inject(BulkSelectionService);
 
   readonly bulkDataSource = input<BulkSelectionEntityDataSource>('sideNavStream');
-  readonly items = input<Array<any>>([]);
+  readonly items = input<Array<T>>([]);
   /**
    * Optional filter function applied to items before rendering. Useful for search/filter UIs.
    */
-  filterFn = input<((item: any) => boolean) | null>(null);
+  filterFn = input<((item: T) => boolean) | null>(null);
   protected readonly localItems = linkedSignal(() => [...this.items()]);
   protected readonly filteredItems = computed(() => {
     const fn = this.filterFn();
@@ -77,13 +83,13 @@ export class DraggableOrderedListComponent {
    * When enabled, draggability is disabled and a checkbox renders instead of order box or drag handle
    */
   bulkMode = input(false);
-  trackByIdentity = input<TrackByFunction<any>>((index: number, item: any) => `${item.id}_${item.order}_${item.title}`);
+  trackByIdentity = input<TrackByFunction<T>>((index: number, item: T) => `${item.id}_${item.order}_${item.title}`);
 
   /**
    * After an item is re-ordered, you MUST reload from backend the new data. This is because accessibility mode will use item.order which needs to be in sync.
    */
-  orderUpdated = output<IndexUpdateEvent>();
-  itemRemove = output<ItemRemoveEvent>();
+  orderUpdated = output<IndexUpdateEvent<T>>();
+  itemRemove = output<ItemRemoveEvent<T>>();
 
   itemTemplate = contentChild.required<TemplateRef<any>>('draggableItem');
 
@@ -104,7 +110,7 @@ export class DraggableOrderedListComponent {
     });
   }
 
-  updateIndex(previousIndex: number, item: any) {
+  updateIndex(previousIndex: number, item: T) {
     const inputElem = document.querySelector<HTMLInputElement>('#reorder-' + previousIndex);
     if (!inputElem) return;
     const newIndex = parseInt(inputElem.value, 10);
@@ -121,7 +127,7 @@ export class DraggableOrderedListComponent {
     });
   }
 
-  removeItem(item: any, position: number) {
+  removeItem(item: T, position: number) {
     this.itemRemove.emit({
       position: item!.order,
       item

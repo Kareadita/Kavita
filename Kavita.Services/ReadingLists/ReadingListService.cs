@@ -156,8 +156,17 @@ public class ReadingListService(
 
             var readingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
             if (readingList == null) return true;
+
             await CalculateReadingListAgeRating(readingList);
             await CalculateStartAndEndDates(readingList);
+
+            var index = 0;
+            foreach (var readingListItem in readingList.Items.Where(i => !itemIdsToRemove.Contains(i.Id)))
+            {
+                readingListItem.Order = index;
+                index++;
+            }
+
             unitOfWork.ReadingListRepository.Update(readingList);
 
             if (!unitOfWork.HasChanges()) return true;

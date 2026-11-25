@@ -12,7 +12,7 @@ public interface IImagePipeline
 
     /// <summary>
     /// Copies <paramref name="sourcePath"/> byte for byte to <paramref name="fileName"/> in <paramref name="directory"/>.
-    /// The caller picks the extension; it should match the content, since the bytes are not re-encoded
+    /// The caller picks the extension; it should match the content, since the bytes are not re-encoded. Will overwrite if destination occupied
     /// </summary>
     ImageWriteResult Copy(string sourcePath, ImageKind kind, string directory, string fileName);
 
@@ -24,4 +24,16 @@ public interface IImagePipeline
 
     /// <inheritdoc cref="Reencode(string, ImageKind, ImagePolicy, string, string)"/>
     ImageWriteResult Reencode(byte[] sourceBytes, ImageKind kind, ImagePolicy policy, string directory, string fileName);
+
+    /// <summary>
+    /// Decodes <paramref name="source"/>, applies the render's steps and returns the encoded bytes. Writes nothing to disk.
+    /// The render's format is used as is: no <see cref="ImageKind"/> rule (such as keeping transparency) applies
+    /// </summary>
+    byte[] Render(ImageSource source, ImageRender render);
+
+    /// <summary>
+    /// Reads the format and size from the image's header, never its file name. Decodes no pixels
+    /// </summary>
+    /// <returns>Null when the source is not an image libvips can read</returns>
+    ImageHeader? Inspect(ImageSource source);
 }

@@ -15,6 +15,7 @@
       <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.13" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.14" />
       <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.14" />
+      <PackageReference Include="NetVips" Version="3.2.0" />
       <PackageReference Include="YamlDotNet" Version="18.1.0" />
     </ItemGroup>
 

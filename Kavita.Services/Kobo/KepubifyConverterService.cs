@@ -28,7 +28,7 @@ public class KepubifyConverterService(
     IServiceScopeFactory serviceScopeFactory,
     IHostApplicationLifetime applicationLifetime): IKepubifyConverterService
 {
-    public const string KepubifyVersion = "v4.0.4";
+    public const string KepubifyVersion = "v5.0.0";
     private const string VersionOutputPrefix = "kepubify ";
     private const string ProgressCost = "books sync to Kobo as plain epub, and reading progress only syncs to the chapter";
 
@@ -41,13 +41,13 @@ public class KepubifyConverterService(
     /// </summary>
     internal static readonly IReadOnlySet<string> DefaultShippedHashes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
-        "37d7628d26c5c906f607f24b36f781f306075e7073a6fe7820a751bb60431fc5", // linux-64bit
-        "5a15b8f6f6a96216c69330601bca29638cfee50f7bf48712795cff88ae2d03a3", // linux-arm64
-        "07f23275c4e674093443f01a591aa0980b0b87dbb0a10986d5001e9d56b0e1e7", // linux-arm
-        "f3dee3ece063329661fef474262fe403812335bf1676eab35b672565bf195738", // windows-64bit
-        "5aa6be67f468e50e1b552a2eb1d1ac1afc375d1e7cb359e344f2e71d2dacdefb", // windows-32bit
-        "6467d44439ee899113c7f710b509ef9e5ce65e8df711c85192b9ea5b683594b7", // darwin-arm64
-        "851afab0b83ecaf11f6965c901483eed3e74a6b41a3ab0a68f7321bc48bac4a3", // darwin-64bit
+        "cb77fe364f780feea8de4586600f7160c7516586c21d9a80b1504c6630389069", // linux-64bit
+        "6d6b44725f3161f3fa9f364c3c7cabd810a67e90420e18c84fe9f366c80d6782", // linux-arm64
+        "57aa3e1a2d8e30af2ebce70e4c203889ee2b66d4b97c9d88a24b6f40b0de26a5", // linux-arm
+        "3b833ee3caceb42894cc7e44a132c29a416de180666b0e49ebf8bca42fe6995d", // windows-64bit
+        "8df1022c753423c1bab726eda567d96d0eae5c7dfece3c31b2f0817761b6b02b", // windows-32bit
+        "bd9e40cb074d84c3081b3548656eb7e17117e29e577dc805252e931aa9aae5e6", // darwin-arm64
+        "c007999e56f5135bd01fbb40ba888a17b08c16db9b098c7a8bfa8a1275df392d", // darwin-64bit
     };
 
     public static string ShippedFileName => OperatingSystem.IsWindows() ? "kepubify.exe" : "kepubify";
@@ -138,7 +138,7 @@ public class KepubifyConverterService(
             }
         }
 
-        var versionFailure = await CheckVersion(services, path, cancellationToken);
+        var versionFailure = await CheckVersion(services, source, path, cancellationToken);
         if (versionFailure != null)
         {
             return Off(source, path, KepubifyOffReason.VersionCheckFailed, versionFailure);
@@ -161,7 +161,7 @@ public class KepubifyConverterService(
     }
 
     /// <returns>Null when the binary printed a kepubify version, otherwise why it failed</returns>
-    private static async Task<string?> CheckVersion(IServiceProvider services, string path, CancellationToken cancellationToken)
+    private async Task<string?> CheckVersion(IServiceProvider services, KepubifySource source, string path, CancellationToken cancellationToken)
     {
         var processRunner = services.GetRequiredService<IProcessRunner>();
         var command = new ProcessCommand.Builder(processRunner)
@@ -175,9 +175,19 @@ public class KepubifyConverterService(
             var result = await command.ExecuteAsync(cancellationToken);
             result.ThrowIfFailed();
 
-            return result.StandardOutput.StartsWith(VersionOutputPrefix, StringComparison.Ordinal)
-                ? null
-                : $"{path.Sanitize()} --version did not print a kepubify version";
+            if (!result.StandardOutput.StartsWith(VersionOutputPrefix, StringComparison.Ordinal))
+            {
+                return $"{path.Sanitize()} --version did not print a kepubify version";
+            }
+
+            var onDiskVersion = result.StandardOutput.TrimPrefix(VersionOutputPrefix).Trim();
+            if (source == KepubifySource.Custom && !KepubifyVersion.Equals(onDiskVersion))
+            {
+                logger.LogWarning("You've provided a custom binary that does not match the shipped version. Expected: {ExpectedVersion}, Got: {ActualVersion}. Compatibility may vary!",
+                    KepubifyVersion, onDiskVersion);
+            }
+
+            return null;
         }
         catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
         {

@@ -604,7 +604,7 @@ public class ScrobblingService : IScrobblingService
             return;
         }
 
-        _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, ctx.Series.Name);
+        _logger.LogDebug("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, ctx.Series.Name);
 
         foreach (var provider in providers)
         {
@@ -821,7 +821,7 @@ public class ScrobblingService : IScrobblingService
         // TODO: This needs updating to take the provider into account (Dict?)
         if (series.DontMatch)
         {
-            _logger.LogInformation("Series {SeriesName} is marked don't match. Not scrobbling", series.Name);
+            _logger.LogDebug("Series {SeriesName} is marked don't match. Not scrobbling", series.Name);
             await _auditService.LogTemperedAsync(al => al.SeriesId == seriesId && al.UserId == userId, KavitaPlusAuditCategory.Scrobble,
                 KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series, seriesId: seriesId, payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, error: "series-dont-match", userId: userId);
             return true;
@@ -829,7 +829,7 @@ public class ScrobblingService : IScrobblingService
 
         if (await _unitOfWork.UserRepository.HasHoldOnSeries(userId, seriesId))
         {
-            _logger.LogInformation("Series {SeriesName} is on AppUserId {AppUserId}'s hold list. Not scrobbling", series.Name, userId);
+            _logger.LogDebug("Series {SeriesName} is on AppUserId {AppUserId}'s hold list. Not scrobbling", series.Name, userId);
             await _auditService.LogTemperedAsync(al => al.SeriesId == seriesId && al.UserId == userId, KavitaPlusAuditCategory.Scrobble,
                 KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series, seriesId: seriesId, payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, error: "scrobble-hold-active", userId: userId);
             return true;

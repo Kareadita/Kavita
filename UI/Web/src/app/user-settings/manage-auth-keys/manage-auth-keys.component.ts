@@ -19,6 +19,7 @@ import {ModalService} from "../../_services/modal.service";
 import {form, FormField} from "@angular/forms/signals";
 import {FormsModule} from "@angular/forms";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {filter, switchMap} from "rxjs";
 
 @Component({
   selector: 'app-manage-auth-keys',
@@ -53,7 +54,11 @@ export class ManageAuthKeysComponent implements OnInit {
 
   opdsAuthKeyModel = signal<string>(OpdsName);
   opdsAuthKeyForm = form(this.opdsAuthKeyModel);
-  opdsUrlRsc = this.accountService.opdsUrlRsc(() => this.opdsAuthKeyModel());
+  protected readonly opdsAuthKeyId = computed(() => {
+    const keys = this.accountService.currentUser()?.authKeys ?? [];
+    return keys.find(k => k.name === this.opdsAuthKeyModel())?.id ?? 0;
+  });
+  opdsUrlRsc = this.accountService.opdsUrlRsc(() => this.opdsAuthKeyId());
 
   authKeys = computed(() => {
     const account = this.accountService.currentUser();
@@ -78,6 +83,13 @@ export class ManageAuthKeysComponent implements OnInit {
 
       this.opdsUrlRsc.reload();
     });
+  }
+
+  rotateAll() {
+    this.confirmService.confirm$(translate('manage-auth-keys.confirm-rotate-all')).pipe(
+      filter(b => b),
+      switchMap(() => this.accountService.rotateAllAuthKeys())
+    ).subscribe(() => this.opdsUrlRsc.reload());
   }
 
   rotate(authKey: AuthKey) {

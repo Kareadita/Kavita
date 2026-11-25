@@ -30,8 +30,8 @@ using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
-using Kavita.Server.Middleware;
 using Kavita.Services;
+using Kavita.Services.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -118,7 +118,7 @@ public class AccountController(UserManager<AppUser> userManager,
     /// <returns></returns>
     [HttpPost("reset-password")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
+    public async Task<ActionResult<TokenRequestDto>> UpdatePassword(ResetPasswordDto resetPasswordDto)
     {
         var ct = HttpContext.RequestAborted;
         var user = await userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName, cancellationToken: ct);
@@ -151,13 +151,32 @@ public class AccountController(UserManager<AppUser> userManager,
             return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-password"));
         }
 
+        // UserManager.AddPasswordAsync updates the stamp so we need to revert to keep logins
+        var oldSecurityStamp = user.SecurityStamp;
+
         var errors = await accountService.ChangeUserPassword(user, resetPasswordDto.Password, ct);
         if (errors.Any())
         {
             return BadRequest(errors);
         }
 
+        if (!resetPasswordDto.LogoutOtherDevices && user.SecurityStamp != oldSecurityStamp)
+        {
+            user.SecurityStamp = oldSecurityStamp;
+            await userManager.UpdateAsync(user);
+        }
+
         logger.LogInformation("{User}'s Password has been reset", user.UserName!.Sanitize());
+
+        if (user.Id == UserId)
+        {
+            return Ok(new TokenRequestDto
+            {
+                Token = await tokenService.CreateToken(user, ct),
+                RefreshToken = await tokenService.CreateRefreshToken(user, ct)
+            });
+        }
+
         return Ok();
     }
 
@@ -678,11 +697,15 @@ public class AccountController(UserManager<AppUser> userManager,
             if (!roleResult.Succeeded) return BadRequest(roleResult.Errors);
 
             await authKeyService.InvalidateAllForUserAsync(user, ct);
+
+            // Force token revoke when admin role is removed or when user can no longer login
+            if ((existingRoles.Contains(PolicyConstants.AdminRole) && !dto.Roles.Contains(PolicyConstants.AdminRole))
+                || (!dto.Roles.Contains(PolicyConstants.AdminRole) && !dto.Roles.Contains(PolicyConstants.LoginRole)))
+            {
+                logger.LogDebug("Updating security stamp for {UserId}", user.Id);
+                await userManager.UpdateSecurityStampAsync(user);
+            }
         }
-
-        // We might want to check if they had admin and no longer, if so:
-        // await _userManager.UpdateSecurityStampAsync(user); to force them to re-authenticate
-
 
         var allLibraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync(ct: ct)).ToList();
         List<Library> libraries;
@@ -1016,7 +1039,13 @@ public class AccountController(UserManager<AppUser> userManager,
             }
 
             var errors = await accountService.ChangeUserPassword(user, dto.Password, ct);
-            return errors.Any() ? BadRequest(errors) : Ok(await localizationService.TranslateAsync(user.Id, "password-updated"));
+            if (errors.Any())
+            {
+                return BadRequest(errors);
+            }
+
+            await userManager.UpdateSecurityStampAsync(user);
+            return Ok(await localizationService.TranslateAsync(user.Id, "password-updated"));
         }
         catch (Exception ex)
         {
@@ -1045,7 +1074,7 @@ public class AccountController(UserManager<AppUser> userManager,
             return Ok(await localizationService.GetAsync("en", "forgot-password-generic"));
         }
 
-        var oidcConfig = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        var oidcConfig = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).OidcConfig;
         if (user.IdentityProvider == IdentityProvider.OpenIdConnect  && oidcConfig is {Enabled: true, SyncUserSettings: true})
         {
             return BadRequest(await localizationService.TranslateAsync(user.Id, "oidc-managed"));
@@ -1203,40 +1232,37 @@ public class AccountController(UserManager<AppUser> userManager,
     /// </summary>
     /// <returns></returns>
     [HttpGet("opds-url")]
-    public async Task<ActionResult<string>> GetOpdsUrl([FromQuery] string? authKeyName = null)
+    public async Task<ActionResult<string>> GetOpdsUrl([FromQuery] int authKeyId)
     {
         var ct = HttpContext.RequestAborted;
+
         var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
 
-        var origin = HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
-        if (!string.IsNullOrEmpty(serverSettings.HostName)) origin = serverSettings.HostName;
+        var baseUrl = Request.GetInstanceUrl(serverSettings);
 
-        var baseUrl = string.Empty;
-        if (!string.IsNullOrEmpty(serverSettings.BaseUrl) &&
-            !serverSettings.BaseUrl.Equals(Configuration.DefaultBaseUrl))
-        {
-            baseUrl = serverSettings.BaseUrl + "/";
-            if (baseUrl.EndsWith("//"))
-            {
-                baseUrl = baseUrl.Replace("//", "/");
-            }
+        var authKey = await unitOfWork.UserRepository.GetAuthKeyById(authKeyId, ct);
+        if (authKey is null || authKey.AppUserId != UserId) return NotFound();
 
-            if (baseUrl.StartsWith('/'))
-            {
-                baseUrl = baseUrl.Substring(1, baseUrl.Length - 1);
-            }
-        }
+        return Ok(baseUrl + "api/opds/" + authKey.Key);
+    }
 
-        authKeyName ??= AuthKeyHelper.OpdsKeyName;
-        var opdsAuthKey = (await unitOfWork.UserRepository.GetAuthKeysForUserId(UserId, ct))
-            .Where(k => k.Name == authKeyName)
-            .Select(k => k.Key)
-            .FirstOrDefault();
+    /// <summary>
+    /// Returns the Kobo Sync url for this user
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("kobo-sync-url")]
+    public async Task<ActionResult<string>> GetKoboUrl([FromQuery] int authKeyId)
+    {
+        var ct = HttpContext.RequestAborted;
 
-        if (opdsAuthKey == null)
-            return NotFound();
+        var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
 
-        return Ok(origin + "/" + baseUrl + "api/opds/" + opdsAuthKey);
+        var baseUrl = Request.GetInstanceUrl(serverSettings);
+
+        var authKey = await unitOfWork.UserRepository.GetAuthKeyById(authKeyId, ct);
+        if (authKey is null || authKey.AppUserId != UserId) return NotFound();
+
+        return Ok(baseUrl + "Kobo/" + authKey);
     }
 
 
@@ -1300,6 +1326,33 @@ public class AccountController(UserManager<AppUser> userManager,
         await eventHub.SendMessageToAsync(MessageFactory.AuthKeyUpdate, MessageFactory.AuthKeyUpdatedEvent(newDto), UserId, ct);
 
         return Ok(newDto);
+    }
+
+    [HttpPost("rotate-all-keys")]
+    public async Task<ActionResult> RotateAllAuthKeys()
+    {
+        var ct = HttpContext.RequestAborted;
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.AuthKeys, ct);
+        if (user is null) return NotFound();
+
+        // Depends on auth key values. Run first
+        await authKeyService.InvalidateAllForUserAsync(user, ct);
+
+        foreach (var authKey in user.AuthKeys)
+        {
+            if (authKey.ExpiresAtUtc is not null)
+            {
+                var originalDuration = authKey.ExpiresAtUtc.Value - authKey.CreatedAtUtc;
+                authKey.ExpiresAtUtc = DateTime.UtcNow.Add(originalDuration);
+            }
+
+            authKey.Key = AuthKeyHelper.GenerateKey(AuthKeyHelper.BoundedKeyLength(authKey.Key.Length));
+        }
+
+        await unitOfWork.CommitAsync(ct);
+
+        return Ok();
     }
 
     /// <summary>

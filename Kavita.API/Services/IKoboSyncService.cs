@@ -31,6 +31,15 @@ public interface IKoboSyncService
     Task<Dictionary<int, KoboBookMetadataDto>> BuildBookMetadata(IEnumerable<int> chapterIds,
         CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Builds book details (as served on the products endpoint) for a single chapter, mapped from
+    /// the sync metadata so standalone books don't get a redundant series
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<KoboBookDetailsDto?> GetKoboBookDetailsAsync(int chapterId, CancellationToken cancellationToken);
+
     Task<IList<KoboAnnotationDto>> GetKoboAnnotationsAsync(int userId, IEnumerable<int> chapterIds, CancellationToken cancellationToken);
     /// <summary>
     /// ETags for the user's annotations per chapter, used by Kobo's annotation sync
@@ -51,4 +60,13 @@ public interface IKoboSyncService
     Task<ActionResult> ProxyRequestIfEnabled(HttpClient? httpClient = null, object? body = null);
 
     Task<(JsonNode?, bool)> ProxyRequest(KoboSyncPoint? syncPoint, CancellationToken ct, bool copyResponse = true, object? body = null, HttpClient? httpClient = null, bool writeResponseOnError = true);
+    /// <summary>
+    /// The chapter's cover (its volume's for a loose-leaf chapter) as a JPEG, shrunk to fit the requested size
+    /// </summary>
+    /// <param name="width">Raw route value; one that does not parse leaves that side unbounded</param>
+    /// <param name="height">Raw route value; one that does not parse leaves that side unbounded</param>
+    /// <param name="quality">JPEG quality, clamped to 1-100; 85 when it does not parse</param>
+    /// <returns>Null when the chapter, its cover or the file is missing</returns>
+    Task<byte[]?> GetBookCoverAsync(int chapterId, string width, string height, string? quality,
+        bool isGreyScale, CancellationToken ct = default);
 }

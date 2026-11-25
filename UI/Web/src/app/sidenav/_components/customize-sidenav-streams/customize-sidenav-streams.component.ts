@@ -131,7 +131,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
     });
   }
 
-  orderUpdated(event: IndexUpdateEvent) {
+  orderUpdated(event: IndexUpdateEvent<SideNavStream>) {
     this.sideNavService.updateSideNavStreamPosition(event.item.name, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
       this.sideNavService.getSideNavStreams(false).subscribe(data => this.items.set([...data]));
     });

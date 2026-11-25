@@ -13,8 +13,8 @@ using Kavita.Models.DTOs.Reader;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Scanner;
+using Kavita.Models.Images;
 using Microsoft.Extensions.Logging;
-using NetVips;
 
 namespace Kavita.Services;
 
@@ -24,7 +24,8 @@ public class CacheService(
     IDirectoryService directoryService,
     IReadingItemService readingItemService,
     IBookmarkService bookmarkService,
-    ILocalizationService localizationService)
+    ILocalizationService localizationService,
+    IImagePipeline imagePipeline)
     : ICacheService
 {
     private static readonly ConcurrentDictionary<int, SemaphoreSlim> ExtractLocks = new();
@@ -52,32 +53,25 @@ public class CacheService(
             return ArraySegment<FileDimensionDto>.Empty;
         }
 
-        var dimensions = new List<FileDimensionDto>();
-        var originalCacheSize = Cache.MaxFiles;
-        try
+        var dimensions = new List<FileDimensionDto>(files.Length);
+        for (var i = 0; i < files.Length; i++)
         {
-            Cache.MaxFiles = 0;
-            for (var i = 0; i < files.Length; i++)
+            var file = files[i];
+            if (imagePipeline.Inspect(new ImageSource.FromFile(file)) is not { } header)
             {
-                var file = files[i];
-                using var image = Image.NewFromFile(file, memory: false, access: Enums.Access.SequentialUnbuffered);
-                dimensions.Add(new FileDimensionDto()
-                {
-                    PageNumber = i,
-                    Height = image.Height,
-                    Width = image.Width,
-                    IsWide = image.Width > image.Height,
-                    FileName = file.Replace(cachePath, string.Empty)
-                });
+                logger.LogError("There was an error calculating image dimensions for {CachePath}, {File} is not a readable image",
+                    cachePath, file);
+                break;
             }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "There was an error calculating image dimensions for {CachePath}", cachePath);
-        }
-        finally
-        {
-            Cache.MaxFiles = originalCacheSize;
+
+            dimensions.Add(new FileDimensionDto()
+            {
+                PageNumber = i,
+                Height = header.Height,
+                Width = header.Width,
+                IsWide = header.Width > header.Height,
+                FileName = file.Replace(cachePath, string.Empty)
+            });
         }
 
         return dimensions;

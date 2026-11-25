@@ -28,7 +28,12 @@ public class ManualMigrateVersionCacheFiles(IDirectoryService directoryService) 
         try
         {
             directoryService.ExistOrCreate(updateScopePath);
-            directoryService.CopyFilesToDirectory(files, updateScopePath);
+
+            foreach (var file in files)
+            {
+                if (directoryService.FileSystem.File.Exists(file))
+                    directoryService.CopyFileToDirectory(file, updateScopePath);
+            }
         }
         catch (Exception ex)
         {
@@ -39,7 +44,12 @@ public class ManualMigrateVersionCacheFiles(IDirectoryService directoryService) 
         try
         {
             directoryService.ExistOrCreate(updateScopePath);
-            directoryService.CopyDirectoryToDirectory(Path.Combine(directoryService.LongTermCacheDirectory, "pr_cache"), updateScopePath);
+
+            var prCacheDirectory = Path.Combine(directoryService.LongTermCacheDirectory, "pr_cache");
+            if (directoryService.Exists(prCacheDirectory))
+            {
+                directoryService.CopyDirectoryToDirectory(prCacheDirectory, updateScopePath);
+            }
         }
         catch (Exception ex)
         {

@@ -453,6 +453,8 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<KoboSyncPoint, KoboSyncPointDto>()
             .ForMemberSimple(dest => dest.DeviceId, src => src.KoboDeviceId)
+            .ForMember(dest => dest.ClientDevice,
+                opt => opt.MapFrom(src => src.ClientDevice))
             .ForMemberSimple(dest => dest.RemovedChapterCount, src => src.RemovedChapterIds.Count)
             .ForMemberSimple(dest => dest.LastSync, src => new[] { src.ProgressSyncTime, src.ChapterSyncTime }.Max());
 

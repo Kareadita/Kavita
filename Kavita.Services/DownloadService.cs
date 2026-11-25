@@ -156,6 +156,14 @@ public class DownloadService(
         return outputPath;
     }
 
+    /// <summary>
+    /// Takes loose images or unpacked archive packages them into an Epub
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="chapterId"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    /// <exception cref="KavitaException"></exception>
     private async Task<string> ConvertImagesToEpub(int userId, int chapterId, CancellationToken ct)
     {
         // TODO: Validate this wont fail if we have a file named "book.kepub.2008.kepub"

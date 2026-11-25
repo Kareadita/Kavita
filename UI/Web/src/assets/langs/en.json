@@ -110,6 +110,8 @@
         "opds": "OPDS",
         "image-only": "Images",
         "add-auth-key": "New",
+        "rotate-all": "Rotate all",
+        "confirm-rotate-all": "Are you sure you want to rotate all your auth keys?",
         "description": "An Auth Key is like a password. Rotating it will invalidate any existing clients.",
         "copy-key": "{{common.copy}}",
         "clients-opds-error": "Failed to load OPDS url for key: {{key}}",
@@ -477,7 +479,8 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "passwords-must-match": "Passwords must match",
-        "permission-error": "You do not have permission to change your password. Reach out to the admin of the server."
+        "permission-error": "You do not have permission to change your password. Reach out to the admin of the server.",
+        "logout-other-devices-label": "Log out other devices"
     },
 
     "change-username": {
@@ -897,7 +900,8 @@
         "error-label": "Error: ",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "logout-other-devices-label": "Force logout the user everywhere"
     },
 
     "all-series": {
@@ -1869,7 +1873,9 @@
         "change-provider-help": "Choose a different provider to search against for this series",
         "provider-switch-help": "Results are from {{provider}}. Applying a match will switch this series to {{provider}}",
         "is-standalone-label": "Is standalone",
-        "is-standalone-tooltip": "Enable if this series represents a single book, and hardcover doesn't have a series entry for it"
+        "is-standalone-tooltip": "Enable if this series represents a single book, and hardcover doesn't have a series entry for it",
+        "bad-match": "Bad match",
+        "bad-match-tooltip": "Clear all external ids and search again"
     },
 
     "match-series-result-item": {
@@ -2927,21 +2933,31 @@
 
     "manage-kobo": {
         "kobo-sync-settings-title": "Sync Settings",
+        "setup-title": "Setup your Kobo",
+        "description": "Setup how your content from Kavita will sync to your Kobo. You can learn how to setup your device {{wikiLink}}",
+        "wiki": "here",
         "kobo-sync-disabled-alert": "Kobo Sync has been disabled by your administrator.",
         "kobo-sync-no-download-role": "Kobo Sync requires the Download role. Ask your administrator for help.",
+        "kobo-sync-no-host-name": "Kobo Sync requires a Hostname set. Ask your administrator for help.",
+        "kobo-sync-no-host-name-admin-action": "Setup a hostname so Kobo Sync can be used by everyone",
+        "hostname-label": "{{manage-email-settings.host-name-label}}",
+        "hostname-tooltip": "This tells Kobo how to reach the Kavita server.",
         "sync-item-limit-label": "Sync Item Limit",
         "sync-item-limit-tooltip": "Maximum number of items sent to the device per sync request. Between 25 and 100.",
         "forward-to-kobo-store-label": "Forward to Kobo Store",
         "forward-to-kobo-store-tooltip": "Forward requests for books outside your Kavita library to the official Kobo store. Disable to stop the device from talking to Kobo's servers.",
+        "create-on-deck-collection-label": "On Deck Tag",
+        "create-on-deck-collection-tooltip": "Sync your On Deck to Kobo as a Tag",
         "sync-sources-title": "Sync Sources",
+        "sync-sources-tooltip": "Configure which book/chapters should be synced to your Kobo. Everything is synced for each source unless specific items are selected",
         "sync-libraries-label": "Libraries",
-        "sync-libraries-tooltip": "Enable to sync chapters in your libraries. If none are selected, all are synced",
+        "sync-libraries-tooltip": "Enable to sync chapters in your libraries.",
         "sync-libraries-selection-label": "Libraries to sync",
         "sync-reading-lists-label": "Reading Lists",
-        "sync-reading-lists-tooltip": "Enable to sync reading lists to your kobo as tags. If none are selected, all are synced",
+        "sync-reading-lists-tooltip": "Enable to sync reading lists to your kobo as tags.",
         "sync-reading-lists-selection-label": "Reading lists to sync",
         "sync-collections-label": "Collections",
-        "sync-collections-tooltip": "Enable to sync collections to your kobo as tags. If none are selected, all are synced",
+        "sync-collections-tooltip": "Enable to sync collections to your kobo as tags.",
         "sync-collections-selection-label": "Collections to sync",
         "sync-smart-filters-label": "Sync Smart Filters",
         "sync-smart-filters-tooltip": "Coming soon. Smart Filters cannot be used as a Kobo sync source yet",
@@ -2958,7 +2974,12 @@
         "no-devices-title": "No Kobo devices",
         "no-devices-description": "A device appears here after it syncs with your account for the first time.",
         "load-error-title": "Could not load Kobo settings",
-        "load-error-description": "Refresh the page to try again."
+        "load-error-description": "Refresh the page to try again.",
+        "kobo-sync-url-label": "Kobo Sync url",
+        "image-only": "{{manage-auth-keys.image-only}}",
+        "opds": "{{manage-auth-keys.opds}}",
+        "host-name-label": "{{manage-settings.host-name-label}}",
+        "host-name-tooltip": "{{manage-settings.host-name-tooltip}}"
     },
 
     "restore-chapters-modal": {

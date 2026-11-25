@@ -73,9 +73,11 @@ export class ManageKoboSyncPointsComponent implements OnInit {
     ref.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((result: ModalResult<number>) => {
       if (!result.success || !result.data) return;
 
-      patchEntitySignal(this.syncPoints, {
-        ...point,
-        removedChapterCount: result.data ?? 0
+      this.koboService.getSyncPoints().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(points => {
+        const updated = points.find(p => p.id === point.id);
+        if (!updated) return;
+
+        patchEntitySignal(this.syncPoints, updated);
       });
     });
   }

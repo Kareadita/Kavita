@@ -1,7 +1,12 @@
 using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Images;
 using Kavita.Services.Helpers;
+using Kavita.Services.Images;
+using Kavita.Services.Images.ImageSteps;
 using Kavita.Services.Tests.Helpers;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using Image = NetVips.Image;
 
 namespace Kavita.Services.Tests.Images;
@@ -82,6 +87,41 @@ public class NetVipsFileHandleTests : IDisposable
 
         AssertReplaceable(first);
         AssertReplaceable(second);
+    }
+
+    /// <summary>
+    /// A Kobo cover is rendered from the stored file while a cover refresh may be replacing it
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Render_FromFile_LeavesFileReplaceable(bool greyscale)
+    {
+        if (!OperatingSystem.IsWindows()) return;
+
+        var cover = WriteWebp("cover.webp", 640, 909);
+        IImageStep[] steps = greyscale ? [new FitWithinStep(355, 530), new GreyscaleStep()] : [new FitWithinStep(355, 530)];
+
+        new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>())
+            .Render(new ImageSource.FromFile(cover), new ImageRender(EncodeFormat.JPEG, steps, 85));
+
+        AssertReplaceable(cover);
+    }
+
+    /// <summary>
+    /// The reader's page dimensions read every cached page, and the chapter cache is deleted after
+    /// </summary>
+    [Fact]
+    public void Inspect_FromFile_LeavesFileReplaceable()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+
+        var page = WriteWebp("page.webp", 640, 909);
+
+        var header = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>()).Inspect(new ImageSource.FromFile(page));
+
+        Assert.Equal((640, 909), (header!.Width, header.Height));
+        AssertReplaceable(page);
     }
 
     private string WriteWebp(string fileName, int width, int height)

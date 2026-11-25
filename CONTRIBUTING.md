@@ -21,6 +21,7 @@ The docs are maintained in the [Wiki-Nextra](https://github.com/Kareadita/Wiki-N
 - dotnet tool install -g Swashbuckle.AspNetCore.Cli
 - dotnet cli tools [link](https://learn.microsoft.com/en-us/ef/core/cli/dotnet) 
 
+
 ### Fork and Clone Kavita
 
 Fork the repository on GitHub, then clone your fork onto your local development machine.
@@ -42,6 +43,7 @@ Fork the repository on GitHub, then clone your fork onto your local development 
 
 1. Build the project in Visual Studio/Rider, and set the startup project to `Kavita.Server (Server)`
 2. Debug the project in Visual Studio/Rider
+3. Grab kepubify for your OS and place it in Kavita.Server/ from [here](https://pgaskin.net/kepubify/dl/). Only needed when working on Kobo areas.
 
 #### Troubleshooting for Apple users
 

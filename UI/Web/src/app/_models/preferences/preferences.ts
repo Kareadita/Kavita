@@ -51,6 +51,7 @@ export interface OpdsPreferences {
 export interface KoboSyncPreferences {
   syncItemLimit: number;
   forwardToKoboStore: boolean;
+  createOnDeckCollection: boolean;
   librarySyncEnabled: boolean;
   syncLibraries: number[];
   readingListSyncEnabled: boolean;

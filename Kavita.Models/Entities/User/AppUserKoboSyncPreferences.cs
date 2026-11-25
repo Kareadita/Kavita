@@ -15,6 +15,11 @@ public class AppUserKoboSyncPreferences
     /// </summary>
     public bool ForwardToKoboStore { get; set; } = true;
 
+    /// <summary>
+    /// Should an On Deck collection be created
+    /// </summary>
+    public bool CreateOnDeckCollection { get; set; } = true;
+
     #region Sync sources
 
     /// <summary>

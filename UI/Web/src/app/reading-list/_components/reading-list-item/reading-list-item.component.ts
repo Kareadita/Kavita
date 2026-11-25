@@ -31,7 +31,7 @@ export class ReadingListItemComponent {
   editMode = input(false);
 
   read = output<ReadingListItem>();
-  remove = output<ItemRemoveEvent>();
+  remove = output<ItemRemoveEvent<ReadingListItem>>();
 
   chapterTitle = computed(() => this.item().chapter?.titleName || this.item().title);
   chapterNumber = computed(() => this.item().chapter?.range || this.item().chapterNumber);

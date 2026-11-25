@@ -12,6 +12,7 @@ interface FormModel {
   password: string;
   oldPassword: string;
   confirmPassword: string;
+  logoutOtherDevices: boolean;
 }
 
 
@@ -30,7 +31,8 @@ export class ChangePasswordComponent {
   private readonly formModel = signal<FormModel>({
     password: '',
     oldPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    logoutOtherDevices: true
   });
   formGroup = form(this.formModel, p => {
     required(p.password);
@@ -53,13 +55,17 @@ export class ChangePasswordComponent {
     this.formGroup.password().value.set('');
     this.formGroup.confirmPassword().value.set('');
     this.formGroup.oldPassword().value.set('');
+    this.formGroup.logoutOtherDevices().value.set(true);
     this.resetPasswordErrors.set([]);
   }
 
   savePasswordForm() {
     const model = this.formModel();
     this.resetPasswordErrors.set([]);
-    this.accountService.resetPassword(this.accountService.username()!, model.confirmPassword, model.oldPassword).subscribe(() => {
+    this.accountService.resetPassword(this.accountService.username()!, model.confirmPassword, model.oldPassword, model.logoutOtherDevices).subscribe((tokens) => {
+      if (tokens) {
+        this.accountService.updateTokens(tokens);
+      }
       this.toastr.success(translate('toasts.password-updated'));
       this.resetPasswordForm();
       this.isEditMode.set(false);

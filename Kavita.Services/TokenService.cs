@@ -8,9 +8,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Services;
 using Kavita.Common.Helpers;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.Internal;
 using Kavita.Models.Entities.User;
+using Kavita.Services.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -32,6 +34,11 @@ public class TokenService(
 
     private const string RefreshTokenName = "RefreshToken";
     /// <summary>
+    /// Claim carrying the user's security stamp, so bearer tokens can be invalidated when the stamp changes
+    /// (e.g. role changes). Checked in JwtBearerEventsHelper.
+    /// </summary>
+    public const string SecurityStampClaimType = "SecurityStamp";
+    /// <summary>
     /// Name of the dedicated token provider used for refresh tokens. Kept separate from the Default provider so the
     /// refresh token can have a long lifespan without inflating password-reset/email-confirmation token lifespans.
     /// </summary>
@@ -44,6 +51,7 @@ public class TokenService(
         {
             new(JwtRegisteredClaimNames.Name, user.UserName!),
             new(NameIdentifier, user.Id.ToString()),
+            new(SecurityStampClaimType, user.SecurityStamp ?? string.Empty),
         };
 
         var roles = await userManager.GetRolesAsync(user);
@@ -109,6 +117,19 @@ public class TokenService(
             if (user == null)
             {
                 logger.LogDebug("[RefreshToken] failed to validate due to not finding user in DB");
+                return null;
+            }
+
+            if (!await userManager.IsEnabledAsync(user))
+            {
+                logger.LogDebug("[RefreshToken] User is not allowed to login due to missing roles");
+                return null;
+            }
+
+            var stampClaim = principal.Claims.FirstOrDefault(q => q.Type == SecurityStampClaimType)?.Value;
+            if (stampClaim != user.SecurityStamp)
+            {
+                logger.LogDebug("[RefreshToken] failed to validate due to security stamp mismatch");
                 return null;
             }
 

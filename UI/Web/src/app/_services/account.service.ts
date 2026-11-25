@@ -374,8 +374,15 @@ export class AccountService {
     return this.httpClient.post<string>(this.baseUrl + 'account/confirm-password-reset', model, TextResonse);
   }
 
-  resetPassword(username: string, password: string, oldPassword: string) {
-    return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password, oldPassword}, TextResonse);
+  resetPassword(username: string, password: string, oldPassword: string, logoutOtherDevices = true) {
+    return this.httpClient.post<{token: string, refreshToken: string} | null>(
+      this.baseUrl + 'account/reset-password', {username, password, oldPassword, logoutOtherDevices});
+  }
+
+  updateTokens(tokens: {token: string, refreshToken: string}) {
+    const current = this._currentUser();
+    if (!current) return;
+    this.setCurrentUser({...current, token: tokens.token, refreshToken: tokens.refreshToken});
   }
 
   update(model: UpdateUserRequest) {
@@ -433,8 +440,22 @@ export class AccountService {
     return undefined;
   }
 
-  opdsUrlRsc(keyName: () => string) {
-    return httpResource.text<string>(() =>this.baseUrl + 'account/opds-url?authKeyName=' + keyName());
+  opdsUrlRsc(keyId: () => number) {
+    return httpResource.text<string>(() => {
+      const id = keyId();
+      if (id === 0) return undefined;
+
+      return id ? this.baseUrl + 'account/opds-url?authKeyId=' + id : this.baseUrl + 'account/opds-url';
+    });
+  }
+
+  koboSyncUrlRsc(keyId: () => number) {
+    return httpResource.text<string>(() => {
+      const id = keyId();
+      if (id === 0) return undefined;
+
+      return id ? this.baseUrl + 'account/kobo-sync-url?authKeyId=' + id : this.baseUrl + 'account/kobo-sync-url';
+    });
   }
 
   getAuthKeys() {
@@ -449,6 +470,11 @@ export class AccountService {
     return this.httpClient.post(this.baseUrl + `account/rotate-auth-key?authKeyId=${id}`, data);
   }
 
+  rotateAllAuthKeys() {
+    return this.httpClient.post(this.baseUrl + 'account/rotate-all-keys', {}).pipe(
+      switchMap(() => this.refreshAccount())
+    );
+  }
 
   deleteAuthKey(id: number) {
     return this.httpClient.delete(this.baseUrl + `account/auth-key?authKeyId=${id}`);

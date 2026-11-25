@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Kavita.Models.Attributes;
@@ -17,6 +18,9 @@ public class KoboSyncPoint
     [ExportScrub(ExportScrubKind.Random)]
     public string KoboDeviceId { get; set; }
 
+    public int? ClientDeviceId { get; set; }
+    public ClientDevice? ClientDevice { get; set; }
+
     /// <summary>
     /// Sync token of the upstream Kobo store, used when forwarding requests
     /// </summary>
@@ -33,6 +37,12 @@ public class KoboSyncPoint
     /// All chapter ids in the last sync
     /// </summary>
     public List<int> ChapterIds { get; set; } = [];
+    /// <summary>
+    /// Series position (rank) of each chapter as sent to the device, used to detect reorders
+    /// that shift the rank of sibling chapters without touching their timestamps
+    /// </summary>
+    [JsonColumn]
+    public Dictionary<int, int> ChapterPositions { get; set; } = [];
     /// <summary>
     /// Amount of already processed changes in the current sync.
     /// </summary>
@@ -55,17 +65,7 @@ public class KoboSyncPoint
     public List<int> ReadingListsIds { get; set; } = [];
     public int ReadingListsSyncedUntilIndex { get; set; }
 
-    public void Reset()
-    {
-        ChapterIndex = 0;
-        ProgressSyncedUntilIndex = 0;
-        CollectionsSyncedUntilIndex = 0;
-        ReadingListsSyncedUntilIndex = 0;
-        ChapterSyncTime = DateTime.UtcNow;
-        ProgressSyncTime = DateTime.UtcNow;
-        CollectionsSyncTime = DateTime.UtcNow;
-        ReadingListsSyncTime = DateTime.UtcNow;
-    }
+    public List<int> OnDeckIds { get; set; } = [];
 
 }
 

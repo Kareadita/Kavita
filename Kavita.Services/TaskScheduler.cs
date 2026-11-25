@@ -318,19 +318,26 @@ public class TaskScheduler : ITaskScheduler
         // Backfilling/Freshening Reviews/Rating/Recommendations
         var randomKPlusBackfill = Rnd.Next(1, 5);
         var randomKPlusBackfillMinute = Rnd.Next(0, 60);
+        _logger.LogTrace("Daily backfill will happen at {Hour} hour and {Minute} minute(s)", randomKPlusBackfill, randomKPlusBackfillMinute);
         RecurringJob.AddOrUpdate(KavitaPlusDataRefreshId,
             () => _externalMetadataService.FetchExternalDataTask(CancellationToken.None),
             Cron.Daily(randomKPlusBackfill, randomKPlusBackfillMinute), RecurringJobOptions);
 
         // This shouldn't be so close to fetching data due to Rate limit concerns
         var randomKPlusStackSync = Rnd.Next(6, 10);
+        var randomKPlusStackSyncMinute = Rnd.Next(0, 60);
+        _logger.LogTrace("Smart collection sync will happen at {Hour} hour and {Minute} minute(s)", randomKPlusStackSync, randomKPlusStackSyncMinute);
         RecurringJob.AddOrUpdate(KavitaPlusStackSyncId,
             () => _smartCollectionSyncService.Sync(CancellationToken.None),
-            Cron.Daily(randomKPlusStackSync), RecurringJobOptions);
+            Cron.Daily(randomKPlusStackSync, randomKPlusStackSyncMinute), RecurringJobOptions);
 
+        var randomKPlusSyncWantToReadDay = DayOfWeekHelper.Random();
+        var randomKPlusSyncWantToRead = Rnd.Next(6, 24);
+        var randomKPlusSyncWantToReadMinute = Rnd.Next(0, 60);
+        _logger.LogTrace("Want to read sync will happen at {Day} day, {Hour} hour and {Minute} minute(s)", randomKPlusSyncWantToReadDay, randomKPlusSyncWantToRead, randomKPlusSyncWantToReadMinute);
         RecurringJob.AddOrUpdate(KavitaPlusWantToReadSyncId,
             () => _wantToReadSyncService.Sync(CancellationToken.None),
-            Cron.Weekly(DayOfWeekHelper.Random()), RecurringJobOptions);
+            Cron.Weekly(randomKPlusSyncWantToReadDay, randomKPlusSyncWantToRead, randomKPlusSyncWantToReadMinute), RecurringJobOptions);
 
         RecurringJob.AddOrUpdate<IKavitaPlusAuditService>(PurgeKavitaPlusAuditLogsId,
             service => service.PurgeOldLogsAsync(CancellationToken.None),

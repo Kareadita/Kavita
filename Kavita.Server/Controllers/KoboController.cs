@@ -20,13 +20,11 @@ using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers.Kobo;
-using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using NetVips;
 
 namespace Kavita.Server.Controllers;
 
@@ -42,7 +40,8 @@ public class KoboController(
     IUnitOfWork unitOfWork,
     IKoboSyncService koboSyncService,
     IDirectoryService directoryService,
-    IDownloadService downloadService): BaseApiController
+    IDownloadService downloadService,
+    IClientInfoAccessor clientInfoAccessor): BaseApiController
 {
 
     private const string KoboImageHost = "https://cdn.kobo.com/book-images/";
@@ -109,9 +108,10 @@ public class KoboController(
         var syncPoint = await unitOfWork.KoboSyncPointRepository.GetSyncPoint(UserId,
             decodedToken.Token.SyncPointId, decodedToken.KoboStoreSyncToken, ct);
 
-        // Delete all other KoboSyncPoints for this device id as they'll not be used anymore
+        // Delete all other KoboSyncPoints for this device id as they'll not be used any more
         await unitOfWork.KoboSyncPointRepository.DeleteOthersForDeviceId(syncPoint.Id, deviceId, ct);
         syncPoint.KoboDeviceId = deviceId;
+        syncPoint.ClientDeviceId = clientInfoAccessor.CurrentDeviceId;
 
         var (kavitaChanges, completedSync) = await koboSyncService.GetChangesSinceAsync(UserId, syncSettings, syncPoint, ct);
 
@@ -282,52 +282,8 @@ public class KoboController(
             return NotFound();
         }
 
-        var coverInfo = await unitOfWork.DataContext.Chapter
-            .Where(c => c.Id == kavitaId)
-            .Select(c => new
-            {
-                ChapterCoverImage = c.CoverImageFile!.FileName,
-                VolumeCoverImage = c.Volume.CoverImageFile!.FileName,
-                c.MinNumber
-            })
-            .FirstOrDefaultAsync(ct);
-
-        if (coverInfo is null)
-        {
-            return NotFound();
-        }
-
-        var coverPath = coverInfo.MinNumber.Is(Parser.DefaultChapterNumber)
-            ? coverInfo.VolumeCoverImage
-            : coverInfo.ChapterCoverImage;
-
-        if (string.IsNullOrEmpty(coverPath))
-        {
-            return NotFound();
-        }
-
-        var fullPath = Path.Join(directoryService.CoverImageDirectory, coverPath);
-        if (!directoryService.FileSystem.File.Exists(fullPath)) return NotFound();
-
-        // BUG: a JPEG cover is returned as is, so the requested size and greyscale are ignored
-        if (string.Equals(Path.GetExtension(fullPath), ".jpg", StringComparison.OrdinalIgnoreCase))
-        {
-            return PhysicalFile(fullPath, "image/jpeg");
-        }
-
-        // TODO: Refactor this method into Service and refactor this into a Steps approach with the Pipeline
-        var q = int.TryParse(quality, out var parsedQ) ? Math.Clamp(parsedQ, 1, 100) : 85;
-
-        var bytes = await Task.Run(() =>
-        {
-            using var img = Image.Thumbnail(fullPath, int.TryParse(width, out var w) ? w : 1000000,
-                height: int.TryParse(height, out var h) ? h : 1000000,
-                size: Enums.Size.Down);
-
-            using var final = isGreyScale ? img.Colourspace(Enums.Interpretation.Bw) : img;
-
-            return final.JpegsaveBuffer(q: q);
-        }, ct);
+        var bytes = await koboSyncService.GetBookCoverAsync(kavitaId, width, height, quality, isGreyScale, ct);
+        if (bytes is null) return NotFound();
 
         return File(bytes, "image/jpeg");
     }
@@ -370,6 +326,24 @@ public class KoboController(
         }
 
         return Ok();
+    }
+
+    /// <summary>
+    /// Dummy implementation of the tag delete endpoint (may happen when switching kavita servers)
+    ///
+    /// Not intended for use beyond Kobo devices
+    /// </summary>
+    /// <param name="tagId"></param>
+    /// <returns></returns>
+    [HttpPost("v1/library/tags/{tagId}/items/delete")]
+    public async Task<ActionResult> DeleteTag(string tagId)
+    {
+        if (tagId.StartsWith("rl:") || tagId.StartsWith("col:"))
+        {
+            return Ok();
+        }
+
+        return await koboSyncService.ProxyRequestIfEnabled();
     }
 
     /// <summary>
@@ -512,7 +486,7 @@ public class KoboController(
             return await koboSyncService.ProxyRequestIfEnabled();
         }
 
-        var detail = await unitOfWork.ChapterRepository.GetKoboBookDetailsAsync(kavitaId, ct);
+        var detail = await koboSyncService.GetKoboBookDetailsAsync(kavitaId, ct);
         if (detail is null)
         {
             return NotFound();
@@ -699,6 +673,23 @@ public class KoboController(
     /// <returns></returns>
     [HttpGet("v1/user/wishlist")]
     public async Task<ActionResult> GetWishlist()
+    {
+        if ((await KoboSyncSettings).ForwardToKoboStore)
+        {
+            return await koboSyncService.ProxyRequestIfEnabled();
+        }
+
+        return Ok(KoboWishlistResponseDto.Empty);
+    }
+
+    /// <summary>
+    /// Dummy implementation to reduce failure when forward is off. Returns an empty pagination response
+    ///
+    /// Not intended for use beyond Kobo devices
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("v1/user/recommendations")]
+    public async Task<ActionResult> GetRecommendations()
     {
         if ((await KoboSyncSettings).ForwardToKoboStore)
         {

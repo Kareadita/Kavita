@@ -793,15 +793,26 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.PrimitiveCollection<string>("ChapterIds")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("ChapterIndex")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ChapterPositions")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{}");
+
                     b.Property<DateTime>("ChapterSyncTime")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("ClientDeviceId")
+                        .HasColumnType("INTEGER");
+
                     b.PrimitiveCollection<string>("CollectionsIds")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CollectionsSyncTime")
@@ -811,9 +822,14 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("KoboDeviceId")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("KoboStoreSyncToken")
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("OnDeckIds")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ProgressSyncTime")
@@ -826,6 +842,7 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.PrimitiveCollection<string>("ReadingListsIds")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ReadingListsSyncTime")
@@ -835,6 +852,7 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("RemovedChapterIds")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasDefaultValue("[]");
@@ -843,6 +861,8 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClientDeviceId");
 
                     b.HasIndex("UserId");
 
@@ -3376,7 +3396,7 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("KoboSyncPreferences")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue("{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"LibrarySyncEnabled\":false,\"SyncLibraries\":[],\"ReadingListSyncEnabled\":false,\"SyncReadingLists\":[],\"CollectionSyncEnabled\":false,\"SyncCollections\":[],\"ManagedCollection\":0,\"HasManagedCollection\":false}");
+                        .HasDefaultValue("{\"SyncItemLimit\":100,\"ForwardToKoboStore\":true,\"CreateOnDeckCollection\":true,\"LibrarySyncEnabled\":false,\"SyncLibraries\":[],\"ReadingListSyncEnabled\":false,\"SyncReadingLists\":[],\"CollectionSyncEnabled\":false,\"SyncCollections\":[],\"ManagedCollection\":0,\"HasManagedCollection\":false}");
 
                     b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");
@@ -4309,11 +4329,17 @@ namespace Kavita.Database.Migrations
 
             modelBuilder.Entity("Kavita.Models.Entities.Kobo.KoboSyncPoint", b =>
                 {
+                    b.HasOne("Kavita.Models.Entities.User.ClientDevice", "ClientDevice")
+                        .WithMany()
+                        .HasForeignKey("ClientDeviceId");
+
                     b.HasOne("Kavita.Models.Entities.User.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ClientDevice");
 
                     b.Navigation("User");
                 });

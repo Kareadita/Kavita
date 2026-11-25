@@ -66,6 +66,14 @@ public class ChapterController(
         var chapterIds = syncPoint.RemovedChapterIds.Select(rc => rc.ChapterId).ToList();
 
         var chapters = await unitOfWork.ChapterRepository.GetChapterDtosAsync(chapterIds, UserId, ct);
+
+        var loadedChapterIds = chapters.Select(c => c.Id);
+        syncPoint.RemovedChapterIds = syncPoint.RemovedChapterIds
+            .Where(rc => loadedChapterIds.Contains(rc.ChapterId))
+            .ToList();
+        if (unitOfWork.HasChanges())
+            await unitOfWork.CommitAsync(ct);
+
         if (chapters.Count == 0) return Ok(new List<ChapterRestoreInfoDto>());
 
         if (!await unitOfWork.UserRepository.HasAccessToAllChapters(UserId, chapters.Select(c => c.Id), ct))

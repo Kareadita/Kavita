@@ -17,57 +17,6 @@ public static class ImageHelper
     // Fixed seed for generation of ColorScapes. Do not change
     private const int ColorScapeSeed = 7;
 
-    /// <summary>
-    /// Reads the image format from the file header, never the file name
-    /// </summary>
-    /// <returns>The extension with its dot (<c>.png</c>, <c>.jpg</c>, <c>.webp</c>, <c>.gif</c>, <c>.avif</c>), or null
-    /// when the file is not an image or is a format Kavita does not take for covers</returns>
-    public static string? GetImageExtension(string filePath)
-    {
-        try
-        {
-            using var image = Image.NewFromFile(filePath, access: Enums.Access.Sequential);
-            return GetExtension(image);
-        }
-        catch (VipsException)
-        {
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// <see cref="GetImageExtension"/> and the size, read from the header of an image already in memory
-    /// </summary>
-    /// <returns>Null when the bytes are not an image or are a format Kavita does not take for covers</returns>
-    public static ImageHeader? GetImageHeader(byte[] bytes)
-    {
-        try
-        {
-            using var image = Image.NewFromBuffer(bytes, access: Enums.Access.Sequential);
-            var extension = GetExtension(image);
-            return extension == null ? null : new ImageHeader(extension, image.Width, image.Height);
-        }
-        catch (VipsException)
-        {
-            return null;
-        }
-    }
-
-    private static string? GetExtension(Image image)
-    {
-        // Loading from file reports pngload, while from memory reports pngload_buffer
-        return (string) image.Get("vips-loader") switch
-        {
-            "pngload" or "pngload_buffer" => ".png",
-            "jpegload" or "jpegload_buffer" => ".jpg",
-            "webpload" or "webpload_buffer" => ".webp",
-            "gifload" or "gifload_buffer" => ".gif",
-            // heifload also opens HEIC, which browsers can't show
-            "heifload" or "heifload_buffer" when image.Contains("heif-compression") && (string) image.Get("heif-compression") == "av1" => ".avif",
-            _ => null,
-        };
-    }
-
 
 
     private static (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath)

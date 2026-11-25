@@ -9,6 +9,7 @@ using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.API.Store;
+using Kavita.Common.Extensions;
 using Kavita.Database.Extensions;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
@@ -18,9 +19,13 @@ using Kavita.Models.DTOs.Progress;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Kobo;
 using Kavita.Models.Entities.Progress;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Images;
 using Kavita.Services.Builders;
+using Kavita.Services.Images;
 using Kavita.Services.Kobo;
+using NetVips;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -31,18 +36,30 @@ namespace Kavita.Services.Tests.Kobo;
 
 public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTest(testOutputHelper)
 {
+    private const int DefaultUserId = 1;
+
     private IKoboSyncService SetupSyncService(
         IUnitOfWork unitOfWork,
         IMapper mapper,
         IReaderService? readerService = null,
         IBookService? bookService = null,
         IFileSystem? fileSystem = null,
-        IKepubifyConverterService? kepubifyConverterService = null
+        IKepubifyConverterService? kepubifyConverterService = null,
+        IDirectoryService? directoryService = null,
+        IImagePipeline? imagePipeline = null,
+        ILocalizationService? localizationService = null
         )
     {
         var userContext = Substitute.For<IUserContext>();
         userContext.AuthKey().Returns("abc");
+        userContext.GetUserId().Returns(DefaultUserId);
+        userContext.GetUserIdOrThrow().Returns(DefaultUserId);
 
+        var httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+        httpContextAccessor.HttpContext.Returns(new DefaultHttpContext
+        {
+            Request = { Host = new HostString("localhost") },
+        });
 
         return new KoboSyncService(
             Substitute.For<ILogger<KoboSyncService>>(),
@@ -52,12 +69,26 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
             bookService ?? Substitute.For<IBookService>(),
             Substitute.For<IReadingSessionService>(),
             userContext,
-            Substitute.For<IHttpContextAccessor>(),
+            httpContextAccessor,
             Substitute.For<IHttpClientFactory>(),
             kepubifyConverterService ?? Substitute.For<IKepubifyConverterService>(),
             fileSystem ?? Substitute.For<IFileSystem>(),
-            Substitute.For<ILocalizationService>()
+            localizationService ?? SetupLocalizationService(),
+            directoryService ?? Substitute.For<IDirectoryService>(),
+            imagePipeline ?? Substitute.For<IImagePipeline>(),
+            new EntityNamingService()
             );
+    }
+
+    private static ILocalizationService SetupLocalizationService()
+    {
+        var localizationService = Substitute.For<ILocalizationService>();
+        localizationService.TranslateAsync(Arg.Any<int>(), "volume-num", Arg.Any<object[]>()).Returns("Volume {0}");
+        localizationService.TranslateAsync(Arg.Any<int>(), "chapter-num", Arg.Any<object[]>()).Returns("Chapter {0}");
+        localizationService.TranslateAsync(Arg.Any<int>(), "issue-num", Arg.Any<object[]>()).Returns("Issue {0}{1}");
+        localizationService.TranslateAsync(Arg.Any<int>(), "book-num", Arg.Any<object[]>()).Returns("Book {0}");
+
+        return localizationService;
     }
 
     private async Task SetupCollection(IDataContext ctx)
@@ -166,7 +197,6 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         Assert.Equal("//body/p[1]", created.EndingXPath);
         Assert.Equal("Hello world", created.SelectedText);
         Assert.Equal(11, created.HighlightCount);
-        Assert.Equal(1, created.SelectedSlotIndex);
         Assert.Equal(0, created.PageNumber);
         Assert.Equal("Chapter One", created.ChapterTitle);
         Assert.Equal("A note", created.CommentPlainText);
@@ -616,4 +646,473 @@ public class KoboSyncServiceTests(ITestOutputHelper testOutputHelper) : Abstract
         Assert.Empty(changes);
         Assert.True(exhausted);
     }
+
+    [Fact]
+    public async Task GetChangesSyncAsync_OnDeckTag()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var library = await ctx.Library.FirstAsync();
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
+                    .WithTitle("Spice and Wolf")
+                    .WithPages(10)
+                    .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
+                    .WithTitle("Spice and Wolf")
+                    .Build())
+                .Build())
+            .Build();
+
+        var user = new AppUserBuilder("Amelia", "amelia@localhost")
+            .WithLibrary(library)
+            .WithRole(PolicyConstants.AdminRole)
+            .Build();
+
+        ctx.Series.Add(series);
+        ctx.AppUser.Add(user);
+
+        await ctx.SaveChangesAsync();
+
+        var syncPreferences = new AppUserKoboSyncPreferences {LibrarySyncEnabled = true, CreateOnDeckCollection = true};
+
+        var syncPoint = new KoboSyncPoint();
+        var syncItems = new List<KoboSyncItem>();
+
+        // Process items added
+        await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+
+        ctx.AppUserProgresses.Add(new AppUserProgress
+        {
+            PagesRead = 1,
+            VolumeId = series.Volumes.First().Id,
+            SeriesId = series.Id,
+            LibraryId = 1,
+            ChapterId = series.Volumes.First().Chapters.First().Id,
+            AppUserId = user.Id,
+        });
+
+        await ctx.SaveChangesAsync();
+
+        (syncItems, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+        var onDeckTag = syncItems.Single(c => c.NewTag?.Tag.Id == "col:on-deck").NewTag!.Tag;
+
+        // Only the partially read chapter; the unread chapter must not be in the tag
+        var partiallyReadChapter = series.Volumes.First().Chapters.First();
+        var unreadChapter = series.Volumes.SelectMany(v => v.Chapters).Single(c => c.Id != partiallyReadChapter.Id);
+        Assert.Single(onDeckTag.Items);
+        Assert.Equal(partiallyReadChapter.Id.ToString(), onDeckTag.Items.Single().RevisionId);
+        Assert.DoesNotContain(onDeckTag.Items, i => i.RevisionId == unreadChapter.Id.ToString());
+
+        await ctx.AppUserProgresses.ExecuteDeleteAsync();
+
+        (syncItems, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Contains(syncItems, c => c.DeletedTag?.Tag.Id == "col:on-deck");
+
+        (syncItems, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Empty(syncItems);
+    }
+
+    [Fact]
+    public async Task GetChangesSinceAsync_OnDeckReportsExhaustedWithZeroBudgetWhenNoPendingChange()
+    {
+        var (unitOfWork, ctx, mapper, user, _, list1, list2) = await SetupReadingListsAndOnDeck();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var syncPreferences = new AppUserKoboSyncPreferences
+        {
+            LibrarySyncEnabled = true,
+            ReadingListSyncEnabled = true,
+            CreateOnDeckCollection = false,
+            SyncItemLimit = 2,
+        };
+
+        var chapter = await ctx.Chapter.FirstAsync();
+        var syncPoint = new KoboSyncPoint
+        {
+            ChapterIds = [chapter.Id],
+            ChapterSyncTime = DateTime.UtcNow,
+            ProgressSyncTime = DateTime.UtcNow,
+        };
+
+        var (changes, exhausted) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+
+        Assert.Equal(2, changes.Count(c => c.NewTag != null));
+        Assert.True(exhausted);
+        Assert.Equal(0, syncPoint.ReadingListsSyncedUntilIndex);
+    }
+
+    [Fact]
+    public async Task GetChangesSinceAsync_ReadingListEditDuringOnDeckContinuationIsNotSkipped()
+    {
+        var (unitOfWork, ctx, mapper, user, _, list1, list2) = await SetupReadingListsAndOnDeck();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var syncPreferences = new AppUserKoboSyncPreferences
+        {
+            LibrarySyncEnabled = true,
+            ReadingListSyncEnabled = true,
+            CreateOnDeckCollection = true,
+            SyncItemLimit = 2,
+        };
+
+        var chapter = await ctx.Chapter.FirstAsync();
+        var syncPoint = new KoboSyncPoint
+        {
+            ChapterIds = [chapter.Id],
+            ChapterSyncTime = DateTime.UtcNow,
+            ProgressSyncTime = DateTime.UtcNow,
+        };
+
+        var (changes, exhausted) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+
+        Assert.Equal(2, changes.Count(c => c.NewTag?.Tag.Id?.StartsWith("rl:") == true));
+        Assert.False(exhausted);
+        Assert.Equal(0, syncPoint.ReadingListsSyncedUntilIndex);
+
+        list1.Title = "List 1 (edited)";
+        await ctx.SaveChangesAsync();
+
+        (changes, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Contains(changes, c => c.ChangedTag?.Tag.Id == $"rl:{list1.Id}");
+    }
+
+    [Fact]
+    public async Task GetChangesSinceAsync_ReorderResendsSiblingsWhoseRankChanged()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var library = await ctx.Library.FirstAsync();
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("A").WithSortOrder(1).WithPages(10).Build())
+                .WithChapter(new ChapterBuilder("B").WithSortOrder(2).WithPages(10).Build())
+                .Build())
+            .Build();
+
+        var user = new AppUserBuilder("Amelia", "amelia@localhost")
+            .WithLibrary(library)
+            .WithRole(PolicyConstants.AdminRole)
+            .Build();
+
+        ctx.Series.Add(series);
+        ctx.AppUser.Add(user);
+        await ctx.SaveChangesAsync();
+
+        var syncPreferences = new AppUserKoboSyncPreferences { LibrarySyncEnabled = true };
+        var syncPoint = new KoboSyncPoint();
+
+        var chapterA = series.Volumes.First().Chapters.Single(c => c.Title == "A");
+        var chapterB = series.Volumes.First().Chapters.Single(c => c.Title == "B");
+
+        var (changes, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+        Assert.Equal(2, changes.Count(c => c.NewEntitlement != null));
+        Assert.Equal(1, syncPoint.ChapterPositions[chapterA.Id]);
+        Assert.Equal(2, syncPoint.ChapterPositions[chapterB.Id]);
+
+        // A & B need an update as their positions will switch
+        chapterB.SortOrder = 0;
+        await ctx.SaveChangesAsync();
+
+        (changes, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+
+        var sent = changes
+            .Select(c => c.ChangedEntitlement ?? c.NewEntitlement)
+            .Where(e => e != null)
+            .ToDictionary(e => int.Parse(e!.BookEntitlement.Id), e => e.BookMetadata.Series!.NumberFloat);
+        Assert.Equal(2, sent.Count);
+        Assert.Equal(1f, sent[chapterB.Id]);
+        Assert.Equal(2f, sent[chapterA.Id]);
+
+        // A will need an update, B doesn't. Position stays the same
+        chapterA.TitleName = "A (renamed)";
+        await ctx.SaveChangesAsync();
+
+        (changes, _) = await koboSyncService.GetChangesSinceAsync(user.Id, syncPreferences, syncPoint, CancellationToken.None);
+
+        sent = changes
+            .Select(c => c.ChangedEntitlement ?? c.NewEntitlement)
+            .Where(e => e != null)
+            .ToDictionary(e => int.Parse(e!.BookEntitlement.Id), e => e.BookMetadata.Series!.NumberFloat);
+        Assert.Single(sent);
+        Assert.True(sent.ContainsKey(chapterA.Id));
+    }
+
+    private async Task<(IUnitOfWork, IDataContext, IMapper, AppUser, Series, ReadingList, ReadingList)> SetupReadingListsAndOnDeck()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+
+        var library = await ctx.Library.FirstAsync();
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(ParserConstants.LooseLeafVolume)
+                    .WithTitle("Spice and Wolf")
+                    .WithPages(10)
+                    .Build())
+                .Build())
+            .Build();
+
+        var user = new AppUserBuilder("Amelia", "amelia@localhost")
+            .WithLibrary(library)
+            .WithRole(PolicyConstants.AdminRole)
+            .Build();
+
+        ctx.Series.Add(series);
+        ctx.AppUser.Add(user);
+        await ctx.SaveChangesAsync();
+
+        var chapter = series.Volumes.First().Chapters.First();
+
+        ctx.AppUserProgresses.Add(new AppUserProgress
+        {
+            PagesRead = 1,
+            VolumeId = series.Volumes.First().Id,
+            SeriesId = series.Id,
+            LibraryId = 1,
+            ChapterId = chapter.Id,
+            AppUserId = user.Id,
+        });
+
+        var list1 = new ReadingListBuilder("List 1")
+            .WithAppUserId(user.Id)
+            .WithItem(new ReadingListItemBuilder(0, series.Id, series.Volumes.First().Id, chapter.Id).Build())
+            .Build();
+        var list2 = new ReadingListBuilder("List 2")
+            .WithAppUserId(user.Id)
+            .WithItem(new ReadingListItemBuilder(0, series.Id, series.Volumes.First().Id, chapter.Id).Build())
+            .Build();
+        ctx.ReadingList.Add(list1);
+        ctx.ReadingList.Add(list2);
+        await ctx.SaveChangesAsync();
+
+        return (unitOfWork, ctx, mapper, user, series, list1, list2);
+    }
+
+    [Fact]
+    public async Task BuildBookMetadata_OrdersSeriesByDefaultChapterOrdering()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var library = await ctx.Library.FirstAsync();
+        var user = new AppUserBuilder("Amelia", "amelia@localhost").WithLibrary(library).Build();
+
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("7").WithSortOrder(0).Build())
+                .WithChapter(new ChapterBuilder("10").WithSortOrder(0).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("5").WithSortOrder(0).Build())
+                .Build())
+            .Build();
+
+        ctx.Series.Add(series);
+        ctx.Users.Add(user);
+        await ctx.SaveChangesAsync();
+
+        var volume1Chapter = series.Volumes.Single(v => v.MinNumber.Is(1f)).Chapters.Single();
+        var volume2Chapters = series.Volumes.Single(v => v.MinNumber.Is(2f)).Chapters.ToList();
+
+        var metadata = await koboSyncService.BuildBookMetadata(
+            series.Volumes.SelectMany(v => v.Chapters).Select(c => c.Id), CancellationToken.None);
+
+        Assert.Equal(3, metadata.Count);
+
+        Assert.Equal(1f, metadata[volume1Chapter.Id].Series!.NumberFloat);
+
+        var chapter7 = volume2Chapters.Single(c => c.Title == "7");
+        var chapter10 = volume2Chapters.Single(c => c.Title == "10");
+        Assert.Equal(2f, metadata[chapter7.Id].Series!.NumberFloat);
+        Assert.Equal(3f, metadata[chapter10.Id].Series!.NumberFloat);
+    }
+
+    [Fact]
+    public async Task BuildBookMetadata_OrdersLooseLeafAndSpecialVolumesLast()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var library = await ctx.Library.FirstAsync();
+        var user = new AppUserBuilder("Amelia", "amelia@localhost").WithLibrary(library).Build();
+
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder(ParserConstants.SpecialVolume)
+                .WithChapter(new ChapterBuilder("2")
+                    .WithTitle("Omake")
+                    .WithIsSpecial(true)
+                    .WithSortOrder(0)
+                    .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(ParserConstants.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder("3").WithSortOrder(0).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("9").WithSortOrder(0).Build())
+                .Build())
+            .Build();
+
+        ctx.Series.Add(series);
+        ctx.Users.Add(user);
+        await ctx.SaveChangesAsync();
+
+        var regularChapter = series.Volumes.Single(v => v.MinNumber.Is(1f)).Chapters.Single();
+        var looseLeafChapter = series.Volumes
+            .Single(v => v.MinNumber.Is(ParserConstants.LooseLeafVolumeNumber)).Chapters.Single();
+        var specialChapter = series.Volumes
+            .Single(v => v.MinNumber.Is(ParserConstants.SpecialVolumeNumber)).Chapters.Single();
+
+        var metadata = await koboSyncService.BuildBookMetadata(
+            series.Volumes.SelectMany(v => v.Chapters).Select(c => c.Id), CancellationToken.None);
+
+        // Real volumes, loose-leaf chapters, specials
+        Assert.Equal(1f, metadata[regularChapter.Id].Series!.NumberFloat);
+        Assert.Equal(2f, metadata[looseLeafChapter.Id].Series!.NumberFloat);
+        Assert.Equal(3f, metadata[specialChapter.Id].Series!.NumberFloat);
+    }
+
+    [Fact]
+    public async Task BuildBookMetadata_NoSeriesForSingleBooks()
+    {
+        var (unitOfWork, ctx, mapper) = await CreateDatabase();
+        var koboSyncService = SetupSyncService(unitOfWork, mapper);
+
+        var library = new LibraryBuilder("Books", LibraryType.Book).Build();
+
+        var series = new SeriesBuilder("Bury Our Bones in the Midnight Soil")
+            .WithLibraryId(2)
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder(ParserConstants.SpecialVolume)
+                .WithChapter(new ChapterBuilder("")
+                    .WithIsSpecial(true)
+                    .WithTitle("Bury Our Bones in the Midnight Soil")
+                    .Build())
+                .Build())
+            .Build();
+
+        ctx.Library.Add(library);
+        ctx.Series.Add(series);
+
+        await ctx.SaveChangesAsync();
+
+        var metadata = await koboSyncService.BuildBookMetadata(
+            series.Volumes.SelectMany(v => v.Chapters).Select(c => c.Id), CancellationToken.None);
+
+        Assert.Single(metadata.Values);
+        Assert.Null(metadata.Values.First().Series);
+    }
+
+    [Fact]
+    public async Task GetBookCoverAsync_ChapterCover_JpegWithinRequest()
+    {
+        await WithCoverChapters(async (service, covers) =>
+        {
+            var bytes = await service.GetBookCoverAsync(covers.ChapterId, "355", "530", null, false);
+
+            using var image = Image.NewFromBuffer(bytes!);
+            Assert.Equal("jpegload_buffer", image.Get("vips-loader"));
+            Assert.Equal((355, 504), (image.Width, image.Height));
+        });
+    }
+
+    /// <summary>
+    /// A chapter numbered -100000 is the volume itself, so the Kobo shows the volume's cover
+    /// </summary>
+    [Fact]
+    public async Task GetBookCoverAsync_VolumeOnlyChapter_UsesVolumeCover()
+    {
+        await WithCoverChapters(async (service, covers) =>
+        {
+            var bytes = await service.GetBookCoverAsync(covers.VolumeOnlyChapterId, "355", "530", null, false);
+
+            using var image = Image.NewFromBuffer(bytes!);
+            Assert.Equal((355, 355), (image.Width, image.Height));
+        });
+    }
+
+    [Fact]
+    public async Task GetBookCoverAsync_CoverFileMissing_Null()
+    {
+        await WithCoverChapters(async (service, covers) =>
+        {
+            File.Delete(Path.Join(covers.Directory, "chapter.jpg"));
+
+            Assert.Null(await service.GetBookCoverAsync(covers.ChapterId, "355", "530", null, false));
+        });
+    }
+
+    [Fact]
+    public async Task GetBookCoverAsync_UnknownChapter_Null()
+    {
+        await WithCoverChapters(async (service, _) =>
+        {
+            Assert.Null(await service.GetBookCoverAsync(int.MaxValue, "355", "530", null, false));
+        });
+    }
+
+    /// <summary>
+    /// Chapter 5 has a 640x909 JPEG cover; the volume-only chapter's volume has a 400x400 PNG, so the rendered size
+    /// tells which one was used
+    /// </summary>
+    private async Task WithCoverChapters(Func<IKoboSyncService, CoverChapters, Task> test)
+    {
+        var directory = Path.Join(Path.GetTempPath(), "kavita-kobo-covers-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        try
+        {
+            using (var black = Image.Black(640, 909, bands: 3))
+            using (var red = black + new double[] { 200, 30, 30 })
+            {
+                red.Jpegsave(Path.Join(directory, "chapter.jpg"));
+            }
+            using (var black = Image.Black(400, 400, bands: 3))
+            using (var blue = black + new double[] { 30, 30, 200 })
+            {
+                blue.Pngsave(Path.Join(directory, "volume.png"));
+            }
+
+            var (unitOfWork, ctx, mapper) = await CreateDatabase();
+            var library = await ctx.Library.FirstAsync();
+            var chapter = new ChapterBuilder("5").Build();
+            chapter.CoverImageFile = new ImageFile { Kind = ImageKind.ChapterCover, FileName = "chapter.jpg", Origin = ImageOrigin.Scan };
+            var volumeOnlyChapter = new ChapterBuilder(ParserConstants.DefaultChapter).Build();
+            var volume = new VolumeBuilder("2").WithChapter(volumeOnlyChapter).Build();
+            volume.CoverImageFile = new ImageFile { Kind = ImageKind.VolumeCover, FileName = "volume.png", Origin = ImageOrigin.Scan };
+
+            ctx.Series.Add(new SeriesBuilder("Covers")
+                .WithLibraryId(library.Id)
+                .WithVolume(new VolumeBuilder("1").WithChapter(chapter).Build())
+                .WithVolume(volume)
+                .Build());
+            await ctx.SaveChangesAsync();
+
+            var directoryService = Substitute.For<IDirectoryService>();
+            directoryService.CoverImageDirectory.Returns(directory);
+            var service = SetupSyncService(unitOfWork, mapper, fileSystem: new FileSystem(), directoryService: directoryService,
+                imagePipeline: new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>()));
+
+            await test(service, new CoverChapters(chapter.Id, volumeOnlyChapter.Id, directory));
+        }
+        finally
+        {
+            try { Directory.Delete(directory, recursive: true); } catch (IOException) { }
+        }
+    }
+
+    private sealed record CoverChapters(int ChapterId, int VolumeOnlyChapterId, string Directory);
 }

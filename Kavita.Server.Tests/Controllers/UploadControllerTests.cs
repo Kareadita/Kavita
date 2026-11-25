@@ -71,7 +71,7 @@ public class UploadControllerTests(ITestOutputHelper outputHelper) : AbstractDbT
         return new UploadController(unitOfWork, Substitute.For<ILogger<UploadController>>(),
             Substitute.For<ITaskScheduler>(), directoryService, Substitute.For<IReadingListService>(),
             Substitute.For<ILocalizationService>(), Substitute.For<IUrlValidationService>(), imageFileService,
-            Substitute.For<ICompositeCoverService>())
+            Substitute.For<ICompositeCoverService>(), Substitute.For<IImagePipeline>())
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
         };

@@ -88,7 +88,7 @@ public sealed class LocalizedNamingContext
         IEntityNamingService namingService,
         ILocalizationService localizationService,
         int userId,
-        List<LibraryType> libraryTypes)
+        IEnumerable<LibraryType> libraryTypes)
     {
         var namingContexts = new Dictionary<LibraryType, LocalizedNamingContext>();
         foreach (var libraryType in libraryTypes.Distinct())

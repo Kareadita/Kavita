@@ -1,17 +1,20 @@
 using System.Text;
-using Kavita.Services.Helpers;
+using Kavita.Models.Images;
+using Kavita.Services.Images;
 using Kavita.Services.Tests.Helpers;
+using Microsoft.Extensions.Logging;
 using NetVips;
+using NSubstitute;
 using Image = NetVips.Image;
 
 namespace Kavita.Services.Tests.Images;
 
 [Collection(NetVipsGlobalStateCollection.Name)]
-public class ImageHelperHeaderTests : IDisposable
+public class ImageInspectTests : IDisposable
 {
     private readonly int _maxFiles = NetVips.Cache.MaxFiles;
 
-    public ImageHelperHeaderTests()
+    public ImageInspectTests()
     {
         NetVips.Cache.MaxFiles = 0;
     }
@@ -34,23 +37,27 @@ public class ImageHelperHeaderTests : IDisposable
 
     [Theory]
     [MemberData(nameof(Cases))]
-    public void GetImageExtension_FileAndMemory_ReadTheSameFormat(string content, string? expected)
+    public void Inspect_FileBytesAndStream_ReadTheSameFormat(string content, string? expected)
     {
         var bytes = Encode(content);
         // .bin so the name says nothing about the format
         var path = Path.Join(Path.GetTempPath(), $"kavita-image-header-{Guid.NewGuid():N}.bin");
         File.WriteAllBytes(path, bytes);
+        var pipeline = new ImagePipeline(Substitute.For<ILogger<ImagePipeline>>());
 
         try
         {
-            Assert.Equal(expected, ImageHelper.GetImageExtension(path));
+            using var stream = new MemoryStream(bytes);
+            ImageSource[] sources = [new ImageSource.FromFile(path), new ImageSource.FromBytes(bytes), new ImageSource.FromStream(stream)];
 
-            var header = ImageHelper.GetImageHeader(bytes);
-            Assert.Equal(expected, header?.Extension);
-            if (header != null)
+            foreach (var source in sources)
             {
-                Assert.Equal(40, header.Width);
-                Assert.Equal(30, header.Height);
+                var header = pipeline.Inspect(source);
+                Assert.Equal(expected, header?.Extension);
+                if (expected != null)
+                {
+                    Assert.Equal((40, 30), (header!.Width, header.Height));
+                }
             }
         }
         finally
