@@ -23,6 +23,10 @@ public class AppUserReadingSession : IEntityDate
     /// </summary>
     public bool IsGenerated { get; set; } = false;
     /// <summary>
+    /// True if a client reported the session after the fact, with the times it measured itself (i.e. read offline)
+    /// </summary>
+    public bool IsBackfilled { get; set; } = false;
+    /// <summary>
     /// Actual activity data recorded during the session
     /// </summary>
     public IList<AppUserReadingSessionActivityData> ActivityData { get; set; }

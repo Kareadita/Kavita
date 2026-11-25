@@ -54,6 +54,12 @@ public class AppUserProgress : IEntityDate
 
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
+    /// <summary>
+    /// When the reading this progress comes from actually happened, if that is not when it was saved (reading a client
+    /// did offline and reported later). It is cleared by any other change to the progress. <see cref="LastModifiedUtc"/>
+    /// stays the time of the save, as syncing to devices relies on that.
+    /// </summary>
+    public DateTime? LastReadUtc { get; set; }
 
 
     // Relationships

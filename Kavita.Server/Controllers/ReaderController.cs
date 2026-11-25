@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,7 +44,8 @@ public class ReaderController(ICacheService cacheService,
     IReaderService readerService, IBookmarkService bookmarkService, IEventHub eventHub,
     IScrobblingService scrobblingService,
     ILocalizationService localizationService,
-    IBookService bookService) : BaseApiController
+    IBookService bookService,
+    IReadingSessionService readingSessionService) : BaseApiController
 {
 
     /// <summary>
@@ -682,6 +683,29 @@ public class ReaderController(ICacheService cacheService,
         }
 
         return Ok();
+    }
+
+    /// <summary>
+    /// Report reading that happened earlier, which the client could not send at the time (i.e. it was offline).
+    /// Each entry becomes a finished reading session with the times the client measured, and the chapter's progress
+    /// moves to where the latest entry ended, unless progress was saved after that.
+    /// </summary>
+    /// <remarks>Entries must be at most <see cref="BackfillReadingResultDto.MaxAgeDays"/> days old. An entry that is
+    /// refused does not stop the others; see the status for each in the response. Sending an entry again is safe.</remarks>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("progress/batch")]
+    public async Task<ActionResult<BackfillReadingResultDto>> BackfillProgress(BackfillReadingDto dto)
+    {
+        var ct = HttpContext.RequestAborted;
+
+        if (dto.Entries.Count > BackfillReadingDto.MaxEntries)
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, "backfill-too-many-entries", BackfillReadingDto.MaxEntries));
+        }
+
+        var results = await readingSessionService.BackfillReadingSessions(UserId, dto.Entries, ct);
+        return Ok(new BackfillReadingResultDto { Results = results });
     }
 
     /// <summary>

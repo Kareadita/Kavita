@@ -94,6 +94,7 @@
     "no-image-for-page": "No such image for page {0}. Try refreshing to allow re-cache.",
     "perform-scan": "Please perform a scan on this series or library and try again",
     "generic-read-progress": "There was an issue saving progress",
+    "backfill-too-many-entries": "At most {0} entries can be sent at once",
     "generic-clear-bookmarks": "Could not clear bookmarks",
     "bookmark-permission": "You do not have permission to bookmark/unbookmark",
     "bookmark-save": "Could not save bookmark",

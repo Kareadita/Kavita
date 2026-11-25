@@ -202,6 +202,295 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         await context.SaveChangesAsync(ct);
     }
 
+    private static readonly TimeSpan BackfillClockSkew = TimeSpan.FromMinutes(5);
+
+    public async Task<IList<BackfillReadingStatus>> BackfillReadingSessions(int userId, IList<BackfillReadingEntryDto> entries, CancellationToken ct = default)
+    {
+        var results = new BackfillReadingStatus[entries.Count];
+        if (entries.Count == 0) return results;
+
+        // Same lock as live progress, so a backfill cannot interleave with the session being built right now
+        var userLock = UserLocks.GetOrAdd(userId, _ => new SemaphoreSlim(1, 1));
+        await userLock.WaitAsync(ct);
+
+        try
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<IDataContext>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+            var nowUtc = DateTime.UtcNow;
+            var oldestUtc = nowUtc - TimeSpan.FromDays(BackfillReadingResultDto.MaxAgeDays);
+
+            var candidates = new List<BackfillCandidate>();
+            var accessByChapter = new Dictionary<int, bool>();
+            for (var i = 0; i < entries.Count; i++)
+            {
+                var entry = entries[i];
+                var start = AsUtc(entry.StartTimeUtc);
+                var end = AsUtc(entry.EndTimeUtc);
+
+                if (end < start || entry.StartPage < 0 || entry.EndPage < 0) results[i] = BackfillReadingStatus.Invalid;
+                // A clock that runs a little ahead is not worth refusing. The times are kept as sent, so sending them again matches
+                else if (end > nowUtc + BackfillClockSkew) results[i] = BackfillReadingStatus.InFuture;
+                else if (start < oldestUtc) results[i] = BackfillReadingStatus.TooOld;
+                else
+                {
+                    if (!accessByChapter.TryGetValue(entry.ChapterId, out var hasAccess))
+                    {
+                        hasAccess = await unitOfWork.UserRepository.HasAccessToChapter(userId, entry.ChapterId, ct);
+                        accessByChapter[entry.ChapterId] = hasAccess;
+                    }
+
+                    if (!hasAccess) results[i] = BackfillReadingStatus.NoAccess;
+                    else candidates.Add(new BackfillCandidate(i, entry, start, end));
+                }
+            }
+
+            if (candidates.Count == 0) return results;
+
+            var chapterIds = candidates.Select(c => c.Entry.ChapterId).Distinct().ToList();
+            var chapters = await context.Chapter
+                .Where(c => chapterIds.Contains(c.Id))
+                .Select(c => new BackfillChapter(c.Id, c.VolumeId, c.Volume.SeriesId, c.Volume.Series.LibraryId, c.Pages, c.WordCount))
+                .ToDictionaryAsync(c => c.Id, ct);
+
+            // A client that never saw its request succeed will send it again. Reading that is already here is not added twice
+            var recorded = (await context.AppUserReadingSessionActivityData
+                    .Where(d => d.ReadingSession.AppUserId == userId && chapterIds.Contains(d.ChapterId) && d.StartTimeUtc >= oldestUtc)
+                    .Select(d => new { d.ChapterId, d.StartTimeUtc, d.EndTimeUtc })
+                    .ToListAsync(ct))
+                .Select(d => (d.ChapterId, Start: Truncate(d.StartTimeUtc), End: d.EndTimeUtc.HasValue ? Truncate(d.EndTimeUtc.Value) : (DateTime?) null))
+                .ToHashSet();
+
+            var toRecord = new List<BackfillCandidate>();
+            foreach (var candidate in candidates)
+            {
+                if (!chapters.ContainsKey(candidate.Entry.ChapterId))
+                {
+                    results[candidate.Index] = BackfillReadingStatus.NoAccess;
+                    continue;
+                }
+
+                var key = (candidate.Entry.ChapterId, Truncate(candidate.Start), (DateTime?) Truncate(candidate.End));
+                if (!recorded.Add(key))
+                {
+                    results[candidate.Index] = BackfillReadingStatus.AlreadyRecorded;
+                    continue;
+                }
+
+                toRecord.Add(candidate);
+            }
+
+            if (toRecord.Count == 0) return results;
+
+            var sessions = new List<AppUserReadingSession>();
+            AppUserReadingSession? current = null;
+            foreach (var candidate in toRecord.OrderBy(c => c.Start))
+            {
+                var chapter = chapters[candidate.Entry.ChapterId];
+                var format = await GetChapterFormatAsync(chapter.Id, context);
+                var activity = await NewBackfillActivityAsync(candidate, chapter, format, scope);
+
+                // One session is one sitting, as when it is built from live progress: it ends after a pause
+                // longer than the session timeout, and never carries over midnight
+                var startsNewSession = current == null
+                                       || candidate.Start - current.EndTimeUtc!.Value > _sessionTimeout
+                                       || activity.StartTime.Date != current.StartTime.Date;
+                if (startsNewSession)
+                {
+                    current = new AppUserReadingSession
+                    {
+                        AppUserId = userId,
+                        IsActive = false,
+                        IsBackfilled = true,
+                        StartTime = activity.StartTime,
+                        StartTimeUtc = activity.StartTimeUtc,
+                        EndTime = activity.EndTime,
+                        EndTimeUtc = activity.EndTimeUtc,
+                        ActivityData = [],
+                    };
+                    sessions.Add(current);
+                }
+
+                current!.ActivityData.Add(activity);
+                if (activity.EndTimeUtc > current.EndTimeUtc)
+                {
+                    current.EndTime = activity.EndTime;
+                    current.EndTimeUtc = activity.EndTimeUtc;
+                }
+
+                results[candidate.Index] = BackfillReadingStatus.Applied;
+            }
+
+            // A session does not carry over midnight, as when one is closed. The activity keeps the times it really had
+            foreach (var session in sessions)
+            {
+                var endOfStartDay = session.StartTime.Date.AddDays(1).AddTicks(-1);
+                if (session.EndTime > endOfStartDay)
+                {
+                    session.EndTime = endOfStartDay;
+                    session.EndTimeUtc = TimeZoneInfo.ConvertTimeToUtc(endOfStartDay, TimeZoneInfo.Local);
+                }
+            }
+
+            // Progress first. Doing it again is harmless (it only ever moves forward in reading time), so a request that
+            // stops after this can be sent again and finish
+            await MoveProgressAsync(userId, toRecord, scope, ct);
+
+            // The sessions and the reads they count go in together. Nothing is recorded by a request that fails here, so a
+            // retry is not told that reading it never finished recording is AlreadyRecorded
+            await using var transaction = await context.Database.BeginTransactionAsync(ct);
+            context.AppUserReadingSession.AddRange(sessions);
+            await context.SaveChangesAsync(ct);
+            await CountCompletedReadsAsync(userId, sessions, context, ct);
+            await transaction.CommitAsync(ct);
+
+            _logger.LogInformation("Recorded {Count} backfilled reading sessions for user {UserId} from {EntryCount} entries",
+                sessions.Count, userId, toRecord.Count);
+        }
+        finally
+        {
+            userLock.Release();
+        }
+
+        return results;
+    }
+
+    private async Task<AppUserReadingSessionActivityData> NewBackfillActivityAsync(BackfillCandidate candidate, BackfillChapter chapter,
+        MangaFormat format, IServiceScope scope)
+    {
+        var entry = candidate.Entry;
+        var tz = TimeZoneInfo.Local;
+        // Like live progress, nothing is read past the end of the chapter
+        var endPage = Math.Min(entry.EndPage, chapter.Pages);
+        var startPage = Math.Min(format == MangaFormat.Epub ? entry.StartPage : Math.Max(entry.StartPage - 1, 0), endPage);
+
+        var activity = new AppUserReadingSessionActivityData
+        {
+            ChapterId = chapter.Id,
+            VolumeId = chapter.VolumeId,
+            SeriesId = chapter.SeriesId,
+            LibraryId = chapter.LibraryId,
+            Format = format,
+            StartPage = startPage,
+            EndPage = endPage,
+            StartBookScrollId = entry.StartBookScrollId,
+            EndBookScrollId = entry.EndBookScrollId,
+            StartTimeUtc = candidate.Start,
+            StartTime = TimeZoneInfo.ConvertTimeFromUtc(candidate.Start, tz),
+            EndTimeUtc = candidate.End,
+            EndTime = TimeZoneInfo.ConvertTimeFromUtc(candidate.End, tz),
+            PagesRead = Math.Max(endPage - startPage, 0),
+            TotalPages = chapter.Pages,
+            TotalWords = chapter.WordCount,
+        };
+
+        if (format == MangaFormat.Epub
+            && !string.IsNullOrEmpty(entry.StartBookScrollId) && !string.IsNullOrEmpty(entry.EndBookScrollId))
+        {
+            activity.WordsRead = await CountWordsAsync(activity, entry, scope);
+        }
+
+        return activity;
+    }
+
+    private async Task<int> CountWordsAsync(AppUserReadingSessionActivityData activity, BackfillReadingEntryDto entry, IServiceScope scope)
+    {
+        try
+        {
+            var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+            var bookService = scope.ServiceProvider.GetRequiredService<IBookService>();
+            var chapter = await cacheService.Ensure(entry.ChapterId);
+            if (chapter == null) return 0;
+
+            return await bookService.GetWordCountBetweenXPaths(
+                cacheService.GetCachedFile(chapter),
+                entry.StartBookScrollId!,
+                activity.StartPage,
+                entry.EndBookScrollId!,
+                entry.EndPage);
+        }
+        catch (Exception ex)
+        {
+            // Words are a nicety; the reading is worth recording without them
+            _logger.LogError(ex, "Error calculating words read for backfilled activity on chapter {ChapterId}", entry.ChapterId);
+            return 0;
+        }
+    }
+
+    /// <summary>
+    /// A chapter's progress moves to where its latest backfilled reading ended, unless progress was saved after that
+    /// (the user kept reading on another device).
+    /// </summary>
+    private async Task MoveProgressAsync(int userId, List<BackfillCandidate> recorded, IServiceScope scope, CancellationToken ct)
+    {
+        var context = scope.ServiceProvider.GetRequiredService<IDataContext>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var readerService = scope.ServiceProvider.GetRequiredService<IReaderService>();
+
+        foreach (var latest in recorded.GroupBy(c => c.Entry.ChapterId).Select(g => g.MaxBy(c => c.End)!))
+        {
+            var chapterId = latest.Entry.ChapterId;
+            var progress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapterId, userId, ct);
+            // Progress put there by earlier backfilled reading counts from when that was read, not from when it was sent
+            if (progress != null && (progress.LastReadUtc ?? progress.LastModifiedUtc) >= latest.End) continue;
+
+            var saved = await readerService.SaveReadingProgress(new ProgressDto
+            {
+                ChapterId = chapterId,
+                PageNum = latest.Entry.EndPage,
+                BookScrollId = latest.Entry.EndBookScrollId,
+                VolumeId = 0,
+                SeriesId = 0,
+                LibraryId = 0,
+                LastModifiedUtc = latest.End,
+            }, userId, saveToReadingSession: false, ct: ct);
+            if (!saved) continue;
+
+            // The save stamps the row with the time of the upload, which devices syncing from the server rely on. Readings
+            // sent later, in other requests, have to be compared with when this one happened, so that is kept apart
+            await context.AppUserProgresses
+                .Where(p => p.AppUserId == userId && p.ChapterId == chapterId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.LastReadUtc, (DateTime?) latest.End), ct);
+        }
+    }
+
+    /// <summary>
+    /// Each session in which a chapter was finished counts as one more read of it, like when a live session closes
+    /// </summary>
+    private static async Task CountCompletedReadsAsync(int userId, List<AppUserReadingSession> sessions, IDataContext context, CancellationToken ct)
+    {
+        var readsByChapter = sessions
+            .SelectMany(session => session.ActivityData
+                .Where(a => a.TotalPages > 0 && a.EndPage >= a.TotalPages)
+                .Select(a => a.ChapterId)
+                .Distinct())
+            .GroupBy(id => id)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        foreach (var (chapterId, reads) in readsByChapter)
+        {
+            await context.AppUserProgresses
+                .Where(p => p.AppUserId == userId && p.ChapterId == chapterId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.TotalReads, x => x.TotalReads + reads), ct);
+        }
+    }
+
+    private static DateTime AsUtc(DateTime value) => value.Kind switch
+    {
+        DateTimeKind.Utc => value,
+        DateTimeKind.Local => value.ToUniversalTime(),
+        _ => DateTime.SpecifyKind(value, DateTimeKind.Utc),
+    };
+
+    /// <summary>Whole seconds, so a time that went through JSON and the database still equals itself</summary>
+    private static DateTime Truncate(DateTime value) => new(value.Ticks - value.Ticks % TimeSpan.TicksPerSecond, DateTimeKind.Utc);
+
+    private sealed record BackfillCandidate(int Index, BackfillReadingEntryDto Entry, DateTime Start, DateTime End);
+
+    private sealed record BackfillChapter(int Id, int VolumeId, int SeriesId, int LibraryId, int Pages, long WordCount);
+
     public static Dictionary<int, (DateTime Start, DateTime End)> ScheduleChapters(
         Dictionary<int, HourEstimateRangeDto> estimatedHoursByChapter, DateTime currentEnd)
     {

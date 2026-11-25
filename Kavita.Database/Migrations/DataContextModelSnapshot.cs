@@ -1799,6 +1799,9 @@ namespace Kavita.Database.Migrations
                     b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("LastReadUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("LibraryId")
                         .HasColumnType("INTEGER");
 
@@ -1880,6 +1883,9 @@ namespace Kavita.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsBackfilled")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsGenerated")
                         .HasColumnType("INTEGER");
