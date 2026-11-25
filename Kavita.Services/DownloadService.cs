@@ -1,24 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Kavita.API.Database;
 using Kavita.API.Services;
-using Kavita.API.Services.Kobo;
-using Kavita.API.Services.Reading;
 using Kavita.Common;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Images;
-using Kavita.Models.Kobo;
-using Kavita.Services.Images.ImageSteps;
 using Microsoft.AspNetCore.StaticFiles;
 using MimeTypes;
-using Serilog.Core;
 
 namespace Kavita.Services;
 
@@ -73,7 +65,7 @@ public class DownloadService(
         return contentType;
     }
 
-    public async Task<string> DownloadChapter(int userId, Chapter chapter, CancellationToken cancellationToken)
+    public async Task<string> DownloadChapter(Chapter chapter, CancellationToken cancellationToken)
     {
         if (chapter.Files is null)
         {
@@ -87,7 +79,6 @@ public class DownloadService(
 
         return await CollectFiles(chapter, cancellationToken);
     }
-
 
     private async Task<string> CollectFiles(Chapter chapter, CancellationToken cancellationToken)
     {

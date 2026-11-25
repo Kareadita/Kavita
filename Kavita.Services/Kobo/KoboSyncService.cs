@@ -547,7 +547,7 @@ public class KoboSyncService(
                     new KoboDownloadUrlDto
                     {
                         Format = canKepubify ? KoboFormat.Kepub : KoboFormat.Epub3,
-                        Size = m.FileSize,
+                        Size = m.FileSize,  // This isn't actually valid because we transform the source, gives an estimation
                         Url = $"{instanceUrl}kobo/{authKey}/v1/library/{m.WorkId}/file/epub?convert={canKepubify}{deviceQuery}"
                     }
                 ],
@@ -1220,7 +1220,7 @@ public class KoboSyncService(
             return new KoboLocationDto();
         }
 
-        if (chapter.Files.First().Format is MangaFormat.Archive or MangaFormat.Image)
+        if (chapter.Files.First().Format is MangaFormat.Archive or MangaFormat.Image or MangaFormat.Pdf)
         {
             return new KoboLocationDto
             {

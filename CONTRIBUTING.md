@@ -43,7 +43,7 @@ Fork the repository on GitHub, then clone your fork onto your local development 
 
 1. Build the project in Visual Studio/Rider, and set the startup project to `Kavita.Server (Server)`
 2. Debug the project in Visual Studio/Rider
-3. Grab kepubify for your OS and place it in Kavita.Server/ from [here](https://pgaskin.net/kepubify/dl/). Only needed when working on Kobo areas.
+3. Grab kepubify for your OS and place it in Kavita.Server/ from [here](https://github.com/Kareadita/Kavita/blob/develop/local-release.yml). Only needed when working on Kobo areas.
 
 #### Troubleshooting for Apple users
 

@@ -209,11 +209,13 @@ public class EpubBuilderService(IUnitOfWork unitOfWork, IDirectoryService direct
         AddPersonAttribution(publication, chapterDto.Editors, PersonRole.Editor, "edt", isCreator: false);
         AddPersonAttribution(publication, chapterDto.Translators, PersonRole.Translator, "trl", isCreator: false);
 
+        var publisher = chapterDto.Publishers.FirstOrDefault()?.Name ?? string.Empty;
+
         publication.SetPublicationDetails(new EpubPublicationDetails()
         {
             Description = HtmlHelper.ToPlainText(chapterDto.Summary),
             PublicationDate = chapterDto.ReleaseDate == DateTime.MinValue ? null : chapterDto.ReleaseDate,
-            Publisher = chapterDto.Publishers.FirstOrDefault()?.Name,
+            Publisher = publisher,
         });
 
         var isbn = chapterDto.ISBN;

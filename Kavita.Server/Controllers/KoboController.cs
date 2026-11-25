@@ -24,9 +24,7 @@ using Kavita.Services;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers.Kobo;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
@@ -248,21 +246,6 @@ public class KoboController(
 
         var path = await koboOptimizationService.GetKoboDownloadPathAsync(UserId, bookId, convert, koboDeviceId, ct);
         return PhysicalFile(path, DownloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
-
-
-        // try
-        // {
-        //     var path = await koboOptimizationService.GetKoboDownloadPathAsync(UserId, bookId, convert, koboDeviceId,
-        //         ct);
-        //     return PhysicalFile(path, DownloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
-        // }
-        // catch (KavitaException ex)
-        // {
-        //     // TODO: Figure out how to handle validation to return NotFound or other things?
-        // }
-
-        return PhysicalFile(path, DownloadService.GetContentTypeFromFile(path), Path.GetFileName(path), enableRangeProcessing: true);
-        // return NotFound();
     }
 
     /// <summary>

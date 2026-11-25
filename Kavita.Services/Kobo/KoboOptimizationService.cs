@@ -47,7 +47,7 @@ public class KoboOptimizationService(ICacheService cacheService,
         var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId, ct);
         if (chapter?.Files == null || chapter.Files.Count == 0)
         {
-            throw new KavitaException("Chapter or files don't exist");
+            throw new KavitaNotFoundException();
         }
 
         return chapter.Files.First().Format switch
@@ -72,19 +72,20 @@ public class KoboOptimizationService(ICacheService cacheService,
     private async Task<string> GetImageDownloadPath(int userId, ChapterDto chapter, bool convert, string? koboDeviceId,
         CancellationToken ct)
     {
-        // TODO: make this less painful
-        //var (volumeId, seriesId, libraryId) = await unitOfWork.ChapterRepository.GetParentIdsForChapter(chapter.Id, ct);
+        var ids = await unitOfWork.ChapterRepository.GetParentIdsForChapter(chapter.Id, ct);
+        if (ids is null) throw new KavitaNotFoundException();
+
+        var (volumeId, seriesId, libraryId) = ids.Value;
         var libraryType = await unitOfWork.ChapterRepository.GetLibraryTypeAsync(chapter.Id, ct);
-        var volumeDto = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, userId, ct);
-        var seriesDto = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(volumeDto!.SeriesId, userId, ct: ct);
-        var readingProfile = await readingProfileService.GetReadingProfileDtoForSeries(userId, seriesDto!.LibraryId, volumeDto.SeriesId, null, ct: ct); // active device id lookup
+        var volumeDto = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, userId, ct);
+        var readingProfile = await readingProfileService.GetReadingProfileDtoForSeries(userId, libraryId, seriesId, null, ct: ct); // active device id lookup
 
         var namingCtx = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType!.Value);
-        var title = namingCtx.BuildChapterTitle(volumeDto, chapter);
+        var title = namingCtx.BuildChapterTitle(volumeDto!, chapter);
 
         var renderSettings = await GetRenderer(userId, koboDeviceId);
         var cacheKey = BuildCacheKey(chapter, title, readingProfile.ReadingDirection, namingCtx, renderSettings);
-        var basePath = Path.Join(directoryService.TempDirectory, $"kavita_kobo_c{chapter.Id}_{cacheKey}");
+        var basePath = Path.Join(directoryService.TempDirectory, $"kavita_kobo_u{userId}_c{chapter.Id}_{cacheKey}");
         var epubPath = $"{basePath}.epub";
         var kepubPath = $"{basePath}.kepub.epub";
 
