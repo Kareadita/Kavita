@@ -138,7 +138,7 @@ public class KepubifyConverterService(
             }
         }
 
-        var versionFailure = await CheckVersion(services, path, cancellationToken);
+        var versionFailure = await CheckVersion(services, source, path, cancellationToken);
         if (versionFailure != null)
         {
             return Off(source, path, KepubifyOffReason.VersionCheckFailed, versionFailure);
@@ -161,7 +161,7 @@ public class KepubifyConverterService(
     }
 
     /// <returns>Null when the binary printed a kepubify version, otherwise why it failed</returns>
-    private static async Task<string?> CheckVersion(IServiceProvider services, string path, CancellationToken cancellationToken)
+    private async Task<string?> CheckVersion(IServiceProvider services, KepubifySource source, string path, CancellationToken cancellationToken)
     {
         var processRunner = services.GetRequiredService<IProcessRunner>();
         var command = new ProcessCommand.Builder(processRunner)
@@ -175,9 +175,19 @@ public class KepubifyConverterService(
             var result = await command.ExecuteAsync(cancellationToken);
             result.ThrowIfFailed();
 
-            return result.StandardOutput.StartsWith(VersionOutputPrefix, StringComparison.Ordinal)
-                ? null
-                : $"{path.Sanitize()} --version did not print a kepubify version";
+            if (!result.StandardOutput.StartsWith(VersionOutputPrefix, StringComparison.Ordinal))
+            {
+                return $"{path.Sanitize()} --version did not print a kepubify version";
+            }
+
+            var onDiskVersion = result.StandardOutput.TrimPrefix(VersionOutputPrefix).Trim();
+            if (source == KepubifySource.Custom && !KepubifyVersion.Equals(onDiskVersion))
+            {
+                logger.LogWarning("You've provided a custom binary that does not match the shipped version. Expected: {ExpectedVersion}, Got: {ActualVersion}. Compatibility may vary!",
+                    KepubifyVersion, onDiskVersion);
+            }
+
+            return null;
         }
         catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
         {
